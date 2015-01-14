@@ -1,0 +1,1 @@
+abs(100*math.tanh(xeval/(2*xmat)))

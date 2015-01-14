@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "./polyglot epd-test -epd $@"
+./polyglot epd-test -epd $@

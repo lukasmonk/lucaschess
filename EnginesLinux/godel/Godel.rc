@@ -1,0 +1,26 @@
+# Transposition table size in mebibytes
+Hash = 128
+
+# Pawn hash table size in mebibytes
+Pawn hash = 16
+
+# Engine resigns on/off
+Resign = false
+
+# Resign material in centipawns
+Resign score = 600
+
+# Resign moves; number of moves that the evaluation is below the - Resign Score
+Resign moves = 3
+
+# Think on the opponent's time 
+Ponder = true
+
+# Name of the opening book file
+Book file = "book.dat"
+
+# Show pv from this ply
+Post ply = 6
+
+# Get the first n moves from the book if possible
+Book depth = 1000

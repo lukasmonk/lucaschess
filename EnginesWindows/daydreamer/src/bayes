@@ -1,0 +1,34 @@
+#!/bin/bash
+
+bayeselo=$HOME/src/chess/bayeselo/bayeselo
+for pgn in $@; do
+    readpgn="${readpgn}readpgn $pgn"$'\n'
+done
+$bayeselo <<ELOSCRIPT
+prompt off
+$readpgn
+players >__players.txt
+elo
+mm
+covariance
+ratings >__ratings.txt
+los >__los.txt
+x
+x
+ELOSCRIPT
+
+if [ $# -eq 1 ]; then
+    out=${1%.pgn}.bayes
+else
+    out=bayes.out
+fi
+rm $out
+
+echo -e "Players" >> $out
+cat __players.txt >> $out
+echo -e "\nRating" >> $out
+cat __ratings.txt >> $out
+echo -e "\nLOS" >> $out
+cat __los.txt >> $out
+rm __players.txt __ratings.txt __los.txt
+cat $out

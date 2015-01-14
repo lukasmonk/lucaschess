@@ -1,0 +1,13 @@
+#!/bin/bash -x
+
+extract=$HOME/src/chess/pgn-extract/pgn-extract
+out=${1%.pgn}
+
+echo $1
+echo ${out}.pgn
+$extract -s -lextract_log.txt -bu19 -nremainder1.pgn $1 -o ${out}_u20.pgn
+$extract -s -lextract_log.txt -bl20 -bu29 -nremainder2.pgn remainder1.pgn -o ${out}_u30.pgn
+$extract -s -lextract_log.txt -bl30 -bu39 -nremainder3.pgn remainder2.pgn -o ${out}_u40.pgn
+$extract -s -lextract_log.txt -bl40 -bu49 -nremainder4.pgn remainder3.pgn -o ${out}_u50.pgn
+$extract -s -lextract_log.txt -bl50 -bu59 -nremainder5.pgn remainder4.pgn -o ${out}_u60.pgn
+rm remainder*.pgn

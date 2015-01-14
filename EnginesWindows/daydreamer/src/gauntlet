@@ -1,0 +1,8 @@
+#!/bin/bash
+
+runs=1000
+if [ $# -eq 2 ]; then
+    runs=$2
+fi
+
+nice ./playgames $1,protector,glaurung64,spark,komodo 1+0.1 $runs $1

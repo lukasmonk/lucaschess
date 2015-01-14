@@ -1,0 +1,238 @@
+# -*- coding: latin-1 -*-
+
+from Code.Constantes import *
+import Code.Util as Util
+import Code.DGT as DGT
+
+import Code.QT.Iconos as Iconos
+
+import Code.QT.FormLayout as FormLayout
+
+def opciones(parent, configuracion):
+    separador = (None, None)
+
+    # Datos generales
+    liGen = [separador]
+
+    # # Nombre del jugador
+    liGen.append(( _("Player's name") + ":", configuracion.jugador ))
+
+    # # Estilo
+    liGen.append(( _("Window style") + ":", configuracion.estilos() ))
+
+    liTraducciones = configuracion.listaTraducciones()
+    trActual = configuracion.traductor if configuracion.traductor else "en"
+    li = [trActual]
+    for k, trad in liTraducciones:
+        li.append(( k, trad ))
+    liGen.append(( _("Language") + ":", li ))
+    liGen.append(separador)
+    liGen.append(( None, _("By showing scores from the engines") + ":" ))
+    liMedidas = [configuracion.centipawns,
+                 ( True, "%s = 100 %s  ->   64, 19, -19, +23, -120, +130" % (_("One pawn"), _("points")  ) ), \
+                 ( False, "%s = 1.00 %s ->   0.64, 0.19, -0.19, +0.23, -1.20, +1.30" % (_("One pawn"), _("points")  ) )]
+    liGen.append((_("Measuring system") + ":", liMedidas))
+
+    # Aspect
+    liAsp = [separador]
+
+    liAsp.append(( _("By default") + ":", False ))
+
+    liAsp.append(( FormLayout.FontCombobox(_("Font")), configuracion.familia ))
+
+    ## Menus
+    liAsp.append(( None, _("Menus") + ":" ))
+    liAsp.append(( FormLayout.Spinbox(_("Font size"), 5, 64, 60), configuracion.puntosMenu ))
+    liAsp.append(( _("Bold") + ":", configuracion.boldMenu ))
+
+    ## Toolbars
+    liAsp.append(separador)
+    liAsp.append(( None, _("Toolbars") + ":" ))
+    liAsp.append(( FormLayout.Spinbox(_("Font size"), 5, 64, 60), configuracion.puntosTB ))
+    liAsp.append(( _("Bold") + ":", configuracion.boldTB ))
+
+    ## PGN table
+    liAsp.append(separador)
+    liAsp.append(( None, _("PGN table") + ":" ))
+    liAsp.append(( FormLayout.Spinbox(_("Width"), 283, 1000, 70), configuracion.anchoPGN ))
+    liAsp.append(( FormLayout.Spinbox(_("Height of each row"), 18, 99, 40), configuracion.altoFilaPGN ))
+    liAsp.append(( FormLayout.Spinbox(_("Font size"), 10, 99, 40), configuracion.puntosPGN ))
+    liAsp.append(( _("PGN always in English") + ":", configuracion.siNomPiezasEN ))
+    liAsp.append(( _("PGN with figurines") + ":", configuracion.figurinesPGN ))
+
+    liAsp.append(separador)
+    liAsp.append(( FormLayout.Spinbox(_("Font size of information labels"), 8, 30, 40), configuracion.tamFontRotulos ))
+
+    # Sonidos
+    liSon = [separador]
+    liSon.append(separador)
+    ## Si añadimos sonido tras cada jugada
+    liSon.append(( _("Beep after opponent's move") + ":", configuracion.siSuenaBeep ))
+    liSon.append(separador)
+    liSon.append(( None, _("Sound on in") + ":" ))
+    liSon.append(( _("Results") + ":", configuracion.siSuenaResultados ))
+    liSon.append(( _("Rival moves") + ":", configuracion.siSuenaJugada ))
+    liSon.append(separador)
+    liSon.append(( _("Activate sounds with our moves") + ":", configuracion.siSuenaNuestro ))
+
+    # Tutor
+    liTT = [separador]
+    liTT.append(( _("Engine") + ":", configuracion.ayudaCambioTutor() ))
+    liTT.append(( _("Duration of tutor analysis (secs)") + ":", float(configuracion.tiempoTutor / 1000.0) ))
+    li = [( _("Maximum"), 0)]
+    for x in ( 1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200 ):
+        li.append((str(x), x))
+    config = FormLayout.Combobox(_("Number of moves evaluated by engine(MultiPV)"), li)
+    liTT.append(( config, configuracion.tutorMultiPV ))
+    liTT.append(separador)
+    liTT.append(( _("Tutor enabled"), configuracion.tutorActivoPorDefecto ))
+    liTT.append(separador)
+    liTT.append(( None, _("Sensitivity") ))
+    liTT.append((FormLayout.Spinbox(_("Minimum difference in points"), 0, 1000, 70), configuracion.tutorDifPts ))
+    liTT.append((FormLayout.Spinbox(_("Minimum difference in %"), 0, 1000, 70), configuracion.tutorDifPorc ))
+
+    # Modo no competitivo
+    liNC = [separador]
+    liNC.append(( FormLayout.Spinbox(_("Lucas-Elo"), 0, 3200, 70), configuracion.eloNC ))
+    liNC.append(( FormLayout.Spinbox(_("Tourney-Elo"), 0, 3200, 70), configuracion.micheloNC ))
+    liNC.append(( FormLayout.Spinbox(_("Fics-Elo"), 0, 3200, 70), configuracion.ficsNC ))
+    liNC.append(( FormLayout.Spinbox(_("Fide-Elo"), 0, 3200, 70), configuracion.fideNC ))
+
+    # Salvado automático
+    liSA = [separador]
+
+    config = FormLayout.Fichero(_("Autosave to a PGN file"), "pgn", True)
+    liSA.append(( config, configuracion.salvarFichero))
+    liSA.append(( _("Won games") + ":", configuracion.salvarGanados ))
+    liSA.append(( _("Lost/Drawn games") + ":", configuracion.salvarPerdidos ))
+    liSA.append(( _("Unfinished games") + ":", configuracion.salvarAbandonados ))
+    liSA.append(separador)
+    liSA.append(( _("Save as variant tutor's suggestion") + ":", configuracion.guardarVariantesTutor ))
+    liSA.append(separador)
+    config = FormLayout.Fichero(_("Autosave to a CSV file moves played"), "csv", True)
+    liSA.append(( config, configuracion.salvarCSV))
+
+    ## Tableros
+    liT = [separador]
+
+    ### Mostrando el tutor
+    # kTutorH, kTutorH2_1, kTutorH1_2, kTutorV
+    liPosTutor = [configuracion.vistaTutor, ( kTutorH, _("Horizontal")), \
+                  ( kTutorH2_1, _("Horizontal") + " 2+1"), \
+                  ( kTutorH1_2, _("Horizontal") + " 1+2"), \
+                  ( kTutorV, _("Vertical") )]
+    liT.append((_("Tutor boards position") + ":", liPosTutor))
+    liT.append(separador)
+    liT.append((_("Visual effects") + ":", configuracion.efectosVisuales))
+
+    drap = {1: 100, 2: 150, 3: 200, 4: 250, 5: 300, 6: 350, 7: 400, 8: 450, 9: 500}
+    drapV = {}
+    for x in drap:
+        drapV[drap[x]] = x
+    liT.append((FormLayout.Dial("%s (%s=1)" % (_("Speed"), _("Default")), 1, len(drap), siporc=False),
+                drapV.get(configuracion.rapidezMovPiezas, 100) ))
+    liT.append(separador)
+
+    liMouseSH = [configuracion.siAtajosRaton,
+                 ( False, _("Type fixed: you must always indicate origin and destination")), \
+                 ( True, _("Type predictive: program tries to guess your intention"))]
+    liT.append((_("Mouse shortcuts") + ":", liMouseSH))
+    liT.append((_("Show candidates") + ":", configuracion.showCandidates ))
+    liT.append((_("Show arrows of variants") + ":", configuracion.showVariantes))
+    liT.append(separador)
+    liT.append(( _("Enable captured material window by default") + ":", configuracion.siActivarCapturas ))
+    liMat = [configuracion.tipoMaterial, ("D", _("Difference material")), ("C", _("Captured material at beginning"))]
+    liT.append((_("Show material") + ":", liMat))
+    liT.append(separador)
+    liT.append(( _("Enable information panel by default") + ":", configuracion.siActivarInformacion ))
+    liT.append(separador)
+    liT.append(( _X(_("Enable %1"), _("DGT board")) + ":", configuracion.siDGT ))
+
+    lista = []
+    lista.append((liGen, _("General"), "" ))
+    lista.append((liSon, _("Sounds"), "" ))
+    lista.append((liTT, _("Tutor"), "" ))
+    lista.append((liT, _("Boards"), "" ))
+    lista.append((liAsp, _("Appearance"), "" ))
+    lista.append((liSA, _("Autosave"), "" ))
+    lista.append((liNC, _("Non competitive mode"), ""))
+
+    # Editamos
+    resultado = FormLayout.fedit(lista, title=_("Configuration"), parent=parent, anchoMinimo=560,
+                                 icon=Iconos.Opciones())
+
+    if resultado:
+        accion, resp = resultado
+
+        liGen, liSon, liTT, liT, liAsp, liSA, liNC = resp
+
+        configuracion.jugador, configuracion.estilo, configuracion.traductor, \
+        configuracion.centipawns = liGen
+
+        porDefecto = liAsp[0]
+        if porDefecto:
+            liAsp = "", 11, False, 11, False, 283, 22, 10, False, True, 10
+        else:
+            del liAsp[0]
+
+        configuracion.familia, configuracion.puntosMenu, configuracion.boldMenu, \
+        configuracion.puntosTB, configuracion.boldTB, \
+        configuracion.anchoPGN, configuracion.altoFilaPGN, configuracion.puntosPGN, \
+        configuracion.siNomPiezasEN, configuracion.figurinesPGN, \
+        configuracion.tamFontRotulos = liAsp
+
+        if configuracion.familia == "System":
+            configuracion.familia = ""
+
+        configuracion.siSuenaBeep, configuracion.siSuenaResultados, configuracion.siSuenaJugada, \
+        configuracion.siSuenaNuestro = liSon
+
+        configuracion.tutor.clave, tiempoTutor, configuracion.tutorMultiPV, \
+        configuracion.tutorActivoPorDefecto, configuracion.tutorDifPts, configuracion.tutorDifPorc = liTT
+        configuracion.tiempoTutor = int(tiempoTutor * 1000)
+
+        configuracion.eloNC, configuracion.micheloNC, configuracion.ficsNC, configuracion.fideNC = liNC
+
+        configuracion.vistaTutor, \
+        configuracion.efectosVisuales, rapidezMovPiezas, \
+        configuracion.siAtajosRaton, configuracion.showCandidates, configuracion.showVariantes, \
+        configuracion.siActivarCapturas, configuracion.tipoMaterial, \
+        configuracion.siActivarInformacion, siDGT = liT
+        configuracion.rapidezMovPiezas = drap[rapidezMovPiezas]
+        if configuracion.siDGT != siDGT:
+            if siDGT:
+                DGT.ponON()
+            configuracion.siDGT = siDGT
+
+        configuracion.salvarFichero, configuracion.salvarGanados, configuracion.salvarPerdidos, \
+        configuracion.salvarAbandonados, configuracion.guardarVariantesTutor, \
+        configuracion.salvarCSV = liSA
+        configuracion.salvarCSV = Util.dirRelativo(configuracion.salvarCSV)
+
+        return True
+    else:
+        return False
+
+def opcionesPrimeraVez(parent, configuracion):
+    separador = (None, None)
+
+    # Datos generales
+    liGen = [separador]
+
+    # # Nombre del jugador
+    liGen.append(( _("Player's name") + ":", configuracion.jugador ))
+
+    # Editamos
+    resultado = FormLayout.fedit(liGen, title=_("Configuration"), parent=parent, anchoMinimo=560,
+                                 icon=Iconos.Opciones())
+
+    if resultado:
+        accion, resp = resultado
+
+        liGen = resp
+
+        configuracion.jugador = liGen[0]
+
+        return True
+    else:
+        return False
