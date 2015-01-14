@@ -4,7 +4,7 @@ Lucas Chess
 Lucas Chess is a GUI of chess:
 
 1. To train chess.
-2. To play chess against engines.
+2. To play against engines.
 
 Dependencies
 ------------
