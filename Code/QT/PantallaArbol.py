@@ -653,15 +653,13 @@ class WMoves(QtGui.QWidget):
         self.tree = TreeMoves(owner, procesador)
 
         # ToolBar
-        self.liAcciones = (
-            ( _("Open new branch"), Iconos.Mas(), "rama" ), None,
-            ( _("Show") + "/" + _("Hide"), Iconos.Mostrar(), "mostrar" ), None,
-            ( _("Rating"), self.tree.iconoValoracion(3), "valorar" ), None,
-            ( _("Analyze"), Iconos.Analizar(), "analizar" ), None,
-            ( _("Comments"), Iconos.ComentarioEditar(), "comentario" ), None,
-            ( _("Variants"), Iconos.Variantes(), "variantes" ), None,
-        )
-        self.tb = Controles.TB(self, self.liAcciones, siTexto=False, tamIcon=16)
+        self.tb = Controles.TBrutina(self, siTexto=False, tamIcon=16)
+        self.tb.new( _("Open new branch"), Iconos.Mas(), self.rama )
+        self.tb.new( _("Show") + "/" + _("Hide"), Iconos.Mostrar(), self.mostrar )
+        self.tb.new( _("Rating"), self.tree.iconoValoracion(3), self.valorar )
+        self.tb.new( _("Analyze"), Iconos.Analizar(), self.analizar )
+        self.tb.new( _("Comments"), Iconos.ComentarioEditar(), self.comentario )
+        self.tb.new( _("Variants"), Iconos.Variantes(), self.variantes )
 
         layout = Colocacion.V().control(self.tb).control(self.tree).margen(1)
 
@@ -674,10 +672,10 @@ class WMoves(QtGui.QWidget):
 
         menu = QTVarios.LCMenu(self)
 
-        for comando in self.liAcciones:
+        for comando in self.tb.liAcciones:
             if comando:
                 txt, icono, accion = comando
-                if accion == "rama" and mov.listaMovesHijos:
+                if accion == self.rama and mov.listaMovesHijos:
                     continue
                 menu.opcion(accion, txt, icono)
                 menu.separador()
@@ -689,28 +687,45 @@ class WMoves(QtGui.QWidget):
     def procesarTB(self):
         self.procesarAccion(self.sender().clave)
 
-    def procesarAccion(self, accion):
+    def getCurrentMovItem(self):
+        item = mov.item
+
+    def rama(self):
         mov = self.tree.currentMov()
         if not mov:
             return
-        item = mov.item
-        if accion == "rama":
-            self.tree.mas()
+        self.tree.mas()
 
-        elif accion == "analizar":
-            self.owner.analizar(mov)
+    def analizar(self):
+        mov = self.tree.currentMov()
+        if not mov:
+            return
+        self.owner.analizar(mov)
 
-        elif accion == "valorar":
-            self.tree.editaValoracion(item, mov)
+    def valorar(self):
+        mov = self.tree.currentMov()
+        if not mov:
+            return
+        self.tree.editaValoracion(mov.item, mov)
 
-        elif accion == "comentario":
-            self.tree.editaComentario(item, mov)
+    def comentario(self):
+        mov = self.tree.currentMov()
+        if not mov:
+            return
+        self.tree.editaComentario(mov.item, mov)
 
-        elif accion == "variantes":
-            self.tree.editaVariantes(item, mov)
+    def variantes(self):
+        mov = self.tree.currentMov()
+        if not mov:
+            return
+        self.tree.editaVariantes(mov.item, mov)
 
-        elif accion == "mostrar":
-            self.tree.mostrarOcultar(item, mov)
+    def mostrar(self):
+        mov = self.tree.currentMov()
+        if not mov:
+            return
+        self.tree.mostrarOcultar(mov.item, mov)
+
 
 class InfoMove(QtGui.QWidget):
     def __init__(self, siBlancasAbajo):
@@ -800,10 +815,9 @@ class PantallaArbol(QTVarios.WDialogo):
             posicion = partida.ultPosicion
         self.listaMoves = ListaMoves(None, posicion.fen(), self.dbCache)
 
-        liAcciones = (  ( _("Save"), Iconos.Grabar(), "grabar" ), None,
-                        ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-        )
-        tb = Controles.TB(self, liAcciones)
+        tb = Controles.TBrutina(self)
+        tb.new( _("Save"), Iconos.Grabar(), self.grabar )
+        tb.new( _("Cancel"), Iconos.Cancelar(), self.cancelar )
 
         self.infoMove = InfoMove(posicion.siBlancas)
 
@@ -837,14 +851,6 @@ class PantallaArbol(QTVarios.WDialogo):
 
     def muestra(self, mov):
         self.infoMove.muestra(mov)
-
-    def procesarTB(self):
-        accion = self.sender().clave
-        if accion == "grabar":
-            self.grabar()
-
-        elif accion == "cancelar":
-            self.cancelar()
 
     def salvarVideo(self):
         dicExten = {

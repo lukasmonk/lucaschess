@@ -465,9 +465,6 @@ class Procesador():
                 self.usuarios()
             elif resp == "favoritos":
                 PantallaFavoritos.miraFavoritos(self.entrenamientos)
-            elif resp == "idioma":
-                if QTVarios.eligeIdioma(self.configuracion):
-                    self.reiniciar()
 
             elif resp == "inicial":
                 self.cpu.stop()

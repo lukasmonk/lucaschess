@@ -929,7 +929,7 @@ class TBrutina(QtGui.QToolBar):
         Y la clave enviada se obtiene de self.sender().clave
     """
 
-    def __init__(self, parent, liAcciones, siTexto=True, tamIcon=32, puntos=None, background=None):
+    def __init__(self, parent, liAcciones=None, siTexto=True, tamIcon=32, puntos=None, background=None):
 
         QtGui.QToolBar.__init__(self, "BASICO", parent)
 
@@ -945,29 +945,38 @@ class TBrutina(QtGui.QToolBar):
         if background:
             self.setStyleSheet("QWidget { background: %s }" % background)
 
-        self.ponAcciones(liAcciones)
+        if liAcciones:
+            self.ponAcciones(liAcciones)
 
-    def ponAcciones(self, liAcciones):
+        else:
+            self.dicTB = {}
+            self.liAcciones = []
+
+    def new(self, titulo, icono, clave, sep=True):
+        accion = QtGui.QAction(titulo, self.parent)
+        accion.setIcon(icono)
+        accion.setIconText(titulo)
+        self.parent.connect(accion, QtCore.SIGNAL("triggered()"), clave)
+        if self.f:
+            accion.setFont(self.f)
+        self.liAcciones.append(accion)
+        self.addAction(accion)
+        self.dicTB[clave] = accion
+        if sep:
+            self.addSeparator()
+
+    def ponAcciones(self, liAcc):
         self.dicTB = {}
-        lista = []
-        for datos in liAcciones:
+        self.liAcciones = []
+        for datos in liAcc:
             if datos:
                 if type(datos) == int:
                     self.addWidget(LB("").anchoFijo(datos))
                 else:
                     titulo, icono, clave = datos
-                    accion = QtGui.QAction(titulo, self.parent)
-                    accion.setIcon(icono)
-                    accion.setIconText(titulo)
-                    self.parent.connect(accion, QtCore.SIGNAL("triggered()"), clave)
-                    if self.f:
-                        accion.setFont(self.f)
-                    lista.append(accion)
-                    self.addAction(accion)
-                    self.dicTB[clave] = accion
+                    self.new(titulo, icono, clave, False)
             else:
                 self.addSeparator()
-        self.liAcciones = lista
 
     def reset(self, liAcciones):
         self.clear()

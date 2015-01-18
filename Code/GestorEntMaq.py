@@ -39,7 +39,7 @@ class GestorEntMaq(Gestor.Gestor):
         self.timekeeper = Util.Timekeeper()
 
         self.summary = {} # numJugada : "a"ccepted, "s"ame, "r"ejected, dif points, time used
-        self.siSummary = dic["SUMMARY"]
+        self.siSummary = dic.get("SUMMARY", False)
 
         siBlancas = dic["SIBLANCAS"]
         self.siJugamosConBlancas = siBlancas
@@ -790,8 +790,7 @@ class GestorEntMaq(Gestor.Gestor):
                                 rmUser, n = self.mrmTutor.buscaRM(movimiento)
                                 menu = QTVarios.LCMenu(self.pantalla)
                                 submenu = menu.submenu(_("There are %d best moves") % num, Iconos.Motor())
-                                submenu.opcion("tutor", "%s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()),
-                                               Iconos.Tutor())
+                                submenu.opcion("tutor", "%s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()), Iconos.Tutor())
                                 submenu.separador()
                                 submenu.opcion("try", _("Try again"), Iconos.Atras())
                                 submenu.separador()
@@ -935,7 +934,7 @@ class GestorEntMaq(Gestor.Gestor):
                 j_num += 1
                 p = d["POINTSBEST"]-d["POINTSUSER"]
                 if p:
-                    if d["SELECTTUTOR"]:
+                    if d.get("SELECTTUTOR", False):
                         st_accept += p
                         nt_accept += 1
                     else:

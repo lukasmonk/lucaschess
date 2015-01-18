@@ -688,6 +688,7 @@ class Configuracion:
                         li.append((uno, dic["NAME"]))
                 except:
                     pass
+        li = sorted(li, key=lambda lng: lng[0])
         return li
 
     def listaMotoresInternos(self):

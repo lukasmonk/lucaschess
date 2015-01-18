@@ -244,35 +244,22 @@ class WMoves(QtGui.QWidget):
         self.tree = TreeMoves(owner)
 
         # ToolBar
+        tb = Controles.TBrutina(self, siTexto=False, tamIcon=16)
         if siEnviar:
-            self.liAcciones = [( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                               ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None]
+            tb.new( _("Accept"), Iconos.Aceptar(), self.owner.aceptar )
+            tb.new( _("Cancel"), Iconos.Cancelar(), self.owner.cancelar )
         else:
-            self.liAcciones = [( _("Quit"), Iconos.MainMenu(), "cancelar" ), None]
+            tb.new( _("Quit"), Iconos.MainMenu(), self.owner.cancelar )
+        tb.new( _("Open new branch"), Iconos.Mas(), self.rama )
+        tb.new( _("Books"), Iconos.Libros(), self.owner.menuLibros )
 
-        self.liAcciones.extend([
-            ( _("Open new branch"), Iconos.Mas(), "rama" ), None,
-            ( _("Books"), Iconos.Libros(), "libros" ), None,
-        ])
-        self.tb = Controles.TB(self, self.liAcciones, siTexto=False, tamIcon=16)
-
-        layout = Colocacion.V().control(self.tb).control(self.tree).margen(1)
+        layout = Colocacion.V().control(tb).control(self.tree).margen(1)
 
         self.setLayout(layout)
 
-    def procesarTB(self):
-        accion = self.sender().clave
-
-        mov = self.tree.currentMov()
-        if accion == "aceptar":
-            self.owner.aceptar()
-        elif accion == "cancelar":
-            self.owner.cancelar()
-        elif accion == "rama":
-            if mov:
-                self.tree.mas()
-        elif accion == "libros":
-            self.owner.menuLibros()
+    def rama(self):
+        if self.tree.currentMov():
+            self.tree.mas()
 
 class InfoMove(QtGui.QWidget):
     def __init__(self, fenActivo):

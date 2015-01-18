@@ -93,23 +93,6 @@ class WAnalisisGraph(QTVarios.WDialogo):
         tab.nuevaTab(alm.blackDif, _("Lost points"))
         tabGraph.nuevaTab(tab, _("Black"))
 
-        # tabInd = Controles.Tab()
-        # def xtab( ori, tit ):
-        # tab = Controles.Tab().ponPosicion("W")
-        # tab.nuevaTab( ori[None], _("Total"))
-        # tab.nuevaTab( ori[True], _("White"))
-        # tab.nuevaTab( ori[False], _("Black"))
-        # tabInd.nuevaTab(tab,tit)
-
-        # xtab(alm.complexity, _("Complexity"))
-        # xtab(alm.winprobability, _("Win probability"))
-        # xtab(alm.narrowness, _("Narrowness"))
-        # xtab(alm.efficientmobility, _("Efficient mobility") )
-        # xtab(alm.piecesactivity, _("Pieces activity"))
-        # xtab(alm.exchangetendency, _("Exchange tendency"))
-
-        # tabGen.nuevaTab(tabInd,_("Indexes"))
-
         layout = Colocacion.V().control(tabGen).margen(8)
         self.setLayout(layout)
 
@@ -244,12 +227,6 @@ class WMuestra(QtGui.QWidget):
     def cambiadoRM(self, fila):
         self.um.ponPosRMactual(fila)
         self.lbPuntuacion.ponTexto(self.um.puntuacionActual())
-        # sLB = self.owner.statusLB
-        # sLB[0].ponTexto( " %s "%self.um.mostlikelyresult() )
-        # sLB[1].ponTexto( " %s "%self.um.complexity() )
-        # sLB[2].ponTexto( " %s "%self.um.narrowness() )
-        # sLB[3].ponTexto( " %s "%self.um.efficientmobility() )
-        # sLB[4].ponTexto( " %s "%self.um.piecesactivity() )
 
         self.lbPGN.ponTexto(self.um.pgnActual())
 
@@ -265,10 +242,6 @@ class WMuestra(QtGui.QWidget):
 
     def gridNumDatos(self, grid):
         return len(self.listaRM)
-
-        # def gridCambiadoRegistro( self, grid, fila, columna ):
-        # self.cambiadoRM( fila )
-        # self.owner.activaMuestra(self.um)
 
     def gridBotonIzquierdo(self, grid, fila, columna):
         self.cambiadoRM(fila)
@@ -399,13 +372,9 @@ class WAnalisis(QTVarios.WDialogo):
         self.siGrabar = siGrabar
         self.siBlancas = siBlancas
 
-        liAccionesWork = (
-            ( _("Close"), Iconos.MainMenu(), "terminar" ), None,
-            ( _("New"), Iconos.NuevoMas(), "crear" ), None,
-        )
-        tbWork = Controles.TB(self, liAccionesWork, tamIcon=24)
-
-        # lyTB = Colocacion.H().relleno(2).control(tbWork).relleno()
+        tbWork = Controles.TBrutina(self, tamIcon=24)
+        tbWork.new( _("Close"), Iconos.MainMenu(), self.terminar )
+        tbWork.new( _("New"), Iconos.NuevoMas(), self.crear )
 
         self.tablero = Tablero.Tablero(self, confTablero)
         self.tablero.crea()
@@ -416,32 +385,7 @@ class WAnalisis(QTVarios.WDialogo):
         self.lbPuntuacion = Controles.LB(self).alinCentrado().ponTipoLetra(puntos=10, peso=75)
         self.lbPGN = Controles.LB(self).ponTipoLetra(peso=75).ponWrap()
 
-        # status0 = QtGui.QStatusBar(self)
-        # status0.setFixedHeight(22)
-        # status0.setSizeGripEnabled( False )
-        # status1 = QtGui.QStatusBar(self)
-        # status1.setFixedHeight(22)
-        # status1.setSizeGripEnabled( False )
-        # self.statusLB = []
-        # for x in range(3):
-        # lb = Controles.LB( ).alinCentrado()
-        # if x < 3:
-        # self.statusLB.append(lb)
-        # status0.addPermanentWidget(lb,1 )
-        # for x in range(2):
-        # lb = Controles.LB( ).alinCentrado()
-        # if x < 2:
-        # self.statusLB.append(lb)
-        # status1.addPermanentWidget(lb,1)
-        # self.statusLB[0].setToolTip( _("Shows how many probabilities to win has the side with the current advantage") )
-        # self.statusLB[1].setToolTip( _("Shows how complex is the current position") )
-        # self.statusLB[2].setToolTip( _("Shows how crowded and narrow is the current position") )
-        # self.statusLB[3].setToolTip( _("Shows how forcing is the nature of the current position") )
-        # self.statusLB[4].setToolTip( _("Shows the ability of all pieces of current color to generate good moves") )
-
-        # self.setStyleSheet("QStatusBar { background-color: lightgray;    border-style: outset;     border-width: 2px;     border-color: beige;}");# border-radius: 3px; } ");
-        self.setStyleSheet(
-            "QStatusBar::item { border-style: outset; border-width: 1px; border-color: LightSlateGray ;}");  # border-radius: 3px; } ");
+        self.setStyleSheet("QStatusBar::item { border-style: outset; border-width: 1px; border-color: LightSlateGray ;}")
 
         liMasAcciones = ( ("FEN:%s" % _("Copy to clipboard"), "MoverFEN", Iconos.Clip()),)
         lytb, self.tb = QTVarios.lyBotonesMovimiento(self, "", siLibre=siLibre,
@@ -455,7 +399,6 @@ class WAnalisis(QTVarios.WDialogo):
         lyMotor = Colocacion.H().control(self.lbPuntuacion).relleno().control(self.lbMotor).control(self.lbTiempo)
 
         lyV = Colocacion.V()
-        # lyV.otro(lyTB)
         lyV.control(tbWork)
         lyV.otro(lyTabl)
         lyV.otro(lytb)
@@ -475,8 +418,6 @@ class WAnalisis(QTVarios.WDialogo):
 
         layout = Colocacion.V()
         layout.otro(lyM)
-        # layout.control(status0).espacio(1)
-        # layout.control(status1)
         layout.margen(3)
         layout.setSpacing(1)
         self.setLayout(layout)
@@ -509,15 +450,16 @@ class WAnalisis(QTVarios.WDialogo):
             self.muestraActual.wmu.procesarTB("MoverLibre")
         elif k == 16777216:  # esc
             self.terminar()
-            self.accept()
 
     def closeEvent(self, event):  # Cierre con X
-        self.terminar()
+        self.terminar(False)
 
-    def terminar(self):
+    def terminar(self, siAccept=True):
         for una in self.mAnalisis.liMuestras:
             una.wmu.siTiempoActivo = False
         self.guardarVideo()
+        if siAccept:
+            self.accept()
 
     def activaMuestra(self, um):
         self.muestraActual = um

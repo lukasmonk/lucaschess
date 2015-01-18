@@ -1123,23 +1123,6 @@ def rondoColores():
     nico.shuffle()
     return nico
 
-def eligeIdioma(configuracion):
-    li = configuracion.listaTraducciones()  # k,txt
-    menu = LCMenu(None)
-
-    nico = rondoPuntos()
-
-    for k, nombre in li:
-        menu.opcion(k, nombre, nico.otro())
-        menu.separador()
-    resp = menu.lanza()
-
-    if resp:
-        configuracion.traductor = resp
-        configuracion.graba()
-        return True
-    return False
-
 class LCMenu(Controles.Menu):
     def __init__(self, parent, puntos=None):
         configuracion = VarGen.configuracion

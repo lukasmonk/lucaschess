@@ -102,11 +102,10 @@ class Tutor():
                 self.partidaRival = Partida.Partida(self.ultPosicion).leerPV(pvBloque)
                 self.posRival = 0
                 self.maxRival = len(self.partidaRival.liJugadas) - 1
-                self.tableroRival.ponPosicion(self.partidaRival.liJugadas[0].posicion)
-                self.mueveRival(True)
-                w.ponPuntuacionRival(self.rmRival.texto())
-            else:
-                siRival = False
+                if self.maxRival>= 0:
+                    self.tableroRival.ponPosicion(self.partidaRival.liJugadas[0].posicion)
+                    self.mueveRival(True)
+                    w.ponPuntuacionRival(self.rmRival.texto())
 
         self.mueveTutor(True)
         self.mueveUsuario(True)

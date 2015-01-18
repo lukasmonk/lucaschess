@@ -41,24 +41,20 @@ if nArgs == 1:
     Code.Init.init()
 
 elif nArgs >= 2:
-    arg = sys.argv[1]
-    argl = arg.lower()
-    if argl.endswith(".pgn") or argl.endswith(".pks") \
-            or argl.endswith(".lcg") or argl.endswith(".lcf") \
-            or argl == "-play":
+    arg = sys.argv[1].lower()
+    if arg.endswith(".pgn") or arg.endswith(".pks") \
+            or arg.endswith(".lcg") or arg.endswith(".lcf") \
+            or arg == "-play":
         import Code.Init
         Code.Init.init()
 
-    elif argl == "-sound":
+    elif arg == "-sound":
         import Code.RunSound
         Code.RunSound.run(sys.argv[2])
 
-    elif argl == "-kibitzer":
+    elif arg == "-kibitzer":
         import Code.RunKibitzer
         Code.RunKibitzer.run(sys.argv[2])
-
-
-
 
 
 

@@ -56,13 +56,12 @@ class WAperturas(QTVarios.WDialogo):
         self.tbBM = tbBM
 
         # Tool bar
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), self.aceptar ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), self.cancelar ), None,
-                      ( _("Reinit"), Iconos.Reiniciar(), self.resetPartida ), None,
-                      ( _("Takeback"), Iconos.Atras(), self.atras ), None,
-                      ( _("Remove"), Iconos.Borrar(), self.borrar ), None,
-        ]
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = Controles.TBrutina(self)
+        tb.new( _("Accept"), Iconos.Aceptar(), self.aceptar )
+        tb.new( _("Cancel"), Iconos.Cancelar(), self.cancelar )
+        tb.new( _("Reinit"), Iconos.Reiniciar(), self.resetPartida )
+        tb.new( _("Takeback"), Iconos.Atras(), self.atras )
+        tb.new( _("Remove"), Iconos.Borrar(), self.borrar )
 
         # Lista Aperturas
         oColumnas = Columnas.ListaColumnas()
@@ -689,15 +688,14 @@ class AperturasPersonales(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         # Toolbar
-        liAcciones = [( _("Close"), Iconos.MainMenu(), "terminar" ), None,
-                      ( _("New"), Iconos.TutorialesCrear(), "nuevo" ), None,
-                      ( _("Modify"), Iconos.Modificar(), "modificar" ), None,
-                      ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-                      ( _("Copy"), Iconos.Copiar(), "copiar" ), None,
-                      ( _("Up"), Iconos.Arriba(), "arriba" ), None,
-                      ( _("Down"), Iconos.Abajo(), "abajo" ), None,
-        ]
-        tb = Controles.TB(self, liAcciones)
+        tb = Controles.TBrutina(self)
+        tb.new( _("Close"), Iconos.MainMenu(), self.terminar )
+        tb.new( _("New"), Iconos.TutorialesCrear(), self.nuevo )
+        tb.new( _("Modify"), Iconos.Modificar(), self.modificar )
+        tb.new( _("Remove"), Iconos.Borrar(), self.borrar )
+        tb.new( _("Copy"), Iconos.Copiar(), self.copiar )
+        tb.new( _("Up"), Iconos.Arriba(), self.arriba )
+        tb.new( _("Down"), Iconos.Abajo(), self.abajo )
 
         # Lista
         oColumnas = Columnas.ListaColumnas()
@@ -719,9 +717,6 @@ class AperturasPersonales(QTVarios.WDialogo):
         self.recuperarVideo(siTam=True)
 
         self.dicPGNSP = {}
-
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
 
     def terminar(self):
         self.guardarVideo()

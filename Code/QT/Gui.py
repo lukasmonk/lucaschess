@@ -50,7 +50,16 @@ def lanzaGUI(procesador):
             Util.copiaFichero(ori, confMain.carpeta)
 
         else:
-            QTVarios.eligeIdioma(configuracion)
+            li = configuracion.listaTraducciones()
+            menu = QTVarios.LCMenu(None)
+
+            nico = QTVarios.rondoPuntos()
+            for k, nombre in li:
+                menu.opcion(k, nombre, nico.otro())
+            resp = menu.lanza()
+            if resp:
+                configuracion.traductor = resp
+                configuracion.graba()
 
     # Estilo
     global stylename

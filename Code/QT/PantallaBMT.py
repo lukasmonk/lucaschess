@@ -52,9 +52,8 @@ class WHistorialBMT(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         # Toolbar
-        liAcciones = [( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-        ]
-        tb = Controles.TB(self, liAcciones)
+        tb = Controles.TBrutina(self)
+        tb.new(_("Quit"), Iconos.MainMenu(), self.terminar)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()
@@ -74,9 +73,6 @@ class WHistorialBMT(QTVarios.WDialogo):
         self.setLayout(ly)
 
         self.recuperarVideo(siTam=True)
-
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
 
     def terminar(self):
         self.guardarVideo()
