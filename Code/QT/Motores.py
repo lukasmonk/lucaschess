@@ -6,14 +6,17 @@ import Code.QT.QTVarios as QTVarios
 import Code.QT.Iconos as Iconos
 import Code.QT.Controles as Controles
 
-INTERNO, EXTERNO, MICGM = range(3)
+INTERNO, EXTERNO, MICGM, MICPER, FIXED = range(5)
 
 class Motores:
     def __init__(self, configuracion):
         self.configuracion = configuracion
-        self.dicIconos = {INTERNO: Iconos.Motor(), EXTERNO: Iconos.MotoresExternos(), MICGM: Iconos.GranMaestro()}
+        self.dicIconos = {INTERNO: Iconos.Motor(), EXTERNO: Iconos.MotoresExternos(),
+                            MICGM: Iconos.GranMaestro(), MICPER:Iconos.EloTimed(),
+                            FIXED: Iconos.FixedElo()}
         self.dicMotoresGM = EnginesMicElo.dicGM()
         self.liMotoresInternos = configuracion.listaMotoresInternos()
+        self.dicMotoresFixedElo = configuracion.dicMotoresFixedElo()
         self.rehazMotoresExternos()
 
     def rehazMotoresExternos(self):
@@ -45,17 +48,34 @@ class Motores:
         icono = Iconos.Mas()
         submenu.opcion(clave, texto, icono)
 
-        if self.dicMotoresGM:
-            menu.separador()
-            submenu = menu.submenu(_("GM engines"), self.dicIconos[MICGM])
-            for gm, li in self.dicMotoresGM.iteritems():
-                icono = rp.otro()
-                submenuGM = submenu.submenu(gm, icono)
-                for cm in li:
-                    clave = MICGM, cm
-                    texto = cm.rotmenu
-                    submenuGM.opcion(clave, texto, icono)
-                submenuGM.separador()
+        menu.separador()
+        submenu = menu.submenu(_("GM engines"), self.dicIconos[MICGM])
+        for gm, li in self.dicMotoresGM.iteritems():
+            icono = rp.otro()
+            submenuGM = submenu.submenu(gm, icono)
+            for cm in li:
+                clave = MICGM, cm
+                texto = cm.alias.split(" ")[2]
+                submenuGM.opcion(clave, texto, icono)
+            submenuGM.separador()
+
+        menu.separador()
+        menu.opcion(( MICPER, None), _("Tourney engines"), self.dicIconos[MICPER])
+
+        menu.separador()
+        submenu = menu.submenu(_("Engines with fixed elo"), self.dicIconos[FIXED])
+        li = self.dicMotoresFixedElo.keys()
+        li.sort()
+        for elo in li:
+            icono = rp.otro()
+            submenuElo = submenu.submenu(str(elo), icono)
+            lien = self.dicMotoresFixedElo[elo]
+            lien.sort(key=lambda x: x.nombre)
+            for cm in lien:
+                clave = FIXED, cm
+                texto = cm.nombre
+                submenuElo.opcion(clave, texto, icono)
+            submenuElo.separador()
 
         return menu.lanza()
 
@@ -89,10 +109,33 @@ class Motores:
                 tipo = INTERNO
                 clave = self.configuracion.rivalInicial
 
+        if tipo == MICPER:
+            liMotores = EnginesMicElo.listaCompleta()
+
+            for cm in liMotores:
+                if cm.clave == clave:
+                    rival = cm
+                    break
+            if not rival:
+                tipo = INTERNO
+                clave = self.configuracion.rivalInicial
+
         if tipo == INTERNO:
             for cm in self.liMotoresInternos:
                 if cm.clave == clave:
                     rival = cm
+                    break
+            if not rival:
+                rival = self.liMotoresInternos[0]
+
+        if tipo == FIXED:
+            rival = None
+            for elo, lista in self.dicMotoresFixedElo.iteritems():
+                for cm in lista:
+                    if cm.clave == clave:
+                        rival = cm
+                        break
+                if rival:
                     break
             if not rival:
                 rival = self.liMotoresInternos[0]

@@ -449,7 +449,7 @@ class WSummary(QtGui.QWidget):
             pv = self.liMoves[fila]["pv"]
             p = Partida.Partida()
             p.leerPV(pv)
-            p.compruebaFinal()
+            p.siTerminada()
             self.infoMove.modoPartida(p, 9999)
             self.setFocus()
             self.grid.setFocus()

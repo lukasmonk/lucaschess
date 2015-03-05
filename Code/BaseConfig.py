@@ -271,6 +271,9 @@ class ConfigMotor(ConfigMotorBase):
     def limpia(self):
         self.categorias.limpia()
 
+    def clona(self):
+        return copy.deepcopy(self)
+
 class ConfigTabTema:
     def __init__(self):
         self.defecto()

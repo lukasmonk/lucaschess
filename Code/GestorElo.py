@@ -18,6 +18,7 @@ class MotorElo:
     def __init__(self, elo, nombre, clave, depth):
         self.elo = elo
         self.nombre = nombre
+        self.alias = nombre
         self.clave = clave
         self.depth = depth
         self.siInterno = depth == 0
@@ -153,7 +154,9 @@ class GestorElo(Gestor.Gestor):
         numX = len(self.liMotores)
         for num, mt in enumerate(self.liMotores):
             mtElo = mt.elo
+            mt.siOut = False
             if mtElo > elo + 400:
+                mt.siOut = True
                 mtElo = elo + 400
             mt.siJugable = abs(mtElo - elo) <= 400
             if mt.siJugable:

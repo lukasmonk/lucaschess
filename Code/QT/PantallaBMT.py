@@ -1556,7 +1556,7 @@ class WBMT(QTVarios.WDialogo):
                 rm.siPrimero = False
                 partida.reset(cp)
                 partida.leerPV(rm.pv)
-                partida.compruebaFinal()
+                partida.siTerminada()
                 rm.txtPartida = partida.guardaEnTexto()
 
             if siCancelado:

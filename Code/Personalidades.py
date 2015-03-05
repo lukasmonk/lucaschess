@@ -167,7 +167,7 @@ class Personalidades:
             return None
 
     def lanzaMenu(self):
-        menu = QTVarios.LCMenu(self.pantalla)
+        menu = QTVarios.LCMenu(self.owner)
         f = Controles.TipoLetra(puntos=8, peso=75)
         menu.ponFuente(f)
         icoCrear = Iconos.Mas()

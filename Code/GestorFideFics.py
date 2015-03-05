@@ -104,7 +104,6 @@ class GestorFideFics(Gestor.Gestor):
         db.cerrar()
 
     def inicio(self, idGame, siCompetitivo, aplazamiento=None):
-
         self.siCompetitivo = siCompetitivo
 
         self.resultado = None

@@ -19,14 +19,13 @@ class WAbout(QtGui.QDialog):
 
         f = Controles.TipoLetra(puntos=10)  # 0, peso=75 )
 
-        cabecera = '<span style="font-size:30px; font-weight="700"; font-family:arial; color:#2D2B2B">%s</span><br>' % _(
+        cabecera = '<span style="font-size:30pt; font-weight="700"; font-family:arial; color:#2D2B2B">%s</span><br>' % _(
             "Lucas Chess")
-        cabecera += '<span style="font-size:15px;">%s</span><br>' % _X(_("version %1"), procesador.version)
-        cabecera += '<span style="font-size:10px;color:2D2B2B">%s</span>' % "Lucas Monge"
-        cabecera += ' - <a style="font-size:10px; color:2D2B2B" href="%s">%s</a>' % (procesador.web, procesador.web)
-        cabecera += ' - <a style="font-size:10px; color:2D2B2B" href="%s">Blog : Fresh news</a><br>' % (
-            procesador.blog, )
-        cabecera += '%s <a style="font-size:10px; color:2D2B2B" href="http://www.gnu.org/copyleft/gpl.html"> GPL</a>' % _(
+        cabecera += '<span style="font-size:15pt;">%s</span><br>' % _X(_("version %1"), procesador.version)
+        cabecera += '<span style="font-size:8pt;color:2D2B2B">%s</span>' % "Lucas Monge"
+        cabecera += ' - <a style="font-size:8pt; color:2D2B2B" href="%s">%s</a>' % (procesador.web, procesador.web)
+        cabecera += ' - <a style="font-size:8pt; color:2D2B2B" href="%s">Blog : Fresh news</a><br>' % (procesador.blog, )
+        cabecera += '%s <a style="font-size:8pt; color:2D2B2B" href="http://www.gnu.org/copyleft/gpl.html"> GPL</a>' % _(
             "License")
 
         lbIco = Controles.LB(self).ponImagen(Iconos.pmAplicacion64())
@@ -38,9 +37,12 @@ class WAbout(QtGui.QDialog):
         tab.ponFuente(f)
 
         ib = InfoBase.ThanksTo()
-        for k, titulo in ib.dic.iteritems():
+
+        for n, (k, titulo) in enumerate(ib.dic.iteritems()):
             txt = ib.texto(k)
             lb = Controles.LB(self, txt)
+            lb.ponFondoN("Ivory")
+            lb.ponFuente(f)
             tab.addTab(lb, titulo)
 
         lyV1 = Colocacion.H().control(lbIco).espacio(15).control(lbTitulo).relleno()

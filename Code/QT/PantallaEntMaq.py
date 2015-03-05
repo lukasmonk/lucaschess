@@ -285,7 +285,7 @@ class WEntMaquina(QTVarios.WDialogo):
         fichero = self.configuracion.ficheroEntMaquinaConf
         dbc = Util.DicSQL(fichero)
         liConf = dbc.keys(siOrdenados=True)
-        menu = Controles.Menu()
+        menu = Controles.Menu(self)
         SELECCIONA, BORRA, AGREGA = range(3)
         for x in liConf:
             menu.opcion((SELECCIONA, x), x, Iconos.PuntoAzul())
@@ -329,6 +329,10 @@ class WEntMaquina(QTVarios.WDialogo):
             if tp == Motores.EXTERNO and cm is None:
                 self.motoresExternos()
                 return
+            elif tp == Motores.MICPER:
+                cm = PantallaMotores.eligeMotorEntMaq(self)
+                if not cm:
+                    return
             self.rivalTipo = tp
             self.rival = cm
             self.ponRival()

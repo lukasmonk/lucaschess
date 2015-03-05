@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 import Code.ControlPosicion as ControlPosicion
 import Code.DGT as DGT
+import Code.Voice as Voice
 import Code.QT.QTUtil2 as QTUtil2
 import Code.QT.QTVarios as QTVarios
 import Code.QT.Colocacion as Colocacion
@@ -53,6 +54,8 @@ class WPosicion(QtGui.QDialog):
         btPegar = Controles.PB(self, _("Paste FEN position"), self.pegarPosicion, plano=False)
         btCopiar = Controles.PB(self, _("Copy FEN position"), self.copiarPosicion, plano=False)
         btVoyager = Controles.PB(self, "", self.lanzaVoyager, plano=False).ponIcono(Iconos.Voyager())
+        self.btVoice = Controles.PB(self, "", self.voiceActive, plano=False).ponIcono(Iconos.S_Microfono())
+        self.btVoiceX = Controles.PB(self, "", self.voiceDeactive, plano=False).ponIcono(Iconos.X_Microfono())
 
         # Tablero
         confTablero = configuracion.confTablero("POSICION", 24)
@@ -119,10 +122,9 @@ class WPosicion(QtGui.QDialog):
         lyI = Colocacion.V().control(tb).otro(ly).margen(3)
 
         ## Derecha
-        # lyDA0 = Colocacion.H().relleno().control(self.dragDropWI).control( self.tablero ).control(self.dragDropBD).relleno()
-        # lyDA = Colocacion.V().controlc(self.dragDropBA).otro( lyDA0 ).controlc(self.dragDropWB)
+        lyBT = Colocacion.H().control(self.btVoice).control(self.btVoiceX)
         lyDA = Colocacion.G()
-        lyDA.controlc(self.dragDropBA, 0, 1)
+        lyDA.controlc(self.dragDropBA, 0, 1).otro(lyBT, 0, 2)
         lyDA.controld(self.dragDropWI, 1, 0).control(self.tablero, 1, 1).control(self.dragDropBD, 1, 2)
         lyDA.controlc(self.dragDropWB, 2, 1)
 
@@ -134,14 +136,70 @@ class WPosicion(QtGui.QDialog):
 
         if configuracion.siDGT:
             if not DGT.activarSegunON_OFF(self.dgt):  # Error
-                QTUtil2.mensError(self.pantalla, _("Error, could not detect the DGT board driver."))
+                QTUtil2.mensError(self, _("Error, could not detect the DGT board driver."))
 
         self.ponCursor()
 
+        self.voyager = None
+        self.bufferVoice = ""
+        self.queueVoice = []
+        self.isVoiceActive = False
+        if not configuracion.voice:
+            self.btVoiceX.setVisible(False)
+            self.btVoice.setVisible(False)
+        else:
+            if Voice.runVoice.isActive():
+                self.voiceActive()
+            else:
+                self.voiceDeactive()
+
+    def voiceActive(self):
+        self.btVoiceX.setVisible(True)
+        self.btVoice.setVisible(False)
+        Voice.runVoice.start(self.voice)
+        self.isVoiceActive = True
+
+    def voiceDeactive(self):
+        self.btVoiceX.setVisible(False)
+        self.btVoice.setVisible(True)
+        if self.isVoiceActive:
+            Voice.runVoice.stop()
+            self.isVoiceActive = False
+
+    def voice(self, lista):
+        li = lista.split(" ")
+        white = self.ultimaPieza.isupper()
+        for w in li:
+            if w in "PNBRQK":
+                self.ultimaPieza = w if white else w.lower()
+            elif w in "abcdefgh":
+                self.bufferVoice = w
+            elif w in "12345678":
+                if self.bufferVoice:
+                    pos = self.bufferVoice + w
+                    self.bufferVoice = ""
+                    self.actPosicion()
+                    self.queueVoice.append( self.posicion.fen() )
+                    if self.casillas[pos]:
+                        self.borraCasilla(pos)
+                    else:
+                        self.repitePieza(pos)
+            elif w == "WHITE":
+                self.ultimaPieza = self.ultimaPieza.upper()
+            elif w == "BLACK":
+                self.ultimaPieza = self.ultimaPieza.lower()
+            elif w == "TAKEBACK":
+                if self.queueVoice:
+                    fen = self.queueVoice[-1]
+                    self.queueVoice = self.queueVoice[:-1]
+                    self.posicion.leeFen(fen)
+                    self.resetPosicion()
+
     def lanzaVoyager(self):
         self.actPosicion()
-        w = WVoyager(self, self.configuracion, self.posicion)
-        w.exec_()
+        self.voyager = WVoyager(self, self.configuracion, self.posicion)
+        self.voyager.exec_()
+        self.voyager = None
         self.resetPosicion()
 
     def dgt(self, quien, dato):
@@ -161,6 +219,7 @@ class WPosicion(QtGui.QDialog):
 
     def cierra(self):
         DGT.quitarDispatch()
+        self.voiceDeactive()
 
     def closeEvent(self, event):
         self.cierra()

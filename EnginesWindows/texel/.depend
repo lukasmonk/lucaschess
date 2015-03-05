@@ -1,0 +1,192 @@
+obj64/bitBoard.o objarm/bitBoard.o objdef/bitBoard.o objw32/bitBoard.o objw32old/bitBoard.o objw64/bitBoard.o objw64amd/bitBoard.o objw64old/bitBoard.o: src/bitBoard.cpp src/bitBoard.hpp src/util/util.hpp \
+ src/util/alignedAlloc.hpp src/position.hpp src/move.hpp src/undoInfo.hpp \
+ src/piece.hpp src/material.hpp
+obj64/book.o objarm/book.o objdef/book.o objw32/book.o objw32old/book.o objw64/book.o objw64amd/book.o objw64old/book.o: src/book.cpp src/book.hpp src/move.hpp src/util/util.hpp \
+ src/util/random.hpp src/util/util.hpp src/position.hpp src/undoInfo.hpp \
+ src/bitBoard.hpp src/util/alignedAlloc.hpp src/piece.hpp \
+ src/material.hpp src/moveGen.hpp src/textio.hpp src/chessParseError.hpp \
+ src/util/timeUtil.hpp
+obj64/computerPlayer.o objarm/computerPlayer.o objdef/computerPlayer.o objw32/computerPlayer.o objw32old/computerPlayer.o objw64/computerPlayer.o objw64amd/computerPlayer.o objw64old/computerPlayer.o: src/computerPlayer.cpp src/computerPlayer.hpp \
+ src/player.hpp src/transpositionTable.hpp src/util/util.hpp src/move.hpp \
+ src/constants.hpp src/util/alignedAlloc.hpp src/book.hpp \
+ src/util/random.hpp src/util/util.hpp src/search.hpp src/position.hpp \
+ src/undoInfo.hpp src/bitBoard.hpp src/piece.hpp src/material.hpp \
+ src/killerTable.hpp src/history.hpp src/evaluate.hpp src/parameters.hpp \
+ src/treeLogger.hpp src/parallel.hpp src/searchUtil.hpp \
+ src/util/timeUtil.hpp src/util/heap.hpp src/moveGen.hpp \
+ src/util/histogram.hpp src/textio.hpp src/chessParseError.hpp \
+ src/tbprobe.hpp
+obj64/enginecontrol.o objarm/enginecontrol.o objdef/enginecontrol.o objw32/enginecontrol.o objw32old/enginecontrol.o objw64/enginecontrol.o objw64amd/enginecontrol.o objw64old/enginecontrol.o: src/enginecontrol.cpp src/enginecontrol.hpp \
+ src/search.hpp src/constants.hpp src/position.hpp src/move.hpp \
+ src/util/util.hpp src/undoInfo.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/piece.hpp src/material.hpp \
+ src/killerTable.hpp src/history.hpp src/transpositionTable.hpp \
+ src/evaluate.hpp src/parameters.hpp src/treeLogger.hpp src/parallel.hpp \
+ src/searchUtil.hpp src/util/timeUtil.hpp src/util/util.hpp \
+ src/util/heap.hpp src/moveGen.hpp src/util/histogram.hpp \
+ src/util/random.hpp src/searchparams.hpp src/book.hpp src/textio.hpp \
+ src/chessParseError.hpp src/util/logger.hpp src/util/timeUtil.hpp \
+ src/numa.hpp
+obj64/endGameEval.o objarm/endGameEval.o objdef/endGameEval.o objw32/endGameEval.o objw32old/endGameEval.o objw64/endGameEval.o objw64amd/endGameEval.o objw64old/endGameEval.o: src/endGameEval.cpp src/endGameEval.hpp src/util/util.hpp \
+ src/position.hpp src/move.hpp src/undoInfo.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/piece.hpp src/material.hpp \
+ src/parameters.hpp
+obj64/evaluate.o objarm/evaluate.o objdef/evaluate.o objw32/evaluate.o objw32old/evaluate.o objw64/evaluate.o objw64amd/evaluate.o objw64old/evaluate.o: src/evaluate.cpp src/evaluate.hpp src/parameters.hpp \
+ src/util/util.hpp src/piece.hpp src/position.hpp src/move.hpp \
+ src/undoInfo.hpp src/bitBoard.hpp src/util/alignedAlloc.hpp \
+ src/material.hpp src/endGameEval.hpp
+obj64/game.o objarm/game.o objdef/game.o objw32/game.o objw32old/game.o objw64/game.o objw64amd/game.o objw64old/game.o: src/game.cpp src/game.hpp src/move.hpp src/util/util.hpp \
+ src/undoInfo.hpp src/position.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/piece.hpp src/material.hpp src/player.hpp \
+ src/moveGen.hpp src/textio.hpp src/chessParseError.hpp \
+ src/util/timeUtil.hpp src/util/util.hpp
+obj64/history.o objarm/history.o objdef/history.o objw32/history.o objw32old/history.o objw64/history.o objw64amd/history.o objw64old/history.o: src/history.cpp src/history.hpp src/piece.hpp src/position.hpp \
+ src/move.hpp src/util/util.hpp src/undoInfo.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/material.hpp
+obj64/humanPlayer.o objarm/humanPlayer.o objdef/humanPlayer.o objw32/humanPlayer.o objw32old/humanPlayer.o objw64/humanPlayer.o objw64amd/humanPlayer.o objw64old/humanPlayer.o: src/humanPlayer.cpp src/humanPlayer.hpp src/player.hpp \
+ src/position.hpp src/move.hpp src/util/util.hpp src/undoInfo.hpp \
+ src/bitBoard.hpp src/util/alignedAlloc.hpp src/piece.hpp \
+ src/material.hpp
+obj64/killerTable.o objarm/killerTable.o objdef/killerTable.o objw32/killerTable.o objw32old/killerTable.o objw64/killerTable.o objw64amd/killerTable.o objw64old/killerTable.o: src/killerTable.cpp src/killerTable.hpp src/util/util.hpp \
+ src/move.hpp
+obj64/kpkTable.o objarm/kpkTable.o objdef/kpkTable.o objw32/kpkTable.o objw32old/kpkTable.o objw64/kpkTable.o objw64amd/kpkTable.o objw64old/kpkTable.o: src/kpkTable.cpp src/endGameEval.hpp src/util/util.hpp
+obj64/krkpTable.o objarm/krkpTable.o objdef/krkpTable.o objw32/krkpTable.o objw32old/krkpTable.o objw64/krkpTable.o objw64amd/krkpTable.o objw64old/krkpTable.o: src/krkpTable.cpp src/endGameEval.hpp src/util/util.hpp
+obj64/krpkrTable.o objarm/krpkrTable.o objdef/krpkrTable.o objw32/krpkrTable.o objw32old/krpkrTable.o objw64/krpkrTable.o objw64amd/krpkrTable.o objw64old/krpkrTable.o: src/krpkrTable.cpp src/endGameEval.hpp src/util/util.hpp
+obj64/material.o objarm/material.o objdef/material.o objw32/material.o objw32old/material.o objw64/material.o objw64amd/material.o objw64old/material.o: src/material.cpp src/material.hpp src/piece.hpp
+obj64/move.o objarm/move.o objdef/move.o objw32/move.o objw32old/move.o objw64/move.o objw64amd/move.o objw64old/move.o: src/move.cpp src/move.hpp src/util/util.hpp
+obj64/moveGen.o objarm/moveGen.o objdef/moveGen.o objw32/moveGen.o objw32old/moveGen.o objw64/moveGen.o objw64amd/moveGen.o objw64old/moveGen.o: src/moveGen.cpp src/moveGen.hpp src/move.hpp src/util/util.hpp \
+ src/position.hpp src/undoInfo.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/piece.hpp src/material.hpp
+obj64/numa.o objarm/numa.o objdef/numa.o objw32/numa.o objw32old/numa.o objw64/numa.o objw64amd/numa.o objw64old/numa.o: src/numa.cpp src/numa.hpp src/util/util.hpp src/util/logger.hpp \
+ src/util/util.hpp src/util/timeUtil.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp
+obj64/parameters.o objarm/parameters.o objdef/parameters.o objw32/parameters.o objw32old/parameters.o objw64/parameters.o objw64amd/parameters.o objw64old/parameters.o: src/parameters.cpp src/parameters.hpp src/util/util.hpp \
+ src/piece.hpp src/position.hpp src/move.hpp src/undoInfo.hpp \
+ src/bitBoard.hpp src/util/alignedAlloc.hpp src/material.hpp \
+ src/computerPlayer.hpp src/player.hpp src/transpositionTable.hpp \
+ src/constants.hpp src/book.hpp src/util/random.hpp src/util/util.hpp \
+ src/search.hpp src/killerTable.hpp src/history.hpp src/evaluate.hpp \
+ src/treeLogger.hpp src/parallel.hpp src/searchUtil.hpp \
+ src/util/timeUtil.hpp src/util/heap.hpp src/moveGen.hpp \
+ src/util/histogram.hpp
+obj64/parallel.o objarm/parallel.o objdef/parallel.o objw32/parallel.o objw32old/parallel.o objw64/parallel.o objw64amd/parallel.o objw64old/parallel.o: src/parallel.cpp src/parallel.hpp src/killerTable.hpp \
+ src/util/util.hpp src/move.hpp src/history.hpp src/piece.hpp \
+ src/position.hpp src/undoInfo.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/material.hpp src/transpositionTable.hpp \
+ src/constants.hpp src/evaluate.hpp src/parameters.hpp src/searchUtil.hpp \
+ src/util/timeUtil.hpp src/util/util.hpp src/util/heap.hpp src/numa.hpp \
+ src/search.hpp src/treeLogger.hpp src/moveGen.hpp src/util/histogram.hpp \
+ src/tbprobe.hpp src/textio.hpp src/chessParseError.hpp \
+ src/util/logger.hpp src/util/timeUtil.hpp
+obj64/piece.o objarm/piece.o objdef/piece.o objw32/piece.o objw32old/piece.o objw64/piece.o objw64amd/piece.o objw64old/piece.o: src/piece.cpp src/piece.hpp
+obj64/position.o objarm/position.o objdef/position.o objw32/position.o objw32old/position.o objw64/position.o objw64amd/position.o objw64old/position.o: src/position.cpp src/position.hpp src/move.hpp \
+ src/util/util.hpp src/undoInfo.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/piece.hpp src/material.hpp \
+ src/evaluate.hpp src/parameters.hpp src/textio.hpp \
+ src/chessParseError.hpp
+obj64/search.o objarm/search.o objdef/search.o objw32/search.o objw32old/search.o objw64/search.o objw64amd/search.o objw64old/search.o: src/search.cpp src/search.hpp src/constants.hpp \
+ src/position.hpp src/move.hpp src/util/util.hpp src/undoInfo.hpp \
+ src/bitBoard.hpp src/util/alignedAlloc.hpp src/piece.hpp \
+ src/material.hpp src/killerTable.hpp src/history.hpp \
+ src/transpositionTable.hpp src/evaluate.hpp src/parameters.hpp \
+ src/treeLogger.hpp src/parallel.hpp src/searchUtil.hpp \
+ src/util/timeUtil.hpp src/util/util.hpp src/util/heap.hpp \
+ src/moveGen.hpp src/util/histogram.hpp src/numa.hpp src/tbprobe.hpp \
+ src/textio.hpp src/chessParseError.hpp src/util/logger.hpp \
+ src/util/timeUtil.hpp
+obj64/tbprobe.o objarm/tbprobe.o objdef/tbprobe.o objw32/tbprobe.o objw32old/tbprobe.o objw64/tbprobe.o objw64amd/tbprobe.o objw64old/tbprobe.o: src/tbprobe.cpp src/tbprobe.hpp src/transpositionTable.hpp \
+ src/util/util.hpp src/move.hpp src/constants.hpp \
+ src/util/alignedAlloc.hpp src/moveGen.hpp src/position.hpp \
+ src/undoInfo.hpp src/bitBoard.hpp src/piece.hpp src/material.hpp \
+ src/gtb/gtb-probe.h src/syzygy/rtb-probe.hpp src/util/timeUtil.hpp \
+ src/util/util.hpp
+obj64/texel.o objarm/texel.o objdef/texel.o objw32/texel.o objw32old/texel.o objw64/texel.o objw64amd/texel.o objw64old/texel.o: src/texel.cpp src/computerPlayer.hpp src/player.hpp \
+ src/transpositionTable.hpp src/util/util.hpp src/move.hpp \
+ src/constants.hpp src/util/alignedAlloc.hpp src/book.hpp \
+ src/util/random.hpp src/util/util.hpp src/search.hpp src/position.hpp \
+ src/undoInfo.hpp src/bitBoard.hpp src/piece.hpp src/material.hpp \
+ src/killerTable.hpp src/history.hpp src/evaluate.hpp src/parameters.hpp \
+ src/treeLogger.hpp src/parallel.hpp src/searchUtil.hpp \
+ src/util/timeUtil.hpp src/util/heap.hpp src/moveGen.hpp \
+ src/util/histogram.hpp src/humanPlayer.hpp src/tuigame.hpp src/game.hpp \
+ src/uciprotocol.hpp src/enginecontrol.hpp src/numa.hpp
+obj64/textio.o objarm/textio.o objdef/textio.o objw32/textio.o objw32old/textio.o objw64/textio.o objw64amd/textio.o objw64old/textio.o: src/textio.cpp src/textio.hpp src/chessParseError.hpp \
+ src/position.hpp src/move.hpp src/util/util.hpp src/undoInfo.hpp \
+ src/bitBoard.hpp src/util/alignedAlloc.hpp src/piece.hpp \
+ src/material.hpp src/moveGen.hpp
+obj64/transpositionTable.o objarm/transpositionTable.o objdef/transpositionTable.o objw32/transpositionTable.o objw32old/transpositionTable.o objw64/transpositionTable.o objw64amd/transpositionTable.o objw64old/transpositionTable.o: src/transpositionTable.cpp \
+ src/transpositionTable.hpp src/util/util.hpp src/move.hpp \
+ src/constants.hpp src/util/alignedAlloc.hpp src/position.hpp \
+ src/undoInfo.hpp src/bitBoard.hpp src/piece.hpp src/material.hpp \
+ src/moveGen.hpp src/textio.hpp src/chessParseError.hpp
+obj64/treeLogger.o objarm/treeLogger.o objdef/treeLogger.o objw32/treeLogger.o objw32old/treeLogger.o objw64/treeLogger.o objw64amd/treeLogger.o objw64old/treeLogger.o: src/treeLogger.cpp src/treeLogger.hpp src/util/util.hpp \
+ src/move.hpp src/parallel.hpp src/killerTable.hpp src/history.hpp \
+ src/piece.hpp src/position.hpp src/undoInfo.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/material.hpp src/transpositionTable.hpp \
+ src/constants.hpp src/evaluate.hpp src/parameters.hpp src/searchUtil.hpp \
+ src/util/timeUtil.hpp src/util/util.hpp src/util/heap.hpp src/textio.hpp \
+ src/chessParseError.hpp
+obj64/tuigame.o objarm/tuigame.o objdef/tuigame.o objw32/tuigame.o objw32old/tuigame.o objw64/tuigame.o objw64amd/tuigame.o objw64old/tuigame.o: src/tuigame.cpp src/tuigame.hpp src/game.hpp src/move.hpp \
+ src/util/util.hpp src/undoInfo.hpp src/position.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/piece.hpp src/material.hpp src/player.hpp \
+ src/uciprotocol.hpp src/enginecontrol.hpp src/search.hpp \
+ src/constants.hpp src/killerTable.hpp src/history.hpp \
+ src/transpositionTable.hpp src/evaluate.hpp src/parameters.hpp \
+ src/treeLogger.hpp src/parallel.hpp src/searchUtil.hpp \
+ src/util/timeUtil.hpp src/util/util.hpp src/util/heap.hpp \
+ src/moveGen.hpp src/util/histogram.hpp src/textio.hpp \
+ src/chessParseError.hpp src/computerPlayer.hpp src/book.hpp \
+ src/util/random.hpp
+obj64/uciprotocol.o objarm/uciprotocol.o objdef/uciprotocol.o objw32/uciprotocol.o objw32old/uciprotocol.o objw64/uciprotocol.o objw64amd/uciprotocol.o objw64old/uciprotocol.o: src/uciprotocol.cpp src/uciprotocol.hpp src/position.hpp \
+ src/move.hpp src/util/util.hpp src/undoInfo.hpp src/bitBoard.hpp \
+ src/util/alignedAlloc.hpp src/piece.hpp src/material.hpp \
+ src/enginecontrol.hpp src/search.hpp src/constants.hpp \
+ src/killerTable.hpp src/history.hpp src/transpositionTable.hpp \
+ src/evaluate.hpp src/parameters.hpp src/treeLogger.hpp src/parallel.hpp \
+ src/searchUtil.hpp src/util/timeUtil.hpp src/util/util.hpp \
+ src/util/heap.hpp src/moveGen.hpp src/util/histogram.hpp \
+ src/searchparams.hpp src/computerPlayer.hpp src/player.hpp src/book.hpp \
+ src/util/random.hpp src/textio.hpp src/chessParseError.hpp
+obj64/logger.o objarm/logger.o objdef/logger.o objw32/logger.o objw32old/logger.o objw64/logger.o objw64amd/logger.o objw64old/logger.o: src/util/logger.cpp src/util/logger.hpp src/util/util.hpp \
+ src/util/timeUtil.hpp
+obj64/random.o objarm/random.o objdef/random.o objw32/random.o objw32old/random.o objw64/random.o objw64amd/random.o objw64old/random.o: src/util/random.cpp src/util/random.hpp src/util/util.hpp \
+ src/util/timeUtil.hpp
+obj64/timeUtil.o objarm/timeUtil.o objdef/timeUtil.o objw32/timeUtil.o objw32old/timeUtil.o objw64/timeUtil.o objw64amd/timeUtil.o objw64old/timeUtil.o: src/util/timeUtil.cpp src/util/timeUtil.hpp src/util/util.hpp
+obj64/util.o objarm/util.o objdef/util.o objw32/util.o objw32old/util.o objw64/util.o objw64amd/util.o objw64old/util.o: src/util/util.cpp src/util/util.hpp
+obj64/rtb-probe.o objarm/rtb-probe.o objdef/rtb-probe.o objw32/rtb-probe.o objw32old/rtb-probe.o objw64/rtb-probe.o objw64amd/rtb-probe.o objw64old/rtb-probe.o: src/syzygy/rtb-probe.cpp src/syzygy/../piece.hpp \
+ src/syzygy/../position.hpp src/syzygy/../move.hpp \
+ src/syzygy/../util/util.hpp src/syzygy/../undoInfo.hpp \
+ src/syzygy/../bitBoard.hpp src/syzygy/../util/alignedAlloc.hpp \
+ src/syzygy/../piece.hpp src/syzygy/../material.hpp \
+ src/syzygy/../moveGen.hpp src/syzygy/../position.hpp \
+ src/syzygy/rtb-probe.hpp src/syzygy/rtb-core.hpp \
+ src/syzygy/rtb-core-impl.hpp
+obj64/Lzma86Dec.o objarm/Lzma86Dec.o objdef/Lzma86Dec.o objw32/Lzma86Dec.o objw32old/Lzma86Dec.o objw64/Lzma86Dec.o objw64amd/Lzma86Dec.o objw64old/Lzma86Dec.o: src/gtb/compression/lzma/Lzma86Dec.c \
+ src/gtb/compression/lzma/Lzma86Dec.h src/gtb/compression/lzma/Types.h \
+ src/gtb/compression/lzma/Alloc.h src/gtb/compression/lzma/Bra.h \
+ src/gtb/compression/lzma/LzmaDec.h
+obj64/LzFind.o objarm/LzFind.o objdef/LzFind.o objw32/LzFind.o objw32old/LzFind.o objw64/LzFind.o objw64amd/LzFind.o objw64old/LzFind.o: src/gtb/compression/lzma/LzFind.c \
+ src/gtb/compression/lzma/LzFind.h src/gtb/compression/lzma/Types.h \
+ src/gtb/compression/lzma/LzHash.h
+obj64/Lzma86Enc.o objarm/Lzma86Enc.o objdef/Lzma86Enc.o objw32/Lzma86Enc.o objw32old/Lzma86Enc.o objw64/Lzma86Enc.o objw64amd/Lzma86Enc.o objw64old/Lzma86Enc.o: src/gtb/compression/lzma/Lzma86Enc.c \
+ src/gtb/compression/lzma/Lzma86Enc.h src/gtb/compression/lzma/Types.h \
+ src/gtb/compression/lzma/Alloc.h src/gtb/compression/lzma/Bra.h \
+ src/gtb/compression/lzma/LzmaEnc.h
+obj64/LzmaDec.o objarm/LzmaDec.o objdef/LzmaDec.o objw32/LzmaDec.o objw32old/LzmaDec.o objw64/LzmaDec.o objw64amd/LzmaDec.o objw64old/LzmaDec.o: src/gtb/compression/lzma/LzmaDec.c \
+ src/gtb/compression/lzma/LzmaDec.h src/gtb/compression/lzma/Types.h
+obj64/Alloc.o objarm/Alloc.o objdef/Alloc.o objw32/Alloc.o objw32old/Alloc.o objw64/Alloc.o objw64amd/Alloc.o objw64old/Alloc.o: src/gtb/compression/lzma/Alloc.c \
+ src/gtb/compression/lzma/Alloc.h
+obj64/Bra86.o objarm/Bra86.o objdef/Bra86.o objw32/Bra86.o objw32old/Bra86.o objw64/Bra86.o objw64amd/Bra86.o objw64old/Bra86.o: src/gtb/compression/lzma/Bra86.c src/gtb/compression/lzma/Bra.h \
+ src/gtb/compression/lzma/Types.h
+obj64/LzmaEnc.o objarm/LzmaEnc.o objdef/LzmaEnc.o objw32/LzmaEnc.o objw32old/LzmaEnc.o objw64/LzmaEnc.o objw64amd/LzmaEnc.o objw64old/LzmaEnc.o: src/gtb/compression/lzma/LzmaEnc.c \
+ src/gtb/compression/lzma/LzmaEnc.h src/gtb/compression/lzma/Types.h \
+ src/gtb/compression/lzma/LzFind.h
+obj64/wrap.o objarm/wrap.o objdef/wrap.o objw32/wrap.o objw32old/wrap.o objw64/wrap.o objw64amd/wrap.o objw64old/wrap.o: src/gtb/compression/wrap.c src/gtb/compression/wrap.h \
+ src/gtb/compression/lzma/Lzma86Enc.h src/gtb/compression/lzma/Types.h \
+ src/gtb/compression/lzma/Lzma86Dec.h
+obj64/gtb-dec.o objarm/gtb-dec.o objdef/gtb-dec.o objw32/gtb-dec.o objw32old/gtb-dec.o objw64/gtb-dec.o objw64amd/gtb-dec.o objw64old/gtb-dec.o: src/gtb/gtb-dec.c src/gtb/gtb-dec.h src/gtb/compression/wrap.h
+obj64/gtb-att.o objarm/gtb-att.o objdef/gtb-att.o objw32/gtb-att.o objw32old/gtb-att.o objw64/gtb-att.o objw64amd/gtb-att.o objw64old/gtb-att.o: src/gtb/gtb-att.c src/gtb/gtb-att.h src/gtb/sysport/sysport.h
+obj64/sysport.o objarm/sysport.o objdef/sysport.o objw32/sysport.o objw32old/sysport.o objw64/sysport.o objw64amd/sysport.o objw64old/sysport.o: src/gtb/sysport/sysport.c src/gtb/sysport/sysport.h
+obj64/gtb-probe.o objarm/gtb-probe.o objdef/gtb-probe.o objw32/gtb-probe.o objw32old/gtb-probe.o objw64/gtb-probe.o objw64amd/gtb-probe.o objw64old/gtb-probe.o: src/gtb/gtb-probe.c src/gtb/gtb-probe.h \
+ src/gtb/sysport/sysport.h src/gtb/gtb-att.h src/gtb/gtb-types.h \
+ src/gtb/gtb-dec.h

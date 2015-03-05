@@ -251,7 +251,7 @@ class WBlindfold(QTVarios.WDialogo):
     def procesarTB(self):
         getattr(self, self.sender().clave)()
 
-    def onCloseEvent(self):
+    def closeEvent(self):
         self.guardarVideo()
 
     def grabar(self):

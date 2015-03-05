@@ -1,7 +1,6 @@
 # -*- coding: latin-1 -*-
 import collections
 import codecs
-import random
 import base64
 
 from PyQt4 import QtCore, QtGui, QtSvg
@@ -14,8 +13,6 @@ import Code.QT.Iconos as Iconos
 import Code.QT.Controles as Controles
 import Code.QT.QTUtil as QTUtil
 import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Grid as Grid
-import Code.QT.Columnas as Columnas
 
 class DragUna(Controles.LB):
     def __init__(self, owner, pmVacio):
@@ -403,191 +400,6 @@ def tiempo(owner, minMinutos=1, minSegundos=0, maxMinutos=999, maxSegundos=999):
     if w.exec_():
         return w.resultado()
     return None
-
-class WEligeMotorElo(WDialogo):
-    def __init__(self, gestor, elo, titulo, icono, tipo):
-
-        super(WEligeMotorElo, self).__init__(gestor.pantalla, titulo, icono, "elo")
-
-        self.gestor = gestor
-
-        self.colorNoJugable = QTUtil.qtColorRGB(241, 226, 226)
-        self.colorMenor = QTUtil.qtColorRGB(245, 245, 245)
-        self.colorMayor = None
-        self.elo = elo
-        self.tipo = tipo
-
-        # Toolbar
-        liAcciones = [( _("Choose"), Iconos.Aceptar(), "elegir" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-        ]
-        if self.tipo == "MICELO":
-            liAcciones.append(( _("Reset"), Iconos.Reiniciar(), "reset" ))
-            liAcciones.append(None)
-
-        tb = Controles.TB(self, liAcciones)
-
-        self.liMotores = self.gestor.listaMotores(elo)
-        dicValores = VarGen.configuracion.leeVariables(tipo)
-        if not dicValores:
-            dicValores = {}
-        get = dicValores.get
-
-        minimo = 9999
-        maximo = 0
-        for mt in self.liMotores:
-            if mt.siJugable:
-                if mt.elo < minimo:
-                    minimo = mt.elo
-                if mt.elo > maximo:
-                    maximo = mt.elo
-        desde = get("DESDE", minimo)
-        hasta = get("HASTA", maximo)
-        if desde < minimo or desde > maximo:
-            desde = minimo
-        if hasta > maximo or hasta < minimo:
-            hasta = maximo
-        if desde > hasta:
-            desde, hasta = hasta, desde
-        self.desdeRandom, lbDesde = QTUtil2.spinBoxLB(self, desde, minimo, maximo, maxTam=50, etiqueta=_("From elo"))
-        self.hastaRandom, lbHasta = QTUtil2.spinBoxLB(self, hasta, minimo, maximo, maxTam=50, etiqueta=_("To"))
-        liAcciones = [( _("Random opponent"), Iconos.FAQ(), "selectRandom" ),
-        ]
-        tbR = Controles.TB(self, liAcciones)
-        ly = Colocacion.G()
-        ly.controld(lbDesde, 0, 1).control(self.desdeRandom, 0, 2)
-        ly.controld(lbHasta, 1, 1).control(self.hastaRandom, 1, 2)
-        ly.controlc(tbR, 0, 0, 2, 1).margen(5)
-        gbRandom = Controles.GB(self, "", ly)
-
-        # Lista
-        oColumnas = Columnas.ListaColumnas()
-        oColumnas.nueva("NUMERO", _("N."), 35, siCentrado=True)
-        oColumnas.nueva("MOTOR", _("Engine"), 140)
-        oColumnas.nueva("ELO", _("Elo"), 60, siDerecha=True)
-        oColumnas.nueva("GANA", _("Win"), 80, siCentrado=True)
-        oColumnas.nueva("TABLAS", _("Draw"), 80, siCentrado=True)
-        oColumnas.nueva("PIERDE", _("Lost"), 80, siCentrado=True)
-
-        self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, siCabeceraMovible=False, altoFila=24)
-        self.registrarGrid(self.grid)
-
-        f = Controles.TipoLetra(puntos=9, peso=75)
-        self.grid.setFont(f)
-
-        self.grid.gotop()
-
-        # Layout
-        lyH = Colocacion.H().control(tb).control(gbRandom)
-        layout = Colocacion.V().otro(lyH).control(self.grid).margen(3)
-        self.setLayout(layout)
-
-        if not self.recuperarVideo():
-            self.resize(self.grid.anchoColumnas() + 24, 430)
-
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
-
-    def reset(self):
-        if not QTUtil2.pregunta(self, _("Are you sure you want to set the original elo of all engines?")):
-            return
-
-        self.gestor.configuracion.escVariables("DicMicElos", {})
-        self.cancelar()
-
-    def cancelar(self):
-        self.resultado = None
-        self.reject()
-
-    def elegir(self):
-        f = self.grid.recno()
-        mt = self.liMotores[f]
-        if mt.siJugable:
-            self.resultado = mt
-            self.guardarVideo()
-            self.accept()
-        else:
-            QTUtil.beep()
-
-    def selectRandom(self):
-        desde = self.desdeRandom.valor()
-        hasta = self.hastaRandom.valor()
-        if desde > hasta:
-            desde, hasta = hasta, desde
-        dicValores = {"DESDE": desde, "HASTA": hasta}
-        VarGen.configuracion.escVariables(self.tipo, dicValores)
-        li = []
-        for mt in self.liMotores:
-            if mt.siJugable and (desde <= mt.elo <= hasta ):
-                li.append(mt)
-        if li:
-            n = random.randint(0, len(li) - 1)
-            self.resultado = li[n]
-            self.guardarVideo()
-            self.accept()
-        else:
-            QTUtil2.mensError(self, _("There is not a playable engine between these values"))
-
-    def gridDobleClick(self, grid, fila, oColumna):
-        self.elegir()
-
-    def gridNumDatos(self, grid):
-        return len(self.liMotores)
-
-    def gridWheelEvent(self, quien, siAdelante):
-        n = len(self.liMotores)
-        f, c = self.grid.posActualN()
-        f += -1 if siAdelante else +1
-        if 0 <= f < n:
-            self.grid.goto(f, c)
-
-    def gridColorFondo(self, grid, fila, oColumna):
-        mt = self.liMotores[fila]
-        if mt.siJugable:
-            return self.colorMenor if mt.elo < self.elo else self.colorMayor
-        else:
-            return self.colorNoJugable
-
-    def gridDato(self, grid, fila, oColumna):
-        mt = self.liMotores[fila]
-        clave = oColumna.clave
-        if clave == "NUMERO":
-            valor = "%2d" % mt.numero
-        elif clave == "MOTOR":
-            valor = " " + mt.rotulo().strip()
-        elif clave == "ELO":
-            valor = "%d " % mt.elo
-        else:
-            if not mt.siJugable:
-                return "x"
-            if clave == "GANA":
-                pts = mt.pgana
-            elif clave == "TABLAS":
-                pts = mt.ptablas
-            elif clave == "PIERDE":
-                pts = mt.ppierde
-
-            valor = "%+d" % pts
-
-        return valor
-
-def eligeMotorElo(gestor, elo):
-    titulo = _("Lucas-Elo") + ". " + _("Choose the opponent")
-    icono = Iconos.Elo()
-    w = WEligeMotorElo(gestor, elo, titulo, icono, "ELO")
-    if w.exec_():
-        return w.resultado
-    else:
-        return None
-
-def eligeMotorMicElo(gestor, elo):
-    titulo = _("Club players competition") + ". " + _("Choose the opponent")
-    icono = Iconos.EloTimed()
-    w = WEligeMotorElo(gestor, elo, titulo, icono, "MICELO")
-    if w.exec_():
-        return w.resultado
-    else:
-        return None
 
 def lyBotonesMovimiento(owner, clave, siLibre=True, siMas=False, siTiempo=True, \
                         siGrabar=False, siGrabarTodos=False, siJugar=False, rutina=None, tamIcon=16,

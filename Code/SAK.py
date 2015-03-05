@@ -44,6 +44,12 @@ class SAKmove:
     def captura(self):
         return self._captura
 
+    def pieza(self):
+        return self._pieza
+
+    def __str__(self):
+        return self._pieza+self._desde+self._hasta+(self._coronacion if self._coronacion else "")
+
 class SAK:
     def __init__(self):
         if VarGen.isWindows:

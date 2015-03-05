@@ -684,12 +684,6 @@ class WMoves(QtGui.QWidget):
         if resp is not None:
             self.procesarAccion(resp)
 
-    def procesarTB(self):
-        self.procesarAccion(self.sender().clave)
-
-    def getCurrentMovItem(self):
-        item = mov.item
-
     def rama(self):
         mov = self.tree.currentMov()
         if not mov:
@@ -725,7 +719,6 @@ class WMoves(QtGui.QWidget):
         if not mov:
             return
         self.tree.mostrarOcultar(mov.item, mov)
-
 
 class InfoMove(QtGui.QWidget):
     def __init__(self, siBlancasAbajo):

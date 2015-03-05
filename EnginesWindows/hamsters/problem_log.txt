@@ -1,0 +1,473 @@
+Random seed: 0x1424288294
+Blunder distance = 4
+Pick move range = 0 -> 0
+Limit NPS = 50000
+fun_search -> start
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+   +-----------------+ W
+ 8 | r n b q k b n r |  
+ 7 | p p p p p p p p |  
+ 6 |   .   .   .   . |  
+ 5 | .   .   .   .   |  
+ 4 |   .   .   .   . |  
+ 3 | .   .   .   .   |  
+ 2 | P P P P P P P P |  
+ 1 | R N B Q K B N R |  
+   +-----------------+
+     a b c d e f g h  
+
+g1f3 = 20
+b1c3 = 20
+e2e4 = 10
+d2d4 = 10
+d2d3 = 7
+e2e3 = 7
+b1a3 = -3
+g1h3 = -3
+g2g3 = -8
+g2g4 = -8
+b2b3 = -8
+b2b4 = -8
+h2h4 = -12
+a2a4 = -12
+c2c4 = -16
+a2a3 = -18
+h2h3 = -18
+f2f4 = -19
+c2c3 = -20
+f2f3 = -21
+-> move g1f3 = 20
+g1f3 = 16
+b1c3 = 16
+e2e4 = 6
+d2d4 = 6
+e2e3 = 3
+d2d3 = 3
+g1h3 = -7
+b1a3 = -7
+g2g3 = -12
+g2g4 = -12
+b2b3 = -12
+b2b4 = -12
+h2h4 = -16
+a2a4 = -16
+c2c4 = -20
+h2h3 = -22
+a2a3 = -22
+f2f4 = -23
+c2c3 = -24
+f2f3 = -25
+-> move g1f3 = 16
+g1f3 = 20
+b1c3 = 20
+e2e3 = 11
+d2d3 = 11
+e2e4 = 10
+d2d4 = 10
+g1h3 = -3
+b1a3 = -3
+g2g3 = -8
+b2b3 = -8
+h2h3 = -10
+a2a3 = -10
+h2h4 = -12
+a2a4 = -12
+c2c4 = -16
+f2f4 = -19
+c2c3 = -20
+g2g4 = -21
+f2f3 = -21
+b2b4 = -38
+-> move g1f3 = 20
+g1f3 = 16
+b1c3 = 16
+e2e3 = 7
+d2d3 = 7
+e2e4 = 6
+d2d4 = 6
+g1h3 = -7
+b1a3 = -7
+g2g3 = -12
+b2b3 = -12
+h2h3 = -14
+a2a3 = -14
+h2h4 = -16
+a2a4 = -16
+c2c4 = -20
+f2f4 = -23
+c2c3 = -24
+g2g4 = -25
+f2f3 = -25
+b2b4 = -39
+-> move g1f3 = 16
+g1f3 = 9
+b1c3 = 9
+e2e3 = 9
+d2d3 = 9
+e2e4 = 8
+d2d4 = 8
+g1h3 = -5
+b1a3 = -5
+g2g3 = -8
+b2b3 = -8
+h2h3 = -10
+a2a3 = -10
+h2h4 = -12
+a2a4 = -12
+c2c4 = -16
+f2f4 = -19
+g2g4 = -28
+c2c3 = -29
+f2f3 = -31
+b2b4 = -39
+-> move g1f3 = 9
+g1f3 = 16
+b1c3 = 16
+e2e3 = 16
+d2d3 = 16
+e2e4 = 13
+d2d4 = 13
+b1a3 = -1
+g2g3 = -1
+b2b3 = -1
+h2h3 = -3
+a2a3 = -3
+g1h3 = -4
+h2h4 = -5
+a2a4 = -5
+c2c4 = -13
+f2f4 = -16
+c2c3 = -22
+f2f3 = -24
+b2b4 = -31
+g2g4 = -34
+-> move g1f3 = 16
+g1f3 = 18
+b1c3 = 18
+d2d3 = 18
+e2e3 = 17
+d2d4 = 13
+e2e4 = 5
+b1a3 = -3
+g1h3 = -4
+h2h4 = -5
+a2a4 = -5
+b2b3 = -8
+g2g3 = -8
+a2a3 = -10
+h2h3 = -10
+c2c4 = -13
+f2f4 = -16
+c2c3 = -22
+f2f3 = -24
+b2b4 = -31
+g2g4 = -34
+-> move g1f3 = 18
+fun_search -> leave (g1f3 = 0)
+Random seed: 0x1424288320
+Blunder distance = 4
+Pick move range = 0 -> 0
+Limit NPS = 50000
+fun_search -> start
+r1bqkbnr/pppppppp/2n5/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 2 1
+
+   +-----------------+ W
+ 8 | r . b q k b n r |  
+ 7 | p p p p p p p p |  
+ 6 |   . n .   .   . |  
+ 5 | .   .   .   .   |  
+ 4 |   .   .   .   . |  
+ 3 | .   .   . N .   |  
+ 2 | P P P P P P P P |  
+ 1 | R N B Q K B . R |  
+   +-----------------+
+     a b c d e f g h  
+
+b1c3 = 20
+d2d3 = 11
+d2d4 = 10
+e2e4 = 6
+e2e3 = 3
+b1a3 = -3
+g2g3 = -8
+g2g4 = -8
+b2b3 = -8
+f3g5 = -9
+h2h3 = -10
+h2h4 = -12
+a2a4 = -12
+c2c4 = -16
+h1g1 = -17
+a2a3 = -18
+c2c3 = -20
+f3h4 = -31
+f3g1 = -52
+b2b4 = -81
+f3e5 = -332
+f3d4 = -344
+-> move b1c3 = 20
+b1c3 = 16
+d2d3 = 7
+d2d4 = 6
+e2e4 = 2
+e2e3 = -1
+b1a3 = -7
+g2g3 = -12
+g2g4 = -12
+b2b3 = -12
+f3g5 = -13
+h2h3 = -14
+h2h4 = -16
+a2a4 = -16
+c2c4 = -20
+h1g1 = -21
+a2a3 = -22
+c2c3 = -24
+f3h4 = -35
+f3g1 = -56
+b2b4 = -81
+f3e5 = -332
+f3d4 = -344
+-> move b1c3 = 16
+d2d3 = 9
+d2d4 = 8
+b1c3 = 7
+e2e3 = 7
+e2e4 = 6
+b1a3 = -5
+g2g3 = -8
+b2b3 = -8
+h2h3 = -10
+a2a3 = -10
+a2a4 = -12
+h2h4 = -12
+c2c4 = -16
+h1g1 = -17
+f3g5 = -20
+c2c3 = -29
+g2g4 = -32
+f3h4 = -43
+f3g1 = -52
+b2b4 = -77
+f3e5 = -327
+f3d4 = -339
+-> move d2d3 = 9
+d2d3 = 16
+d2d4 = 15
+b1c3 = 14
+e2e3 = 14
+e2e4 = 13
+b1a3 = 0
+g2g3 = -1
+b2b3 = -1
+h2h3 = -3
+a2a3 = -3
+h2h4 = -5
+a2a4 = -5
+c2c4 = -9
+h1g1 = -10
+f3g5 = -22
+c2c3 = -22
+g2g4 = -27
+f3h4 = -45
+f3g1 = -47
+b2b4 = -81
+f3d4 = -309
+f3e5 = -314
+-> move d2d3 = 16
+d2d3 = 18
+b1c3 = 18
+e2e3 = 17
+d2d4 = 15
+e2e4 = 5
+b1a3 = -3
+g2g3 = -7
+b2b3 = -10
+h2h3 = -10
+a2a3 = -12
+h2h4 = -12
+a2a4 = -12
+c2c4 = -16
+h1g1 = -17
+c2c3 = -20
+f3g5 = -22
+g2g4 = -39
+f3h4 = -43
+f3g1 = -43
+b2b4 = -76
+f3d4 = -300
+f3e5 = -313
+-> move d2d3 = 18
+d2d3 = 16
+b1c3 = 16
+e2e3 = 16
+d2d4 = 13
+e2e4 = 12
+b1a3 = -9
+g2g3 = -10
+b2b3 = -12
+h2h3 = -12
+a2a3 = -14
+h2h4 = -14
+a2a4 = -14
+c2c4 = -18
+h1g1 = -19
+c2c3 = -22
+f3g5 = -24
+g2g4 = -28
+f3h4 = -43
+f3g1 = -43
+b2b4 = -76
+f3e5 = -293
+f3d4 = -294
+-> move d2d3 = 16
+b1c3 = 15
+e2e3 = 15
+d2d4 = 8
+e2e4 = 4
+d2d3 = -8
+b1a3 = -11
+g2g3 = -12
+b2b3 = -12
+h2h3 = -12
+a2a3 = -14
+h2h4 = -14
+a2a4 = -14
+c2c4 = -18
+h1g1 = -19
+c2c3 = -22
+f3g5 = -24
+g2g4 = -28
+f3h4 = -43
+f3g1 = -43
+b2b4 = -76
+f3e5 = -293
+f3d4 = -294
+-> move b1c3 = 15
+fun_search -> leave (b1c3 = 0)
+Random seed: 0x1424293981
+Blunder distance = 4
+Pick move range = 0 -> 0
+Limit NPS = 50000
+fun_search -> start
+rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1
+
+   +-----------------+ B
+ 8 | r n b q k b n r |  
+ 7 | p p p p p p p p |  
+ 6 |   .   .   .   . |  
+ 5 | .   .   .   .   |  
+ 4 |   . P .   .   . |  
+ 3 | .   .   .   .   |  
+ 2 | P P   P P P P P |  
+ 1 | R N B Q K B N R |  
+   +-----------------+
+     a b c d e f g h  
+
+g8f6 = 21
+b8c6 = 21
+e7e5 = 6
+e7e6 = 3
+d7d6 = 3
+g8h6 = 2
+b8a6 = 2
+d7d5 = 2
+g7g5 = -4
+b7b6 = -4
+g7g6 = -4
+h7h5 = -6
+a7a5 = -6
+c7c5 = -8
+a7a6 = -9
+h7h6 = -9
+c7c6 = -10
+f7f5 = -11
+f7f6 = -11
+b7b5 = -78
+-> move g8f6 = 21
+g8f6 = 8
+b8c6 = 8
+d7d5 = 2
+e7e5 = -7
+d7d6 = -10
+e7e6 = -10
+g8h6 = -11
+b8a6 = -11
+g7g6 = -17
+g7g5 = -17
+b7b6 = -17
+h7h5 = -19
+a7a5 = -19
+c7c5 = -21
+h7h6 = -22
+a7a6 = -22
+c7c6 = -23
+f7f6 = -24
+f7f5 = -24
+b7b5 = -78
+-> move g8f6 = 8
+g8f6 = 21
+b8c6 = 21
+e7e5 = 6
+e7e6 = 5
+d7d6 = 5
+d7d5 = 2
+g8h6 = 2
+b8a6 = 2
+g7g6 = -4
+b7b6 = -4
+h7h6 = -5
+a7a6 = -5
+h7h5 = -6
+a7a5 = -6
+c7c5 = -8
+c7c6 = -10
+f7f6 = -11
+f7f5 = -11
+g7g5 = -22
+b7b5 = -65
+-> move g8f6 = 21
+g8f6 = 8
+b8c6 = 8
+e7e5 = -7
+e7e6 = -8
+d7d6 = -8
+d7d5 = -11
+g8h6 = -11
+b8a6 = -11
+g7g6 = -17
+b7b6 = -17
+h7h6 = -18
+a7a6 = -18
+h7h5 = -19
+a7a5 = -19
+c7c5 = -21
+c7c6 = -23
+f7f6 = -24
+f7f5 = -24
+g7g5 = -35
+b7b5 = -78
+-> move g8f6 = 8
+g8f6 = 4
+b8c6 = 4
+e7e5 = 4
+d7d6 = 4
+e7e6 = 3
+g8h6 = 1
+b8a6 = 1
+g7g6 = -4
+b7b6 = -4
+h7h6 = -5
+a7a6 = -5
+h7h5 = -6
+a7a5 = -6
+c7c5 = -8
+f7f5 = -11
+g7g5 = -22
+c7c6 = -23
+f7f6 = -26
+d7d5 = -27
+b7b5 = -70
+-> move g8f6 = 4
+fun_search -> leave (g8f6 = 0)

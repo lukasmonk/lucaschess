@@ -1,6 +1,7 @@
 # -*- coding: latin-1 -*-
 import collections
 import random
+
 import Code.Util as Util
 
 class ThanksTo():
@@ -13,14 +14,14 @@ class ThanksTo():
         d["Themes"] = _("Themes")
         d["Pieces"] = _("Pieces")
         d["Training"] = _("Training")
-        d["EnginesWindows"] = "%s-Windows" % _("Engines")
-        d["EnginesLinux"] = "%s-Linux" % _("Engines")
+        d["Engines-1"] = "%s/1" % _("Engines")
+        d["Engines-2"] = "%s/2" % _("Engines")
         d["Games"] = _("Games")
         d["Programming"] = _("Programming")
         d["Dedicated"] = _("Dedicated to")
 
-    def listaMotoresWindows(self):
-        return [
+    def listaMotores(self, bloque):
+        li= [
             ["Tarrasch ToyEngine Beta V0.905", "Bill Forster", "http://www.triplehappy.com/"],
             ["Rocinante 2.0", "Antonio Torrecillas", "http://sites.google.com/site/barajandotrebejos/"],
             ["Bikjump 2.01 (32-bit)", "Aart J.C. Bik", "http://www.aartbik.com/"],
@@ -28,7 +29,7 @@ class ThanksTo():
             ["Lime v 66", "Richard Allbert", "http://www.geocities.com/taciturn_lemon"],
             ["Chispa 4.0.3", "Federico Corigliano", "http://chispachess.blogspot.com/"],
             ["Gaia 3.5", "Jean-Francois Romang, David Rabel", "http://gaiachess.free.fr"],
-            ["Greko 10.2", "Vladimir Medvedev", "http://greko.110mb.com/index.html"],
+            ["Greko 12, 9.8", "Vladimir Medvedev", "http://sourceforge.net/projects/greko/"],
             ["Pawny 0.3.1", "Mincho Georgiev", "http://pawny.netii.net/"],
             ["Umko 0.7", "Borko Boskovic", "http://umko.sourceforge.net/"],
             ["Garbochess 2.20", "Gary Linscott", "http://forwardcoding.com/projects/chess/chess.html"],
@@ -37,68 +38,65 @@ class ThanksTo():
             ["Cyrano 06B17", "Harald Johnsen", "http://sites.estvideo.net/tipunch/cyrano/"],
             ["Daydreamer 1.75 JA", "Aaron Becker", "http://github.com/AaronBecker/daydreamer/downloads"],
             ["Glaurung 2.2 JA", "Tord RomsTad", "http://www.glaurungchess.com/"],
-            ["Toga deepTogaNPS 1.9.6", "WHMoweryJr,Thomas Gaksch,Fabien Letouzey",
-             "http://www.computerchess.info/tdbb/phpBB3/viewtopic.php?f=9&t=357"],
+            ["Toga deepTogaNPS 1.9.6", "WHMoweryJr,Thomas Gaksch,Fabien Letouzey", "http://www.computerchess.info/tdbb/phpBB3/viewtopic.php?f=9&t=357"],
             ["Komodo 5.1r2 32-bit", "Don Dailey, Larry Kaufman", "http://komodochess.com/"],
             ["Rybka 2.3.2a 32-bit", "Vasik Rajlich", "http://rybkachess.com/"],
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
-            ["Stockfish 5", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["Greko 7.1", "Vladimir Medvedev", "http://greko.110mb.com/index.html"],
-        ]
-
-    def listaMotoresLinux(self):
-        return [
-            ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
-            ["Cheng 4 ver 0.36c", "Martin Sedlák", "http://www.vlasak.biz/cheng"],
-            ["Clarabit 1.00", "Salvador Pallares Bejarano", "http://sapabe.googlepages.com"],
-            ["Komodo 5r1 32-bit", "Don Dailey, Larry Kaufman", "http://komodochess.com/"],
-            ["Stockfish 3", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["Greko 10.2", "Vladimir Medvedev", "http://greko.110mb.com/index.html"],
+            ["Stockfish 6", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
+            ["Amyan 1.62", "Antonio Dieguez R.", "http://www.pincha.cl/amyan/amyane.html"],
+            ["Hamsters 0.5", "Alessandro Scotti", "https://chessprogramming.wikispaces.com/Alessandro+Scotti"],
+            ["Cheng 4 ver 0.38", "Martin Sedlák", "http://www.vlasak.biz/cheng"],
             ["Cinnamon 1.2b", "Giuseppe Cannella", "http://cinnamonchess.altervista.org/"],
-            ["Cyrano 06B17", "Harald Johnsen", "http://sites.estvideo.net/tipunch/cyrano/"],
             ["Fruit 2.3.1", "Fabien Letouzey", "http://www.fruitchess.com/"],
-            ["Discocheck 4.21", "Lucas Braesch", "https://github.com/lucasart/"],
+            ["Rhetoric 1.4.1", "Alberto Sanjuan", "http://www.chessrhetoric.com"],
+            ["Discocheck 5.2", "Lucas Braesch", "https://github.com/lucasart/"],
             ["Gaviota 1.0", "Miguel A. Ballicora", "https://sites.google.com/site/gaviotachessengine"],
             ["Godel 3.4.9", "Juan Manuel Vazquez", "https://sites.google.com/site/godelchessengine"],
-            ["Daydreamer 1.75 JA", "Aaron Becker", "http://github.com/AaronBecker/daydreamer/downloads"],
-            ["Glaurung 2.2 JA", "Tord RomsTad", "http://www.glaurungchess.com/"],
-            ["Gnuchess 5.50", "Chua Kong Sian,Stuart Cracraft,Lukas Geyer,<br>Simon Waters,Michael Van den Bergh", "http://www.gnu.org/software/chess/"],
-            ["Pawny 1.0", "Mincho Georgiev", "http://pawny.netii.net/"],
-            ["Rocinante 2.0", "Antonio Torrecillas", "http://sites.google.com/site/barajandotrebejos/"],
             ["Simplex 0.98", "Antonio Torrecillas", "http://sites.google.com/site/barajandotrebejos/"],
-            ["Roce 0.0395", "Roman Hartmann", "http://www.rocechess.ch/rocee.html"],
+            ["Roce 0.0390", "Roman Hartmann", "http://www.rocechess.ch/rocee.html"],
             ["Texel 0.98", "Peter Österlund", "http://web.comhem.se/petero2home/javachess/index.html#texel"],
+            ["Rodent 1.6", "Pawel Koziol", "http://www.pkoziol.cal24.pl/rodent/rodent.htm"],
         ]
+        li.sort(key=lambda x: x[0])
+        # for n, a, u in li:
+            # k = n.split(" ")[0].lower()
+            # p rint '                                    ( "%s", "%s", "%s", "%s" ),'%(k,a,n,u)
+        if bloque == "1":
+            return li[:len(li)/2]
+        else:
+            return li[len(li)/2:]
 
     def texto(self, clave):
+        if ( "-" in clave ):
+            clave, arg = clave.split("-")
+            return getattr(self, clave)(arg)
         return getattr(self, clave)()
 
-    def Contributors(self):
+    def tableIni(self):
+        return '<center><table border="1" cellpadding="3" cellspacing="0">'
 
-        txt = '<center><table border="1" cellpadding="15" cellspacing="0" >'
+    def tableEnd(self):
+        return '</table>'
+
+    def th(self, txt, mas=""):
+        return "<th %s>%s</th>"%(mas,txt)
+
+    def Contributors(self):
+        txt = "<br><center><big>%s: <b>Michele Tumbarello</b></big><br>"%_("Chief engineer officer")
+
+        txt += self.tableIni()
 
         txt += "<tr>"
-        txt += "<th>%s</th>" % _("Version %s") % "9"
-        txt += "<th>%s</th>" % _("Version %s") % "8"
-        txt += "<th>%s</th>" % _("Other versions")
+        txt += self.th(_("Version %s") % "9")
+        txt += self.th(_("Version %s") % "8")
+        txt += self.th(_("Other versions"))
         txt += "</tr>"
 
-        liV9 = ["Michele Tumbarello"]
+        liV9 = []
 
-        li = [
-            "Indianajones",
-            "Pavel Rehulka",
-            "ADT",
-            "Adrijan",
-            "Nils Andersson",
-            "Urban Gustavsson",
-            "Johannes Reimers",
-            "Red Hood",
-            "Robert Anderson",
-            "Laudecir Daniel",
-            "Reinhard",
-            "Di Maria Giovanni",
-            "Filomeno Marmalé",
+        li = [ "Indianajones", "Pavel Rehulka", "ADT", "Adrijan", "Nils Andersson", "Urban Gustavsson",
+            "Johannes Reimers", "Red Hood", "Robert Anderson", "Laudecir Daniel", "Reinhard",
+            "Di Maria Giovanni", "Filomeno Marmalé",
             # "Chris McFarland",
             # "Myles Turple",
             # "thetasquared",
@@ -112,38 +110,14 @@ class ThanksTo():
         liV9.extend(li)
         liV9.extend(li1)
 
-        liV8 = ["Michele Tumbarello"]
+        liV8 = []
 
         li = [
-            "Indianajones",
-            "James",
-            "Uli",
-            "Pavel Rehulka",
-            "Laudecir Daniel",
-            "Xavier Jimenez",
-            "Rajkrishna",
-            "ADT",
-            "Vishy",
-            "thetasquared",
-            "Mike Eddies",
-            "jayriginal",
-            "baddadza",
-            "bbbaro25us",
-            "Victor Perez",
-            "M.Larson",
-            "Filomeno Marmalé",
-            "Shahin Jafarli (shahinjy)",
-            "Heikki Junes",
-            "Toan Luong",
-            "R. Sehgal",
-            "WyoCas",
-            "J.Reimers",
-            "Dariusz Popadowski",
-            "Ken Brown",
-            "Dieter Heinrich",
-            "Nils Andersson",
-            "Chris K.",
-            "Philou",
+            "Indianajones", "James", "Uli", "Pavel Rehulka", "Laudecir Daniel", "Xavier Jimenez",
+            "Rajkrishna", "ADT", "Vishy", "thetasquared", "Mike Eddies", "jayriginal", "baddadza",
+            "bbbaro25us", "Victor Perez", "M.Larson", "Filomeno Marmalé", "Shahin Jafarli (shahinjy)",
+            "Heikki Junes", "Toan Luong", "R. Sehgal", "WyoCas", "J.Reimers", "Dariusz Popadowski",
+            "Ken Brown", "Dieter Heinrich", "Nils Andersson", "Chris K.", "Philou",
         ]
         random.shuffle(li)
         li1 = [
@@ -154,33 +128,16 @@ class ThanksTo():
         liV8.extend(li1)
 
         liOthers = [
-            "Michele Tumbarello",
             # "Ezequiel Canario"
         ]
         li2 = [
-            "Felicia",
-            "Shahin Jafarli (shahinjy)",
-            "Alfons",
-            "Raúl Giorgi",
-            "Red Hood",
-            "Filomeno Marmalé",
-            "Roberto Mizzoni",
-            "bolokay",
-            "Istolacio",
-            "Mohammed Abdalazez",
-            "Rui Grafino",
-            "Georg Pfefferle",
-            "Lolo S.",
-            "Joaquín Alvarez",
-            "Ransith Fernando",
+            "Felicia", "Shahin Jafarli (shahinjy)", "Alfons", "Raúl Giorgi", "Red Hood", "Filomeno Marmalé",
+            "Roberto Mizzoni", "bolokay", "Istolacio", "Mohammed Abdalazez", "Rui Grafino", "Georg Pfefferle",
+            "Lolo S.", "Joaquín Alvarez", "Ransith Fernando",
         ]
         random.shuffle(li2)
         li3 = [
-            "Gianfranco Cutipa",
-            "Daniel Trebejo",
-            "Jose Luis García",
-            "Carmen Martínez",
-            "..."
+            "Gianfranco Cutipa", "Daniel Trebejo", "Jose Luis García", "Carmen Martínez", "..."
         ]
         liOthers.extend(li2)
         liOthers.extend(li3)
@@ -210,14 +167,15 @@ class ThanksTo():
         txt += "</td>"
 
         txt += "<td>"
-        txt += '<table border="0" cellpadding="6" cellspacing="0"><tr>'
+        txt += '<table border="0" cellpadding="6" cellspacing="0">'
+        txt += '<tr>'
         for uno in liOthers:
             txt += "<b>%s</b><br>" % uno
         txt += '</tr></table>'
         txt += "</td>"
 
         txt += "</tr>"
-        txt += "</table></center></hr>"
+        txt += self.tableEnd()
         return txt
 
     def Translators(self):
@@ -245,30 +203,31 @@ class ThanksTo():
         dic[_("Slovenian")] = (r("si"), "")
         # _("English"):"Lucas, Georg Pfefferle, Lolo S., bolokay",
         li = dic.keys()
-        random.shuffle(li)
-        txt = '<center><table border="1" cellpadding="4" cellspacing="0" >'
+        li.sort()
+        # random.shuffle(li)
+        txt = self.tableIni()
 
         txt += "<tr>"
-        txt += "<th></th>"
-        txt += "<th></th>"
-        txt += "<th>%s</th>" % _("Previous")
+        txt += self.th(_("Language"))
+        txt += self.th(_("Translator"))
+        txt += self.th(_("Previous"))
         txt += "</tr>"
         for uno in li:
             current, previous = dic[uno]
             txt += "<tr>"
             txt += "<th>%s</th><td><b>%s</b></td><td>%s</td>" % ( uno, current, previous )
             txt += "</tr>"
-        txt += "</table></center>"
+        txt += self.tableEnd()
         return txt
 
     def Images(self):
-        txt = '<center><table border="1" cellpadding="5" cellspacing="0" >'
+        txt = self.tableIni()
 
         txt += "<tr>"
         txt += "<td></td>"
-        txt += "<td><b>%s</b></td>" % _("Author")
-        txt += "<td><b>%s</b></td>" % _("Web")
-        txt += "<td><b>%s</b></td>" % _("License")
+        txt += self.th(_("Author"))
+        txt += self.th(_("Web"))
+        txt += self.th(_("License"))
         txt += "</tr>"
 
         li = [
@@ -302,11 +261,11 @@ class ThanksTo():
         return txt
 
     def Themes(self):
-        txt = '<center><table border="1" cellpadding="5" cellspacing="0" >'
+        txt = self.tableIni()
 
         txt += "<tr>"
-        txt += "<td align=center><b>%s</b></td>" % _("Author")
-        txt += "<td><b>%s</b></td>" % _("License")
+        txt += self.th(_("Author"))
+        txt += self.th(_("License"))
         txt += "</tr>"
 
         li = [
@@ -324,8 +283,8 @@ class ThanksTo():
 
         txt += '<br><table border="1" cellpadding="5" cellspacing="0" >'
         txt += "<tr>"
-        txt += "<th>%s</th>" % _("Colors")
-        txt += "<th>%s</th>" % _("Author")
+        txt += self.th(_("Colors"))
+        txt += self.th(_("Author"))
         txt += "<th>%s: <a href=\"%s\">%s</a></th>" % (
             _("License"), "http://creativecommons.org/licenses/by-nc-sa/3.0/",
             "Attribution-NonCommercial-ShareAlike 3.0 Unported" )
@@ -350,13 +309,13 @@ class ThanksTo():
         return txt
 
     def Pieces(self):
-        txt = '<center><table border="1" cellpadding="2" cellspacing="0" >'
+        txt = self.tableIni()
 
         txt += "<tr>"
         txt += "<td></td>"
-        txt += "<th>%s</th>" % _("Author")
-        txt += "<th>%s</th>" % _("Web")
-        txt += "<th>%s</th>" % _("License")
+        txt += self.th(_("Author"))
+        txt += self.th(_("Web"))
+        txt += self.th(_("License"))
         txt += "</tr>"
 
         li = [
@@ -410,12 +369,12 @@ class ThanksTo():
         return txt
 
     def Training(self):
-        txt = '<center><table border="1" cellpadding="5" cellspacing="0" >'
+        txt = self.tableIni()
 
         txt += "<tr>"
-        txt += "<td align=center><b>%s</b></td>" % _("Training")
-        txt += "<td><b>%s</b></td>" % _("Web")
-        txt += "<td><b>%s</b></td>" % _("License")
+        txt += self.th(_("Training"))
+        txt += self.th(_("Web"))
+        txt += self.th(_("License"))
         txt += "</tr>"
 
         li = (
@@ -439,29 +398,21 @@ class ThanksTo():
         txt += "</table><center>"
         return txt
 
-    def Engines(self, siWindows):
-        txt = '<center><table border="1" cellpadding="2" cellspacing="0" >'
-
+    def Engines(self, orden):
+        txt = self.tableIni()
         txt += "<tr>"
-        txt += "<th>%s</th>" % _("Engine")
-        txt += "<th>%s</th>" % _("Author")
-        txt += "<th>%s</th>" % _("Web")
+        txt += self.th(_("Engine"))
+        txt += self.th(_("Author"))
+        txt += self.th(_("Web"))
         txt += "</tr>"
-        lista = self.listaMotoresWindows() if siWindows else self.listaMotoresLinux()
-        for nombre, autor, url in lista:
+        for nombre, autor, url in self.listaMotores(orden):
             txt += "<tr>"
             txt += "<th>%s</th>" % nombre
             txt += "<th>%s</th>" % autor
             txt += "<td><a href=\"%s\">%s</a></td>" % (url, url)
             txt += "</tr>"
-        txt += "</table><center>"
+        txt += self.tableEnd()
         return txt
-
-    def EnginesWindows(self):
-        return self.Engines(True)
-
-    def EnginesLinux(self):
-        return self.Engines(False)
 
     def Games(self):
         li = (
@@ -484,60 +435,40 @@ class ThanksTo():
 
     def Programming(self):
         li = (
+            ( _("Programming language"), "Python 2.7", "http://www.python.org/" ),
             ( _("GUI"), "PyQt4 - GPL", "http://www.riverbankcomputing.co.uk" ),
             ( _("Audio"), "PyAudio v0.2.4 - MIT License", "http://people.csail.mit.edu/hubert/pyaudio/" ),
-            ( "suds", _X(_("Created by %1"), "Jeff Ortel"), "https://fedorahosted.org/suds/"),
+            # ( "suds", _X(_("Created by %1"), "Jeff Ortel"), "https://fedorahosted.org/suds/"),
             ( "psutil", _X(_("Created by %1"), "Giampaolo Rodola"), "http://code.google.com/p/psutil/"),
-            ("Python for Windows extensions", _X(_("Created by %1"), "Mark Hammond"),
-             "http://sourceforge.net/projects/pywin32" ),
+            ( "Python for Windows extensions", _X(_("Created by %1"), "Mark Hammond"), "http://sourceforge.net/projects/pywin32" ),
             ( "pygal", _X(_("Created by %1"), "Kozea"), "http://pygal.org"),
             ( "chardet", _X(_("Created by %1"), "Ian Cordasco"), "https://github.com/chardet/chardet"),
-            (_("Polyglot books"), _X(_("Based on work by %1"), "Michel Van den Bergh"),
-             "http://alpha.uhasselt.be/Research/Algebra/Toga/book_format.html"),
-            (
-                "Polyglot1.4w",
-                _X(_("Created by %1"), "Fabien Letouzy") + ". " + _X(_("Modified by %1"), "Fonzy Bluemers"),
-                "http://www.geenvis.net/" ),
-            ("winglet", _X(_("Created by %1"), "Stef Luijten"),
-             "http://aghaznawi.comuf.com/computer%20chess/winglet/index.htm"),
-            ( "XFCC protocol", _X(_("Created by %1"), "Martin Bennedik"), "http://www.xfcc.org/"),
-            ("STS", _X(_("Created by %1"), "Dan Corbit,Swaminathan"),
-             "https://sites.google.com/site/strategictestsuite/about-1"),
+            (_("Polyglot books"), _X(_("Based on work by %1"), "Michel Van den Bergh"), "http://alpha.uhasselt.be/Research/Algebra/Toga/book_format.html"),
+            ( "Polyglot1.4w",_X(_("Created by %1"), "Fabien Letouzy") + ". " + _X(_("Modified by %1"), "Fonzy Bluemers"), "http://www.geenvis.net/" ),
+            ( "winglet", _X(_("Created by %1"), "Stef Luijten"), "http://aghaznawi.comuf.com/computer%20chess/winglet/index.htm"),
+            # ( "XFCC protocol", _X(_("Created by %1"), "Martin Bennedik"), "http://www.xfcc.org/"),
+            ( "STS", _X(_("Created by %1"), "Dan Corbit,Swaminathan"), "https://sites.google.com/site/strategictestsuite/about-1"),
+            ( "CMU Sphinx", "Open Source Toolkit For Speech Recognition by Carnegie Mellon University", "http://cmusphinx.sourceforge.net/"),
+            ( "PyPocketSphinx", _X(_("Created by %1"), "Dmitry Prazdnichnov"), "https://github.com/bambocher/PyPocketSphinx"),
         )
-        txt = "<ul>"
-        txt += '<li>%s : <b><a href="http://www.python.org/">Python 2.7</a></b></li>' % _("Language")
-        txt += '<li>%s :</li>' % _("Libraries and utilities")
-        txt += "<ul>"
+        txt = self.tableIni()
+
+        txt += "<tr>"
+        txt += self.th(_("Utility"))
+        txt += self.th(_("Author"))
+        txt += self.th(_("Web"))
+        txt += "</tr>"
+
         for tipo, nom, web in li:
-            txt += '<li>%s : <b><a href="%s">%s</a></b></li>' % (tipo, web, nom)
-        txt += "</ul></ul>"
+            txt += "<tr>"
+            txt += "<th>%s</th>" % tipo
+            txt += "<td>%s</td>" % nom
+            txt += "<td><a href=\"%s\">%s</a></td>" % (web, web)
+            txt += "</tr>"
+
+        txt += self.tableEnd()
         return txt
 
     def Dedicated(self):
         txt = "<center><big style=\"color:teal;\"><b>Lucas & Luisa</b></big></center>"
         return txt
-
-        # import Code.EnginesWindows as EnginesWindows
-        # import Code.EnginesLinux as EnginesLinux
-        # import Code.VarGen as VarGen
-        # VarGen.isWine = False
-
-        # prnt "poner <br> en GnuChess"
-        # ew = EnginesWindows.leeRivales()
-        # prnt "    def listaMotoresWindows( self ):"
-        # prnt "        return ["
-        # for uno in ew:
-        # r = ew[uno]
-        # prnt '                ["%s", "%s", "%s"],'%( r.nombre, r.autor, r.url )
-        # prnt '                ["%s", "%s", "%s"],'%( "Greko 7.1", "Vladimir Medvedev", "http://greko.110mb.com/index.html" )
-        # prnt "                ]"
-
-        # prnt
-        # ew = EnginesLinux.leeRivales()
-        # prnt "    def listaMotoresLinux( self ):"
-        # prnt "        return ["
-        # for uno in ew:
-        # r = ew[uno]
-        # prnt '                ["%s", "%s", "%s"],'%( r.nombre, r.autor, r.url )
-
-# prnt "                ]"

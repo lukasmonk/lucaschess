@@ -2,9 +2,11 @@
 
 from PyQt4 import QtCore, QtGui
 
+import Code.QT.QTUtil as QTUtil
 import Code.QT.QTUtil2 as QTUtil2
 import Code.QT.QTVarios as QTVarios
 import Code.QT.Colocacion as Colocacion
+import Code.QT.Info as Info
 import Code.QT.Iconos as Iconos
 import Code.QT.Controles as Controles
 import Code.QT.FormLayout as FormLayout
@@ -93,10 +95,22 @@ def dameCategoria(wParent, configuracion, procesador):
             submenu.opcion("MT_" + rv.clave, rv.rotuloPuntos(), ico, siDes or siActual)
         menuRival.separador()
 
+    # ----------- RIVAL
+    menu.separador()
+    menu.opcion("ayuda", _("Help"), Iconos.Ayuda())
+
     cursor = QtGui.QCursor.pos()
     resp = menu.lanza()
     if resp is None:
         return None
+    elif resp == "ayuda":
+        titulo = _("Competition")
+        ancho, alto = QTUtil.tamEscritorio()
+        ancho = min(ancho, 700)
+        txt = _("<br><b>The aim is to obtain the highest possible score</b> :<ul><li>The current point score is displayed in the title bar.</li><li>To obtain points it is necessary to win on different levels in different categories.</li><li>To overcome a level it is necessary to win against the engine with white and with black.</li><li>The categories are ranked in the order of the following table:</li><ul><li><b>Beginner</b> : 5</li><li><b>Amateur</b> : 10</li><li><b>Master candidate</b> : 20</li><li><b>Master</b> : 40</li><li><b>Grandmaster candidate</b> : 80</li><li><b>Grandmaster</b> : 160</li></ul><li>The score for each game is calculated by multiplying the playing level with the score of the category.</li><li>The engines are divided into groups.</li><li>To be able to play with an opponent of a particular group a minimum point score is required. The required score is shown next to the group label.</li></ul>")
+        Info.info(wParent, _("Lucas Chess"), titulo, txt, ancho, Iconos.pmAyudaGR())
+        return None
+
     elif resp.startswith("MT_"):
         procesador.cambiaRival(resp[3:])
         QtGui.QCursor.setPos(cursor)

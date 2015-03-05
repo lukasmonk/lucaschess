@@ -8,7 +8,6 @@ import base64
 import datetime
 import hashlib
 import random
-import binascii
 import sqlite3
 import zlib
 import codecs
@@ -126,21 +125,6 @@ def microsegundosRnd():
     d = datetime.datetime.now()
     return random.randint(0, 1000) + 1000 * (
         d.microsecond + 1000000 * (d.second + 60 * ( d.minute + 60 * ( d.hour + 24 * d.toordinal() ) ) ))
-
-def bloque_envio(texto):
-    return base64.encodestring(texto + "�%d" % binascii.crc32(texto)).strip()
-
-def bloque_recibe(texto):
-    txt = base64.decodestring(texto)
-    pos = txt.rfind("�")
-    if pos >= 0:
-        num = int(txt[pos + 1:])
-        txt = txt[:pos]
-        crc = binascii.crc32(txt)
-        resp = num == crc
-    else:
-        resp = False
-    return resp, txt
 
 def fileNext(folder, base, ext):
     n = 1
@@ -927,6 +911,85 @@ class LIdisk:
         if self._conexion:
             self._conexion.close()
             self._conexion = None
+
+class DicRaw():
+    def __init__(self, nomDB, tabla="Data"):
+        self.table = tabla
+
+        self._conexion = sqlite3.connect(nomDB)
+        atexit.register(self.close)
+
+        cursor = self._conexion.cursor()
+        cursor.execute("pragma table_info(%s)" % tabla)
+        if not cursor.fetchall():
+            sql = "CREATE TABLE %s( KEY TEXT PRIMARY KEY, VALUE TEXT );" % tabla
+            cursor.execute(sql)
+            self._conexion.commit()
+        cursor.close()
+
+    def __setitem__(self, key, obj):
+        key = str(key)
+        if self.__contains__(key):
+            sql = "UPDATE %s SET VALUE=? WHERE KEY = ?" % self.table
+        else:
+            sql = "INSERT INTO %s (VALUE,KEY) values(?,?)" % self.table
+        cursor = self._conexion.cursor()
+        dato = base64.encodestring(cPickle.dumps(obj))
+        cursor.execute(sql, (dato, key))
+        cursor.close()
+        self._conexion.commit()
+
+    def __getitem__(self, key):
+        cursor = self._conexion.cursor()
+        sql = "SELECT VALUE FROM %s WHERE KEY= ?" % self.table
+        cursor.execute(sql, (key,))
+        li = cursor.fetchone()
+        cursor.close()
+        if not li:
+            return None
+        dato = base64.decodestring(li[0])
+        return cPickle.loads(dato)
+
+    def __delitem__(self, key):
+        cursor = self._conexion.cursor()
+        sql = "DELETE FROM %s WHERE KEY= ?" % self.table
+        cursor.execute(sql, (key,))
+        cursor.close()
+        self._conexion.commit()
+
+    def __contains__(self, key):
+        cursor = self._conexion.cursor()
+        sql = "SELECT KEY FROM %s WHERE KEY= ?" % self.table
+        cursor.execute(sql, (key,))
+        li = cursor.fetchone()
+        cursor.close()
+        return True if li else False
+
+    def close(self):
+        if self._conexion:
+            self._conexion.close()
+            self._conexion = None
+
+    def get(self, key, default):
+        v = self.__getitem__(key)
+        return v if v else default
+
+    def pack(self):
+        cursor = self._conexion.cursor()
+        cursor.execute("VACUUM")
+        cursor.close()
+        self._conexion.commit()
+
+    def __len__(self):
+        return len(self.keys())
+
+    def keys(self):
+        cursor = self._conexion.cursor()
+        sql = "SELECT KEY FROM %s" % self.table
+        cursor.execute(sql)
+        liKeys = [reg[0] for reg in cursor.fetchall()]
+        cursor.close()
+        return liKeys
 
 class DicBLOB(object):
     def __init__(self, nomDB, tabla="Datos"):

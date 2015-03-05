@@ -81,7 +81,7 @@ class WGamesFEN(WBG_Games.WGames):
         p = Partida.Partida()
         p.resetFEN(fen)
         p.leerPV(pv)
-        p.compruebaFinal()
+        p.siTerminada()
         self.infoMove.modoPartida(p, -1)
         self.setFocus()
         self.grid.setFocus()

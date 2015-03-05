@@ -1,6 +1,6 @@
 # -*- coding: latin-1 -*-
 DEBUG = False
-VERSION = "9 step 6a"
+VERSION = "9"
 
 import sys
 

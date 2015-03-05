@@ -115,7 +115,7 @@ class WLearnBase(QTVarios.WDialogo):
         unpgn = PantallaPGN.eligePartida(self)
         if unpgn and unpgn.partida.numJugadas():
             reg = unpgn.dic
-            unpgn.partida.compruebaFinal()
+            unpgn.partida.siTerminada()
             reg["PARTIDA"] = unpgn.partida.guardaEnTexto()
             self.db.append(reg)
             self.grid.refresh()

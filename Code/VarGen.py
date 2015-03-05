@@ -16,7 +16,7 @@ configuracion = None  # Actualizado en Configuracion tras lee()
 
 todasPiezas = None
 
-tbook = "Openings/GM_1990-2012.bin"
+tbook = "Openings/GMopenings.bin"
 tbookPTZ = "Openings/fics15.bin"
 
 xtutor = None

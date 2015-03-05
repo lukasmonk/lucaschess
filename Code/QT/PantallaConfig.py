@@ -23,8 +23,11 @@ def opciones(parent, configuracion):
     liTraducciones = configuracion.listaTraducciones()
     trActual = configuracion.traductor if configuracion.traductor else "en"
     li = [trActual]
-    for k, trad in liTraducciones:
-        li.append(( k, trad ))
+    for k, trad, porc in liTraducciones:
+        rotulo = trad
+        if porc != "100":
+            rotulo += " (%s%%)"%porc
+        li.append(( k, rotulo ))
     liGen.append(( _("Language") + ":", li ))
     liGen.append(separador)
     liGen.append(( None, _("By showing scores from the engines") + ":" ))
@@ -74,6 +77,9 @@ def opciones(parent, configuracion):
     liSon.append(( _("Rival moves") + ":", configuracion.siSuenaJugada ))
     liSon.append(separador)
     liSon.append(( _("Activate sounds with our moves") + ":", configuracion.siSuenaNuestro ))
+    liSon.append(separador)
+    config = FormLayout.Combobox(_("Activate voice recognition"), configuracion.listVoices())
+    liSon.append(( config, configuracion.voice ))
 
     # Tutor
     liTT = [separador]
@@ -185,7 +191,7 @@ def opciones(parent, configuracion):
             configuracion.familia = ""
 
         configuracion.siSuenaBeep, configuracion.siSuenaResultados, configuracion.siSuenaJugada, \
-        configuracion.siSuenaNuestro = liSon
+        configuracion.siSuenaNuestro, configuracion.voice = liSon
 
         configuracion.tutor.clave, tiempoTutor, configuracion.tutorMultiPV, \
         configuracion.tutorActivoPorDefecto, configuracion.tutorDifPts, configuracion.tutorDifPorc = liTT

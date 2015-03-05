@@ -496,7 +496,6 @@ class ControlPosicion:
         return peso
 
     def distanciaPiezaKenemigo(self, a1):
-
         pieza = self.casillas[a1]
         if pieza is None:
             return 15

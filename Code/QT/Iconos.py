@@ -2062,3 +2062,45 @@ def pmTormenta():
 def Tormenta():
     return QtGui.QIcon( pmTormenta() )
 
+def pmWords():
+    return PM(840110,843778)
+
+def Words():
+    return QtGui.QIcon( pmWords() )
+
+def pmAdaptVoice():
+    return PM(338019,340707)
+
+def AdaptVoice():
+    return QtGui.QIcon( pmAdaptVoice() )
+
+def pmFixedElo():
+    return PM(163138,166836)
+
+def FixedElo():
+    return QtGui.QIcon( pmFixedElo() )
+
+def pmX_Microfono():
+    return PM(843778,846086)
+
+def X_Microfono():
+    return QtGui.QIcon( pmX_Microfono() )
+
+def pmSoundTool():
+    return PM(846086,848820)
+
+def SoundTool():
+    return QtGui.QIcon( pmSoundTool() )
+
+def pmImportar():
+    return PM(848820,851884)
+
+def Importar():
+    return QtGui.QIcon( pmImportar() )
+
+def pmVoyager1():
+    return PM(851884,853906)
+
+def Voyager1():
+    return QtGui.QIcon( pmVoyager1() )
+

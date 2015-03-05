@@ -1098,8 +1098,8 @@ class Gestor():
         if self.siJuegaPorMi and self.estado == kJugando and (
                     self.ayudas or self.tipoJuego in (kJugEntMaq, kJugSolo, kJugEntPos, kJugEntTac) ):
             if not self.siTerminada():
-                self.analizaTutor()
-                rm = self.mrmTutor.mejorMov()
+                mrm = self.analizaTutor()
+                rm = mrm.mejorMov()
                 if rm.desde:
                     self.siAnalizadoTutor = True
                     self.mueveHumano(rm.desde, rm.hasta, rm.coronacion)
@@ -1577,7 +1577,7 @@ class Gestor():
         fila, columna = self.pantalla.pgnPosActual()
         numJugadas, nj, fila, siBlancas = self.jugadaActual()
         if numJugadas:
-            self.partida.compruebaFinal()
+            self.partida.siTerminada()
             if fila == 0 and columna.clave == "NUMERO":
                 fen = self.partida.iniPosicion.fen()
                 nj = -1
@@ -1736,7 +1736,7 @@ class Gestor():
         fila, columna = self.pantalla.pgnPosActual()
         numJugadas, nj, fila, siBlancas = self.jugadaActual()
         if numJugadas:
-            self.partida.compruebaFinal()
+            self.partida.siTerminada()
             if fila == 0 and columna.clave == "NUMERO":
                 fen = self.partida.iniPosicion.fen()
             else:

@@ -6,6 +6,7 @@ from PyQt4 import QtCore, QtGui
 
 import Code.VarGen as VarGen
 import Code.Usuarios as Usuarios
+import Code.Voice as Voice
 import Code.Configuracion as Configuracion
 import Code.Util as Util
 import Code.QT.Controles as Controles
@@ -54,7 +55,10 @@ def lanzaGUI(procesador):
             menu = QTVarios.LCMenu(None)
 
             nico = QTVarios.rondoPuntos()
-            for k, nombre in li:
+            for k, nombre, porc in li:
+                rotulo = nombre
+                if porc != "100":
+                    rotulo += " (%s%%)"%porc
                 menu.opcion(k, nombre, nico.otro())
             resp = menu.lanza()
             if resp:
@@ -77,7 +81,10 @@ def lanzaGUI(procesador):
     # Lanzamos la pantalla
     procesador.iniciarGUI()
 
-    return app.exec_()
+    resp = app.exec_()
+    Voice.runVoice.close()
+
+    return resp
 
 class WPassword(QtGui.QDialog):
     def __init__(self, liUsuarios):

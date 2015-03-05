@@ -22,7 +22,7 @@ class AperturaPol:
     def __init__(self, maxNivel):
         self.fichero = VarGen.tbookPTZ if 1 <= maxNivel <= 2 else VarGen.tbook
         self.book = Books.Polyglot()
-        if not ((Util.tamFichero(self.fichero) / (len(self.fichero) - 9)) in ( 54161, 187620) ):
+        if not ((Util.tamFichero(self.fichero) / (len(self.fichero) - 9)) in ( 54161, 860795) ):
             import sys
 
             sys.exit()

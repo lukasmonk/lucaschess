@@ -1169,7 +1169,6 @@ class Tablero(QtGui.QGraphicsView):
         return chr(96 + columna) + str(fila)
 
     def intentaMover(self, piezaSC, posCursor, eventButton):
-
         pieza = piezaSC.bloquePieza
         desde = self.num2alg(pieza.fila, pieza.columna)
 

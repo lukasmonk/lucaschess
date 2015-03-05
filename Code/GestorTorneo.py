@@ -137,7 +137,7 @@ class GestorTorneo(Gestor.Gestor):
         else:
             jgUlt = self.partida.liJugadas[-1]
             result = None
-            if self.partida.compruebaFinal():
+            if self.partida.siTerminada():
                 if jgUlt.siJaqueMate:
                     result = 1 if jgUlt.posicionBase.siBlancas else 2
                 else:

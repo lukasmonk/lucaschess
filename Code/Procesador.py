@@ -22,7 +22,7 @@ import Code.GestorElo as GestorElo
 import Code.GestorMicElo as GestorMicElo
 import Code.GestorFideFics as GestorFideFics
 import Code.GestorSolo as GestorSolo
-import Code.GestorXFCC as GestorXFCC
+# import Code.GestorXFCC as GestorXFCC
 import Code.GestorPGN as GestorPGN
 import Code.GestorEntMaq as GestorEntMaq
 import Code.GestorTorneo as GestorTorneo
@@ -38,7 +38,7 @@ import Code.QT.PantallaConfig as PantallaConfig
 import Code.QT.PantallaMotores as PantallaMotores
 import Code.QT.PantallaSonido as PantallaSonido
 import Code.QT.PantallaColores as PantallaColores
-import Code.QT.PantallaXFCC as PantallaXFCC
+# import Code.QT.PantallaXFCC as PantallaXFCC
 import Code.QT.Info as Info
 import Code.QT.PantallaEntMaq as PantallaEntMaq
 import Code.QT.PantallaUsuarios as PantallaUsuarios
@@ -51,6 +51,7 @@ import Code.QT.WBGuide as WBGuide
 import Code.QT.WBDatabase as WBDatabase
 import Code.QT.WBDatabaseFEN as WBDatabaseFEN
 import Code.QT.PantallaWorkMap as PantallaWorkMap
+import Code.QT.PantallaVoice as PantallaVoice
 
 class Procesador():
     """
@@ -64,8 +65,8 @@ class Procesador():
         self.web = "http://www-lucaschess.rhcloud.com"
         self.blog = "http://lucaschess.blogspot.com"
 
-        self.liOpcionesInicio = [k_terminar, k_play, k_competicion, k_elo, k_entrenamiento, k_tools, k_opciones,
-                                 k_informacion]  # Lo incluimos aquí porque sino no lo lee, en caso de aplazada
+        self.liOpcionesInicio = [   k_terminar, k_play, k_competicion, k_elo,
+                                    k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aquí porque sino no lo lee, en caso de aplazada
 
         self.configuracion = Configuracion.Configuracion(user)
         self.configuracion.start(self.version)
@@ -373,7 +374,6 @@ class Procesador():
         self.gestor.inicio(album, cromo)
 
     def procesarAccion(self, clave):
-
         if self.siPresentacion:
             self.presentacion(False)
 
@@ -407,24 +407,20 @@ class Procesador():
         elif clave == k_informacion:
             self.informacion()
 
-            # elif clave == 999 : # Martin debug
-            # self.pantalla.showDebug()
-
     def opciones(self):
-
         menu = QTVarios.LCMenu(self.pantalla)
 
-        menu.opcion("configuracion", _("Configuration"), Iconos.Opciones())
+        menu.opcion(self.cambiaConfiguracion, _("Configuration"), Iconos.Opciones())
         menu.separador()
 
         menu1 = menu.submenu(_("Colors"), Iconos.Colores())
-        menu1.opcion("color_editar", _("Main board"), Iconos.EditarColores())
+        menu1.opcion(self.editaColoresTablero, _("Main board"), Iconos.EditarColores())
         menu1.separador()
-        menu1.opcion("color_pgn", _("PGN"), Iconos.Vista())
+        menu1.opcion(self.cambiaColoresPGN, _("PGN"), Iconos.Vista())
         menu.separador()
 
         menu1 = menu.submenu(_("Change board size"), Iconos.TamTablero())
-        menu1.opcion("size_main", _("Main board"), Iconos.PuntoVerde())
+        menu1.opcion(self.size_main, _("Main board"), Iconos.PuntoVerde())
         menu1.separador()
         menu2 = menu1.submenu(_("Tutor board"), Iconos.PuntoAzul())
         for txt, size in (   ( _("Large"), 64 ),
@@ -432,78 +428,48 @@ class Procesador():
                              ( _("Medium-small"), 32 ),
                              ( _("Small"), 24 ),
                              ( _("Very small"), 16 ) ):
-            menu2.opcion("sizet_%d" % size, txt, Iconos.PuntoNaranja())
+            menu2.opcion( (self.size_tutor, size), txt, Iconos.PuntoNaranja())
             menu2.separador()
 
         menu.separador()
+        menu1 = menu.submenu(_("Sound"), Iconos.SoundTool())
+        menu1.opcion(self.sonidos, _("Custom sounds"), Iconos.S_Play())
+        if self.configuracion.voice:
+            menu1.separador()
+            menu2 = menu1.submenu(_("Test voice"), Iconos.S_Microfono())
+            menu2.opcion( (self.voice, "word"), _("Words"), Iconos.Words())
+            menu2.opcion( (self.voice, "position"), _("Positions"), Iconos.Voyager())
+            menu2.opcion( (self.voice, "pgn"), _("Games"), Iconos.InformacionPGN())
+        menu1.separador()
+        menu2 = menu1.submenu(_("Import voices"), Iconos.Importar())
+        menu2.opcion( (self.voiceImport, "en_us"), _("English") + " US", Iconos.PuntoVerde() )
+        menu2.opcion( (self.voiceImport, "es"), _("Spanish"), Iconos.PuntoRojo() )
 
-        menu.opcion("sonidos", _("Custom sounds"), Iconos.S_Play())
         menu.separador()
-        menu.opcion("favoritos", _("Training favorites"), Iconos.Corazon())
+        menu.opcion(self.favoritos, _("Training favorites"), Iconos.Corazon())
+
         if self.configuracion.siMain:
             menu.separador()
-            menu.opcion("usuarios", _("Users"), Iconos.Usuarios())
+            menu.opcion(self.usuarios, _("Users"), Iconos.Usuarios())
             menu.separador()
 
             menu1 = menu.submenu(_("User data folder"), Iconos.Carpeta())
-            menu1.opcion("folder_change", _("Change the folder"), Iconos.FolderChange())
+            menu1.opcion(self.folder_change, _("Change the folder"), Iconos.FolderChange())
             if not Configuracion.isDefaultFolder():
                 menu1.separador()
-                menu1.opcion("folder_default", _("Set the default"), Iconos.Defecto())
+                menu1.opcion(self.folder_default, _("Set the default"), Iconos.Defecto())
 
         resp = menu.lanza()
         if resp:
-            if resp == "color_editar":
-                self.editaColoresTablero()
-            elif resp == "color_pgn":
-                self.cambiaColoresPGN()
-            elif resp == "configuracion":
-                self.cambiaConfiguracion()
-            elif resp == "sonidos":
-                self.sonidos()
-            elif resp == "usuarios":
-                self.usuarios()
-            elif resp == "favoritos":
-                PantallaFavoritos.miraFavoritos(self.entrenamientos)
-
-            elif resp == "inicial":
-                self.cpu.stop()
-                del self.cpu
-                self.siPrimeraVez = True
-                self.inicio()
-            elif resp == "size_main":
-                self.tablero.cambiaSize()
-
-            elif resp == "folder_change":
-                carpeta = QTUtil2.leeCarpeta(self.pantalla, self.configuracion.carpeta,
-                                             _("Change the folder where all data is saved") + "\n" + _(
-                                                 "Be careful please"))
-                if carpeta:
-                    if os.path.isdir(carpeta):
-                        self.configuracion.changeFolder(carpeta)
-                        self.reiniciar()
-
-            elif resp == "folder_default":
-                self.configuracion.changeFolder(None)
-                self.reiniciar()
-
-            elif resp.startswith("sizet_"):
-                tam = int(resp[6:])
-                self.size_tutor(tam)
-
-    def reiniciar(self):
-        self.pantalla.accept()
-        QTUtil.salirAplicacion(kFinReinicio)
+            if isinstance(resp, tuple):
+                resp[0](resp[1])
+            else:
+                resp()
 
     def cambiaConfiguracion(self):
-
         if PantallaConfig.opciones(self.pantalla, self.configuracion):
             self.configuracion.graba()
             self.reiniciar()
-
-    def cambiaConfiguracionPrimeraVez(self):
-        if PantallaConfig.opcionesPrimeraVez(self.pantalla, self.configuracion):
-            self.configuracion.graba()
 
     def editaColoresTablero(self):
         w = PantallaColores.WColores(self.tablero)
@@ -512,17 +478,56 @@ class Procesador():
     def cambiaColoresPGN(self):
         PantallaColores.cambiaColoresPGN(self.pantalla, self.configuracion)
 
+    def size_main(self):
+        self.tablero.cambiaSize()
+
     def size_tutor(self, tam):
         confTablero = self.configuracion.confTablero("TUTOR", 16)
         confTablero.anchoPieza(tam)
         confTablero.guardaEnDisco()
 
-    def motoresExternos(self):
-        w = PantallaMotores.WMotores(self.pantalla, self.configuracion.ficheroMExternos)
-        w.exec_()
-
     def sonidos(self):
         w = PantallaSonido.WSonidos(self)
+        w.exec_()
+
+    def voice(self, tipo):
+        if tipo == "word":
+            w = PantallaVoice.WVoiceWordsTest(self)
+        elif tipo == "position":
+            w = PantallaVoice.WVoicePositionsTest(self)
+        elif tipo == "pgn":
+            w = PantallaVoice.WVoicePGNsTest(self)
+        w.exec_()
+
+    def voiceImport( self, lng):
+        PantallaVoice.importVoice(self.pantalla, lng, self.configuracion)
+
+    def favoritos(self):
+        PantallaFavoritos.miraFavoritos(self.entrenamientos)
+
+    def folder_change(self):
+        carpeta = QTUtil2.leeCarpeta(self.pantalla, self.configuracion.carpeta,
+                                     _("Change the folder where all data is saved") + "\n" + _(
+                                         "Be careful please"))
+        if carpeta:
+            if os.path.isdir(carpeta):
+                self.configuracion.changeFolder(carpeta)
+                self.reiniciar()
+
+    def folder_default(self):
+        self.configuracion.changeFolder(None)
+        self.reiniciar()
+
+    def reiniciar(self):
+        self.pantalla.accept()
+        QTUtil.salirAplicacion(kFinReinicio)
+
+    def cambiaConfiguracionPrimeraVez(self):
+        if PantallaConfig.opcionesPrimeraVez(self.pantalla, self.configuracion):
+            self.configuracion.graba()
+
+    def motoresExternos(self):
+        w = PantallaMotores.WMotores(self.pantalla, self.configuracion.ficheroMExternos)
         w.exec_()
 
     def aperturaspers(self):
@@ -567,13 +572,13 @@ class Procesador():
 
     def lucaselo(self, siCompetitivo):
         self.gestor = GestorElo.GestorElo(self)
-        resp = QTVarios.eligeMotorElo(self.gestor, self.configuracion.eloActivo(siCompetitivo))
+        resp = PantallaMotores.eligeMotorElo(self.gestor, self.configuracion.eloActivo(siCompetitivo))
         if resp:
             self.gestor.inicio(resp, siCompetitivo)
 
     def micelo(self, siCompetitivo):
         self.gestor = GestorMicElo.GestorMicElo(self)
-        resp = QTVarios.eligeMotorMicElo(self.gestor, self.configuracion.miceloActivo(siCompetitivo))
+        resp = PantallaMotores.eligeMotorMicElo(self.gestor, self.configuracion.miceloActivo(siCompetitivo))
         if resp:
             respT = QTVarios.tiempo(self.pantalla, minMinutos=10 if siCompetitivo else 3, minSegundos=0, maxMinutos=999,
                                     maxSegundos=999)
@@ -640,25 +645,25 @@ class Procesador():
         menu.separador()
         menu.separador()
 
-        menu1 = menu.submenu(_("Correspondence Chess"), Iconos.XFCC())
-        liRemoves = []
-        for f in Util.listfiles(self.configuracion.carpeta, "*.xfcc"):
-            nomf = os.path.basename(f)[:-5]
-            x = nomf.rfind("_")
-            if x > 0:
-                user = nomf[x + 1:].lower()
-                server = nomf[:x]
-                menu1.opcion("xfcc|%s|%s|%s" % (user, server, f), "%s: %s" % (server, user), Iconos.PuntoAzul())
-                menu1.separador()
-                liRemoves.append((user, server, f))
+        # menu1 = menu.submenu(_("Correspondence Chess"), Iconos.XFCC())
+        # liRemoves = []
+        # for f in Util.listfiles(self.configuracion.carpeta, "*.xfcc"):
+            # nomf = os.path.basename(f)[:-5]
+            # x = nomf.rfind("_")
+            # if x > 0:
+                # user = nomf[x + 1:].lower()
+                # server = nomf[:x]
+                # menu1.opcion("xfcc|%s|%s|%s" % (user, server, f), "%s: %s" % (server, user), Iconos.PuntoAzul())
+                # menu1.separador()
+                # liRemoves.append((user, server, f))
 
-        menu1.opcion("xfcc_nuevo", _("New link"), Iconos.Mas())
-        if liRemoves:
-            menu1.separador()
-            menu2 = menu1.submenu(_("Remove"), Iconos.Delete())
-            for user, server, f in liRemoves:
-                menu2.opcion("del_xfcc|%s|%s|%s" % (user, server, f), "%s: %s" % (server, user), Iconos.PuntoNaranja())
-                menu2.separador()
+        # menu1.opcion("xfcc_nuevo", _("New link"), Iconos.Mas())
+        # if liRemoves:
+            # menu1.separador()
+            # menu2 = menu1.submenu(_("Remove"), Iconos.Delete())
+            # for user, server, f in liRemoves:
+                # menu2.opcion("del_xfcc|%s|%s|%s" % (user, server, f), "%s: %s" % (server, user), Iconos.PuntoNaranja())
+                # menu2.separador()
 
         resp = menu.lanza()
         if resp:
@@ -686,11 +691,11 @@ class Procesador():
                 w = WBGuide.WBGuide(self.pantalla, self)
                 w.exec_()
 
-            elif resp.startswith("xfcc"):
-                self.xfcc(resp)
+            # elif resp.startswith("xfcc"):
+                # self.xfcc(resp)
 
-            elif resp.startswith("del_xfcc"):
-                self.xfccDel(resp)
+            # elif resp.startswith("del_xfcc"):
+                # self.xfccDel(resp)
 
     def externDatabase(self, fichero):
         self.configuracion.ficheroDBgames = fichero
@@ -710,30 +715,30 @@ class Procesador():
         w = WBDatabaseFEN.WBDatabaseFEN(self.pantalla, self)
         w.exec_()
 
-    def xfcc(self, orden):
-        dicServ = GestorXFCC.dicServers()
-        if orden == "xfcc_nuevo":
-            resp = PantallaXFCC.newServerUser(self.pantalla, dicServ)
-            if resp:
-                server, user, password = resp
-                db = GestorXFCC.DB_XFCC(self.configuracion.carpeta, server, user, dicServ[server], password)
-            else:
-                return
-        else:
-            nada, user, server, fich = orden.split("|")
-            for k in dicServ:
-                if k.lower() == server.lower():
-                    server = k
-                    break
-            db = GestorXFCC.DB_XFCC(self.configuracion.carpeta, server, user, dicServ[server])
-        if PantallaXFCC.pantallaXFCC(self, db):
-            self.gestor = GestorXFCC.GestorXFCC(self)
-            self.gestor.inicio(db)
+    # def xfcc(self, orden):
+        # dicServ = GestorXFCC.dicServers()
+        # if orden == "xfcc_nuevo":
+            # resp = PantallaXFCC.newServerUser(self.pantalla, dicServ)
+            # if resp:
+                # server, user, password = resp
+                # db = GestorXFCC.DB_XFCC(self.configuracion.carpeta, server, user, dicServ[server], password)
+            # else:
+                # return
+        # else:
+            # nada, user, server, fich = orden.split("|")
+            # for k in dicServ:
+                # if k.lower() == server.lower():
+                    # server = k
+                    # break
+            # db = GestorXFCC.DB_XFCC(self.configuracion.carpeta, server, user, dicServ[server])
+        # if PantallaXFCC.pantallaXFCC(self, db):
+            # self.gestor = GestorXFCC.GestorXFCC(self)
+            # self.gestor.inicio(db)
 
-    def xfccDel(self, orden):
-        nada, user, server, fich = orden.split("|")
-        if QTUtil2.pregunta(self.pantalla, _X(_("Delete %1?"), "%s: %s" % (server, user))):
-            os.remove(fich)
+    # def xfccDel(self, orden):
+        # nada, user, server, fich = orden.split("|")
+        # if QTUtil2.pregunta(self.pantalla, _X(_("Delete %1?"), "%s: %s" % (server, user))):
+            # os.remove(fich)
 
     def torneos(self):
         xjugar = PantallaTorneos.torneos(self.pantalla)
@@ -822,19 +827,8 @@ class Procesador():
 
         menu = QTVarios.LCMenu(self.pantalla)
 
-        menu1 = menu.submenu(_("Help"), Iconos.Ayuda())
-        menu1.opcion("ayuda", _("Competition"), Iconos.NuevaPartida())
-        menu1.separador()
-        menu1.opcion("faq", "%s (%s)" % (_("FAQ by bolokay"), _("English")), Iconos.FAQ())
-        menu1.separador()
-        menu1.opcion("modes", "%s (%s)" % ("Summary of game modes by Mike Eddies", _("English")), Iconos.Estrella())
-        menu1.separador()
-        menu1.opcion("refRapida", "%s (%s)" % ("Guia rápida de referencia por Raúl Giorgi", _("Spanish")),
-                     Iconos.Estrella())
-        menu1.separador()
-        menu1.opcion("advinfo", "%s (%s)" % ("Advanced info in LC8 by Michele Tumbarello", _("English")),
-                     Iconos.Estrella())
-        menu.separador()
+        menu1 = menu.opcion( "docs", _("Documents"), Iconos.Ayuda())
+
         menu.opcion("web", _("Homepage"), Iconos.Web())
         menu.separador()
         menu1 = menu.submenu("Fresh news", Iconos.Blog())
@@ -843,8 +837,8 @@ class Procesador():
         for txt, lnk in liBlog:
             menu1.opcion(lnk, txt, Iconos.PuntoAzul())
         menu.separador()
-        menu.opcion("downloads", _("Downloads"), Iconos.Downloads())
-        menu.separador()
+        # menu.opcion("downloads", _("Downloads"), Iconos.Downloads())
+        # menu.separador()
         menu.opcion("mail", _("Contact") + " (%s)" % "lukasmonk@gmail.com", Iconos.Mail())
         menu.separador()
 
@@ -855,28 +849,16 @@ class Procesador():
             return
         elif resp == "acercade":
             self.acercade()
-        elif resp == "ayuda":
-            self.ayuda()
-        elif resp == "faq":
-            VarGen.startfile("IntFiles/Docs/Lucas Chess FAQ.pdf")
-        elif resp == "modes":
-            VarGen.startfile("IntFiles/Docs/Summary_of_Game_Modes.pdf")
-        elif resp == "refRapida":
-            VarGen.startfile("IntFiles/Docs/AdL-Guia_rapida1_0.pdf")
-        elif resp == "advinfo":
-            VarGen.startfile("IntFiles/Docs/advanced info in LC8.pdf")
+        elif resp == "docs":
+            VarGen.startfile("%s/docs" % self.web)
         elif resp == "blog":
             VarGen.startfile(self.blog)
         elif resp.startswith("http"):
             VarGen.startfile(resp)
         elif resp == "web":
-            idioma = self.configuracion.traductor
-            if idioma == "ca":
-                idioma = "es"
-            VarGen.startfile("%s/index?lang=%s" % (self.web, idioma))
-        elif resp == "downloads":
-            VarGen.startfile(
-                "https://2dc90e9d4d8c66f3ab71f42ff9cd1b6ab1f26543.googledrive.com/host/0B0D6J3YCrUoublFqc0VGZWw3VVU/release/")
+            VarGen.startfile("%s/index?lang=%s" % (self.web, self.configuracion.traductor))
+        # elif resp == "downloads":
+            # VarGen.startfile("https://2dc90e9d4d8c66f3ab71f42ff9cd1b6ab1f26543.googledrive.com/host/0B0D6J3YCrUoublFqc0VGZWw3VVU/release/")
         elif resp == "mail":
             VarGen.startfile("mailto:lukasmonk@gmail.com")
 
@@ -889,16 +871,6 @@ class Procesador():
                ': <a href="mailto:lukasmonk@gmail.com">Lucas Monge</a> -' + \
                ' <a href="%s">%s</a></a>' % (self.web, self.web) + \
                '(%s <a href="http://www.gnu.org/copyleft/gpl.html"> GPL</a>).<br>' % _("License")
-
-    def ayuda(self):
-        titulo = _("Competition")
-        ancho, alto = QTUtil.tamEscritorio()
-        ancho = min(ancho, 700)
-
-        txt = _(
-            "<br><b>The aim is to obtain the highest possible score</b> :<ul><li>The current point score is displayed in the title bar.</li><li>To obtain points it is necessary to win on different levels in different categories.</li><li>To overcome a level it is necessary to win against the engine with white and with black.</li><li>The categories are ranked in the order of the following table:</li><ul><li><b>Beginner</b> : 5</li><li><b>Amateur</b> : 10</li><li><b>Master candidate</b> : 20</li><li><b>Master</b> : 40</li><li><b>Grandmaster candidate</b> : 80</li><li><b>Grandmaster</b> : 160</li></ul><li>The score for each game is calculated by multiplying the playing level with the score of the category.</li><li>The engines are divided into groups.</li><li>To be able to play with an opponent of a particular group a minimum point score is required. The required score is shown next to the group label.</li></ul>")
-
-        Info.info(self.pantalla, _("Lucas Chess"), titulo, txt, ancho, Iconos.pmAyudaGR())
 
     def acercade(self):
         w = Info.WAbout(self)

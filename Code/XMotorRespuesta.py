@@ -352,7 +352,11 @@ class MRespuestaMotor:
             rm.nodes = int(dClaves["nodes"].strip())
 
         if "nps" in dClaves:
-            rm.nps = int(dClaves["nps"].strip())
+            nps = dClaves["nps"].strip()
+            if " " in nps:
+                nps = nps.split(" ")[0]
+            if nps.isdigit():
+                rm.nps = int(nps)
 
         if "seldepth" in dClaves:
             rm.seldepth = int(dClaves["seldepth"].strip())

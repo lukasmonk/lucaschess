@@ -7,6 +7,9 @@
 # Licence : GPL
 # ==============================================================================
 
+
+
+
 import os
 import sys
 
@@ -14,8 +17,6 @@ reload(sys)
 sys.setdefaultencoding("latin-1")
 sys.path.append(os.curdir)
 
-
-import Code.SAK
 import sip
 
 sip.setapi('QDate', 2)
@@ -33,7 +34,6 @@ Traducir.install()
 current_dir = os.path.dirname(sys.argv[0])
 if current_dir:
     os.chdir(current_dir)
-
 
 nArgs = len(sys.argv)
 if nArgs == 1:
@@ -55,6 +55,10 @@ elif nArgs >= 2:
     elif arg == "-kibitzer":
         import Code.RunKibitzer
         Code.RunKibitzer.run(sys.argv[2])
+
+    elif arg == "-voyager":
+        import Code.RunVoyager
+        Code.RunVoyager.run(sys.argv[2])
 
 
 

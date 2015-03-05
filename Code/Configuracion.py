@@ -3,6 +3,7 @@
 NIVELBAK = 1
 
 import os
+import codecs
 import operator
 
 from PyQt4 import QtGui
@@ -147,6 +148,8 @@ class Configuracion:
 
         self.siNomPiezasEN = False
 
+        self.voice = ""
+
         self.siAplazada = False
 
         self.grupos = BaseConfig.Grupos(self)
@@ -155,7 +158,7 @@ class Configuracion:
         self.grupos.nuevo("Bikjump", 2000, 2400, 600)
         self.grupos.nuevo("Greko", 2401, 2599, 1800)
         self.grupos.nuevo("Alaric", 2600, 2799, 3600)
-        self.grupos.nuevo("Rybka", 2800, 3200, 6000)
+        self.grupos.nuevo("Rybka", 2800, 3400, 6000)
 
     def start(self, version):
         self.lee()
@@ -244,6 +247,19 @@ class Configuracion:
         self.ficheroDBgamesFEN = "%s/%s.lcf" % ( self.carpeta, _("Positions database") )
 
         self.carpetaSTS = "%s/sts" % self.carpeta
+
+    def setVoice(self):
+        if self.voice:
+            self.folderVoice = os.path.join( self.carpeta, "Voice", self.voice )
+            self.folderVoiceWavs = os.path.join( self.folderVoice, "wavs" )
+            self.folderVoiceHMM = os.path.join( self.folderVoice, "hmm" )
+            self.folderVoiceLM = os.path.join( self.folderVoice, "lm" )
+            if not os.path.isdir(self.folderVoice):
+                os.makedirs(self.folderVoice)
+
+            if not os.path.isdir(self.folderVoiceWavs):
+                os.makedirs(self.folderVoiceWavs)
+            self.ficheroVoice = "%s/trainingvoices.pkd" % self.folderVoice
 
     def compruebaBMT(self):
         if not Util.existeFichero(self.ficheroBMT):
@@ -491,6 +507,8 @@ class Configuracion:
 
         dic["CENTIPAWNS"] = self.centipawns
 
+        dic["VOICE"] = self.voice
+
         for clave, rival in self.dicRivales.iteritems():
             dic["RIVAL_%s" % clave] = rival.graba()
         if aplazamiento:
@@ -602,6 +620,8 @@ class Configuracion:
 
                 self.centipawns = dg("CENTIPAWNS", self.centipawns)
 
+                self.voice = dg("VOICE", self.voice)
+
                 for k in dic.keys():
                     if k.startswith("RIVAL_"):
                         claveK = k[6:]
@@ -636,8 +656,9 @@ class Configuracion:
 
         TrListas.ponPiecesLNG(self.siNomPiezasEN or self.traductor == "en")
 
-    def releeTRA(self):
+        self.setVoice()
 
+    def releeTRA(self):
         Traducir.install(self.traductor)
 
     def eloActivo(self, siModoCompetitivo):
@@ -685,7 +706,7 @@ class Configuracion:
                 try:
                     dic = Util.iniBase8dic(fini)
                     if "NAME" in dic:
-                        li.append((uno, dic["NAME"]))
+                        li.append((uno, dic["NAME"], dic.get( "%", "100")))
                 except:
                     pass
         li = sorted(li, key=lambda lng: lng[0])
@@ -768,6 +789,23 @@ class Configuracion:
         ct._anchoPiezaDef = tamDef
 
         return ct
+
+    def listVoices(self):
+        base = "Voice"
+        li = [x for x in os.listdir(base) if os.path.isdir(os.path.join(base,x))]
+        lista = [(_("Disabled"), "")]
+
+        for cp in li:
+            ini = os.path.join(base,cp,"config.ini")
+            if os.path.isfile(ini):
+                with codecs.open(ini, "r", "utf-8") as f:
+                    for linea in f:
+                        if linea.startswith("VOICE"):
+                            lista.append( (linea.split("=")[1].strip(), cp) )
+        return lista
+
+    def dicMotoresFixedElo(self):
+        return Engines.dicMotoresFixedElo()
 
         # ~ if __name__ == "__main__":
         #~ os.chdir( ".." )

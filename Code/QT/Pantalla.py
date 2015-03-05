@@ -2,6 +2,7 @@
 
 from PyQt4 import QtCore, QtGui
 
+import Code.Voice as Voice
 import Code.QT.Iconos as Iconos
 import Code.QT.Colocacion as Colocacion
 import Code.QT.WBase as WBase
@@ -30,9 +31,6 @@ class Pantalla(QTVarios.WDialogo):
         self.setBackgroundRole(QtGui.QPalette.Light)
         # self.setStyleSheet( "QToolButton { padding: 2px;}" )
         # self.setStyleSheet( "QWidget { background-color: yellow; }")
-
-        # self.setMaximumWidth(QTUtil.anchoEscritorio()) # NO ya que elimina maximize
-
         self.base = WBase.WBase(self, gestor)
 
         self.capturas = self.base.capturas
@@ -96,7 +94,12 @@ class Pantalla(QTVarios.WDialogo):
 
         self.resizing = None
 
-        self.cursorPensando = QtGui.QCursor(QtCore.Qt.BusyCursor)  # BusyCursor )#Iconos.pmTime())
+        self.cursorPensando = QtGui.QCursor(QtCore.Qt.BusyCursor)
+
+        Voice.runVoice.setConf(self, False)
+
+    def voice(self, txt):
+        Voice.runVoice.voiceDispatch(txt)
 
     def onTopWindow(self):
         self.onTop = not self.onTop

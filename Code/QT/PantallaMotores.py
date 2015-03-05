@@ -2,12 +2,15 @@
 
 import os
 import operator
+import random
 
 from PyQt4 import QtCore, QtGui
 
 import Code.VarGen as VarGen
 import Code.Util as Util
 import Code.Books as Books
+import Code.EnginesMicElo as EnginesMicElo
+import Code.QT.QTUtil as QTUtil
 import Code.QT.QTUtil2 as QTUtil2
 import Code.QT.Colocacion as Colocacion
 import Code.QT.Iconos as Iconos
@@ -352,3 +355,254 @@ def selectEngine(wowner):
         return None
 
     return me
+
+class WEligeMotorElo(QTVarios.WDialogo):
+    def __init__(self, gestor, elo, titulo, icono, tipo):
+        QTVarios.WDialogo.__init__(self, gestor.pantalla, titulo, icono, tipo.lower())
+
+        self.siMicElo = tipo == "MICELO"
+        self.siMicPer = tipo == "MICPER"
+        self.siMic = self.siMicElo or self.siMicPer
+
+        self.gestor = gestor
+
+        self.colorNoJugable = QTUtil.qtColorRGB(241, 226, 226)
+        self.colorMenor = QTUtil.qtColorRGB(245, 245, 245)
+        self.colorMayor = None
+        self.elo = elo
+        self.tipo = tipo
+
+        # Toolbar
+        liAcciones = [( _("Choose"), Iconos.Aceptar(), self.elegir ), None,
+                      ( _("Cancel"), Iconos.Cancelar(), self.cancelar ), None,
+                      ( _("Random opponent"), Iconos.FAQ(), self.selectRandom ), None,
+        ]
+        if self.siMicElo:
+            liAcciones.append(( _("Reset"), Iconos.Reiniciar(), self.reset ))
+            liAcciones.append(None)
+
+        self.tb = Controles.TBrutina(self, liAcciones)
+
+        self.liMotores = self.gestor.listaMotores(elo)
+        self.liMotoresActivos = self.liMotores
+        dicValores = VarGen.configuracion.leeVariables(tipo)
+        if not dicValores:
+            dicValores = {}
+
+        liFiltro = (
+                        ( "---", None ),
+                        ( ">=", ">" ),
+                        ( "<=", "<" ),
+                        ( "+-100", "100" ),
+                        ( "+-200", "200" ),
+                        ( "+-400", "400" ),
+                        ( "+-800", "800" ),
+                    )
+
+        self.cbElo = Controles.CB(self, liFiltro, None).capturaCambiado(self.filtrar)
+
+        minimo = 9999
+        maximo = 0
+        for mt in self.liMotores:
+            if mt.siJugable:
+                if mt.elo < minimo:
+                    minimo = mt.elo
+                if mt.elo > maximo:
+                    maximo = mt.elo
+        self.sbElo, lbElo = QTUtil2.spinBoxLB(self, elo, minimo, maximo, maxTam=50, etiqueta=_("Elo"))
+        self.sbElo.capturaCambiado(self.filtrar)
+
+        if self.siMic:
+            liCaract = []
+            st = set()
+            for mt in self.liMotores:
+                mt.liCaract = li = mt.idInfo.split("\n")
+                mt.txtCaract = ", ".join([ _F(x) for x in li])
+                for x in li:
+                    if x not in st:
+                        st.add(x)
+                        liCaract.append( (_F(x), x) )
+            liCaract.sort( key=lambda x: x[1] )
+            liCaract.insert(0, ("---", None) )
+            self.cbCaract = Controles.CB(self,liCaract,None).capturaCambiado(self.filtrar)
+
+        ly = Colocacion.H().control(lbElo).control(self.cbElo).control(self.sbElo)
+        if self.siMic:
+            ly.control(self.cbCaract)
+        ly.relleno(1)
+        gbRandom = Controles.GB(self, "", ly)
+
+        # Lista
+        oColumnas = Columnas.ListaColumnas()
+        oColumnas.nueva("NUMERO", _("N."), 35, siCentrado=True)
+        oColumnas.nueva("MOTOR", _("Name"), 140)
+        oColumnas.nueva("ELO", _("Elo"), 60, siDerecha=True)
+        if not self.siMicPer:
+            oColumnas.nueva("GANA", _("Win"), 80, siCentrado=True)
+            oColumnas.nueva("TABLAS", _("Draw"), 80, siCentrado=True)
+            oColumnas.nueva("PIERDE", _("Lost"), 80, siCentrado=True)
+        if self.siMic:
+            oColumnas.nueva("INFO", _("Information"), 300, siCentrado=True)
+
+        self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, siCabeceraMovible=False, altoFila=24)
+        n = self.grid.anchoColumnas()
+        self.grid.setMinimumWidth(n + 20)
+        self.registrarGrid(self.grid)
+
+        f = Controles.TipoLetra(puntos=9)
+        self.grid.setFont(f)
+
+        self.grid.gotop()
+
+        # Layout
+        lyH = Colocacion.H().control(self.tb).control(gbRandom)
+        layout = Colocacion.V().otro(lyH).control(self.grid).margen(3)
+        self.setLayout(layout)
+
+        self.filtrar()
+
+        self.recuperarVideo()
+
+    def removeReset(self):
+        self.tb.setAccionVisible(self.reset,False)
+
+    def filtrar(self):
+        cb = self.cbElo.valor()
+        elo = self.sbElo.valor()
+        if cb is None:
+            self.liMotoresActivos = self.liMotores
+            self.sbElo.setDisabled(True)
+        else:
+            self.sbElo.setDisabled(False)
+            if cb == ">":
+                self.liMotoresActivos = [ x for x in self.liMotores if x.elo >= elo ]
+            elif cb == "<":
+                self.liMotoresActivos = [ x for x in self.liMotores if x.elo <= elo ]
+            elif cb in ("100", "200", "400", "800"):
+                mx = int(cb)
+                self.liMotoresActivos = [ x for x in self.liMotores if abs(x.elo-elo) <= mx ]
+        if self.siMic:
+            cc = self.cbCaract.valor()
+            if cc:
+                self.liMotoresActivos = [ mt for mt in self.liMotoresActivos if cc in mt.liCaract ]
+        self.grid.refresh()
+
+    def reset(self):
+        if not QTUtil2.pregunta(self, _("Are you sure you want to set the original elo of all engines?")):
+            return
+
+        self.gestor.configuracion.escVariables("DicMicElos", {})
+        self.cancelar()
+
+    def cancelar(self):
+        self.resultado = None
+        self.guardarVideo()
+        self.reject()
+
+    def elegir(self):
+        f = self.grid.recno()
+        mt = self.liMotoresActivos[f]
+        if mt.siJugable:
+            self.resultado = mt
+            self.guardarVideo()
+            self.accept()
+        else:
+            QTUtil.beep()
+
+    def selectRandom(self):
+        li = []
+        for mt in self.liMotoresActivos:
+            if mt.siJugable:
+                li.append(mt)
+        if li:
+            n = random.randint(0, len(li) - 1)
+            self.resultado = li[n]
+            self.guardarVideo()
+            self.accept()
+        else:
+            QTUtil2.mensError(self, _("There is not a playable engine between these values"))
+
+    def gridDobleClick(self, grid, fila, oColumna):
+        self.elegir()
+
+    def gridNumDatos(self, grid):
+        return len(self.liMotoresActivos)
+
+    def gridWheelEvent(self, quien, siAdelante):
+        n = len(self.liMotoresActivos)
+        f, c = self.grid.posActualN()
+        f += -1 if siAdelante else +1
+        if 0 <= f < n:
+            self.grid.goto(f, c)
+
+    def gridColorFondo(self, grid, fila, oColumna):
+        mt = self.liMotoresActivos[fila]
+        if mt.siOut:
+            return self.colorNoJugable
+        else:
+            return self.colorMenor if mt.elo < self.elo else self.colorMayor
+
+    def gridDato(self, grid, fila, oColumna):
+        mt = self.liMotoresActivos[fila]
+        clave = oColumna.clave
+        if clave == "NUMERO":
+            valor = "%2d" % mt.numero
+        elif clave == "MOTOR":
+            valor = " " + mt.alias.strip()
+        elif clave == "ELO":
+            valor = "%d " % mt.elo
+        elif clave == "INFO":
+            valor = mt.txtCaract
+        else:
+            if not mt.siJugable:
+                return "x"
+            if clave == "GANA":
+                pts = mt.pgana
+            elif clave == "TABLAS":
+                pts = mt.ptablas
+            elif clave == "PIERDE":
+                pts = mt.ppierde
+
+            valor = "%+d" % pts
+
+        return valor
+
+def eligeMotorElo(gestor, elo):
+    titulo = _("Lucas-Elo") + ". " + _("Choose the opponent")
+    icono = Iconos.Elo()
+    w = WEligeMotorElo(gestor, elo, titulo, icono, "ELO")
+    if w.exec_():
+        return w.resultado
+    else:
+        return None
+
+def eligeMotorMicElo(gestor, elo):
+    titulo = _("Club players competition") + ". " + _("Choose the opponent")
+    icono = Iconos.EloTimed()
+    w = WEligeMotorElo(gestor, elo, titulo, icono, "MICELO")
+    if w.exec_():
+        return w.resultado
+    else:
+        return None
+
+def eligeMotorEntMaq(pantalla):
+    titulo = _("Choose the opponent")
+    icono = Iconos.EloTimed()
+    class GestorTmp:
+        def __init__(self):
+            self.pantalla = pantalla
+            self.configuracion = VarGen.configuracion
+        def listaMotores(self, elo):
+            li = EnginesMicElo.listaCompleta()
+            numX = len(li)
+            for num, mt in enumerate(li):
+                mt.siJugable = True
+                mt.siOut = False
+                mt.numero = numX-num
+            return li
+
+    w = WEligeMotorElo(GestorTmp(), 1600, titulo, icono, "MICPER")
+    if w.exec_():
+        return w.resultado
+    else:
+        return None

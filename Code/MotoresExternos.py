@@ -209,8 +209,7 @@ class MotorExterno:
         self.multiPV = 0
         txtop = dic["OPCIONES"]
         self.liOpciones = []
-        # p rint self.alias
-        # p rint self.elo
+
         for parte in txtop.split("|"):
             if parte:
                 op = OpcionUCI()
@@ -219,8 +218,6 @@ class MotorExterno:
                     self.multiPV = op.max
                     self.maxMultiPV = op.max
                 self.liOpciones.append(op)
-                # if op.valor != op.default:
-                # p rint op.nombre, "[%s]"%op.valor, "[%s]"%op.default
 
     def leerTXT(self, txt):
         dic = Util.txt2dic(txt)
@@ -248,6 +245,7 @@ class ListaMotoresExternos:
             f = open(self.fichero, "rb")
             siIni = True
             siGrabar = False
+            # st = set()
             for linea in f:
                 linea = linea.strip()
                 if siIni:
@@ -257,9 +255,13 @@ class ListaMotoresExternos:
                     me = MotorExterno()
                     if me.leerTXT(linea):
                         self.liMotores.append(me)
+                        # li = me.idInfo.split("\n")
+                        # for x in li:
+                            # st.add(x)
                     else:
                         siGrabar = True
             f.close()
+            # p rint st
             if siGrabar:
                 self.grabar()
 

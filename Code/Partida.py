@@ -1,6 +1,5 @@
 # -*- coding: latin-1 -*-
 
-import Code.MotorInterno as MotorInterno
 import Code.ControlPosicion as ControlPosicion
 import Code.Jugada as Jugada
 
@@ -212,14 +211,12 @@ class Partida:
 
         return resp.strip()
 
-    def compruebaFinal(self):
+    def siTerminada(self):
         if self.liJugadas:
             jg = self.liJugadas[-1]
             if jg.siTablas() or jg.siJaqueMate:
                 return True
-            ml = MotorInterno.MotorInterno()
-            ml.ponFen(jg.posicion.fen())
-            if ml.siTerminada():
+            if jg.posicion.siTerminada():
                 if jg.siJaque:
                     jg.siJaqueMate = True
                 else:

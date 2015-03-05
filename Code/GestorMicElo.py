@@ -29,10 +29,7 @@ class DicMicElos:
         self.configuracion.escVariables(self.variable, self._dic)
 
 def lista():
-    li = EnginesMicElo.listaGreko()
-    li.extend(EnginesMicElo.listaGM())
-
-    li = sorted(li, key=lambda uno: uno.elo)
+    li = EnginesMicElo.listaCompleta()
     dicElos = DicMicElos().dic()
     for mt in li:
         k = mt.clave
@@ -63,6 +60,7 @@ class GestorMicElo(Gestor.Gestor):
         for num, mt in enumerate(self.liMotores):
             mtElo = mt.elo
             mt.siJugable = abs(mtElo - elo) < 400
+            mt.siOut = not mt.siJugable
             if mt.siJugable or (mtElo > elo):
                 def rot(res):
                     return self.calcDifElo(elo, mtElo, res)
@@ -119,6 +117,7 @@ class GestorMicElo(Gestor.Gestor):
             self.partida.recuperaDeTexto(aplazamiento["JUGADAS"])
 
             self.datosMotor = EnginesMicElo.MotorMicElo(aplazamiento["NOMBRE"], aplazamiento["EXE"])
+            self.datosMotor.alias = aplazamiento["NOMBRE"]
             self.datosMotor.elo = aplazamiento["ELO"]
             self.datosMotor.pgana = aplazamiento["PGANA"]
             self.datosMotor.ppierde = aplazamiento["PPIERDE"]
@@ -139,11 +138,12 @@ class GestorMicElo(Gestor.Gestor):
             self.tiempo[True] = Util.Timer(self.maxSegundos)
             self.tiempo[False] = Util.Timer(self.maxSegundos)
 
-        if self.datosMotor.book:
-            self.book = Books.Libro("P", self.datosMotor.book, self.datosMotor.book, True)
-            self.book.polyglot()
-        else:
-            self.book = None
+        cbook = self.datosMotor.book if self.datosMotor.book else VarGen.tbook
+        self.book = Books.Libro("P", cbook, cbook, True)
+        self.book.polyglot()
+
+        elo = self.datosMotor.elo
+        self.maxMoveBook = elo/200 if 0 <= elo <= 1700 else 9999
 
         eloengine = self.datosMotor.elo
         eloplayer = self.configuracion.miceloActivo(siCompetitivo)
@@ -194,7 +194,7 @@ class GestorMicElo(Gestor.Gestor):
 
         tpBL = self.tiempo[True].etiqueta()
         tpNG = self.tiempo[False].etiqueta()
-        rival = self.xrival.nombre + " (%d)" % self.datosMotor.elo
+        self.rival = rival = self.datosMotor.alias + " (%d)" % self.datosMotor.elo
         jugador = self.configuracion.jugador + " (%d)" % self.configuracion.miceloActivo(siCompetitivo)
         bl, ng = jugador, rival
         if self.siRivalConBlancas:
@@ -252,7 +252,7 @@ class GestorMicElo(Gestor.Gestor):
             aplazamiento["SICOMPETITIVO"] = self.siCompetitivo
 
             aplazamiento["ELO"] = self.datosMotor.elo
-            aplazamiento["NOMBRE"] = self.datosMotor.nombre
+            aplazamiento["NOMBRE"] = self.datosMotor.alias
             aplazamiento["EXE"] = self.datosMotor.exe
             aplazamiento["PGANA"] = self.datosMotor.pgana
             aplazamiento["PPIERDE"] = self.datosMotor.ppierde
@@ -327,17 +327,21 @@ class GestorMicElo(Gestor.Gestor):
             self.desactivaTodas()
 
             siEncontrada = False
+
             if self.book:
-                fen = self.fenUltimo()
-                pv = self.book.eligeJugadaTipo(fen, "ap")
-                if pv:
-                    self.rmRival = XMotorRespuesta.RespuestaMotor("Apertura", self.siRivalConBlancas)
-                    self.rmRival.desde = pv[:2]
-                    self.rmRival.hasta = pv[2:4]
-                    self.rmRival.coronacion = pv[4:]
-                    siEncontrada = True
-                else:
+                if self.partida.ultPosicion.jugadas >= self.maxMoveBook:
                     self.book = None
+                else:
+                    fen = self.fenUltimo()
+                    pv = self.book.eligeJugadaTipo(fen, "ap")
+                    if pv:
+                        self.rmRival = XMotorRespuesta.RespuestaMotor("Apertura", self.siRivalConBlancas)
+                        self.rmRival.desde = pv[:2]
+                        self.rmRival.hasta = pv[2:4]
+                        self.rmRival.coronacion = pv[4:]
+                        siEncontrada = True
+                    else:
+                        self.book = None
             if not siEncontrada:
                 tiempoBlancas = self.tiempo[True].tiempoPendiente
                 tiempoNegras = self.tiempo[False].tiempoPendiente
@@ -472,7 +476,7 @@ class GestorMicElo(Gestor.Gestor):
 
         self.beepResultado(quien)
 
-        nombreContrario = self.datosMotor.rotulo()
+        nombreContrario = self.rival
 
         mensaje = _("End Game")
         if quien == kGanamos:

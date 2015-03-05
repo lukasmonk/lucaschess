@@ -11,6 +11,8 @@ import Code.Jugada as Jugada
 import Code.PGN as PGN
 import Code.TrListas as TrListas
 import Code.Gestor as Gestor
+import Code.Voice as Voice
+import Code.XVoyager as XVoyager
 import Code.QT.QTUtil as QTUtil
 import Code.QT.QTUtil2 as QTUtil2
 import Code.QT.QTVarios as QTVarios
@@ -22,25 +24,18 @@ import Code.QT.PantallaEntMaq as PantallaEntMaq
 import Code.QT.PantallaSolo as PantallaSolo
 import Code.QT.WinPosition as WinPosition
 
-def pgn_pks(estado, pgn, jugadaInicial=None):
+def pgn_pks(estado, pgn, jugada_inicial=None):
     unpgn = PGN.UnPGN()
     unpgn.leeTexto(pgn)
-    dic = {}
-    dic["VOLTEO"] = False
-    dic["liPGN"] = unpgn.listaCabeceras()
-    dic["FEN"] = unpgn.dic.get("FEN", None)
-    dic["ESTADO"] = estado
-    dic["BLOQUEAPERTURA"] = None
-    dic["POSICAPERTURA"] = None
-    dic["SIJUEGAMOTOR"] = False
-    dic["PARTIDA"] = unpgn.partida.guardaEnTexto()
-    siBlancasAbajo = True
-    if jugadaInicial:
-        jg = unpgn.partida.jugada(jugadaInicial)
-        siBlancasAbajo = jg.posicionBase.siBlancas
-    dic["SIBLANCASABAJO"] = siBlancasAbajo
+    if jugada_inicial:
+        jg = unpgn.partida.jugada(jugada_inicial)
+        si_blancas_abajo = jg.posicionBase.siBlancas
+    else:
+        si_blancas_abajo = True
 
-    return dic
+    return dict(VOLTEO=False, liPGN=unpgn.listaCabeceras(), FEN=unpgn.dic.get("FEN", None), ESTADO=estado,
+               BLOQUEAPERTURA=None, POSICAPERTURA=None, SIJUEGAMOTOR=False, PARTIDA=unpgn.partida.guardaEnTexto(),
+               SIBLANCASABAJO=si_blancas_abajo)
 
 # def pgn_json(estado, pgn, jugadaInicial=None):
 # unpgn = PGN.UnPGN()
@@ -67,10 +62,7 @@ def pgn_pks(estado, pgn, jugadaInicial=None):
 
 class GestorSolo(Gestor.Gestor):
     def inicio(self, dic=None, fichero=None, pgn=None, jugadaInicial=None, siGrabar=True, siExterno=False):
-
         self.tipoJuego = kJugSolo
-
-        # self.pensando(True)
 
         siPGN = False
         if fichero:
@@ -126,7 +118,6 @@ class GestorSolo(Gestor.Gestor):
 
         self.fen = dic.get("FEN", None)
 
-        # self.fen = "k5r1/2R5/1p1q2n1/p2P2p1/PN1Ppp2/1P2P3/2Q2PP1/1K6 w - - 0 1"
         cp = ControlPosicion.ControlPosicion()
         if self.fen:
             cp.leeFen(self.fen)
@@ -176,8 +167,6 @@ class GestorSolo(Gestor.Gestor):
         if self.siPGN:
             self.pgnInicial = self.pgn.actual()
 
-        # self.pensando(False)
-
         self.ponPosicionDGT()
 
         self.refresh()
@@ -185,6 +174,8 @@ class GestorSolo(Gestor.Gestor):
         if "SICAMBIORIVAL" in dic:
             self.cambioRival()
             del dic["SICAMBIORIVAL"]  # que no lo vuelva a pedir
+
+        self.activeVoice = False
 
         self.siguienteJugada()
 
@@ -293,6 +284,9 @@ class GestorSolo(Gestor.Gestor):
                 return
             elif resp:
                 self.grabarComo()
+
+        if self.activeVoice:
+            self.setVoice( False )
 
         if self.siExterno or self.finExit:
             self.procesador.procesarAccion(k_terminar)
@@ -679,25 +673,30 @@ class GestorSolo(Gestor.Gestor):
             self.editarEtiquetasPGN()
 
     def configurarGS(self):
+        # self.test()
+        # return
 
         mt = _("Engine").lower()
         mt = _X(_("Disable %1"), mt) if self.siJuegaMotor else _X(_("Enable %1"), mt)
 
-        liMasOpciones = (
-            ( "rotacion", _("Auto-rotate board"), Iconos.JS_Rotacion() ),
-            ( None, None, None ),
-            ( "apertura", _("Opening"), Iconos.Apertura() ),
-            ( None, None, None ),
-            ( "posicion", _("Start position"), Iconos.Datos() ),
-            ( None, None, None ),
-            ( "pasteposicion", _("Paste FEN position"), Iconos.Pegar16() ),
-            ( None, None, None ),
-            ( "leerpgn", _("Read PGN"), Iconos.PGN_Importar() ),
-            ( None, None, None ),
-            ( "pastepgn", _("Paste PGN"), Iconos.Pegar16() ),
-            ( None, None, None ),
-            ( "motor", mt, Iconos.Motores() ),
-        )
+        sep = ( None, None, None )
+
+        liMasOpciones = [
+            ( "rotacion", _("Auto-rotate board"), Iconos.JS_Rotacion() ), sep,
+            ( "apertura", _("Opening"), Iconos.Apertura() ), sep,
+            ( "posicion", _("Start position"), Iconos.Datos() ), sep,
+            ( "pasteposicion", _("Paste FEN position"), Iconos.Pegar16() ), sep,
+            ( "leerpgn", _("Read PGN"), Iconos.PGN_Importar() ), sep,
+            ( "pastepgn", _("Paste PGN"), Iconos.Pegar16() ), sep,
+            ( "motor", mt, Iconos.Motores() ), sep,
+            ( "voyager", _("Voyager 2").replace("2", "1"), Iconos.Voyager1() ),
+        ]
+        if self.configuracion.voice:
+            liMasOpciones.append(sep)
+            if self.activeVoice:
+                liMasOpciones.append(( "desvoice", _("Deactivate voice"), Iconos.X_Microfono() ))
+            else:
+                liMasOpciones.append(( "actvoice", _("Activate voice"), Iconos.S_Microfono() ))
         resp = self.configurar(liMasOpciones, siCambioTutor=True, siSonidos=True)
 
         if resp == "rotacion":
@@ -749,14 +748,14 @@ class GestorSolo(Gestor.Gestor):
             texto = QTUtil.traePortapapeles()
             if texto:
                 cp = ControlPosicion.ControlPosicion()
-                # try:
-                cp.leeFen(str(texto))
-                self.fen = cp.fen()
-                self.bloqueApertura = None
-                self.posicApertura = None
-                self.reiniciar()
-                # except:
-                # pass
+                try:
+                    cp.leeFen(str(texto))
+                    self.fen = cp.fen()
+                    self.bloqueApertura = None
+                    self.posicApertura = None
+                    self.reiniciar()
+                except:
+                    pass
 
         elif resp == "leerpgn":
             unpgn = PantallaPGN.eligePartida(self.pantalla)
@@ -777,8 +776,7 @@ class GestorSolo(Gestor.Gestor):
                 unpgn = PGN.UnPGN()
                 unpgn.leeTexto(texto)
                 if unpgn.siError:
-                    QTUtil2.mensError(self.pantalla,
-                                      _("The text from the clipboard does not contain a chess game in PGN format"))
+                    QTUtil2.mensError(self.pantalla, _("The text from the clipboard does not contain a chess game in PGN format"))
                     return
                 self.bloqueApertura = None
                 self.posicApertura = None
@@ -798,6 +796,23 @@ class GestorSolo(Gestor.Gestor):
                 self.siJuegaMotor = False
             else:
                 self.cambioRival()
+
+        elif resp == "voyager":
+            ptxt = XVoyager.xVoyager(self.pantalla, self.configuracion, self.partida)
+            if ptxt:
+                dic = self.creaDic()
+                dic["PARTIDA"] = ptxt
+                p = self.partida.copia()
+                p.recuperaDeTexto(ptxt)
+                dic["FEN"] = None if p.siFenInicial() else p.iniPosicion.fen()
+                dic["SIBLANCASABAJO"] = self.tablero.siBlancasAbajo
+                self.reiniciar(dic)
+
+        elif resp == "actvoice":
+            self.setVoice( True )
+
+        elif resp == "desvoice":
+            self.setVoice( False )
 
     def controlTeclado(self, nkey):
         if nkey in (86, 80):  # V,P
@@ -838,7 +853,6 @@ class GestorSolo(Gestor.Gestor):
                 self.mueveHumano(rm.desde, rm.hasta, rm.coronacion)
 
     def cambioRival(self):
-
         if self.dicRival:
             dicBase = self.dicRival
         else:
@@ -879,3 +893,57 @@ class GestorSolo(Gestor.Gestor):
             self.estado = kJugando
             self.refresh()
             self.siguienteJugada()
+
+    def setVoice(self, ok):
+        if ok:
+            Voice.runVoice.start(self.voice)
+            self.activeVoice = True
+            self.liVoice = []
+        else:
+            Voice.runVoice.stop()
+            self.activeVoice = False
+
+    # def test(self):
+        # if not hasattr(self,"litest"):
+            # li = "e4 e5 Nf3 Nc6 Bb5 Nf6 O-O Nxe4 d4 Nd6 Bxc6 dxc6 dxe5 Nf5 "\
+                           # "Qxd8+ Kxd8 Nc3 Bd7 h3 h6 Rd1 Kc8 a4 a5 b3 b6 Bb2 Ne7 "\
+                           # "Rd2 c5 Ne2 Ng6 Rad1 Be6 c4 Be7 Nc3 Kb7 Nd5 Rad8 Nxe7 "\
+                           # "Rxd2 Nxd2 Nxe7 Nf1 Kc8 f3 g5 Ng3 Rd8 Rxd8+ Kxd8 Kf2 Bf5 "\
+                           # "Nxf5 Nxf5 g4 Nd4 Bxd4 cxd4 Ke2 Kd7 Kd3 c5 Ke4 Ke6 f4 "\
+                           # "gxf4 Kxf4 d3 Ke3 Kxe5 Kxd3 Kf4 Ke2 Kg3 Ke3 Kxh3 Kf4 Kh4 "\
+                           # "Kf5 Kg3".split(" ")
+            # self.litest = li
+            # self.postest = 0
+            # self.liVoice = []
+        # c = self.litest[self.postest]
+        # if c[0] == "O":
+            # self.voice(c)
+        # else:
+            # self.voice(" ".join(list(c)))
+        # self.postest += 1
+
+    def voice(self, txt):
+        if "TAKEBACK" in txt:
+            self.atras()
+            self.liVoice = []
+            return
+        self.liVoice.extend(txt.split(" "))
+        while True:
+            resp = Voice.readPGN(self.liVoice, self.partida.ultPosicion)
+            if resp is None:
+                self.liVoice = []
+                self.beepExtendido(True)
+                return
+            else:
+                siMove, move, nGastados = resp
+                if siMove:
+                    self.mueveHumano(move.desde(), move.hasta(), move.coronacion())
+                    n = len(self.liVoice)
+                    if nGastados >= n:
+                        self.liVoice = []
+                        return
+                    else:
+                        self.liVoice = self.liVoice[nGastados:]
+                        continue
+                else:
+                    return

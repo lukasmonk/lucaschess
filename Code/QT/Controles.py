@@ -763,7 +763,7 @@ class Menu(QtGui.QMenu):
 
     Ejemplo::
 
-        menu = Controles.Menu()
+        menu = Controles.Menu(window)
 
         menu.opcion( "op1", "Primera opcion", icono )
         menu.separador()

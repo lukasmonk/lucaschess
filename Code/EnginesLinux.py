@@ -60,7 +60,7 @@ def leeRivales():
         cm.ponMultiPV(20, 40)
         mas(cm)
 
-    cm = ConfigMotor("greko", "Vladimir Medvedev", "10.2", "http://greko.110mb.com/index.html")
+    cm = ConfigMotor("greko", "Vladimir Medvedev", "10.2", "http://sourceforge.net/projects/greko")
     cm.path = "10.2/bin/GreKo-102-32-ja"
     cm.elo = 2480
     mas(cm)
@@ -142,15 +142,28 @@ def leeRivales():
     cm.elo = 1854
     mas(cm)
 
-    # cm = ConfigMotor( "gaia", "Jean-Francois Romang, David Rabel", "3.5", "http://gaiachess.free.fr" )
-    # cm.path = "gaia"
-    # cm.elo = 2378
-    # cm.ordenUCI( "Ponder", "false" )
-    # mas(cm)
-
     cm = ConfigMotor("texel", "Peter Österlund", "0.98", "http://web.comhem.se/petero2home/javachess/index.html#texel")
     cm.path = "texel32"
     cm.elo = 2900
     mas(cm)
 
     return dicRivales
+
+def dicMotoresFixedElo():
+    d = leeRivales()
+    dic = {}
+    for nm, desde, hasta in (
+                                ("cheng", 800, 2500),
+                                ("greko", 1600, 2400),
+                                ("discocheck", 1500, 2700),
+                            ):
+        for elo in range(desde, hasta+100, 100):
+            cm = d[nm].clona()
+            if elo not in dic:
+                dic[elo] = []
+            cm.ordenUCI("UCI_LimitStrengh", "true")
+            cm.ordenUCI("UCI_Elo", str(elo))
+            cm.clave += " (%d)"%elo
+            cm.nombre += " (%d)"%elo
+            dic[elo].append(cm)
+    return dic

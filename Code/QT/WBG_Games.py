@@ -251,7 +251,7 @@ class WGames(QtGui.QWidget):
         pv = self.dbGames.damePV(fila)
         p = Partida.Partida()
         p.leerPV(pv)
-        p.compruebaFinal()
+        p.siTerminada()
         self.infoMove.modoPartida(p, self.numJugada)
         self.setFocus()
         self.grid.setFocus()

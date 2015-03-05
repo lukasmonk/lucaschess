@@ -78,16 +78,20 @@ class GestorEntMaq(Gestor.Gestor):
                 self.apertura = Apertura.AperturaPol(100)  # lee las aperturas
 
         self.book = dic.get("BOOK", None)
+        elo = getattr(self.cm, "elo", 0)
+        self.maxMoveBook = elo/200 if 0 <= elo <= 1700 else 9999
         if self.book:
             self.book.polyglot()
             self.bookRR = dic.get("BOOKRR", "mp")
             self.bookMandatory = dic.get("BOOKMANDATORY", False)
             self.siApertura = True
-        elif dic["RIVAL"].get("TIPO", None) == Motores.MICGM:
-            self.book = Books.Libro("P", self.cm.book, self.cm.book, True)
-            self.book.polyglot()
-            self.bookRR = "mp"
-            self.bookMandatory = None
+        elif dic["RIVAL"].get("TIPO", None) in (Motores.MICGM, Motores.MICPER):
+            if self.cm.book:
+                self.book = Books.Libro("P", self.cm.book, self.cm.book, True)
+                self.book.polyglot()
+                self.bookRR = "mp"
+                self.bookMandatory = None
+                self.maxMoveBook = 0
 
         self.siTutorActivado = (VarGen.dgtDispatch is None) and self.configuracion.tutorActivoPorDefecto
         self.pantalla.ponActivarTutor(self.siTutorActivado)
@@ -515,23 +519,26 @@ class GestorEntMaq(Gestor.Gestor):
 
             siEncontrada = False
             if self.siApertura:
-                if self.siAperturaStd:
-                    siEncontrada, desde, hasta, coronacion = self.apertura.juegaMotor(self.fenUltimo())
+                if self.partida.ultPosicion.jugadas >= self.maxMoveBook:
+                    self.siApertura = False
                 else:
-                    if self.book:  # Sin apertura estandar, con apertura y libro
-                        siEncontrada, desde, hasta, coronacion = self.eligeJugadaBook()
-                        if siEncontrada:
-                            self.siApertura = False  # para que no haya problemas de busqueda futura, ya seguimos siempre el libro
-                    if not siEncontrada:  # Nada en el libro en su caso buscamos la apertura normal
-                        if self.nAjustarFuerza:
-                            siEncontrada, desde, hasta, coronacion = self.eligeJugadaBookAjustada()
-                        if not siEncontrada and self.apertura:
-                            siEncontrada, desde, hasta, coronacion = self.apertura.juegaMotor(self.fenUltimo())
-                            if not siEncontrada:
-                                self.siApertura = False
+                    if self.siAperturaStd:
+                        siEncontrada, desde, hasta, coronacion = self.apertura.juegaMotor(self.fenUltimo())
+                    else:
+                        if self.book:  # Sin apertura estandar, con apertura y libro
+                            siEncontrada, desde, hasta, coronacion = self.eligeJugadaBook()
+                            if siEncontrada:
+                                self.siApertura = False  # para que no haya problemas de busqueda futura, ya seguimos siempre el libro
+                        if not siEncontrada:  # Nada en el libro en su caso buscamos la apertura normal
+                            if self.nAjustarFuerza:
+                                siEncontrada, desde, hasta, coronacion = self.eligeJugadaBookAjustada()
+                            if not siEncontrada and self.apertura:
+                                siEncontrada, desde, hasta, coronacion = self.apertura.juegaMotor(self.fenUltimo())
+                                if not siEncontrada:
+                                    self.siApertura = False
 
-            if not siEncontrada and self.book:  # Sin apertura y con libro
-                siEncontrada, desde, hasta, coronacion = self.eligeJugadaBook()
+                if not siEncontrada and self.book:  # Sin apertura y con libro
+                    siEncontrada, desde, hasta, coronacion = self.eligeJugadaBook()
 
             if siEncontrada:
                 self.rmRival = XMotorRespuesta.RespuestaMotor("Apertura", self.siRivalConBlancas)
@@ -680,6 +687,10 @@ class GestorEntMaq(Gestor.Gestor):
         return Gestor.Gestor.valoraRMrival(self, self.siRivalConBlancas)
 
     def eligeJugadaBookBase(self, book, bookRR):
+        jugadas = self.partida.ultPosicion.jugadas
+        if self.maxMoveBook:
+            if self.maxMoveBook <= jugadas:
+                return False, None, None, None
         fen = self.fenUltimo()
 
         if bookRR == "su":

@@ -239,7 +239,7 @@ FILESW=%s:100
         if mj:  # blunder
             rm = mj
         p.leerPV(rm.pv)
-        if p.compruebaFinal():
+        if p.siTerminada():
             result = p.resultado()
             mas = ""  # ya lo añade en la última jugada
         else:
@@ -604,7 +604,7 @@ class UnaMuestra():
         self.posRMactual = posRM
         self.rm = self.listaRM[self.posRMactual][0]
         self.partida = Partida.Partida(self.jg.posicionBase).leerPV(self.rm.pv)
-        self.partida.compruebaFinal()
+        self.partida.siTerminada()
         self.posMovActual = 0
 
     def pgnActual(self):
