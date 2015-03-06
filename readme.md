@@ -9,14 +9,20 @@ Lucas Chess is a GUI of chess:
 Dependencies
 ------------
 
-1. Python 2.7
-2. PyQt4
-3. suds
-4. psutil
-5. pygal
-6. chardet
+* Python 2.7
+* PyQt4
+* PyAudio
+* psutil
+* Python for windows extensions
+* pygal
+* chardet
+* PyPocketSphinx
 
+Links
+-----
 
+* [Web: http://www-lucaschess.rhcloud.com/](http://www-lucaschess.rhcloud.com/).
+* [Blog: http://lucaschess.blogspot.com.es/](http://lucaschess.blogspot.com.es/).
 
 Legal Details
 -------------
