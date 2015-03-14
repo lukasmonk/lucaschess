@@ -682,7 +682,8 @@ class WPotencia(QTVarios.WDialogo):
         for wm in self.liwm:
             wm.deshabilita()
 
-        self.um = QTUtil2.mensEspera.inicio(self, _("Analyzing the move...."), posicion="ad")
+        um = QTUtil2.analizando(self)
+
         self.liAnalisis = []
         cp = ControlPosicion.ControlPosicion()
         cp.leeFen(self.fen)
@@ -723,7 +724,7 @@ class WPotencia(QTVarios.WDialogo):
             else:
                 break
 
-        self.um.final()
+        um.final()
         self.btConsultar.show()
 
         if not siError:

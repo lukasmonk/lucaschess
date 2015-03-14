@@ -170,7 +170,7 @@ class GestorMotor:
         if self.ml.siTerminada():
             return None
 
-        mrm = self.motor.mejorMovF(fen, self.motorTiempoJugada, None)
+        mrm = self.motor.mejorMovF(fen, self.motorTiempoJugada, self.motorProfundidad)
         rm = mrm.mejorMov()
         rm.cambiaColor(posicion)
         mv = desde + hasta + (coronacion if coronacion else "")

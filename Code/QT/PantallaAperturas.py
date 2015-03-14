@@ -362,7 +362,7 @@ class EntrenamientoApertura(QTVarios.WDialogo):
                 self.grid.refresh()
 
     def editar(self, bloque):
-        me = QTUtil2.mensEspera.inicio(self, _("One moment please..."))
+        me = QTUtil2.unMomento(self)
         w = WAperturas(self, VarGen.configuracion, bloque)
         me.final()
         if w.exec_():
@@ -470,7 +470,7 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
         if not fbin:
             return
 
-        me = QTUtil2.mensEspera.inicio(self, _("One moment please..."))
+        me = QTUtil2.unMomento(self)
 
         # Determinamos el fichero de trabajo
         plTMP = "deleteme_%d.pgn"

@@ -93,7 +93,7 @@ class Analisis:
 
         xmotor = self.procesador.creaGestorMotor(confMotor, alm.tiempo, alm.depth, siMultiPV=True)
 
-        me = QTUtil2.mensEspera.inicio(self.pantalla, _("Analyzing the move...."), posicion="ad")
+        me = QTUtil2.analizando(self.pantalla)
         mrm = xmotor.analiza(fenM2 + " 0 1")
         mrm.tiempo = alm.tiempo / 1000.0
 

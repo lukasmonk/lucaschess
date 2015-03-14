@@ -255,9 +255,7 @@ class GestorFideFics(Gestor.Gestor):
         return self.mrm
 
     def analizaMinimo(self, minTime):
-        self.pensando(True)
         self.mrm = copy.deepcopy(self.xtutor.ac_minimo(minTime, False))
-        self.pensando(False)
         return self.mrm
 
     def analizaFinal(self):
@@ -354,20 +352,26 @@ class GestorFideFics(Gestor.Gestor):
                 if not siBookObj:
                     self.book = None
         if siAnalizaJuez:
+            um = QTUtil2.analizando(self.pantalla)
             mrm = self.analizaMinimo(5000)
             posicion = self.partida.ultPosicion
 
             rmUsu, nada = mrm.buscaRM(jgUsu.movimiento())
             if rmUsu is None:
+                self.analizaFinal()
                 rmUsu = self.xtutor.valora(posicion, jgUsu.desde, jgUsu.hasta, jgUsu.coronacion)
                 mrm.agregaRM(rmUsu)
+                self.analizaInicio()
 
             rmObj, posObj = mrm.buscaRM(jgObj.movimiento())
             if rmObj is None:
+                self.analizaFinal()
                 rmObj = self.xtutor.valora(posicion, jgObj.desde, jgObj.hasta, jgObj.coronacion)
                 posObj = mrm.agregaRM(rmObj)
+                self.analizaInicio()
 
             analisis = mrm, posObj
+            um.final()
 
             w = PantallaJuicio.WJuicio(self, self.xtutor, self.nombreObj, posicion, mrm, rmObj, rmUsu, analisis)
             w.exec_()

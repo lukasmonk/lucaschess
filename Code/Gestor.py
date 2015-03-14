@@ -869,7 +869,6 @@ class Gestor():
         return jg, siBlancas, siUltimo, tam_lj, pos
 
     def ayudaMover(self, maxRecursion):
-
         if not self.siTerminada():
             jg = Jugada.Jugada()
             jg.posicionBase = self.partida.ultPosicion.copia()

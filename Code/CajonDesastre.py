@@ -87,7 +87,7 @@ def dicDisk(configuracion):
     dicDisk_SQL(backup, configuracion.ficheroLearnPGN)
     dicDisk_SQL(backup, configuracion.ficheroMoves)
     dicDisk_SQL(backup, configuracion.ficheroEntMaquinaConf)
-    dicDisk_SQL(backup, configuracion.ficheroNivel, siAllTables=True)
+    dicDisk_SQL(backup, configuracion.ficheroDailyTest, siAllTables=True)
     dicDisk_SQL(backup, configuracion.ficheroPotencia, tabla="parametros")
     dicDisk_SQL(backup, configuracion.ficheroPuntuaciones)
     dicDisk_SQL(backup, configuracion.carpeta + "/*.visdb")

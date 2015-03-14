@@ -549,6 +549,10 @@ def comboBoxLB(parent, liOpciones, valor, etiqueta=None):
 def unMomento(owner):
     return mensEspera.inicio(owner, _("One moment please..."))
 
+def analizando(owner):
+    return mensEspera.inicio(owner, _("Analyzing the move...."), posicion="ad")
+
+
 def ponIconosMotores(lista):
     liResp = []
     for titulo, clave in lista:

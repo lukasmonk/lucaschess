@@ -7,6 +7,7 @@ import Code.VarGen as VarGen
 import Code.Partida as Partida
 import Code.Analisis as Analisis
 import Code.QT.QTUtil as QTUtil
+import Code.QT.QTUtil2 as QTUtil2
 import Code.QT.Colocacion as Colocacion
 import Code.QT.Iconos as Iconos
 import Code.QT.Controles as Controles
@@ -226,15 +227,23 @@ class WJuicio(QTVarios.WDialogo):
 
         rmUsuN, pos = mrm.buscaRM(self.rmUsu.movimiento())
         if rmUsuN is None:
+            um = QTUtil2.analizando(self)
+            self.gestor.analizaFinal()
             rmUsuN = self.xmotor.valora(self.posicion, self.rmUsu.desde, self.rmUsu.hasta, self.rmUsu.coronacion)
             mrm.agregaRM(rmUsuN)
+            self.gestor.analizaInicio()
+            um.final()
 
         self.rmUsu = rmUsuN
 
         rmOPN, pos = mrm.buscaRM(self.rmOP.movimiento())
         if rmOPN is None:
+            um = QTUtil2.analizando(self)
+            self.gestor.analizaFinal()
             rmOPN = self.xmotor.valora(self.posicion, self.rmOP.desde, self.rmOP.hasta, self.rmOP.coronacion)
             pos = mrm.agregaRM(rmOPN)
+            self.gestor.analizaInicio()
+            um.final()
 
         self.rmOP = rmOPN
         self.analisis = self.mrm, pos

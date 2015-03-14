@@ -88,7 +88,7 @@ class WBooksCrear(QtGui.QDialog):
         if not self.fichero:
             return
 
-        me = QTUtil2.mensEspera.inicio(self, _("One moment please..."))
+        me = QTUtil2.unMomento(self)
 
         # Creamos el pgn
         fichTemporal = self.wParent.damePGNtemporal()
@@ -196,7 +196,7 @@ def polyglotUnir(owner):
             pass
 
         # Ejecutamos
-        me = QTUtil2.mensEspera.inicio(owner, _("One moment please..."))
+        me = QTUtil2.unMomento(owner)
 
         process = subprocess.Popen(li, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 

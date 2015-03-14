@@ -12,19 +12,6 @@ import Code.VarGen as VarGen
 import Code.LCOS as LCOS
 import Code.XMotorRespuesta as XMotorRespuesta
 
-# def prlk( x ):
-    # f = open( "stk.txt", "ab")
-    # f.write( x )
-    # f.close()
-
-# def prlkn( *x ):
-    # f = open( "stk.txt", "ab")
-    # for l in x:
-        # f.write( l )
-        # f.write( " ")
-        # f.write( "\n")
-    # f.close()
-
 class XMotor(QtCore.QProcess):
     def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=None, priority=LCOS.NORMAL):
         QtCore.QProcess.__init__(self)

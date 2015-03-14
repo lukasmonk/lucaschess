@@ -20,15 +20,15 @@ import Code.QT.Tablero as Tablero
 
 # liFens = []
 
-class WNivelBase(QTVarios.WDialogo):
+class WDailyTestBase(QTVarios.WDialogo):
     def __init__(self, procesador):
 
-        QTVarios.WDialogo.__init__(self, procesador.pantalla, _("Your daily test"), Iconos.Nivel(), "nivelBase")
+        QTVarios.WDialogo.__init__(self, procesador.pantalla, _("Your daily test"), Iconos.DailyTest(), "nivelBase")
 
         self.procesador = procesador
         self.configuracion = procesador.configuracion
 
-        self.historico = Util.DicSQL(self.configuracion.ficheroNivel)
+        self.historico = Util.DicSQL(self.configuracion.ficheroDailyTest)
         self.calcListaHistorico()
 
         self.motor, self.segundos, self.pruebas, self.fns = self.leeParametros()
@@ -63,7 +63,7 @@ class WNivelBase(QTVarios.WDialogo):
         self.recuperarVideo()
 
     def leeParametros(self):
-        param = Util.DicSQL(self.configuracion.ficheroNivel, tabla="parametros")
+        param = Util.DicSQL(self.configuracion.ficheroDailyTest, tabla="parametros")
         motor = param.get("MOTOR", "stockfish")
         segundos = param.get("SEGUNDOS", 7)
         pruebas = param.get("PRUEBAS", 5)
@@ -152,7 +152,7 @@ class WNivelBase(QTVarios.WDialogo):
             self.pruebas = liResp[2]
             self.fns = liResp[3]
 
-            param = Util.DicSQL(self.configuracion.ficheroNivel, tabla="parametros")
+            param = Util.DicSQL(self.configuracion.ficheroDailyTest, tabla="parametros")
             param["MOTOR"] = self.motor
             param["SEGUNDOS"] = self.segundos
             param["PRUEBAS"] = self.pruebas
@@ -210,15 +210,15 @@ class WNivelBase(QTVarios.WDialogo):
                 liR.append(li[t0][t1] + " 0 1")
 
         # liR = liFens
-        w = WNivel(self, liR, self.motor, self.segundos, self.fns)
+        w = WDailyTest(self, liR, self.motor, self.segundos, self.fns)
         w.exec_()
         self.calcListaHistorico()
         self.ghistorico.refresh()
 
-class WNivel(QTVarios.WDialogo):
+class WDailyTest(QTVarios.WDialogo):
     def __init__(self, owner, liFens, motor, segundos, fns):
 
-        super(WNivel, self).__init__(owner, _("Your daily test"), Iconos.Nivel(), "nivel")
+        super(WDailyTest, self).__init__(owner, _("Your daily test"), Iconos.DailyTest(), "nivel")
 
         self.procesador = owner.procesador
         self.configuracion = self.procesador.configuracion
@@ -415,7 +415,7 @@ class WNivel(QTVarios.WDialogo):
     def calculaTiempoPuntos(self):
         tiempo = time.clock() - self.iniTiempo
 
-        um = QTUtil2.mensEspera.inicio(self, _("Analyzing the move...."), posicion="ad")
+        um = QTUtil2.analizando(self)
         self.rmr, pos = self.xtutor.analizaJugada(self.jg, self.xtutor.motorTiempoJugada)
         self.jg.analisis = self.rmr, pos
         um.final()
@@ -469,6 +469,6 @@ class WNivel(QTVarios.WDialogo):
         Analisis.muestraAnalisis(self.procesador, self.xtutor, self.jg, self.posicion.siBlancas, 9999999, 1,
                                  pantalla=self, siGrabar=False)
 
-def pantallaNivel(procesador):
-    w = WNivelBase(procesador)
+def dailyTest(procesador):
+    w = WDailyTestBase(procesador)
     w.exec_()

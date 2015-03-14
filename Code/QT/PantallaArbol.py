@@ -932,7 +932,7 @@ class PantallaArbol(QTVarios.WDialogo):
 
         xmotor = self.procesador.creaGestorMotor(confMotor, alm.tiempo, alm.depth, siMultiPV=True)
 
-        me = QTUtil2.mensEspera.inicio(self, _("Analyzing the move...."), posicion="ad")
+        me = QTUtil2.analizando(self)
         mrm = xmotor.analiza(fen)
         mrm.tiempo = alm.tiempo / 1000.0
         mrm.depth = alm.depth

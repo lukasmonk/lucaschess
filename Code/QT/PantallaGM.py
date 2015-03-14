@@ -456,7 +456,7 @@ class WGM(QTVarios.WDialogo):
 
     def aperturasEditar(self):
         self.btApertura.setDisabled(True)  # Puede tardar bastante tiempo
-        me = QTUtil2.mensEspera.inicio(self, _("One moment please..."))
+        me = QTUtil2.unMomento(self)
         w = PantallaAperturas.WAperturas(self, self.configuracion, self.bloqueApertura)
         me.final()
         self.btApertura.setDisabled(False)

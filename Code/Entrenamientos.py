@@ -26,7 +26,7 @@ import Code.QT.PantallaBooks as PantallaBooks
 import Code.QT.DatosNueva as DatosNueva
 import Code.QT.QTVarios as QTVarios
 import Code.QT.PantallaAperturas as PantallaAperturas
-import Code.QT.PantallaNivel as PantallaNivel
+import Code.QT.PantallaDailyTest as PantallaDailyTest
 import Code.QT.PantallaBMT as PantallaBMT
 import Code.QT.PantallaPotencia as PantallaPotencia
 import Code.QT.PantallaPuente as PantallaPuente
@@ -143,8 +143,8 @@ class Entrenamientos():
 
         menu.separador()
 
-        # Nivel ------------------------------------------------------------------------------------------------
-        xopcion(menu, "nivel", _("Your daily test"), Iconos.Nivel())
+        # DailyTest ------------------------------------------------------------------------------------------------
+        xopcion(menu, "dailytest", _("Your daily test"), Iconos.DailyTest())
         menu.separador()
 
         # Resistencia ------------------------------------------------------------------------------------------
@@ -350,8 +350,8 @@ class Entrenamientos():
                 elif resp == "aperturas":
                     self.aperturas()
 
-                elif resp == "nivel":
-                    self.nivelAjedrez()
+                elif resp == "dailytest":
+                    self.dailyTest()
 
                 elif resp == "potencia":
                     self.potencia()
@@ -539,8 +539,8 @@ class Entrenamientos():
             self.procesador.gestor = GestorAperturas.GestorAperturas(self.procesador)
             self.procesador.gestor.inicio(listaAperturasStd, ficheroDatos, lista, fila, jugamos, repeticiones, 0)
 
-    def nivelAjedrez(self):
-        PantallaNivel.pantallaNivel(self.procesador)
+    def dailyTest(self):
+        PantallaDailyTest.dailyTest(self.procesador)
 
     def potencia(self):
         PantallaPotencia.pantallaPotencia(self.procesador)

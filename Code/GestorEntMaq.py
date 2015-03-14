@@ -787,6 +787,12 @@ class GestorEntMaq(Gestor.Gestor):
 
             if not siElegido and self.siTutorActivado:
                 self.analizaTutorFinal()
+                rmUser, n = self.mrmTutor.buscaRM(movimiento)
+                if not rmUser:
+                    rmUser = self.xtutor.valora(self.partida.ultPosicion, desde, hasta, coronacion)
+                    if not rmUser:
+                        return False
+                    self.mrmTutor.agregaRM(rmUser)
                 siAnalisis = True
                 pointsBest, pointsUser = self.mrmTutor.difPointsBest(movimiento)
                 self.setSummary("POINTSBEST", pointsBest)

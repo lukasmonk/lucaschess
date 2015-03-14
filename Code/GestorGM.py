@@ -149,9 +149,7 @@ class GestorGM(Gestor.Gestor):
         return self.mrm
 
     def analizaMinimo(self, minTime):
-        self.pensando(True)
         self.mrm = copy.deepcopy(self.xtutor.ac_minimo(minTime, False))
-        self.pensando(False)
         return self.mrm
 
     def analizaFinal(self):
@@ -277,7 +275,7 @@ class GestorGM(Gestor.Gestor):
         analisis = None
 
         # Peón coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
+        if not coronacion and posicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(posicion.siBlancas)
             if coronacion is None:
                 self.sigueHumano()
@@ -299,7 +297,7 @@ class GestorGM(Gestor.Gestor):
         if not isValid:
             self.tablero.ponPosicion(posicion)
             self.tablero.activaColor(self.siJugamosConBlancas)
-            liJugadas = self.motorGM.dameJugadasTXT(self.partida.ultPosicion, True)
+            liJugadas = self.motorGM.dameJugadasTXT(posicion, True)
             desdeGM, hastaGM, coronacionGM = PantallaGM.eligeJugada(self, liJugadas, True)
             siAnalizaJuez = self.siJuez
             if siAnalizaJuez:
@@ -320,20 +318,24 @@ class GestorGM(Gestor.Gestor):
         movUsu = jgUsu.pgnSP()
 
         if siAnalizaJuez:
-            self.pensando(True)
+            um = QTUtil2.analizando(self.pantalla)
             mrm = self.analizaMinimo(self.tiempo * 100)
 
             rmUsu, nada = mrm.buscaRM(jgUsu.movimiento())
             if rmUsu is None:
+                self.analizaFinal()
                 rmUsu = self.xtutor.valora(posicion, desde, hasta, coronacion)
                 mrm.agregaRM(rmUsu)
+                self.analizaInicio()
 
             rmGM, posGM = mrm.buscaRM(jgGM.movimiento())
             if rmGM is None:
+                self.analizaFinal()
                 rmGM = self.xtutor.valora(posicion, desdeGM, hastaGM, coronacionGM)
                 posGM = mrm.agregaRM(rmGM)
+                self.analizaInicio()
 
-            self.pensando(False)
+            um.final()
 
             analisis = mrm, posGM
             dpts = rmUsu.puntosABS() - rmGM.puntosABS()
@@ -370,6 +372,7 @@ class GestorGM(Gestor.Gestor):
         self.error = ""
         self.siguienteJugada()
         return True
+
     def mueveRival(self, move):
         desde = move[:2]
         hasta = move[2:4]

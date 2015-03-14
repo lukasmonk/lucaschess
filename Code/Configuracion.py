@@ -135,11 +135,11 @@ class Configuracion:
 
         self.tutorInicial = "stockfish"
         self.tutor = self.buscaRival(self.tutorInicial)
-        self.tutorMultiPV = 0 # 0: maximo
+        self.tutorMultiPV = 10 # 0: maximo
         self.tutorDifPts = 0
         self.tutorDifPorc = 0
 
-        self.tiempoTutor = 1000
+        self.tiempoTutor = 3000
 
         self.siSuenaBeep = False
         self.siSuenaNuestro = False
@@ -218,7 +218,7 @@ class Configuracion:
         self.ficheroEntAperturasPar = "%s/entaperturaspar.pkd" % self.carpeta
         self.ficheroPersAperturas = "%s/persaperturas.pkd" % self.carpeta
         self.ficheroAnalisis = "%s/paranalisis.pkd" % self.carpeta
-        self.ficheroNivel = "%s/nivel.pkd" % self.carpeta
+        self.ficheroDailyTest = "%s/nivel.pkd" % self.carpeta
         self.ficheroTemas = "%s/themes.pkd" % self.carpeta
         self.dirPersonalTraining = "%s/Personal Training" % self.carpeta
         self.ficheroBMT = "%s/lucas.bmt" % self.carpeta

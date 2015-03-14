@@ -216,7 +216,7 @@ class ConfigMotorBase:
 
     def actMultiPV(self, xMultiPV):
         if xMultiPV == "PD":
-            pass
+            self.multiPV = min(self.maxMultiPV, 10)
         elif xMultiPV == "MX":
             self.multiPV = self.maxMultiPV
         else:
@@ -225,7 +225,7 @@ class ConfigMotorBase:
                 self.multiPV = self.maxMultiPV
 
     def puedeSerTutor(self):
-        return self.multiPV >= 10
+        return self.maxMultiPV >= 10
 
 class ConfigMotor(ConfigMotorBase):
     def __init__(self, clave, autor, version, url, carpeta=None):
