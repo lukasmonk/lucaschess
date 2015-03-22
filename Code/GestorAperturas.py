@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 
 from Code.Constantes import *
@@ -185,7 +183,7 @@ class GestorAperturas(Gestor.Gestor):
             self.sigueHumano()
             return False
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:

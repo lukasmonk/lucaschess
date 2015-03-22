@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os.path
 import random
 import time
@@ -246,7 +244,7 @@ class WDailyTest(QTVarios.WDialogo):
         self.tablero.crea()
         self.tablero.ponMensajero(self.mueveHumano)
 
-        # Rotulos información
+        # Rotulos informacion
         self.lbColor = Controles.LB(self, "").ponWrap().anchoMinimo(200)
         self.lbJuego = Controles.LB(self, "").alinCentrado()
 
@@ -395,7 +393,7 @@ class WDailyTest(QTVarios.WDialogo):
 
         movimiento = desde + hasta
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.posicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.posicion.siBlancas)
             if coronacion is None:

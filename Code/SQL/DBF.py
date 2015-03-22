@@ -1,6 +1,5 @@
-# -*- coding: latin-1 -*-
 """
-Navegación por una tabla de datos mediante instrucciones tipo xBase.
+Navegacion por una tabla de datos mediante instrucciones tipo xBase.
 """
 
 import time
@@ -13,8 +12,8 @@ class Almacen:
 class DBF:
     """
     Permite acceder a una consulta de SQL, con un estilo dBase, haciendo una
-    lectura inicial completa de los rowids y luego moviéndose a través de los
-    mismos, y leyendo el registro actual, y asignándo los valores de los campos
+    lectura inicial completa de los rowids y luego moviendose a traves de los
+    mismos, y leyendo el registro actual, y asignando los valores de los campos
     a variables con el mismo nombre::
 
         import sqlite3 as sqlite
@@ -49,7 +48,7 @@ class DBF:
         @param conexion: recibe la conexion de la base de datos, crea con ella el cursor de trabajo
         @param ctabla: str tabla principal de la consulta
         @param select: str lista de campos separados por comas, como en un select sql
-        @param condicion: str condición
+        @param condicion: str condicion
         @param orden: str orden
         """
 
@@ -67,7 +66,7 @@ class DBF:
 
     def reccount(self):
         """
-        Devuelve el número total de registros.
+        Devuelve el numero total de registros.
         """
         return len(self.liIDs)
 
@@ -185,7 +184,7 @@ class DBF:
 
     def _leerUno(self, numRecno):
         """
-        Lectura de un registro, y asignación a las variables = campos.
+        Lectura de un registro, y asignacion a las variables = campos.
         """
         self.ID = self.liIDs[numRecno][0]
         self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % ( self.select, self.ctabla, self.ID ))
@@ -201,7 +200,7 @@ class DBF:
 
     def goto(self, numRecno):
         """
-        Nos sitúa en un registro concreto con la lectura de los campos.
+        Nos situa en un registro concreto con la lectura de los campos.
         """
         if numRecno < 0 or numRecno >= self.reccount():
             self.eof = True
@@ -222,7 +221,7 @@ class DBF:
     def rowid(self, numRecno):
         """
         Devuelve el id del registro numRecno.
-        @param numRecno: número de registro.
+        @param numRecno: numero de registro.
         """
         return self.liIDs[numRecno][0]
 
@@ -230,7 +229,7 @@ class DBF:
         """
         Busca el recno de un ID.
 
-        @param id: número de id.
+        @param id: numero de id.
         """
         for r in range(self.reccount()):
             if self.rowid(r) == id:
@@ -245,13 +244,13 @@ class DBF:
 
     def gotop(self):
         """
-        Salta al registro número 0.
+        Salta al registro numero 0.
         """
         return self.goto(0)
 
     def gobottom(self):
         """
-        Salta al registro último.
+        Salta al registro ultimo.
         """
         return self.goto(self.reccount() - 1)
 
@@ -524,7 +523,7 @@ class DBF:
 
     def copiaDBF(self):
         """
-        Se crea una copia completa del objeto, para hacer una lectura diferente, con los mismos datos básicos.
+        Se crea una copia completa del objeto, para hacer una lectura diferente, con los mismos datos basicos.
         """
 
         return DBF(self.conexion, self.ctabla, self.select, self.condicion, self.orden)
@@ -576,8 +575,8 @@ class DBF:
 class DBFT(DBF):
     """
     Permite acceder a una consulta de SQL, con un estilo dBase, haciendo una
-    lectura inicial completa de todos los datos y luego moviéndose a través
-    de los mismos, y leyendo el registro actual, y asignándo los valores de
+    lectura inicial completa de todos los datos y luego moviendose a traves
+    de los mismos, y leyendo el registro actual, y asignando los valores de
     los campos a variables con el mismo nombre.
     """
 
@@ -587,7 +586,7 @@ class DBFT(DBF):
 
     def reccount(self):
         """
-        Devuelve el número total de registros.
+        Devuelve el numero total de registros.
         """
         return len(self.liRows)
 
@@ -616,7 +615,7 @@ class DBFT(DBF):
 
     def _leerUno(self, numRecno):
         """
-        Lectura de un registro, y asignación a las variables = campos.
+        Lectura de un registro, y asignacion a las variables = campos.
         """
         liValores = self.liRows[numRecno]
         for numCampo, campo in enumerate(self.liCampos):
@@ -625,13 +624,13 @@ class DBFT(DBF):
     def rowid(self, numRecno):
         """
         Devuelve el id del regitro numRecno.
-        @param numRecno: número de registro.
+        @param numRecno: numero de registro.
         """
         return self.liRows[numRecno][0]
 
     def copiaDBF(self):
         """
-        Se crea una copia completa del objeto, para hacer una lectura diferente, con los mismos datos básicos.
+        Se crea una copia completa del objeto, para hacer una lectura diferente, con los mismos datos basicos.
         """
 
         return DBFT(self.conexion, self.ctabla, self.select, self.condicion, self.orden)

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 
 from PyQt4 import QtCore, QtGui
@@ -17,7 +15,7 @@ import Code.QT.QTUtil as QTUtil
 
 def lanzaGUI(procesador):
     """
-    Lanzador del interfaz gráfico de la aplicación.
+    Lanzador del interfaz grafico de la aplicacion.
     """
 
     # Comprobamos el lenguaje
@@ -122,7 +120,7 @@ class WPassword(QtGui.QDialog):
         return usuario if self.edP.texto().strip() == usuario.password else None
 
 def pideUsuario(liUsuarios):
-    # Miramos si alguno tiene clave, si es así, lanzamos ventana
+    # Miramos si alguno tiene clave, si es asi, lanzamos ventana
     siPass = False
     for usuario in liUsuarios:
         if usuario.password:
@@ -144,7 +142,7 @@ def pideUsuario(liUsuarios):
         if len(liUsuarios) == 1:
             usuario = liUsuarios[0]
         else:
-            menu = Controles.Menu(None)  # No puede ser LCmenu, ya que todavía no existe la configuración
+            menu = Controles.Menu(None)  # No puede ser LCmenu, ya que todavia no existe la configuracion
             menu.separador()
 
             for usuario in liUsuarios:

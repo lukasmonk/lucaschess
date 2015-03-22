@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from Code.Constantes import *
 
 import Code.VarGen as VarGen

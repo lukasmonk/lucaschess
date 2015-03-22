@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import time
 import os
 import random
@@ -291,4 +289,4 @@ class Gestor60(Gestor.Gestor):
         self.pantalla.base.pgn.goto(fila, 0)
 
     def pgnInformacion(self, fila, clave):
-        pass  # Para anular el efecto del botón derecho
+        pass  # Para anular el efecto del boton derecho

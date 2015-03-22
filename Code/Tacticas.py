@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import os
 import codecs
 import random
@@ -326,7 +325,7 @@ class Tactica(BaseTactica):
 
         numPuzzles = len(liFNS)
 
-        # Deteminamos la lista índice con el orden de cada fen en liFNS
+        # Deteminamos la lista indice con el orden de cada fen en liFNS
         liJUMPS = self.JUMPS
 
         li = [None] * (len(liJUMPS) * 2 * numPuzzles)  # Creamos un list muy grande, mayor del que vamos a usar

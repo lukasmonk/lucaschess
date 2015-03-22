@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 import time
 import atexit
@@ -392,7 +390,7 @@ class WHorses(QTVarios.WDialogo):
             self.reiniciar()
 
     def reiniciar(self):
-        # Si no está en la posición actual, le lleva a la misma
+        # Si no esta en la posicion actual, le lleva a la misma
         pa = self.posTemporal
         pi = self.camino[0 if self.baseUnica else self.posActual]
 

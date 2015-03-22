@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 class JuegaAperturaStd:
     def __init__(self, bloque):
         self.bloque = bloque

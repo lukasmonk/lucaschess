@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtCore, QtGui
 
 import Code.VarGen as VarGen

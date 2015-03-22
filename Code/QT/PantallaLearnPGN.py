@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import time
 
 from PyQt4 import QtGui, QtCore
@@ -64,7 +62,7 @@ class WLearnBase(QTVarios.WDialogo):
         def creaCol(clave, rotulo, siCentrado=True):
             oColumnas.nueva(clave, rotulo, 80, siCentrado=siCentrado)
 
-        # # Claves según orden estandar
+        # # Claves segun orden estandar
         liBasic = ("EVENT", "SITE", "DATE", "ROUND", "WHITE", "BLACK", "RESULT", "ECO", "FEN", "WHITEELO", "BLACKELO" )
         for clave in liBasic:
             rotulo = TrListas.pgnLabel(clave)
@@ -157,7 +155,7 @@ class WLearn1(QTVarios.WDialogo):
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("DATE", _("Date"), 80, siCentrado=True)
         oColumnas.nueva("LEVEL", _("Level"), 80, siCentrado=True)
-        oColumnas.nueva("COLOR", _("Color"), 80, siCentrado=True)
+        oColumnas.nueva("COLOR", _("Play with"), 80, siCentrado=True)
         oColumnas.nueva("ERRORS", _("Errors"), 80, siCentrado=True)
         oColumnas.nueva("HINTS", _("Hints"), 80, siCentrado=True)
         oColumnas.nueva("TIME", _("Time"), 80, siCentrado=True)
@@ -492,7 +490,7 @@ class WLearnPuente(QTVarios.WDialogo):
 
         jg = self.partida.jugada(self.movActual)
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and jg.posicionBase.siPeonCoronando(desde, hasta):
             coronacion = self.tableroIni.peonCoronando(jg.posicionBase.siBlancas)
             if coronacion is None:

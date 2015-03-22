@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # This code is a translation to python from pg_key.c and pg_show.c released in the public domain by Michel Van den Bergh.
 # http://alpha.uhasselt.be/Research/Algebra/Toga
 
@@ -215,7 +214,7 @@ class Libro:
         elif nli == 1:
             return li[0].pv()
 
-        elif tipo == "mp":  # Mejor posición
+        elif tipo == "mp":  # Mejor posicion
             for entry in li:
                 w = entry.weight
                 if w > maxim:

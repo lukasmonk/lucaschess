@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import copy
 import codecs
@@ -88,7 +86,7 @@ class WTV_SVG(QtGui.QDialog):
         # Datos generales
         liGen = []
 
-        # nombre del svg que se usará en los menús del tutorial
+        # nombre del svg que se usara en los menus del tutorial
         config = FormLayout.Editbox(_("Name"), ancho=120)
         liGen.append((config, regSVG.nombre ))
 

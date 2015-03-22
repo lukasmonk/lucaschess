@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import copy
 import codecs
@@ -65,7 +63,7 @@ class WElegir(QTVarios.WDialogo):
         self.siElegir = siElegir
         self.gestor = gestor
         self.dClaves = dClaves = copy.deepcopy(dClaves)
-        self.seHaBorradoAlgo = False  # Para que se haga un touch antiguo al DB y lo regenere la próxima vez
+        self.seHaBorradoAlgo = False  # Para que se haga un touch antiguo al DB y lo regenere la proxima vez
         siRepite = estado is not None
         if siRepite:
             self.estado = estado
@@ -92,9 +90,9 @@ class WElegir(QTVarios.WDialogo):
             tam = max(dClaves[clave], len(rotulo), 11)
             oColumnas.nueva(clave, rotulo, tam * 6, siCentrado=siCentrado)
 
-        # # Claves según orden estandar
+        # # Claves segun orden estandar
         liBasic = ("EVENT", "SITE", "DATE", "ROUND", "WHITE", "BLACK", "RESULT", "ECO", "FEN", "WHITEELO", "BLACKELO" )
-        self.liOrdenClaves = []  # nos servira´en el exterior, para paste pgn y para mostrar info
+        self.liOrdenClaves = []  # nos servira en el exterior, para paste pgn y para mostrar info
         for clave in liBasic:
             if clave in dClaves:
                 rotulo = TrListas.pgnLabel(clave)
@@ -404,7 +402,7 @@ class WElegir(QTVarios.WDialogo):
 
         liJugadores = jugador.upper().split(";") if jugador else None
 
-        # Se crea el objeto de ejecución
+        # Se crea el objeto de ejecucion
         fgm = GM.FabGM(self.gestor.configuracion, nombre, liJugadores)
 
         # Se pasan todas las partidas

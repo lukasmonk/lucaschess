@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 """
 formlayout adapted to Lucas Chess
 =================================
@@ -165,10 +164,14 @@ class LBotonFichero(QtGui.QHBoxLayout):
     def __init__(self, parent, config, fichero):
         QtGui.QHBoxLayout.__init__(self)
 
+        if config.liHistorico and not config.ficheroDefecto:
+            config.ficheroDefecto = os.path.dirname(config.liHistorico[0])
+
         self.boton = BotonFichero(fichero, config.extension, config.siSave, config.siRelativo, config.anchoMinimo,
                                   config.ficheroDefecto)
         btCancelar = Controles.PB(parent, "", self.cancelar)
         btCancelar.ponIcono(Iconos.Delete()).anchoFijo(16)
+        self.parent = parent
 
         self.addWidget(self.boton)
         self.addWidget(btCancelar)
@@ -181,7 +184,7 @@ class LBotonFichero(QtGui.QHBoxLayout):
 
     def historico(self):
         if self.liHistorico:
-            menu = Controles.Menu(self, puntos=8)
+            menu = Controles.Menu(self.parent, puntos=8)
             menu.setToolTip(_("To choose: <b>left button</b> <br>To erase: <b>right button</b>"))
             for fichero in self.liHistorico:
                 menu.opcion( fichero, fichero, Iconos.PuntoAzul())
@@ -191,7 +194,7 @@ class LBotonFichero(QtGui.QHBoxLayout):
                 if menu.siIzq:
                     self.boton.ponFichero(resp)
                 elif menu.siDer:
-                    if QTUtil2.pregunta(self, _("Do you want to remove file %s from the list?")%resp):
+                    if QTUtil2.pregunta(self.parent, _("Do you want to remove file %s from the list?")%resp):
                         del self.liHistorico[self.liHistorico.index(resp)]
 
     def cancelar(self):
@@ -496,7 +499,7 @@ class FormWidget(QtGui.QWidget):
                     field.setAlignment(QtCore.Qt.AlignRight)
                     field.setFixedWidth(40)
 
-                # Número
+                # Numero
                 elif isinstance(value, int):
                     field = QtGui.QSpinBox(self)
                     field.setMaximum(9999)

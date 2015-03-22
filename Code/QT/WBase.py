@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtCore, QtGui
 
 from Code.Constantes import *
@@ -138,11 +136,11 @@ class WBase(QtGui.QWidget):
         f = Controles.TipoLetra(puntos=12)
         self.lbCredito = Controles.LB(self, _("Available hints") + " :   ").alinCentrado().ponFuente(f)
 
-        ## Botón de tutor activo
+        ## Boton de tutor activo
         self.btActivarTutor = Controles.PB(self, "", rutina=self.cambiaSiActivarTutor,
                                            plano=False)  #.anchoFijo( nAnchoPgn )
 
-        ## Rótulos de información
+        ## Rotulos de informacion
         f = Controles.TipoLetra(puntos=self.gestor.configuracion.tamFontRotulos)
         self.lbRotulo1 = Controles.LB(self).ponWrap().ponFuente(f)
         self.lbRotulo2 = Controles.LB(self).ponWrap().ponFuente(f)
@@ -436,7 +434,7 @@ class WBase(QtGui.QWidget):
 
     def gridPonValor(self, grid, fila, oColumna, valor):
         """
-        Al añadir los editores, pasa por aquí
+        Al a_adir los editores, pasa por aqui
         """
         pass
         # ~ #--------------------------------------------------------------------------------------------------------------------------------

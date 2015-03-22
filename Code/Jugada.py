@@ -1,6 +1,6 @@
-# -*- coding: latin-1 -*-
 import cPickle
 
+import Code.VarGen as VarGen
 import Code.ControlPosicion as ControlPosicion
 import Code.TrListas as TrListas
 
@@ -28,7 +28,7 @@ class Jugada:
         self.siTablasAcuerdo = False
         self.siTablasFaltaMaterial = False
         self.siAbandono = NOABANDONO
-        self.siDesconocido = False  # Si ha sido una terminación de partida, por causas desconocidas
+        self.siDesconocido = False  # Si ha sido una terminacion de partida, por causas desconocidas
         self.pgnBase = posicionBase.pgn(desde, hasta, coronacion)
         self.liMovs = [( "b", hasta ), ( "m", desde, hasta )]
         if self.posicion.liExtras:
@@ -199,10 +199,10 @@ class Jugada:
 
     def guardaEnTexto(self):
         def mas(c):
-            return c + "·"
+            return c + VarGen.XSEP
 
         def masL(si):
-            return ("S" if si else "N") + "·"
+            return ("S" if si else "N") + VarGen.XSEP
 
         txt = ""
         txt += mas(self.posicionBase.fen())
@@ -233,7 +233,7 @@ class Jugada:
 
     def recuperaDeTexto(self, txt):
 
-        li = txt.split("·")
+        li = txt.split(VarGen.XSEP)
 
         def xL(num):
             return li[num] == "S"
@@ -285,7 +285,7 @@ class Jugada:
         elif self.siAhogado:
             mas = "Ahogado"
         elif self.siTablasRepeticion:
-            mas = "Tablas por repetición"
+            mas = "Tablas por repeticion"
         elif self.siTablasAcuerdo:
             mas = "Tablas por acuerdo"
         else:

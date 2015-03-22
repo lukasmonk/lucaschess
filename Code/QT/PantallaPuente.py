@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 import time
 import atexit
@@ -353,8 +351,8 @@ class WPuenteBase(QTVarios.WDialogo):
         self.tb.update()
 
     def dameOtro(self):
-        partida, dicPGN, info, jugadaInicial = PantallaPotencia.leeLineaMFN()
-        # Tenemos 10 jugadas válidas desde jugadaInicial
+        partida, dicPGN, info, jugadaInicial, linea = PantallaPotencia.leeLineaMFN()
+        # Tenemos 10 jugadas validas desde jugadaInicial
         n = random.randint(jugadaInicial, jugadaInicial + 10 - self.nivel)
         fenIni = partida.jugada(n).posicionBase.fen()
         liMV = []
@@ -403,7 +401,7 @@ class WPuente(QTVarios.WDialogo):
         cpFin.leeFen(fenFin)
         self.tableroFin = Tablero.TableroEstatico(self, confTablero)
         self.tableroFin.crea()
-        self.tableroFin.ponerPiezasAbajo(siBlancas)  # está bien
+        self.tableroFin.ponerPiezasAbajo(siBlancas)  # esta bien
         self.tableroFin.ponPosicion(cpFin)
 
         # Rotulo informacion
@@ -516,7 +514,7 @@ class WPuente(QTVarios.WDialogo):
 
         cpFin = ControlPosicion.ControlPosicion()
         cpFin.leeFen(fenFin)
-        self.tableroFin.ponerPiezasAbajo(siBlancas)  # está bien
+        self.tableroFin.ponerPiezasAbajo(siBlancas)  # esta bien
         self.tableroFin.ponPosicion(cpFin)
 
         # Rotulo informacion

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtCore, QtGui
 
 class BloqueEspSC(QtGui.QGraphicsItem):

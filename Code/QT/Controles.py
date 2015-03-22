@@ -1,8 +1,3 @@
-# -*- coding: latin-1 -*-
-"""
-Clases para el manejo de los controles de una forma más sencilla.
-"""
-
 # import datetime
 
 from PyQt4 import QtCore, QtGui
@@ -57,7 +52,7 @@ from PyQt4 import QtCore, QtGui
 
 class ED(QtGui.QLineEdit):
     """
-    Control de entrada de texto en una línea.
+    Control de entrada de texto en una linea.
     """
 
     def __init__(self, parent, texto=None):
@@ -128,22 +123,22 @@ class ED(QtGui.QLineEdit):
 
     def anchoMinimo(self, tam):
         """
-        Ancho mínimo en pixeles
+        Ancho minimo en pixeles
         """
         self.setMinimumWidth(tam)
         return self
 
     def anchoMaximo(self, tam):
         """
-        Ancho máximo en pixeles
+        Ancho maximo en pixeles
         """
         self.setMaximumWidth(tam)
         return self
 
     def caracteres(self, num):
         """
-        Número máximo de caracteres.
-        @param num: número de caracteres máximo que puede contener.
+        Numero maximo de caracteres.
+        @param num: numero de caracteres maximo que puede contener.
         """
         self.setMaxLength(num)
         self.numCaracteres = num
@@ -152,14 +147,14 @@ class ED(QtGui.QLineEdit):
     def anchoFijo(self, tam):
         """
         Ancho fijo del campo.
-        @param tam: tamaño en pixeles.
+        @param tam: tama_o en pixeles.
         """
         self.setFixedWidth(tam)
         return self
 
     def controlrx(self, regexpr):
         """
-        Valida los caracteres introducidos en base a una expresión regular
+        Valida los caracteres introducidos en base a una expresion regular
         """
         rx = QtCore.QRegExp(regexpr)
         validator = QtGui.QRegExpValidator(rx, self)
@@ -182,8 +177,8 @@ class ED(QtGui.QLineEdit):
         """
         Valida los caracteres suponiendo que es un tipo decimal con unas condiciones
         @param valor: valor inicial
-        @param desde: valor mínimo
-        @param hasta: valor máximo
+        @param desde: valor minimo
+        @param hasta: valor maximo
         @param decimales: num. decimales
         """
         if desde is None:
@@ -198,7 +193,7 @@ class ED(QtGui.QLineEdit):
 
     def ponFloat(self, valor):
         """
-        Pone el número decimal en el campo
+        Pone el numero decimal en el campo
         """
         fm = "%0." + str(self.decimales) + "f"
         self.ponTexto(fm % valor)
@@ -206,7 +201,7 @@ class ED(QtGui.QLineEdit):
 
     def textoFloat(self):
         """
-        Recupera el número decimal del campo.
+        Recupera el numero decimal del campo.
         """
         txt = self.text()
         return round(float(txt), self.decimales) if txt else 0.0
@@ -223,7 +218,7 @@ class ED(QtGui.QLineEdit):
 
     def ponInt(self, valor):
         """
-        Pone el número entero en el campo
+        Pone el numero entero en el campo
         """
         self.ponTexto(str(valor))
         return self
@@ -237,14 +232,14 @@ class ED(QtGui.QLineEdit):
 
 class SB(QtGui.QSpinBox):
     """
-    SpinBox: Entrada de números enteros, con control de incremento o reducción
+    SpinBox: Entrada de numeros enteros, con control de incremento o reduccion
     """
 
     def __init__(self, parent, valor, desde, hasta):
         """
         @param valor: valor inicial
-        @param desde: límite inferior
-        @param hasta: límite superior
+        @param desde: limite inferior
+        @param hasta: limite superior
         """
         QtGui.QSpinBox.__init__(self, parent)
         self.setRange(desde, hasta)
@@ -253,7 +248,7 @@ class SB(QtGui.QSpinBox):
 
     def tamMaximo(self, maxTam):
         """
-        Tamaño máximo del campo en pixeles
+        Tama_o maximo del campo en pixeles
         """
         self.setFixedWidth(maxTam)
         return self
@@ -283,7 +278,7 @@ class CB(QtGui.QComboBox):
 
     def valor(self):
         """
-        Devuelve la clave de la opción elegida
+        Devuelve la clave de la opcion elegida
         """
         return self.itemData(self.currentIndex())
 
@@ -339,7 +334,7 @@ class CHB(QtGui.QCheckBox):
 
     def __init__(self, parent, etiqueta, valorInicial):
         """
-        @param etiqueta: rótulo mostrado
+        @param etiqueta: rotulo mostrado
         @param valorInicial: valor inicial : True/False
         """
         QtGui.QCheckBox.__init__(self, etiqueta, parent)
@@ -432,14 +427,14 @@ class LB(QtGui.QLabel):
 
     def anchoMinimo(self, tam):
         """
-        Ancho mínimo del campo.
+        Ancho minimo del campo.
         """
         self.setMinimumWidth(tam)
         return self
 
     def altoMinimo(self, tam):
         """
-        Alto mínimo del campo.
+        Alto minimo del campo.
         """
         self.setMinimumHeight(tam)
         return self
@@ -503,14 +498,14 @@ def LB2P(parent, texto):
 
 class PB(QtGui.QPushButton):
     """
-    Botón.
+    Boton.
     """
 
     def __init__(self, parent, texto, rutina=None, plano=True):
         """
         @param parent: ventana propietaria, necesario para conectar una rutina.
         @param texto: etiqueta inicial.
-        @param rutina: rutina a la que se conecta el botón.
+        @param rutina: rutina a la que se conecta el boton.
         """
         QtGui.QPushButton.__init__(self, texto, parent)
         self.wParent = parent
@@ -552,7 +547,7 @@ class PB(QtGui.QPushButton):
 
     def anchoMinimo(self, tam):
         """
-        Ancho mínimo del campo.
+        Ancho minimo del campo.
         """
         self.setMinimumWidth(tam)
         return self
@@ -635,7 +630,7 @@ class GB(QtGui.QGroupBox):
 
 class EM(QtGui.QTextEdit):
     """
-    Control de entrada de texto en varias líneas.
+    Control de entrada de texto en varias lineas.
     """
 
     def __init__(self, parent, texto=None, siHTML=True):
@@ -645,7 +640,7 @@ class EM(QtGui.QTextEdit):
         QtGui.QTextEdit.__init__(self, parent)
         self.parent = parent
 
-        self.menu = None  # menú de contexto
+        self.menu = None  # menu de contexto
         self.rutinaDobleClick = None
 
         self.setAcceptRichText(siHTML)
@@ -665,14 +660,14 @@ class EM(QtGui.QTextEdit):
 
     def insertarHtml(self, texto):
         """
-        Inserta un texto en la posición del cursor.
+        Inserta un texto en la posicion del cursor.
         """
         self.insertHtml(texto)
         return self
 
     def insertarTexto(self, texto):
         """
-        Inserta un texto en la posición del cursor.
+        Inserta un texto en la posicion del cursor.
         """
         self.insertPlainText(texto)
         return self
@@ -708,21 +703,21 @@ class EM(QtGui.QTextEdit):
 
     def anchoMinimo(self, tam):
         """
-        Ancho mínimo del campo.
+        Ancho minimo del campo.
         """
         self.setMinimumWidth(tam)
         return self
 
     def altoMinimo(self, tam):
         """
-        Alto mínimo del campo.
+        Alto minimo del campo.
         """
         self.setMinimumHeight(tam)
         return self
 
     def altoFijo(self, tam):
         """
-        Alto mínimo del campo.
+        Alto minimo del campo.
         """
         self.setFixedHeight(tam)
         return self
@@ -853,8 +848,8 @@ class TB(QtGui.QToolBar):
 
     @param liAcciones: lista de acciones, en forma de tupla = titulo, icono, clave
     @param siTexto: si muestra texto
-    @param tamIcon: tamaño del icono
-    @param rutina: rutina que se llama al pulsar una opción. Por defecto será parent.procesarTB().
+    @param tamIcon: tama_o del icono
+    @param rutina: rutina que se llama al pulsar una opcion. Por defecto sera parent.procesarTB().
         Y la clave enviada se obtiene de self.sender().clave
     """
 
@@ -924,8 +919,8 @@ class TBrutina(QtGui.QToolBar):
 
     @param liAcciones: lista de acciones, en forma de tupla = titulo, icono, clave
     @param siTexto: si muestra texto
-    @param tamIcon: tamaño del icono
-    @param rutina: rutina que se llama al pulsar una opción. Por defecto será parent.procesarTB().
+    @param tamIcon: tama_o del icono
+    @param rutina: rutina que se llama al pulsar una opcion. Por defecto sera parent.procesarTB().
         Y la clave enviada se obtiene de self.sender().clave
     """
 

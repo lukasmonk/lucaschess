@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import collections
 
 from Code.Constantes import *
@@ -183,7 +181,9 @@ class ControlPGN:
             negras = jugador
         hoy = Util.hoy()
         resp = '[Event "%s"]\n' % _("Lucas Chess")
-        # ~ Site (lugar): el lugar donde el evento se llevó a cabo. Esto debe ser en formato "Ciudad, Región PAÍS", donde PAÍS es el código del mismo en tres letras de acuerdo a l código del Comité Olímpico Internacional. Cómo ejemplo: "México, D.F. MEX".
+        # ~ Site (lugar): el lugar donde el evento se llevo a cabo.
+        # Esto debe ser en formato "Ciudad, Region PAIS", donde PAIS es el codigo del mismo
+        # en tres letras de acuerdo al codigo del Comite Olimpico Internacional. Como ejemplo: "Mexico, D.F. MEX".
         resp += '[Date "%d.%02d.%02d"]\n' % (hoy.year, hoy.month, hoy.day)
         #~ Round (ronda): La ronda original de la partida.
         resp += '[White "%s"]\n' % blancas

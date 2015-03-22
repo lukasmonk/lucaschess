@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import os
 
 from PyQt4 import QtGui
@@ -30,7 +29,7 @@ class InformacionPGN(QtGui.QWidget):
         self.lbApertura = Controles.LB(self, "").ponFuente(f).alinCentrado().ponColorFondoN("#eeeeee", "#474d59").ponWrap()
         self.lbApertura.hide()
 
-        # Valoración
+        # Valoracion
         liOpciones = [("-", "-")]
         dicNAGs = TrListas.dicNAGs()
 

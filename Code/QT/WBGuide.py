@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtGui, QtCore
 
 import Code.BookGuide as BookGuide

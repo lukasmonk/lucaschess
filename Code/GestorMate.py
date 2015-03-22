@@ -1,7 +1,4 @@
-# -*- coding: latin-1 -*-
-
 import time
-# import random
 
 from Code.Constantes import *
 

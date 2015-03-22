@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.QT.QTVarios as QTVarios
 import Code.QT.Colocacion as Colocacion
 import Code.QT.Iconos as Iconos

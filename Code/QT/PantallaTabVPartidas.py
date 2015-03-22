@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.VarGen as VarGen
 
 import Code.PGN as PGN

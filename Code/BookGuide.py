@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import atexit
 import sqlite3
 import os

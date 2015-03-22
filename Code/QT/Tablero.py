@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import copy
 import os
 import collections
@@ -67,7 +65,7 @@ class Tablero(QtGui.QGraphicsView):
 
         self.siF11 = False
 
-        self._dispatchSize = None  # configuración en vivo, dirige a la rutina de la pantalla afectada
+        self._dispatchSize = None  # configuracion en vivo, dirige a la rutina de la pantalla afectada
 
         self.pendingRelease = None
 
@@ -90,7 +88,7 @@ class Tablero(QtGui.QGraphicsView):
                     desde = self.liMouse[-1]
                     hasta = None
 
-                # Miramos si están las F1..F10
+                # Miramos si estan las F1..F10
                 # Sino las creamos
                 self.lanzaFuncion(f - 1, desde, hasta)
             self.init_kb_buffer()
@@ -610,7 +608,6 @@ class Tablero(QtGui.QGraphicsView):
             li.sort(key=lambda x: x[0])
             for x, ico in li:
                 menup.opcion(x, x, ico)
-                menup.separador()
             resp = menup.lanza()
             if resp:
                 self.cambiaPiezas(resp)
@@ -892,7 +889,7 @@ class Tablero(QtGui.QGraphicsView):
             dbSVGs.close()
 
         if QtGui.QApplication.keyboardModifiers() == QtCore.Qt.ControlModifier:
-            if func == 0:  # ^F1 elimina el último movible
+            if func == 0:  # ^F1 elimina el ultimo movible
                 li = self.dicMovibles.keys()
                 if li:
                     self.borraMovible(self.dicMovibles[li[-1]])
@@ -1211,7 +1208,7 @@ class Tablero(QtGui.QGraphicsView):
         if self.flechaSC is None:
             self.flechaSC = self.creaFlechaSC(a1h8)
         self.flechaSC.show()
-        # self.ultMovFlecha = (desdeA1h8, hastaA1h8) # Lo usamos si se cambia la posición del tablero
+        # self.ultMovFlecha = (desdeA1h8, hastaA1h8) # Lo usamos si se cambia la posicion del tablero
         self.flechaSC.ponA1H8(a1h8)
         self.flechaSC.update()
 
@@ -1583,7 +1580,7 @@ class Tablero(QtGui.QGraphicsView):
             self.escena.removeItem(uno)
         self.dicMovibles = collections.OrderedDict()
 
-    def bloqueaRotacion(self, siBloquea):  # se usa en la presentación para que no rote
+    def bloqueaRotacion(self, siBloquea):  # se usa en la presentacion para que no rote
         self.siPosibleRotarTablero = not siBloquea
 
     def dispatchSize(self, rutinaControl):
@@ -1676,7 +1673,7 @@ class WTamTablero(QtGui.QDialog):
         return ap if ap in ( 80, 64, 48, 32, 24, 16 ) else 0
 
     def colocate(self):
-        self.show()  # Necesario para que calcule bien el tamaño antes de colocar
+        self.show()  # Necesario para que calcule bien el tama_o antes de colocar
         pos = self.tablero.parent().mapToGlobal(self.tablero.pos())
 
         y = pos.y() - self.frameGeometry().height()

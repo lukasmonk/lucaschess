@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import random
 import datetime
 import Code.SQL.Base as SQLBase

@@ -1,15 +1,12 @@
-# -*- coding: latin-1 -*-
-"""
-Se establecen las clases Columna y ListaColumnas, que controlan las columnas en las vistas de registros
-"""
-
 import copy
 
 from PyQt4 import QtCore, QtGui
 
+import Code.VarGen as VarGen
+
 class Columna:
     """
-    Definición de cada columna del grid.
+    Definicion de cada columna del grid.
     """
 
     def __init__(self, clave, cabecera, ancho=100, siCentrado=False, siDerecha=False, rgbTexto=None, rgbFondo=None,
@@ -19,15 +16,15 @@ class Columna:
         @param clave: referencia de la columna.
         @param cabecera: texto mostrado en el grid como cabecera.
         @param ancho: anchura en pixels.
-        @param siCentrado: alineación
-        @param siDerecha: alineación, se ha diferenciado la alineación, para que al definir
-            columnas sea más fácilmente visible el tipo de alineación, cuando no es a la izquierda.
+        @param siCentrado: alineacion
+        @param siDerecha: alineacion, se ha diferenciado la alineacion, para que al definir
+            columnas sea mas facilmente visible el tipo de alineacion, cuando no es a la izquierda.
         @param rgbTexto: color del texto como un entero.
         @param rgbFondo: color de fondo.
         @param siOrden: si se puede ordenar por este campo
         @param estadoOrden: indica cual es el orden inicial de la columna  -1 Desc, 0 No, 1 Asc
-        @param edicion: objeto delegate usado para la edición de los campos de esta columna
-        @param siEditable: este parámetro se usa cuando aunque la columna tiene un delegate asociado para mostrarla, sin embargo no es editable.
+        @param edicion: objeto delegate usado para la edicion de los campos de esta columna
+        @param siEditable: este parametro se usa cuando aunque la columna tiene un delegate asociado para mostrarla, sin embargo no es editable.
         @param siMostrar: si se muestra o no.
         @param siChecked: si es un campo de chequeo.
         """
@@ -61,7 +58,7 @@ class Columna:
         self.siMostrarDef = self.siMostrar = siMostrar
         self.siChecked = siChecked
 
-        # Por defecto no es una fórmula
+        # Por defecto no es una formula
         self.siFormula = False
         self.formula = ""
         self.siFormExec = False
@@ -78,7 +75,7 @@ class Columna:
 
     def porDefecto(self):
         """
-        Pone la configuración de la columna en sus valores por defecto.
+        Pone la configuracion de la columna en sus valores por defecto.
         """
         if not self.siFormula:
             self.cabecera = self.cabeceraDef
@@ -89,7 +86,7 @@ class Columna:
 
     def QTalineacion(self, alin):
         """
-        Convierte un parámetro de alineación para que sea usable por QT
+        Convierte un parametro de alineacion para que sea usable por QT
         """
         if alin == "c":
             qtalin = QtCore.Qt.AlignCenter
@@ -102,7 +99,7 @@ class Columna:
 
     def QTcolorTexto(self, rgb):
         """
-        Convierte un parámetro de color del texto para que sea usable por QT
+        Convierte un parametro de color del texto para que sea usable por QT
         """
         if rgb == -1:
             return None
@@ -111,7 +108,7 @@ class Columna:
 
     def QTcolorFondo(self, rgb):
         """
-        Convierte un parámetro de color del fondo para que sea usable por QT
+        Convierte un parametro de color del fondo para que sea usable por QT
         """
         if rgb == -1:
             return None
@@ -119,16 +116,16 @@ class Columna:
             return QtGui.QBrush(QtGui.QColor(rgb))
 
     def ponFormula(self, formula):
-        self.formula = formula.strip().replace("·", ".")
+        self.formula = formula.strip().replace(VarGen.XSEP, ".")
         self.siFormExec = "\n" in self.formula
         if self.siFormExec:
             self.formula = self.formula.replace("\r\n", "\n")
 
     def guardarConf(self, dic, grid):
         """
-        Guarda los valores actuales de configuración de la columna.
+        Guarda los valores actuales de configuracion de la columna.
 
-        @param dic: diccionario con los datos del módulo al que pertenece la columna.
+        @param dic: diccionario con los datos del modulo al que pertenece la columna.
         """
 
         id = grid.id
@@ -141,7 +138,7 @@ class Columna:
 
             dic[k] = v
 
-        x("CABECERA", self.cabecera)  # Traducción
+        x("CABECERA", self.cabecera)  # Traduccion
         x("ANCHO", str(self.ancho))
         x("ALINEACION", self.alineacion)
         x("RGBTEXTO", str(self.rgbTexto))
@@ -152,16 +149,16 @@ class Columna:
 
         if self.siFormula:
             if self.siFormExec:
-                form = self.formula.replace("\n", "·")
+                form = self.formula.replace("\n", VarGen.XSEP)
                 x("FORMULA", form)
             else:
                 x("FORMULA", self.formula)
 
     def recuperarConf(self, dic, grid):
         """
-        Recupera los valores de configuración de la columna.
+        Recupera los valores de configuracion de la columna.
 
-        @param dic: diccionario con los datos del módulo al que pertenece la columna.
+        @param dic: diccionario con los datos del modulo al que pertenece la columna.
         """
         id = grid.id
 
@@ -177,7 +174,7 @@ class Columna:
                     v = v == "S"
                 setattr(self, varInt, v)
 
-        # x( "CABECERA", self.cabecera ) # Traducción, se pierde si no
+        # x( "CABECERA", self.cabecera ) # Traduccion, se pierde si no
         x("ANCHO", "ancho", "n")
         # x( "ALINEACION", "alineacion" )
         x("RGBTEXTO", "rgbTexto", "n")
@@ -190,16 +187,16 @@ class Columna:
         self.ponQT()
 
         if self.siFormula:
-            if "·" in self.formula:
-                self.formula = self.formula.replace("·", "\n")
+            if VarGen.XSEP in self.formula:
+                self.formula = self.formula.replace(VarGen.XSEP, "\n")
             self.ponFormula(self.formula)
 
         return self
 
     def evalua(self, dicLocals, siError=False):
         """
-        Hace el cálculo cuando se trata de columnas calculadas.
-        @param dicLocals: diccionario con las variables (+sus valores) utilizados en la fórmula.
+        Hace el calculo cuando se trata de columnas calculadas.
+        @param dicLocals: diccionario con las variables (+sus valores) utilizados en la formula.
         @param siError: si devuelve un mensaje de error, utilizable en las comprobaciones.
         """
         try:
@@ -219,7 +216,7 @@ class Columna:
 
 class ListaColumnas:
     """
-    Almacena la configuración de columnas como un bloque.
+    Almacena la configuracion de columnas como un bloque.
     """
 
     def __init__(self):
@@ -229,20 +226,20 @@ class ListaColumnas:
     def nueva(self, clave, cabecera="", ancho=100, siCentrado=False, siDerecha=False, rgbTexto=None, rgbFondo=None,
               siOrden=True, estadoOrden=0, edicion=None, siEditable=None, siMostrar=True, siChecked=False):
         """
-        Contiene los mismos parámetros que la Columna.
+        Contiene los mismos parametros que la Columna.
 
         @param clave: referencia de la columna.
         @param cabecera: texto mostrado en el grid como cabecera.
         @param ancho: anchura en pixels.
-        @param siCentrado: alineación
-        @param siDerecha: alineación, se ha diferenciado la alineación, para que al definir
-            columnas sea más fácilmente visible el tipo de alineación, cuando no es a la izquierda.
+        @param siCentrado: alineacion
+        @param siDerecha: alineacion, se ha diferenciado la alineacion, para que al definir
+            columnas sea mas facilmente visible el tipo de alineacion, cuando no es a la izquierda.
         @param rgbTexto: color del texto como un entero.
         @param rgbFondo: color de fondo.
         @param siOrden: si se puede ordenar por este campo
         @param estadoOrden: indica cual es el orden inicial de la columna  -1 Desc, 0 No, 1 Asc
-        @param edicion: objeto delegate usado para la edición de los campos de esta columna
-        @param siEditable: este parámetro se usa cuando aunque la columna tiene un delegate asociado para mostrarla, sin embargo no es editable.
+        @param edicion: objeto delegate usado para la edicion de los campos de esta columna
+        @param siEditable: este parametro se usa cuando aunque la columna tiene un delegate asociado para mostrarla, sin embargo no es editable.
         @param siMostrar: si se muestra o no.
         @param siChecked: si es un campo de chequeo.
 
@@ -274,7 +271,7 @@ class ListaColumnas:
 
     def columnasMostrables(self):
         """
-        Crea un nuevo objeto con sólo las columnas mostrables.
+        Crea un nuevo objeto con solo las columnas mostrables.
         """
         cols = [columna for columna in self.liColumnas if columna.siMostrar]
         cols.sort(lambda x, y: cmp(x.posicion, y.posicion))

@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 
 from PyQt4 import QtCore
 
@@ -122,7 +121,7 @@ class GestorEntMaq(Gestor.Gestor):
 
         else:
             rival = dr["CM"]
-            r_t = dr["TIEMPO"] * 100  # Se guarda en décimas -> milésimas
+            r_t = dr["TIEMPO"] * 100  # Se guarda en decimas -> milesimas
             r_p = dr["PROFUNDIDAD"]
             if r_t <= 0:
                 r_t = None
@@ -730,7 +729,7 @@ class GestorEntMaq(Gestor.Gestor):
 
         movimiento = desde + hasta
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:
@@ -1032,7 +1031,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.partida.liJugadas[-1].comentario = _X(_("%1 has won on time."), nombreContrario)
 
         self.guardarGanados(quien == kGanamos)
-        if quien != kGanaRivalTiempo:  # Ya que el mensaje ya se ha usado, para añadir minutos
+        if quien != kGanaRivalTiempo:  # Ya que el mensaje ya se ha usado, para a_adir minutos
             QTUtil2.mensaje(self.pantalla, mensaje)
         if QTUtil2.pregunta(self.pantalla, _("Do you want to play again?")):
             self.reiniciar(False)
@@ -1075,7 +1074,7 @@ class GestorEntMaq(Gestor.Gestor):
 
             dr = dic["RIVAL"]
             rival = dr["CM"]
-            r_t = dr["TIEMPO"] * 100  # Se guarda en décimas -> milésimas
+            r_t = dr["TIEMPO"] * 100  # Se guarda en decimas -> milesimas
             r_p = dr["PROFUNDIDAD"]
             if r_t <= 0:
                 r_t = None

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.GestorVariantes as GestorVariantes
 
 def editaVariante(procesador, gestorBase, fen, lineaPGN, titulo=None, siEngineActivo=False):
@@ -21,7 +19,7 @@ def editaVariante(procesador, gestorBase, fen, lineaPGN, titulo=None, siEngineAc
         titulo = lineaPGN
     procesadorVariantes.pantalla.muestraVariantes(titulo)
 
-    return gestorVariantes.valor()  # pgn y a1h8, el a1h8 nos servirá para editar las aperturas
+    return gestorVariantes.valor()  # pgn y a1h8, el a1h8 nos servira para editar las aperturas
 
 def editaVarianteMoves(procesador, wpantalla, siBlancasAbajo, fen, lineaPGN, titulo=None):
     procesadorVariantes = procesador.clonVariantes(wpantalla)
@@ -34,4 +32,4 @@ def editaVarianteMoves(procesador, wpantalla, siBlancasAbajo, fen, lineaPGN, tit
         titulo = lineaPGN
     procesadorVariantes.pantalla.muestraVariantes(titulo)
 
-    return gestorVariantes.valor()  # pgn y a1h8, el a1h8 nos servirá para editar las aperturas
+    return gestorVariantes.valor()  # pgn y a1h8, el a1h8 nos servira para editar las aperturas

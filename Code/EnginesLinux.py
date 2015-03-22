@@ -1,4 +1,4 @@
-# -*- coding: latin-1 -*-
+# -*- coding: utf-8 -*-
 
 import collections
 
@@ -21,7 +21,7 @@ def leeRivales():
     mas(cm)
 
     ConfigMotor = BaseConfig.ConfigMotor
-    cm = ConfigMotor("cheng", "Martin Sedl·k", "4 ver 0.36c", "http://www.vlasak.biz/cheng")
+    cm = ConfigMotor("cheng", "Martin Sedl√°k", "4 ver 0.36c", "http://www.vlasak.biz/cheng")
     cm.path = "cheng4_linux"
     cm.elo = 2750
     cm.ponMultiPV(20, 256)
@@ -142,7 +142,7 @@ def leeRivales():
     cm.elo = 1854
     mas(cm)
 
-    cm = ConfigMotor("texel", "Peter ÷sterlund", "0.98", "http://web.comhem.se/petero2home/javachess/index.html#texel")
+    cm = ConfigMotor("texel", "Peter √ñsterlund", "0.98", "http://web.comhem.se/petero2home/javachess/index.html#texel")
     cm.path = "texel32"
     cm.elo = 2900
     mas(cm)

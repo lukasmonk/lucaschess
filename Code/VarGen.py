@@ -21,3 +21,5 @@ tbookPTZ = "Openings/fics15.bin"
 
 xtutor = None
 
+XSEP=chr(183)
+

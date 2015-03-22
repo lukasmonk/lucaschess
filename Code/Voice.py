@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import os
 import collections
 import wave
@@ -24,7 +23,7 @@ class Listen(QtCore.QThread):
         self.config = readConfig(lang)
         self.save = siSave
         if siSave:
-            self.maxSave = 16000*10*60/1024 # Máximo 10 minutos
+            self.maxSave = 16000*10*60/1024 # Max 10 minutos
             self.numSave = 0
             self.liSave = []
 

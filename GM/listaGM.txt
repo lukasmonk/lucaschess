@@ -1,201 +1,210 @@
-Adams·Adams, Michael·245693·1125
-Akobian·Akobian, Varuzhan·82652·391
-Akopian·Akopian, Vladimir·140920·649
+Adams·Adams, Michael·253814·1156
+Akobian·Akobian, Varuzhan·88871·416
+Akopian·Akopian, Vladimir·148103·682
 Alburt·Alburt,L·62136·286
 Alekhine·Alekhine, Alexander·281750·1461
-Alekseev·Alekseev, Evgeny·98208·428
-Almasi·Almasi, Zoltan·153532·706
-Anand·Anand, Viswanathan·251424·1158
+Alekseev·Alekseev, Evgeny·110009·477
+Almasi·Almasi, Zoltan·158069·726
+Anand·Anand, Viswanathan·262571·1207
 Anderssen·Anderssen, Adolf·64461·348
-Andersson·Andersson, Ulf·166660·733
-Andreikin·Andreikin, Dmitry·90619·411
-Areshchenko·Areshchenko, Alexander·119270·527
-Aronian·Aronian, Levon·152408·684
-Ashley·Ashley, Maurice·35598·173
+Andersson·Andersson, Ulf·167777·737
+Andreikin·Andreikin, Dmitry·92270·418
+Areshchenko·Areshchenko, Alexander·126900·560
+Aronian·Aronian, Levon·170526·755
+Artemiev·Artemiev, Vladislav·8734·42
+Ashley·Ashley, Maurice·36841·177
 Averbakh·Averbakh, Yuri L·60977·281
-Avrukh·Avrukh, Boris·114067·547
-Azarov·Azarov, Sergei·70996·336
+Avrukh·Avrukh, Boris·114723·550
+Azarov·Azarov, Sergei·79144·372
 Azmaiparashvili·Azmaiparashvili, Zurab·108483·504
-Bacrot·Bacrot, Etienne·178942·820
-Baklan·Baklan, Vladimir·125926·597
-Balogh·Balogh, Csaba·82543·388
+Bacrot·Bacrot, Etienne·193213·880
+Baklan·Baklan, Vladimir·130477·619
+Balogh·Balogh, Csaba·90916·423
 Bareev·Bareev, Evgeny·164332·769
-Bartel·Bartel, Mateusz·102140·469
-Bauer·Bauer, Christian·103829·473
+Bartel·Bartel, Mateusz·121169·550
+Bauer·Bauer, Christian·115024·523
 Becerrarivero·Becerra Rivero, Julio·36046·173
-Beliavsky·Beliavsky, Alexander G·277966·1273
-Benjamin·Benjamin, Joel·149275·695
+Beliavsky·Beliavsky, Alexander G·285486·1305
+Benjamin·Benjamin, Joel·150202·699
 Benko·Benko, Pal·92773·444
-Berkes·Berkes, Ferenc·119495·540
+Berkes·Berkes, Ferenc·130108·584
 Berliner·Berliner, Hans Jack·3220·19
 Bernstein·Bernstein, Ossip·23298·107
 Bird·Bird, Henry·40161·195
 Bisguier·Bisguier, Arthur Bernard·80351·403
 Blackburne·Blackburne, Joseph·105507·552
-Blatny·Blatny, Pavel·158605·737
+Blatny·Blatny, Pavel·161929·752
 Bogoljubow·Bogoljubow, Efim·93841·443
 Boleslavsky·Boleslavsky, Isaak·47006·219
-Bologan·Bologan, Viktor·225653·1013
+Bologan·Bologan, Viktor·237650·1067
 Botvinnik·Botvinnik, Mikhail·130880·620
 Bronstein·Bronstein, David I·187570·896
-Browne·Browne, Walter S·131254·618
+Browne·Browne, Walter S·134354·633
 Bruzon·Bruzon, Lazaro·64136·297
-Bu·Bu, Xiangzhi·115615·501
+Bu·Bu, Xiangzhi·125588·544
 Byrne·Byrne, Robert Eugene·68224·332
 Capablanca·Capablanca, José Raúl·142624·697
-Carlsen·Carlsen, Magnus·157897·702
-Caruana·Caruana, Fabiano·118435·525
+Carlsen·Carlsen, Magnus·177163·782
+Caruana·Caruana, Fabiano·135853·599
 Chajes·Chajes, Oscar·17134·74
-Cheparinov·Cheparinov, Ivan·133379·599
+Cheparinov·Cheparinov, Ivan·148931·659
 Chiburdanidze·Chiburdanidze, Maia·91819·432
 Chigorin·Chigorin, Mikhail·102118·491
 Christiansen·Christiansen, Larry Mark·133737·631
 Dake·Dake, Arthur William·14418·68
-Defirmian·DeFirmian, Nick·157222·742
+Defirmian·DeFirmian, Nick·157962·745
 Delabourdonnais·LaBourdonnais, Louis de·10340·55
 Denker·Denker, Arnold S·27163·139
-Ding·Ding, Liren·33717·144
-Dominguezperez·Dominguez Perez, Leinier·37346·157
-Dreev·Dreev, Alexey·250140·1118
+Ding·Ding, Liren·45916·197
+Dominguezperez·Dominguez Perez, Leinier·44056·185
+Dreev·Dreev, Alexey·259893·1157
 Dzindzichashvili·Dzindzichashvili, Roman·57056·265
-Efimenko·Efimenko, Zahar·82186·371
-Ehlvest·Ehlvest, Jaan·205873·975
-Eljanov·Eljanov, Pavel·120148·529
+Edouard·Edouard, Romain·1296·6
+Efimenko·Efimenko, Zahar·91381·413
+Ehlvest·Ehlvest, Jaan·209349·990
+Eljanov·Eljanov, Pavel·132726·580
 Euwe·Euwe, Max·160830·823
 Evans·Evans, Larry·65942·318
 Factor·Factor, Samuel D·6827·31
-Fedorchuk·Fedorchuk, Sergey A.·150391·731
-Fedorowicz·Fedorowicz, John·113396·550
-Feller·Feller, Sebastien·39405·173
+Fedorchuk·Fedorchuk, Sergey A.·167982·804
+Fedorowicz·Fedorowicz, John·114078·553
+Fedoseev·Fedoseev, Vladimir·11901·47
+Feller·Feller, Sebastien·40003·176
 Fine·Fine, Reuben·31052·158
-Finegold·Finegold, Benjamin·70164·341
+Finegold·Finegold, Benjamin·72087·349
 Fischer·Fischer, Robert James·112600·553
-Fishbein·Fishbein, Alexander·40627·191
+Fishbein·Fishbein, Alexander·41360·195
 Flohr·Flohr, Salo·82260·383
-Fressinet·Fressinet, Laurent·156841·710
-Fridman·Fridman, Daniel·180615·837
-Ganguly·Ganguly, Surya Shekhar·129477·595
-Gaprindashvili·Gaprindashvili, Nona·105227·475
-Gareev·Gareev, Timur·34854·159
+Fressinet·Fressinet, Laurent·167605·757
+Fridman·Fridman, Daniel·197486·913
+Ganguly·Ganguly, Surya Shekhar·143115·657
+Gaprindashvili·Gaprindashvili, Nona·108801·488
+Gareev·Gareev, Timur·39020·177
 Gashimov·Gashimov, Vugar·95225·447
-Gelfand·Gelfand, Boris·192247·855
+Gelfand·Gelfand, Boris·200954·892
 Geller·Geller, Efim P·170856·810
-Georgiev·Georgiev, Kiril D·279135·1255
-Gharamian·Gharamian, Tigran·42393·202
-Giri·Giri, Anish·65204·293
+Georgiev·Georgiev, Kiril D·293033·1317
+Gharamian·Gharamian, Tigran·46078·218
+Giri·Giri, Anish·79451·349
 Gligoric·Gligoric, Svetozar·255073·1182
 Goldin·Goldin, Alexander·79881·374
-Grachev·Grachev, Boris·99700·430
-Grandazuniga·Granda Zuniga, Julio E·170640·775
-Grischuk·Grischuk, Alexander·187017·837
+Grachev·Grachev, Boris·113153·487
+Grandazuniga·Granda Zuniga, Julio E·183103·827
+Grischuk·Grischuk, Alexander·206648·920
 Grunfeld·Grunfeld, Ernst·39048·177
 Gulko·Gulko, Boris F·129070·617
 Gunsberg·Gunsberg, Isidor·25092·113
-Gupta·Gupta, Abhijeet·95182·433
+Gupta·Gupta, Abhijeet·114487·518
 Gurevichd·Gurevich, Dmitry·89250·424
 Gurevichm·Gurevich, Mikhail·116139·537
-Gustafsson·Gustafsson, Jan·130942·575
+Gustafsson·Gustafsson, Jan·133927·587
 Gyimesi·Gyimesi, Zoltan·65668·295
-Harikrishna·Harikrishna, Pentala·117935·519
-Hort·Hort, Vlastimil·236500·1125
+Harikrishna·Harikrishna, Pentala·132553·581
+Hort·Hort, Vlastimil·237679·1131
 Horwitz·Horwitz, Bernhard·7749·39
-Huebner·Huebner, Robert·152551·705
-Ibragimov·Ibragimov, Ildar·142763·673
-Illescascordoba·Illescas Cordoba, Miguel·111355·513
-Inarkiev·Inarkiev, Ernesto·92922·405
-Ivanchuk·Ivanchuk, Vassily·292993·1337
-Ivanova·Ivanov, Alexander·64493·323
+Hou·Hou, Yifan·9540·42
+Howell·Howell, David W L·1543·6
+Huebner·Huebner, Robert·153229·708
+Ibragimov·Ibragimov, Ildar·145127·684
+Illescascordoba·Illescas Cordoba, Miguel·113369·522
+Inarkiev·Inarkiev, Ernesto·109191·478
+Ivanchuk·Ivanchuk, Vassily·305215·1391
+Ivanova·Ivanov, Alexander·65146·326
 Ivanovi·Ivanov, Igor Vasilievich·69555·344
 Ivkov·Ivkov, Borislav·173837·817
-Jakovenko·Jakovenko, Dmitry·115589·495
+Jakovenko·Jakovenko, Dmitry·123524·529
 Janowski·Janowski, David·77087·345
-Jobava·Jobava, Baadur·123833·555
-Jussupow·Jussupow, Artur·162939·756
-Kaidanov·Kaidanov, Gregory·116787·579
-Kamsky·Kamsky, Gata·155200·664
-Karjakin·Karjakin, Sergey·161870·695
-Karpov·Karpov, Anatoly·413888·1847
-Kasimdzhanov·Kasimdzhanov, Rustam·119077·543
-Kasparov·Kasparov, Garry·300623·1492
+Jobava·Jobava, Baadur·136864·613
+Jussupow·Jussupow, Artur·165134·766
+Kaidanov·Kaidanov, Gregory·118136·585
+Kamsky·Kamsky, Gata·161848·695
+Karjakin·Karjakin, Sergey·178830·761
+Karpov·Karpov, Anatoly·416056·1856
+Kasimdzhanov·Kasimdzhanov, Rustam·126907·576
+Kasparov·Kasparov, Garry·301109·1494
 Kavalek·Kavalek, Lubomir·89317·442
 Keres·Keres, Paul·221435·1070
-Khalifman·Khalifman, Alexander·140938·665
+Khalifman·Khalifman, Alexander·146039·687
 Khenkin·Khenkin, Igor·4189·19
-Khismatullin·Khismatullin, Denis·115780·508
+Khismatullin·Khismatullin, Denis·131408·578
 Kholmov·Kholmov, Ratmir D·125876·572
 Kieninger·Kieninger, Georg·10270·41
-Kobalia·Kobalia, Mikhail·58943·255
-Koneru·Koneru, Humpy·114414·503
-Korchnoi·Korchnoi, Viktor·488007·2271
-Korobov·Korobov, Anton·114003·519
-Kosteniuk·Kosteniuk, Alexandra·133117·591
+Kobalia·Kobalia, Mikhail·61337·264
+Koneru·Koneru, Humpy·119908·524
+Korchnoi·Korchnoi, Viktor·489016·2275
+Korobov·Korobov, Anton·131584·600
+Kosteniuk·Kosteniuk, Alexandra·150724·662
 Kostic·Kostic, Borislav·25899·120
-Kotov·Kotov, Alexander·61665·279
-Kramnik·Kramnik, Vladimir·203639·951
-Krasenkow·Krasenkow, Michal·219575·1047
-Krush·Krush, Irina·119947·536
-Kryvoruchko·Kryvoruchko, Yuriy·58740·273
+Kotov·Kotov, Alexander·62459·283
+Kovalenko·Kovalenko, Igor·4160·17
+Kramnik·Kramnik, Vladimir·213517·993
+Krasenkow·Krasenkow, Michal·226758·1080
+Krush·Krush, Irina·128117·573
+Kryvoruchko·Kryvoruchko, Yuriy·69594·319
 Kudrin·Kudrin, Sergey·100603·490
 Kupchik·Kupchik, Abraham·34933·149
 Kurnosov·Kurnosov, Igor·92832·419
+Kuzubov·Kuzubov, Yuriy·391·2
 Lahno·Lahno, Kateryna·77255·348
 Larsen·Larsen, Bent·271863·1243
 Lasker·Lasker, Emanuel·125805·627
-Lastin·Lastin, Alexander·75623·362
+Lastin·Lastin, Alexander·76324·366
 Lautier·Lautier, Joel·139686·658
-Laznicka·Laznicka, Viktor·109557·489
-Le·Le, Quang Liem·126117·554
-Leko·Leko, Peter·129809·565
+Laznicka·Laznicka, Viktor·121611·543
+Le·Le, Quang Liem·137977·606
+Leko·Leko, Peter·136571·589
 Leonhardt·Leonhardt,Paul Saladin·24773·117
 Levenfish·Levenfish, Grigory·26723·114
-Lichao·Li, Chao·70727·307
+Lichao·Li, Chao·79978·349
 Lilienthal·Lilienthal, Andre·47187·220
 Ljubojevic·Ljubojevic, Ljubomir·147958·688
 Lputian·Lputian, Smbat G·122898·583
-Lysyj·Lysyj, Igor·56915·238
+Lysyj·Lysyj, Igor·67829·284
 Mackenzie·MacKenzie, George·30528·150
-Malakhov·Malakhov, Vladimir·140536·606
-Mamedov·Mamedov, Rauf·75681·341
-Mamedyarov·Mamedyarov, Shakhriyar·144194·690
+Malakhov·Malakhov, Vladimir·155158·664
+Mamedov·Mamedov, Rauf·89960·404
+Mamedyarov·Mamedyarov, Shakhriyar·162382·765
 Maroczy·Maroczy, Geza·65802·310
 Marshall·Marshall, Frank James·107300·536
+Matlakov·Matlakov, Maxim·3051·13
 Mcdonnell·McDonnell, Alexander·8647·46
-Mcshane·McShane, Luke J·104962·462
+Mcshane·McShane, Luke J·107627·473
 Mecking·Mecking, Henrique·40816·192
-Meier·Meier, Georg·77622·330
+Meier·Meier, Georg·86546·368
+Melkumyan·Melkumyan, Hrant·1709·7
 Mikenas·Mikenas, Vladas·37231·169
 Miles·Miles, Anthony J·241876·1118
-Milov·Milov, Vadim·164392·753
-Miroshnichenko·Miroshnichenko, Evgenij·114833·520
-Moiseenko·Moiseenko, Alexander·137863·620
-Morozevich·Morozevich, Alexander·163251·751
+Milov·Milov, Vadim·167462·766
+Miroshnichenko·Miroshnichenko, Evgenij·118248·536
+Moiseenko·Moiseenko, Alexander·152634·685
+Morozevich·Morozevich, Alexander·178569·821
 Morphy·Morphy, Paul·40272·240
-Motylev·Motylev, Alexander·111958·517
-Movsesian·Movsesian, Sergei·200626·927
-Naiditsch·Naiditsch, Arkadij·176694·815
+Motylev·Motylev, Alexander·121820·561
+Movsesian·Movsesian, Sergei·209318·960
+Naiditsch·Naiditsch, Arkadij·199108·910
 Najdorf·Najdorf, Miguel·181400·884
-Najer·Najer, Evgeniy·139322·640
-Nakamura·Nakamura, Hikaru·188536·814
-Navara·Navara, David·149487·695
-Negi·Negi,Parimarjan·78971·377
-Nepomniachtchi·Nepomniachtchi, Ian·118144·511
+Najer·Najer, Evgeniy·151720·692
+Nakamura·Nakamura, Hikaru·205979·886
+Navara·Navara, David·168648·785
+Negi·Negi,Parimarjan·86265·410
+Nepomniachtchi·Nepomniachtchi, Ian·137313·591
 Nezhmetdinov·Nezhmetdinov, Rashit·28977·156
-Nguyen·Nguyen, Ngoc Truongson·67727·298
-Ni·Ni, Hua·112016·506
-Nielsen·Nielsen, Peter Heine·170037·804
-Nikolic·Nikolic, Predrag·163860·735
+Nguyen·Nguyen, Ngoc Truongson·75464·331
+Ni·Ni, Hua·125764·566
+Nielsen·Nielsen, Peter Heine·172991·816
+Nikolic·Nikolic, Predrag·168446·755
 Nimzowitsch·Nimzowitsch, Aron·73010·342
-Nisipeanu·Nisipeanu, Liviu-Dieter·130470·619
+Nisipeanu·Nisipeanu, Liviu-Dieter·142406·675
 Novikov·Novikov, Igor A·84954·407
 Nunn·Nunn, John·127002·632
-Nyback·Nyback, Tomi·95092·455
+Nyback·Nyback, Tomi·99232·473
 Olafsson·Olafsson, Fridrik·79768·388
 Oll·Oll, Lembit·80418·396
-Onischuk·Onischuk, Alexander·125242·559
+Onischuk·Onischuk, Alexander·126612·565
 Pachman·Pachman, Ludek·103300·494
-Paehtz·Paehtz, Elisabeth·146843·674
+Paehtz·Paehtz, Elisabeth·164815·748
 Panno·Panno, Oscar·157562·725
-Pashikian·Pashikian, Arman·50790·228
+Pashikian·Pashikian, Arman·57660·258
 Paulsen·Paulsen, Louis·43791·212
 Petrosian·Petrosian, Tigran Vartanovich·144150·674
 Philidor·Philidor, Francois·2719·15
@@ -205,95 +214,101 @@ Polgarj·Polgar, Judit·126881·582
 Polgars·Polgar, Sofia·56201·276
 Polgarz·Polgar, Zsuzsa·54961·264
 Polugaevsky·Polugaevsky, Lev·143761·679
-Ponomariov·Ponomariov, Ruslan·121901·537
-Portisch·Portisch, Lajos·253347·1190
-Postny·Postny, Evgeny·104657·458
-Potkin·Potkin, Vladimir·69066·303
+Ponomariov·Ponomariov, Ruslan·128271·563
+Portisch·Portisch, Lajos·254047·1193
+Postny·Postny, Evgeny·115986·507
+Potkin·Potkin, Vladimir·79123·347
 Psakhis·Psakhis, Lev·145002·706
 Purdy·Purdy, Cecil John Seddon·7638·34
 Quinteros·Quinteros, Miguel A·106814·491
-Radjabov·Radjabov, Teimour·103219·471
-Ragger·Ragger, Markus·65520·307
+Radjabov·Radjabov, Teimour·112465·509
+Ragger·Ragger, Markus·77461·363
+Rapport·Rapport, Richard·2530·12
 Reinfeld·Reinfeld, Fred·6402·33
 Reshevsky·Reshevsky, Samuel Herman·98986·471
 Reti·Reti, Richard·54237·279
-Riazantsev·Riazantsev, Alexander·113715·508
-Ribli·Ribli, Zoltan·125806·617
-Rodshtein·Rodshtein, Maxim·68141·324
+Riazantsev·Riazantsev, Alexander·128687·569
+Ribli·Ribli, Zoltan·129193·632
+Robson·Robson, Ray·393·2
+Rodshtein·Rodshtein, Maxim·78625·371
 Rohde·Rohde, Michael A·40139·198
-Roiz·Roiz, Michael·76160·343
-Rowson·Rowson, Jonathan·52349·253
+Roiz·Roiz, Michael·81520·366
+Rowson·Rowson, Jonathan·52566·254
 Rubinstein·Rubinstein, Akiba·100460·487
-Rublevsky·Rublevsky, Sergei·130550·612
+Rublevsky·Rublevsky, Sergei·132491·621
+Sadler·Sadler, Matthew D·441·2
 Saemisch·Saemisch, Fritz·39873·195
-Sakaev·Sakaev, Konstantin·116034·520
+Sakaev·Sakaev, Konstantin·117152·524
 Salov·Salov, Valery·58707·248
 Santasiere·Santasiere, Anthony ·26470·124
-Sargissian·Sargissian, Gabriel·107072·450
-Sasikiran·Sasikiran, Krishnan·163442·725
-Savchenko·Savchenko, Boris·98092·440
+Sargissian·Sargissian, Gabriel·117949·493
+Sasikiran·Sasikiran, Krishnan·167924·746
+Savchenko·Savchenko, Boris·118138·530
 Savon·Savon, Vladimir A·99318·468
 Schlechter·Schlechter, Carl·61199·305
 Seirawan·Seirawan, Yasser·134893·614
 Serper·Serper, Grigory·63970·306
-Shabalov·Shabalov, Alexander·193473·952
+Shabalov·Shabalov, Alexander·200344·984
 Shamkovich·Shamkovich, Leonid·71423·336
-Shirov·Shirov, Alexei·280267·1342
-Short·Short, Nigel·239920·1110
-Shulman·Shulman, Yuri·104552·497
-Smeets·Smeets, Jan·106147·488
-Smirin·Smirin, Ilia·166495·806
+Shirov·Shirov, Alexei·290666·1391
+Short·Short, Nigel·247718·1145
+Shulman·Shulman, Yuri·106383·505
+Sjugirov·Sjugirov, Sanan·3871·16
+Smeets·Smeets, Jan·108114·496
+Smirin·Smirin, Ilia·176252·852
 Smyslov·Smyslov, Vasily·228092·1062
-So·So, Wesley·61226·284
-Socko·Socko, Bartosz·148726·637
-Sokolov·Sokolov, Ivan·245286·1167
+So·So, Wesley·71534·330
+Socko·Socko, Bartosz·162758·700
+Sokolov·Sokolov, Ivan·249892·1187
 Soltis·Soltis, Andrew·21770·112
 Spassky·Spassky, Boris·181681·906
-Speelman·Speelman, Jonathan·146543·704
+Speelman·Speelman, Jonathan·148203·712
 Spielmann·Spielmann, Rudolf·76833·406
 Stahlberg·Stahlberg, Gideon·77476·358
 Staunton·Staunton, Howard·37622·199
-Stefanova·Stefanova, Antoaneta·172128·790
+Stefanova·Stefanova, Antoaneta·189437·862
 Stein·Stein, Leonid·61665·293
 Steinitz·Steinitz, William·99145·522
 Suetin·Suetin, Alexey S·92775·437
-Sutovsky·Sutovsky, Emil·132781·633
-Svidler·Svidler, Peter·189939·895
+Sutovsky·Sutovsky, Emil·137712·657
+Svidler·Svidler, Peter·201887·947
 Szabo·Szabo, Laszlo·139467·681
 Taimanov·Taimanov, Mark·207716·972
 Tal·Tal, Mikhail·295675·1509
 Tarrasch·Tarrasch, Siegbert·93745·448
 Tartakower·Tartakower, Savielly·131627·646
 Teichmann·Teichmann, Richard·49754·238
-Timman·Timman, Jan·285511·1346
-Timofeev·Timofeev, Artyom·112919·484
-Tiviakov·Tiviakov, Sergei·249877·1150
-Tkachiev·Tkachiev, Vladislav·111448·547
-Tomashevsky·Tomashevsky, Evgeny·68609·292
-Topalov·Topalov, Veselin·170049·771
-Turov·Turov, Maxim·76268·357
-Uhlmann·Uhlmann, Wolfgang·211398·1006
+Timman·Timman, Jan·288425·1357
+Timofeev·Timofeev, Artyom·124281·535
+Tiviakov·Tiviakov, Sergei·265494·1215
+Tkachiev·Tkachiev, Vladislav·117115·574
+Tomashevsky·Tomashevsky, Evgeny·80062·338
+Topalov·Topalov, Veselin·175143·792
+Turov·Turov, Maxim·81752·380
+Uhlmann·Uhlmann, Wolfgang·212344·1009
 Unzicker·Unzicker, Wolfgang·76372·364
-Vachierlagrave·Vachier-Lagrave, Maxime·130544·583
-Vaganian·Vaganian, Rafael A·187216·853
-Vallejopons·Vallejo Pons, Francisco·144069·688
+Vachierlagrave·Vachier-Lagrave, Maxime·146286·648
+Vaganian·Vaganian, Rafael A·188240·858
+Vallejopons·Vallejo Pons, Francisco·157776·746
 Vanwely·Van Wely, Loek·119498·552
-Vitiugov·Vitiugov, Nikita·94217·416
-Volokitin·Volokitin, Andrei·101011·468
+Vitiugov·Vitiugov, Nikita·107374·474
+Volokitin·Volokitin, Andrei·110595·513
 Waitzkin·Waitzkin, Joshua·29755·138
-Wang·Wang Yue·150827·653
-Wangh·Wang, Hao·83977·370
+Wang·Wang Yue·159672·685
+Wangh·Wang, Hao·94647·415
+Wei·Wei, Yi·1598·6
 Winawer·Winawer, Szymon·23266·107
-Wojtaszek·Wojtaszek, Radoslaw·132418·602
+Wojtaszek·Wojtaszek, Radoslaw·151549·680
 Wojtkiewicz·Wojtkiewicz, Aleksander·134754·673
 Wolff·Wolff, Patrick·51043·243
 Xie·Xie Jun·53039·235
 Yates·Yates, Frederick D·32887·152
 Ye·Ye Jiangchuan·48754·224
-Yermolinsky·Yermolinsky, Alex·113905·555
+Yermolinsky·Yermolinsky, Alex·115153·561
+Yu·Yu, Yangyi·2234·9
 Yudasin·Yudasin, Leonid·116284·550
-Zhigalko·Zhigalko, Sergei·89618·402
-Zhou·Zhou, Jianchao·55902·236
-Zhu·Zhu Chen·91148·387
+Zhigalko·Zhigalko, Sergei·102232·458
+Zhou·Zhou, Jianchao·62456·264
+Zhu·Zhu Chen·97436·412
 Zukertort·Zukertort, Johannes Hermann·24954·119
-Zvjaginsev·Zvjaginsev, Vadim·99690·462
+Zvjaginsev·Zvjaginsev, Vadim·103225·477

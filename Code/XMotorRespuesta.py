@@ -1,4 +1,3 @@
-# -*- coding:latin-1 -*-
 import random
 import codecs
 
@@ -430,7 +429,7 @@ class MRespuestaMotor:
             if not rm.mate:  # stockfish mate 0
                 rm.mate = -1
 
-    def agregaRM(self, rm):  # Para los análisis MultiPV donde no han considerado una jugada
+    def agregaRM(self, rm):  # Para los analisis MultiPV donde no han considerado una jugada
         n = 1
         while True:
             if str(n) not in self.dicMultiPV:
@@ -789,7 +788,7 @@ class MRespuestaMotor:
             return self.liMultiPV[0]
 
         # Buscamos una jugada positiva que no sea de mate
-        # Si no la hay, cogemos el último
+        # Si no la hay, cogemos el ultimo
         rmIni = None
         for rm in self.liMultiPV:
             if rm.mate == 0:
@@ -823,7 +822,7 @@ class MRespuestaMotor:
             return self.liMultiPV[0]
 
         # Buscamos una jugada positiva que no sea de mate
-        # Si no la hay, cogemos el último
+        # Si no la hay, cogemos el ultimo
         rmIni = None
         for rm in self.liMultiPV:
             if rm.mate == 0:
@@ -833,7 +832,7 @@ class MRespuestaMotor:
             return self.liMultiPV[-1]  # Mandamos el mate peor
 
         ptsIni = rmIni.puntosABS()
-        if ptsIni > aterrizaje:  # el motor hace una jugada bastante peor, pero no malísima
+        if ptsIni > aterrizaje:  # el motor hace una jugada bastante peor, pero no malisima
             minimo = ptsIni - aterrizaje
         else:
             minimo = 0
@@ -855,7 +854,7 @@ class MRespuestaMotor:
             return self.liMultiPV[0]
 
         # Buscamos una jugada positiva que no sea de mate
-        # Si no la hay, cogemos el último
+        # Si no la hay, cogemos el ultimo
         rmIni = None
         for rm in self.liMultiPV:
             if rm.mate == 0:
@@ -865,7 +864,7 @@ class MRespuestaMotor:
             return self.liMultiPV[-1]  # Mandamos el mate peor
 
         ptsIni = rmIni.puntosABS()
-        if ptsIni > aterrizaje:  # el motor hace una jugada peor, pero no malísima
+        if ptsIni > aterrizaje:  # el motor hace una jugada peor, pero no malisima
             minimo = ptsIni - aterrizaje
         else:
             minimo = 0
@@ -920,7 +919,7 @@ class MRespuestaMotor:
             if rmSel is None:
                 rmSel = self.liMultiPV[0]
 
-            # Para comprobar pérdida de puntos
+            # Para comprobar perdida de puntos
             if self.partida.numJugadas():
                 self.partida.liJugadas[-1].puntosABS_3 = rmSel.puntosABS()
 
@@ -928,7 +927,7 @@ class MRespuestaMotor:
         return RespuestaMotor(self.nombre, self.siBlancas)
 
     def miraBrilliancies(self, texto, mindepth, minpuntos):
-        # Que hay un mínimo de opciones
+        # Que hay un minimo de opciones
         if len(self.liMultiPV) < 5:
             return
 
@@ -937,7 +936,7 @@ class MRespuestaMotor:
         rmbr = self.liMultiPV[0]
         ptsbr = rmbr.puntosABS()
 
-        # 1. Que la situación en que se queda sea positiva
+        # 1. Que la situacion en que se queda sea positiva
         if ptsbr < minpuntos / 2:
             return
 
@@ -975,6 +974,6 @@ class MRespuestaMotor:
                     rmbr.ponBrilliancie(depth)
                     return
 
-                elif dif < minpuntos:  # primeras depths ya se sabía que era buena jugada
+                elif dif < minpuntos:  # primeras depths ya se sabia que era buena jugada
                     return
 

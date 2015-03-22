@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 
 from PyQt4 import QtGui, QtCore
@@ -167,7 +165,7 @@ class TreeMoves(QtGui.QTreeWidget):
             padre = self if moveOwner is None else moveOwner.item
             for n, mov in enumerate(liMoves):
                 item = QtGui.QTreeWidgetItem(padre, [mov.pgn, mov.porcentaje, mov.absoluto,
-                                                     "%07d" % int(mov.absoluto.strip("·"))])
+                                                     "%07d" % int(mov.absoluto.strip(VarGen.XSEP))])
                 item.setTextAlignment(1, QtCore.Qt.AlignRight)
                 item.setTextAlignment(2, QtCore.Qt.AlignRight)
 
@@ -352,7 +350,7 @@ class PantallaArbolBook(QTVarios.WDialogo):
         self.fvar = gestor.configuracion.ficheroBooks
         self.listaLibros.recuperaVar(self.fvar)
 
-        # Comprobamos que todos estén accesibles
+        # Comprobamos que todos esten accesibles
         self.listaLibros.comprueba()
         self.book = self.listaLibros.porDefecto()
 

@@ -1,4 +1,3 @@
-# -*- coding:latin-1 -*-
 import sys
 
 from PyQt4 import QtCore, QtGui
@@ -19,17 +18,6 @@ import Code.QT.Tablero as Tablero
 import Code.QT.Columnas as Columnas
 import Code.QT.Grid as Grid
 import Code.QT.Delegados as Delegados
-
-# Muestra tabla + tablero en pequeño + bloque con datos posicion
-# como un gestor solo en pequeño
-# minimiza lc, y este espera hasta que se crea el fichero de txt temporal, con consultas cada segundo o 0.5
-# permite entrada desde teclado y de voz.
-# permite lanzar la pos inicial
-
-# Activa voz si está así en configuración.
-
-# En origen cada 0.5 consulta el fichero de intercambio, con la variable Terminado, si tiene esa variable # None coge
-# el testigo y lee el pgn y se muestra setvisible(true).
 
 MODO_POSICION, MODO_PARTIDA=range(2)
 

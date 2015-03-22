@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtCore
 
 from Code.Constantes import *
@@ -192,7 +190,7 @@ def cambioTutor(parent, configuracion):
     # # Tutor
     liGen.append(( _("Engine") + ":", configuracion.ayudaCambioTutor() ))
 
-    # # Décimas de segundo a pensar el tutor
+    # # Decimas de segundo a pensar el tutor
     liGen.append(( _("Duration of engine analysis (secs)") + ":", float(configuracion.tiempoTutor / 1000.0) ))
     li = [( _("Maximum"), 0)]
     for x in ( 1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200 ):

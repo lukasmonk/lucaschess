@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import base64
 

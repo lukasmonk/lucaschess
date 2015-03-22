@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import gc
 
 from PyQt4 import QtCore, QtGui
@@ -79,7 +77,7 @@ def qtAlineacion(cAlin):
 
 def qtColor(nColor):
     """
-    Genera un color a partir de un dato numérico
+    Genera un color a partir de un dato numerico
     """
     return QtGui.QColor(nColor)
 
@@ -91,7 +89,7 @@ def qtColorRGB(r, g, b):
 
 def qtBrush(nColor):
     """
-    Genera un brush a partir de un dato numérico
+    Genera un brush a partir de un dato numerico
     """
     return QtGui.QBrush(qtColor(nColor))
 

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import copy
 
 from PyQt4 import QtCore, QtGui
@@ -55,7 +53,7 @@ class WTV_Flecha(QtGui.QDialog):
         liGen = []
 
         if siNombre:
-            # nombre de la flecha que se usará en los menús del tutorial
+            # nombre de la flecha que se usara en los menus del tutorial
             config = FormLayout.Editbox(_("Name"), ancho=120)
             liGen.append((config, regFlecha.nombre ))
 

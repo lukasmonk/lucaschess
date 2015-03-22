@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtCore, QtGui
 
 import Code.QT.QTUtil as QTUtil
@@ -12,7 +10,7 @@ import Code.QT.Controles as Controles
 import Code.QT.FormLayout as FormLayout
 
 def datos(wParent, configuracion, procesador):
-    # Primero determinamos la categoría
+    # Primero determinamos la categoria
     resp = dameCategoria(wParent, configuracion, procesador)
     if resp:
         categoria = resp

@@ -1,5 +1,3 @@
-# -*- coding:latin-1 -*-
-
 from Code.Constantes import *
 
 import Code.LCOS as LCOS
@@ -209,7 +207,7 @@ class GestorMotor:
                 mrm.miraBrilliancies(txt, brDepth, brPuntos)
             return mrm, n
 
-        # No está considerado, obliga a hacer el análisis de nuevo desde posicion
+        # No esta considerado, obliga a hacer el analisis de nuevo desde posicion
         if jg.siJaqueMate or jg.siTablas():
             rm = XMotorRespuesta.RespuestaMotor(self.nombre, jg.posicionBase.siBlancas)
             rm.desde = mv[:2]

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.EnginesMicElo as EnginesMicElo
 import Code.MotoresExternos as MotoresExternos
 import Code.QT.QTVarios as QTVarios

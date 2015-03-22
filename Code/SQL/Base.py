@@ -1,8 +1,3 @@
-# -*- coding: latin-1 -*-
-"""
-Clases genéricas relativas a las bases de datos.
-"""
-
 import atexit
 import sqlite3 as sqlite
 
@@ -23,7 +18,7 @@ class DBBase:
 
     def cerrar(self):
         """
-        Cierra la conexión a esta base de datos
+        Cierra la conexion a esta base de datos
         """
         if self.conexion:
             self.conexion.close()
@@ -42,7 +37,7 @@ class DBBase:
 
         @param ctabla: nombre de la tabla
         @param select: lista de campos separados por comas
-        @param condicion: sentencia de condición SQL
+        @param condicion: sentencia de condicion SQL
         @param orden: sentencia de orden SQL
         """
         return DBF.DBF(self.conexion, ctabla, select, condicion, orden)
@@ -52,7 +47,7 @@ class DBBase:
 
         @param ctabla: nombre de la tabla
         @param select: lista de campos separados por comas
-        @param condicion: sentencia de condición SQL
+        @param condicion: sentencia de condicion SQL
         @param orden: sentencia de orden SQL
         """
         return DBFcache.DBFcache(self.conexion, ctabla, select, condicion, orden)
@@ -63,7 +58,7 @@ class DBBase:
 
         @param ctabla: nombre de la tabla
         @param select: lista de campos separados por comas
-        @param condicion: sentencia de condición SQL
+        @param condicion: sentencia de condicion SQL
         @param orden: sentencia de orden SQL
         """
         return DBF.DBFT(self.conexion, ctabla, select, condicion, orden)
@@ -75,7 +70,7 @@ class DBBase:
 
 class TablaBase:
     """
-    Definición genérica de una tabla.
+    Definicion generica de una tabla.
     """
 
     def __init__(self, nombre):
@@ -104,7 +99,7 @@ class TablaBase:
 
 class Campo:
     """
-    Definición genérica de un campo de una tabla.
+    Definicion generica de un campo de una tabla.
     """
 
     def __init__(self, nombre, tipo, notNull=False, primaryKey=False, autoInc=False):
@@ -126,7 +121,7 @@ class Campo:
 
 class Indice:
     """
-    Definición genérica de un índice de una tabla.
+    Definicion generica de un indice de una tabla.
     """
 
     def __init__(self, nombre, campos, siUnico=False):

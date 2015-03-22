@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 
 import Code.Usuarios as Usuarios
@@ -64,7 +62,7 @@ class WUsuarios(QTVarios.WDialogo):
             self.liUsuarios = [usuario]
 
         main = self.liUsuarios[0]
-        # Para que al pedir la password siempre en el idioma del main en principio solo hace falta el password pero por si acaso se cambia de opinión
+        # Para que al pedir la password siempre en el idioma del main en principio solo hace falta el password pero por si acaso se cambia de opinion
         main.trlucas = _("Lucas Chess")
         main.trusuario = _("User")
         main.trpassword = _("Password")

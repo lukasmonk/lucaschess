@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import shutil
 import random
@@ -449,7 +447,7 @@ class Entrenamientos():
         nico = QTVarios.rondoPuntos()
         if len(liMenus) > 1:
             menu = QTVarios.LCMenu(self.parent)
-            menu.opcion(None, nombre, Iconos.Tacticas())
+            menu.opcion(None, _SP(nombre), Iconos.Tacticas())
             menu.separador()
 
             dmenu = {}

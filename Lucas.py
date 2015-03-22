@@ -1,13 +1,4 @@
-#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
-# ==============================================================================
-# Author : Lucas Monge, lukasmonk@gmail.com
-# Web : http://www-lucaschess.rhcloud.com
-# Blog : http://lucaschess.blogspot.com/
-# Licence : GPL
-# ==============================================================================
-
-
 
 
 import os
@@ -29,6 +20,7 @@ sip.setapi('QVariant', 2)
 
 import Code.Traducir as Traducir
 Traducir.install()
+
 
 
 current_dir = os.path.dirname(sys.argv[0])
@@ -59,11 +51,5 @@ elif nArgs >= 2:
     elif arg == "-voyager":
         import Code.RunVoyager
         Code.RunVoyager.run(sys.argv[2])
-
-
-
-
-
-
 
 

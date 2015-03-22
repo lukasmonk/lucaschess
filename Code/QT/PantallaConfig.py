@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from Code.Constantes import *
 import Code.Util as Util
 import Code.DGT as DGT
@@ -69,7 +67,7 @@ def opciones(parent, configuracion):
     # Sonidos
     liSon = [separador]
     liSon.append(separador)
-    ## Si añadimos sonido tras cada jugada
+    ## Si a_adimos sonido tras cada jugada
     liSon.append(( _("Beep after opponent's move") + ":", configuracion.siSuenaBeep ))
     liSon.append(separador)
     liSon.append(( None, _("Sound on in") + ":" ))
@@ -104,7 +102,7 @@ def opciones(parent, configuracion):
     liNC.append(( FormLayout.Spinbox(_("Fics-Elo"), 0, 3200, 70), configuracion.ficsNC ))
     liNC.append(( FormLayout.Spinbox(_("Fide-Elo"), 0, 3200, 70), configuracion.fideNC ))
 
-    # Salvado automático
+    # Salvado automatico
     liSA = [separador]
 
     config = FormLayout.Fichero(_("Autosave to a PGN file"), "pgn", True)

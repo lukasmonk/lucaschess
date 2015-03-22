@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Rutinas de gestión de los análisis
-"""
 import os
 import copy
 import codecs
@@ -19,20 +15,7 @@ import Code.QT.PantallaPGN as PantallaPGN
 import Code.QT.PantallaParamAnalisis as PantallaParamAnalisis
 
 class AnalizaPartida:
-    """
-    Realiza el análisis de todos/algunos movimientos de una partida
-    """
-
     def __init__(self, procesador, alm, siMasivo, liJugadas=None):
-        """
-            procesador : referencia al procesador principal del programa.
-            alm.motor : nombre del motor que realizará el análisis
-            alm.tiempo : tiempo de análisis de cada jugada, en milésimas
-            alm.multiPV : si se define el número de multiPV a usar por el motor, si no None
-            alm.masvariantes : si se añade el análisis a las variantes en las partidas
-
-        """
-
         self.procesador = procesador
         self.alm = alm
         self.siMasivo = siMasivo
@@ -46,8 +29,8 @@ class AnalizaPartida:
         self.depth = alm.depth
         self.siVariantes = (not siMasivo) and alm.masvariantes
 
-        # Asignación de variables para blunders:
-        # kblunders: puntos de pérdida para considerar un blunder
+        # Asignacion de variables para blunders:
+        # kblunders: puntos de perdida para considerar un blunder
         # tacticblunders: folder donde guardar tactic
         # pgnblunders: fichero pgn donde guardar la partidas
         # oriblunders: si se guarda la partida original
@@ -80,14 +63,14 @@ class AnalizaPartida:
         self.bmtbrilliancies = alm.bmtbrilliancies
         self.bmt_listaBrilliancies = None
 
-        # Asignación de variables comunes
+        # Asignacion de variables comunes
         # blancas: si se analizan las blancas
         # negras: si se analizan las negras
-        # liJugadores: si sólo se miran los movimiento de determinados jugadores
+        # liJugadores: si solo se miran los movimiento de determinados jugadores
         # libroAperturas: si se usa un libro de aperturas para no analizar los iniciales
         # listaElegidas: si se indica un alista de movimientos concreta que analizar
-        # desdeelfinal: se determina si se empieza de atras adelante o al revés
-        # siBorrarPrevio: si la partida tiene un análisis previo, se determina si se hace o no
+        # desdeelfinal: se determina si se empieza de atras adelante o al reves
+        # siBorrarPrevio: si la partida tiene un analisis previo, se determina si se hace o no
         self.blancas = alm.blancas
         self.negras = alm.negras
         self.liJugadores = alm.liJugadores if siMasivo else None
@@ -100,7 +83,7 @@ class AnalizaPartida:
 
     def terminarBMT(self, bmt_lista, nombre):
         """
-        Si se están creando registros para el entrenamiento BMT (Best move Training), al final hay que grabarlos
+        Si se estan creando registros para el entrenamiento BMT (Best move Training), al final hay que grabarlos
         @param bmt_lista: lista a grabar
         @param nombre: nombre del entrenamiento
         """
@@ -140,7 +123,7 @@ class AnalizaPartida:
 
     def dispatchBP(self, rutDispatchBP):
         """
-        Se determina la rutina que se llama cada análisis
+        Se determina la rutina que se llama cada analisis
         """
         self.rutDispatchBP = rutDispatchBP
 
@@ -182,8 +165,6 @@ FILESW=%s:100
 """ % (_("Avoid the blunder"), before, _("Take advantage of blunder"), after))
             f.close()
 
-        # Añadimos a los ficheros
-
         cab = ""
         for k, v in dicCab.iteritems():
             ku = k.upper()
@@ -216,9 +197,9 @@ FILESW=%s:100
         Graba una partida en un pgn
 
         @param fichero: pgn donde grabar
-        @param nombre: nombre del motor que hace el análisis
+        @param nombre: nombre del motor que hace el analisis
         @param dicCab: etiquetas de cabecera del PGN
-        @param fen: fen de la posición
+        @param fen: fen de la posicion
         @param jg: jugada analizada
         @param rm: respuesta motor
         @param mj: respuesta motor con la mejor jugada, usado en caso de blunders, para incluirla
@@ -241,7 +222,7 @@ FILESW=%s:100
         p.leerPV(rm.pv)
         if p.siTerminada():
             result = p.resultado()
-            mas = ""  # ya lo añade en la última jugada
+            mas = ""  # ya lo anade en la ultima jugada
         else:
             mas = " *"
             result = "*"
@@ -277,9 +258,9 @@ FILESW=%s:100
         """
         Se graba una posicion en un entrenamiento BMT
         @param siBlunder: si es blunder o brilliancie
-        @param fen: posición
+        @param fen: posicion
         @param mrm: multirespuesta del motor
-        @param posAct: posición de la posición elegida en mrm
+        @param posAct: posicion de la posicion elegida en mrm
         @param clpartida: clave de la partida
         @param txtPartida: la partida completa en texto
         """
@@ -321,7 +302,7 @@ FILESW=%s:100
 
     def xprocesa(self, dicPGN, partida, tmpBP, textoOriginal):
         """
-        Realiza el análisis
+        Realiza el analisis
         @param dicPGN: etiquetas de cabecera de la partida
         @param partida: partida a analizar
         @param textoOriginal: texto de la partida, por si se graba la partida original
@@ -331,13 +312,13 @@ FILESW=%s:100
         self.siBMTbrilliancies = False
 
         siBP2 = hasattr(tmpBP,
-                        "bp2")  # Para diferenciar el análisis de una partida que usa una progressbar unica del análisis de muchas, que usa doble
+                        "bp2")  # Para diferenciar el analisis de una partida que usa una progressbar unica del analisis de muchas, que usa doble
 
         def guiDispatch(rm):
             return not tmpBP.siCancelado()
 
         self.xgestor.ponGuiDispatch(
-            guiDispatch)  # Dispatch del motor, si está puesto a 4 minutos por ejemplo que compruebe si se ha indicado que se cancele.
+            guiDispatch)  # Dispatch del motor, si esta puesto a 4 minutos por ejemplo que compruebe si se ha indicado que se cancele.
 
         siBlunders = self.kblunders > 0
         siBrilliancies = self.fnsbrilliancies or self.pgnbrilliancies or self.bmtbrilliancies
@@ -402,7 +383,7 @@ FILESW=%s:100
                     self.xgestor.quitaGuiDispatch()
                     return
 
-                # # Si está en el libro
+                # # Si esta en el libro
                 jg = partida.liJugadas[njg]
                 if xlibroAperturas.miraListaJugadas(jg.posicionBase.fen()):
                     liBorrar.append(pos)
@@ -521,7 +502,7 @@ FILESW=%s:100
                         self.grabaBMT(False, fen, mrm, posAct, clpartida, txtPartida)
                         self.siBMTbrilliancies = True
 
-        # Ponemos el texto original en la última
+        # Ponemos el texto original en la ultima
         if siPonerPGNOriginalBlunders and self.oriblunders:
             f = codecs.open(self.pgnblunders, "a", 'utf-8', 'ignore')
             f.write("\n%s\n\n" % textoOriginal)
@@ -703,7 +684,7 @@ class MuestraAnalisis():
         self.procesador = procesador
         self.configuracion = procesador.configuracion
         self.jg = jg
-        self.posJugada = posJugada  # Para mostrar el pgn con los números correctos
+        self.posJugada = posJugada  # Para mostrar el pgn con los numeros correctos
         self.maxRecursion = maxRecursion
         self.liMuestras = []
 
@@ -775,7 +756,7 @@ class AnalisisVariantes():
         self.rm = None
 
         if self.xtutor.motorTiempoJugada:
-            segundosPensando = self.xtutor.motorTiempoJugada / 1000  # está en milésimas
+            segundosPensando = self.xtutor.motorTiempoJugada / 1000  # esta en milesimas
             if self.xtutor.motorTiempoJugada % 1000 > 0:
                 segundosPensando += 1
         else:
@@ -794,7 +775,7 @@ class AnalisisVariantes():
 
     def mueveHumano(self, desde, hasta, coronacion=None):
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.posicionBase.siPeonCoronando(desde, hasta):
             coronacion = self.w.tablero.peonCoronando(not self.jg.posicion.siBlancas)
             if coronacion is None:

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtGui
 
 import Code.Util as Util
@@ -247,7 +245,7 @@ class WConfTactics(QtGui.QWidget):
         gbJumps = Controles.GB(self, _("Repetitions of each puzzle"), ly).ponFuente(f)
         self.grid_jumps.gotop()
 
-        # Repetición del bloque
+        # Repeticion del bloque
         if regHistorico:
             self.liREPEAT = regHistorico["REPEAT"][:]
         else:

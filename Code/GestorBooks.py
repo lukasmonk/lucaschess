@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 
 from Code.Constantes import *
@@ -163,7 +161,7 @@ class GestorBooks(Gestor.Gestor):
             self.sigueHumano()
             return False
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:
@@ -187,7 +185,7 @@ class GestorBooks(Gestor.Gestor):
                 actpeso = peso
                 break
 
-        if siEncontrado and self.jugJugador:  # si el jugador busca elegir el máximo
+        if siEncontrado and self.jugJugador:  # si el jugador busca elegir el maximo
             maxpeso = 0.0
             for jdesde, jhasta, jcoronacion, jpgn, peso in self.listaJugadas:
                 if peso > maxpeso:

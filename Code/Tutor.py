@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import codecs
 
@@ -42,7 +40,7 @@ class Tutor():
 
         self.rmUsuario, posUsuario = self.mrmTutor.buscaRM(self.jg.movimiento())
         if self.rmUsuario is None:
-            # Elegimos si la opción del tutor es mejor que la del usuario
+            # Elegimos si la opcion del tutor es mejor que la del usuario
             # Ponemos un mensaje mientras piensa
             me = QTUtil2.mensEspera.inicio(self.pantalla, _("Analyzing the move...."), posicion="ad")
 
@@ -57,11 +55,11 @@ class Tutor():
                 self.gestor.siTeclaPanico = True
                 return False
 
-        # Estadísticas
+        # Estadisticas
         if self.salvarCSV:
             self.guardaEstadisticas()
 
-        # Comparamos la puntuación del usuario con la del tutor
+        # Comparamos la puntuacion del usuario con la del tutor
         if not self.mrmTutor.mejorRMQue(self.rmUsuario, self.difpts, self.difporc):
             return False
 
@@ -361,7 +359,7 @@ class Tutor():
     def exePulsadoNumTutor(self, siIzq, siActivar, numero):
         if numero in [1, 8]:
             if siActivar:
-                # Que jugada está en el tablero
+                # Que jugada esta en el tablero
                 jg = self.partidaTutor.liJugadas[self.posTutor if self.posTutor > -1 else 0]
                 if self.posTutor == -1:
                     fen = jg.posicionBase.fen()
@@ -381,7 +379,7 @@ class Tutor():
     def exePulsadoNumUsuario(self, siIzq, siActivar, numero):
         if numero in [1, 8]:
             if siActivar:
-                # Que jugada está en el tablero
+                # Que jugada esta en el tablero
                 jg = self.partidaUsuario.liJugadas[self.posUsuario if self.posUsuario > -1 else 0]
                 if self.posUsuario == -1:
                     fen = jg.posicionBase.fen()

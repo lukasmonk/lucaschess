@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import subprocess
 
@@ -93,7 +91,7 @@ class WBooksCrear(QtGui.QDialog):
         # Creamos el pgn
         fichTemporal = self.wParent.damePGNtemporal()
 
-        # Creamos la línea de órdenes
+        # Creamos la linea de ordenes
         if VarGen.isWindows:
             exe = 'EnginesWindows/polyglot/polyglot.exe'
         else:
@@ -256,7 +254,7 @@ class WBooks(QtGui.QDialog):
         self.listaLibros = Books.ListaLibros()
         self.listaLibros.recuperaVar(fvar)
 
-        # # Comprobamos que todos estén accesibles
+        # # Comprobamos que todos esten accesibles
         self.listaLibros.comprueba()
         li = [(x.nombre, x) for x in self.listaLibros.lista]
         libInicial = None

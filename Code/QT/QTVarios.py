@@ -1,18 +1,22 @@
-# -*- coding: latin-1 -*-
+import os
 import collections
 import codecs
 import base64
+from encodings.aliases import aliases
+import chardet.universaldetector
 
 from PyQt4 import QtCore, QtGui, QtSvg
 
 import Code.Util as Util
 import Code.VarGen as VarGen
 import Code.BaseConfig as BaseConfig
+import Code.PGN as PGN
 import Code.QT.Colocacion as Colocacion
 import Code.QT.Iconos as Iconos
 import Code.QT.Controles as Controles
 import Code.QT.QTUtil as QTUtil
 import Code.QT.QTUtil2 as QTUtil2
+import Code.QT.FormLayout as FormLayout
 
 class DragUna(Controles.LB):
     def __init__(self, owner, pmVacio):
@@ -215,7 +219,7 @@ class WDialogo(QtGui.QDialog):
         dic["_POSICION_"] = "%d,%d" % (pos.x(), pos.y())
 
         tam = self.size()
-        dic["_TAMAÑO_"] = "%d,%d" % (tam.width(), tam.height())
+        dic["_SIZE_"] = "%d,%d" % (tam.width(), tam.height())
 
         for grid in self.liGrids:
             grid.guardarVideo(dic)
@@ -247,7 +251,13 @@ class WDialogo(QtGui.QDialog):
                 y = 0
             self.move(x, y)
             if siTam:
-                w, h = dic["_TAMAÑO_"].split(",")
+                if "_SIZE_" not in dic:
+                    w, h = self.width(),self.height()
+                    for k in dic:
+                        if k.startswith( "_TAMA" ):
+                            w, h = dic[k].split(",")
+                else:
+                    w, h = dic["_SIZE_"].split(",")
                 w = int(w)
                 h = int(h)
                 if w > wE:
@@ -1119,3 +1129,91 @@ class MensajeFide(QtGui.QDialog):
             self.accept()
         self.siFinalizado = True
         QTUtil.refreshGUI()
+
+def savePGN( owner, pgn ):
+    configuracion = VarGen.configuracion
+    dicVariables = configuracion.leeVariables("SAVEPGN")
+
+    liGen = [(None, None)]
+
+    liHistorico = dicVariables.get("LIHISTORICO")
+
+    config = FormLayout.Fichero(_("File to save"), "pgn", True, liHistorico=liHistorico, anchoMinimo=300)
+    liGen.append(( config, "" ))
+
+    #Codec
+    liCodecs = [k for k in set(v for k,v in aliases.iteritems())]
+    liCodecs.sort()
+    liCodecs = [(k,k) for k in liCodecs]
+    liCodecs.insert( 0, (_("Same as file"), "file" ) )
+    liCodecs.insert( 0, ("%s: UTF-8"%_("By default"), "default" ) )
+    config = FormLayout.Combobox(_("Write with the codec"), liCodecs)
+    codec = dicVariables.get("CODEC", "default")
+    liGen.append(( config, codec ))
+
+    #Overwrite
+    liGen.append( ( _("Overwrite"), dicVariables.get("OVERWRITE", False)) )
+
+    #Remove comments
+    liGen.append( ( _("Remove comments and variations"), dicVariables.get("REMCOMMENTSVAR", False)) )
+
+    # Editamos
+    resultado = FormLayout.fedit(liGen, title=_("Save PGN"), parent=owner, icon=Iconos.PGN())
+    if resultado is None:
+        return
+
+    accion, liResp = resultado
+    fichero, codec, overwrite, remcommentsvar = liResp
+    if not fichero:
+        return
+    if not liHistorico:
+        liHistorico = []
+    if fichero in liHistorico:
+        del liHistorico[liHistorico.index(fichero)]
+        chardet
+    liHistorico.insert(0,fichero)
+
+    dicVariables["LIHISTORICO"] = liHistorico[:20]
+    dicVariables["CODEC"] = codec
+    dicVariables["OVERWRITE"] = overwrite
+    dicVariables["REMCOMMENTSVAR"] = remcommentsvar
+
+    configuracion.escVariables("SAVEPGN",dicVariables)
+    carpeta, name = os.path.split(fichero)
+    if carpeta != configuracion.dirSalvados:
+        configuracion.dirSalvados = carpeta
+        configuracion.graba()
+
+    if remcommentsvar:
+        pgn = PGN.rawPGN(pgn)
+    pgn = pgn.replace( "\n", "\r\n" )
+
+    modo = "w" if overwrite else "a"
+    if not overwrite:
+        if not Util.existeFichero(fichero):
+            modo = "w"
+    if codec == "default":
+        codec = "utf-8"
+    elif codec == "file":
+        codec = "utf-8"
+        if Util.existeFichero(fichero):
+            with open(fichero) as f:
+                u = chardet.universaldetector.UniversalDetector()
+                for n, x in enumerate(f):
+                    u.feed(x)
+                    if n == 1000:
+                        break
+                u.close()
+                codec = u.result.get("encoding", "utf-8")
+
+    try:
+        f = codecs.open( fichero, modo, codec, 'ignore' )
+        if modo == "a":
+            f.write( "\r\n\r\n" )
+        f.write(pgn)
+        f.close()
+        QTUtil2.mensajeTemporal( owner, _( "Saved" ), 1.2 )
+    except:
+        QTUtil.ponPortapapeles(pgn)
+        QTUtil2.mensError(owner, "%s : %s\n\n%s" % (_("Unable to save"), fichero, _("It is saved in the clipboard to paste it wherever you want.") ))
+

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import __builtin__
 import os
 import gettext

@@ -1,6 +1,5 @@
-# -*- coding: latin-1 -*-
 DEBUG = False
-VERSION = "9.01"
+VERSION = "9.02"
 
 import sys
 

@@ -1,7 +1,7 @@
-# -*- coding: latin-1 -*-
 import os
 import operator
 
+import Code.VarGen as VarGen
 import Code.Util as Util
 import Code.Jugada as Jugada
 from Code.Movimientos import xpv2pv, pv2xpv
@@ -78,7 +78,7 @@ class GM:
         nextPly = self.ply + 1
         for gmPartida in self.liGMPartidas:
             if gmPartida.isValidMove(self.ply, move):
-                self.lastGame = gmPartida  # - Siempre hay una última
+                self.lastGame = gmPartida  # - Siempre hay una ultima
                 ok = True
                 if not gmPartida.isFinished(nextPly):
                     liP.append(gmPartida)
@@ -175,7 +175,7 @@ def dicGM():
     f = open("gm/listaGM.txt", "rb")
     for linea in f:
         if linea:
-            li = linea.split("·")
+            li = linea.split(VarGen.XSEP)
             gm = li[0].lower()
             nombre = li[1]
             dic[gm] = nombre

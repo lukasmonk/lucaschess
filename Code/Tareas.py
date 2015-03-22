@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import copy
 
 from PyQt4 import QtCore
@@ -139,7 +138,7 @@ class TareaMuevePieza(Tarea):
         self.nPaso += 1
         siUltimo = self.nPaso >= self.totalPasos
         if siUltimo:
-            # Para que esté al final en la posición correcta
+            # Para que este al final en la posicion correcta
             self.tablero.colocaPieza(bp, self.hastaA1H8)
         return siUltimo
 
@@ -209,7 +208,7 @@ class TareaMuevePiezaLI(Tarea):
         self.nPaso += 1
         siUltimo = self.nPaso >= self.totalPasos
         if siUltimo:
-            # Para que esté al final en la posición correcta
+            # Para que este al final en la posicion correcta
             self.tablero.colocaPieza(bp, self.hastaA1H8)
         return siUltimo
 

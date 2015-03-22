@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtGui
 
 import Code.QT.Iconos as Iconos
@@ -90,7 +88,7 @@ class WTraining(QTVarios.WDialogo):
         self.rbBlancas = Controles.RB(self, _("White")).activa()
         self.rbNegras = Controles.RB(self, _("Black"))
         hbox = Colocacion.H().control(self.rbBlancas).control(self.rbNegras)
-        gbColor = Controles.GB(self, _("Color"), hbox)
+        gbColor = Controles.GB(self, _("Play with"), hbox)
 
         self.tcWhite = TConf(dicValoracion, dicVentaja)
         ly = Colocacion.H().control(self.tcWhite)

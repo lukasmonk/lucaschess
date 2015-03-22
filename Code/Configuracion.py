@@ -1,4 +1,4 @@
-# -*- coding: latin-1 -*-
+# -*- coding: utf-8 -*-
 
 NIVELBAK = 1
 
@@ -637,9 +637,9 @@ class Configuracion:
                         self.siAplazada = False
                     self.graba()
 
-        self.dicTrad = {'english': "en", 'espaÒol': "es", 'francais': "fr",
+        self.dicTrad = {'english': "en", 'espa√±ol': "es", 'francais': "fr",
                         'deutsch': "de", 'portuguese': "pt", 'russian': "ru",
-                        "italiano": "it", "azeri": "az", "catal‡": "ca",
+                        "italiano": "it", "azeri": "az", "catal√†": "ca",
                         "vietnamese": "vi", "swedish": "sv"}
 
         # Si viene de la instalacion

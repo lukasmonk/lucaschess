@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtCore, QtGui
 
 import Code.ControlPosicion as ControlPosicion
@@ -36,11 +34,11 @@ class WPosicion(QtGui.QDialog):
         self.cbNoo = Controles.CHB(self, _("Black") + " O-O", True)
         self.cbNooo = Controles.CHB(self, _("Black") + " O-O-O", True)
 
-        # Peón al paso
+        # Peon al paso
         lbAlPaso = Controles.LB(self, _("En passant") + ":")
         self.edAlPaso = Controles.ED(self).controlrx("(-|[a-h][36])").anchoFijo(30)
 
-        # Medias jugadas desde último mov. peón
+        # Medias jugadas desde ultimo mov. peon
         self.edMedias, lbMedias = QTUtil2.spinBoxLB(self, 0, 0, 999,
                                                     etiqueta=_("Moves since the last pawn advance or capture"),
                                                     maxTam=50)

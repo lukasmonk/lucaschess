@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 
 import Code.Util as Util
@@ -9,7 +7,7 @@ import Code.VarGen as VarGen
 
 class OpcionUCI:
     def leeTXT(self, txt):
-        li = txt.split("·")
+        li = txt.split(VarGen.XSEP)
         self.tipo = li[0]
         self.nombre = li[1]
         self.default = li[2]
@@ -33,10 +31,11 @@ class OpcionUCI:
             self.liVars = eval(li[4])
 
     def grabaTXT(self):
-        txt = self.tipo + "·" + self.nombre + "·" + str(self.default) + "·" + str(self.valor) + "·"
+        x = VarGen.XSEP
+        txt = self.tipo + x + self.nombre + x + str(self.default) + x + str(self.valor) + x
 
         if self.tipo == "spin":
-            txt += str(self.min) + "·" + str(self.max)
+            txt += str(self.min) + VarGen.XSEP + str(self.max)
 
         elif self.tipo == "combo":
             txt += str(self.liVars)

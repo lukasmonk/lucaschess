@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 """
 Rutinas internas para la conexion con DGTEBDLL.dll
 """
@@ -216,7 +215,7 @@ def _dgt2fen(dato):
     return "/".join(caja)
 
 def _dgt2pv(dato):
-    # Coronación
+    # Coronacion
     if dato[0] in "Pp" and dato[3].lower() != "p":
         return dato[1:3] + dato[4:6] + dato[3].lower()
 

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 
 from PyQt4 import QtCore, QtGui
@@ -236,7 +234,7 @@ class WEntMaquina(QTVarios.WDialogo):
         fvar = self.configuracion.ficheroBooks
         self.listaLibros = Books.ListaLibros()
         self.listaLibros.recuperaVar(fvar)
-        ## Comprobamos que todos estén accesibles
+        ## Comprobamos que todos esten accesibles
         self.listaLibros.comprueba()
         li = [(x.nombre, x) for x in self.listaLibros.lista]
         libInicial = li[0][1] if li else None

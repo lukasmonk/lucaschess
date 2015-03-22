@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import collections
 
@@ -137,7 +135,7 @@ class PGN:
         # Mismo fichero
         if uno["FICHERO"] != fichero:
             return False
-        # Mismo tamaño
+        # Mismo tama_o
         tam = Util.tamFichero(uno["FICHERO"])
         if tam != uno["TAM"]:
             return False
@@ -154,7 +152,7 @@ class PGN:
 
         fichero = os.path.abspath(fichero)
 
-        # Pedimos la posición que le corresponde
+        # Pedimos la posicion que le corresponde
         nPos = self.damePosicion(fichero)
 
         uno = self.liDatos[nPos]
@@ -176,7 +174,7 @@ class PGN:
         titulo = os.path.basename(fichero)
         tmpBP = QTUtil2.BarraProgreso(ventana, titulo, _("Working..."), Util.tamFichero(fichero)).mostrar()
 
-        dClaves = Util.SymbolDict()  # contiene tamaño maximo de los campos a mostrar
+        dClaves = Util.SymbolDict()  # contiene tama_o maximo de los campos a mostrar
 
         def iniDB():
             fichDB = uno["PATHDB"]
@@ -242,7 +240,7 @@ class PGN:
 
         if not dbf:
             bd, dbf = iniDB()
-        dbf.commit()  # Graba los últimos
+        dbf.commit()  # Graba los ultimos
         dbf.cerrar()
         bd.cerrar()
 
@@ -293,3 +291,15 @@ def leeEntDirigido(fen, solucion):
 
     return dicDirigidoFen
 
+def rawPGN(pgn):
+    g = PGNreader.read1Game(pgn)
+    p = Partida.Partida(fen=g.fen)
+    p.leerPV(g.pv())
+
+    txt = ""
+    for k,v in g.labels.iteritems():
+        txt += "[%s \"%s\"]\n"%(k,v)
+    txt += "\n\n"
+    txt += p.pgnBase()
+
+    return txt

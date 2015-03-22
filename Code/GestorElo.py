@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 import operator
 import datetime
@@ -18,13 +16,15 @@ class MotorElo:
     def __init__(self, elo, nombre, clave, depth):
         self.elo = elo
         self.nombre = nombre
-        self.alias = nombre
         self.clave = clave
         self.depth = depth
         self.siInterno = depth == 0
         self.depthOpen = (elo / 100 - 8) if elo < 2100 else 100
         if self.depthOpen < 2:
             self.depthOpen = 2
+        self.alias = self.nombre
+        if self.depth:
+            self.alias += " %d" % self.depth
 
     def rotulo(self):
         resp = self.nombre
@@ -456,7 +456,7 @@ class GestorElo(Gestor.Gestor):
             self.sigueHumano()
             return False
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:

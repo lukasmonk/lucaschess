@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.Util as Util
 import Code.Books as Books
 import Code.LCOS as LCOS
@@ -166,7 +164,7 @@ def paramAnalisis(parent, configuracion, siModoAmpliado, siTodosMotores=False):
         fvar = configuracion.ficheroBooks
         listaLibros = Books.ListaLibros()
         listaLibros.recuperaVar(fvar)
-        ## Comprobamos que todos estén accesibles
+        ## Comprobamos que todos esten accesibles
         listaLibros.comprueba()
         li = [("--", None)]
         defecto = listaLibros.lista[0] if alm.libro else None
@@ -353,7 +351,7 @@ def paramAnalisisMasivo(parent, configuracion, siVariosSeleccionados):
     fvar = configuracion.ficheroBooks
     listaLibros = Books.ListaLibros()
     listaLibros.recuperaVar(fvar)
-    ## Comprobamos que todos estén accesibles
+    ## Comprobamos que todos esten accesibles
     listaLibros.comprueba()
     defecto = listaLibros.lista[0]
     li = [("--", None)]

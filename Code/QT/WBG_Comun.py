@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.VarGen as VarGen
 import Code.Partida as Partida
 import Code.ControlPosicion as ControlPosicion
@@ -20,7 +18,7 @@ class Analisis:
 
         liAnalisis, nActivo = self.dbAnalisis.lista(fenM2)
 
-        # Si tiene ya análisis, lo pedimos o nuevo
+        # Si tiene ya analisis, lo pedimos o nuevo
         if liAnalisis:
             if menu is None:
                 submenu = QTVarios.LCMenu(self.pantalla)

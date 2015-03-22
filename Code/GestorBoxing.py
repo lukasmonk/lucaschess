@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from Code.Constantes import *
 
 import Code.Util as Util
@@ -261,7 +259,7 @@ class GestorBoxing(Gestor.Gestor):
             self.sigueHumano()
             return False
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:

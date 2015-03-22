@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import copy
 
 import Code.Util as Util

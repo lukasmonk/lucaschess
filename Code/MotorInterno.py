@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 
 import Movimientos
@@ -179,7 +177,7 @@ class MotorInterno:
                 t = (7 - fil) * 8 + col
                 pz = self.tb[t]
                 if pz is None:
-                    pz = "·" if (col + fil) % 2 else " "
+                    pz = "." if (col + fil) % 2 else " "
                 resp += " " + pz + " |"
             resp += " " + filas[7 - fil] + "\n"
             resp += "   " + "+---" * 8 + "+" + "\n"
@@ -535,7 +533,7 @@ class MotorInterno:
                                 if om.apos == m.npos:
                                     if siTodos:
                                         liMovs.append((m, om))
-                                    else:  # sólo los no defendidos
+                                    else:  # solo los no defendidos
                                         siDefen = False
                                         if om.pzO.lower() != "k":
                                             for om1 in ldef:
@@ -619,7 +617,7 @@ class MotorInterno:
         if mp1("N", ( (+1, +2), (+1, -2), (-1, +2), (-1, -2), (+2, +1), (+2, -1), (-2, +1), (-2, -1) )):
             return True
 
-        # Peón
+        # Peon
         if mp1("P", ( (+1, +1), (+1, -1) ) if self.siW else ( (-1, -1), (-1, +1) )):
             return True
 

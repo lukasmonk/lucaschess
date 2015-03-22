@@ -1,10 +1,10 @@
-# -*- coding: latin-1 -*-
 import os
 import shutil
 import sqlite3
 import cPickle
 import base64
 
+import Code.VarGen as VarGen
 import Code.BaseConfig as BaseConfig
 import Code.Util as Util
 import Code.Movimientos as Movimientos
@@ -68,7 +68,7 @@ def dicDisk(configuracion):
         os.mkdir(backup)
     except:
         pass
-    # comprobar si la tabla es unica si es así crear nuevo fichero, sino, borrar tabla y generar nueva
+    # comprobar si la tabla es unica si es asi crear nuevo fichero, sino, borrar tabla y generar nueva
 
     dicDisk_SQL(backup, configuracion.ficheroAlbumes)
     dicDisk_SQL(backup, configuracion.ficheroBoxing + "*")
@@ -478,7 +478,7 @@ class GMconvert:
                         pv = dicPVs[numSiError]
                         datos = liPartidas[numSiError]
                         repe += 1
-                    datos = datos.replace("|", "-").replace("·", "|")
+                    datos = datos.replace("|", "-").replace(VarGen.XSEP, "|")
                     q.write("%s||%s\n" % (Movimientos.pv2xpv(pv.strip()), datos))
                 q.close()
 

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 import time
 
@@ -87,7 +85,7 @@ class WMemoria(QTVarios.WDialogo):
         ly = Colocacion.H().control(lbAyuda)
         self.gbAyuda = Controles.GB(self, _("Help"), ly)
 
-        # Rotulos información
+        # Rotulos informacion
         lbCategoria = Controles.LB(self, txtcategoria).ponFuente(f)
         lbNivel = Controles.LB(self, _X(_("Level %1/%2"), str(nivel + 1), "25")).ponFuente(f)
         if record:

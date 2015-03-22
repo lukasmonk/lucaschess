@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import codecs
 
@@ -400,7 +398,7 @@ class GestorEntPos(Gestor.Gestor):
 
         movimiento = desde + hasta
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:

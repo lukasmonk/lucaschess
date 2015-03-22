@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""
-Rutinas de gestión de los análisis
-"""
-
 import Code.VarGen as VarGen
 import Code.SAK as SAK
 

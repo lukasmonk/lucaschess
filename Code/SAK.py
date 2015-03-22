@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 """
 Rutinas internas para la conexion con winglet .dll .so
 """
@@ -161,7 +160,7 @@ class SAK:
         return mv
 
     def pgn2pv(self, pgn):
-        # Hace también el movimiento en el board
+        # Hace tambien el movimiento en el board
         return self.dll.lc_pgn2pv(str(pgn))
 
     def think(self, depth):

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 import copy
 
@@ -274,7 +272,7 @@ class GestorGM(Gestor.Gestor):
         posicion = self.partida.ultPosicion
         analisis = None
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and posicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(posicion.siBlancas)
             if coronacion is None:

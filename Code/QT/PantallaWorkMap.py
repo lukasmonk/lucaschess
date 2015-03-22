@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 from PyQt4 import QtGui, QtSvg
 
 import Code.Partida as Partida
@@ -227,7 +226,7 @@ class WUnSTSMap(QTVarios.WDialogo):
         self.tablero.crea()
         self.tablero.ponMensajero(self.mueveHumano)
 
-        # Rotulos información
+        # Rotulos informacion
         self.lbJuego = Controles.LB(self).ponWrap().anchoMinimo(200)
 
         # Tool bar
@@ -306,7 +305,7 @@ class WUnSTSMap(QTVarios.WDialogo):
     def mueveHumano(self, desde, hasta, coronacion=None):
         self.tablero.desactivaTodas()
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.posicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.posicion.siBlancas)
             if coronacion is None:

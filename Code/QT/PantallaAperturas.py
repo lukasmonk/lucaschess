@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import copy
 import os
 import subprocess
@@ -102,7 +100,7 @@ class WAperturas(QTVarios.WDialogo):
 
         posicion = self.partida.jugada(self.posCurrent).posicion if self.posCurrent >= 0 else self.partida.ultPosicion
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and posicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(posicion.siBlancas)
             if coronacion is None:
@@ -129,7 +127,7 @@ class WAperturas(QTVarios.WDialogo):
             return ap.nombre + "\n" + ap.pgn
 
     def gridDobleClick(self, grid, fila, columna):
-        if fila > -1:
+        if -1 < fila < len(self.liActivas):
             ap = self.liActivas[fila]
             self.partida.reset()
             self.partida.leerPV(ap.a1h8)

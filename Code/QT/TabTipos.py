@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtCore
 
 class Posicion:
@@ -159,7 +157,7 @@ class Flecha(Bloque):
             ( "ancho", "n", 10 ),  # ancho de la base de la flecha si es un poligono
             ( "vuelo", "n", 5 ),  # ancho adicional en la base
             ( "descuelgue", "n", 2 ),  # angulo de la base de la cabeza
-            ( "png", "c", "" )  # png para usar como botón
+            ( "png", "c", "" )  # png para usar como boton
         ]
         Bloque.__init__(self)
 
@@ -197,7 +195,7 @@ class Marco(Bloque):
             ( "tipo", "n", 1 ),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine, 0=Sin borde
             ( "opacidad", "n", 1.0 ),
             ( "anchoCasilla", "n", 1 ),
-            ( "png", "c", "" )  # png para usar como botón
+            ( "png", "c", "" )  # png para usar como boton
         ]
         Bloque.__init__(self)
 
@@ -207,12 +205,12 @@ class SVG(Bloque):
         self.liVars = [
             ( "posicion", "o", Posicion(0, 0, 80, 80, 0, 9) ),
             ( "fa1h8", "c", "0.0,0.0,0.0,0.0" ),
-            # se indica en unidades de ancho de casilla, podrá tener valores negativos para que se pueda mover fuera de pantalla
+            # se indica en unidades de ancho de casilla, podra tener valores negativos para que se pueda mover fuera de pantalla
             ( "xml", "c", "" ),
             ( "opacidad", "n", 1.0 ),
             ( "anchoCasilla", "n", 1 ),
-            ( "psize", "n", 100 ),  # % ajustetamaño
-            ( "png", "c", "" )  # png para usar como botón
+            ( "psize", "n", 100 ),  # ajustetama_o
+            ( "png", "c", "" )  # png para usar como boton
         ]
         Bloque.__init__(self)
 
@@ -222,13 +220,13 @@ class Marker(Bloque):
         self.liVars = [
             ( "posicion", "o", Posicion(0, 0, 80, 80, 0, 9) ),
             ( "fa1h8", "c", "0.0,0.0,0.0,0.0" ),
-            # se indica en unidades de ancho de casilla, podrá tener valores negativos para que se pueda mover fuera de pantalla
+            # se indica en unidades de ancho de casilla, podra tener valores negativos para que se pueda mover fuera de pantalla
             ( "xml", "c", "" ),
             ( "opacidad", "n", 1.0 ),
             ( "anchoCasilla", "n", 1 ),
-            ( "psize", "n", 100 ),  # % ajustetamaño
+            ( "psize", "n", 100 ),  # % ajustetama_o
             ( "poscelda", "n", 1 ),  # 0 = Up-Left 1 = Up-Right 2 = Down-Right 3 = Down-Left
-            ( "png", "c", "" )  # png para usar como botón
+            ( "png", "c", "" )  # png para usar como boton
         ]
         Bloque.__init__(self)
 

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import collections
 
 from PyQt4 import QtGui, QtCore
@@ -426,7 +424,7 @@ class TreeMoves(QtGui.QTreeWidget):
 
     def editaAnalisis(self, item, mov):
 
-        # Hay un análisis -> se muestra en variantes
+        # Hay un analisis -> se muestra en variantes
         # Analisis.muestraAnalisis( self.procesador, self.xtutor, jg, siBlancas, maxRecursion, pos )
         fen = mov.partida.ultPosicion.fen()
 
@@ -876,7 +874,7 @@ class PantallaArbol(QTVarios.WDialogo):
         else:
             lm = self.listaMoves
 
-        # Si tiene ya análisis, lo pedimos o nuevo
+        # Si tiene ya analisis, lo pedimos o nuevo
         menu = QTVarios.LCMenu(self)
         if lm.liAnalisis:
             for n, mrm in enumerate(lm.liAnalisis):

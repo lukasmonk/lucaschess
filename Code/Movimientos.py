@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 def posFC(pos):
     return pos / 8, pos % 8
 

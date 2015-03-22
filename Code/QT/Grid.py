@@ -1,19 +1,18 @@
-# -*- coding: latin-1 -*-
 """
 El grid es un TableView de QT.
 
-Realiza llamadas a rutinas de la ventana donde está ante determinados eventos, o en determinadas situaciones,
+Realiza llamadas a rutinas de la ventana donde esta ante determinados eventos, o en determinadas situaciones,
 siempre que la rutina se haya definido en la ventana:
 
-    - gridDobleClickCabecera : ante un doble click en la cabecera, normalmente se usa para la reordenación de la tabla por la columna pulsada.
-    - gridTeclaPulsada : al pulsarse una tecla, llama a esta rutina, para que pueda usarse por ejemplo en búsquedas.
-    - gridTeclaControl : al pulsarse una tecla de control, llama a esta rutina, para que pueda usarse por ejemplo en búsquedas.
+    - gridDobleClickCabecera : ante un doble click en la cabecera, normalmente se usa para la reordenacion de la tabla por la columna pulsada.
+    - gridTeclaPulsada : al pulsarse una tecla, llama a esta rutina, para que pueda usarse por ejemplo en busquedas.
+    - gridTeclaControl : al pulsarse una tecla de control, llama a esta rutina, para que pueda usarse por ejemplo en busquedas.
     - gridDobleClick : en el caso de un doble click en un registro, se hace la llamad a esta rutina
-    - gridBotonDerecho : si se ha pulsado el botón derecho del ratón.
-    - gridPonValor : si hay un campo editable, la llamada se produce cuando se ha cambiado el valor tras la edición.
+    - gridBotonDerecho : si se ha pulsado el boton derecho del raton.
+    - gridPonValor : si hay un campo editable, la llamada se produce cuando se ha cambiado el valor tras la edicion.
 
-    - gridColorTexto : si está definida se la llama al mostrar el texto de un campo, para determinar el color del mismo.
-    - gridColorFondo : si está definida se la llama al mostrar el texto de un campo, para determinar el color del fondo del mismo.
+    - gridColorTexto : si esta definida se la llama al mostrar el texto de un campo, para determinar el color del mismo.
+    - gridColorFondo : si esta definida se la llama al mostrar el texto de un campo, para determinar el color del fondo del mismo.
 
 """
 
@@ -29,7 +28,7 @@ class ControlGrid(QtCore.QAbstractTableModel):
     def __init__(self, grid, wParent, oColumnasR):
         """
         @param tableView:
-        @param oColumnasR: ListaColumnas con la configuración de todas las columnas visualizables.
+        @param oColumnasR: ListaColumnas con la configuracion de todas las columnas visualizables.
         """
         QtCore.QAbstractTableModel.__init__(self, wParent)
         self.grid = grid
@@ -48,14 +47,14 @@ class ControlGrid(QtCore.QAbstractTableModel):
 
     def rowCount(self, parent):
         """
-        Llamada interna, solicitando el número de registros.
+        Llamada interna, solicitando el numero de registros.
         """
         self.numDatos = self.wParent.gridNumDatos(self.grid)
         return self.numDatos
 
     def refresh(self):
         """
-        Si hay un cambio del número de registros, la llamada a esta rutina actualiza la visualización.
+        Si hay un cambio del numero de registros, la llamada a esta rutina actualiza la visualizacion.
         """
         self.emit(QtCore.SIGNAL("layoutAboutToBeChanged()"))
         ant_ndatos = self.numDatos
@@ -78,14 +77,14 @@ class ControlGrid(QtCore.QAbstractTableModel):
 
     def columnCount(self, parent):
         """
-        Llamada interna, solicitando el número de columnas.
+        Llamada interna, solicitando el numero de columnas.
         """
         self.numCols = self.oColumnasR.numColumnas()
         return self.numCols
 
     def data(self, index, role):
         """
-        Llamada interna, solicitando información que ha de tener/contener el campo actual.
+        Llamada interna, solicitando informacion que ha de tener/contener el campo actual.
         """
         if not index.isValid():
             return None
@@ -122,7 +121,7 @@ class ControlGrid(QtCore.QAbstractTableModel):
 
     def flags(self, index):
         """
-        Llamada interna, solicitando mas información sobre las carcaterísticas del campo actual.
+        Llamada interna, solicitando mas informacion sobre las carcateristicas del campo actual.
         """
         if not index.isValid():
             return QtCore.Qt.ItemIsEnabled
@@ -138,7 +137,7 @@ class ControlGrid(QtCore.QAbstractTableModel):
 
     def setData(self, index, valor, role=QtCore.Qt.EditRole):
         """
-        Tras producirse la edición de un campo en un registro se llama a esta rutina para cambiar el valor en el origen de los datos.
+        Tras producirse la edicion de un campo en un registro se llama a esta rutina para cambiar el valor en el origen de los datos.
         Se lanza gridPonValor en la ventana propietaria.
         """
         if not index.isValid():
@@ -194,7 +193,7 @@ class CabeceraHeight(Cabecera):
 
 class Grid(QtGui.QTableView):
     """
-    Implementa un TableView, en base a la configuración de una lista de columnas.
+    Implementa un TableView, en base a la configuracion de una lista de columnas.
     """
 
     def __init__(self, wParent, oColumnas, dicVideo=None, altoFila=20, siSelecFilas=False, siSeleccionMultiple=False,
@@ -202,7 +201,7 @@ class Grid(QtGui.QTableView):
                  siCabeceraVisible=True, altoCabecera=None):
         """
         @param wParent: ventana propietaria
-        @param oColumnas: configuración de las columnas.
+        @param oColumnas: configuracion de las columnas.
         @param altoFila: altura de todas las filas.
         """
 
@@ -245,7 +244,7 @@ class Grid(QtGui.QTableView):
 
         self.seleccionaFilas(siSelecFilas, siSeleccionMultiple)
 
-        self.ponAnchosColumnas()  # es necesario llamarlo desde aquí
+        self.ponAnchosColumnas()  # es necesario llamarlo desde aqui
 
         self.siEditable = siEditable
 
@@ -263,7 +262,7 @@ class Grid(QtGui.QTableView):
 
     def releerColumnas(self):
         """
-        Cuando se cambia la configuración de las columnas, se vuelven a releer y se indican al control de datos.
+        Cuando se cambia la configuracion de las columnas, se vuelven a releer y se indican al control de datos.
         """
         self.oColumnasR = self.oColumnas.columnasMostrables()
         self.cg.oColumnasR = self.oColumnasR
@@ -310,7 +309,7 @@ class Grid(QtGui.QTableView):
         """
         Se gestiona este evento, ante la posibilidad de que la ventana quiera controlar,
         cada doble click, llamando a la rutina correspondiente si existe (gridDobleClick)
-        con el número de fila y el objeto columna como argumentos
+        con el numero de fila y el objeto columna como argumentos
         """
         if self.siEditable:
             QtGui.QTableView.mouseDoubleClickEvent(self, event)
@@ -321,7 +320,7 @@ class Grid(QtGui.QTableView):
     def mousePressEvent(self, event):
         """
         Se gestiona este evento, ante la posibilidad de que la ventana quiera controlar,
-        cada pulsación del botón derecho, llamando a la rutina correspondiente si existe (gridBotonDerecho)
+        cada pulsacion del boton derecho, llamando a la rutina correspondiente si existe (gridBotonDerecho)
         """
         QtGui.QTableView.mousePressEvent(self, event)
         button = event.button()
@@ -364,9 +363,9 @@ class Grid(QtGui.QTableView):
 
     def guardarVideo(self, dic):
         """
-        Guarda en el diccionario de video la configuración actual de todas las columnas
+        Guarda en el diccionario de video la configuracion actual de todas las columnas
 
-        @param dic: diccionario de video donde se guarda la configuración de las columnas
+        @param dic: diccionario de video donde se guarda la configuracion de las columnas
         """
         liClaves = []
         for n, columna in enumerate(self.oColumnasR.liColumnas):
@@ -382,10 +381,10 @@ class Grid(QtGui.QTableView):
 
     def recuperarVideo(self, dic):
         """
-        Recupera del diccionario de video la configuración actual de todas las columnas
+        Recupera del diccionario de video la configuracion actual de todas las columnas
         """
 
-        # Miramos en dic, si hay columnas calculadas y las añadimos
+        # Miramos en dic, si hay columnas calculadas y las a_adimos
         liCalc = [k.split(".")[0] for k in dic.keys() if k.startswith("CALC_")]
         if liCalc:
             s = set(liCalc)
@@ -415,6 +414,9 @@ class Grid(QtGui.QTableView):
         nX = self.cg.numDatos - 1
         return n if n <= nX else nX
 
+    def reccount(self):
+        return self.cg.numDatos
+
     def recnosSeleccionados(self):
         li = []
         for x in self.selectionModel().selectedIndexes():
@@ -424,7 +426,7 @@ class Grid(QtGui.QTableView):
 
     def goto(self, fila, col):
         """
-        Se sitúa en una posición determinada.
+        Se situa en una posicion determinada.
         """
         elem = self.cg.createIndex(fila, col)
         self.setCurrentIndex(elem)
@@ -432,40 +434,40 @@ class Grid(QtGui.QTableView):
 
     def gotop(self):
         """
-        Se sitúa al principio del grid.
+        Se situa al principio del grid.
         """
         if self.cg.numDatos > 0:
             self.goto(0, 0)
 
     def gobottom(self, col=0):
         """
-        Se sitúa en el último registro del frid.
+        Se situa en el ultimo registro del frid.
         """
         if self.cg.numDatos > 0:
             self.goto(self.cg.numDatos - 1, col)
 
     def refresh(self):
         """
-        Hace un refresco de la visualización del grid, ante algún cambio en el contenido.
+        Hace un refresco de la visualizacion del grid, ante algun cambio en el contenido.
         """
         self.cg.refresh()
 
     def posActual(self):
         """
-        Devuelve la posición actual.
+        Devuelve la posicion actual.
 
         @return: tupla con ( num fila, objeto columna )
         """
         columna = self.oColumnasR.columna(self.currentIndex().column())
-        return (self.currentIndex().row(), columna)
+        return (self.recno(), columna)
 
     def posActualN(self):
         """
-        Devuelve la posición actual.
+        Devuelve la posicion actual.
 
         @return: tupla con ( num fila, num  columna )
         """
-        return (self.currentIndex().row(), self.currentIndex().column())
+        return (self.recno(), self.currentIndex().column())
 
     def tipoLetra(self, nombre="", puntos=8, peso=50, siCursiva=False, siSubrayado=False, siTachado=False, txt=None):
         font = QtGui.QFont()

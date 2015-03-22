@@ -1,6 +1,5 @@
-# -*- coding: latin-1 -*-
 """
-Rutinas básicas para la edición en las listas de registros.
+Rutinas basicas para la edicion en las listas de registros.
 """
 
 import os
@@ -31,10 +30,6 @@ def generaPM(piezas):
                 dicNG[nag] = QtSvg.QSvgRenderer(fsvg)
 
 class ComboBox(QtGui.QItemDelegate):
-    """
-    Delegado para la edición de un campo tipo combobox directamente en la tabla.
-    """
-
     def __init__(self, liTextos):
         QtGui.QItemDelegate.__init__(self)
         self.liTextos = liTextos
@@ -58,10 +53,6 @@ class ComboBox(QtGui.QItemDelegate):
         editor.setGeometry(option.rect)
 
 class LineaTexto(QtGui.QItemDelegate):
-    """
-    Delegado para la edición de un campo-texto directamente en la tabla.
-    """
-
     def __init__(self, parent=None, siPassword=False, siEntero=False):
         QtGui.QItemDelegate.__init__(self, parent)
         self.siPassword = siPassword
@@ -89,10 +80,6 @@ class LineaTexto(QtGui.QItemDelegate):
         editor.setGeometry(option.rect)
 
 class LineaTextoUTF8(QtGui.QItemDelegate):
-    """
-    Delegado para la edición de un campo-texto directamente en la tabla.
-    """
-
     def __init__(self, parent=None, siPassword=False):
         QtGui.QItemDelegate.__init__(self, parent)
         self.siPassword = siPassword

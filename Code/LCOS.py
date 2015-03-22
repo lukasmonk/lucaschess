@@ -1,4 +1,3 @@
-# -*- coding:latin-1 -*-
 import struct
 
 import Code.VarGen as VarGen

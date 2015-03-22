@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import os.path
 import time
 
@@ -45,7 +44,7 @@ class WHistorialBMT(QTVarios.WDialogo):
             dic["SEGUNDOS"] = dbf.SEGUNDOS
             self.liHistorial.append(dic)
 
-        # Diálogo ---------------------------------------------------------------
+        # Dialogo ---------------------------------------------------------------
         icono = Iconos.Historial()
         titulo = _("Track record") + ": " + dbf.NOMBRE
         extparam = "bmthistorial"
@@ -122,7 +121,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
         self.siMostrarPGN = False
 
         self.posicion = ControlPosicion.ControlPosicion()
-        self.actualP = 0  # Posición actual
+        self.actualP = 0  # Posicion actual
 
         self.controlPGN = ControlPGN.ControlPGN(self)
 
@@ -140,7 +139,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
         self.timer = None
         self.datosInicio = self.bmt_lista.calculaTHPSE()
 
-        # Diálogo ---------------------------------------------------------------
+        # Dialogo ---------------------------------------------------------------
         icono = Iconos.BMT()
         titulo = dbf.NOMBRE
         extparam = "bmtentrenar"
@@ -636,7 +635,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
 
         movimiento = desde + hasta
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.posicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.posicion.siBlancas)
             if coronacion is None:
@@ -936,7 +935,7 @@ class WBMT(QTVarios.WDialogo):
         extra = dbf.EXTRA
         bmt_lista = Util.blob2var(dbf.leeOtroCampo(recno, "BMT_LISTA"))
 
-        # Motor y tiempo, cogemos los estandars de análisis
+        # Motor y tiempo, cogemos los estandars de analisis
         fichero = self.configuracion.ficheroAnalisis
         dic = Util.recuperaVar(fichero)
         if dic:
@@ -958,7 +957,7 @@ class WBMT(QTVarios.WDialogo):
         li[0] = motor
         liGen.append(( _("Engine") + ":", li ))
 
-        ## Décimas de segundo a pensar el tutor
+        ## Decimas de segundo a pensar el tutor
         liGen.append(( _("Duration of engine analysis (secs)") + ":", tiempo / 1000.0 ))
 
         liGen.append((None, None))
@@ -1038,7 +1037,7 @@ class WBMT(QTVarios.WDialogo):
             if siCancelado:
                 break
 
-            uno.mrm = mrm  # lo cambiamos y ya está
+            uno.mrm = mrm  # lo cambiamos y ya esta
 
         xgestor.terminar()
 
@@ -1450,7 +1449,7 @@ class WBMT(QTVarios.WDialogo):
         nombre = os.path.basename(fns)[:-4]
         nombre = TrListas.dicTraining().get(nombre, nombre)
 
-        # Motor y tiempo, cogemos los estandars de análisis
+        # Motor y tiempo, cogemos los estandars de analisis
         fichero = self.configuracion.ficheroAnalisis
         dic = Util.recuperaVar(fichero)
         if dic:
@@ -1476,7 +1475,7 @@ class WBMT(QTVarios.WDialogo):
             li[0] = motor
             liGen.append(( _("Engine") + ":", li ))
 
-            ## Décimas de segundo a pensar el tutor
+            ## Decimas de segundo a pensar el tutor
             liGen.append(( _("Duration of engine analysis (secs)") + ":", tiempo / 1000.0 ))
 
             liGen.append((None, None))

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from operator import attrgetter
 
 import Code.Util as Util
@@ -154,7 +152,7 @@ class ListaAperturasStd:
         a1h8 = a1h8.strip()
         for k in self.dic:
             if k.startswith(a1h8):
-                return  # volvemos con la apertura pendiente aún
+                return  # volvemos con la apertura pendiente aun
         partida.pendienteApertura = False  # No hay ninguna aplicable
 
     def asignaAperturaListaMoves(self, liMoves):  # PGO
@@ -175,7 +173,7 @@ class ListaAperturasStd:
         a1h8 = a1h8[1:]
         li = []
 
-        # Las ordenamos para que estén antes las principales que las variantes
+        # Las ordenamos para que esten antes las principales que las variantes
         lik = self.dic.keys()
         lik.sort()
 
@@ -185,7 +183,7 @@ class ListaAperturasStd:
 
         for k in lik:
             if k.startswith(a1h8) and len(k) > len(a1h8):
-                # Comprobamos que no sea una variante de las añadidas, no nos interesan para mostrar opciones al usuario
+                # Comprobamos que no sea una variante de las a_adidas, no nos interesan para mostrar opciones al usuario
                 siMas = True
                 for ap in li:
                     if k.startswith(ap.a1h8):

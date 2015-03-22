@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import copy
 
 from PyQt4 import QtCore, QtGui
@@ -44,7 +42,7 @@ class WTV_Marco(QtGui.QDialog):
         # Datos generales
         liGen = []
 
-        # nombre del marco que se usará en los menús del tutorial
+        # nombre del marco que se usara en los menus del tutorial
         config = FormLayout.Editbox(_("Name"), ancho=120)
         liGen.append((config, regMarco.nombre ))
 

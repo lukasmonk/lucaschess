@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import time
 
 class Almacen:
@@ -71,7 +69,7 @@ class DBFcache:
 
     def reccount(self):
         """
-        Devuelve el número total de registros.
+        Devuelve el numero total de registros.
         """
         return len(self.liIDs)
 
@@ -142,7 +140,7 @@ class DBFcache:
 
     def _leerUno(self, numRecno):
         """
-        Lectura de un registro, y asignación a las variables = campos.
+        Lectura de un registro, y asignacion a las variables = campos.
         """
         self.ID = self.liIDs[numRecno][0]
         recValores = self.readCache(numRecno)
@@ -163,7 +161,7 @@ class DBFcache:
 
     def goto(self, numRecno):
         """
-        Nos sitúa en un registro concreto con la lectura de los campos.
+        Nos situa en un registro concreto con la lectura de los campos.
         """
         if numRecno < 0 or numRecno >= self.reccount():
             self.eof = True
@@ -180,7 +178,7 @@ class DBFcache:
     def rowid(self, numRecno):
         """
         Devuelve el id del registro numRecno.
-        @param numRecno: número de registro.
+        @param numRecno: numero de registro.
         """
         return self.liIDs[numRecno][0]
 
@@ -188,7 +186,7 @@ class DBFcache:
         """
         Busca el recno de un ID.
 
-        @param id: número de id.
+        @param id: numero de id.
         """
         for r in range(self.reccount()):
             if self.rowid(r) == id:
@@ -203,13 +201,13 @@ class DBFcache:
 
     def gotop(self):
         """
-        Salta al registro número 0.
+        Salta al registro numero 0.
         """
         return self.goto(0)
 
     def gobottom(self):
         """
-        Salta al registro último.
+        Salta al registro ultimo.
         """
         return self.goto(self.reccount() - 1)
 

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.ControlPosicion as ControlPosicion
 import Code.Jugada as Jugada
 

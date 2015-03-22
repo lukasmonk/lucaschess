@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.QT.QTUtil2 as QTUtil2
 import Code.QT.Colocacion as Colocacion
 import Code.QT.Iconos as Iconos
@@ -15,7 +13,7 @@ class WBoxing(QTVarios.WDialogo):
 
         self.boxing = boxing
 
-        # Diálogo ---------------------------------------------------------------
+        # Dialogo ---------------------------------------------------------------
         icono = Iconos.Resistencia()
         titulo = _("Resistance Test")
         tipo = boxing.tipo

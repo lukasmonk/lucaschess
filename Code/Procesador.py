@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import sys
 import os
 import random
@@ -55,7 +53,7 @@ import Code.QT.PantallaVoice as PantallaVoice
 
 class Procesador():
     """
-    Vínculo entre pantalla y gestores
+    Vinculo entre pantalla y gestores
     """
 
     def iniciaConUsuario(self, user):
@@ -66,7 +64,7 @@ class Procesador():
         self.blog = "http://lucaschess.blogspot.com"
 
         self.liOpcionesInicio = [   k_terminar, k_play, k_competicion, k_elo,
-                                    k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aquí porque sino no lo lee, en caso de aplazada
+                                    k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
 
         self.configuracion = Configuracion.Configuracion(user)
         self.configuracion.start(self.version)
@@ -78,13 +76,13 @@ class Procesador():
         self.teclaPanico = 32  # necesario
 
         self.siPrimeraVez = True
-        self.siPresentacion = False  # si está funcionando la presentación
+        self.siPresentacion = False  # si esta funcionando la presentacion
 
         self.posicionInicial = ControlPosicion.ControlPosicion()
         self.posicionInicial.posInicial()
 
         self.xrival = None
-        self.xtutor = None  # creaTutor lo usa así que hay que definirlo antes
+        self.xtutor = None  # creaTutor lo usa asi que hay que definirlo antes
 
         self.replay = None
         self.replayBeep = None
@@ -827,8 +825,8 @@ class Procesador():
 
         menu = QTVarios.LCMenu(self.pantalla)
 
-        menu1 = menu.opcion( "docs", _("Documents"), Iconos.Ayuda())
-
+        menu.opcion( "docs", _("Documents"), Iconos.Ayuda())
+        menu.separador()
         menu.opcion("web", _("Homepage"), Iconos.Web())
         menu.separador()
         menu1 = menu.submenu("Fresh news", Iconos.Blog())

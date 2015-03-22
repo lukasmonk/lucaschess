@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.TrListas as TrListas
 import Code.SAK as SAK
 
@@ -7,13 +5,15 @@ FEN_INICIAL = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 class ControlPosicion:
     """
-    Lleva el control del tablero, piezas en cada casilla, posibilidad de mover de una a otra, así como el turno....
+    Lleva el control del tablero, piezas en cada casilla, posibilidad de mover de una a otra, asi como el turno....
     A FEN record contains six fields. The separator between fields is a space. The fields are:
 
        1. Piece placement (from white's perspective). Each rank is described, starting with rank 8 and ending with rank 1; within each rank, the contents of each square are described from file a through file h. Following the Standard Algebraic Notation (SAN), each piece is identified by a single letter taken from the standard English names (pawn = "P", knight = "N", bishop = "B", rook = "R", queen = "Q" and king = "K").[1] White pieces are designated using upper-case letters ("PNBRQK") while Black take lowercase ("pnbrqk"). Blank squares are noted using digits 1 through 8 (the number of blank squares), and "/" separate ranks.
        2. Active color. "w" means white moves next, "b" means black.
-       3. Castling availability. If neither side can castle, this is "–". Otherwise, this has one or more letters: "K" (White can castle kingside), "Q" (White can castle queenside), "k" (Black can castle kingside), and/or "q" (Black can castle queenside).
-       4. En passant target square in algebraic notation. If there's no en passant target square, this is "–". If a pawn has just made a 2-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.
+       3. Castling availability. If neither side can castle, this is "-". Otherwise,
+       this has one or more letters: "K" (White can castle kingside),
+       "Q" (White can castle queenside), "k" (Black can castle kingside), and/or "q" (Black can castle queenside).
+       4. En passant target square in algebraic notation. If there's no en passant target square, this is "-". If a pawn has just made a 2-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.
        5. Halfmove clock: This is the number of halfmoves since the last pawn advance or capture. This is used to determine if a draw can be claimed under the fifty-move rule.
        6. Fullmove number: The number of the full move. It starts at 1, and is incremented after Black's move.
     """
@@ -33,7 +33,7 @@ class ControlPosicion:
         # self.leeFen( "7k/4Q3/8/6K1/8/8/8/8 w - - 0 1" ) # Mate en 2/3 para blancas
         # self.leeFen( "7K/4q3/8/6k1/8/8/8/8 w - - 0 1" ) # Mate en 2/3 para negras
         # self.leeFen( "7K/4q3/Q7/6k1/8/8/8/8 w - - 0 1" ) # Mate en 2/3 para negras
-        # self.leeFen( "8/3P3k/8/8/8/8/7K/8 w - - 0 1" ) # Peon a punto de coronar -> promoción
+        # self.leeFen( "8/3P3k/8/8/8/8/7K/8 w - - 0 1" ) # Peon a punto de coronar -> promocion
         # ~ self.leeFen( "7K/8/7k/4Q3/8/8/8/8 w - - 0 1" ) # Tablas
         #~ self.leeFen( "8/8/8/4k1P1/8/8/6P1/2K5 w - - 0 1" )
         # self.leeFen( "r3k1nr/pp1n1ppp/4p3/1N6/3N4/8/PP2KP1q/R1B1b3 w - - 0 1" ) # Mate a las blancas
@@ -90,9 +90,6 @@ class ControlPosicion:
             # self.alPaso = "-"
 
     def leeFen(self, fen):
-        """
-        Lee una definición FEN y lo pone en variables
-        """
         fen = fen.strip()
         if "/" not in fen:
             fen = FEN_INICIAL
@@ -243,10 +240,6 @@ class ControlPosicion:
         return resp
 
     def fen(self):
-        """
-        Devuelve el FEN de la situación actual.
-        """
-
         posicion = self.fenBase()
 
         self.legal()
@@ -255,7 +248,7 @@ class ControlPosicion:
 
     def fenM2(self):
         """
-        Se utiliza en análisis
+        Se utiliza en analisis
         """
         fen = self.fen()
         li = fen.split(" ")
@@ -291,18 +284,6 @@ class ControlPosicion:
         return self.mover(pv[:2], pv[2:4], pv[4:])
 
     def mover(self, desdeA1H8, hastaA1H8, coronacion=None):
-        """
-        desde y hasta en notación a1h8
-        para los peones que coronen, coronacion = pieza en que se convierte
-
-        Devuelve:
-            siCorrecto:
-                False + mensaje error
-                True + liExtras, movimientos adicionales, para tenerlos en cuenta en el tablero (por ejemplo en el enroque o captura al paso)
-                        liExtras = lista comando(b=borrar,m=mover, casilla/s)
-
-        """
-
         self.setSAK()
 
         mv = self.sak.moveExPV(desdeA1H8, hastaA1H8, coronacion)

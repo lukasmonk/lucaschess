@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 
 from PyQt4 import QtGui
@@ -75,7 +73,7 @@ class WTabDirector(QTVarios.WDialogo):
         # Tools
         listaPiezas = QTVarios.ListaPiezas(self, "P,N,B,R,Q,K,p,n,b,r,q,k", self.tablero, 18, margen=0)
 
-        # Guión
+        # Guion
         liAcciones = [( _("New"), Iconos.Nuevo(), self.gnuevo ),
                       ( _("Insert"), Iconos.Insertar(), self.ginsertar ),
                       ( _("Copy"), Iconos.Copiar(), self.gcopiar ), None,
@@ -815,7 +813,7 @@ class WTabDirector(QTVarios.WDialogo):
             self.cierraRecursos()
 
     def terminar(self):
-        self.guardarTablero()  # Solo guarda con Quit, con la x no, así hay mas control
+        self.guardarTablero()  # Solo guarda con Quit, con la x no, asi hay mas control
         self.close()
 
     def portapapeles(self):

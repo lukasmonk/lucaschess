@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 
 from PyQt4 import QtGui

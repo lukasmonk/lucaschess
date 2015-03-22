@@ -1,219 +1,118 @@
-# -*- coding: latin-1 -*-
-
 from PyQt4 import QtCore, QtGui
 
 class V(QtGui.QVBoxLayout):
-    """
-    Acomodación en vertical.
-    """
-
-    # def __init__(self):
-        # QtGui.QVBoxLayout.__init__(self)
-
     def control(self, control):
-        """
-        Añade un control.
-        """
         self.addWidget(control)
         return self
 
     def controlc(self, control):
-        """
-        Añade un control.
-        """
         self.addWidget(control)
         self.setAlignment(QtCore.Qt.AlignCenter)
         return self
 
     def controld(self, control):
-        """
-        Añade un control.
-        """
         self.addWidget(control)
         self.setAlignment(control, QtCore.Qt.AlignRight)
         return self
 
     def controli(self, control):
-        """
-        Añade un control.
-        """
         self.addWidget(control)
         self.setAlignment(control, QtCore.Qt.AlignLeft)
         return self
 
     def otro(self, layout):
-        """
-        Añade otro layout.
-        """
         self.addLayout(layout)
         return self
 
     def espacio(self, espacio):
-        """
-        Añade espacio fijo.
-        """
         self.addSpacing(espacio)
         return self
 
     def margen(self, n):
-        """
-        Margen exterior.
-        """
         self.setContentsMargins(n, n, n, n)
         return self
 
     def relleno(self, factor=1):
-        """
-        Añade espacio de relleno, que ocupa lo que puede según un factor = stretch.
-        """
         self.addStretch(factor)
         return self
 
 class H(QtGui.QHBoxLayout):
-    """
-    Acomodación en horizontal.
-    """
-
-    # def __init__(self):
-        # QtGui.QHBoxLayout.__init__(self)
-
     def control(self, control):
-        """
-        Añade un control.
-        """
         self.addWidget(control)
         return self
 
     def controld(self, control):
-        """
-        Añade un control.
-        """
         self.addWidget(control)
         self.setAlignment(control, QtCore.Qt.AlignRight)
         return self
 
     def controli(self, control):
-        """
-        Añade un control.
-        """
         self.addWidget(control)
         self.setAlignment(control, QtCore.Qt.AlignLeft)
         return self
 
     def otro(self, layout):
-        """
-        Añade otro layout.
-        """
         self.addLayout(layout)
         return self
 
     def otroi(self, layout):
-        """
-        Añade otro layout.
-        """
         self.addLayout(layout)
         self.setAlignment(layout, QtCore.Qt.AlignLeft)
         return self
 
     def otroc(self, layout):
-        """
-        Añade otro layout.
-        """
         self.addLayout(layout)
         self.setAlignment(layout, QtCore.Qt.AlignCenter)
         return self
 
     def espacio(self, espacio):
-        """
-        Añade espacio fijo.
-        """
         self.addSpacing(espacio)
         return self
 
     def ponSeparacion(self, tam):
-        """
-        Separación entre controles
-        """
         self.setSpacing(tam)
         return self
 
     def margen(self, n):
-        """
-        Margen exterior.
-        """
         self.setContentsMargins(n, n, n, n)
         return self
 
     def relleno(self, factor=1):
-        """
-        Añade espacio de relleno, que ocupa lo que puede según un factor = stretch.
-        """
         self.addStretch(factor)
         return self
 
 class G(QtGui.QGridLayout):
-    """
-    Acomodación en tabla.
-    """
-
-    # def __init__(self):
-        # QtGui.QGridLayout.__init__(self)
-
     dicAlineacion = {None: QtCore.Qt.AlignLeft, "d": QtCore.Qt.AlignRight, "c": QtCore.Qt.AlignCenter}
 
     def control(self, control, fila, columna, numFilas=1, numColumnas=1, alineacion=None):
-        """
-        Añade un control.
-        """
         self.addWidget(control, fila, columna, numFilas, numColumnas, self.dicAlineacion[alineacion])
         return self
 
     def controld(self, control, fila, columna, numFilas=1, numColumnas=1):
-        """
-        Añade un control.
-        """
         self.addWidget(control, fila, columna, numFilas, numColumnas, self.dicAlineacion["d"])
         return self
 
     def controlc(self, control, fila, columna, numFilas=1, numColumnas=1):
-        """
-        Añade un control.
-        """
         self.addWidget(control, fila, columna, numFilas, numColumnas, self.dicAlineacion["c"])
         return self
 
     def otro(self, layout, fila, columna, numFilas=1, numColumnas=1, alineacion=None):
-        """
-        Añade otro layout.
-        """
         self.addLayout(layout, fila, columna, numFilas, numColumnas, self.dicAlineacion[alineacion])
         return self
 
     def otroc(self, layout, fila, columna, numFilas=1, numColumnas=1):
-        """
-        Añade otro layout.
-        """
         self.addLayout(layout, fila, columna, numFilas, numColumnas, self.dicAlineacion["c"])
         return self
 
     def otrod(self, layout, fila, columna, numFilas=1, numColumnas=1):
-        """
-        Añade otro layout.
-        """
         self.addLayout(layout, fila, columna, numFilas, numColumnas, self.dicAlineacion["d"])
         return self
 
     def margen(self, n):
-        """
-        Margen exterior.
-        """
         self.setContentsMargins(n, n, n, n)
         return self
 
     def rellenoColumna(self, col, factor):
-        """
-        Añade espacio de relleno, que ocupa lo que puede según un factor = stretch.
-        """
         self.setColumnStretch(col, factor)
         return self
 

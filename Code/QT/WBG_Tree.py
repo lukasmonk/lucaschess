@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import collections
 
 from PyQt4 import QtGui, QtCore

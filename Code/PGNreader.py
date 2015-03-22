@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import codecs
 
 import Code.Util as Util
@@ -31,7 +30,7 @@ class Move:
         self.hasta = None
         self.coronacion = None
         self.siMate = False
-        self.siDesconocido = False  # Si ha sido una terminación de partida, por causas desconocidas
+        self.siDesconocido = False  # Si ha sido una terminacion de partida, por causas desconocidas
         self.fenPrev = ""
         self.fen = ""
 
@@ -105,12 +104,15 @@ class Moves:
                 desde = pos
                 hasta = pos
                 pos += 1
-                while pos < ntxt and txt[pos] in "abcdefghKQRBN12345678xX=p.":
+                while pos < ntxt and txt[pos] in "abcdefghKQRBN12345678xX-=p.":
                     hasta += 1
                     pos += 1
 
                 mv = Move()
                 x = mv.pgn = txt[desde:hasta + 1]
+                if "-" in x:
+                    x = x.replace("-", "")
+                    mv.pgn = x
                 if not (x in ("ep", "e.p.", "e.p", "ep." )):
                     self.liMoves.append(mv)
 
@@ -273,11 +275,13 @@ class Moves:
                 desde = pos
                 hasta = pos
                 pos += 1
-                while pos < ntxt and txt[pos] in "abcdefghKQRBN12345678xX=p.":
+                while pos < ntxt and txt[pos] in "abcdefghKQRBN12345678xX-=p.":
                     hasta += 1
                     pos += 1
 
                 x = txt[desde:hasta + 1]
+                if "-" in x:
+                    x = x.replace("-", "")
                 if not (x in ("ep", "e.p.", "e.p", "ep." )):
                     pv = SAK.sak.pgn2pv(x)
                     if len(pv) < 4:

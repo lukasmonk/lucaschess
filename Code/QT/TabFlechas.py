@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import copy
 
 from PyQt4 import QtCore, QtGui
@@ -49,7 +48,7 @@ class FlechaSC(TabBloques.BloqueEspSC):
         if bf.destino == "c":
             hx = hc * ac - ac / 2
             hy = hf * ac - ac / 2
-        elif bf.destino == "m":  # mínimo
+        elif bf.destino == "m":  # minimo
             min_v = 99999999999
             min_hx = min_hy = 0
             for x in ( 3, 2, 1 ):  # 3/4 = izquierda 1/2 y 1/4 izquierda
@@ -230,7 +229,7 @@ def paintArrow(painter, bf):
     xp = 1.0 - float(altoCab) / tamLinea
     pbc = linea.pointAt(xp)  # base de la cabeza
 
-    # Usamos una linea a 90º para calcular los puntos del final de la cabeza de flecha
+    # Usamos una linea a 90 grados para calcular los puntos del final de la cabeza de flecha
     l90 = linea.normalVector()
     l90.setLength(ancho + vuelo * 2)
     l90.translate(pbc - p_ini)  # la llevamos a la base de la cabeza
@@ -239,9 +238,9 @@ def paintArrow(painter, bf):
     p_ala2 = l90.p1()  # final del ala de un lado
 
     xp = 1.0 - float(altoCab - bf.descuelgue) / tamLinea
-    p_basecab = linea.pointAt(xp)  # Punto teniendo en cuenta el angulo en la base de la cabeza, válido para tipo c y p
+    p_basecab = linea.pointAt(xp)  # Punto teniendo en cuenta el angulo en la base de la cabeza, valido para tipo c y p
 
-    # Puntos de la base, se calculan aunque no se dibujen para determinar el polígono de control
+    # Puntos de la base, se calculan aunque no se dibujen para determinar el poligono de control
     l90 = linea.normalVector()
     l90.setLength(ancho)
     p_base1 = l90.pointAt(0.5)  # final de la base de un lado
@@ -254,19 +253,19 @@ def paintArrow(painter, bf):
     lf.translate(p_base2 - p_base1)
     p_cab2 = lf.p2()
 
-    # Polígonos para determinar si se ha pulsado sobre la flecha
+    # Poligonos para determinar si se ha pulsado sobre la flecha
     xancho = max(ancho + vuelo * 2.0, 16.0)
     xl90 = linea.normalVector()
     xl90.setLength(xancho)
     xp_base2 = xl90.pointAt(0.5)
     xl90.translate(xp_base2 - xl90.p2())  # La colocamos que empiece en base1
     xp_base1 = xl90.p1()
-    xpbb = linea.pointAt(0.15)  # Siempre un 15% para cambiar de tamaño por el pie
+    xpbb = linea.pointAt(0.15)  # Siempre un 15% para cambiar de tama_o por el pie
     xl90.translate(xpbb - p_ini)  # la llevamos a la base de la cabeza
     xp_medio1b = xl90.p1()
     xp_medio2b = xl90.p2()
     xl90.translate(p_ini - xpbb)  # la llevamos a la base para poderla trasladar
-    xpbc = linea.pointAt(0.85)  # Siempre un 15% para cambiar de tamaño por la cabeza
+    xpbc = linea.pointAt(0.85)  # Siempre un 15% para cambiar de tama_o por la cabeza
     xl90.translate(xpbc - p_ini)  # la llevamos a la base de la cabeza
     xp_medio1t = xl90.p1()
     xp_medio2t = xl90.p2()

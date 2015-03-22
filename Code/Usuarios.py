@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import cPickle
 
 import Code.Configuracion as Configuracion

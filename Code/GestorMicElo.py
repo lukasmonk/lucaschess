@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 import datetime
 
@@ -373,7 +371,7 @@ class GestorMicElo(Gestor.Gestor):
             self.sigueHumano()
             return False
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:

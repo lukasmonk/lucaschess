@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 import time
 
 from PyQt4 import QtCore, QtGui
@@ -551,7 +550,6 @@ def unMomento(owner):
 
 def analizando(owner):
     return mensEspera.inicio(owner, _("Analyzing the move...."), posicion="ad")
-
 
 def ponIconosMotores(lista):
     liResp = []

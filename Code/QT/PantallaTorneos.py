@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import sys
 import shutil
@@ -170,7 +168,7 @@ class WUnTorneo(QTVarios.WDialogo):
         fvar = VarGen.configuracion.ficheroBooks
         self.listaLibros = Books.ListaLibros()
         self.listaLibros.recuperaVar(fvar)
-        ## Comprobamos que todos estén accesibles
+        ## Comprobamos que todos esten accesibles
         self.listaLibros.comprueba()
         li = [(x.nombre, x.path) for x in self.listaLibros.lista]
         li.insert(0, ("* " + _("Default"), ""))
@@ -178,7 +176,7 @@ class WUnTorneo(QTVarios.WDialogo):
         btNuevoBook = Controles.PB(self, "", self.nuevoBook, plano=False).ponIcono(Iconos.Nuevo(), tamIcon=16)
         lyBook = Colocacion.H().control(self.cbBooks).control(btNuevoBook).relleno()
 
-        ## Posicióninicial
+        ## Posicion inicial
         lbFEN = Controles.LB(self, _("Initial position") + ": ")
         self.fen = torneo.fen()
         self.btPosicion = Controles.PB(self, " " * 5 + _("Change") + " " * 5, self.posicionEditar).ponPlano(False)
@@ -717,57 +715,35 @@ class WUnTorneo(QTVarios.WDialogo):
                 self.gridGames.refresh()
                 self.borraResult()
 
-    def gmMostrar(self):
-        li = self.gridGames.recnosSeleccionados()
-        if li:
-            # Se genera un PGN
-            pgn = self.torneo.grabaPGNgames(li)
-            if pgn:
-
-                fpgn = Util.ficheroTemporal("Tmp", "pgn")
-                f = codecs.open(fpgn, "w", "utf-8", 'ignore')
-                f.write(pgn)
-                f.close()
-
-                # Se lanza otro LC con ese PGN
-                QTUtil2.mensajeTemporal(self, _("One moment please..."), 0.3)
-                if sys.argv[0].endswith(".py"):
-                    subprocess.Popen(["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", fpgn])
-                else:
-                    subprocess.Popen(["Lucas.exe" if VarGen.isWindows else "Lucas", fpgn])
-
-    def gmGuardar(self):
+    def pgnActual(self):
+        nrec = self.gridGames.reccount()
+        if not nrec:
+            return None
         li = self.gridGames.recnosSeleccionados()
         if not li:
-            return
-        pgn = self.torneo.grabaPGNgames(li)
-        if not pgn:
-            return
-        extension = "pgn"
-        resp = QTUtil2.salvaFichero(self, _("File to save"), VarGen.configuracion.dirSalvados,
-                                    _("File") + " %s (*.%s)" % (extension, extension), False)
-        if resp:
-            try:
-                modo = "w"
-                if Util.existeFichero(resp):
-                    # yn = QTUtil2.preguntaCancelar( self, _X( _("The file %1 already exists, what do you want to do?"), resp ), si=_("Append"), no=_("Overwrite") )
-                    # if yn is None:
-                    # return
-                    # if yn:
-                    modo = "a"
-                    pgn = "\n" * 2 + pgn
-                f = codecs.open(resp, modo, 'utf-8', 'ignore')
-                f.write(pgn.replace("\n", "\r\n"))
-                f.close()
-                QTUtil2.mensaje(self, _X(_("Saved to %1"), resp))
-                direc = os.path.dirname(resp)
-                if direc != VarGen.configuracion.dirSalvados:
-                    VarGen.configuracion.dirSalvados = direc
-                    VarGen.configuracion.graba()
-            except:
-                QTUtil.ponPortapapeles(pgn)
-                QTUtil2.mensError(self, "%s : %s\n\n%s" % (
-                    _("Unable to save"), resp, _("It is saved in the clipboard to paste it wherever you want.") ))
+            li = range(nrec)
+        return self.torneo.grabaPGNgames(li)
+
+
+    def gmMostrar(self):
+        pgn = self.pgnActual()
+        if pgn:
+            fpgn = Util.ficheroTemporal("Tmp", "pgn")
+            f = codecs.open(fpgn, "w", "utf-8", 'ignore')
+            f.write(pgn)
+            f.close()
+
+            # Se lanza otro LC con ese PGN
+            QTUtil2.mensajeTemporal(self, _("One moment please..."), 0.3)
+            if sys.argv[0].endswith(".py"):
+                subprocess.Popen(["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", fpgn])
+            else:
+                subprocess.Popen(["Lucas.exe" if VarGen.isWindows else "Lucas", fpgn])
+
+    def gmGuardar(self):
+        pgn = self.pgnActual()
+        if pgn:
+            QTVarios.savePGN(self, pgn)
 
 class WTorneos(QTVarios.WDialogo):
     def __init__(self, wParent):

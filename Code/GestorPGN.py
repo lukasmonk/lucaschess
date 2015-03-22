@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import sys
 
@@ -233,7 +231,7 @@ class GestorPGN(Gestor.Gestor):
             if self.configuracion.dirPGN != carpeta:
                 self.configuracion.dirPGN = carpeta
                 self.configuracion.graba()
-        # ~ else ya está el nombre
+        # ~ else ya esta el nombre
 
         fpgn = PGN.PGN()
 
@@ -347,7 +345,7 @@ class GestorPGN(Gestor.Gestor):
 
     def actualPGN(self):
 
-        # cabecera será el inicio de pgnpaste
+        # cabecera sera el inicio de pgnpaste
         txt = self.pgnPaste.strip()
         cab = ""
         result = ""

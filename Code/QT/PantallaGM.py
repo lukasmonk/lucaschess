@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import shutil
 import urllib
@@ -7,6 +5,7 @@ import zipfile
 
 from PyQt4 import QtCore, QtGui
 
+import Code.VarGen as VarGen
 import Code.Util as Util
 import Code.GM as GM
 import Code.Books as Books
@@ -102,7 +101,7 @@ class WGM(QTVarios.WDialogo):
         fvar = self.configuracion.ficheroBooks
         self.listaLibros = Books.ListaLibros()
         self.listaLibros.recuperaVar(fvar)
-        # # Comprobamos que todos estén accesibles
+        # # Comprobamos que todos esten accesibles
         self.listaLibros.comprueba()
         li = [(x.nombre, x) for x in self.listaLibros.lista]
         li.insert(0, ("--", None))
@@ -147,7 +146,7 @@ class WGM(QTVarios.WDialogo):
         gbAdvanced = Controles.GB(self, "", vlayout)
         gbAdvanced.setFlat(True)
 
-        # Histórico
+        # Historico
         self.liHisto = []
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("FECHA", _("Date"), 80, siCentrado=True)
@@ -634,7 +633,7 @@ def importarGM(ownerGM):
     for linea in f:
         linea = linea.strip()
         if linea:
-            gm, nombre, ctam, cpart = linea.split("·")
+            gm, nombre, ctam, cpart = linea.split(VarGen.XSEP)
             if Util.tamFichero("gm/%s.xgm" % gm) != int(ctam): # si no existe tam = -1
                 dic = {"GM": gm, "NOMBRE": nombre, "PARTIDAS": cpart, "ELEGIDO": False}
                 liGM.append(dic)

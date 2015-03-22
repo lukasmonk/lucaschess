@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import random
 import time
 import atexit
@@ -8,6 +6,7 @@ import base64
 
 from PyQt4 import QtGui, QtCore
 
+import Code.VarGen as VarGen
 import Code.Util as Util
 import Code.ControlPosicion as ControlPosicion
 import Code.Jugada as Jugada
@@ -28,7 +27,7 @@ def lee1LineaMFN(linea):
     cabs, pv, jugada = linea.strip().split("||")
     dic = Util.SymbolDict()
     for x in cabs.split("|"):
-        k, v = x.split("·")
+        k, v = x.split(VarGen.XSEP)
         dic[k] = v
     p = Partida.Partida()
     p.leerPV(pv)

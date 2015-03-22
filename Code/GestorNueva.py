@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from Code.Constantes import *
 
 import Code.VarGen as VarGen
@@ -276,7 +274,7 @@ class GestorNueva(Gestor.Gestor):
 
         movimiento = desde + hasta
 
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:

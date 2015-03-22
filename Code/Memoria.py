@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import Code.Util as Util
 
 import Code.QT.PantallaMemoria as PantallaMemoria

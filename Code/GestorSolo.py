@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import sys
 import time
@@ -276,7 +274,7 @@ class GestorSolo(Gestor.Gestor):
         self.pantalla.ponToolBar(li)
 
     def finPartida(self):
-        # Comprobamos que no haya habido cambios desde el último grabado
+        # Comprobamos que no haya habido cambios desde el ultimo grabado
         if self.siCambios and self.partida.numJugadas():
             resp = QTUtil2.preguntaCancelar(self.pantalla, _("Do you want to save changes to a file?"), _("Yes"),
                                             _("No"))
@@ -345,7 +343,7 @@ class GestorSolo(Gestor.Gestor):
         self.activaColor(siBlancas)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-        # Peón coronando
+        # Peon coronando
         if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
             if coronacion is None:
@@ -365,7 +363,7 @@ class GestorSolo(Gestor.Gestor):
                 self.siJuegaMotor = False
                 self.desactivaTodas()
                 self.juegaRival()
-                self.siJuegaMotor = True  # Como juega por mi pasa por aquí, para que no se meta en un bucle infinito
+                self.siJuegaMotor = True  # Como juega por mi pasa por aqui, para que no se meta en un bucle infinito
 
             self.siguienteJugada()
             return True
@@ -866,7 +864,7 @@ class GestorSolo(Gestor.Gestor):
 
             dr = dic["RIVAL"]
             rival = dr["CM"]
-            r_t = dr["TIEMPO"] * 100  # Se guarda en décimas -> milésimas
+            r_t = dr["TIEMPO"] * 100  # Se guarda en decimas -> milesimas
             r_p = dr["PROFUNDIDAD"]
             if r_t <= 0:
                 r_t = None

@@ -1,4 +1,3 @@
-# -*- coding:latin-1 -*-
 import os
 import struct
 import time

@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 
 from PyQt4 import QtGui
@@ -68,7 +66,7 @@ class WTabVisual(QTVarios.WDialogo):
         self.listaPiezasW = QTVarios.ListaPiezas(self, "P;N;B;R;Q;K", self.tablero, 32)
         self.listaPiezasB = QTVarios.ListaPiezas(self, "p;n;b;r;q;k", self.tablero, 32)
 
-        # Guión
+        # Guion
         liAcciones = [( _("New"), Iconos.Nuevo(), "gnuevo" ),
                       ( _("Insert"), Iconos.Insertar(), "ginsertar" ),
                       ( _("Copy"), Iconos.Copiar(), "gcopiar" ), None,
@@ -94,7 +92,7 @@ class WTabVisual(QTVarios.WDialogo):
         # Visuales
         self.dragBandaArriba = QTVarios.DragBanda(self, (10,), 40)
 
-        # Guión
+        # Guion
         lyGuion = Colocacion.V().control(tbGuion).control(self.g_guion)
 
         # Zona tablero
@@ -646,7 +644,7 @@ class WTabVisual(QTVarios.WDialogo):
         self.cierraRecursos()
 
     def terminar(self):
-        self.guardarTablero()  # Solo guarda con Quit, con la x no, así hay mas control
+        self.guardarTablero()  # Solo guarda con Quit, con la x no, asi hay mas control
         # self.cierraRecursos()
         self.close()
 

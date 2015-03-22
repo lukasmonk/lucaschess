@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 from Code.Constantes import *
 
 import Code.QT.QTUtil2 as QTUtil2
@@ -42,7 +40,7 @@ class Personalidades:
         if una is None:
             una = {}
 
-        # Datos básicos
+        # Datos basicos
         liGen = [(None, None )]
         liGen.append(( FormLayout.Editbox(_("Name")), una.get("NOMBRE", "") ))
 

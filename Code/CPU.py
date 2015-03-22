@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import collections
 import time
 

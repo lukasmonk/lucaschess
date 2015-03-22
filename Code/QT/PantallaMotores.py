@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 import os
 import operator
 import random
@@ -27,7 +25,7 @@ class WMotores(QTVarios.WDialogo):
         self.listaMotores.leer()
         self.siCambios = False
 
-        # Diálogo ---------------------------------------------------------------
+        # Dialogo ---------------------------------------------------------------
         icono = Iconos.MotoresExternos()
         titulo = _("External engines")
         extparam = "motoresExternos"
@@ -208,7 +206,7 @@ class WMotor(QtGui.QDialog):
             fvar = VarGen.configuracion.ficheroBooks
             self.listaLibros = Books.ListaLibros()
             self.listaLibros.recuperaVar(fvar)
-            # # Comprobamos que todos estén accesibles
+            # # Comprobamos que todos esten accesibles
             self.listaLibros.comprueba()
             li = [(x.nombre, x.path) for x in self.listaLibros.lista]
             li.insert(0, ("* " + _("Engine book"), "-"))

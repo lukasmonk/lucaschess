@@ -1,13 +1,9 @@
-# -*- coding: latin-1 -*-
-
 import os
 import time
 import codecs
 import random
 import sys
 import subprocess
-from encodings.aliases import aliases
-import chardet.universaldetector
 
 from Code.Constantes import *
 import Code.VarGen as VarGen
@@ -34,7 +30,6 @@ import Code.QT.PantallaColores as PantallaColores
 import Code.QT.PantallaArbol as PantallaArbol
 import Code.QT.PantallaArbolBook as PantallaArbolBook
 import Code.QT.WBGuide as WBGuide
-import Code.QT.FormLayout as FormLayout
 
 class Gestor():
     def __init__(self, procesador):
@@ -50,7 +45,7 @@ class Gestor():
 
         self.liKibitzersActivas = procesador.liKibitzersActivas
 
-        self.estado = kFinJuego  # Para que siempre esté definido
+        self.estado = kFinJuego  # Para que siempre este definido
 
         self.tipoJuego = None
         self.ayudas = None
@@ -93,7 +88,7 @@ class Gestor():
 
         self.tablero.exePulsadoNum = self.exePulsadoNum
 
-        self.siRevision = True  # controla si hay mostrar el rótulo de revisando
+        self.siRevision = True  # controla si hay mostrar el rotulo de revisando
 
         # Capturas
         self.capturasActivable = False
@@ -102,7 +97,7 @@ class Gestor():
         self.informacionActivable = True
 
         # x Control del tutor
-        #  así sabemos si ha habido intento de análisis previo (por ejemplo el usuario mientras piensa decide activar el tutor)
+        #  asi sabemos si ha habido intento de analisis previo (por ejemplo el usuario mientras piensa decide activar el tutor)
         self.siIniAnalizaTutor = False
 
         # Atajos raton:
@@ -181,7 +176,7 @@ class Gestor():
         if not li:
             return None
 
-        # Se comprueba si algún movimiento puede empezar o terminar ahí
+        # Se comprueba si algun movimiento puede empezar o terminar ahi
         siOrigen = siDestino = False
         for mov in li:
             desde = mov.desde()
@@ -232,7 +227,7 @@ class Gestor():
             self.atajosRatonReset()
             return
         # Que hay en esa casilla:
-        # vacía o pieza contraria = destino
+        # vacia o pieza contraria = destino
         # pieza nuestra = origen
 
         numJugadas, nj, fila, siBlancas = self.jugadaActual()
@@ -248,7 +243,7 @@ class Gestor():
         if not li:
             return
 
-        # Se comprueba si algún movimiento puede empezar o terminar ahí
+        # Se comprueba si algun movimiento puede empezar o terminar ahi
         siOrigen = siDestino = False
         for mov in li:
             desde = mov.desde()
@@ -636,7 +631,7 @@ class Gestor():
     def ponteAlPrincipio(self):
         self.ponPosicion(self.partida.iniPosicion)
         self.pantalla.base.pgn.goto(0, 0)
-        self.pantalla.base.pgnRefresh()  # No se puede usar pgnRefresh, ya que se usa con gobottom en otros lados y aquí eso no funciona
+        self.pantalla.base.pgnRefresh()  # No se puede usar pgnRefresh, ya que se usa con gobottom en otros lados y aqui eso no funciona
         self.ponVista()
 
     def ponteAlPrincipioColor(self):
@@ -645,7 +640,7 @@ class Gestor():
             self.ponPosicion(jg.posicion)
             self.pantalla.base.pgn.goto(0, 2 if jg.posicion.siBlancas else 1)
             self.tablero.ponFlechaSC(jg.desde, jg.hasta)
-            self.pantalla.base.pgnRefresh()  # No se puede usar pgnRefresh, ya que se usa con gobottom en otros lados y aquí eso no funciona
+            self.pantalla.base.pgnRefresh()  # No se puede usar pgnRefresh, ya que se usa con gobottom en otros lados y aqui eso no funciona
             self.ponVista()
         else:
             self.ponteAlPrincipio()
@@ -669,7 +664,7 @@ class Gestor():
             self.mueveJugada(kMoverFinal)
         else:
             self.ponPosicion(self.partida.iniPosicion)
-            self.pantalla.base.pgnRefresh()  # No se puede usar pgnRefresh, ya que se usa con gobottom en otros lados y aquí eso no funciona
+            self.pantalla.base.pgnRefresh()  # No se puede usar pgnRefresh, ya que se usa con gobottom en otros lados y aqui eso no funciona
         self.ponVista()
 
     def jugadaActual(self):
@@ -802,7 +797,7 @@ class Gestor():
 
     def fenActivoConInicio(self):
         """
-        Incluye la posición inicial
+        Incluye la posicion inicial
         """
 
         pos, jg = self.jugadaActiva()
@@ -934,7 +929,7 @@ class Gestor():
 
     def finalX0(self):
         # Se llama desde la pantalla al pulsar X
-        # Se comprueba si estamos en la película
+        # Se comprueba si estamos en la pelicula
         if self.xpelicula:
             self.xpelicula.terminar()
             return False
@@ -968,7 +963,7 @@ class Gestor():
     def exePulsadoNum(self, siActivar, numero):
         if numero in [1, 2, 7, 8]:
             if siActivar:
-                # Que jugada está en el tablero
+                # Que jugada esta en el tablero
                 fen = self.fenActivoConInicio()
                 siBlancas = " w " in fen
                 if siBlancas:
@@ -1351,7 +1346,7 @@ class Gestor():
                     submenu.opcion("analizar_grafico", _("Show graphics"), Iconos.Estadisticas())
                 menu.separador()
 
-        # Película
+        # Pelicula
         if siJugadas:
             menu.opcion("pelicula", _("Replay game"), Iconos.Pelicula())
             menu.separador()
@@ -1530,7 +1525,7 @@ class Gestor():
         dato = self.listado(extension)
         if siFichero:
             if extension == "pgn":
-                self.savePGN()
+                QTVarios.savePGN( self.pantalla, self.pgn.actual())
                 return
 
             resp = QTUtil2.salvaFichero(self.pantalla, _("File to save"), self.configuracion.dirSalvados,
@@ -1540,17 +1535,14 @@ class Gestor():
 
                     modo = "w"
                     if Util.existeFichero(resp):
-                        if extension == "pgn":
-                            yn = True  # alfons : gone is gone
-                        else:
-                            yn = QTUtil2.preguntaCancelar(self.pantalla,
-                                                          _X(_("The file %1 already exists, what do you want to do?"),
-                                                             resp), si=_("Append"), no=_("Overwrite"))
-                            if yn is None:
-                                return
-                        if yn:
-                            modo = "a"
-                            dato = "\n" * 2 + dato
+                        yn = QTUtil2.preguntaCancelar(self.pantalla,
+                                                      _X(_("The file %1 already exists, what do you want to do?"),
+                                                         resp), si=_("Append"), no=_("Overwrite"))
+                        if yn is None:
+                            return
+                    if yn:
+                        modo = "a"
+                        dato = "\n" * 2 + dato
                     f = codecs.open(resp, modo, 'utf-8', 'ignore')
                     f.write(dato.replace("\n", "\r\n"))
                     f.close()
@@ -1724,7 +1716,7 @@ class Gestor():
         menu.lanza()
 
     def saveSelectedPosition(self, lineaTraining):
-        # Llamado desde GestorEnPos and GestorEntTac, para salvar la posición tras pulsar una P
+        # Llamado desde GestorEnPos and GestorEntTac, para salvar la posicion tras pulsar una P
         f = open(self.configuracion.ficheroSelectedPositions, "ab")
         f.write(lineaTraining + "\n")
         f.close()
@@ -1774,97 +1766,98 @@ class Gestor():
             tipo = "ms" if tipo == "mt" else "mt"
         return True
 
-    def savePGN( self ):
-        dicVariables = self.configuracion.leeVariables("SAVEPGN")
+    # def savePGN( self ):
+        # QTVarios.savePGN( self.pantalla, self.pgn.actual())
 
-        liGen = [(None, None)]
+        # dicVariables = self.configuracion.leeVariables("SAVEPGN")
 
-        liHistorico = dicVariables.get("LIHISTORICO")
+        # liGen = [(None, None)]
 
-        config = FormLayout.Fichero(_("File to save"), "pgn", True, liHistorico=liHistorico, anchoMinimo=300)
-        liGen.append(( config, "" ))
+        # liHistorico = dicVariables.get("LIHISTORICO")
 
-        #Codec
-        liCodecs = [k for k in set(v for k,v in aliases.iteritems())]
-        liCodecs.sort()
-        liCodecs = [(k,k) for k in liCodecs]
-        liCodecs.insert( 0, (_("Same as file"), "file" ) )
-        liCodecs.insert( 0, ("%s: UTF-8"%_("By default"), "default" ) )
-        config = FormLayout.Combobox(_("Write with the codec"), liCodecs)
-        codec = dicVariables.get("CODEC", "default")
-        liGen.append(( config, codec ))
+        # config = FormLayout.Fichero(_("File to save"), "pgn", True, liHistorico=liHistorico, anchoMinimo=300)
+        # liGen.append(( config, "" ))
 
-        #Overwrite
-        liGen.append( ( _("Overwrite"), dicVariables.get("OVERWRITE", False)) )
+        # #Codec
+        # liCodecs = [k for k in set(v for k,v in aliases.iteritems())]
+        # liCodecs.sort()
+        # liCodecs = [(k,k) for k in liCodecs]
+        # liCodecs.insert( 0, (_("Same as file"), "file" ) )
+        # liCodecs.insert( 0, ("%s: UTF-8"%_("By default"), "default" ) )
+        # config = FormLayout.Combobox(_("Write with the codec"), liCodecs)
+        # codec = dicVariables.get("CODEC", "default")
+        # liGen.append(( config, codec ))
 
-        #Remove comments
-        liGen.append( ( _("Remove comments and variations"), dicVariables.get("REMCOMMENTSVAR", False)) )
+        # #Overwrite
+        # liGen.append( ( _("Overwrite"), dicVariables.get("OVERWRITE", False)) )
 
-        # Editamos
-        resultado = FormLayout.fedit(liGen, title=_("Save PGN"), parent=self.pantalla, icon=Iconos.PGN())
-        if resultado is None:
-            return
+        # #Remove comments
+        # liGen.append( ( _("Remove comments and variations"), dicVariables.get("REMCOMMENTSVAR", False)) )
 
-        accion, liResp = resultado
-        fichero, codec, overwrite, remcommentsvar = liResp
-        if not fichero:
-            return
-        if not liHistorico:
-            liHistorico = []
-        if fichero in liHistorico:
-            del liHistorico[liHistorico.index(fichero)]
-            chardet
-        liHistorico.insert(0,fichero)
+        # # Editamos
+        # resultado = FormLayout.fedit(liGen, title=_("Save PGN"), parent=self.pantalla, icon=Iconos.PGN())
+        # if resultado is None:
+            # return
 
-        dicVariables["LIHISTORICO"] = liHistorico[:20]
-        dicVariables["CODEC"] = codec
-        dicVariables["OVERWRITE"] = overwrite
-        dicVariables["REMCOMMENTSVAR"] = remcommentsvar
+        # accion, liResp = resultado
+        # fichero, codec, overwrite, remcommentsvar = liResp
+        # if not fichero:
+            # return
+        # if not liHistorico:
+            # liHistorico = []
+        # if fichero in liHistorico:
+            # del liHistorico[liHistorico.index(fichero)]
+        # liHistorico.insert(0,fichero)
 
-        self.configuracion.escVariables("SAVEPGN",dicVariables)
-        carpeta, name = os.path.split(fichero)
-        if carpeta != self.configuracion.dirSalvados:
-            self.configuracion.dirSalvados = carpeta
-            self.configuracion.graba()
+        # dicVariables["LIHISTORICO"] = liHistorico[:20]
+        # dicVariables["CODEC"] = codec
+        # dicVariables["OVERWRITE"] = overwrite
+        # dicVariables["REMCOMMENTSVAR"] = remcommentsvar
 
-        if remcommentsvar:
-            p = partida.copia()
-            p.borraCV( )
-            x = self.partida
-            self.partida = p
-            pgn = self.pgn.actual()
-            self.partida = x
-        else:
-            pgn = self.pgn.actual()
-        pgn = pgn.replace( "\n", "\r\n" )
+        # self.configuracion.escVariables("SAVEPGN",dicVariables)
+        # carpeta, name = os.path.split(fichero)
+        # if carpeta != self.configuracion.dirSalvados:
+            # self.configuracion.dirSalvados = carpeta
+            # self.configuracion.graba()
 
-        modo = "w" if overwrite else "a"
-        if not overwrite:
-            if not Util.existeFichero(fichero):
-                modo = "w"
-        if codec == "default":
-            codec = "utf-8"
-        elif code == "file":
-            codec = "utf-8"
-            if Util.existeFichero(fichero):
-                f = open(fich)
-                u = chardet.universaldetector.UniversalDetector()
-                for n, x in enumerate(f):
-                    u.feed(x)
-                    if n == 1000:
-                        break
-                f.close()
-                u.close()
-                codec = u.result.get("encoding", "utf-8")
+        # if remcommentsvar:
+            # p = partida.copia()
+            # p.borraCV( )
+            # x = self.partida
+            # self.partida = p
+            # pgn = self.pgn.actual()
+            # self.partida = x
+        # else:
+            # pgn = self.pgn.actual()
+        # pgn = pgn.replace( "\n", "\r\n" )
 
-        try:
-            f = codecs.open( fichero, modo, codec, 'ignore' )
-            if modo == "a":
-                f.write( "\r\n\r\n" )
-            f.write(pgn)
-            f.close()
-            QTUtil2.mensajeTemporal( self.pantalla, _( "Saved" ), 1.2 )
-        except:
-            QTUtil.ponPortapapeles(self.pgn.actual())
-            QTUtil2.mensError(self.pantalla, "%s : %s\n\n%s" % (_("Unable to save"), fichero, _("It is saved in the clipboard to paste it wherever you want.") ))
+        # modo = "w" if overwrite else "a"
+        # if not overwrite:
+            # if not Util.existeFichero(fichero):
+                # modo = "w"
+        # if codec == "default":
+            # codec = "utf-8"
+        # elif code == "file":
+            # codec = "utf-8"
+            # if Util.existeFichero(fichero):
+                # f = open(fich)
+                # u = chardet.universaldetector.UniversalDetector()
+                # for n, x in enumerate(f):
+                    # u.feed(x)
+                    # if n == 1000:
+                        # break
+                # f.close()
+                # u.close()
+                # codec = u.result.get("encoding", "utf-8")
+
+        # try:
+            # f = codecs.open( fichero, modo, codec, 'ignore' )
+            # if modo == "a":
+                # f.write( "\r\n\r\n" )
+            # f.write(pgn)
+            # f.close()
+            # QTUtil2.mensajeTemporal( self.pantalla, _( "Saved" ), 1.2 )
+        # except:
+            # QTUtil.ponPortapapeles(pgn)
+            # QTUtil2.mensError(self.pantalla, "%s : %s\n\n%s" % (_("Unable to save"), fichero, _("It is saved in the clipboard to paste it wherever you want.") ))
 
