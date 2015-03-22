@@ -271,7 +271,7 @@ class VentanaMultiPV(QtGui.QDialog):
         dic["_POSICION_"] = "%d,%d" % (pos.x(), pos.y())
 
         tam = self.size()
-        dic["_TAMAÑO_"] = "%d,%d" % (tam.width(), tam.height())
+        dic["_SIZE_"] = "%d,%d" % (tam.width(), tam.height())
 
         dic["SHOW_TABLERO"] = self.siShowTablero
         dic["NARROWS"] = self.nArrows
@@ -297,7 +297,13 @@ class VentanaMultiPV(QtGui.QDialog):
             if not ( 0 <= y <= (hE - 50) ):
                 y = 0
             self.move(x, y)
-            w, h = dicVideo["_TAMAÑO_"].split(",")
+            if "_SIZE_" not in dicVideo:
+                w, h = self.width(),self.height()
+                for k in dicVideo:
+                    if k.startswith( "_TAMA" ):
+                        w, h = dicVideo[k].split(",")
+            else:
+                w, h = dicVideo["_SIZE_"].split(",")
             w = int(w)
             h = int(h)
             if w > wE:
@@ -617,7 +623,7 @@ class Ventana(QtGui.QDialog):
         dic["_POSICION_"] = "%d,%d" % (pos.x(), pos.y())
 
         tam = self.size()
-        dic["_TAMAÑO_"] = "%d,%d" % (tam.width(), tam.height())
+        dic["_SIZE_"] = "%d,%d" % (tam.width(), tam.height())
 
         dic["SHOW_TABLERO"] = self.siShowTablero
         dic["NARROWS"] = self.nArrows
@@ -640,7 +646,13 @@ class Ventana(QtGui.QDialog):
                 if not ( 0 <= y <= (hE - 50) ):
                     y = 0
                 self.move(x, y)
-                w, h = dic["_TAMAÑO_"].split(",")
+                if "_SIZE_" not in dic:
+                    w, h = self.width(),self.height()
+                    for k in dic:
+                        if k.startswith( "_TAMA" ):
+                            w, h = dic[k].split(",")
+                else:
+                    w, h = dic["_SIZE_"].split(",")
                 w = int(w)
                 h = int(h)
                 if w > wE:
@@ -1004,7 +1016,7 @@ class VentanaJugadas(Ventana):
         self.em.hide()
         self.tablero.hide()
 
-        # Si el motor está trabajando -> stop
+        # Si el motor esta trabajando -> stop
         if self.siMotorTrabajando:
             self.ready_ok("stop")
             self.runOrdenes()
