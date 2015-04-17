@@ -283,7 +283,7 @@ class GestorAlbum(Gestor.Gestor):
 
         nombreContrario = self.cromo.nombre
 
-        mensaje = _("End Game")
+        mensaje = _("Game ended")
         if quien == kGanamos:
             mensaje = _X(_("Congratulations you have a new sticker %1."), self.cromo.nombre)
             self.cromo.hecho = True

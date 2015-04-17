@@ -87,7 +87,6 @@ class WBase(QtGui.QWidget):
         self.pgn.seleccionaFilas(siPoner, False)
 
     def creaBloqueInformacion(self):
-
         nAnchoPgn = self.gestor.configuracion.anchoPGN
         nAnchoColor = (nAnchoPgn - 35 - 20) / 2
         nAnchoLabels = max(int((nAnchoPgn - 3) / 2), 140)

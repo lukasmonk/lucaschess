@@ -1358,11 +1358,12 @@ class Tablero(QtGui.QGraphicsView):
         flecha.show()
 
     def quitaFlechas(self):
-        if self.liFlechas:
-            for flecha in self.liFlechas:
-                flecha.hide()
-                del flecha
-            self.update()
+        for flecha in self.liFlechas:
+            self.escena.removeItem(flecha)
+            flecha.hide()
+            del flecha
+        self.liFlechas = []
+        self.update()
 
     def ponerPiezasAbajo(self, siBlancasAbajo):
         if self.siBlancasAbajo == siBlancasAbajo:
@@ -1457,7 +1458,6 @@ class Tablero(QtGui.QGraphicsView):
         return contents
 
     def a1h8_fc(self, a1h8):
-
         df = int(a1h8[1])
         dc = ord(a1h8[0]) - 96
         hf = int(a1h8[3])
@@ -1472,7 +1472,6 @@ class Tablero(QtGui.QGraphicsView):
         return df, dc, hf, hc
 
     def fc_a1h8(self, df, dc, hf, hc):
-
         if self.siBlancasAbajo:
             df = 9 - df
             hf = 9 - hf
@@ -1485,28 +1484,24 @@ class Tablero(QtGui.QGraphicsView):
         return a1h8
 
     def creaMarco(self, bloqueMarco):
-
         bloqueMarcoN = copy.deepcopy(bloqueMarco)
         bloqueMarcoN.anchoCasilla = self.anchoCasilla
 
         return TabMarcos.MarcoSC(self.escena, bloqueMarcoN)
 
     def creaSVG(self, bloqueSVG, siEditando=False):
-
         bloqueSVGN = copy.deepcopy(bloqueSVG)
         bloqueSVGN.anchoCasilla = self.anchoCasilla
 
         return TabSVG.SVGSC(self.escena, bloqueSVGN, siEditando=siEditando)
 
     def creaMarker(self, bloqueMarker, siEditando=False):
-
         bloqueMarkerN = copy.deepcopy(bloqueMarker)
         bloqueMarkerN.anchoCasilla = self.anchoCasilla
 
         return TabMarker.MarkerSC(self.escena, bloqueMarkerN, siEditando=siEditando)
 
     def creaFlecha(self, bloqueFlecha, rutina=None):
-
         bloqueFlechaN = copy.deepcopy(bloqueFlecha)
         bloqueFlechaN.anchoCasilla = self.anchoCasilla
 
@@ -1525,6 +1520,8 @@ class Tablero(QtGui.QGraphicsView):
         self.ponIndicador(bd.colorRelleno == self.colorBlancas)
         for k, uno in self.dicMovibles.items():
             uno.posicion2xy()
+        for flecha in self.liFlechas:
+            flecha.posicion2xy()
         self.escena.update()
 
         if hasattr(self.pantalla, "capturas"):

@@ -260,7 +260,7 @@ class GestorMateMap(Gestor.Gestor):
         elif quien == kTablasFaltaMaterial:
             self.resultado = kTablas
 
-        mensaje = _("End Game")
+        mensaje = _("Game ended")
         if quien == kGanamos:
             mensaje = _("Congratulations you have win %s.")%self.workmap.nameAim()
             self.workmap.winAim(self.partida.pv())

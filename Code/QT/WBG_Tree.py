@@ -11,6 +11,7 @@ import Code.QT.QTUtil as QTUtil
 import Code.QT.QTUtil2 as QTUtil2
 import Code.QT.FormLayout as FormLayout
 import Code.QT.WBG_Comun as WBG_Comun
+import Code.QT.PantallaColores as PantallaColores
 
 SIN_VALORACION, MUY_MALO, MALO, BUENO, MUY_BUENO, INTERESANTE, DUDOSA = (0, 4, 2, 1, 3, 5, 6)
 V_SIN, V_IGUAL, V_BLANCAS, V_NEGRAS, V_BLANCAS_MAS, V_NEGRAS_MAS, V_BLANCAS_MAS_MAS, V_NEGRAS_MAS_MAS = (
@@ -52,13 +53,13 @@ class TreeMoves(QtGui.QTreeWidget):
 
         dicNAGs = TrListas.dicNAGs()
         self.dicValoracion = collections.OrderedDict()
-        self.dicValoracion[BUENO] = (dicNAGs[1], Iconos.JG_Buena())
-        self.dicValoracion[MALO] = (dicNAGs[2], Iconos.JG_Mala())
-        self.dicValoracion[MUY_BUENO] = (dicNAGs[3], Iconos.JG_MuyBuena())
-        self.dicValoracion[MUY_MALO] = (dicNAGs[4], Iconos.JG_MuyMala())
-        self.dicValoracion[INTERESANTE] = (dicNAGs[5], Iconos.JG_Interesante())
-        self.dicValoracion[DUDOSA] = (dicNAGs[6], Iconos.JG_Dudosa())
-        self.dicValoracion[SIN_VALORACION] = (_("No rating"), self.noIcon )  # Iconos.JG_SinValoracion())
+        self.dicValoracion[BUENO] = (dicNAGs[1], PantallaColores.nag2ico(1,16))
+        self.dicValoracion[MALO] = (dicNAGs[2], PantallaColores.nag2ico(2,16))
+        self.dicValoracion[MUY_BUENO] = (dicNAGs[3], PantallaColores.nag2ico(3,16))
+        self.dicValoracion[MUY_MALO] = (dicNAGs[4], PantallaColores.nag2ico(4,16))
+        self.dicValoracion[INTERESANTE] = (dicNAGs[5], PantallaColores.nag2ico(5,16))
+        self.dicValoracion[DUDOSA] = (dicNAGs[6], PantallaColores.nag2ico(6,16))
+        self.dicValoracion[SIN_VALORACION] = (_("No rating"), self.noIcon )
 
         self.dicVentaja = collections.OrderedDict()
         self.dicVentaja[V_SIN] = ( _("Undefined"), self.noIcon )
@@ -370,7 +371,7 @@ class TreeMoves(QtGui.QTreeWidget):
                 reg.wpgn.setChecked(False)
                 QTUtil.refreshGUI()
 
-        resultado = FormLayout.fedit(liGen, title="Bookmark", parent=self.wmoves, anchoMinimo=460,
+        resultado = FormLayout.fedit(liGen, title=_("Bookmark"), parent=self.wmoves, anchoMinimo=460,
                                      icon=Iconos.Favoritos(), dispatch=dispatch)
         if resultado is None:
             return None

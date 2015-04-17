@@ -41,6 +41,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
             oColumnas.nueva("MOVE", _("Move"), 120, siCentrado=True, edicion=Delegados.EtiquetaPGN(True))
             oColumnas.nueva("BEST", _("Best move"), 120, siCentrado=True, edicion=Delegados.EtiquetaPGN(True))
             oColumnas.nueva("DIF", _("Difference"), 80, siCentrado=True)
+            oColumnas.nueva("PORC", "%", 80, siCentrado=True)
             return oColumnas
 
         self.dicLiJG = {"A": self.alm.lijg, "W": self.alm.lijgW, "B": self.alm.lijgB}
@@ -154,6 +155,13 @@ class WAnalisisGraph(QTVarios.WDialogo):
                 return "%0.2f" % pts
             else:
                 return "%d" % pts
+        elif columna == "PORC":
+            mrm, pos = jg.analisis
+            rm = mrm.liMultiPV[0]
+            rm1 = mrm.liMultiPV[pos]
+            pts = rm.puntosABS_5() - rm1.puntosABS_5()
+            prc = 100-pts if pts < 100 else 0
+            return "%3d%%"%prc
 
     def closeEvent(self, event):
         self.guardarVideo()

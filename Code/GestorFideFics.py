@@ -330,18 +330,26 @@ class GestorFideFics(Gestor.Gestor):
         siBookUsu = False
         siBookObj = False
 
+        comentarioUsu = ""
+        comentarioObj = ""
+        comentarioPuntos = ""
+
         siAnalizaJuez = True
         if self.book:
             fen = self.fenUltimo()
             siBookUsu = self.book.compruebaHumano(fen, desde, hasta)
             siBookObj = self.book.compruebaHumano(fen, jgObj.desde, jgObj.hasta)
+            if siBookUsu:
+                comentarioUsu = _( "book move")
+            if siBookObj:
+                comentarioObj = _( "book move")
             if siBookUsu and siBookObj:
                 if jgObj.movimiento() == jgUsu.movimiento():
                     comentario = "%s: %s" % (_("Same book move"), jgObj.pgnSP())
                 else:
                     bmove = _("book move")
-                    comentario = "%s: %s %s<br>%s: %s %s" % (
-                    self.nombreObj, jgObj.pgnSP(), bmove, self.configuracion.jugador, jgUsu.pgnSP(), bmove )
+                    comentario = "%s: %s %s\n%s: %s %s" % (self.nombreObj, jgObj.pgnSP(), bmove,
+                                                                self.configuracion.jugador, jgUsu.pgnSP(), bmove)
                 w = PantallaJuicio.MensajeF(self.pantalla, comentario)
                 w.mostrar()
                 siAnalizaJuez = False
@@ -349,6 +357,7 @@ class GestorFideFics(Gestor.Gestor):
                 siAnalizaJuez = True
                 if not siBookObj:
                     self.book = None
+
         if siAnalizaJuez:
             um = QTUtil2.analizando(self.pantalla)
             mrm = self.analizaMinimo(5000)
@@ -375,8 +384,19 @@ class GestorFideFics(Gestor.Gestor):
             w.exec_()
 
             analisis = w.analisis
-            self.puntos += w.difPuntos()
+            dpts = w.difPuntos()
+            self.puntos += dpts
             self.ponPuntos()
+
+            comentarioUsu += " %s"%(rmUsu.abrTexto())
+            comentarioObj += " %s"%(rmObj.abrTexto())
+
+            comentarioPuntos = "%s = %d %+d %+d = %d"%(_("Points"), self.puntos-dpts, rmUsu.puntosABS(),
+                                                            -rmObj.puntosABS(), self.puntos)
+
+            comentario = "%s: %s %s\n%s: %s %s\n%s"%( self.nombreObj, jgObj.pgnSP(), comentarioObj,
+                                                  self.configuracion.jugador, jgUsu.pgnSP(), comentarioUsu,
+                                                  comentarioPuntos )
 
         self.analizaFinal()
 

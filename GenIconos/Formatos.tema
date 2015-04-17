@@ -182,7 +182,6 @@ Pelicula_Pausa woocons Button_Pause.png
 Pelicula_Seguir woocons Button_Play.png
 Pelicula_Rapido woocons Button_Add.png
 Pelicula_Lento woocons Button_White_Remove.png
-#Pelicula_Terminar woocons Stop.png
 Pelicula_Repetir woocons Button_White_Load.png
 
 Memoria nuvola bell.png
@@ -259,7 +258,6 @@ MasR qt4 addtab(3)R.png
 MasDoc woocons file_Add.png
 
 Potencia silk lightning.png
-#Relax silk emoticon_waii.png
 Sorpresa silk emoticon_surprised.png
 Sonrisa silk emoticon_smile.png
 
@@ -292,29 +290,6 @@ AceptarPeque silk accept.png
 
 P_16c Chessicons WhiteP_16.png
 
-#N0 lucas n0.png
-#N1 lucas n1.png
-#N2 lucas n2.png
-#N3 lucas n3.png
-#N4 lucas n4.png
-#N5 lucas n5.png
-#N6 lucas n6.png
-#N7 lucas n7.png
-#N8 lucas n8.png
-#N9 lucas n9.png
-
-#N0 visualpharm 0-26.png
-#N1 visualpharm 1-26.png
-#N2 visualpharm 2-26.png
-#N3 visualpharm 3-26.png
-#N4 visualpharm 4-26.png
-#N5 visualpharm 5-26.png
-#N6 visualpharm 6-26.png
-#N7 visualpharm 7-26.png
-#N8 visualpharm 8-26.png
-#N9 visualpharm 9-26.png
-
-
 Libre nuvola connect_established.png
 
 EnBlanco lucas caja.png
@@ -340,14 +315,6 @@ Voyager nuvola kasteroids.png
 Reindexar nuvola recycled.png
 
 Rename woocons applix.png
-
-JG_Mala lucas jgmala.png
-JG_Buena lucas jgbuena.png
-JG_MuyBuena lucas jgmuybuena.png
-JG_MuyMala lucas jgmuymala.png
-JG_Interesante lucas jginteresante.png
-JG_Dudosa lucas jgdudosa.png
-JG_SinValoracion lucas jgsinvaloracion.png
 
 Add silk add.png
 

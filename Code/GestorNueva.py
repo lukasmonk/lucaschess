@@ -419,7 +419,7 @@ class GestorNueva(Gestor.Gestor):
 
         nombreContrario = "%s (%s %d)" % ( self.xrival.nombre, _("Level"), self.nivelJugado )
 
-        mensaje = _("End Game")
+        mensaje = _("Game ended")
 
         if quien == kGanamos:
 

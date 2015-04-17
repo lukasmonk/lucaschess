@@ -117,9 +117,9 @@ class RespuestaMotor:
     def puntosABS_5(self):
         if self.mate:
             if self.mate < 0:
-                puntos = -3000 - (self.mate + 1) * 100
+                puntos = -10000 - (self.mate + 1) * 100
             else:
-                puntos = +3000 - (self.mate - 1) * 100
+                puntos = +10000 - (self.mate - 1) * 100
         else:
             puntos = self.puntos
 

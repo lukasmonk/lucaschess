@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: latin-1 -*-
 
 import collections
 import random
@@ -46,7 +46,7 @@ class ThanksTo():
             ["Stockfish 6", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
             ["Amyan 1.62", "Antonio Dieguez R.", "http://www.pincha.cl/amyan/amyane.html"],
             ["Hamsters 0.5", "Alessandro Scotti", "https://chessprogramming.wikispaces.com/Alessandro+Scotti"],
-            ["Cheng 4 ver 0.38", "Martin SedlÃ¡k", "http://www.vlasak.biz/cheng"],
+            ["Cheng 4 ver 0.38", "Martin Sedlák", "http://www.vlasak.biz/cheng"],
             ["Cinnamon 1.2b", "Giuseppe Cannella", "http://cinnamonchess.altervista.org/"],
             ["Fruit 2.3.1", "Fabien Letouzey", "http://www.fruitchess.com/"],
             ["Rhetoric 1.4.1", "Alberto Sanjuan", "http://www.chessrhetoric.com"],
@@ -55,7 +55,7 @@ class ThanksTo():
             ["Godel 3.4.9", "Juan Manuel Vazquez", "https://sites.google.com/site/godelchessengine"],
             ["Simplex 0.98", "Antonio Torrecillas", "http://sites.google.com/site/barajandotrebejos/"],
             ["Roce 0.0390", "Roman Hartmann", "http://www.rocechess.ch/rocee.html"],
-            ["Texel 0.98", "Peter Ã–sterlund", "http://web.comhem.se/petero2home/javachess/index.html#texel"],
+            ["Texel 0.98", "Peter Österlund", "http://web.comhem.se/petero2home/javachess/index.html#texel"],
             ["Rodent 1.6", "Pawel Koziol", "http://www.pkoziol.cal24.pl/rodent/rodent.htm"],
         ]
         li.sort(key=lambda x: x[0])
@@ -97,7 +97,7 @@ class ThanksTo():
 
         li = [ "Indianajones", "Pavel Rehulka", "ADT", "Adrijan", "Nils Andersson", "Urban Gustavsson",
             "Johannes Reimers", "Red Hood", "Robert Anderson", "Laudecir Daniel", "Reinhard",
-            "Di Maria Giovanni", "Filomeno MarmalÃ©", "Max Aloyau",
+            "Di Maria Giovanni", "Filomeno Marmalé", "Max Aloyau",
             # "Chris McFarland",
             # "Myles Turple",
             # "thetasquared",
@@ -116,7 +116,7 @@ class ThanksTo():
         li = [
             "Indianajones", "James", "Uli", "Pavel Rehulka", "Laudecir Daniel", "Xavier Jimenez",
             "Rajkrishna", "ADT", "Vishy", "thetasquared", "Mike Eddies", "jayriginal", "baddadza",
-            "bbbaro25us", "Victor Perez", "M.Larson", "Filomeno MarmalÃ©", "Shahin Jafarli (shahinjy)",
+            "bbbaro25us", "Victor Perez", "M.Larson", "Filomeno Marmalé", "Shahin Jafarli (shahinjy)",
             "Heikki Junes", "Toan Luong", "R. Sehgal", "WyoCas", "J.Reimers", "Dariusz Popadowski",
             "Ken Brown", "Dieter Heinrich", "Nils Andersson", "Chris K.", "Philou",
         ]
@@ -132,13 +132,13 @@ class ThanksTo():
             # "Ezequiel Canario"
         ]
         li2 = [
-            "Felicia", "Shahin Jafarli (shahinjy)", "Alfons", "RaÃºl Giorgi", "Red Hood", "Filomeno MarmalÃ©",
+            "Felicia", "Shahin Jafarli (shahinjy)", "Alfons", "Raúl Giorgi", "Red Hood", "Filomeno Marmalé",
             "Roberto Mizzoni", "bolokay", "Istolacio", "Mohammed Abdalazez", "Rui Grafino", "Georg Pfefferle",
-            "Lolo S.", "JoaquÃ­n Alvarez", "Ransith Fernando",
+            "Lolo S.", "Joaquín Alvarez", "Ransith Fernando",
         ]
         random.shuffle(li2)
         li3 = [
-            "Gianfranco Cutipa", "Daniel Trebejo", "Jose Luis GarcÃ­a", "Carmen MartÃ­nez", "..."
+            "Gianfranco Cutipa", "Daniel Trebejo", "Jose Luis García", "Carmen Martínez", "..."
         ]
         liOthers.extend(li2)
         liOthers.extend(li3)
@@ -198,6 +198,7 @@ class ThanksTo():
             (_("Portuguese") + " (BR)"): ("Laudecir Daniel",""),
             _("Arabic"): ("Mohamad Alhedhed",""),
             _("Dutch"): ("Willy Lefebvre",""),
+            _("Chinese simplified"): ("Kevin Sicong Jiang",""),
         }
         def r(lng):
             return Util.iniBase8dic("Locale/%s/lang.ini"%lng)["AUTHOR"]
@@ -241,11 +242,11 @@ class ThanksTo():
             ("Ultimate Gnome 0.5.1", 'Marco Tessarotto',
              'http://gnome-look.org/content/show.php/Ultimate+Gnome?content=75000', "GPL" ),
             ("SnowIsh SVG", "Saki", 'http://gnome-look.org/content/show.php/SnowIsh+SVG+%26+PNG?content=32599', "GPL" ),
-            ("Cartoon animal icons", "Martin BÃ©rubÃ©", 'http://www.how-to-draw-funny-cartoons.com/',
+            ("Cartoon animal icons", "Martin Bérubé", 'http://www.how-to-draw-funny-cartoons.com/',
              "Free for personal non-commercial use" ),
             ("Album of vehicles", "Icons-Land", "http://www.icons-land.com/vista-icons-transport-icon-set.php",
              "Icons-Land Demo License Agreement" ),
-            ("Figurines", 'Armando H. MarroquÃ­n', 'http://www.enpassant.dk/chess/fonteng.htm', _("Freeware") ),
+            ("Figurines", 'Armando H. Marroquín', 'http://www.enpassant.dk/chess/fonteng.htm', _("Freeware") ),
             ("Icons for Windows8", 'VisualPharm', 'http://www.visualpharm.com/',
              "Creative Commons Attribution-NoDerivs 3.0 Unported" ),
         ]
@@ -335,7 +336,7 @@ class ThanksTo():
             ("Montreal", 'Gary Katch',
              '<a href="http://alcor.concordia.ca/~gpkatch/montreal_font.html">http://alcor.concordia.ca/~gpkatch/montreal_font.html</a>',
              _("Permission of author") ),
-            ("Magnetic-Leipzig<br>AlfonsoX-Maya<br>Condal", 'Armando H. MarroquÃ­n',
+            ("Magnetic-Leipzig<br>AlfonsoX-Maya<br>Condal", 'Armando H. Marroquín',
              '<a href="http://www.enpassant.dk/chess/fonteng.htm">http://www.enpassant.dk/chess/fonteng.htm</a>',
              _("Freeware") ),
             ("Chess Pirat", 'Klaus Wolf',
@@ -347,7 +348,7 @@ class ThanksTo():
             ("Kilfiger", 'James Kilfiger',
              '<a href="https://sites.google.com/site/jameskilfiger/">https://sites.google.com/site/jameskilfiger/</a>',
              "SIL open font licence" ),
-            ("Cartoon", "Based on work by Martin BÃ©rubÃ©",
+            ("Cartoon", "Based on work by Martin Bérubé",
              '<a href="http://www.how-to-draw-funny-cartoons.com">http://www.how-to-draw-funny-cartoons.com</a>',
              _("Free for personal non-commercial use") ),
             ("Qwertyxp2000", "Qwertyxp2000",
@@ -357,8 +358,9 @@ class ThanksTo():
              '<a href="http://ixian.com/chess/jin-piece-sets/">http://ixian.com/chess/jin-piece-sets/</a>',
              "Creative Commons Attribution-Share Alike 3.0 Unported" ),
             ("Etruscan<br>Etruscan clear", "Fabrice",
-             '<a href="hhttp://zipanatura.fr/">http://zipanatura.fr/</a>',
+             '<a href="http://zipanatura.fr/">http://zipanatura.fr/</a>',
              "CC BY-NC-ND 4.0" ),
+             ("Stauton 3D", "Marc Graziani", '<a href="<https://plus.google.com/101635611158475796811/about">Marc Graziani</a>', _("Permission of author") ),
         ]
 
         for tipo, autor, web, licencia in li:

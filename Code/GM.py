@@ -138,8 +138,8 @@ class GM:
 
         txt = _("Opponent") + " : <b>" + gPartida.oponent + "</b><br>"
         site = gPartida.site
-        if gPartida.site:
-            txt = _("Site") + " : <b>" + site + "</b><br>"
+        if site:
+            txt += _("Site") + " : <b>" + site + "</b><br>"
         txt += _("Date") + " : <b>" + gPartida.date + "</b><br>"
         txt += _("Opening") + " : <b>" + apertura + "</b><br>"
         txt += _("Result") + " : <b>" + gPartida.result + "</b><br>"

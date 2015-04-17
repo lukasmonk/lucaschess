@@ -724,7 +724,6 @@ class WUnTorneo(QTVarios.WDialogo):
             li = range(nrec)
         return self.torneo.grabaPGNgames(li)
 
-
     def gmMostrar(self):
         pgn = self.pgnActual()
         if pgn:

@@ -997,7 +997,7 @@ class GestorEntMaq(Gestor.Gestor):
 
         nombreContrario = self.xrival.nombre
 
-        mensaje = _("End Game")
+        mensaje = _("Game ended")
         if quien == kGanamos:
             mensaje = _X(_("Congratulations you have won against %1."), nombreContrario)
 

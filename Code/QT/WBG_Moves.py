@@ -119,21 +119,21 @@ class WMoves(QtGui.QWidget):
 
         # ToolBar
         liAccionesWork = (
-            ( _("Close"), Iconos.MainMenu(), "tw_terminar" ), None,
-            ( _("Bookmarks"), Iconos.Favoritos(), "tw_bookmarks" ),
+            ( _("Close"), Iconos.MainMenu(), self.tw_terminar ), None,
+            ( _("Bookmarks"), Iconos.Favoritos(), self.tw_bookmarks ),
         )
-        self.tbWork = Controles.TB(self, liAccionesWork, tamIcon=24)
+        self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
 
         liAccionesGen = (
-            ( _("Change"), Iconos.Modificar(), "tg_cambiar" ),
-            ( _("New"), Iconos.NuevoMas(), "tg_crear" ),
-            ( _("Copy"), Iconos.Copiar(), "tg_copiar" ),
-            ( _("Remove"), Iconos.Borrar(), "tg_borrar" ),
-            ( _("Rename"), Iconos.Rename(), "tg_rename" ),
-            ( _("Training"), Iconos.Entrenamiento(), "tg_training" ),
-            ( _("Import"), Iconos.Mezclar(), "tg_import" ),
+            ( _("Change"), Iconos.Modificar(), self.tg_cambiar ),
+            ( _("New"), Iconos.NuevoMas(), self.tg_crear ),
+            ( _("Copy"), Iconos.Copiar(), self.tg_copiar ),
+            ( _("Remove"), Iconos.Borrar(), self.tg_borrar ),
+            ( _("Rename"), Iconos.Rename(), self.tg_rename ),
+            ( _("Training"), Iconos.Entrenamiento(), self.tg_training ),
+            ( _("Import"), Iconos.Mezclar(), self.tg_import ),
         )
-        self.tbGen = Controles.TB(self, liAccionesGen, tamIcon=24)
+        self.tbGen = Controles.TBrutina(self, liAccionesGen, tamIcon=24)
 
         # Name
         self.lbName = Controles.LB(self, "").ponWrap().alinCentrado().ponColorFondoN("white", "darkcyan").ponTipoLetra(
@@ -226,9 +226,6 @@ class WMoves(QtGui.QWidget):
 
     def showChildren(self, unMove):
         self.tree.showChildren(unMove, True)
-
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
 
     def tw_terminar(self):
         self.winBookGuide.terminar()

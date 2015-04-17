@@ -222,7 +222,7 @@ class GestorBoxing(Gestor.Gestor):
                 self.ponRotuloObjetivo()
             else:
                 if siFinPartida:
-                    txt = "<h2>%s<h2>" % (_("End game") )
+                    txt = "<h2>%s<h2>" % (_("Game ended") )
                     txt += "<h3>%s<h3>" % (self.boxing.dameEti(Util.hoy(), self.movimientos))
                 else:
                     txt = "<h3>%s</h3>" % ( _X(_("You have lost %1 points."), str(-self.puntosRival)) )

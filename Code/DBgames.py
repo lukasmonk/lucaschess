@@ -750,14 +750,14 @@ class DBgames:
         return pgn
 
     def leerPGN(self, fichero, dlTmp):
-
         erroneos = duplicados = importados = 0
 
         # 1.File pgn -> temporal clean
         for n, g in enumerate(PGNreader.readGames(fichero)):
-
+            if n == 10000:
+                break
             if n % 100 == 0:
-                if not dlTmp.actualiza(n + 1, erroneos, duplicados, importados):
+                if not dlTmp.actualiza(n, erroneos, duplicados, importados):
                     break
             if g.erroneo:
                 erroneos += 1

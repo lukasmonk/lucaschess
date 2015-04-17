@@ -26,10 +26,10 @@ def funcionPNG( qbin, dic, desde, nomFuncion, nomDir, nomFichero ) :
         desde = a
         dic[tt] = (de,a)
         dx[0] += 1
-    t = "def pm%s() :\n"%nomFuncion
+    t = "def pm%s():\n"%nomFuncion
     t += '    return PM(%d,%d)\n\n'%(de,a)
-    t += "def %s() :\n"%nomFuncion
-    t += '    return QtGui.QIcon( pm%s() )\n\n'%nomFuncion
+    t += "def %s():\n"%nomFuncion
+    t += '    return QtGui.QIcon(pm%s())\n\n'%nomFuncion
     return desde, t
 
 def leeTema( cTema ) :
@@ -47,13 +47,13 @@ f = open("IntFiles/Iconos.bin","rb")
 binIconos = f.read()
 f.close()
 
-def icono( name ):
+def icono(name):
     return eval( "%s()"%name )
 
-def pixmap( name ):
+def pixmap(name):
     return eval( "pm%s()"%name )
 
-def PM( desde, hasta ) :
+def PM(desde, hasta):
     pm = QtGui.QPixmap()
     pm.loadFromData( binIconos[desde:hasta] )
     return pm

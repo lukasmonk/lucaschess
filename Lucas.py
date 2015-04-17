@@ -4,6 +4,7 @@
 import os
 import sys
 
+
 reload(sys)
 sys.setdefaultencoding("latin-1")
 sys.path.append(os.curdir)
@@ -20,8 +21,6 @@ sip.setapi('QVariant', 2)
 
 import Code.Traducir as Traducir
 Traducir.install()
-
-
 
 current_dir = os.path.dirname(sys.argv[0])
 if current_dir:

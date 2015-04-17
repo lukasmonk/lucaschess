@@ -419,7 +419,7 @@ class GestorGM(Gestor.Gestor):
         self.estado = kFinJuego
         self.tablero.desactivaTodas()
 
-        mensaje = _("End Game")
+        mensaje = _("Game ended")
 
         txt, porc, txtResumen = self.motorGM.resultado(self.partida)
         mensaje += "<br><br>" + txt

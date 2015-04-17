@@ -413,11 +413,11 @@ class Configuracion:
         return li
 
     def coloresPGNdefecto(self):
-        self.color_nag1 = "blue"
+        self.color_nag1 = "#0707FF"
         self.color_nag2 = "#FF7F00"
-        self.color_nag3 = "purple"
-        self.color_nag4 = "red"
-        self.color_nag5 = "green"
+        self.color_nag3 = "#820082"
+        self.color_nag4 = "#FF0606"
+        self.color_nag5 = "#008500"
         self.color_nag6 = "#ECC70A"
 
     def graba(self, aplazamiento=None):

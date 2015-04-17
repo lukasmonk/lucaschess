@@ -562,7 +562,7 @@ class GestorElo(Gestor.Gestor):
 
         nombreContrario = self.datosMotor.rotulo()
 
-        mensaje = _("End Game")
+        mensaje = _("Game ended")
         if quien == kGanamos:
             mensaje = _X(_("Congratulations you have won against %1."), nombreContrario)
 

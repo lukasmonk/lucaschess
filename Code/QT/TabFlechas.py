@@ -34,7 +34,6 @@ class FlechaSC(TabBloques.BloqueEspSC):
         self.update()
 
     def posicion2xy(self):
-
         bf = self.bloqueDatos
         posicion = bf.posicion
         ac = bf.anchoCasilla
