@@ -64,7 +64,7 @@ def leeRivales():
     mas(cm)
 
     cm = ConfigMotor("simplex", "Antonio Torrecillas", "0.9.8", "http://sites.google.com/site/barajandotrebejos/" )
-    cm.path = "simplex-098-32-ja.exe"
+    cm.path = "Windows/simplex-098-32-ja.exe"
     cm.elo = 2396
     mas(cm)
 

@@ -4,7 +4,6 @@
 import os
 import sys
 
-
 reload(sys)
 sys.setdefaultencoding("latin-1")
 sys.path.append(os.curdir)
