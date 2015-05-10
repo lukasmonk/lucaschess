@@ -173,7 +173,7 @@ class WTV_Markers(QTVarios.WDialogo):
         liMovs = ["g4h3", "e2e4", "d6f4"]
         self.liEjemplos = []
         regMarker = TabTipos.Marker()
-        with open("IntFiles/rival.svg") as f:
+        with open("./IntFiles/rival.svg") as f:
             xml = f.read()
         for a1h8 in liMovs:
             regMarker.a1h8 = a1h8

@@ -23,8 +23,8 @@ import Code.Util as Util
 import Code.CajonDesastre as CajonDesastre
 import Code.TrListas as TrListas
 
-LCFILEFOLDER = "lc.folder"
-LCBASEFOLDER = "UsrData"
+LCFILEFOLDER = os.path.abspath("./lc.folder")
+LCBASEFOLDER = os.path.abspath("./UsrData")
 
 def activeFolder():
     if os.path.isfile(LCFILEFOLDER):
@@ -36,11 +36,11 @@ def activeFolder():
     return LCBASEFOLDER
 
 def isDefaultFolder():
-    return activeFolder() == LCBASEFOLDER
+    return activeFolder() == os.path.abspath(LCBASEFOLDER)
 
 def changeFolder(nueva):
     if nueva:
-        if os.path.abspath(nueva) == os.path.abspath(LCBASEFOLDER):
+        if os.path.abspath(nueva) == LCBASEFOLDER:
             return changeFolder(None)
         f = open(LCFILEFOLDER, "wb")
         f.write(nueva)
@@ -577,7 +577,9 @@ class Configuracion:
                 fich = dg("DBGAMESFEN", self.ficheroDBgamesFEN)
                 if os.path.isfile(fich):
                     self.ficheroDBgamesFEN = fich
-                self.ficheroBookGuide = dg("BOOKGUIDE", self.ficheroBookGuide)
+                fich = dg("BOOKGUIDE", self.ficheroBookGuide)
+                if os.path.isfile(fich):
+                    self.ficheroBookGuide = fich
 
                 self.elo = dg("ELO", 0)
                 self.eloNC = dg("ELONC", 1600)

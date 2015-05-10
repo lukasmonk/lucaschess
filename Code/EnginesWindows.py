@@ -22,7 +22,7 @@ def leeRivales():
     mas(cm)
 
     cm = ConfigMotor("roce", "Roman Hartmann", "0.0390", "http://www.rocechess.ch/rocee.html")
-    cm.path = "roce39"
+    cm.path = "roce39.exe"
     cm.elo = 1854
     mas(cm)
 

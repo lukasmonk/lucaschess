@@ -12,7 +12,7 @@ import Code.QT.QTUtil2 as QTUtil2
 class Control60:
     def __init__(self, gestor, siJugador):
 
-        self.db = Util.recuperaVar("IntFiles/lista60.dkv")
+        self.db = Util.recuperaVar("./IntFiles/lista60.dkv")
         # prnt len(self.db)
         # t = 0
         # b = 0
@@ -194,7 +194,7 @@ class Gestor60(Gestor.Gestor):
             self.ordenPZ += d[k]
 
         self.errores = 0
-        self.iniTiempo = time.clock()
+        self.iniTiempo = time.time()
         self.pendientes = len(self.liMovs)
         self.estado = kJugando
 
@@ -257,7 +257,7 @@ class Gestor60(Gestor.Gestor):
         self.atajosRatonReset()
 
     def ponResultado(self):
-        tiempo = int((time.clock() - self.iniTiempo) * 100.0)
+        tiempo = int((time.time() - self.iniTiempo) * 100.0)
         self.finJuego()
         self.ponPosicion(self.cp)
 

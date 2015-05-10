@@ -21,7 +21,7 @@ def generaPM(piezas):
     for k in "KQRNBkqrnb":
         dicPZ[k] = piezas.render(k)
 
-    carpNAGs = "IntFiles/NAGs"
+    carpNAGs = "./IntFiles/NAGs"
     for f in os.listdir(carpNAGs):
         if f.endswith(".svg") and f.startswith("$") and len(f) > 5:
             nag = f[1:-4]
@@ -107,9 +107,11 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
     Delegado para la muestra con html
     """
 
-    def __init__(self, siBlancas):
+    def __init__(self, siBlancas, siAlineacion=False, siFondo=False):
         self.siBlancas = siBlancas  # None = no hacer
         self.siFigurinesPGN = siBlancas is not None
+        self.siAlineacion = siAlineacion
+        self.siFondo = siFondo
         QtGui.QStyledItemDelegate.__init__(self, None)
 
     def rehazPosicion(self):
@@ -152,6 +154,10 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
         if option.state & QtGui.QStyle.State_Selected:
             painter.fillRect(rect, QtGui.QColor("#678DB2"))  # sino no se ve en CDE-Motif-Windows
             # painter.fillRect(option.rect, palette.highlight().color())
+        elif self.siFondo:
+            fondo = index.model().getFondo(index)
+            if fondo:
+                painter.fillRect(rect, fondo)
 
         if indicadorInicial:
             painter.save()
@@ -188,6 +194,13 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
             ancho += wpz * len(liNAGs)
 
         x = xTotal + (wTotal - ancho) / 2
+        if self.siAlineacion:
+            alineacion = index.model().getAlineacion(index)
+            if alineacion == "i":
+                x = xTotal+3
+            elif alineacion == "d":
+                x = xTotal + (wTotal - ancho - 3)
+
         y = yTotal + (hTotal - hPGN * 0.9) / 2
 
         if iniPZ:

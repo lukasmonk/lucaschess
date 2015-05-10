@@ -43,7 +43,7 @@ def convert(liMotores):
     return li
 
 def listaPersonal():
-    lme = MotoresExternos.ListaMotoresExternos("IntFiles/michelep.pkt")
+    lme = MotoresExternos.ListaMotoresExternos("./IntFiles/michelep.pkt")
     lme.leer()
     for mt in lme.liMotores:
         mt.book = None
@@ -51,7 +51,7 @@ def listaPersonal():
 
 def listaGM():
     dic = {"champion": _("Champion"), "expert": _("Expert"), "master": _("Master")}
-    lme = MotoresExternos.ListaMotoresExternos("IntFiles/micheleg.pkt")
+    lme = MotoresExternos.ListaMotoresExternos("./IntFiles/micheleg.pkt")
     lme.leer()
     liR = dic.keys()
     for mt in lme.liMotores:

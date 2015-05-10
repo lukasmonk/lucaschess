@@ -30,7 +30,7 @@ class ConfigNivel:
         liDepth = [2, 4, 6, 10]
         self.depth = liDepth[mate - 1]
 
-        fmt = "IntFiles/Mate/mate%d.lst"%mate
+        fmt = "./IntFiles/Mate/mate%d.lst"%mate
         with open(fmt) as f:
             dic = {}
             for nlinea, linea in enumerate(f):
@@ -38,7 +38,7 @@ class ConfigNivel:
                 if linea:
                     dic[nlinea] = [ uno.split(",") for uno in linea.split("|") ]
 
-        # dic = Util.recuperaVar("IntFiles/mate.nvd")
+        # dic = Util.recuperaVar("./IntFiles/mate.nvd")
         self.dicMate = dic
         self.nivelMaximo = len(self.dicMate) / 10
 
@@ -179,10 +179,10 @@ class ControlMate:
         self.liFenPV = self.configNivel.dameFenPV(self.mateNivel.nivel, bloque)
         self.posFenPV = -1
 
-        self.tiempoInicial = time.clock()
+        self.tiempoInicial = time.time()
 
     def final(self, errores):
-        tiempo = int(time.clock() - self.tiempoInicial)
+        tiempo = int(time.time() - self.tiempoInicial)
 
         siRecord = self.mateNivel.grabaBloque(self.bloque, errores, tiempo)
 

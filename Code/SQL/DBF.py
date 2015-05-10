@@ -150,7 +150,7 @@ class DBF:
         cSQL = "SELECT rowid FROM %s %s" % (self.ctabla, resto)
         self.cursorBuffer.execute(cSQL)
         self.liIDs = []
-        xInicio = time.clock()
+        xInicio = time.time()
         while True:
             li = self.cursorBuffer.fetchmany(chunk)
             if li:
@@ -159,7 +159,7 @@ class DBF:
                 self.siBufferPendiente = False
                 self.cursorBuffer.close()
                 break
-            xt = time.clock() - xInicio
+            xt = time.time() - xInicio
             if xt > segundos:
                 break
         return self.siBufferPendiente
@@ -167,7 +167,7 @@ class DBF:
     def leerMasBuffer(self, segundos=1.0, chunk=200):
         if not self.siBufferPendiente:
             return True
-        xInicio = time.clock()
+        xInicio = time.time()
         while True:
             li = self.cursorBuffer.fetchmany(chunk)
 
@@ -177,7 +177,7 @@ class DBF:
                 self.siBufferPendiente = False
                 self.cursorBuffer.close()
                 break
-            xt = time.clock() - xInicio
+            xt = time.time() - xInicio
             if xt > segundos:
                 break
         return self.siBufferPendiente

@@ -512,7 +512,7 @@ class WEntMaquina(QTVarios.WDialogo):
         self.sbArrows.ponValor(dic.get("ARROWS", 7))
         self.cbThoughtOp.ponValor(dic.get("THOUGHTOP", -1))
         self.cbThoughtTt.ponValor(dic.get("THOUGHTTT", -1))
-        self.sbBoxHeight.ponValor(dic.get("BOXHEIGHT", 24))
+        self.sbBoxHeight.ponValor(dic.get("BOXHEIGHT", 32))
         self.cbContinueTt.setChecked(dic.get("CONTINUETT", True))
         self.cbChance.setChecked(dic.get("2CHANCE", True))
         self.chbSummary.setChecked(dic.get("SUMMARY", False))

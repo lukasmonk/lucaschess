@@ -754,7 +754,7 @@ class Tablero(QtGui.QGraphicsView):
     def checkLEDS(self):
         if not hasattr(self, "dicXML"):
             def lee(fich):
-                f = open("IntFiles/%s.svg" % fich)
+                f = open("./IntFiles/%s.svg" % fich)
                 resp = f.read()
                 f.close()
                 return resp

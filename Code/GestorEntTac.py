@@ -337,7 +337,7 @@ class GestorEntTac(Gestor.Gestor):
             self.activaColor(siBlancas)
 
             if not self.siSeguirJugando:
-                self.iniReloj = time.clock()
+                self.iniReloj = time.time()
 
     def finLinea(self):
         self.compruebaComentarios()
@@ -429,7 +429,7 @@ class GestorEntTac(Gestor.Gestor):
                 return False
 
         if not self.siSeguirJugando:
-            segundos = time.clock() - self.iniReloj
+            segundos = time.time() - self.iniReloj
             self.tactica.masSegundos(segundos)
         self.movimientosPiezas(jg.liMovs)
 

@@ -38,8 +38,8 @@ class WAnalisisGraph(QTVarios.WDialogo):
         def xcol():
             oColumnas = Columnas.ListaColumnas()
             oColumnas.nueva("NUM", _("N."), 50, siCentrado=True)
-            oColumnas.nueva("MOVE", _("Move"), 120, siCentrado=True, edicion=Delegados.EtiquetaPGN(True))
-            oColumnas.nueva("BEST", _("Best move"), 120, siCentrado=True, edicion=Delegados.EtiquetaPGN(True))
+            oColumnas.nueva("MOVE", _("Move"), 120, siCentrado=True, edicion=Delegados.EtiquetaPGN(True, True, True))
+            oColumnas.nueva("BEST", _("Best move"), 120, siCentrado=True, edicion=Delegados.EtiquetaPGN(True, True, True))
             oColumnas.nueva("DIF", _("Difference"), 80, siCentrado=True)
             oColumnas.nueva("PORC", "%", 80, siCentrado=True)
             return oColumnas
@@ -129,6 +129,12 @@ class WAnalisisGraph(QTVarios.WDialogo):
             return self.colorWhite if jg.xsiW else None
         return None
 
+    def gridAlineacion(self, grid, fila, oColumna):
+        if grid.id == "A":
+            jg = self.alm.lijg[fila]
+            return "i" if jg.xsiW else "d"
+        return None
+
     def gridNumDatos(self, grid):
         return len(self.dicLiJG[grid.id])
 
@@ -136,7 +142,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
         columna = oColumna.clave
         jg = self.dicLiJG[grid.id][fila]
         if columna == "NUM":
-            return jg.xnum
+            return " %s "%jg.xnum
         elif columna in ("MOVE", "BEST"):
             mrm, pos = jg.analisis
             rm = mrm.liMultiPV[pos if columna == "MOVE" else 0]

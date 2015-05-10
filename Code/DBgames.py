@@ -334,7 +334,7 @@ class TreeSTAT:
 
 class DBgames:
     def __init__(self, nomFichero, segundosBuffer=0.8):
-        self.nomFichero = nomFichero
+        self.nomFichero = Util.dirRelativo(nomFichero)
         self.liCamposBase = ["EVENT", "SITE", "DATE", "WHITE", "BLACK", "RESULT", "ECO", "WHITEELO", "BLACKELO",
                              "PLIES"]
         self.liCamposWork = ["XPV", "PGN"]

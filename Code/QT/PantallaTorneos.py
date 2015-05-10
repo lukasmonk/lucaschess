@@ -735,9 +735,9 @@ class WUnTorneo(QTVarios.WDialogo):
             # Se lanza otro LC con ese PGN
             QTUtil2.mensajeTemporal(self, _("One moment please..."), 0.3)
             if sys.argv[0].endswith(".py"):
-                subprocess.Popen(["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", fpgn])
+                subprocess.Popen(["pythonw.exe" if VarGen.isWindows else "python", "./Lucas.py", fpgn])
             else:
-                subprocess.Popen(["Lucas.exe" if VarGen.isWindows else "Lucas", fpgn])
+                subprocess.Popen(["Lucas.exe" if VarGen.isWindows else "./Lucas", fpgn])
 
     def gmGuardar(self):
         pgn = self.pgnActual()

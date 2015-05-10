@@ -12,7 +12,7 @@ class GestorM1:
         self.pantalla = procesador.pantalla
         self.tablero = self.pantalla.tablero
 
-        fmt = "IntFiles/Mate/mate1.lst"
+        fmt = "./IntFiles/Mate/mate1.lst"
         with open(fmt) as f:
             li = [linea for linea in f.read().split("\n") if linea.strip()]
         linea = random.choice(li)
@@ -30,7 +30,7 @@ class GestorM1:
         self.cp = ControlPosicion.ControlPosicion()
         self.cp.leeFen(fen)
 
-        self.iniTime = time.clock()
+        self.iniTime = time.time()
 
         self.siBlancas = " w " in fen
         self.tablero.bloqueaRotacion(False)
@@ -41,7 +41,7 @@ class GestorM1:
         self.tablero.ponIndicador(self.siBlancas)
 
     def muestraMensaje(self):
-        tm = time.clock() - self.iniTime
+        tm = time.time() - self.iniTime
 
         mensaje = "%s: %0.02f"%(_("Time"), tm)
         if tm < 10.0:
@@ -105,7 +105,7 @@ def basico(procesador, hx, factor=1.0):
 
 def partidaDia(procesador, hx):
     dia = Util.hoy().day
-    lid = Util.LIdisk("IntFiles/31.pkl")
+    lid = Util.LIdisk("./IntFiles/31.pkl")
     dic = lid[dia - 1]
     lid.close()
 

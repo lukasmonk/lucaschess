@@ -24,7 +24,7 @@ def wHistogram(ncolor, siDiferencias, x, y):
                        style=estilo,
                        fill=True,
                        show_legend=False,
-                       css=['IntFiles/PyGal/style.css', 'IntFiles/PyGal/graph.css'],
+                       css=['./IntFiles/PyGal/style.css', './IntFiles/PyGal/graph.css'],
                        label_font_size=7)
     chart.x_labels = x
     chart.add("0", y)

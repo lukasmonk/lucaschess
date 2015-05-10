@@ -89,7 +89,7 @@ class Memoria():
 
         li = []
 
-        f = open("Trainings/Checkmates by Eduardo Sadier/131279 positions of mate in two.fns", "rb")
+        f = open("./Trainings/Checkmates by Eduardo Sadier/131279 positions of mate in two.fns", "rb")
         for l in f:
             if l:
                 pz = 0

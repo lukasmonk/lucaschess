@@ -196,9 +196,11 @@ class VentanaMultiPV(QtGui.QDialog):
 
         configMotor = self.cpu.configMotor
         exe = configMotor.ejecutable()
+        absexe = os.path.abspath(exe)
+        direxe = os.path.abspath(os.path.dirname(exe))
 
-        self.motor.setWorkingDirectory(os.path.abspath(os.path.dirname(exe)))
-        self.motor.start(exe, [], mode=QtCore.QIODevice.Unbuffered | QtCore.QIODevice.ReadWrite)
+        self.motor.setWorkingDirectory(direxe)
+        self.motor.start(absexe, [], mode=QtCore.QIODevice.ReadWrite)
         self.motor.waitForStarted()
         self.connect(self.motor, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
 
@@ -1549,7 +1551,7 @@ class CPU():
         #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 def run(fdb):
-    ferr = open("bug.kibitzer", "at")
+    ferr = open("./bug.kibitzer", "at")
     sys.stderr = ferr
 
     cpu = CPU(fdb)

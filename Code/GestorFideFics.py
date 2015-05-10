@@ -17,7 +17,7 @@ import Code.QT.PantallaJuicio as PantallaJuicio
 class GestorFideFics(Gestor.Gestor):
     def selecciona(self, tipo):
         if tipo == "Fics":
-            self._db = "IntFiles/FicsElo.db"
+            self._db = "./IntFiles/FicsElo.db"
             self.tipoJuego = kJugFics
             self._activo = self.configuracion.ficsActivo
             self._ponActivo = self.configuracion.ponFicsActivo
@@ -28,7 +28,7 @@ class GestorFideFics(Gestor.Gestor):
             self._TIPO = "FICS"
 
         else:
-            self._db = "IntFiles/FideElo.db"
+            self._db = "./IntFiles/FideElo.db"
             self.tipoJuego = kJugFide
             self._activo = self.configuracion.fideActivo
             self._ponActivo = self.configuracion.ponFideActivo

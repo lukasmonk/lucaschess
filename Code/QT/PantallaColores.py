@@ -913,7 +913,7 @@ def eligeTema(parent, fichTema):
     return None if resp is None else liTemas[int(resp)]
 
 def nag2ico( nag, tam ):
-    with open("IntFiles/NAGs/Color/nag_%d.svg"%nag) as f:
+    with open("./IntFiles/NAGs/Color/nag_%d.svg"%nag) as f:
         dato = f.read()
         color = getattr(VarGen.configuracion,"color_nag%d"%nag)
         dato = dato.replace("#3139ae",color)

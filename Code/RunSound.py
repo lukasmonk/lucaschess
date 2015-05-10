@@ -161,7 +161,7 @@ class IO():
                 time.sleep(0.1)
 
 def run(fdb):
-    ferr = open("bug.sound", "at")
+    ferr = open("./bug.sound", "at")
     sys.stderr = ferr
 
     r = Replay()

@@ -44,7 +44,7 @@ def lee1LineaMFN(linea):
 
 def leeLineaMFN():
     npos = random.randint(0, 2999)
-    f = open("IntFiles/games.mfn", "rb")
+    f = open("./IntFiles/games.mfn", "rb")
     for num, linea in enumerate(f):
         if num == npos:
             return lee1LineaMFN(linea)
@@ -575,7 +575,7 @@ class WPotencia(QTVarios.WDialogo):
         # Tiempo
         self.timer = None
         if min_min or min_max:
-            self.baseTiempo = time.clock()
+            self.baseTiempo = time.time()
             if min_min:
                 self.gbMovs.hide()
                 self.iniciaReloj(self.pensandoHastaMin)
@@ -627,20 +627,20 @@ class WPotencia(QTVarios.WDialogo):
         self.ultimaCelda = wmcelda
 
     def pensandoHastaMin(self):
-        dif = self.min_min * 60 - int(time.clock() - self.baseTiempo)
+        dif = self.min_min * 60 - int(time.time() - self.baseTiempo)
         if dif <= 0:
             self.ponToolBar([self.comprobar, self.cancelar])
             self.paraReloj()
             if self.min_max:
                 self.gbMovs.show()
                 self.liwm[0].activa()
-                self.baseTiempo = time.clock()
+                self.baseTiempo = time.time()
                 self.iniciaReloj(self.pensandoHastaMax)
         else:
             self.lbTiempo.ponTexto(_X(_("%1 seconds remain to think moves before you can indicate them"), str(dif)))
 
     def pensandoHastaMax(self):
-        dif = (self.min_max - self.min_min) * 60 - int(time.clock() - self.baseTiempo)
+        dif = (self.min_max - self.min_min) * 60 - int(time.time() - self.baseTiempo)
         if dif <= 0:
             self.paraReloj()
             self.comprobar()

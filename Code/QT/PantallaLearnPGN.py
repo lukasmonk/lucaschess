@@ -434,7 +434,7 @@ class WLearnPuente(QTVarios.WDialogo):
     def reset(self):
         if self.siClock:
             self.timer.start()
-        self.baseTiempo = time.clock()
+        self.baseTiempo = time.time()
         self.tableroIni.ponPosicion(self.partida.iniPosicion)
 
         self.movActual = -1
@@ -521,7 +521,7 @@ class WLearnPuente(QTVarios.WDialogo):
         if self.black:
             color += "b"
         dic = {}
-        dic["SECONDS"] = int(time.clock() - self.baseTiempo)
+        dic["SECONDS"] = int(time.time() - self.baseTiempo)
         dic["DATE"] = Util.hoy()
         dic["LEVEL"] = self.nivel
         dic["COLOR"] = color
@@ -551,7 +551,7 @@ class WLearnPuente(QTVarios.WDialogo):
 
     def ajustaReloj(self):
         if self.siClock:
-            s = int(time.clock() - self.baseTiempo)
+            s = int(time.time() - self.baseTiempo)
 
             m = s / 60
             s -= m * 60

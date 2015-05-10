@@ -293,7 +293,7 @@ class Torneo:
         if self._fen:
             return self._fen
         if self._norman:
-            with open( "IntFiles/40H-Openings.epd" ) as f:
+            with open( "./IntFiles/40H-Openings.epd" ) as f:
                 lista = [ linea for linea in f.read().split("\n") if linea.strip() ]
                 fen = random.choice(lista)
                 fen = fen[:fen.index("id")].strip()

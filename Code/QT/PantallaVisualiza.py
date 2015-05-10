@@ -380,7 +380,7 @@ class WPlay(QTVarios.WDialogo):
 
     def miraTiempo(self):
         if self.iniTime:
-            t = int(time.clock() - self.iniTime)
+            t = int(time.time() - self.iniTime)
             self.iniTime = None
             self.dicdatos["TIME"] += t
 
@@ -454,10 +454,10 @@ class WPlay(QTVarios.WDialogo):
 
         self.activaTablero()
         QtCore.QTimer.singleShot(1000, self.compruebaTiempo)
-        self.iniTime = time.clock()
+        self.iniTime = time.time()
 
     def compruebaTiempo(self):
-        t = round(time.clock() - self.iniTimeTablero, 0)
+        t = round(time.time() - self.iniTimeTablero, 0)
         r = self.intervaloMax - int(t)
 
         if r <= 0:
@@ -467,7 +467,7 @@ class WPlay(QTVarios.WDialogo):
             QtCore.QTimer.singleShot(1000, self.compruebaTiempo)
 
     def activaTablero(self):
-        self.iniTimeTablero = time.clock()
+        self.iniTimeTablero = time.time()
         self.gbSolucion.hide()
         self.btTablero.hide()
         self.btComprueba.hide()
@@ -585,5 +585,5 @@ class WPlay(QTVarios.WDialogo):
         return liSolucion
 
 def pantallaVisualiza(procesador):
-    w = WControl(procesador, "IntFiles/Visual/R50-01.vis")
+    w = WControl(procesador, "./IntFiles/Visual/R50-01.vis")
     w.exec_()

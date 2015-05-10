@@ -197,7 +197,7 @@ class WDailyTestBase(QTVarios.WDialogo):
                 self.fns = ""
 
         if not liR:
-            li = Util.recuperaVar("IntFiles/lista60.dkv")
+            li = Util.recuperaVar("./IntFiles/lista60.dkv")
             liR = []
             dif = int(40 / self.pruebas)
             ini = 10
@@ -340,7 +340,7 @@ class WDailyTest(QTVarios.WDialogo):
         self.lbColor.ponTexto(mens)
 
         self.sigueHumano()
-        self.iniTiempo = time.clock()
+        self.iniTiempo = time.time()
 
     def terminarTest(self):
         self.paraHumano()
@@ -411,7 +411,7 @@ class WDailyTest(QTVarios.WDialogo):
             self.sigueHumano()
 
     def calculaTiempoPuntos(self):
-        tiempo = time.clock() - self.iniTiempo
+        tiempo = time.time() - self.iniTiempo
 
         um = QTUtil2.analizando(self)
         self.rmr, pos = self.xtutor.analizaJugada(self.jg, self.xtutor.motorTiempoJugada)

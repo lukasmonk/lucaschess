@@ -631,7 +631,7 @@ class CPU():
         w.exec_()
 
 def run(fdb):
-    ferr = open("bug.voyager", "at")
+    ferr = open("./bug.voyager", "at")
     sys.stderr = ferr
 
     cpu = CPU(fdb)

@@ -1,5 +1,5 @@
 DEBUG = False
-VERSION = "9.03a"
+VERSION = "9.04"
 
 import sys
 
@@ -39,7 +39,7 @@ def init():
 
     if resp == kFinReinicio:
         if sys.argv[0].endswith(".py"):
-            exe = sys.argv[0]
+            exe = "./%s"%sys.argv[0]
         else:
             exe = "Lucas.exe" if VarGen.isWindows else "Lucas"
         VarGen.startfile(exe)

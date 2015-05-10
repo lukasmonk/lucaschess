@@ -1,7 +1,7 @@
 """Iconos y pixmap usados en el programa"""
 from PyQt4 import QtGui
 
-f = open("IntFiles/Iconos.bin","rb")
+f = open("./IntFiles/Iconos.bin","rb")
 binIconos = f.read()
 f.close()
 

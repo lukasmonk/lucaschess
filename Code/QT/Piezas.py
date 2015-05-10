@@ -116,7 +116,7 @@ class BlindfoldConfig:
             fich = "g"
         elif tipo == CHECKER:
             fich = "w" if siWhite else "b"
-        return os.path.join("IntFiles", "blind_%s.svg" % fich)
+        return os.path.join("././IntFiles", "blind_%s.svg" % fich)
 
     def restore(self):
         self.dicPiezas = VarGen.configuracion.leeVariables("BLINDFOLD")
@@ -131,7 +131,7 @@ class Blindfold(ConjuntoPiezas):
     def __init__(self, nomPiezasOri, tipo=kBlindfoldConfig):
         self.nombre = "BlindFold"
         self.carpetaBF = os.path.join(VarGen.configuracion.carpeta, "BlindFoldPieces")
-        self.carpetaPZ = "IntFiles"
+        self.carpetaPZ = "./IntFiles"
         self.tipo = tipo
         self.reset(nomPiezasOri)
 

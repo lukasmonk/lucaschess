@@ -278,7 +278,7 @@ class BookGuide:
         self.dbAnalisis = DBanalisis()
 
     def pathGuide(self, nameGuide):
-        return os.path.join(self.configuracion.carpeta, nameGuide + ".pgo")
+        return Util.dirRelativo(os.path.join(self.configuracion.carpeta, nameGuide + ".pgo"))
 
     def getOtras(self):
         li = Util.listdir(self.configuracion.carpeta)

@@ -524,7 +524,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
     def ponSegundos(self):
         segundos = self.bmt_uno.segundos
         if self.iniTiempo:
-            segundos += int(time.clock() - self.iniTiempo)
+            segundos += int(time.time() - self.iniTiempo)
         minutos = segundos / 60
         segundos = segundos - minutos * 60
 
@@ -734,13 +734,13 @@ class WEntrenarBMT(QTVarios.WDialogo):
         self.pgn.refresh()
 
     def iniciaTiempo(self):
-        self.iniTiempo = time.clock()
+        self.iniTiempo = time.time()
         if not self.timer:
             self.ponReloj()
 
     def finalizaTiempo(self):
         if self.iniTiempo:
-            tiempo = time.clock() - self.iniTiempo
+            tiempo = time.time() - self.iniTiempo
             self.bmt_uno.segundos += int(tiempo)
         self.iniTiempo = None
         self.quitaReloj()
@@ -834,6 +834,8 @@ class WBMT(QTVarios.WDialogo):
                                        siSeleccionMultiple=True)
         self.registrarGrid(gridT)
         tab.nuevaTab(gridT, _("Finished"))
+
+        self.dicReverse = {}
 
         # Layout
         layout = Colocacion.V().control(tb).control(tab).margen(8)
@@ -1067,6 +1069,37 @@ class WBMT(QTVarios.WDialogo):
 
         tmpBP.cerrar()
         self.grid.refresh()
+
+    def gridDobleClickCabecera(self, grid, oColumna):
+        clave = oColumna.clave
+        if clave != "NOMBRE":
+            return
+
+        grid, dbf, recno = self.actual()
+
+        li = []
+        for x in range(dbf.reccount()):
+            dbf.goto(x)
+            li.append( (dbf.NOMBRE, x) )
+
+        li.sort( key=lambda x: x[0])
+
+        siReverse = self.dicReverse.get(grid.id, False)
+        self.dicReverse[grid.id] = not siReverse
+
+        if siReverse:
+            li.reverse()
+
+        order = 0
+        reg = dbf.baseRegistro()
+        for nom, recno in li:
+            reg.ORDEN = order
+            dbf.modificarReg(recno, reg)
+            order += 1
+        dbf.commit()
+        dbf.leer()
+        grid.refresh()
+        grid.gotop()
 
     def dividir(self):
         grid, dbf, recno = self.actual()

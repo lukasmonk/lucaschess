@@ -407,7 +407,7 @@ class AlbumesAnimales(Albumes):
             Cromo("Penguin", _("Penguin"), 4, 62, 0, 0, 20, 37, 400, 150, 1, "s", 7),
             Cromo("Snake", _("Snake"), 4, 64, 0, 0, 15, 36, 400, 150, 1, "t", 8),
             Cromo("Shark", _("Shark"), 4, 66, 0, 0, 10, 35, 400, 150, 1, "c", 8),
-            Cromo("Turkey", _("Turkey"), 4, 67, 0, 0, 10, 30, 400, 150, 1, "s", 8),
+            Cromo("Turkey", _("Turkeycock"), 4, 67, 0, 0, 10, 30, 400, 150, 1, "s", 8),
             Cromo("Monkey", _("Monkey"), 4, 68, 0, 0, 10, 28, 400, 150, 1, "t", 8),
             Cromo("Wolf", _("Wolf"), 5, 70, 0, 0, 10, 26, 300, 150, 1, "k", 8),
             Cromo("Fox", _("Fox"), 5, 72, 0, 0, 10, 24, 300, 150, 1, "c", 9),

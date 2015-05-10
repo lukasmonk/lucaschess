@@ -155,7 +155,7 @@ class GestorPGN(Gestor.Gestor):
     def jugadaDia(self):
         self.pensando(True)
         dia = Util.hoy().day
-        lid = Util.LIdisk("IntFiles/31.pkl")
+        lid = Util.LIdisk("./IntFiles/31.pkl")
         dic = lid[dia - 1]
         lid.close()
         txt = dic["PGN"]

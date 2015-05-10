@@ -515,7 +515,6 @@ class WBase(QtGui.QWidget):
         self.pgn.refresh()
 
     def activaJuego(self, siActivar, siReloj, siAyudas=None):
-
         self.pgn.setVisible(siActivar)
         self.lbRevision.hide()
         if siAyudas is None:

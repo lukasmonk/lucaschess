@@ -274,7 +274,7 @@ class WMemoria(QTVarios.WDialogo):
             _X(_("When you've loaded the %1 pieces you can click the Check button"), str(self.nivel + 3)))
         self.rotuloDispone.setVisible(False)
 
-        self.iniTiempo = time.clock()
+        self.iniTiempo = time.time()
 
         for k in self.casillas:
             self.casillas[k] = None
@@ -289,7 +289,7 @@ class WMemoria(QTVarios.WDialogo):
 
     def comprobar(self):
 
-        self.tiempo = int(time.clock() - self.iniTiempo)
+        self.tiempo = int(time.time() - self.iniTiempo)
 
         fenNuevo = self.posicion.fen()
         fenNuevo = fenNuevo[:fenNuevo.index(" ")]

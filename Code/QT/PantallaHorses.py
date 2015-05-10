@@ -256,7 +256,7 @@ class WHorses(QTVarios.WDialogo):
         self.tablero.ponPosicion(self.cpInicial)
         self.tablero.quitaFlechas()
         self.ponSiguiente()
-        self.timer = time.clock()
+        self.timer = time.time()
         self.moves = 0
         self.hints = 0
         self.nayuda = 0  # para que haga un rondo
@@ -297,7 +297,7 @@ class WHorses(QTVarios.WDialogo):
         self.ponSiguiente()
 
     def final(self):
-        seconds = int(time.clock() - self.timer)
+        seconds = int(time.time() - self.timer)
         self.historico.append(Util.hoy(), self.moves, seconds, self.hints)
 
         QTUtil2.mensaje(self, "<b>%s<b><ul><li>%s: <b>%d</b></li><li>%s: <b>%d</b></li><li>%s: <b>%d</b></li></ul>" % (

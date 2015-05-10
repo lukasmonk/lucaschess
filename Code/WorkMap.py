@@ -405,7 +405,7 @@ class WorkMap:
         self.db.nuevo(self)
 
     def leeSVG(self):
-        svg = "IntFiles/Maps/%s.svg"%self.mapa
+        svg = "./IntFiles/Maps/%s.svg"%self.mapa
         f = open(svg)
         lineasSVG = []
         for nlinea, linea in enumerate(f):

@@ -67,7 +67,7 @@ class Group:
 class Groups:
     def __init__(self, txt=None):
         if txt is None:
-            with open("IntFiles/STS.ini") as f:
+            with open("./IntFiles/STS.ini") as f:
                 txt = f.read()
         dic = collections.OrderedDict()
         for linea in txt.split("\n"):

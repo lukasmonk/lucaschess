@@ -1,4 +1,14 @@
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
+
+# ==============================================================================
+# Author : Lucas Monge, lukasmonk@gmail.com
+# Web : http://www-lucaschess.rhcloud.com
+# Blog : http://lucaschess.blogspot.com/
+# Licence : GPL
+# ==============================================================================
+
+# 9.04
 
 
 import os
@@ -34,7 +44,7 @@ elif nArgs >= 2:
     arg = sys.argv[1].lower()
     if arg.endswith(".pgn") or arg.endswith(".pks") \
             or arg.endswith(".lcg") or arg.endswith(".lcf") \
-            or arg == "-play":
+            or arg == "-play" or arg.endswith(".bmt"):
         import Code.Init
         Code.Init.init()
 

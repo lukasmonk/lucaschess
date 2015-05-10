@@ -295,12 +295,12 @@ class WEdicionSonido(QTVarios.WDialogo):
 
         self.taller.micInicio()
 
-        iniTime = time.clock()
+        iniTime = time.time()
 
         while self.siGrabando:
             self.taller.micGraba()
             QTUtil.refreshGUI()
-            t = time.clock() - iniTime
+            t = time.time() - iniTime
             self.mesa.ponCentesimas(t * 100)
             if t > self.maxTime:
                 break

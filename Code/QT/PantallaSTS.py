@@ -131,9 +131,9 @@ class WRun(QTVarios.WDialogo):
                 self.tablero.creaFlechaTmp(xa1h8[:2], xa1h8[2:], False)
             if not self.playing:
                 return
-            t0 = time.clock()
+            t0 = time.time()
             mrm = self.xengine.analiza(self.elem.fen)
-            t1 = time.clock()-t0
+            t1 = time.time()-t0
             if mrm:
                 rm = mrm.mejorMov()
                 if rm:

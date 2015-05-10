@@ -50,6 +50,7 @@ import Code.QT.WBDatabase as WBDatabase
 import Code.QT.WBDatabaseFEN as WBDatabaseFEN
 import Code.QT.PantallaWorkMap as PantallaWorkMap
 import Code.QT.PantallaVoice as PantallaVoice
+import Code.QT.PantallaBMT as PantallaBMT
 
 class Procesador():
     """
@@ -133,6 +134,10 @@ class Procesador():
                     return
                 elif comandoL.endswith(".lcf"):
                     self.externDatabaseFEN(comando)
+                    return
+                elif comandoL.endswith(".bmt"):
+                    self.inicio()
+                    self.externBMT(comando)
                     return
                 elif comando == "-play":
                     fen = sys.argv[2]
@@ -694,6 +699,10 @@ class Procesador():
 
             # elif resp.startswith("del_xfcc"):
                 # self.xfccDel(resp)
+
+    def externBMT(self, fichero):
+        self.configuracion.ficheroBMT = fichero
+        PantallaBMT.pantallaBMT(self)
 
     def externDatabase(self, fichero):
         self.configuracion.ficheroDBgames = fichero

@@ -398,7 +398,7 @@ class GestorElo(Gestor.Gestor):
             self.pensando(True)
             self.desactivaTodas()
 
-            iniT = time.clock()
+            iniT = time.time()
 
             siPensar = True
 
@@ -432,7 +432,7 @@ class GestorElo(Gestor.Gestor):
                     else:
                         dT, hT = 10, 35
 
-            difT = time.clock() - iniT
+            difT = time.time() - iniT
             t = random.randint(dT * 10, hT * 10) * 0.01
             if difT < t:
                 time.sleep(t - difT)

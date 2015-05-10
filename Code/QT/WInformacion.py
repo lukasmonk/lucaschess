@@ -33,7 +33,7 @@ class InformacionPGN(QtGui.QWidget):
         liOpciones = [("-", "-")]
         dicNAGs = TrListas.dicNAGs()
 
-        carpNAGs = "IntFiles/NAGs"
+        carpNAGs = "./IntFiles/NAGs"
 
         for x in dicNAGs:
             if x:

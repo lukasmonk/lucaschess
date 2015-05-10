@@ -301,7 +301,6 @@ class GestorEntMaq(Gestor.Gestor):
             self.refresh()
 
     def procesarAccion(self, clave):
-
         if clave == k_cancelar:
             self.finalizar()
 
@@ -315,6 +314,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.atras()
 
         elif clave == k_ayudaMover:
+            self.analizaTutorFinal()
             self.ayudaMover(999)
 
         elif clave == k_reiniciar:
@@ -720,7 +720,6 @@ class GestorEntMaq(Gestor.Gestor):
         return self.eligeJugadaBookBase(book, "pr")
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
         if self.siJuegaHumano:
             self.paraHumano()
         else:

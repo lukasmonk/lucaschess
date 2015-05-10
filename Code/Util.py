@@ -152,10 +152,18 @@ def copiaFichero(origen, destino):
     return False
 
 def renombraFichero(origen, destino):
-    if existeFichero(origen):
-        if borraFichero(destino):
-            shutil.move(origen, destino)
-            return True
+    if not existeFichero(origen):
+        return False
+    origen = os.path.abspath(origen)
+    destino = os.path.abspath(destino)
+    if origen == destino:
+        return True
+    if origen.lower() == destino.lower():
+        os.rename(origen, destino)
+        return True
+    if borraFichero(destino):
+        shutil.move(origen, destino)
+        return True
     return False
 
 def borraFichero(fichero):
@@ -348,12 +356,12 @@ class ListaNumerosImpresion:
         return False
 
 def speed():
-    t = time.clock()
+    t = time.time()
     for x in xrange(100000):
         for i in xrange(10):
             oct(i)
         gc.enable()
-    return time.clock() - t
+    return time.time() - t
 
 class SymbolDict():
     def __init__(self, dic=None):
@@ -491,7 +499,7 @@ class Timer:
 
     def dameSegundos(self):
         if self.marcaTiempo:
-            tp = self.tiempoPendiente - (time.clock() - self.marcaTiempo)
+            tp = self.tiempoPendiente - (time.time() - self.marcaTiempo)
         else:
             tp = self.tiempoPendiente
         if tp <= 0.0:
@@ -500,7 +508,7 @@ class Timer:
 
     def dameSegundos2(self):
         if self.marcaTiempo:
-            tp2 = int(time.clock() - self.marcaTiempo)
+            tp2 = int(time.time() - self.marcaTiempo)
             tp = int(self.tiempoPendiente) - tp2
         else:
             tp = self.tiempoPendiente
@@ -543,7 +551,7 @@ class Timer:
 
     def siAgotado(self):
         if self.marcaTiempo:
-            if (self.tiempoPendiente - ( time.clock() - self.marcaTiempo )) <= 0.0:
+            if (self.tiempoPendiente - ( time.time() - self.marcaTiempo )) <= 0.0:
                 return True
         else:
             return self.tiempoPendiente <= 0.0
@@ -552,7 +560,7 @@ class Timer:
     def isZeitnot(self):
         if self.marcaZeitnot:
             if self.marcaTiempo:
-                t = self.tiempoPendiente - ( time.clock() - self.marcaTiempo )
+                t = self.tiempoPendiente - ( time.time() - self.marcaTiempo )
             else:
                 t = self.tiempoPendiente
             if t > 0:
@@ -566,11 +574,11 @@ class Timer:
         self.marcaZeitnot = segs
 
     def iniciaMarcador(self):
-        self.marcaTiempo = time.clock()
+        self.marcaTiempo = time.time()
 
     def paraMarcador(self, tiempoJugada):
         if self.marcaTiempo:
-            self.tiempoPendiente -= ( time.clock() - self.marcaTiempo ) - tiempoJugada
+            self.tiempoPendiente -= ( time.time() - self.marcaTiempo ) - tiempoJugada
             self.marcaTiempo = None
 
     def tiempoAplazamiento(self):
@@ -1078,11 +1086,11 @@ class Timekeeper:
         self._begin = None
 
     def start(self):
-        self._begin = time.clock()
+        self._begin = time.time()
 
     def stop(self):
         if self._begin:
             b = self._begin
             self._begin = None
-            return time.clock()-b
+            return time.time()-b
 

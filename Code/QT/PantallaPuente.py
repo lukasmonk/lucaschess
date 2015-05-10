@@ -446,7 +446,7 @@ class WPuente(QTVarios.WDialogo):
         self.adjustSize()
 
         # Tiempo
-        self.baseTiempo = time.clock()
+        self.baseTiempo = time.time()
 
         self.btSeguir.hide()
         self.btTerminar.hide()
@@ -526,7 +526,7 @@ class WPuente(QTVarios.WDialogo):
         for wm in self.liwm:
             wm.limpia()
 
-        self.baseTiempo = time.clock()
+        self.baseTiempo = time.time()
 
         self.btComprobar.show()
         self.btSeguir.hide()
@@ -536,7 +536,7 @@ class WPuente(QTVarios.WDialogo):
         self.liwm[0].activa()
 
     def correcto(self):
-        segundos = float(time.clock() - self.baseTiempo)
+        segundos = float(time.time() - self.baseTiempo)
         self.lbTiempo.ponTexto("<h2>%s</h2>" % _X(_("Right, it took %1 seconds."), "%.02f" % segundos))
 
         self.historico.append(Util.hoy(), segundos)

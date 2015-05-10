@@ -117,7 +117,7 @@ class XMotor(QtCore.QProcess):
     def dispatch(self):
         QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
         if self.guiDispatch:
-            tm = time.clock()
+            tm = time.time()
             if tm-self.ultDispatch < self.minDispatch:
                 return True
             self.ultDispatch = tm
@@ -136,7 +136,7 @@ class XMotor(QtCore.QProcess):
         return True
 
     def espera(self, txt, msStop, siStop=True):
-        iniTiempo = time.clock()
+        iniTiempo = time.time()
         stop = False
         tamBuffer = len(self._buffer)
         while True:
@@ -150,7 +150,7 @@ class XMotor(QtCore.QProcess):
             if not self.dispatch():
                 return False
 
-            queda = msStop - int((time.clock() - iniTiempo) * 1000)
+            queda = msStop - int((time.time() - iniTiempo) * 1000)
             if queda <= 0:
                 if stop:
                     return True

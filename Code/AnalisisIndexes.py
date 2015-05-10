@@ -2,7 +2,7 @@ import Code.VarGen as VarGen
 import Code.SAK as SAK
 
 def calc_formula(cual, cp, mrm):  # , limit=200.0):
-    f = open("IntFiles/Formulas/%s.formula" % cual, "rb")
+    f = open("./IntFiles/Formulas/%s.formula" % cual, "rb")
     formula = f.read()
     f.close()
     piew = pieb = 0

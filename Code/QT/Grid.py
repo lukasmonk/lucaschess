@@ -37,6 +37,7 @@ class ControlGrid(QtCore.QAbstractTableModel):
         self.hh = grid.horizontalHeader()
         self.siColorTexto = hasattr(self.wParent, "gridColorTexto")
         self.siColorFondo = hasattr(self.wParent, "gridColorFondo")
+        self.siAlineacion = hasattr(self.wParent, "gridAlineacion")
         self.font = grid.font()
         self.siBold = hasattr(self.wParent, "gridBold")
         if self.siBold:
@@ -92,6 +93,10 @@ class ControlGrid(QtCore.QAbstractTableModel):
         columna = self.oColumnasR.columna(index.column())
 
         if role == QtCore.Qt.TextAlignmentRole:
+            if self.siAlineacion:
+                resp = self.wParent.gridAlineacion(self.grid, index.row(), columna)
+                if resp:
+                    return columna.QTalineacion(resp)
             return columna.qtAlineacion
         elif role == QtCore.Qt.BackgroundRole:
             if self.siColorFondo:
@@ -118,6 +123,14 @@ class ControlGrid(QtCore.QAbstractTableModel):
             return self.wParent.gridDato(self.grid, index.row(), columna)
 
         return None
+
+    def getAlineacion(self, index):
+        columna = self.oColumnasR.columna(index.column())
+        return self.wParent.gridAlineacion(self.grid, index.row(), columna)
+
+    def getFondo(self, index):
+        columna = self.oColumnasR.columna(index.column())
+        return self.wParent.gridColorFondo(self.grid, index.row(), columna)
 
     def flags(self, index):
         """

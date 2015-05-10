@@ -250,7 +250,7 @@ class ConfigMotor(ConfigMotorBase):
 
     def ejecutable(self):
         tipo = "Linux" if VarGen.isLinux else "Windows"
-        return "Engines%s/%s/%s" % ( tipo, self.carpeta, self.path )
+        return "./Engines%s/%s/%s" % ( tipo, self.carpeta, self.path )
 
     def puntuacion(self):
         return self.categorias.puntuacion()
