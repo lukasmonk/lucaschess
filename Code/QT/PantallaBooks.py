@@ -184,9 +184,9 @@ def polyglotUnir(owner):
             return
 
         if VarGen.isWindows:
-            exe = 'engines/polyglot/polyglot.exe'
+            exe = 'EnginesWindows/polyglot/polyglot.exe'
         else:
-            exe = 'enginesLinux/polyglot/polyglot'
+            exe = 'EnginesLinux/polyglot/polyglot'
         li = [os.path.abspath(exe), 'merge-book', "-in1", f1, "-in2", f2, "-out", fr]
         try:
             os.remove(fr)

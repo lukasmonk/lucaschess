@@ -23,8 +23,8 @@ import Code.Util as Util
 import Code.CajonDesastre as CajonDesastre
 import Code.TrListas as TrListas
 
-LCFILEFOLDER = os.path.abspath("./lc.folder")
-LCBASEFOLDER = os.path.abspath("./UsrData")
+LCFILEFOLDER = "./lc.folder"
+LCBASEFOLDER = "./UsrData"
 
 def activeFolder():
     if os.path.isfile(LCFILEFOLDER):
@@ -40,7 +40,7 @@ def isDefaultFolder():
 
 def changeFolder(nueva):
     if nueva:
-        if os.path.abspath(nueva) == LCBASEFOLDER:
+        if os.path.abspath(nueva) == os.path.abspath(LCBASEFOLDER):
             return changeFolder(None)
         f = open(LCFILEFOLDER, "wb")
         f.write(nueva)

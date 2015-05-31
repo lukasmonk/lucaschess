@@ -1,5 +1,5 @@
 DEBUG = False
-VERSION = "9.04"
+VERSION = "9.05"
 
 import sys
 

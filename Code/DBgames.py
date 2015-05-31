@@ -753,12 +753,12 @@ class DBgames:
         erroneos = duplicados = importados = 0
 
         # 1.File pgn -> temporal clean
-        for n, g in enumerate(PGNreader.readGames(fichero)):
-            if n == 10000:
-                break
+        for n, g in enumerate(PGNreader.readGames(fichero),1):
             if n % 100 == 0:
                 if not dlTmp.actualiza(n, erroneos, duplicados, importados):
                     break
+                if n%10000 == 0:
+                    self.dbf.commit()
             if g.erroneo:
                 erroneos += 1
                 continue

@@ -170,9 +170,11 @@ class RespuestaMotor:
     def abrTextoBase(self):
         if self.mate != 0:
             mt = self.mate
+            if mt > 0:
+                mt -= 1
             if not self.siBlancas:
                 mt = -mt
-            return "M%+d" % mt
+            return ("M%+d" % mt) if mt else "M"
         else:
             pts = self.puntos
             if not self.siBlancas:

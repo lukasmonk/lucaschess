@@ -789,8 +789,9 @@ class GestorSolo(Gestor.Gestor):
         elif resp == "motor":
             self.ponRotulo1("")
             if self.siJuegaMotor:
-                self.xrival.terminar()
-                self.xrival = None
+                if self.xrival:
+                    self.xrival.terminar()
+                    self.xrival = None
                 self.siJuegaMotor = False
             else:
                 self.cambioRival()

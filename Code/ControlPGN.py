@@ -225,17 +225,30 @@ class ControlPGN:
 
     def actualGM(self):
 
-        gm = self.gestor.apertura.gm
-        siBlancas = self.gestor.apertura.siBlancas
-        oponente, fecha, apertura, result = self.gestor.apertura.datosActuales()
+        gm = self.gestor.gm
+        motorGM = self.gestor.motorGM
 
-        if siBlancas:
-            blancas = gm
-            negras = oponente
+        partidaGM = motorGM.getLastGame()
+
+        if partidaGM:
+            event = partidaGM.event
+            oponent = partidaGM.oponent
+            fecha = partidaGM.date
+            result = partidaGM.result
         else:
-            blancas = oponente
+            event = "?"
+            oponent = "?"
+            fecha = "????.??.??"
+            result = "*"
+
+        if self.gestor.siBlancas:
+            blancas = gm
+            negras = oponent
+        else:
+            blancas = oponent
             negras = gm
-        resp = '[Event "?"]\n'
+
+        resp = '[Event "%s"]\n' % event
         resp += '[Date "%s"]\n' % fecha
         resp += '[White "%s"]\n' % blancas
         resp += '[Black "%s"]\n' % negras

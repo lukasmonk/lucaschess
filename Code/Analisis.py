@@ -596,19 +596,19 @@ class UnaMuestra():
         return rm.texto()
 
     def complexity(self):
-        return get_complexity(self.jg.posicionBase, self.mrm)
+        return AnalisisIndexes.get_complexity(self.jg.posicionBase, self.mrm)
 
     def winprobability(self):
-        return get_winprobability(self.jg.posicionBase, self.mrm)
+        return AnalisisIndexes.get_winprobability(self.jg.posicionBase, self.mrm)
 
     def narrowness(self):
-        return get_narrowness(self.jg.posicionBase, self.mrm)
+        return AnalisisIndexes.get_narrowness(self.jg.posicionBase, self.mrm)
 
     def efficientmobility(self):
-        return get_efficientmobility(self.jg.posicionBase, self.mrm)
+        return AnalisisIndexes.get_efficientmobility(self.jg.posicionBase, self.mrm)
 
     def piecesactivity(self):
-        return get_piecesactivity(self.jg.posicionBase, self.mrm)
+        return AnalisisIndexes.get_piecesactivity(self.jg.posicionBase, self.mrm)
 
     def posicionActual(self):
         nMovs = self.partida.numJugadas()

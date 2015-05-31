@@ -137,7 +137,7 @@ class Cromo:
         self.aterrizaje = int(aterrizaje)
         self.mate = int(mate)
 
-        dic = {"t": "toga" if VarGen.isWindows else "fruit", "c": "critter", "k": "komodo", "s": "stockfish"}
+        dic = {"t": "fruit", "c": "critter", "k": "komodo", "s": "stockfish"}
         self.engine = dic.get(engine, None)
 
         self.apertura = apertura

@@ -8,7 +8,7 @@ from Code.Movimientos import xpv2pv, pv2xpv
 
 class GMpartida:
     def __init__(self, linea):
-        xpv, self.site, self.oponent, self.date, self.opening, self.result, self.color = linea.split("|")
+        xpv, self.event, self.oponent, self.date, self.opening, self.result, self.color = linea.split("|")
         self.liPV = xpv2pv(xpv).split(" ")
         self.lenPV = len(self.liPV)
 
@@ -52,9 +52,13 @@ class GM:
         self.liGMPartidas = self.read()
 
         self.ply = 0
+        self.lastGame = None
 
     def __len__(self):
         return len(self.liGMPartidas)
+
+    def getLastGame(self):
+        return self.lastGame
 
     def read(self):
         ficheroGM = self.gm + ".xgm"
@@ -137,9 +141,9 @@ class GM:
         apertura = partida.apertura.trNombre if partida.apertura else gPartida.opening
 
         txt = _("Opponent") + " : <b>" + gPartida.oponent + "</b><br>"
-        site = gPartida.site
-        if site:
-            txt += _("Site") + " : <b>" + site + "</b><br>"
+        event = gPartida.event
+        if event:
+            txt += _("Event") + " : <b>" + event + "</b><br>"
         txt += _("Date") + " : <b>" + gPartida.date + "</b><br>"
         txt += _("Opening") + " : <b>" + apertura + "</b><br>"
         txt += _("Result") + " : <b>" + gPartida.result + "</b><br>"
@@ -155,8 +159,8 @@ class GM:
         else:
             porc = 0
 
-        site = " - %s" % site if site else ""
-        txtResumen = "%s%s - %s - %s" % (gPartida.oponent, site, gPartida.date, gPartida.result)
+        event = " - %s" % event if event else ""
+        txtResumen = "%s%s - %s - %s" % (gPartida.oponent, event, gPartida.date, gPartida.result)
 
         return txt, porc, txtResumen
 
