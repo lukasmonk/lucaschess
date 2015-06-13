@@ -736,7 +736,6 @@ class Tablero(QtGui.QGraphicsView):
         f = chr(48 + yc)
         c = chr(96 + xc)
         a1h8 = c + f
-
         self.liMouse.append(a1h8)
 
         if self.atajosRaton:

@@ -370,11 +370,12 @@ class WBase(QtGui.QWidget):
             mate = analisis.mate
             siW = jg.posicionBase.siBlancas
             if mate:
-                if mate > 0:
-                    mate -= 1
-                if not siW:
-                    mate = -mate
-                info = ("(M%+d)" % mate) if mate else ""
+                if mate == 1:
+                    info = ""
+                else:
+                    if not siW:
+                        mate = -mate
+                    info = "(M%+d)" % mate
             else:
                 pts = analisis.puntos
                 if not siW:

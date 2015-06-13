@@ -321,6 +321,7 @@ class GestorEntPos(Gestor.Gestor):
 
         self.siJuegaHumano = True
         self.activaColor(siBlancas)
+        self.siAnalizadoTutor = False
 
     def piensaRival(self):
         self.rivalPensando = True

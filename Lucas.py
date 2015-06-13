@@ -11,13 +11,14 @@
 
 
 """
-1. Mate label in analysis. (dima d)
+1. Wrong analysis label when mate. (dima d)
 2. When program path includes cyrillic characters. (tserv)
 3. Merging polyglot books.
 4. Renaming a Personal opening guide. (Mario L)
 5. Changed stockfish with a compilation valid to old pcs. (Jörg R)
 6. Play like a GM, when saving to PGN. (Uli)
-7. Cinnamon problems working with low fixed depths, detected but not fixed. (Xema)
+7. Cinnamon engine, problems working with low depths, fixed by author Giussepe Cannella. (Xema)
+8. Moving pieces pressing cell, can put pieces in wrong positions. (Bolivar Gonzalez)
 """
 
 import os

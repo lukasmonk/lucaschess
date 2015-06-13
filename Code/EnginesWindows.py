@@ -26,8 +26,8 @@ def leeRivales():
     cm.elo = 1854
     mas(cm)
 
-    cm = ConfigMotor("cinnamon", "Giuseppe Cannella", "1.2b", "http://cinnamonchess.altervista.org/")
-    cm.path = "cinnamon_1.2b-generic.exe"
+    cm = ConfigMotor("cinnamon", "Giuseppe Cannella", "1.2c", "http://cinnamonchess.altervista.org/")
+    cm.path = "cinnamon_1.2c-generic.exe"
     cm.ordenUCI("Hash", "32")
     cm.elo = 1930
     mas(cm)

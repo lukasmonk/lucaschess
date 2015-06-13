@@ -560,12 +560,14 @@ class UnaMuestra():
             hasta = pv1[2:4]
             coronacion = pv1[4] if len(pv1) == 5 else None
 
+            txt = rm.abrTextoBase()
+            if txt:
+                txt = "(%s)"%txt
             if self.siFigurines:
-                nombre = pb.pgn(desde, hasta, coronacion) + \
-                         " (%s)" % rm.abrTextoBase()
+                nombre = pb.pgn(desde, hasta, coronacion) + txt
+
             else:
-                nombre = pb.pgnSP(desde, hasta, coronacion) + \
-                         " (%s)" % rm.abrTextoBase()
+                nombre = pb.pgnSP(desde, hasta, coronacion) + txt
             li.append((rm, nombre, rm.puntosABS()))
 
         return li

@@ -150,7 +150,10 @@ class WAnalisisGraph(QTVarios.WDialogo):
             desde = pv1[:2]
             hasta = pv1[2:4]
             coronacion = pv1[4] if len(pv1) == 5 else None
-            return jg.posicionBase.pgn(desde, hasta, coronacion) + " (%s)" % rm.abrTextoBase()
+            txt = rm.abrTextoBase()
+            if txt:
+                txt = " (%s)" % txt
+            return jg.posicionBase.pgn(desde, hasta, coronacion) + txt
         elif columna == "DIF":
             mrm, pos = jg.analisis
             rm = mrm.liMultiPV[0]

@@ -276,7 +276,7 @@ class Gestor():
 
         if not siPredictivo:
             if self.atajosRatonOrigen and self.atajosRatonDestino:
-                self.tablero.muevePiezaTemporal(self.atajosRatonOrigen, self.atajosRatonDestino)
+                # self.tablero.muevePiezaTemporal(self.atajosRatonOrigen, self.atajosRatonDestino)
                 self.tablero.mensajero(self.atajosRatonOrigen, self.atajosRatonDestino)
             elif not self.atajosRatonOrigen:
                 self.atajosRatonReset()

@@ -350,8 +350,7 @@ class GestorFideFics(Gestor.Gestor):
                     bmove = _("book move")
                     comentario = "%s: %s %s\n%s: %s %s" % (self.nombreObj, jgObj.pgnSP(), bmove,
                                                                 self.configuracion.jugador, jgUsu.pgnSP(), bmove)
-                w = PantallaJuicio.MensajeF(self.pantalla, comentario)
-                w.mostrar()
+                QTUtil2.mensajeTemporal(self.pantalla, comentario, 2)
                 siAnalizaJuez = False
             else:
                 siAnalizaJuez = True
