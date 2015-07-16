@@ -345,50 +345,59 @@ class Gestor():
         """
         Hace los movimientos de piezas en el tablero
         """
-        # if siMovTemporizado and self.configuracion.efectosVisuales:
+        if siMovTemporizado and self.configuracion.efectosVisuales:
 
-            # rapidez = self.configuracion.rapidezMovPiezas * 1.0 / 100.0
-            # cpu = self.procesador.cpu
-            # cpu.reset()
-            # segundos = None
+            rapidez = self.configuracion.rapidezMovPiezas * 1.0 / 100.0
+            cpu = self.procesador.cpu
+            cpu.reset()
+            segundos = None
 
-            # # primero los movimientos
-            # for movim in liMovs:
-                # if movim[0] == "m":
-                    # if segundos is None:
-                        # desde, hasta = movim[1], movim[2]
-                        # dc = ord(desde[0]) - ord(hasta[0])
-                        # df = int(desde[1]) - int(hasta[1])
-                        # # Maxima distancia = 9.9 ( 9,89... sqrt(7**2+7**2)) = 4 segundos
-                        # dist = ( dc ** 2 + df ** 2 ) ** 0.5
-                        # segundos = 4.0 * dist / (9.9 * rapidez)
+            # primero los movimientos
+            for movim in liMovs:
+                if movim[0] == "m":
+                    if segundos is None:
+                        desde, hasta = movim[1], movim[2]
+                        dc = ord(desde[0]) - ord(hasta[0])
+                        df = int(desde[1]) - int(hasta[1])
+                        # Maxima distancia = 9.9 ( 9,89... sqrt(7**2+7**2)) = 4 segundos
+                        dist = ( dc ** 2 + df ** 2 ) ** 0.5
+                        segundos = 4.0 * dist / (9.9 * rapidez)
+                    if self.procesador.gestor:
+                        cpu.muevePieza(movim[1], movim[2], siExclusiva=False, segundos=segundos)
+                    else:
+                        return
 
-                    # cpu.muevePieza(movim[1], movim[2], siExclusiva=False, segundos=segundos)
+            if segundos is None:
+                segundos = 1.0
 
-            # if segundos is None:
-                # segundos = 1.0
+            # segundo los borrados
+            for movim in liMovs:
+                if movim[0] == "b":
+                    if self.procesador.gestor:
+                        n = cpu.duerme(segundos * 0.80 / rapidez)
+                        cpu.borraPieza(movim[1], padre=n)
+                    else:
+                        return
 
-            # # segundo los borrados
-            # for movim in liMovs:
-                # if movim[0] == "b":
-                    # n = cpu.duerme(segundos * 0.80 / rapidez)
-                    # cpu.borraPieza(movim[1], padre=n)
+            # tercero los cambios
+            for movim in liMovs:
+                if movim[0] == "c":
+                    if self.procesador.gestor:
+                        cpu.cambiaPieza(movim[1], movim[2], siExclusiva=True)
+                    else:
+                        return
 
-            # # tercero los cambios
-            # for movim in liMovs:
-                # if movim[0] == "c":
-                    # cpu.cambiaPieza(movim[1], movim[2], siExclusiva=True)
+            if self.procesador.gestor:
+                cpu.runLineal()
 
-            # cpu.runLineal()
-
-        # else:
-        for movim in liMovs:
-            if movim[0] == "b":
-                self.tablero.borraPieza(movim[1])
-            elif movim[0] == "m":
-                self.tablero.muevePieza(movim[1], movim[2])
-            elif movim[0] == "c":
-                self.tablero.cambiaPieza(movim[1], movim[2])
+        else:
+            for movim in liMovs:
+                if movim[0] == "b":
+                    self.tablero.borraPieza(movim[1])
+                elif movim[0] == "m":
+                    self.tablero.muevePieza(movim[1], movim[2])
+                elif movim[0] == "c":
+                    self.tablero.cambiaPieza(movim[1], movim[2])
 
         # Aprovechamos que esta operacion se hace en cada jugada
         self.atajosRatonReset()
