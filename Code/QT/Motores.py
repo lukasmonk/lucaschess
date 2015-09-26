@@ -12,7 +12,7 @@ class Motores:
         self.dicIconos = {INTERNO: Iconos.Motor(), EXTERNO: Iconos.MotoresExternos(),
                             MICGM: Iconos.GranMaestro(), MICPER:Iconos.EloTimed(),
                             FIXED: Iconos.FixedElo()}
-        self.dicMotoresGM = EnginesMicElo.dicGM()
+        self.liMotoresGM = EnginesMicElo.listaGM()
         self.liMotoresInternos = configuracion.listaMotoresInternos()
         self.dicMotoresFixedElo = configuracion.dicMotoresFixedElo()
         self.rehazMotoresExternos()
@@ -48,14 +48,12 @@ class Motores:
 
         menu.separador()
         submenu = menu.submenu(_("GM engines"), self.dicIconos[MICGM])
-        for gm, li in self.dicMotoresGM.iteritems():
+        for cm in self.liMotoresGM:
             icono = rp.otro()
-            submenuGM = submenu.submenu(gm, icono)
-            for cm in li:
-                clave = MICGM, cm
-                texto = cm.alias.split(" ")[2]
-                submenuGM.opcion(clave, texto, icono)
-            submenuGM.separador()
+            clave = MICGM, cm
+            texto = cm.nombre
+            submenu.opcion(clave, texto, icono)
+            submenu.separador()
 
         menu.separador()
         menu.opcion(( MICPER, None), _("Tourney engines"), self.dicIconos[MICPER])
@@ -96,12 +94,9 @@ class Motores:
                 clave = self.configuracion.rivalInicial
 
         if tipo == MICGM:
-            for nom, li in self.dicMotoresGM.iteritems():
-                for cm in li:
-                    if cm.clave == clave:
-                        rival = cm
-                        break
-                if rival:
+            for cm in self.liMotoresGM:
+                if cm.clave == clave:
+                    rival = cm
                     break
             if not rival:
                 tipo = INTERNO

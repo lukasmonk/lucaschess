@@ -36,6 +36,12 @@ class Personalidades:
                 liAjustes.append(( una["NOMBRE"], 1000 + num ))
         return liAjustes
 
+    def label(self, nAjuste):
+        for lb, n in self.listaAjustes(True):
+            if n == nAjuste:
+                return lb
+        return ""
+
     def editar(self, una, icono):
         if una is None:
             una = {}

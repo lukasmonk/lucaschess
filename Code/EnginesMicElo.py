@@ -1,7 +1,5 @@
-import collections
-
-import VarGen
 import Code.MotoresExternos as MotoresExternos
+
 
 class MotorMicElo:
     def __init__(self, nombre, exe):
@@ -31,57 +29,33 @@ class MotorMicElo:
     def recuperaUCI(self, txt):
         self.liUCI = eval(txt)
 
-def convert(liMotores):
+
+def leeMicEngines():
+    lme = MotoresExternos.ListaMotoresExternos("./IntFiles/michele.pkt")
+    lme.leer()
     li = []
-    for mt in liMotores:
+    for mt in lme.liMotores:
         mt1 = MotoresExternos.ConfigMotor(mt)
-        mt1.book = mt.book
+        if mt.alias.isupper():
+            mt1.alias = mt1.nombre = mt.alias[0] + mt.alias[1:].lower()
+            mt1.book = "Openings/%s.bin" % mt.alias.lower()
+        else:
+            mt1.alias = mt1.nombre = mt.alias
+            mt1.book = None
+
         mt1.elo = mt.elo
         mt1.idInfo = mt.idInfo
-        mt1.alias = mt.alias
         li.append(mt1)
     return li
 
-def listaPersonal():
-    lme = MotoresExternos.ListaMotoresExternos("./IntFiles/michelep.pkt")
-    lme.leer()
-    for mt in lme.liMotores:
-        mt.book = None
-    return convert(lme.liMotores)
 
 def listaGM():
-    dic = {"champion": _("Champion"), "expert": _("Expert"), "master": _("Master")}
-    lme = MotoresExternos.ListaMotoresExternos("./IntFiles/micheleg.pkt")
-    lme.leer()
-    liR = dic.keys()
-    for mt in lme.liMotores:
-        alias = mt.alias.strip()
-        for x in liR:
-            if alias.endswith(x):
-                alias = alias[:-len(x)]
-                mt.book = "Openings/%s.bin" % alias.lower()
-                alias = alias[0].upper()+alias[1:].lower() + " - " + dic[x]
-                mt.alias = alias
-                mt.nombre = alias
-                break
-
-    return convert(lme.liMotores)
-
-def listaCompleta():
-    li = listaPersonal()
-    li.extend(listaGM())
-    li.sort(key=lambda uno: uno.elo)
+    li = [mtl for mtl in leeMicEngines() if mtl.nombre[0].isupper()]
+    li.sort(key=lambda uno: uno.nombre)
     return li
 
-def dicGM():
-    dic = collections.OrderedDict()
-    if VarGen.isLinux and not VarGen.isWine:
-        return dic
 
-    lista = listaGM()
-    for cm in lista:
-        gm = cm.alias.split(" ")[0]
-        if gm not in dic:
-            dic[gm] = []
-        dic[gm].append(cm)
-    return dic
+def listaCompleta():
+    li = leeMicEngines()
+    li.sort(key=lambda uno: uno.elo)
+    return li

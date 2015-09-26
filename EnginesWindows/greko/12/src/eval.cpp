@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  eval.cpp: static position evaluation
-//  modified: 25-Mar-2014
+//  modified: 01-Oct-2014
 
 #include "eval.h"
 
@@ -24,7 +24,8 @@ EVAL PawnPassedSquare     =  50;
 EVAL KnightCenter         =  10;
 EVAL KnightOutpost        =  10;
 EVAL KnightMobility       =  20;
-EVAL BishopPair           =  50;
+EVAL BishopPairMidgame    =  20;
+EVAL BishopPairEndgame    = 100;
 EVAL BishopCenter         =  10;
 EVAL BishopMobility       =  60;
 EVAL Rook7th              =  20;
@@ -136,9 +137,9 @@ EVAL Evaluate(const Position& pos, EVAL alpha, EVAL beta)
 
 	EVAL matScore = pos.Material(WHITE) - pos.Material(BLACK);
 	if (pos.Count(BW) == 2)
-		matScore += BishopPair;
+		matScore += (BishopPairMidgame * pos.MatIndex(BLACK) + BishopPairEndgame * (32 - pos.MatIndex(BLACK))) / 32;
 	if (pos.Count(BB) == 2)
-		matScore -= BishopPair;
+		matScore -= (BishopPairMidgame * pos.MatIndex(WHITE) + BishopPairEndgame * (32 - pos.MatIndex(WHITE))) / 32;
 	matScore = matScore * g_evalParams.Material / 50;
 
 	EVAL lazy = (pos.Side() == WHITE)? matScore : -matScore;

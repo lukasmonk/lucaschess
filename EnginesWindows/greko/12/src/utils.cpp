@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  utils.cpp: some utilities
-//  modified: 01-Mar-2013
+//  modified: 19-Dec-2014
 
 #include "utils.h"
 
@@ -47,3 +47,16 @@ U64 Rand64()
 	r ^= Rand32();
 	return r;
 }
+
+bool CaseInsensitiveEquals(const std::string& s1, const std::string& s2)
+{
+	if (s1.length() != s2.length())
+		return false;
+	for (size_t i = 0; i < s1.length(); ++i)
+	{
+		if (toupper(s1[i]) != toupper(s2[i]))
+			return false;
+	}
+	return true;
+}
+

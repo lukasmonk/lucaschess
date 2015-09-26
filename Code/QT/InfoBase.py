@@ -184,7 +184,7 @@ class ThanksTo():
             _("Portuguese"): ("Rui Grafino", "" ),
             _("French"): ("Max Aloyau", "Lolo S."),
             _("Russian"): ("Reinhard, Vladimir", "Slavik Pavlov"),
-            _("German"): ("Alfons", "Georg Pfefferle"),
+            _("German"): ("Frank Stender", "Alfons, Georg Pfefferle"),
             _("Italiano"): ("Maurizio Peroni,Michele Tumbarello", ""),
             _("Azeri"): ("Shahin Jafarli (shahinjy)", ""),
             _("Catalan"): ("Salvador Morral i Esteve", ""),
@@ -199,11 +199,11 @@ class ThanksTo():
             _("Arabic"): ("Mohamad Alhedhed",""),
             _("Dutch"): ("Willy Lefebvre",""),
             _("Chinese simplified"): ("Kevin Sicong Jiang",""),
-            _("Turkish"): ("Mustafa Nazmi ÖZDEMIR",""),
         }
         def r(lng):
             return Util.iniBase8dic("Locale/%s/lang.ini"%lng)["AUTHOR"]
         dic[_("Slovenian")] = (r("si"), "")
+        dic[_("Turkish")] = (r("tr"), "")
         # _("English"):"Lucas, Georg Pfefferle, Lolo S., bolokay",
         li = dic.keys()
         li.sort()

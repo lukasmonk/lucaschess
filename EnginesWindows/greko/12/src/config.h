@@ -1,6 +1,6 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  config.cpp: configuration file code
 //  modified: 01-Mar-2013

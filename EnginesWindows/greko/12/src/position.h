@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  position.h: position and game representation
-//  modified: 01-Mar-2013
+//  modified: 19-Dec-2014
 
 #ifndef POSITION_H
 #define POSITION_H
@@ -56,6 +56,7 @@ public:
 	bool  IsAttacked(FLD to, COLOR side) const;
 	bool  IsGameOver(std::string& message);
 	FLD   King(COLOR side) const { return m_Kings[side]; }
+	Move  LastMove() const { return (m_undoSize > 0)? m_undos[m_undoSize - 1].m_mv : Move(); }
 	bool  MakeMove(Move mv);
 	void  MakeNullMove();
 	void  Mirror();

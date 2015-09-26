@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  book.cpp: opening book
-//  modified: 25-Mar-2014
+//  modified: 01-Oct-2014
 
 #include "book.h"
 #include "notation.h"
@@ -195,8 +195,7 @@ bool Book::Load(const std::string& path)
 
 		while (fread(&hash, sizeof(U64), 1, srcBin))
 		{
-			fread(&be, sizeof(int), 1, srcBin);
-			m_data[hash] += be;
+			if (fread(&be, sizeof(int), 1, srcBin) == 1) m_data[hash] += be;
 		}
 		fclose(srcBin);
 		if (g_protocol == CONSOLE)

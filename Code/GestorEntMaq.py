@@ -15,6 +15,7 @@ import Code.Books as Books
 import Code.MotorInterno as MotorInterno
 import Code.DGT as DGT
 import Code.Gestor as Gestor
+import Code.Personalidades as Personalidades
 import Code.QT.QTUtil2 as QTUtil2
 import Code.QT.QTVarios as QTVarios
 import Code.QT.Iconos as Iconos
@@ -23,7 +24,7 @@ import Code.QT.PantallaBooks as PantallaBooks
 import Code.QT.Motores as Motores
 
 class GestorEntMaq(Gestor.Gestor):
-    def inicio(self, dic, aplazamiento=None):
+    def inicio(self, dic, aplazamiento=None, siPrimeraJugadaHecha=False):
         if aplazamiento:
             dic = aplazamiento["EMDIC"]
         self.reinicio = dic
@@ -140,7 +141,7 @@ class GestorEntMaq(Gestor.Gestor):
 
         self.xrival.siBlancas = self.siRivalConBlancas
 
-        self.siPrimeraJugadaHecha = False
+        self.siPrimeraJugadaHecha = siPrimeraJugadaHecha
 
         self.siTiempo = dic["SITIEMPO"]
         if self.siTiempo:
@@ -184,13 +185,10 @@ class GestorEntMaq(Gestor.Gestor):
 
                 self.siPrimeraJugadaHecha = False
 
-        if self.siAtras:
-            self.pantalla.ponToolBar((
-                k_cancelar, k_rendirse, k_tablas, k_atras, k_ayudaMover, k_reiniciar, k_aplazar, k_configurar,
-                k_utilidades ))
-        else:
-            self.pantalla.ponToolBar(
-                ( k_cancelar, k_rendirse, k_tablas, k_ayudaMover, k_reiniciar, k_aplazar, k_configurar, k_utilidades ))
+        li = (k_cancelar, k_rendirse, k_tablas, k_atras, k_ayudaMover, k_reiniciar, k_aplazar, k_peliculaPausa, k_configurar, k_utilidades )
+        if not self.siAtras:
+            del li[3]
+        self.pantalla.ponToolBar(li)
         self.pantalla.mostrarOpcionToolbar(k_tablas, not self.siRivalInterno)
 
         self.pantalla.activaJuego(True, self.siTiempo)
@@ -222,7 +220,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.mueveJugada(kMoverFinal)
 
         if self.siTiempo:
-            self.siPrimeraJugadaHecha = False
+            self.siPrimeraJugadaHecha = siPrimeraJugadaHecha
             tpBL = self.tiempo[True].etiqueta()
             tpNG = self.tiempo[False].etiqueta()
             rival = self.xrival.nombre
@@ -313,6 +311,12 @@ class GestorEntMaq(Gestor.Gestor):
         elif clave == k_atras:
             self.atras()
 
+        elif clave == k_peliculaPausa:
+            self.pausa()
+
+        elif clave == k_peliculaSeguir:
+            self.seguir()
+
         elif clave == k_ayudaMover:
             self.analizaTutorFinal()
             self.ayudaMover(999)
@@ -366,32 +370,41 @@ class GestorEntMaq(Gestor.Gestor):
             self.pantalla.paraReloj()
         self.inicio(self.reinicio)
 
+    def genAplazamiento(self):
+        aplazamiento = {}
+        aplazamiento["EMDIC"] = self.reinicio
+
+        aplazamiento["TIPOJUEGO"] = self.tipoJuego
+        aplazamiento["SIBLANCAS"] = self.siJugamosConBlancas
+        aplazamiento["JUGADAS"] = self.partida.guardaEnTexto()
+        aplazamiento["SITUTOR"] = self.siTutorActivado
+        aplazamiento["AYUDAS"] = self.ayudas
+        aplazamiento["SUMMARY"] = self.summary
+
+        aplazamiento["SIAPERTURA"] = self.siApertura
+        aplazamiento["PENDIENTEAPERTURA"] = self.partida.pendienteApertura
+        aplazamiento["APERTURA"] = self.partida.apertura.a1h8 if self.partida.apertura else None
+
+        aplazamiento["SITIEMPO"] = self.siTiempo
+        if self.siTiempo:
+            aplazamiento["MAXSEGUNDOS"] = self.maxSegundos
+            aplazamiento["SEGUNDOSJUGADA"] = self.segundosJugada
+            aplazamiento["TIEMPOBLANCAS"] = self.tiempo[True].tiempoAplazamiento()
+            aplazamiento["TIEMPONEGRAS"] = self.tiempo[False].tiempoAplazamiento()
+        return aplazamiento
+
     def aplazar(self):
         if QTUtil2.pregunta(self.pantalla, _("Do you want to adjourn the game?")):
 
-            aplazamiento = {}
-            aplazamiento["EMDIC"] = self.reinicio
-
-            aplazamiento["TIPOJUEGO"] = self.tipoJuego
-            aplazamiento["SIBLANCAS"] = self.siJugamosConBlancas
-            aplazamiento["JUGADAS"] = self.partida.guardaEnTexto()
-            aplazamiento["SITUTOR"] = self.siTutorActivado
-            aplazamiento["AYUDAS"] = self.ayudas
-            aplazamiento["SUMMARY"] = self.summary
-
-            aplazamiento["SIAPERTURA"] = self.siApertura
-            aplazamiento["PENDIENTEAPERTURA"] = self.partida.pendienteApertura
-            aplazamiento["APERTURA"] = self.partida.apertura.a1h8 if self.partida.apertura else None
-
-            aplazamiento["SITIEMPO"] = self.siTiempo
-            if self.siTiempo:
-                aplazamiento["MAXSEGUNDOS"] = self.maxSegundos
-                aplazamiento["SEGUNDOSJUGADA"] = self.segundosJugada
-                aplazamiento["TIEMPOBLANCAS"] = self.tiempo[True].tiempoAplazamiento()
-                aplazamiento["TIEMPONEGRAS"] = self.tiempo[False].tiempoAplazamiento()
-
-            self.configuracion.graba(aplazamiento)
+            self.configuracion.graba(self.genAplazamiento())
             self.pantalla.accept()
+
+    def pausa(self):
+        self.pausaReg = self.genAplazamiento()
+        self.pantalla.ponToolBar((k_peliculaSeguir,))
+
+    def seguir(self):
+        self.inicio(None, self.pausaReg, siPrimeraJugadaHecha=True)
 
     def finalX(self):
         return self.finalizar()
@@ -1146,4 +1159,13 @@ class GestorEntMaq(Gestor.Gestor):
                 self.ponRotulo3("<br>".join(li)+"</span>")
 
         return True
+
+    def pgnLabelsAdded(self):
+        d = {}
+        if self.nAjustarFuerza != kAjustarMejor:
+            pers = Personalidades.Personalidades(None,self.configuracion)
+            label = pers.label(self.nAjustarFuerza)
+            if label:
+                d["Strength"] = label
+        return d
 

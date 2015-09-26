@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  main.cpp: initialize and start engine, command line interface
-//  modified: 01-Apr-2014
+//  modified: 01-Aug-2015
 
 #include "book.h"
 #include "config.h"
@@ -14,8 +14,8 @@
 #include "search.h"
 #include "utils.h"
 
-const std::string VERSION = "GreKo 12.0";
-const std::string RELEASE_DATE = "1-Apr-2014";
+const std::string VERSION = "GreKo 12.9";
+const std::string RELEASE_DATE = "01-Aug-2015";
 
 Position g_pos;
 Book g_book;
@@ -26,7 +26,13 @@ FILE* g_log = NULL;
 class Engine
 {
 public:
-	Engine() : m_force(false), m_uciLimitStrength(false), m_uciElo(2600) {}
+	Engine() :
+		m_force(false),
+		m_uciLimitStrength(false),
+		m_uciElo(2600),
+		m_inc(0),
+		m_movesPerSession(0),
+		m_movesToGo(0) {}
 
 private:
 	Search      m_search;
@@ -35,6 +41,9 @@ private:
 	TokenString m_line;
 	bool        m_uciLimitStrength;
 	int         m_uciElo;
+	int         m_inc;
+	int         m_movesPerSession;
+	int         m_movesToGo;
 
 	std::string GetToken()
 	{
@@ -108,28 +117,35 @@ private:
 
 	void OnGo()
 	{
+		int restTimeMillisec = 0;
+
 		for (std::string token = GetToken(); token.length() > 0; token = GetToken())
 		{
 			if (token == "infinite")
-				m_search.SetLimits(0, 0, 0, 0, 0);
+				m_search.SetLimits(0, 0, 0, 0);
 			else if (token == "depth")
-				m_search.SetLimits(0, atol(GetToken().c_str()), 0, 0, 0);
+				m_search.SetLimits(atol(GetToken().c_str()), 0, 0, 0);
 			else if (token == "nodes")
-				m_search.SetLimits(0, 0, atol(GetToken().c_str()), 0, 0);
+				m_search.SetLimits(0, atol(GetToken().c_str()), 0, 0);
 			else if (token == "movetime")
 			{
 				token = GetToken();
-				m_search.SetLimits(atol(token.c_str()), 0, 0, atol(token.c_str()), atol(token.c_str()));
+				m_search.SetLimits(0, 0, atol(token.c_str()), atol(token.c_str()));
 			}
 			else if (token == "wtime" && g_pos.Side() == WHITE)
-				SetTimeLimits(atoi(GetToken().c_str()));
+				restTimeMillisec = atoi(GetToken().c_str());
 			else if (token == "btime" && g_pos.Side() == BLACK)
-				SetTimeLimits(atoi(GetToken().c_str()));
+				restTimeMillisec = atoi(GetToken().c_str());
 			else if(token == "winc" && g_pos.Side() == WHITE)
-				m_search.SetIncrement(atoi(GetToken().c_str())); // in UCI time comes in milliseconds
+				m_inc = atoi(GetToken().c_str()); // in UCI time comes in milliseconds
 			else if(token == "binc" && g_pos.Side() == BLACK)
-				m_search.SetIncrement(atoi(GetToken().c_str())); // in UCI time comes in milliseconds
+				m_inc = atoi(GetToken().c_str()); // in UCI time comes in milliseconds
+			else if (token == "movestogo")
+				m_movesToGo = atoi(GetToken().c_str());
 		}
+
+		if (restTimeMillisec > 0)
+			SetTimeLimits(restTimeMillisec);
 
 		m_force = false;
 		m_search.StartThinking(g_pos);
@@ -137,10 +153,12 @@ private:
 
 	void OnLevel()
 	{
-		GetToken(); // mps
-		GetToken(); // base
-		int inc = atoi(GetToken().c_str()); // inc
-		m_search.SetIncrement(1000 * inc); // in WB increment comes in seconds
+		// mps
+		m_movesPerSession = atoi(GetToken().c_str());
+		// base
+		GetToken();
+		// inc
+		m_inc = 1000 * atoi(GetToken().c_str()); // in WB increment comes in seconds
 	}
 
 	void OnList()
@@ -168,8 +186,10 @@ private:
 		char buf[256];
 		for (int i = 0; i < lineNum; ++i)
 		{
-			fgets(buf, sizeof(buf), psrc);
-			if (buf[strlen(buf) - 1] == '\n' || buf[strlen(buf) - 1] == '\r') buf[strlen(buf) - 1] = 0;
+			if (fgets(buf, sizeof(buf), psrc) != NULL)
+			{
+				if (buf[strlen(buf) - 1] == '\n' || buf[strlen(buf) - 1] == '\r') buf[strlen(buf) - 1] = 0;
+			}
 		}
 		if (g_pos.SetFen(buf))
 			out("%s\n\n", buf);
@@ -296,20 +316,22 @@ private:
 		out("option name KingSafety type spin default %d min 0 max 100\n", DEFAULT_KING_SAFETY);
 		out("option name LazyEvalMargin type spin default %d min 50 max 500\n", DEFAULT_LAZY_EVAL_MARGIN);
 		out("option name DrawScore type spin default %d min -1200 max 1200\n", DEFAULT_DRAW_SCORE);
-		out("option name NullMoveReduction type spin default %d min 1 max 5\n", DEFAULT_NULL_MOVE_REDUCTION);
+		out("option name NullMoveReduction type spin default %d min 0 max 5\n", DEFAULT_NULL_MOVE_REDUCTION);
+		out("option name NullMoveReductionPV type spin default %d min 0 max 5\n", DEFAULT_NULL_MOVE_REDUCTION_PV);
 		out("option name NullMoveMinDepth type spin default %d min 1 max 9999\n", DEFAULT_NULL_MOVE_MIN_DEPTH);
 		out("option name PruningMargin1 type spin default %d min 1 max 9999\n", DEFAULT_PRUNING_MARGIN_1);
 		out("option name PruningMargin2 type spin default %d min 1 max 9999\n", DEFAULT_PRUNING_MARGIN_2);
 		out("option name PruningMargin3 type spin default %d min 1 max 9999\n", DEFAULT_PRUNING_MARGIN_3);
 		out("option name LmrMinDepth type spin default %d min 1 max 9999\n", DEFAULT_LMR_MIN_DEPTH);
 		out("option name LmrMinMoveNumber type spin default %d min 1 max 9999\n", DEFAULT_LMR_MIN_MOVE_NUMBER);
+		out("option name QChecks type spin default %d min 0 max 64\n", DEFAULT_QCHECKS);
 		out("uciok\n");
 	}
 
 	void OnSD()
 	{
 		int sd = atoi(GetToken().c_str());
-		m_search.SetLimits(0, sd, 0, 0, 0);
+		m_search.SetLimits(sd, 0, 0, 0);
 	}
 
 	void OnSetboard()
@@ -331,13 +353,13 @@ private:
 		GetToken(); // value
 		std::string value = GetToken();
 
-		if (key == "MultiPV")
+		if (CaseInsensitiveEquals(key, "MultiPV"))
 			m_search.SetMultiPV(atoi(value.c_str()));
-		else if (key == "Hash")
+		else if (CaseInsensitiveEquals(key, "Hash"))
 			m_search.SetHashMB(atof(value.c_str()));
-		else if (key == "UCI_LimitStrength")
+		else if (CaseInsensitiveEquals(key, "UCI_LimitStrength"))
 			m_uciLimitStrength = (value != "false" && value != "0");
-		else if (key == "UCI_Elo")
+		else if (CaseInsensitiveEquals(key, "UCI_Elo"))
 		{
 			if (m_uciLimitStrength)
 			{
@@ -348,53 +370,57 @@ private:
 				m_search.SetKnps(knps);
 			}
 		}
-		else if (key == "LimitKnps")
+		else if (CaseInsensitiveEquals(key, "LimitKnps"))
 		{
 			if (!m_uciLimitStrength)
 				m_search.SetKnps(atof(value.c_str()));
 		}
-		else if (key == "Material")
+		else if (CaseInsensitiveEquals(key, "Material"))
 			g_evalParams.Material = atoi(value.c_str());
-		else if (key == "BoardControl")
+		else if (CaseInsensitiveEquals(key, "BoardControl"))
 			g_evalParams.BoardControl = atoi(value.c_str());
-		else if (key == "Mobility")
+		else if (CaseInsensitiveEquals(key, "Mobility"))
 			g_evalParams.Mobility = atoi(value.c_str());
-		else if (key == "PawnStruct")
+		else if (CaseInsensitiveEquals(key, "PawnStruct"))
 			g_evalParams.PawnStruct = atoi(value.c_str());
-		else if (key == "PawnPassed")
+		else if (CaseInsensitiveEquals(key, "PawnPassed"))
 			g_evalParams.PawnPassed = atoi(value.c_str());
-		else if (key == "KingSafety")
+		else if (CaseInsensitiveEquals(key, "KingSafety"))
 			g_evalParams.KingSafety = atoi(value.c_str());
-		else if (key == "LazyEvalMargin")
+		else if (CaseInsensitiveEquals(key, "LazyEvalMargin"))
 			g_evalParams.LazyEvalMargin = atoi(value.c_str());
-		else if (key == "DrawScore")
+		else if (CaseInsensitiveEquals(key, "DrawScore"))
 			g_evalParams.DrawScore = atoi(value.c_str());
-		else if (key == "NullMoveReduction")
+		else if (CaseInsensitiveEquals(key, "NullMoveReduction"))
 			g_searchParams.NullMoveReduction = atoi(value.c_str());
-		else if (key == "NullMoveMinDepth")
+		else if (CaseInsensitiveEquals(key, "NullMoveReductionPV"))
+			g_searchParams.NullMoveReductionPV = atoi(value.c_str());
+		else if (CaseInsensitiveEquals(key, "NullMoveMinDepth"))
 			g_searchParams.NullMoveMinDepth = atoi(value.c_str());
-		else if (key == "PruningMargin1")
+		else if (CaseInsensitiveEquals(key, "PruningMargin1"))
 			g_searchParams.PruningMargin1 = atoi(value.c_str());
-		else if (key == "PruningMargin2")
+		else if (CaseInsensitiveEquals(key, "PruningMargin2"))
 			g_searchParams.PruningMargin2 = atoi(value.c_str());
-		else if (key == "PruningMargin3")
+		else if (CaseInsensitiveEquals(key, "PruningMargin3"))
 			g_searchParams.PruningMargin3 = atoi(value.c_str());
-		else if (key == "LmrMinDepth")
+		else if (CaseInsensitiveEquals(key, "LmrMinDepth"))
 			g_searchParams.LmrMinDepth = atoi(value.c_str());
-		else if (key == "LmrMinMoveNumber")
+		else if (CaseInsensitiveEquals(key, "LmrMinMoveNumber"))
 			g_searchParams.LmrMinMoveNumber = atoi(value.c_str());
+		else if (CaseInsensitiveEquals(key, "QChecks"))
+			g_searchParams.QChecks = atoi(value.c_str());
 	}
 
 	void OnSN()
 	{
 		NODES sn = atol(GetToken().c_str());
-		m_search.SetLimits(0, 0, sn, 0, 0);
+		m_search.SetLimits(0, sn, 0, 0);
 	}
 
 	void OnST()
 	{
 		int dt = int(1000 * atof(GetToken().c_str()));
-		m_search.SetLimits(dt, 0, 0, dt, dt);
+		m_search.SetLimits(0, 0, dt, dt);
 	}
 
 	void OnTime()
@@ -486,24 +512,33 @@ public:
 
 	void SetTimeLimits(int restMillisec)
 	{
-		// all values in milliseconds
+		int movesToGo = 60;
 
-		int AVOST_TIME = 5000;
-		int N = 60;
-
-		if (restMillisec <= AVOST_TIME)
+		if (m_movesToGo > 0)
+			movesToGo = m_movesToGo;
+		else if (m_movesPerSession > 0)
 		{
-			int stHard = restMillisec / N;
-			int stSoft = restMillisec / N;
-			m_search.SetLimits(restMillisec, 0, 0, stHard, stSoft);
+			int movesPlayed = (g_pos.Ply() / 2) % m_movesPerSession;
+			movesToGo = m_movesPerSession - movesPlayed;
+		}
+
+		// for safety reasons
+		if (movesToGo == 1)
+			movesToGo++;
+		else if (movesToGo < 1)
+			movesToGo = 60;
+
+		if (m_inc > 0)
+		{
+			int stHard = restMillisec / 2;
+			int stSoft = restMillisec / movesToGo + m_inc;
+			m_search.SetLimits(0, 0, stHard, stSoft);
 		}
 		else
 		{
-			int stHard = (restMillisec - AVOST_TIME);
-			int stSoft = (restMillisec - AVOST_TIME) / N;
-			if (stSoft + m_search.GetIncrement() < restMillisec)
-				stSoft += m_search.GetIncrement();
-			m_search.SetLimits(restMillisec, 0, 0, stHard, stSoft);
+			int stHard = restMillisec / movesToGo;
+			int stSoft = restMillisec / movesToGo;
+			m_search.SetLimits(0, 0, stHard, stSoft);
 		}
 	}
 
@@ -528,6 +563,7 @@ public:
 		g_evalParams.DrawScore = config.GetInt("DrawScore", DEFAULT_DRAW_SCORE);
 
 		g_searchParams.NullMoveReduction = config.GetInt("NullMoveReduction", DEFAULT_NULL_MOVE_REDUCTION);
+		g_searchParams.NullMoveReductionPV = config.GetInt("NullMoveReductionPV", DEFAULT_NULL_MOVE_REDUCTION_PV);
 		g_searchParams.NullMoveMinDepth = config.GetInt("NullMoveMinDepth", DEFAULT_NULL_MOVE_MIN_DEPTH);
 
 		g_searchParams.PruningMargin1 = config.GetInt("PruningMargin1", DEFAULT_PRUNING_MARGIN_1);
@@ -536,6 +572,8 @@ public:
 
 		g_searchParams.LmrMinDepth = config.GetInt("LmrMinDepth", DEFAULT_LMR_MIN_DEPTH);
 		g_searchParams.LmrMinMoveNumber = config.GetInt("LmrMinMoveNumber", DEFAULT_LMR_MIN_MOVE_NUMBER);
+
+		g_searchParams.QChecks = config.GetInt("QChecks", DEFAULT_QCHECKS);
 
 		g_book.Init();
 		RandSeed32(U32(time(0)));

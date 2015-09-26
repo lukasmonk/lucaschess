@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  types.h: chess types and enums, standard headers
-//  modified: 25-Mar-2014
+//  modified: 01-Oct-2014
 
 #ifndef TYPES_H
 #define TYPES_H
@@ -19,23 +19,25 @@
 #include <time.h>
 
 #ifdef _MSC_VER
-typedef unsigned __int8 U8;
+typedef unsigned __int8   U8;
 typedef unsigned __int16 U16;
 typedef unsigned __int32 U32;
 typedef unsigned __int64 U64;
-typedef __int8 I8;
-typedef __int16 I16;
-typedef __int32 I32;
-typedef __int64 I64;
+typedef __int8            I8;
+typedef __int16          I16;
+typedef __int32          I32;
+typedef __int64          I64;
 #define LL(x) x##L
 #else
 #include <stdint.h>
-typedef uint8_t   U8;
-typedef int8_t    I8;
-typedef uint16_t U16;
-typedef uint32_t U32;
-typedef int32_t  I32;
-typedef uint64_t U64;
+typedef uint8_t           U8;
+typedef uint16_t         U16;
+typedef uint32_t         U32;
+typedef uint64_t         U64;
+typedef int8_t            I8;
+typedef int16_t          I16;
+typedef int32_t          I32;
+typedef int64_t          I64;
 #define LL(x) x##LL
 #endif
 

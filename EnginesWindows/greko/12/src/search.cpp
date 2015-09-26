@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  search.cpp: chess tree search
-//  modified: 25-Mar-2014
+//  modified: 01-Aug-2015
 
 #include "book.h"
 #include "eval.h"
@@ -25,13 +25,13 @@ EVAL Search::AlphaBetaRoot(EVAL alpha, EVAL beta, const int depth)
 
 	int ply = 0;
 	bool inCheck = m_pos.InCheck();
-	m_PV[ply].clear();
+	m_PV[ply].Clear();
 	m_nodes++;
 
 	for (int j = 0; j < MAX_BRANCH; ++j)
 	{
 		m_multiPVs[j].m_score = -INFINITY_SCORE;
-		m_multiPVs[j].m_pv.clear();
+		m_multiPVs[j].m_pv.Clear();
 	}
 
 	Move hashMove = 0;
@@ -50,10 +50,11 @@ EVAL Search::AlphaBetaRoot(EVAL alpha, EVAL beta, const int depth)
 	EVAL e = 0;
 	int legalMoves = 0;
 	Move bestMove = 0;
+	Move lastMove = m_pos.LastMove();
 
 	for (int i = 0; i < mvlist.Size(); ++i)
 	{
-		Move mv = mvlist.GetNthBest(i);
+		Move mv = mvlist.GetNthBest(i, hashMove);
 		if (m_pos.MakeMove(mv))
 		{
 			legalMoves++;
@@ -66,18 +67,7 @@ EVAL Search::AlphaBetaRoot(EVAL alpha, EVAL beta, const int depth)
 			}
 
 			int newDepth = depth - 1;
-			bool givesCheck = m_pos.InCheck();
-
-			//
-			//   EXTENSIONS
-			//
-
-			if (givesCheck)
-				++newDepth;
-			else if (mv.Piece() == PW && (mv.To() / 8) == 1)
-				++newDepth;
-			else if (mv.Piece() == PB && (mv.To() / 8) == 6)
-				++newDepth;
+			newDepth += Extensions(mv, lastMove, inCheck, ply, true);
 
 			if (m_multiPV > 1)
 				e = -AlphaBeta(-beta - VAL_Q, -alpha + VAL_Q, newDepth, ply + 1, false);
@@ -100,9 +90,7 @@ EVAL Search::AlphaBetaRoot(EVAL alpha, EVAL beta, const int depth)
 			if (legalMoves == 1)
 			{
 				bestMove = mv;
-				m_PV[ply].clear();
-				m_PV[ply].push_back(mv);
-				m_PV[ply].insert(m_PV[ply].end(), m_PV[ply + 1].begin(), m_PV[ply + 1].end());
+				m_PV[ply].Compose(mv, m_PV[ply + 1]);
 			}
 
 			if (e == DRAW_SCORE)
@@ -115,11 +103,8 @@ EVAL Search::AlphaBetaRoot(EVAL alpha, EVAL beta, const int depth)
 			if (legalMoves < MAX_BRANCH)
 			{
 				MultiPVEntry *mpv = &(m_multiPVs[legalMoves - 1]);
-
-				mpv->m_pv.clear();
 				mpv->m_score = e;
-				mpv->m_pv.push_back(mv);
-				mpv->m_pv.insert(mpv->m_pv.end(), m_PV[ply + 1].begin(), m_PV[ply + 1].end());
+				mpv->m_pv.Compose(mv, m_PV[ply + 1]);
 			}
 
 			if (e > alpha)
@@ -129,10 +114,7 @@ EVAL Search::AlphaBetaRoot(EVAL alpha, EVAL beta, const int depth)
 					m_histSuccess[mv.Piece()][mv.To()] += depth;
 				hashType = HASH_EXACT;
 
-				m_PV[ply].clear();
-				m_PV[ply].push_back(mv);
-				m_PV[ply].insert(m_PV[ply].end(), m_PV[ply + 1].begin(), m_PV[ply + 1].end());
-
+				m_PV[ply].Compose(mv, m_PV[ply + 1]);
 				alpha = e;
 
 				if (alpha >= beta)
@@ -163,7 +145,7 @@ EVAL Search::AlphaBetaRoot(EVAL alpha, EVAL beta, const int depth)
 
 EVAL Search::AlphaBeta(EVAL alpha, EVAL beta, const int depth, int ply, bool isNull)
 {
-	m_PV[ply].clear();
+	m_PV[ply].Clear();
 	++m_nodes;
 
 	COLOR side = m_pos.Side();
@@ -240,9 +222,9 @@ EVAL Search::AlphaBeta(EVAL alpha, EVAL beta, const int depth, int ply, bool isN
 	EVAL MARGIN[4] =
 	{
 		INFINITY_SCORE,
-		g_searchParams.PruningMargin1,
-		g_searchParams.PruningMargin2,
-		g_searchParams.PruningMargin3
+		(EVAL)g_searchParams.PruningMargin1,
+		(EVAL)g_searchParams.PruningMargin2,
+		(EVAL)g_searchParams.PruningMargin3
 	};
 
 	if (!inCheck && !onPV && depth > 0 && depth < 4)
@@ -258,8 +240,12 @@ EVAL Search::AlphaBeta(EVAL alpha, EVAL beta, const int depth, int ply, bool isN
 	//   NULL MOVE
 	//
 
-	const int R = g_searchParams.NullMoveReduction;
-	if (!inCheck && !isNull && !lateEndgame && depth >= g_searchParams.NullMoveMinDepth)
+	const int R = (onPV)? g_searchParams.NullMoveReductionPV : g_searchParams.NullMoveReduction;
+	if (R > 0 &&
+		!inCheck &&
+		!isNull &&
+		!lateEndgame &&
+		depth >= g_searchParams.NullMoveMinDepth)
 	{
 		m_pos.MakeNullMove();
 		EVAL nullEval;
@@ -273,10 +259,10 @@ EVAL Search::AlphaBeta(EVAL alpha, EVAL beta, const int depth, int ply, bool isN
 	//   IID
 	//
 
-	if (hashMove == 0 && depth > 4)
+	if (onPV && hashMove == 0 && depth > 4)
 	{
 		AlphaBeta(alpha, beta, depth - 4, ply, isNull);
-		if (m_PV[ply].size() > 0)
+		if (m_PV[ply].Size() > 0)
 			hashMove = m_PV[ply][0];
 	}
 
@@ -290,27 +276,18 @@ EVAL Search::AlphaBeta(EVAL alpha, EVAL beta, const int depth, int ply, bool isN
 	int legalMoves = 0, quietMoves = 0;
 	EVAL e = 0;
 	Move bestMove = 0;
+	Move lastMove = m_pos.LastMove();
 
 	for (int i = 0; i < mvlist.Size(); ++i)
 	{
-		Move mv = mvlist.GetNthBest(i);
+		Move mv = mvlist.GetNthBest(i, hashMove);
 		if (m_pos.MakeMove(mv))
 		{
 			legalMoves++;
 			m_histTry[mv.Piece()][mv.To()] += depth;
 			int newDepth = depth - 1;
 			bool givesCheck = m_pos.InCheck();
-
-			//
-			//   EXTENSIONS
-			//
-
-			if (givesCheck)
-				++newDepth;
-			else if (mv.Piece() == PW && (mv.To() / 8) == 1)
-				++newDepth;
-			else if (mv.Piece() == PB && (mv.To() / 8) == 6)
-				++newDepth;
+			newDepth += Extensions(mv, lastMove, inCheck, ply, onPV);
 
 			//
 			//   LMR
@@ -318,12 +295,14 @@ EVAL Search::AlphaBeta(EVAL alpha, EVAL beta, const int depth, int ply, bool isN
 
 			bool reduced = false;
 			if (depth >= g_searchParams.LmrMinDepth &&
-				!onPV &&
 				!inCheck &&
+				!onPV &&
 				!givesCheck &&
 				!mv.Captured() &&
 				!mv.Promotion() &&
-				m_histSuccess[mv.Piece()][mv.To()] <= m_histTry[mv.Piece()][mv.To()] / 2)
+				!lateEndgame &&
+				m_histSuccess[mv.Piece()][mv.To()] <= m_histTry[mv.Piece()][mv.To()] * 3 / 4 &&
+				mv != m_killers[ply])
 			{
 				++quietMoves;
 				if (quietMoves >= g_searchParams.LmrMinMoveNumber)
@@ -370,9 +349,7 @@ EVAL Search::AlphaBeta(EVAL alpha, EVAL beta, const int depth, int ply, bool isN
 					}
 					break;
 				}
-				m_PV[ply].clear();
-				m_PV[ply].push_back(mv);
-				m_PV[ply].insert(m_PV[ply].end(), m_PV[ply + 1].begin(), m_PV[ply + 1].end());
+				m_PV[ply].Compose(mv, m_PV[ply + 1]);
 			}
 		}
 	}
@@ -391,7 +368,7 @@ EVAL Search::AlphaBeta(EVAL alpha, EVAL beta, const int depth, int ply, bool isN
 
 EVAL Search::AlphaBetaQ(EVAL alpha, EVAL beta, int ply, int qply)
 {
-	m_PV[ply].clear();
+	m_PV[ply].Clear();
 	++m_nodes;
 
 	CheckLimits();
@@ -416,7 +393,7 @@ EVAL Search::AlphaBetaQ(EVAL alpha, EVAL beta, int ply, int qply)
 	if (inCheck)
 		mvlist.GenCheckEvasions(m_pos);
 	else
-		mvlist.GenCaptures(m_pos, qply < 2);
+		mvlist.GenCaptures(m_pos, qply < g_searchParams.QChecks);
 	UpdateScoresQ(mvlist);
 
 	EVAL e = 0;
@@ -441,10 +418,7 @@ EVAL Search::AlphaBetaQ(EVAL alpha, EVAL beta, int ply, int qply)
 				alpha = e;
 				if (alpha >= beta)
 					break;
-
-				m_PV[ply].clear();
-				m_PV[ply].push_back(mv);
-				m_PV[ply].insert(m_PV[ply].end(), m_PV[ply + 1].begin(), m_PV[ply + 1].end());
+				m_PV[ply].Compose(mv, m_PV[ply + 1]);
 			}
 		}
 	}
@@ -456,7 +430,7 @@ EVAL Search::AlphaBetaQ(EVAL alpha, EVAL beta, int ply, int qply)
 
 void Search::CheckInput()
 {
-	if (m_rootPV.empty())
+	if (m_rootPV.Size() == 0)
 		return;
 
 	if (InputAvailable())
@@ -553,7 +527,7 @@ void Search::CheckInput()
 
 void Search::CheckLimits()
 {
-	if (m_rootPV.empty())
+	if (m_rootPV.Size() == 0)
 		return;
 
 	if (m_stHard)
@@ -592,7 +566,7 @@ void Search::Epdtest(FILE* src, double seconds, int reps)
 {
 	char fen[256];
 	int dt = static_cast<int>(1000 * seconds);
-	SetLimits(0, 0, 0, dt, dt);
+	SetLimits(0, 0, dt, dt);
 	int total = 0, solved = 0;
 	while (fgets(fen, sizeof(fen), src))
 	{
@@ -603,6 +577,23 @@ void Search::Epdtest(FILE* src, double seconds, int reps)
 		if (StartEpd(fen, reps)) ++solved;
 		out("\nScore: %d / %d\n\n", solved, total);
 	}
+}
+
+int Search::Extensions(Move mv, Move lastMove, bool check, int ply, bool onPV) const
+{
+	int ext = 0;
+	if (check)
+		++ext;
+	else if (ply < m_iter + 10)
+	{
+		if (mv.Piece() == PW && (mv.To() / 8) == 1)
+			++ext;
+		else if (mv.Piece() == PB && (mv.To() / 8) == 6)
+			++ext;
+		else if (onPV && lastMove && mv.To() == lastMove.To() && lastMove.Captured())
+			++ext;
+	}
+	return ext;
 }
 
 NODES Search::Perft(int depth)
@@ -646,7 +637,7 @@ void Search::PrintPV()
 				mpv = &(m_multiPVs[k]);
 				if (mpv->m_seen)
 					continue;
-				if (mpv->m_pv.empty())
+				if (mpv->m_pv.Size() == 0)
 					break;
 				if (mpv->m_score > best_score)
 				{
@@ -676,7 +667,7 @@ void Search::PrintPV()
 					out (" nps %d", static_cast<int>(1000 * knps));
 				}
 				out(" pv ");
-				for (size_t m = 0; m < mpv->m_pv.size(); ++m)
+				for (size_t m = 0; m < mpv->m_pv.Size(); ++m)
 				{
 					mv = mpv->m_pv[m];
 					out("%s ", MoveToStrLong(mv));
@@ -705,7 +696,7 @@ void Search::PrintPV()
 
 	Position tmp = m_pos;
 	int movenum = tmp.Ply() / 2 + 1;
-	for (size_t m = 0; m < m_rootPV.size(); ++m)
+	for (size_t m = 0; m < m_rootPV.Size(); ++m)
 	{
 		mv = m_rootPV[m];
 		if (tmp.Side() == WHITE)
@@ -791,9 +782,8 @@ void Search::SetHashMB(double mb)
 	}
 }
 
-void Search::SetLimits(int restMillisec, int sd, NODES sn, int stHard, int stSoft)
+void Search::SetLimits(int sd, NODES sn, int stHard, int stSoft)
 {
-	m_restMillisec = restMillisec;
 	m_sd = sd;
 	m_sn = sn;
 	m_stHard = stHard;
@@ -802,14 +792,14 @@ void Search::SetLimits(int restMillisec, int sd, NODES sn, int stHard, int stSof
 
 void Search::StartAnalyze(const Position& pos)
 {
-	m_start_time = clock();
+	m_startTime = GetTime();
 	m_pos = pos;
 	m_hashAge = (m_hashAge + 1) & 0x0f;
 	m_mode = ANALYZE;
 	m_flag = false;
 	m_nodes = 0;
 
-	SetLimits(0, 0, 0, 0, 0);
+	SetLimits(0, 0, 0, 0);
 
 	ClearHash();
 	ClearHistory();
@@ -863,7 +853,7 @@ bool Search::StartEpd(const std::string& fen, int reps)
 	ClearHistory();
 	ClearKillers();
 
-	m_start_time = clock();
+	m_startTime = GetTime();
 
 	EVAL alpha = -INFINITY_SCORE;
 	EVAL beta = INFINITY_SCORE;
@@ -881,7 +871,7 @@ bool Search::StartEpd(const std::string& fen, int reps)
 		if (e > alpha)
 			m_rootPV = m_PV[0];
 
-		if (!m_rootPV.empty())
+		if (m_rootPV.Size() > 0)
 		{
 			Move mv = m_rootPV[0];
 			std::string mvstr = MoveToStrShort(mv, m_pos);
@@ -937,7 +927,7 @@ bool Search::StartEpd(const std::string& fen, int reps)
 
 void Search::StartThinking(Position& pos)
 {
-	m_start_time = clock();
+	m_startTime = GetTime();
 
 	std::string message;
 	if (pos.IsGameOver(message))
@@ -948,7 +938,7 @@ void Search::StartThinking(Position& pos)
 
 	m_pos = pos;
 	m_hashAge = (m_hashAge + 1) & 0x0f;
-	m_rootPV.clear();
+	m_rootPV.Clear();
 	EVAL e = 0;
 
 	m_mode = THINKING;
@@ -1049,7 +1039,7 @@ MAKE_MOVE:
 void Search::StartPerft(const Position& pos, int depth)
 {
 	m_pos = pos;
-	int t0 = clock();
+	int t0 = GetTime();
 	NODES sum = 0, delta = 0;
 
 	MoveList& mvlist = m_lists[depth];
@@ -1081,7 +1071,7 @@ void Search::StartPerft(const Position& pos, int depth)
 
 	if (i == mvlist.Size())
 	{
-		int t1 = clock();
+		int t1 = GetTime();
 		double dt = (t1 - t0) / 1000.;
 
 		out("\n Nodes: %d\n", sum);
@@ -1149,7 +1139,10 @@ void Search::UpdateScores(MoveList& mvlist, Move hashmv, int ply)
 		mvlist[i].m_value = 0;
 
 		if (mv == hashmv)
+		{
 			mvlist[i].m_value = SORT_HASH;
+			std::swap(mvlist[0], mvlist[i]);
+		}
 		else if (mv.Captured())
 			mvlist[i].m_value = SORT_CAPTURE + 10 * VALUE[mv.Captured()] - mv.Piece();
 		else if (mv == m_matekillers[ply])

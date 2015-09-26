@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  moves.cpp: bitboard moves generator
-//  modified: 01-Mar-2013
+//  modified: 21-Apr-2015
 
 #include "eval.h"
 #include "moves.h"
@@ -11,17 +11,23 @@
 #include "search.h"
 #include "utils.h"
 
-Move MoveList::GetNthBest(int n)
+Move MoveList::GetNthBest(int n, Move hashMove)
 {
+	if (m_data[n].m_mv == hashMove)
+		return hashMove;
+
+	int bestIndex = n;
+	int bestValue = m_data[n].m_value;
 	for (int i = n + 1; i < m_size; ++i)
 	{
-		if (m_data[i].m_value > m_data[n].m_value)
+		if (m_data[i].m_value > bestValue)
 		{
-			MoveEntry tmp = m_data[n];
-			m_data[n] = m_data[i];
-			m_data[i] = tmp;
+			bestIndex = i;
+			bestValue = m_data[i].m_value;
 		}
 	}
+	if (bestIndex != n)
+		std::swap(m_data[n], m_data[bestIndex]);
 	return m_data[n].m_mv;
 }
 

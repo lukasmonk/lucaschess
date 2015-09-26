@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  search.h: chess tree search
-//  modified: 25-Mar-2014
+//  modified: 01-Aug-2015
 
 #ifndef SEARCH_H
 #define SEARCH_H
@@ -13,25 +13,51 @@
 #include "position.h"
 #include "utils.h"
 
+class Line
+{
+public:
+
+	Line() : m_size(0) {}
+	~Line() {}
+
+	void Clear() { m_size = 0; }
+	void Compose(Move mv, const Line& tail)
+	{
+		m_data[0] = mv;
+		memcpy(m_data + 1, tail.m_data, tail.Size() * sizeof(Move));
+		m_size = 1 + tail.Size();
+	}
+	size_t Size() const { return m_size; }
+	Move operator[](size_t i) const { return m_data[i]; }
+
+private:
+	Move m_data[256];
+	size_t m_size;
+};
+
 struct SearchParams
 {
 	SearchParams() :
 		NullMoveReduction(DEFAULT_NULL_MOVE_REDUCTION),
+		NullMoveReductionPV(DEFAULT_NULL_MOVE_REDUCTION_PV),
 		NullMoveMinDepth(DEFAULT_NULL_MOVE_MIN_DEPTH),
 		PruningMargin1(DEFAULT_PRUNING_MARGIN_1),
 		PruningMargin2(DEFAULT_PRUNING_MARGIN_2),
 		PruningMargin3(DEFAULT_PRUNING_MARGIN_3),
 		LmrMinDepth(DEFAULT_LMR_MIN_DEPTH),
-		LmrMinMoveNumber(DEFAULT_LMR_MIN_MOVE_NUMBER)
+		LmrMinMoveNumber(DEFAULT_LMR_MIN_MOVE_NUMBER),
+		QChecks(DEFAULT_QCHECKS)
 	{}
 
 	int NullMoveReduction;
+	int NullMoveReductionPV;
 	int NullMoveMinDepth;
 	int PruningMargin1;
 	int PruningMargin2;
 	int PruningMargin3;
 	int LmrMinDepth;
 	int LmrMinMoveNumber;
+	int QChecks;
 };
 
 extern SearchParams g_searchParams;
@@ -52,12 +78,8 @@ struct HashEntry
 	I8  m_depth;
 	U8  m_flags;
 
-	U8 Age() const  {
-		return m_flags & 0x0f;
-	}
-	U8 Type() const {
-		return m_flags & 0xf0;
-	}
+	U8 Age() const { return m_flags & 0x0f; }
+	U8 Type() const { return m_flags & 0xf0; }
 };
 
 const int SORT_HASH       = 0x40000000;
@@ -72,7 +94,6 @@ public:
 		m_mode(IDLE),
 		m_hash(NULL),
 		m_hashSize(0),
-		m_inc(0),
 		m_knpsLimit(999999),
 		m_multiPV(1),
 		m_rootWindow(VAL_P),
@@ -90,30 +111,17 @@ public:
 	void  ClearHistory();
 	void  ClearKillers();
 	void  Epdtest(FILE* psrc, double time_in_seconds, int reps);
-	int   GetIncrement() const {
-		return m_inc;
-	}
-	int   GetSearchTime() {
-		return 1000 * (clock() - m_start_time) / CLOCKS_PER_SEC;    // milliseconds
-	}
+	int   Extensions(Move mv, Move lastMove, bool check, int ply, bool onPV) const;
+	int   GetSearchTime() const { return GetTime() - m_startTime; }   // milliseconds
 	NODES Perft(int depth);
 	void  PrintPV();
 	HashEntry* ProbeHash();
 	void  RecordHash(Move bestMove, int depth, EVAL eval, U8 type, int ply);
 	void  SetHashMB(double mb);
-	void  SetIncrement(int inc) {
-		m_inc = inc;
-	}
-	void  SetKnps(double knps) {
-		m_knpsLimit = knps;
-	}
-	void  SetLimits(int restMillisec, int sd, NODES sn, int stHard, int stSoft);
-	void  SetMultiPV(int n) {
-		m_multiPV = n;
-	}
-	void  SetNPS(int nps) {
-		m_npsLimit = nps;
-	}
+	void  SetKnps(double knps) { m_knpsLimit = knps; }
+	void  SetLimits(int sd, NODES sn, int stHard, int stSoft);
+	void  SetMultiPV(int n) { m_multiPV = n; }
+	void  SetNPS(int nps) { m_npsLimit = nps; }
 	void  StartAnalyze(const Position& pos);
 	bool  StartEpd(const std::string& fen, int reps);
 	void  StartPerft(const Position& pos, int depth);
@@ -154,7 +162,7 @@ private:
 
 	struct MultiPVEntry
 	{
-		std::vector<Move> m_pv;
+		Line m_pv;
 		EVAL m_score;
 		bool m_seen;
 	};
@@ -165,7 +173,6 @@ private:
 	long         m_hashSize;
 	int          m_histTry[14][64];
 	int          m_histSuccess[14][64];
-	int          m_inc;
 	int          m_iter;
 	EVAL         m_iterScore;
 	Move         m_killers[MAX_PLY];
@@ -177,13 +184,12 @@ private:
 	NODES        m_nodes;
 	int          m_npsLimit;
 	Position     m_pos;
-	std::vector<Move> m_PV[MAX_PLY];
-	int          m_restMillisec;
-	std::vector<Move> m_rootPV;
+	Line         m_PV[MAX_PLY];
+	Line         m_rootPV;
 	EVAL         m_rootAlpha;
 	EVAL         m_rootBeta;
 	EVAL         m_rootWindow;
-	clock_t      m_start_time;
+	U32          m_startTime;
 	int          m_sd;
 	NODES        m_sn;
 	int          m_stHard;

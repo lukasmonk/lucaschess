@@ -217,6 +217,11 @@ class ControlPGN:
             resp += '[ECO "%s"]\n' % ap.eco
             resp += '[Opening "%s"]\n' % ap.trNombre
 
+        dmore = getattr(self.gestor, "pgnLabelsAdded", None)
+        if dmore:
+            for k,v in dmore().iteritems():
+                resp += '[%s "%s"]\n'%(k,v)
+
         resp += "\n" + self.gestor.partida.pgnBase()
         if not resp.endswith(r):
             resp += " %s" % r

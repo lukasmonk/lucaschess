@@ -134,15 +134,13 @@ class WEdMove(QtGui.QWidget):
 
         self.promocion = " "
 
-        self.origen = EDCelda(self, "").caracteres(2).controlrx("(|[a-h][1-8])").anchoFijo(
-            24).alinCentrado().capturaCambiado(self.miraPromocion)
+        self.origen = EDCelda(self, "").caracteres(2).controlrx("(|[a-h][1-8])").anchoFijo(32).alinCentrado().capturaCambiado(self.miraPromocion)
 
         self.flecha = flecha = Controles.LB(self).ponImagen(Iconos.pmMover())
 
-        self.destino = EDCelda(self, "").caracteres(2).controlrx("(|[a-h][1-8])").anchoFijo(
-            24).alinCentrado().capturaCambiado(self.miraPromocion)
+        self.destino = EDCelda(self, "").caracteres(2).controlrx("(|[a-h][1-8])").anchoFijo(32).alinCentrado().capturaCambiado(self.miraPromocion)
 
-        self.pbPromocion = Controles.PB(self, "", self.pulsadoPromocion, plano=False).anchoFijo(24)
+        self.pbPromocion = Controles.PB(self, "", self.pulsadoPromocion, plano=False).anchoFijo(32)
 
         ly = Colocacion.H().relleno().control(self.origen).espacio(2).control(flecha).espacio(2).control(
             self.destino).control(self.pbPromocion).margen(0).relleno()

@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  unix.cpp: Unix-specific code
-//  modified: 25-Mar-2014
+//  modified: 01-Oct-2014
 
 #ifndef _MSC_VER
 
@@ -17,7 +17,14 @@
 PROTOCOL_T g_protocol = UCI;
 static int g_isPipe = 0;
 
-void SleepMilliseconds(int ms) {
+U32 GetTime()
+{
+  // relative time in milliseconds
+  return 1000 * clock() / CLOCKS_PER_SEC;
+}
+
+void SleepMilliseconds(int ms)
+{
 	usleep(1000 * ms);
 }
 

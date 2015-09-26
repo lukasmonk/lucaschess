@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  utils.h: some utilities
-//  modified: 01-Mar-2013
+//  modified: 19-Dec-2014
 
 #ifndef UTILS_H
 #define UTILS_H
@@ -12,6 +12,7 @@
 
 extern FILE* g_log;
 
+U32   GetTime();
 void  InitInput();
 int   InputAvailable();
 void  out(const char* s);
@@ -24,10 +25,10 @@ void  SleepMilliseconds(int ms);
 
 inline void out(const char* s)
 {
-	printf(s);
+	printf("%s", s);
 	if (g_log)
 	{
-		fprintf(g_log, s);
+		fprintf(g_log, "%s", s);
 		fflush(g_log);
 	}
 }
@@ -101,5 +102,7 @@ private:
 	std::string m_line;
 	size_t m_curr;
 };
+
+bool CaseInsensitiveEquals(const std::string& s1, const std::string& s2);
 
 #endif

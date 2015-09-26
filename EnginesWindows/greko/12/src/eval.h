@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  eval.h: static position evaluation
-//  modified: 25-Mar-2014
+//  modified: 01-Oct-2014
 
 #ifndef EVAL_H
 #define EVAL_H

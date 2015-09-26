@@ -1,9 +1,9 @@
 //  GREKO Chess Engine
-//  (c) 2002-2014 Vladimir Medvedev <vrm@bk.ru>
-//  http://greko.110mb.com
+//  (c) 2002-2015 Vladimir Medvedev <vrm@bk.ru>
+//  http://greko.su
 
 //  win32.cpp: Windows-specific code
-//  modified: 25-Mar-2014
+//  modified: 01-Oct-2014
 
 #include <windows.h>
 #include <conio.h>
@@ -13,6 +13,12 @@
 PROTOCOL_T g_protocol = CONSOLE;
 static int g_pipe = 0;
 static HANDLE g_handle = 0;
+
+U32 GetTime()
+{
+	// relative time in milliseconds
+	return GetTickCount();
+}
 
 void SleepMilliseconds(int ms)
 {

@@ -30,8 +30,8 @@ kZvalue_pieza, kZvalue_piezaMovimiento = 10, 20
 kTutorH, kTutorH2_1, kTutorH1_2, kTutorV = range(4)
 
 kAjustarMejor, kAjustarSuperior, kAjustarSimilar, kAjustarInferior, kAjustarPeor, kAjustarPlayer, \
-kAjustarNivelAlto, kAjustarNivelMedio, kAjustarNivelBajo, kAjustarSuperiorM, kAjustarSuperiorMM, kAjustarInferiorM, kAjustarInferiorMM = range(
-    13)
+kAjustarNivelAlto, kAjustarNivelMedio, kAjustarNivelBajo, kAjustarSuperiorM, kAjustarSuperiorMM, \
+kAjustarInferiorM, kAjustarInferiorMM = range(13)
 
 kControlTableroNo, kControlTableroGeneral, kControlTableroParticular = range(3)
 
