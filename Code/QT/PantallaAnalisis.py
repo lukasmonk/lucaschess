@@ -103,6 +103,9 @@ class WAnalisisGraph(QTVarios.WDialogo):
         gridW.gotop()
         self.gridBotonIzquierdo(gridAll, 0, None)
 
+    def gridCambiadoRegistro(self, grid, fila, columna):
+        self.gridBotonIzquierdo(grid, fila, columna)
+
     def saveIndexes(self):
         self.gestor.partida.setFirstComment(self.alm.indexesRAW)
         QTUtil2.mensajeTemporal(self, _("Saved"), 1.8 )
@@ -116,6 +119,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
         self.tablero.ponFlechaSC(rm.desde, rm.hasta)
         rm = mrm.liMultiPV[0]
         self.tablero.creaFlechaMulti(rm.movimiento(), False)
+        grid.setFocus()
 
     def gridDobleClick(self, grid, fila, columna):
         jg = self.dicLiJG[grid.id][fila]
