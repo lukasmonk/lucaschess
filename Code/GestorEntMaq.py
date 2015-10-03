@@ -185,7 +185,7 @@ class GestorEntMaq(Gestor.Gestor):
 
                 self.siPrimeraJugadaHecha = False
 
-        li = (k_cancelar, k_rendirse, k_tablas, k_atras, k_ayudaMover, k_reiniciar, k_aplazar, k_peliculaPausa, k_configurar, k_utilidades )
+        li = [k_cancelar, k_rendirse, k_tablas, k_atras, k_ayudaMover, k_reiniciar, k_aplazar, k_peliculaPausa, k_configurar, k_utilidades]
         if not self.siAtras:
             del li[3]
         self.pantalla.ponToolBar(li)
