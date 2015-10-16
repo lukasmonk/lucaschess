@@ -328,7 +328,7 @@ class GestorEntPos(Gestor.Gestor):
         pensarRival = True
         fen = self.partida.ultPosicion.fen()
         if self.siDirigido and self.siTutorActivado:
-            if (fen in self.dicDirigidoFen):
+            if fen in self.dicDirigidoFen:
                 liOpciones = self.dicDirigidoFen[fen]
                 if liOpciones:
                     liJugadas = []
@@ -376,6 +376,7 @@ class GestorEntPos(Gestor.Gestor):
         self.siguienteJugada()
 
     def lineaTerminadaOpciones(self):
+        self.estado = kFinJuego
         if self.jump:
             self.ent_siguiente(k_siguiente)
             return False
@@ -385,12 +386,9 @@ class GestorEntPos(Gestor.Gestor):
                 if k_peliculaSeguir not in self.liOpcionesToolBar:
                     self.liOpcionesToolBar.append(k_peliculaSeguir)
                     self.pantalla.ponToolBar(self.liOpcionesToolBar)
-            self.estado = kFinJuego
-
             return False
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
         if self.siJuegaHumano:
             self.paraHumano()
         else:
@@ -415,7 +413,6 @@ class GestorEntPos(Gestor.Gestor):
             return False
 
         if siBien:
-
             siMirarTutor = self.siTutorActivado
 
             if self.siTeclaPanico:
@@ -423,7 +420,6 @@ class GestorEntPos(Gestor.Gestor):
                 return False
 
             if siMirarTutor:
-
                 fen = self.partida.ultPosicion.fen()
                 if self.siDirigido and (fen in self.dicDirigidoFen):
                     liOpciones = self.dicDirigidoFen[fen]

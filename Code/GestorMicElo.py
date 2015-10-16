@@ -59,6 +59,7 @@ class GestorMicElo(Gestor.Gestor):
             mtElo = mt.elo
             mt.siJugable = abs(mtElo - elo) < 400
             mt.siOut = not mt.siJugable
+            mt.baseElo = elo # servira para rehacer la lista y elegir en aplazamiento
             if mt.siJugable or (mtElo > elo):
                 def rot(res):
                     return self.calcDifElo(elo, mtElo, res)
@@ -79,6 +80,13 @@ class GestorMicElo(Gestor.Gestor):
                 li.append(mt)
 
         return li
+
+    def engineAplazado(self, alias, basElo):
+        li = self.listaMotores(basElo)
+        for mt in li:
+            if mt.alias == alias:
+                return mt
+        return None
 
     def inicio(self, datosMotor, minutos, segundos, siCompetitivo, aplazamiento=None):
 
@@ -114,14 +122,7 @@ class GestorMicElo(Gestor.Gestor):
         if aplazamiento:
             self.partida.recuperaDeTexto(aplazamiento["JUGADAS"])
 
-            self.datosMotor = EnginesMicElo.MotorMicElo(aplazamiento["NOMBRE"], aplazamiento["EXE"])
-            self.datosMotor.alias = aplazamiento["NOMBRE"]
-            self.datosMotor.elo = aplazamiento["ELO"]
-            self.datosMotor.pgana = aplazamiento["PGANA"]
-            self.datosMotor.ppierde = aplazamiento["PPIERDE"]
-            self.datosMotor.ptablas = aplazamiento["PTABLAS"]
-            self.datosMotor.book = aplazamiento["BOOK"]
-            self.datosMotor.recuperaUCI(aplazamiento["UCI"])
+            self.datosMotor = self.engineAplazado(aplazamiento["ALIAS"], aplazamiento["BASEELO"])
 
             self.tiempo[True] = Util.Timer(aplazamiento["TIEMPOBLANCAS"])
             self.tiempo[False] = Util.Timer(aplazamiento["TIEMPONEGRAS"])
@@ -249,14 +250,8 @@ class GestorMicElo(Gestor.Gestor):
             aplazamiento["JUGADAS"] = self.partida.guardaEnTexto()
             aplazamiento["SICOMPETITIVO"] = self.siCompetitivo
 
-            aplazamiento["ELO"] = self.datosMotor.elo
-            aplazamiento["NOMBRE"] = self.datosMotor.alias
-            aplazamiento["EXE"] = self.datosMotor.exe
-            aplazamiento["PGANA"] = self.datosMotor.pgana
-            aplazamiento["PPIERDE"] = self.datosMotor.ppierde
-            aplazamiento["PTABLAS"] = self.datosMotor.ptablas
-            aplazamiento["BOOK"] = self.datosMotor.book
-            aplazamiento["UCI"] = self.datosMotor.guardaUCI()
+            aplazamiento["BASEELO"] = self.datosMotor.baseElo
+            aplazamiento["ALIAS"] = self.datosMotor.alias
 
             aplazamiento["MAXSEGUNDOS"] = self.maxSegundos
             aplazamiento["SEGUNDOSJUGADA"] = self.segundosJugada

@@ -831,6 +831,9 @@ class GestorEntMaq(Gestor.Gestor):
                                     return False
                                 elif resp == "user":
                                     siTutor = False
+                                elif resp != "tutor":
+                                    self.sigueHumano()
+                                    return False
                         if siTutor:
                             tutor = Tutor.Tutor(self, self, jg, desde, hasta, False)
 

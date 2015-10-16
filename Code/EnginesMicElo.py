@@ -1,35 +1,6 @@
 import Code.MotoresExternos as MotoresExternos
 
 
-class MotorMicElo:
-    def __init__(self, nombre, exe):
-        self.nombre = nombre[0].upper() + nombre[1:]
-        self.clave = nombre
-        self.exe = exe
-        self.elo = 0
-        self.liUCI = []
-        self.book = "Openings/%s.bin" % nombre.split(" ")[0].lower()
-        self.multiPV = 0
-        self.siDebug = False
-
-    def ejecutable(self):
-        return self.exe
-
-    def rotulo(self):
-        return self.nombre
-
-    def opcionUCI(self, nombre, valor):
-        self.liUCI.append((nombre, valor))
-        if nombre == "MultiPV":
-            self.multiPV = int(valor)
-
-    def guardaUCI(self):
-        return str(self.liUCI)
-
-    def recuperaUCI(self, txt):
-        self.liUCI = eval(txt)
-
-
 def leeMicEngines():
     lme = MotoresExternos.ListaMotoresExternos("./IntFiles/michele.pkt")
     lme.leer()

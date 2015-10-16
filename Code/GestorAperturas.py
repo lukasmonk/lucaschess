@@ -62,17 +62,24 @@ class GestorAperturas(Gestor.Gestor):
     def lee(self):
         lili = self.lista[self.fila]["LISTA"]
 
+        dicStd = self.listaAperturasStd.dic
         dic = {}
         for x in lili:
-            td = dic
             lx = x.split(" ")
+            nombre = ""
+            tt = ""
+            for rx in lx:
+                tt = ("%s %s"%(tt, rx)).strip()
+                if tt in dicStd:
+                    nombre = dicStd[tt].nombre
+            td = dic
             for a1h8 in lx:
                 if a1h8 in td:
                     td = td[a1h8]["HIJOS"]
                 else:
                     td[a1h8] = {}
                     td = td[a1h8]
-                    td["NOMBRE"] = self.listaAperturasStd.dic[x].nombre
+                    td["NOMBRE"] = nombre
                     td["HIJOS"] = {}
                     td = td["HIJOS"]
 
