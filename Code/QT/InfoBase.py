@@ -5,7 +5,7 @@ import random
 
 import Code.Util as Util
 
-class ThanksTo():
+class ThanksTo:
     def __init__(self):
         d = self.dic = collections.OrderedDict()
 
@@ -68,7 +68,7 @@ class ThanksTo():
             return li[len(li)/2:]
 
     def texto(self, clave):
-        if ( "-" in clave ):
+        if "-" in clave:
             clave, arg = clave.split("-")
             return getattr(self, clave)(arg)
         return getattr(self, clave)()
@@ -84,7 +84,6 @@ class ThanksTo():
 
     def Contributors(self):
         txt = "<br><center><big>%s: <b>Michele Tumbarello</b></big><br>"%_("Chief engineer officer")
-
         txt += self.tableIni()
 
         txt += "<tr>"
@@ -198,7 +197,7 @@ class ThanksTo():
             (_("Portuguese") + " (BR)"): ("Laudecir Daniel",""),
             _("Arabic"): ("Mohamad Alhedhed",""),
             _("Dutch"): ("Willy Lefebvre",""),
-            _("Chinese simplified"): ("Kevin Sicong Jiang",""),
+            _("Chinese simplified"): ("Kevin Sicong Jiang,Stephen Yang",""),
         }
         def r(lng):
             return Util.iniBase8dic("Locale/%s/lang.ini"%lng)["AUTHOR"]

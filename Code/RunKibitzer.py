@@ -22,21 +22,6 @@ import Code.QT.QTVarios as QTVarios
 import Code.QT.Columnas as Columnas
 import Code.QT.Grid as Grid
 
-# log = []
-# def prlk( x ):
-# # import sys
-# # f = sys.stdout
-# if not log:
-# f = open("logging.log","wb")
-# log.append(f)
-# else:
-# f = log[0]
-# f.write( str(x) )
-# def wn( *x ):
-# for l in x:
-# prlk(l)
-# prlk("\n")
-
 CONFIGURACION = "C"
 FEN = "F"
 TERMINAR = "T"
@@ -864,6 +849,24 @@ class Ventana(QtGui.QDialog):
 
         self.orden_ok("go infinite", None)
 
+    def orden_eval(self, fen):
+        posicionInicial = ControlPosicion.ControlPosicion()
+        posicionInicial.leeFen(fen)
+
+        self.siW = posicionInicial.siBlancas
+        self.centipawns = self.cpu.configuracion.centipawns
+
+        self.partida = Partida.Partida(posicionInicial)
+
+        self.tableroPosicion(posicionInicial)
+
+        self.ready_ok("stop")
+
+        self.ready_ok("ucinewgame")
+        self.ready_ok("position fen %s" % fen)
+
+        self.orden_ok("eval", None)
+
     def confTextoBase(self, una):
         mt = una["mate"]
         pts = una["puntos"]
@@ -1423,6 +1426,90 @@ class VentanaLinea(Ventana):
             self.motor.close()
             self.motor = None
 
+class VentanaStockfishEval(Ventana):
+    def __init__(self, cpu):
+        Ventana.__init__(self, cpu, False)
+
+    def creaRestoControles(self):
+
+        liAcciones = (
+            ( _("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
+            ("%s: %s" % (_("Enable"), _("window on top")), Iconos.Top(), self.windowTop),
+            ("%s: %s" % (_("Disable"), _("window on top")), Iconos.Bottom(), self.windowBottom),
+        )
+        self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
+        self.tb.setAccionVisible(self.windowTop, False)
+        self.em = Controles.EM(self).soloLectura()
+        f = Controles.TipoLetra(nombre="Courier New", puntos=10)
+        self.em.ponFuente(f)
+
+        layout = Colocacion.V().control(self.tb).control(self.em).margen(1)
+
+        self.setLayout(layout)
+
+        self.lanzaMotor(True)
+
+    def ponFen(self, fen):
+        if fen:
+
+            if fen != self.fen:
+                html = self.em.html()
+                if self.fen and html:
+                    self.almFEN[self.fen] = html
+                self.liData = []
+
+            self.fen = fen
+            if self.siAnalizar():
+                if len(self.liData) == 0:
+                    self.em.ponHtml("")
+                    self.orden_eval(fen)
+                    self.runOrdenes()
+            else:
+                html = self.almFEN.get(fen, "")
+                self.em.ponHtml(html)
+                self.ready_ok("stop")
+                self.runOrdenes()
+
+        else:
+            self.em.ponHtml("")
+            self.ready_ok("stop")
+            self.runOrdenes()
+
+    def terminar(self):
+        self.finalizar()
+        self.accept()
+
+    def miraBuffer(self):
+        if not self.siPlay:
+            return
+        self.lock = True
+
+        li = self.buffer.split("\n")
+        if self.buffer.endswith("\n"):
+            self.buffer = ""
+        else:
+            self.buffer = li[-1]
+            li = li[:-1]
+
+        lir = []
+        ok = False
+        for linea in li:
+            if not ok:
+                if "Eval term" in linea:
+                    ok = True
+                else:
+                    continue
+            lir.append(linea)
+
+            if "Total Evaluation" in linea:
+                break
+
+        if lir:
+
+            self.em.ponTexto("\n".join(lir))
+
+        self.lock = False
+
 class Orden:
     def __init__(self):
         self.clave = ""
@@ -1527,28 +1614,25 @@ class CPU():
             self.ventana = VentanaLinea(self)
         elif self.tipo == "M":
             self.ventana = VentanaMultiPV(self)
+        elif self.tipo == "E":
+            self.ventana = VentanaStockfishEval(self)
         self.ventana.show()
 
         VarGen.gc = QTUtil.GarbageCollector()
 
         return app.exec_()
 
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def compruebaInput(self):
         orden = self.recibe()
         if orden:
             self.procesa(orden)
 
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def dispatch(self, texto):
         if texto:
             self.ventana.ponTexto(texto)
         QTUtil.refreshGUI()
 
         return True
-        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 def run(fdb):
     ferr = open("./bug.kibitzer", "at")

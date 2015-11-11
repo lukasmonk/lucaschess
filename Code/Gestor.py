@@ -1283,6 +1283,7 @@ class Gestor():
         icoNaranja = Iconos.PuntoNaranja()
         icoMagenta = Iconos.PuntoMagenta()
         icoRojo = Iconos.PuntoRojo()
+        icoAmarillo = Iconos.PuntoAmarillo()
 
         trFichero = _("Save to a file")
         trPortapapeles = _("Copy to clipboard")
@@ -1367,7 +1368,7 @@ class Gestor():
 
             liKibitzers = XKibitzers.listaKibitzersRecuperar(self.configuracion)
 
-            dico = {"S": icoVerde, "C": icoAzul, "J": icoNaranja, "I": icoNegro, "L": icoMagenta, "M": icoRojo}
+            dico = {"S": icoVerde, "C": icoAzul, "J": icoNaranja, "I": icoNegro, "L": icoMagenta, "M": icoRojo, "E": icoAmarillo}
             for nkibitzer, kibitzer in enumerate(liKibitzers):
                 menuKibitzers.opcion("kibitzer_%d" % nkibitzer, kibitzer["NOMBRE"], dico[kibitzer["TIPO"]])
 

@@ -218,13 +218,6 @@ class Replay():
 
         fdb = VarGen.configuracion.ficheroTemporal("db")
 
-        if sys.argv[0].endswith(".py"):
-            li = ["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", "-sound", fdb]
-        else:
-            li = ["Lucas.exe" if VarGen.isWindows else "Lucas", "-sound", fdb]
-
-        self.popen = subprocess.Popen(li)
-
         self.ipc = Util.IPC(fdb, True)
 
         orden = Orden()
@@ -234,6 +227,13 @@ class Replay():
 
         self.escribe(orden)
         self.siSonando = False
+
+        if sys.argv[0].endswith(".py"):
+            li = ["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", "-sound", fdb]
+        else:
+            li = ["Lucas.exe" if VarGen.isWindows else "Lucas", "-sound", fdb]
+
+        self.popen = subprocess.Popen(li)
 
     def escribe(self, orden):
         self.ipc.push(orden.bloqueEnvio())

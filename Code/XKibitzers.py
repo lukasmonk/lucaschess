@@ -35,6 +35,7 @@ def nuevaKibitzer(ventana, configuracion):
                ( "L", _("Best move in one line") ),
                ( "J", _("Select move") ),
                ( "C", _("Threats") ),
+               ( "E", _("Stockfish eval") ),
     ]
     liGen.append((_("Type"), liTipos))
 
@@ -53,8 +54,8 @@ def nuevaKibitzer(ventana, configuracion):
                     kibitzer = "%s: %s" % (txt, motor)
 
         d = datetime.datetime.now()
-        id = "MOS" + d.isoformat()[2:].strip("0").replace("-", "").replace("T", "").replace(":", "").replace(".", "")
-        fvideo = configuracion.plantillaVideo % id
+        xid = "MOS" + d.isoformat()[2:].strip("0").replace("-", "").replace("T", "").replace(":", "").replace(".", "")
+        fvideo = configuracion.plantillaVideo % xid
 
         dic = {"NOMBRE": kibitzer, "MOTOR": motor, "TIPO": tipo, "FVIDEO": fvideo}
 
@@ -79,7 +80,7 @@ class Orden:
         self.dv["__CLAVE__"] = self.clave
         return self.dv
 
-class XKibitzer():
+class XKibitzer:
     CONFIGURACION = "C"
     FEN = "F"
     TERMINAR = "T"
@@ -88,12 +89,6 @@ class XKibitzer():
 
         fdb = VarGen.configuracion.ficheroTemporal("db")
 
-        if sys.argv[0].endswith(".py"):
-            li = ["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", "-kibitzer", fdb]
-        else:
-            li = ["Lucas.exe" if VarGen.isWindows else "Lucas", "-kibitzer", fdb]
-
-        self.popen = subprocess.Popen(li)
 
         self.ipc = Util.IPC(fdb, True)
 
@@ -109,6 +104,13 @@ class XKibitzer():
         orden.dv["CONFIG_MOTOR"] = configMotor
 
         self.escribe(orden)
+
+        if sys.argv[0].endswith(".py"):
+            li = ["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", "-kibitzer", fdb]
+        else:
+            li = ["Lucas.exe" if VarGen.isWindows else "Lucas", "-kibitzer", fdb]
+
+        self.popen = subprocess.Popen(li)
 
     def escribe(self, orden):
         self.ipc.push(orden.bloqueEnvio())
