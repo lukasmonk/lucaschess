@@ -186,8 +186,8 @@ def leeRivales():
     cm.ponMultiPV(20, 40)
     mas(cm)
 
-    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman", "5.1r2 32bit", "http://komodochess.com/")
-    cm.path = "komodo51r2-32bit.exe"
+    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman", "7a 32bit", "http://komodochess.com/")
+    cm.path = "komodo-7-32bit.exe"
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "32")
     cm.elo = 3053

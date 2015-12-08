@@ -29,6 +29,7 @@ sip.setapi('QVariant', 2)
 
 
 
+
 import Code.Traducir as Traducir
 Traducir.install()
 

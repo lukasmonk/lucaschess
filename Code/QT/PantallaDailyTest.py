@@ -15,6 +15,7 @@ import Code.QT.Columnas as Columnas
 import Code.QT.Grid as Grid
 import Code.QT.FormLayout as FormLayout
 import Code.QT.Tablero as Tablero
+import Code.QT.PantallaPotencia as PantallaPotencia
 
 # liFens = []
 
@@ -197,15 +198,7 @@ class WDailyTestBase(QTVarios.WDialogo):
                 self.fns = ""
 
         if not liR:
-            li = Util.recuperaVar("./IntFiles/lista60.dkv")
-            liR = []
-            dif = int(40 / self.pruebas)
-            ini = 10
-            for x in range(self.pruebas):
-                t0 = random.randint(ini, ini + dif - 1)
-                ini += dif
-                t1 = random.randint(0, len(li[t0]) - 1)
-                liR.append(li[t0][t1] + " 0 1")
+            liR = PantallaPotencia.leeVariasLineasMFN(self.pruebas)
 
         # liR = liFens
         w = WDailyTest(self, liR, self.motor, self.segundos, self.fns)

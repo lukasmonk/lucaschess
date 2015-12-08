@@ -948,7 +948,9 @@ def crearTactic(procesador, wowner, liRegistros, rutinaDatos):
                 x = x.replace(".?", "").replace("?", "")
             return x.strip()
 
-        fen = dicValores.get("FEN", fen0)
+        fen = dicValores.get("FEN")
+        if not fen:
+            fen = fen0
         event = xdic("EVENT")
         site = xdic("SITE")
         date = xdic("DATE")

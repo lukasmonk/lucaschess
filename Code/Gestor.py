@@ -1542,7 +1542,6 @@ class Gestor():
                                         _("File") + " %s (*.%s)" % (extension, extension), False)
             if resp:
                 try:
-
                     modo = "w"
                     if Util.existeFichero(resp):
                         yn = QTUtil2.preguntaCancelar(self.pantalla,
@@ -1550,9 +1549,9 @@ class Gestor():
                                                          resp), si=_("Append"), no=_("Overwrite"))
                         if yn is None:
                             return
-                    if yn:
-                        modo = "a"
-                        dato = "\n" * 2 + dato
+                        if yn:
+                            modo = "a"
+                            dato = "\n" * 2 + dato
                     f = codecs.open(resp, modo, 'utf-8', 'ignore')
                     f.write(dato.replace("\n", "\r\n"))
                     f.close()

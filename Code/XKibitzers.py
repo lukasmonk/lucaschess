@@ -89,7 +89,6 @@ class XKibitzer:
 
         fdb = VarGen.configuracion.ficheroTemporal("db")
 
-
         self.ipc = Util.IPC(fdb, True)
 
         motor = kibitzer["MOTOR"]

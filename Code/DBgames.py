@@ -793,7 +793,7 @@ class DBgames:
             else:
                 duplicados += 1
 
-        dlTmp.actualiza(n + 1, erroneos, duplicados, importados)
+        dlTmp.actualiza(n, erroneos, duplicados, importados)
 
         dlTmp.ponSaving()
         self.dbf.commit()

@@ -17,9 +17,9 @@ import Code.QT.WBG_Tree as WBG_Tree
 import Code.QT.WBG_Training as WBG_Training
 
 class WN_LB(Controles.ED):
-    def __init__(self, wNavigator, id):
+    def __init__(self, wNavigator, xid):
         Controles.ED.__init__(self, wNavigator)
-        self.id = id
+        self.id = xid
         self.wNavigator = wNavigator
 
         # self.soloLectura(True)
@@ -69,9 +69,9 @@ class WNavigator(QtGui.QWidget):
         layout = Colocacion.H().control(self.bt).relleno().margen(3)
         self.setLayout(layout)
 
-    def pulsadoBT(self, id, siInicio, posicion=None, si2=False):
+    def pulsadoBT(self, xid, siInicio, posicion=None, si2=False):
         if siInicio:  # se muestra el item y se guarda el item
-            if self.historia:
+            if self.historia and len(self.historia)>1:
                 txt = self.bt.texto()[:posicion]
                 numMove = txt.count(" ") + 1
                 self.siWorking = True
@@ -84,7 +84,7 @@ class WNavigator(QtGui.QWidget):
                 self.siWorking = False
                 self.wmoves.tree.setCurrentItem(self.tmpItem)
             else:  # vuelve a ver el item ultimo
-                if self.historia:
+                if self.historia and len(self.historia)>1:
                     item = self.historia[-1].item()
                     self.wmoves.tree.setCurrentItem(item)
                     self.wmoves.tree.scrollToItem(item)
@@ -120,7 +120,8 @@ class WMoves(QtGui.QWidget):
         # ToolBar
         liAccionesWork = (
             ( _("Close"), Iconos.MainMenu(), self.tw_terminar ), None,
-            ( _("Bookmarks"), Iconos.Favoritos(), self.tw_bookmarks ),
+            ( _("Bookmarks"), Iconos.Favoritos(), self.tw_bookmarks ), None,
+            ( _("Start position"), Iconos.Inicio(), self.tw_inicio ),
         )
         self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
 
@@ -141,7 +142,7 @@ class WMoves(QtGui.QWidget):
 
         # Navigator
         self.navigator = WNavigator(self)
-        self.btInicial = Controles.PB(self, "", self.tw_inicio).ponIcono(Iconos.MoverInicio()).anchoFijo(16)
+        self.btInicial = Controles.PB(self, "", self.tw_inicio).ponIcono(Iconos.Inicio(), tamIcon=24).anchoFijo(24)
         lyN = Colocacion.H().control(self.btInicial).control(self.navigator).relleno().margen(3)
 
         lyTB = Colocacion.H().control(self.tbWork).relleno().control(self.tbGen)

@@ -761,6 +761,7 @@ class DicSQL(object):
         self.cache = collections.OrderedDict()
 
         self._conexion = sqlite3.connect(nomDB)
+        self._conexion.text_factory = lambda x: unicode(x, "utf-8", "ignore")
         atexit.register(self.close)
 
         cursor = self._conexion.cursor()

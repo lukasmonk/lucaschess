@@ -32,7 +32,7 @@ def lee1LineaMFN(linea):
     p = Partida.Partida()
     p.leerPV(pv)
     event = dic["Event"]
-    site = dic["Event"]
+    site = dic["Site"]
     if site and site != event:
         event += "-%s" % site
     date = dic["Date"].replace(".?", "").replace("?", "")
@@ -44,10 +44,23 @@ def lee1LineaMFN(linea):
 
 def leeLineaMFN():
     npos = random.randint(0, 2999)
-    f = open("./IntFiles/games.mfn", "rb")
-    for num, linea in enumerate(f):
-        if num == npos:
-            return lee1LineaMFN(linea)
+    with open("./IntFiles/games.mfn") as f:
+        for num, linea in enumerate(f):
+            if num == npos:
+                return lee1LineaMFN(linea)
+
+def leeVariasLineasMFN(nlineas): # PantallaDailyTest
+    liPos = random.sample(range(0,2999),nlineas)
+    liFEN = []
+    with open("./IntFiles/games.mfn") as f:
+        for num, linea in enumerate(f):
+            if num in liPos:
+                cabs, pv, jugada = linea.strip().split("||")
+                p = Partida.Partida()
+                p.leerPV(pv)
+                fen = p.jugada(int(jugada)).posicion.fen()
+                liFEN.append(fen)
+    return liFEN
 
 class PotenciaHistorico:
     def __init__(self, fichero):
