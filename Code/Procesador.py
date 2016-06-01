@@ -510,15 +510,14 @@ class Procesador():
 
     def folder_change(self):
         carpeta = QTUtil2.leeCarpeta(self.pantalla, self.configuracion.carpeta,
-                                     _("Change the folder where all data is saved") + "\n" + _(
-                                         "Be careful please"))
+                                     _("Change the folder where all data is saved") + "\n" + _("Be careful please"))
         if carpeta:
             if os.path.isdir(carpeta):
-                self.configuracion.changeFolder(carpeta)
+                self.configuracion.changeActiveFolder(carpeta)
                 self.reiniciar()
 
     def folder_default(self):
-        self.configuracion.changeFolder(None)
+        self.configuracion.changeActiveFolder(None)
         self.reiniciar()
 
     def reiniciar(self):

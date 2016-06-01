@@ -26,7 +26,7 @@ class GestorMotor:
 
         self.siInfinito = self.clave == "tarrasch"
 
-        if self.clave == "daydreamer" and profundidad and profundidad == 1:
+        if self.clave in ("daydreamer", "cinnamon") and profundidad and profundidad == 1:
             self.motorProfundidad = 2
 
     def cambiaOpciones(self, tiempoJugada, profundidad):

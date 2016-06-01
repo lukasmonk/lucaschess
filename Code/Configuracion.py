@@ -35,8 +35,10 @@ def activeFolder():
             return x
     return LCBASEFOLDER
 
+
 def isDefaultFolder():
     return activeFolder() == os.path.abspath(LCBASEFOLDER)
+
 
 def changeFolder(nueva):
     if nueva:

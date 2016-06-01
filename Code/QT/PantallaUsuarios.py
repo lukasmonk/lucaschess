@@ -104,12 +104,12 @@ class WUsuarios(QTVarios.WDialogo):
         self.grid.setFocus()
 
     def aceptar(self):
-
+        self.grid.goto(len(self.liUsuarios) - 1, 1)
+        self.grid.setFocus()
         Usuarios.guardaUsuarios(self.liUsuarios)
         self.accept()
 
     def borrar(self):
-
         fila = self.grid.recno()
         if fila > 0:
             del self.liUsuarios[fila]

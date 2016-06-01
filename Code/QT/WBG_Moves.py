@@ -514,6 +514,7 @@ class WMoves(QtGui.QWidget):
         # Se crea el fichero con los puzzles
         f = codecs.open(nomFNS, "w", "utf-8", 'ignore')
         setPr = set()
+        set_fathers_removed = set()
         for nline, liMVbase in enumerate(liT):
             if siBlancas:
                 liMV = liMVbase[1:]
@@ -537,12 +538,17 @@ class WMoves(QtGui.QWidget):
                 mas = ""
 
                 if mv.adv() in dicVen[colorAct] or \
-                                mv.nag() in dicVal[colorAct]:
+                                mv.nag() in dicVal[colorAct] or \
+                                mv.father in set_fathers_removed:
+                    set_fathers_removed.add(mv)
                     continue
 
                 if colorAct == siBlancas:
                     liBrothers = mv.brothers()
                     for mv1 in liBrothers:
+                        if mv1.adv() in dicVen[colorAct] or \
+                                mv1.nag() in dicVal[colorAct]:
+                            continue
                         mas += "(%s)" % mv1.pgnEN()
 
                 if colorAct:
