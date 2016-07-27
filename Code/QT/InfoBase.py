@@ -198,6 +198,7 @@ class ThanksTo:
             _("Arabic"): ("Mohamad Alhedhed",""),
             _("Dutch"): ("Willy Lefebvre",""),
             _("Chinese simplified"): ("Kevin Sicong Jiang,Stephen Yang",""),
+            _("Greek"): ("Nick Delta",""),
         }
         def r(lng):
             return Util.iniBase8dic("Locale/%s/lang.ini"%lng)["AUTHOR"]

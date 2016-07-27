@@ -248,8 +248,8 @@ def dicMotoresFixedElo():
             cm = d[nm].clona()
             if elo not in dic:
                 dic[elo] = []
-            cm.ordenUCI("UCI_LimitStrengh", "true")
             cm.ordenUCI("UCI_Elo", str(elo))
+            cm.ordenUCI("UCI_LimitStrength", "true")
             cm.nombre += " (%d)"%elo
             cm.clave += " (%d)"%elo
             dic[elo].append(cm)
