@@ -16,7 +16,10 @@ Dependencies
 * Python for windows extensions
 * pygal
 * chardet
-* PyPocketSphinx
+* python-chess
+* pyllow
+* photohash
+* cython
 
 Links
 -----
