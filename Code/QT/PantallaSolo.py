@@ -1,32 +1,29 @@
-from PyQt4 import QtCore, QtGui
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTVarios
+from Code import TrListas
+from Code import Util
 
-import Code.TrListas as TrListas
-import Code.Util as Util
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Grid as Grid
-import Code.QT.Controles as Controles
-import Code.QT.Columnas as Columnas
-import Code.QT.Delegados as Delegados
-
-class WEtiquetasPGN(QtGui.QDialog):
+class WEtiquetasPGN(QTVarios.WDialogo):
     def __init__(self, procesador, liPGN):
-        wParent = procesador.pantalla
+        titulo = _("Edit PGN labels")
+        icono = Iconos.PGN()
+        extparam = "editlabels"
+
+        QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, icono, extparam)
         self.procesador = procesador
         self.creaLista(liPGN)
 
-        super(WEtiquetasPGN, self).__init__(wParent)
-
-        self.setWindowTitle(_("Edit PGN labels"))
-        self.setWindowIcon(Iconos.PGN())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
-
         # Toolbar
         liAccionesWork = (
-            ( _("Accept"), Iconos.Aceptar(), self.accept ), None,
-            ( _("Cancel"), Iconos.Cancelar(), self.reject ), None,
-            ( _("Up"), Iconos.Arriba(), self.arriba ), None,
-            ( _("Down"), Iconos.Abajo(), self.abajo ), None,
+            (_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+            (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+            (_("Up"), Iconos.Arriba(), self.arriba), None,
+            (_("Down"), Iconos.Abajo(), self.abajo), None,
         )
         tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
 
@@ -38,10 +35,13 @@ class WEtiquetasPGN(QtGui.QDialog):
         self.grid = Grid.Grid(self, oColumnas, siEditable=True)
         n = self.grid.anchoColumnas()
         self.grid.setFixedWidth(n + 20)
+        self.registrarGrid(self.grid)
 
         # Layout
         layout = Colocacion.V().control(tbWork).control(self.grid).margen(3)
         self.setLayout(layout)
+
+        self.recuperarVideo()
 
     def creaLista(self, liPGN):
         sd = Util.SymbolDict()
@@ -49,22 +49,26 @@ class WEtiquetasPGN(QtGui.QDialog):
             sd[eti] = val
 
         li = []
-        for eti in (
-                "Event", "Site", "Date", "Round", "White", "Black", "Result", "ECO", "FEN", "WhiteElo", "BlackElo" ):
-            if eti in sd:
-                li.append([eti, sd[eti]])
-            else:
-                li.append([eti, ""])
+        listandard = ("Event", "Site", "Date", "Round", "White", "Black", "Result", "ECO", "WhiteElo", "BlackElo")
+        for eti in listandard:
+            li.append([eti, sd.get(eti,"")])
+        for eti, val in liPGN:
+            if eti not in listandard:
+                li.append([eti,val])
         while len(li) < 30:
             li.append(["", ""])
         self.liPGN = li
 
-    def procesarTB(self):
-        accion = self.sender().clave
-        if accion == "aceptar":
-            self.accept()
-        elif accion == "cancelar":
-            self.reject()
+    def aceptar(self):
+        self.guardarVideo()
+        self.accept()
+
+    def closeEvent(self):
+        self.guardarVideo()
+
+    def cancelar(self):
+        self.guardarVideo()
+        self.reject()
 
     def gridNumDatos(self, grid):
         return len(self.liPGN)
@@ -113,4 +117,3 @@ def editarEtiquetasPGN(procesador, liPGN):
         return li
     else:
         return None
-

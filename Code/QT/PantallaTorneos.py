@@ -1,28 +1,28 @@
+import codecs
 import os
-import sys
 import shutil
 import time
-import subprocess
-import codecs
 
 from PyQt4 import QtGui
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.Books as Books
-import Code.Torneo as Torneo
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.PantallaMotores as PantallaMotores
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.FormLayout as FormLayout
-import Code.QT.WinPosition as WinPosition
+from Code import Books
+from Code import ControlPosicion
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaMotores
+from Code.QT import PantallaSavePGN
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Torneo
+from Code import Util
+from Code import VarGen
+from Code import XRun
+from Code import XVoyager
 
 class WResult(QTVarios.WDialogo):
     def __init__(self, wParent, torneo, torneoTMP, gestor):
@@ -52,7 +52,7 @@ class WResult(QTVarios.WDialogo):
         oColumnas.nueva("PERDIDOS", _("Lost"), 120, siCentrado=True)
         oColumnas.nueva("TABLAS", _("Draw"), 120, siCentrado=True)
         oColumnas.nueva("PUNTOS", _("Points"), 120, siCentrado=True)
-        self.gridResultTMP = Grid.Grid(self, oColumnas, siSelecFilas=True, id="T")
+        self.gridResultTMP = Grid.Grid(self, oColumnas, siSelecFilas=True, xid="T")
         # # Layout
         layout = Colocacion.V().control(self.gridResultTMP)
         w.setLayout(layout)
@@ -60,7 +60,7 @@ class WResult(QTVarios.WDialogo):
 
         # Tab-configuracion --------------------------------------------------
         w = QtGui.QWidget()
-        ## Grid
+        # Grid
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("NUMERO", _("N."), 35, siCentrado=True)
         oColumnas.nueva("MOTOR", _("Engine"), 190, siCentrado=True)
@@ -68,8 +68,8 @@ class WResult(QTVarios.WDialogo):
         oColumnas.nueva("PERDIDOS", _("Lost"), 120, siCentrado=True)
         oColumnas.nueva("TABLAS", _("Draw"), 120, siCentrado=True)
         oColumnas.nueva("PUNTOS", _("Points"), 120, siCentrado=True)
-        self.gridResult = Grid.Grid(self, oColumnas, siSelecFilas=True, id="B")
-        ## Layout
+        self.gridResult = Grid.Grid(self, oColumnas, siSelecFilas=True, xid="B")
+        # Layout
         layout = Colocacion.V().control(self.gridResult)
         w.setLayout(layout)
         tab.nuevaTab(w, _("All"))
@@ -133,6 +133,8 @@ class WUnTorneo(QTVarios.WDialogo):
         extparam = "untorneo"
         QTVarios.WDialogo.__init__(self, wParent, titulo, icono, extparam)
 
+        self.configuracion = VarGen.configuracion
+
         # Datos
         self.torneo = torneo
         self.liEnActual = []
@@ -140,10 +142,10 @@ class WUnTorneo(QTVarios.WDialogo):
         self.liResult = None
 
         # Toolbar
-        liAcciones = (   ( _("Save") + "+" + _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-                         ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-                         ( _("Play"), Iconos.Pelicula_Seguir(), "gmJugar" ), None,
-        )
+        liAcciones = ((_("Save") + "+" + _("Quit"), Iconos.MainMenu(), "terminar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
+                      (_("Play"), Iconos.Empezar(), "gmJugar"), None,
+                      )
         tb = Controles.TB(self, liAcciones)
 
         # Tabs
@@ -157,18 +159,18 @@ class WUnTorneo(QTVarios.WDialogo):
         # # Resign
         lbResign = Controles.LB(self, _("Minimum points to assign winner") + ": ")
         self.sbResign = Controles.SB(self, torneo.resign(), 60, 10000)
-        ## Draw-plys
+        # Draw-plys
         lbDrawMinPly = Controles.LB(self, _("Minimum moves to assign draw") + ": ")
         self.sbDrawMinPly = Controles.SB(self, torneo.drawMinPly(), 20, 9999)
-        ## Draw-puntos
+        # Draw-puntos
         lbDrawRange = Controles.LB(self, _("Maximum points to assign draw") + ": ")
         self.sbDrawRange = Controles.SB(self, torneo.drawRange(), 0, 50)
 
         lbBook = Controles.LB(self, _("Opening book") + ": ")
-        fvar = VarGen.configuracion.ficheroBooks
+        fvar = self.configuracion.ficheroBooks
         self.listaLibros = Books.ListaLibros()
         self.listaLibros.recuperaVar(fvar)
-        ## Comprobamos que todos esten accesibles
+        # Comprobamos que todos esten accesibles
         self.listaLibros.comprueba()
         li = [(x.nombre, x.path) for x in self.listaLibros.lista]
         li.insert(0, ("* " + _("Default"), ""))
@@ -176,21 +178,22 @@ class WUnTorneo(QTVarios.WDialogo):
         btNuevoBook = Controles.PB(self, "", self.nuevoBook, plano=False).ponIcono(Iconos.Nuevo(), tamIcon=16)
         lyBook = Colocacion.H().control(self.cbBooks).control(btNuevoBook).relleno()
 
-        ## Posicion inicial
+        # Posicion inicial
         lbFEN = Controles.LB(self, _("Initial position") + ": ")
         self.fen = torneo.fen()
         self.btPosicion = Controles.PB(self, " " * 5 + _("Change") + " " * 5, self.posicionEditar).ponPlano(False)
         self.btPosicionQuitar = Controles.PB(self, "", self.posicionQuitar).ponIcono(Iconos.Motor_No())
         self.btPosicionPegar = Controles.PB(self, "", self.posicionPegar).ponIcono(Iconos.Pegar16()).ponToolTip(
-            _("Paste FEN position"))
+                _("Paste FEN position"))
         lyFEN = Colocacion.H().control(self.btPosicionQuitar).control(self.btPosicion).control(
-            self.btPosicionPegar).relleno()
+                self.btPosicionPegar).relleno()
 
-        ## Norman Pollock
-        lbNorman = Controles.LB(self, '%s(<a href="http://www.hoflink.com/~npollock/chess.html">?</a>): '%_("Initial position from Norman Pollock openings database"))
+        # Norman Pollock
+        lbNorman = Controles.LB(self, '%s(<a href="http://www.hoflink.com/~npollock/40H.html">?</a>): ' %
+                                _("Initial position from Norman Pollock openings database"))
         self.chbNorman = Controles.CHB(self, " ", self.torneo.norman())
 
-        ## Layout
+        # Layout
         layout = Colocacion.G()
         layout.controld(lbNombre, 0, 0).control(self.edNombre, 0, 1)
         layout.controld(lbResign, 1, 0).control(self.sbResign, 1, 1)
@@ -202,26 +205,26 @@ class WUnTorneo(QTVarios.WDialogo):
         layoutV = Colocacion.V().relleno().otro(layout).relleno()
         layoutH = Colocacion.H().relleno().otro(layoutV).relleno()
 
-        ## Creamos
+        # Creamos
         w.setLayout(layoutH)
         tab.nuevaTab(w, _("Configuration"))
 
         # Tab-engines --------------------------------------------------
         self.splitterEngines = QtGui.QSplitter(self)
         self.registrarSplitter(self.splitterEngines, "engines")
-        ## TB
-        liAcciones = [( _("New"), Iconos.TutorialesCrear(), "enNuevo" ), None,
-                      ( _("Modify"), Iconos.Modificar(), "enModificar" ), None,
-                      ( _("Remove"), Iconos.Borrar(), "enBorrar" ), None,
-                      ( _("Copy"), Iconos.Copiar(), "enCopiar" ), None,
-                      ( _("Import"), Iconos.MasDoc(), "enImportar" ), None,
-        ]
+        # TB
+        liAcciones = [(_("New"), Iconos.TutorialesCrear(), "enNuevo"), None,
+                      (_("Modify"), Iconos.Modificar(), "enModificar"), None,
+                      (_("Remove"), Iconos.Borrar(), "enBorrar"), None,
+                      (_("Copy"), Iconos.Copiar(), "enCopiar"), None,
+                      (_("Import"), Iconos.MasDoc(), "enImportar"), None,
+                      ]
         tbEnA = Controles.TB(self, liAcciones, tamIcon=24)
 
-        ## Grid engine
+        # Grid engine
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("ALIAS", _("Alias"), 209)
-        self.gridEnginesAlias = Grid.Grid(self, oColumnas, siSelecFilas=True, id="EA", siSeleccionMultiple=True)
+        self.gridEnginesAlias = Grid.Grid(self, oColumnas, siSelecFilas=True, xid="EA", siSeleccionMultiple=True)
         self.registrarGrid(self.gridEnginesAlias)
 
         w = QtGui.QWidget()
@@ -232,7 +235,7 @@ class WUnTorneo(QTVarios.WDialogo):
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("CAMPO", _("Label"), 200, siDerecha=True)
         oColumnas.nueva("VALOR", _("Value"), 286)
-        self.gridEnginesValores = Grid.Grid(self, oColumnas, siSelecFilas=False, id="EV")
+        self.gridEnginesValores = Grid.Grid(self, oColumnas, siSelecFilas=False, xid="EV")
         self.registrarGrid(self.gridEnginesValores)
 
         w = QtGui.QWidget()
@@ -247,36 +250,36 @@ class WUnTorneo(QTVarios.WDialogo):
         w.setLayout(ly)
         tab.nuevaTab(w, _("Engines"))
 
-        ## Creamos
+        # Creamos
 
         # Tab-games --------------------------------------------------
         w = QtGui.QWidget()
-        ## TB
-        liAcciones = [( _("New"), Iconos.TutorialesCrear(), "gmCrear" ), None,
-                      ( _("Remove"), Iconos.Borrar(), "gmBorrar" ), None,
-                      ( _("Show"), Iconos.PGN(), "gmMostrar" ), None,
-                      ( _("Save") + "(%s)" % _("PGN"), Iconos.GrabarComo(), "gmGuardar" ), None,
-        ]
+        # TB
+        liAcciones = [(_("New"), Iconos.TutorialesCrear(), "gmCrear"), None,
+                      (_("Remove"), Iconos.Borrar(), "gmBorrar"), None,
+                      (_("Show"), Iconos.PGN(), "gmMostrar"), None,
+                      (_("Save") + "(%s)" % _("PGN"), Iconos.GrabarComo(), "gmGuardar"), None,
+                      ]
         tbEnG = Controles.TB(self, liAcciones, tamIcon=24)
-        ## Grid engine
+        # Grid engine
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("WHITE", _("White"), 190, siCentrado=True)
         oColumnas.nueva("BLACK", _("Black"), 190, siCentrado=True)
         oColumnas.nueva("RESULT", _("Result"), 190, siCentrado=True)
         oColumnas.nueva("TIEMPO", _("Time"), 170, siCentrado=True)
-        self.gridGames = Grid.Grid(self, oColumnas, siSelecFilas=True, id="G", siSeleccionMultiple=True)
+        self.gridGames = Grid.Grid(self, oColumnas, siSelecFilas=True, xid="G", siSeleccionMultiple=True)
         self.registrarGrid(self.gridGames)
-        ## Layout
+        # Layout
         layout = Colocacion.V().control(tbEnG).control(self.gridGames)
 
-        ## Creamos
+        # Creamos
         w.setLayout(layout)
         tab.nuevaTab(w, _("Games"))
 
         # Tab-resultado --------------------------------------------------
         w = QtGui.QWidget()
 
-        ## Grid
+        # Grid
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("NUMERO", _("N."), 35, siCentrado=True)
         oColumnas.nueva("MOTOR", _("Engine"), 190, siCentrado=True)
@@ -284,12 +287,12 @@ class WUnTorneo(QTVarios.WDialogo):
         oColumnas.nueva("PERDIDOS", _("Lost"), 120, siCentrado=True)
         oColumnas.nueva("TABLAS", _("Draw"), 120, siCentrado=True)
         oColumnas.nueva("PUNTOS", _("Points"), 120, siCentrado=True)
-        self.gridResult = Grid.Grid(self, oColumnas, siSelecFilas=True, id="R")
+        self.gridResult = Grid.Grid(self, oColumnas, siSelecFilas=True, xid="R")
         self.registrarGrid(self.gridResult)
-        ## Layout
+        # Layout
         layout = Colocacion.V().control(self.gridResult)
 
-        ## Creamos
+        # Creamos
         w.setLayout(layout)
         tab.nuevaTab(w, _("Result"))
 
@@ -319,7 +322,7 @@ class WUnTorneo(QTVarios.WDialogo):
         self.btPosicion.ponTexto(rotulo)
 
     def posicionEditar(self):
-        resp = WinPosition.editarPosicion(self, VarGen.configuracion, self.fen)
+        resp = XVoyager.xVoyagerFEN(self, self.configuracion, self.fen)
         if resp is not None:
             self.fen = resp
             self.muestraPosicion()
@@ -348,7 +351,7 @@ class WUnTorneo(QTVarios.WDialogo):
             nombre = os.path.basename(fbin)[:-4]
             b = Books.Libro("P", nombre, fbin, False)
             self.listaLibros.nuevo(b)
-            fvar = VarGen.configuracion.ficheroBooks
+            fvar = self.configuracion.ficheroBooks
             self.listaLibros.guardaVar(fvar)
             li = [(x.nombre, x.path) for x in self.listaLibros.lista]
             li.insert(0, ("* " + _("Default"), "*"))
@@ -444,13 +447,13 @@ class WUnTorneo(QTVarios.WDialogo):
 
         me = self.torneo.liEngines()[fila]
         # tipo, clave, rotulo, valor
-        self.liEnActual.append(( _("Engine"), me.idName ))
-        self.liEnActual.append(( _("Author"), me.idAuthor ))
-        self.liEnActual.append(( _("File"), me.exe ))
-        self.liEnActual.append(( _("Information"), me.idInfo.replace("\n", " - ") ))
-        self.liEnActual.append(( "ELO", me.elo ))
-        self.liEnActual.append(( _("Maximum depth"), me.depth() ))
-        self.liEnActual.append(( _("Maximum seconds to think"), me.time() ))
+        self.liEnActual.append((_("Engine"), me.idName))
+        self.liEnActual.append((_("Author"), me.idAuthor))
+        self.liEnActual.append((_("File"), me.exe))
+        self.liEnActual.append((_("Information"), me.idInfo.replace("\n", " - ")))
+        self.liEnActual.append(("ELO", me.elo))
+        self.liEnActual.append((_("Maximum depth"), me.depth()))
+        self.liEnActual.append((_("Maximum seconds to think"), me.time()))
         pbook = me.book()
         if pbook == "-":
             pbook = "* " + _("Engine book")
@@ -464,10 +467,10 @@ class WUnTorneo(QTVarios.WDialogo):
             }
             pbook += "   (%s)" % dic[me.bookRR()]
 
-        self.liEnActual.append(( _("Opening book"), pbook ))
+        self.liEnActual.append((_("Opening book"), pbook))
 
         for opcion in me.liOpciones:
-            self.liEnActual.append(( opcion.nombre, str(opcion.valor) ))
+            self.liEnActual.append((opcion.nombre, str(opcion.valor)))
 
     def procesarTB(self):
         accion = self.sender().clave
@@ -559,7 +562,7 @@ class WUnTorneo(QTVarios.WDialogo):
 
     def enImportar(self):
         menu = QTVarios.LCMenu(self)
-        lista = VarGen.configuracion.comboMotoresCompleto()
+        lista = self.configuracion.comboMotoresCompleto()
         nico = QTVarios.rondoPuntos()
         for nombre, clave in lista:
             menu.opcion(clave, nombre, nico.otro())
@@ -626,31 +629,31 @@ class WUnTorneo(QTVarios.WDialogo):
             QTUtil2.mensError(self, _("You must create at least two engines"))
             return
 
-        dicValores = VarGen.configuracion.leeVariables("crear_torneo")
+        dicValores = self.configuracion.leeVariables("crear_torneo")
 
         get = dicValores.get
 
         liGen = [(None, None)]
 
         config = FormLayout.Spinbox(_("Rounds"), 1, 999, 50)
-        liGen.append(( config, get("ROUNDS", 1) ))
+        liGen.append((config, get("ROUNDS", 1)))
 
         liGen.append((None, None))
 
         config = FormLayout.Spinbox(_("Total minutes"), 1, 999, 50)
-        liGen.append(( config, get("MINUTES", 10) ))
+        liGen.append((config, get("MINUTES", 10)))
 
         config = FormLayout.Spinbox(_("Seconds added per move"), 0, 999, 50)
-        liGen.append(( config, get("SECONDS", 0) ))
+        liGen.append((config, get("SECONDS", 0)))
 
         liGen.append((None, _("Engines")))
 
         liEngines = self.torneo.liEngines()
         for pos, en in enumerate(liEngines):
-            liGen.append(( en.alias, get(en.huella(), True) ))
+            liGen.append((en.alias, get(en.huella(), True)))
 
         liGen.append((None, None))
-        liGen.append(( _("Select all"), False ))
+        liGen.append((_("Select all"), False))
 
         reg = Util.Almacen()
         reg.form = None
@@ -690,7 +693,7 @@ class WUnTorneo(QTVarios.WDialogo):
             if si:
                 liSel.append(en.huella())
 
-        VarGen.configuracion.escVariables("crear_torneo", dicValores)
+        self.configuracion.escVariables("crear_torneo", dicValores)
 
         nSel = len(liSel)
         if nSel < 2:
@@ -734,15 +737,14 @@ class WUnTorneo(QTVarios.WDialogo):
 
             # Se lanza otro LC con ese PGN
             QTUtil2.mensajeTemporal(self, _("One moment please..."), 0.3)
-            if sys.argv[0].endswith(".py"):
-                subprocess.Popen(["pythonw.exe" if VarGen.isWindows else "python", "./Lucas.py", fpgn])
-            else:
-                subprocess.Popen(["Lucas.exe" if VarGen.isWindows else "./Lucas", fpgn])
+
+            XRun.run_lucas(fpgn)
 
     def gmGuardar(self):
         pgn = self.pgnActual()
         if pgn:
-            QTVarios.savePGN(self, pgn)
+            w = PantallaSavePGN.WSave(self, pgn, self.configuracion)
+            w.exec_()
 
 class WTorneos(QTVarios.WDialogo):
     def __init__(self, wParent):
@@ -752,17 +754,19 @@ class WTorneos(QTVarios.WDialogo):
         extparam = "torneos"
         QTVarios.WDialogo.__init__(self, wParent, titulo, icono, extparam)
 
+        self.configuracion = VarGen.configuracion
+
         # Datos
         self.lista = self.leeTorneos()
         self.xjugar = None
 
         # Toolbar
-        liAcciones = (   ( _("Quit"), Iconos.MainMenu(), "terminar", True ),
-                         ( _("Modify"), Iconos.Modificar(), "modificar", False ),
-                         ( _("New"), Iconos.TutorialesCrear(), "crear", True ),
-                         ( _("Remove"), Iconos.Borrar(), "borrar", False ),
-                         ( _("Copy"), Iconos.Copiar(), "copiar", False ),
-        )
+        liAcciones = ((_("Close"), Iconos.MainMenu(), "terminar", True),
+                      (_("New"), Iconos.Nuevo(), "crear", True),
+                      (_("Modify"), Iconos.Modificar(), "modificar", False),
+                      (_("Copy"), Iconos.Copiar(), "copiar", False),
+                      (_("Remove"), Iconos.Borrar(), "borrar", False),
+                      )
         li = []
         siTodos = len(self.lista) > 0
         for txt, ico, clv, siT in liAcciones:
@@ -789,7 +793,7 @@ class WTorneos(QTVarios.WDialogo):
 
     def leeTorneos(self):
         li = []
-        carpeta = VarGen.configuracion.carpeta
+        carpeta = self.configuracion.carpeta
         for x in Util.listdir(carpeta, siUnicode=True):
             if x.lower().endswith(".mvm"):
                 fich = os.path.join(carpeta, x)
@@ -887,4 +891,3 @@ def unTorneo(parent, torneo):
         return w.verSiJugar()
     else:
         return None
-

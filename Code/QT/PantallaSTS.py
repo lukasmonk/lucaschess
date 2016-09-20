@@ -1,24 +1,24 @@
 import os
-import time
 import shutil
+import time
 
 from PyQt4 import QtGui, QtCore
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.STS as STS
-import Code.ControlPosicion as ControlPosicion
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.PantallaMotores as PantallaMotores
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.FormLayout as FormLayout
-import Code.QT.Tablero as Tablero
+from Code import ControlPosicion
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaMotores
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import STS
+from Code import Util
+from Code import VarGen
 
 class WRun(QTVarios.WDialogo):
     def __init__(self, wParent, sts, work, procesador):
@@ -29,7 +29,8 @@ class WRun(QTVarios.WDialogo):
 
         self.work = work
         self.sts = sts
-        self.xengine = procesador.creaGestorMotor(work.configEngine(), work.seconds*1000, work.depth)
+        self.ngroup = -1
+        self.xengine = procesador.creaGestorMotor(work.configEngine(), work.seconds * 1000, work.depth)
         self.playing = False
         self.configuracion = procesador.configuracion
         dic = self.configuracion.leeVariables("STSRUN")
@@ -40,7 +41,7 @@ class WRun(QTVarios.WDialogo):
                       (_("Run"), Iconos.Run(), self.run),
                       (_("Pause"), Iconos.Pelicula_Pausa(), self.pause), None,
                       (_("Config"), Iconos.Configurar(), self.config), None,
-        ]
+                      ]
         self.tb = tb = Controles.TBrutina(self, liAcciones, tamIcon=24)
 
         # Board
@@ -52,13 +53,21 @@ class WRun(QTVarios.WDialogo):
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("GROUP", _("Group"), 180)
         oColumnas.nueva("DONE", _("Done"), 100, siCentrado=True)
-        oColumnas.nueva("RESULT", _("Result"), 150, siCentrado=True)
+        oColumnas.nueva("WORK", _("Result"), 120, siCentrado=True)
+
+        self.dworks = self.read_works()
+        self.calc_max()
+        for x in range(len(self.sts.works)):
+            work = self.sts.works.getWork(x)
+            if work != self.work:
+                key = "OTHER%d" % x
+                reg = self.dworks[key]
+                oColumnas.nueva(key, reg.title, 120, siCentrado=True)
+
         self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True)
 
-        # self.splitter = splitter = QtGui.QSplitter(self)
-        # splitter.addWidget(self.tablero)
-        # splitter.addWidget(self.grid)
-        # self.registrarSplitter(splitter,"base")
+        self.colorMax = QTUtil.qtColor("#840C24")
+        self.colorOth = QTUtil.qtColor("#4668A6")
 
         layout = Colocacion.H()
         layout.control(self.tablero)
@@ -82,6 +91,7 @@ class WRun(QTVarios.WDialogo):
         self.setViewBoard()
 
     def cerrar(self):
+        self.sts.save()
         self.xengine.terminar()
         self.guardarVideo()
         self.playing = False
@@ -116,11 +126,16 @@ class WRun(QTVarios.WDialogo):
         self.tb.setAccionVisible(self.pause, False)
         self.tb.setAccionVisible(self.run, True)
         self.playing = False
+        self.sts.save()
 
     def siguiente(self):
         resp = self.sts.siguientePosicion(self.work)
         if resp:
-            self.ngroup, self.nfen, self.elem = resp
+            ngroup, self.nfen, self.elem = resp
+            if ngroup != self.ngroup:
+                self.calc_max()
+                self.grid.refresh()
+                self.ngroup = ngroup
             if not self.hideBoard:
                 cp = ControlPosicion.ControlPosicion()
                 cp.leeFen(self.elem.fen)
@@ -133,7 +148,7 @@ class WRun(QTVarios.WDialogo):
                 return
             t0 = time.time()
             mrm = self.xengine.analiza(self.elem.fen)
-            t1 = time.time()-t0
+            t1 = time.time() - t0
             if mrm:
                 rm = mrm.mejorMov()
                 if rm:
@@ -145,6 +160,9 @@ class WRun(QTVarios.WDialogo):
                         self.grid.refresh()
 
         else:
+            self.sts.save()
+            self.calc_max()
+            self.grid.refresh()
             self.tb.setAccionVisible(self.pause, False)
             self.tb.setAccionVisible(self.run, False)
             self.playing = False
@@ -160,6 +178,31 @@ class WRun(QTVarios.WDialogo):
     def gridNumDatos(self, grid):
         return len(self.sts.groups)
 
+    def gridBold(self, grid, fila, oColumna):
+        columna = oColumna.clave
+        if columna.startswith("OTHER") or columna == "WORK":
+            return self.dworks[columna].labels[fila].is_max
+        return False
+
+        # def gridColorTexto(self, grid, fila, oColumna):
+        # columna = oColumna.clave
+        # if columna.startswith("OTHER") or columna == "WORK":
+        # mx_col = []
+        # mx_pt = 0
+        # for col, work in self.dworks.iteritems():
+        # pt = self.sts.xdonePoints(work, fila)
+        # if pt:
+        # if pt == mx_pt:
+        # mx_col.append(col)
+        # elif pt > mx_pt:
+        # mx_col = [col]
+        # mx_pt = pt
+        # if columna in mx_col:
+        # return self.colorMax
+        # else:
+        # return self.colorOth
+        # return None
+
     def gridDato(self, grid, fila, oColumna):
         columna = oColumna.clave
         group = self.sts.groups.group(fila)
@@ -167,8 +210,50 @@ class WRun(QTVarios.WDialogo):
             return group.name
         elif columna == "DONE":
             return self.sts.donePositions(self.work, fila)
-        elif columna == "RESULT":
+        elif columna == "WORK":
             return self.sts.donePoints(self.work, fila)
+        elif columna.startswith("OTHER"):
+            return self.dworks[columna].labels[fila].label
+
+    def read_work(self, work):
+        tm = '%d"' % work.seconds if work.seconds else ''
+        dp = "%d^" % work.depth if work.depth else ''
+        r = Util.Almacen()
+        r.title = "%s %s%s" % (work.ref, tm, dp)
+        r.labels = []
+        for ng in range(len(self.sts.groups)):
+            rl = Util.Almacen()
+            rl.points = self.sts.xdonePoints(work, ng)
+            rl.label = self.sts.donePoints(work, ng)
+            rl.is_max = False
+            r.labels.append(rl)
+        return r
+
+    def read_works(self):
+        d = {}
+        nworks = len(self.sts.works)
+        for xw in range(nworks):
+            work = self.sts.works.getWork(xw)
+            key = "OTHER%d" % xw if work != self.work else "WORK"
+            d[key] = self.read_work(work)
+        return d
+
+    def calc_max(self):
+        self.dworks["WORK"] = self.read_work(self.work)
+        ngroups = len(self.sts.groups)
+        for ng in range(ngroups):
+            mx = 0
+            st = set()
+            for key, r in self.dworks.iteritems():
+                rl = r.labels[ng]
+                pt = rl.points
+                if pt > mx:
+                    mx = pt
+                    st = {key}
+                elif pt > 0 and pt == mx:
+                    st.add(key)
+            for key, r in self.dworks.iteritems():
+                r.labels[ng].is_max = key in st
 
 class WWork(QtGui.QDialog):
     def __init__(self, wParent, sts, work):
@@ -178,8 +263,7 @@ class WWork(QtGui.QDialog):
 
         self.setWindowTitle(sts.name)
         self.setWindowIcon(Iconos.Motor())
-        self.setWindowFlags(
-            QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
 
         tb = QTUtil2.tbAcceptCancel(self)
 
@@ -309,7 +393,7 @@ class WUnSTS(QTVarios.WDialogo):
                       (_("Down"), Iconos.Abajo(), self.down), None,
                       (_("Export"), Iconos.Grabar(), self.export), None,
                       (_("Config"), Iconos.Configurar(), self.configurar), None,
-        ]
+                      ]
         tb = Controles.TBrutina(self, liAcciones, tamIcon=24)
 
         # # Grid works
@@ -354,9 +438,9 @@ class WUnSTS(QTVarios.WDialogo):
                 liGen = [(None, None)]
                 liGen.append((None, "X * %s + K" % _("Result")))
                 config = FormLayout.Editbox("X", 100, tipo=float, decimales=4)
-                liGen.append(( config, X ))
+                liGen.append((config, X))
                 config = FormLayout.Editbox("K", 100, tipo=float, decimales=4)
-                liGen.append(( config, K ))
+                liGen.append((config, K))
                 resultado = FormLayout.fedit(liGen, title=_("Formula to calculate elo"), parent=self, icon=Iconos.Elo(),
                                              siDefecto=True)
                 if resultado:
@@ -397,6 +481,9 @@ class WUnSTS(QTVarios.WDialogo):
             w = WRun(self, self.sts, work, self.procesador)
             w.exec_()
 
+    def gridDobleClick(self, grid, fila, columna):
+        self.wkRun()
+
     def wkEdit(self):
         fila = self.grid.recno()
         if fila >= 0:
@@ -411,6 +498,8 @@ class WUnSTS(QTVarios.WDialogo):
             if not me:
                 return
             work = self.sts.createWork(me)
+        else:
+            work.workTime = 0.0
 
         w = WWork(self, self.sts, work)
         if w.exec_():
@@ -459,10 +548,10 @@ class WUnSTS(QTVarios.WDialogo):
             secs = work.workTime
             if secs == 0.0:
                 return "-"
-            d = int(secs*10)%10
-            s = int(secs)%60
-            m = int(secs)//60
-            return "%d' %d.%d\""%(m,s,d)
+            d = int(secs * 10) % 10
+            s = int(secs) % 60
+            m = int(secs) // 60
+            return "%d' %02d.%d\"" % (m, s, d)
         test = int(columna[1:])
         return self.sts.donePoints(work, test)
 
@@ -487,13 +576,13 @@ class WSTS(QTVarios.WDialogo):
         self.lista = self.leeSTS()
 
         # Toolbar
-        liAcciones = (  (_("Close"), Iconos.MainMenu(), self.terminar),
-                        (_("Select"), Iconos.Seleccionar(), self.modificar),
-                        (_("New"), Iconos.NuevoMas(), self.crear),
-                        (_("Rename"), Iconos.Rename(), self.rename),
-                        (_("Copy"), Iconos.Copiar(), self.copiar),
-                        (_("Remove"), Iconos.Borrar(), self.borrar),
-        )
+        liAcciones = ((_("Close"), Iconos.MainMenu(), self.terminar),
+                      (_("Select"), Iconos.Seleccionar(), self.modificar),
+                      (_("New"), Iconos.NuevoMas(), self.crear),
+                      (_("Rename"), Iconos.Rename(), self.rename),
+                      (_("Copy"), Iconos.Copiar(), self.copiar),
+                      (_("Remove"), Iconos.Borrar(), self.borrar),
+                      )
         tb = Controles.TBrutina(self, liAcciones)
         if len(self.lista) == 0:
             for x in (self.modificar, self.borrar, self.copiar, self.rename):
@@ -508,8 +597,8 @@ class WSTS(QTVarios.WDialogo):
         self.registrarGrid(self.grid)
 
         lb = Controles.LB(self,
-            '<a href="https://sites.google.com/site/strategictestsuite/about-1">%s</a>  %s: <b>Dan Corbit & Swaminathan</b>' % (
-                _("More info"), _("Authors")))
+                          '<a href="https://sites.google.com/site/strategictestsuite/about-1">%s</a>  %s: <b>Dan Corbit & Swaminathan</b>' % (
+                              _("More info"), _("Authors")))
 
         # Layout
         layout = Colocacion.V().control(tb).control(self.grid).control(lb).margen(8)
@@ -632,4 +721,3 @@ class WSTS(QTVarios.WDialogo):
 def sts(procesador, parent):
     w = WSTS(parent, procesador)
     w.exec_()
-

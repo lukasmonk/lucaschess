@@ -1,37 +1,38 @@
 import collections
 
+import LCEngine
+
 from PyQt4 import QtGui, QtCore
 
-import Code.VarGen as VarGen
-import Code.MotorInterno as MotorInterno
-import Code.ControlPosicion as ControlPosicion
-import Code.Partida as Partida
-import Code.TrListas as TrListas
-import Code.Util as Util
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Tablero as Tablero
-import Code.QT.FormLayout as FormLayout
-import Code.QT.PantallaParamAnalisis as PantallaParamAnalisis
+from Code import ControlPosicion
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import PantallaParamAnalisis
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import TrListas
+from Code import Util
+from Code import VarGen
 
 SIN_VALORACION, MUY_MALO, MALO, BUENO, MUY_BUENO, INTERESANTE, DUDOSA = (0, 4, 2, 1, 3, 5, 6)
 
 class UnMove:
-    def __init__(self, listaMovesPadre, mov, dicCache):
+    def __init__(self, listaMovesPadre, pv, dicCache):
 
         self.listaMovesPadre = listaMovesPadre
         self.listaMovesHijos = None
 
-        self.pv = mov.pv()
+        self.pv = pv
 
         self.partida = listaMovesPadre.partidaBase.copia()
         self.partida.leerPV(self.pv)
 
-        self.titulo = self.partida.liJugadas[-1].pgnSP()
+        self.titulo = self.partida.last_jg().pgnSP()
 
         if dicCache:
             dic = dicCache.get(self.pv, {})
@@ -97,7 +98,7 @@ class UnMove:
             posicion = self.partida.iniPosicion
             desde, hasta = None, None
         else:
-            jg = self.partida.liJugadas[self.posActual]
+            jg = self.partida.jugada(self.posActual)
             posicion = jg.posicion
             desde = jg.desde
             hasta = jg.hasta
@@ -142,15 +143,14 @@ class ListaMoves:
         self.fenM2 = self.partidaBase.ultPosicion.fenM2()
 
         dicCache = self.dbCache[self.fenM2]
-        ml = MotorInterno.MotorInterno()
-        ml.ponFen(self.fenM2 + " 0 1")
-        ml.calculaEstado()
-        liMov = ml.listaMovimientos()
 
-        liMov.sort(key=lambda x: x.pv())
+        LCEngine.setFen(self.fenM2 + " 0 1")
+        liMov = [xpv[1:] for xpv in LCEngine.getMoves()]
+
+        liMov.sort()
         liMoves = []
-        for mov in liMov:
-            um = UnMove(self, mov, dicCache)
+        for pv in liMov:
+            um = UnMove(self, pv, dicCache)
             liMoves.append(um)
 
         self.liMoves = liMoves
@@ -295,13 +295,13 @@ class TreeMoves(QtGui.QTreeWidget):
 
         dicNAGs = TrListas.dicNAGs()
         self.dicValoracion = collections.OrderedDict()
-        self.dicValoracion["1"] = ( MUY_BUENO, dicNAGs[3] )
-        self.dicValoracion["2"] = ( BUENO, dicNAGs[1] )
-        self.dicValoracion["3"] = ( MALO, dicNAGs[2] )
-        self.dicValoracion["4"] = ( MUY_MALO, dicNAGs[4] )
-        self.dicValoracion["5"] = ( INTERESANTE, dicNAGs[5] )
-        self.dicValoracion["6"] = ( DUDOSA, dicNAGs[6] )
-        self.dicValoracion["0"] = ( SIN_VALORACION, _("No rating") )
+        self.dicValoracion["1"] = (MUY_BUENO, dicNAGs[3])
+        self.dicValoracion["2"] = (BUENO, dicNAGs[1])
+        self.dicValoracion["3"] = (MALO, dicNAGs[2])
+        self.dicValoracion["4"] = (MUY_MALO, dicNAGs[4])
+        self.dicValoracion["5"] = (INTERESANTE, dicNAGs[5])
+        self.dicValoracion["6"] = (DUDOSA, dicNAGs[6])
+        self.dicValoracion["0"] = (SIN_VALORACION, _("No rating"))
 
         ftxt = Controles.TipoLetra(puntos=9)
 
@@ -395,7 +395,7 @@ class TreeMoves(QtGui.QTreeWidget):
         liGen = [(None, None)]
 
         config = FormLayout.Editbox(_("Comments"), ancho=230)
-        liGen.append((config, mov.comentario ))
+        liGen.append((config, mov.comentario))
 
         resultado = FormLayout.fedit(liGen, title=_("Comments") + " " + mov.titulo, parent=self, anchoMinimo=200,
                                      icon=Iconos.ComentarioEditar())
@@ -408,7 +408,6 @@ class TreeMoves(QtGui.QTreeWidget):
         item.setText(2, mov.comentario)
 
     def editaValoracion(self, item, mov):
-
         menu = QTVarios.LCMenu(self)
         for k in self.dicValoracion:
             cl, titulo = self.dicValoracion[k]
@@ -652,12 +651,12 @@ class WMoves(QtGui.QWidget):
 
         # ToolBar
         self.tb = Controles.TBrutina(self, siTexto=False, tamIcon=16)
-        self.tb.new( _("Open new branch"), Iconos.Mas(), self.rama )
-        self.tb.new( _("Show") + "/" + _("Hide"), Iconos.Mostrar(), self.mostrar )
-        self.tb.new( _("Rating"), self.tree.iconoValoracion(3), self.valorar )
-        self.tb.new( _("Analyze"), Iconos.Analizar(), self.analizar )
-        self.tb.new( _("Comments"), Iconos.ComentarioEditar(), self.comentario )
-        self.tb.new( _("Variants"), Iconos.Variantes(), self.variantes )
+        self.tb.new(_("Open new branch"), Iconos.Mas(), self.rama)
+        self.tb.new(_("Show") + "/" + _("Hide"), Iconos.Mostrar(), self.mostrar)
+        self.tb.new(_("Rating"), self.tree.iconoValoracion(3), self.valorar)
+        self.tb.new(_("Analyze"), Iconos.Analizar(), self.analizar)
+        self.tb.new(_("Comments"), Iconos.ComentarioEditar(), self.comentario)
+        self.tb.new(_("Variants"), Iconos.Variantes(), self.variantes)
 
         layout = Colocacion.V().control(self.tb).control(self.tree).margen(1)
 
@@ -801,14 +800,14 @@ class PantallaArbol(QTVarios.WDialogo):
 
         self.dbCache = Util.DicSQL(VarGen.configuracion.ficheroMoves)
         if nj >= 0:
-            posicion = partida.liJugadas[nj].posicion
+            posicion = partida.jugada(nj).posicion
         else:
             posicion = partida.ultPosicion
         self.listaMoves = ListaMoves(None, posicion.fen(), self.dbCache)
 
         tb = Controles.TBrutina(self)
-        tb.new( _("Save"), Iconos.Grabar(), self.grabar )
-        tb.new( _("Cancel"), Iconos.Cancelar(), self.cancelar )
+        tb.new(_("Save"), Iconos.Grabar(), self.grabar)
+        tb.new(_("Cancel"), Iconos.Cancelar(), self.cancelar)
 
         self.infoMove = InfoMove(posicion.siBlancas)
 
@@ -966,4 +965,3 @@ class PantallaArbol(QTVarios.WDialogo):
         self.wmoves.tree.goto(lm.liMoves[0])
 
         self.infoMove.ponValores()
-

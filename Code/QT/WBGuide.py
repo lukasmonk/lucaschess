@@ -1,15 +1,15 @@
 from PyQt4 import QtGui, QtCore
 
-import Code.BookGuide as BookGuide
-import Code.DBgames as DBgames
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTVarios as QTVarios
-import Code.QT.WBG_Moves as WBG_Moves
-import Code.QT.WBG_Games as WBG_Games
-import Code.QT.WBG_Summary as WBG_Summary
-import Code.QT.WBG_InfoMove as WBG_InfoMove
+from Code import BookGuide
+from Code import DBgames
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTVarios
+from Code.QT import WBG_Games
+from Code.QT import WBG_InfoMove
+from Code.QT import WBG_Moves
+from Code.QT import WBG_Summary
 
 class WBGuide(QTVarios.WDialogo):
     def __init__(self, wParent, procesador, fenM2inicial=None, pvInicial=None):

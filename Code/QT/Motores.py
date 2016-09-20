@@ -1,25 +1,64 @@
-import Code.EnginesMicElo as EnginesMicElo
-import Code.MotoresExternos as MotoresExternos
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
+from Code import VarGen
+if VarGen.isLinux:
+    import Code.EnginesLinux as Engines
+else:
+    import Code.EnginesWindows as Engines
 
-INTERNO, EXTERNO, MICGM, MICPER, FIXED = range(5)
+from Code import BaseConfig
+from Code import EnginesMicElo
+from Code import MotoresExternos
+from Code import GestorElo
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTVarios
+
+INTERNO, EXTERNO, MICGM, MICPER, FIXED, IRINA, ELO = range(7)
 
 class Motores:
     def __init__(self, configuracion):
         self.configuracion = configuracion
         self.dicIconos = {INTERNO: Iconos.Motor(), EXTERNO: Iconos.MotoresExternos(),
-                            MICGM: Iconos.GranMaestro(), MICPER:Iconos.EloTimed(),
-                            FIXED: Iconos.FixedElo()}
+                          MICGM: Iconos.GranMaestro(), MICPER: Iconos.EloTimed(),
+                          FIXED: Iconos.FixedElo(), IRINA: Iconos.RivalesMP(),
+                          ELO: Iconos.Elo()}
         self.liMotoresGM = EnginesMicElo.listaGM()
         self.liMotoresInternos = configuracion.listaMotoresInternos()
         self.dicMotoresFixedElo = configuracion.dicMotoresFixedElo()
         self.rehazMotoresExternos()
 
+        self.liIrina = self.genEnginesIrina()
+
+        self.liElo = self.genEnginesElo()
+
     def rehazMotoresExternos(self):
         self.liMotoresExternos = [MotoresExternos.ConfigMotor(cm) for cm in self.configuracion.listaMotoresExternos()]
         self.liMotoresClavePV = self.configuracion.comboMotoresMultiPV10()
+
+    def genEnginesIrina(self):
+        cmbase = self.configuracion.buscaRival("irina")
+        li = []
+        for name, trans, ico in QTVarios.list_irina():
+            cm = BaseConfig.ConfigMotor(name, cmbase.autor, cmbase.version, cmbase.url)
+            cm.nombre = trans
+            cm.icono = ico
+            cm.carpeta = cmbase.carpeta
+            cm.path = cmbase.path
+            cm.ordenUCI("Personality", name)
+            li.append(cm)
+        return li
+
+    def genEnginesElo(self):
+        d = Engines.leeRivales()
+        li = []
+        for elo, clave, depth in GestorElo.listaMotoresElo():
+            cm = d[clave].clona()
+            cm.nombre = "%d - %s (%s %d)" % (elo, cm.nombre, _("depth"), depth)
+            cm.clave = cm.nombre
+            cm.fixed_depth = depth
+            cm.elo = elo
+            li.append(cm)
+        li.sort(key=lambda x:x.elo)
+        return li
 
     def menu(self, parent):
         menu = Controles.Menu(parent)
@@ -56,7 +95,7 @@ class Motores:
             submenu.separador()
 
         menu.separador()
-        menu.opcion(( MICPER, None), _("Tourney engines"), self.dicIconos[MICPER])
+        menu.opcion((MICPER, None), _("Tourney engines"), self.dicIconos[MICPER])
 
         menu.separador()
         submenu = menu.submenu(_("Engines with fixed elo"), self.dicIconos[FIXED])
@@ -72,6 +111,22 @@ class Motores:
                 texto = cm.nombre
                 submenuElo.opcion(clave, texto, icono)
             submenuElo.separador()
+
+        menu.separador()
+        menu1 = menu.submenu(_("Opponents for young players"), Iconos.RivalesMP())
+        for cm in self.liIrina:
+            menu1.opcion((IRINA, cm), cm.nombre, cm.icono)
+
+        menu.separador()
+        menu1 = menu.submenu(_("Lucas-Elo"), Iconos.Elo())
+        ico = QTVarios.rondoPuntos()
+        limenus = []
+        for x in range(1000, 2250, 250):
+            limenus.append(menu1.submenu("%d - %d"%(x,x+250), ico.otro()))
+
+        for cm in self.liElo:
+            submenu = limenus[cm.elo/250-4]
+            submenu.opcion((ELO, cm), cm.nombre, ico.otro())
 
         return menu.lanza()
 
@@ -133,5 +188,22 @@ class Motores:
             if not rival:
                 rival = self.liMotoresInternos[0]
 
-        return tipo, rival
+        if tipo == IRINA:
+            rival = None
+            for cm in self.liIrina:
+                if cm.clave == clave:
+                    rival = cm
+                    break
+            if not rival:
+                rival = self.liMotoresInternos[0]
 
+        if tipo == ELO:
+            rival = None
+            for cm in self.liElo:
+                if cm.clave == clave:
+                    rival = cm
+                    break
+            if not rival:
+                rival = self.liMotoresInternos[0]
+
+        return tipo, rival

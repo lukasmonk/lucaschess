@@ -1,16 +1,16 @@
-import random
 import datetime
+import random
 
+from Code import Books
+from Code import DGT
+from Code import EnginesMicElo
+from Code import Gestor
+from Code import Jugada
+from Code.QT import QTUtil2
+from Code import Util
+from Code import VarGen
+from Code import XMotorRespuesta
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Books as Books
-import Code.Jugada as Jugada
-import Code.XMotorRespuesta as XMotorRespuesta
-import Code.DGT as DGT
-import Code.Gestor as Gestor
-import Code.EnginesMicElo as EnginesMicElo
-import Code.QT.QTUtil2 as QTUtil2
 
 class DicMicElos:
     def __init__(self):
@@ -49,8 +49,8 @@ class GestorMicElo(Gestor.Gestor):
     def listaMotores(self, elo):
         self.liT = (
             (0, 50, 3), (20, 53, 5), (40, 58, 4), (60, 62, 4), (80, 66, 5), (100, 69, 4), (120, 73, 3), (140, 76, 3),
-            (160, 79, 3), (180, 82, 2), (200, 84, 9), (300, 93, 4), (400, 97, 3) )
-        self.liK = ( (0, 60), (800, 50), (1200, 40), (1600, 30), (2000, 30), (2400, 10) )
+            (160, 79, 3), (180, 82, 2), (200, 84, 9), (300, 93, 4), (400, 97, 3))
+        self.liK = ((0, 60), (800, 50), (1200, 40), (1600, 30), (2000, 30), (2400, 10))
 
         li = []
         self.liMotores = lista()
@@ -59,7 +59,7 @@ class GestorMicElo(Gestor.Gestor):
             mtElo = mt.elo
             mt.siJugable = abs(mtElo - elo) < 400
             mt.siOut = not mt.siJugable
-            mt.baseElo = elo # servira para rehacer la lista y elegir en aplazamiento
+            mt.baseElo = elo  # servira para rehacer la lista y elegir en aplazamiento
             if mt.siJugable or (mtElo > elo):
                 def rot(res):
                     return self.calcDifElo(elo, mtElo, res)
@@ -96,6 +96,7 @@ class GestorMicElo(Gestor.Gestor):
         self.siJuegaHumano = False
         self.estado = kJugando
         self.siCompetitivo = siCompetitivo
+        self.puestoResultado = False # Problema doble asignacion de ptos Thomas
 
         if aplazamiento:
             siBlancas = aplazamiento["SIBLANCAS"]
@@ -142,7 +143,7 @@ class GestorMicElo(Gestor.Gestor):
         self.book.polyglot()
 
         elo = self.datosMotor.elo
-        self.maxMoveBook = elo/200 if 0 <= elo <= 1700 else 9999
+        self.maxMoveBook = elo / 200 if 0 <= elo <= 1700 else 9999
 
         eloengine = self.datosMotor.elo
         eloplayer = self.configuracion.miceloActivo(siCompetitivo)
@@ -176,15 +177,15 @@ class GestorMicElo(Gestor.Gestor):
 
         nbsp = "&nbsp;" * 3
 
-        txt = "%s:%+d%s%s:%+d%s%s:%+d" % ( _("Win"), self.datosMotor.pgana, nbsp,
-                                           _("Draw"), self.datosMotor.ptablas, nbsp,
-                                           _("Lost"), self.datosMotor.ppierde )
+        txt = "%s:%+d%s%s:%+d%s%s:%+d" % (_("Win"), self.datosMotor.pgana, nbsp,
+                                          _("Draw"), self.datosMotor.ptablas, nbsp,
+                                          _("Lost"), self.datosMotor.ppierde)
         self.ponRotulo1("<center>%s</center>" % txt)
         self.ponRotulo2("")
         self.pgnRefresh(True)
         self.ponCapInfoPorDefecto()
 
-        #-Aplazamiento 2/2--------------------------------------------------
+        # -Aplazamiento 2/2--------------------------------------------------
         if aplazamiento:
             self.mueveJugada(kMoverFinal)
             self.siPrimeraJugadaHecha = True
@@ -207,12 +208,12 @@ class GestorMicElo(Gestor.Gestor):
 
     def ponToolBar(self):
         if self.pteToolRendirse:
-            liTool = ( k_cancelar, k_aplazar, k_atras, k_configurar, k_utilidades )
+            liTool = (k_cancelar, k_aplazar, k_atras, k_configurar, k_utilidades)
         else:
             if self.siCompetitivo:
-                liTool = ( k_rendirse, k_tablas, k_aplazar, k_configurar, k_utilidades )
+                liTool = (k_rendirse, k_tablas, k_aplazar, k_configurar, k_utilidades)
             else:
-                liTool = ( k_rendirse, k_tablas, k_aplazar, k_atras, k_configurar, k_utilidades )
+                liTool = (k_rendirse, k_tablas, k_aplazar, k_atras, k_configurar, k_utilidades)
 
         self.pantalla.ponToolBar(liTool)
 
@@ -291,7 +292,7 @@ class GestorMicElo(Gestor.Gestor):
         numJugadas = self.partida.numJugadas()
 
         if numJugadas > 0:
-            jgUltima = self.partida.liJugadas[-1]
+            jgUltima = self.partida.last_jg()
             if jgUltima:
                 if jgUltima.siJaqueMate:
                     self.ponResultado(kGanaRival if self.siJugamosConBlancas == siBlancas else kGanamos)
@@ -359,44 +360,17 @@ class GestorMicElo(Gestor.Gestor):
             self.activaColor(siBlancas)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
+        self.movimientosPiezas(jg.liMovs)
+        self.relojStop(True)
 
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-
-        if self.siTeclaPanico:
-            self.sigueHumano()
-            return False
-
-        if siBien:
-
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
-
-            self.movimientosPiezas(jg.liMovs)
-            self.relojStop(True)
-
-            self.partida.ultPosicion = jg.posicion
-            self.masJugada(jg, True)
-            self.error = ""
-            self.siguienteJugada()
-            return True
-        else:
-            self.sigueHumano()
-            self.error = mens
-            return False
+        self.partida.ultPosicion = jg.posicion
+        self.masJugada(jg, True)
+        self.siguienteJugada()
+        return True
 
     def masJugada(self, jg, siNuestra):
 
@@ -461,6 +435,9 @@ class GestorMicElo(Gestor.Gestor):
             return False
 
     def ponResultado(self, quien):
+        if self.puestoResultado: # Problema doble asignacion de ptos Thomas
+            return
+
         self.resultado = quien
         self.desactivaTodas()
         self.siJuegaHumano = False
@@ -538,6 +515,7 @@ class GestorMicElo(Gestor.Gestor):
         mensaje += "<br><br>%s : %d<br>" % (_("New Tourney-Elo"), nelo)
 
         self.guardarGanados(quien == kGanamos)
+        self.puestoResultado = True
         QTUtil2.mensaje(self.pantalla, mensaje)
         self.ponFinJuego()
 

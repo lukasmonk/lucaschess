@@ -1,16 +1,143 @@
-import random
-import operator
 import datetime
+import random
 import time
 
+from Code import Apertura
+from Code import Gestor
+from Code import Jugada
+from Code.QT import QTUtil2
+from Code import Util
+from Code import XMotorRespuesta
 from Code.Constantes import *
-import Code.Util as Util
-import Code.Jugada as Jugada
-import Code.MotorInternoGM as MotorInternoGM
-import Code.XMotorRespuesta as XMotorRespuesta
-import Code.Apertura as Apertura
-import Code.Gestor as Gestor
-import Code.QT.QTUtil2 as QTUtil2
+
+def listaMotoresElo():
+    x = """amyan|1|1112|5461
+amyan|2|1360|6597
+amyan|3|1615|7010
+amyan|4|1914|7347
+alaric|1|1151|5442
+alaric|2|1398|6552
+alaric|3|1781|7145
+alaric|4|2008|7864
+bikjump|1|1123|4477
+bikjump|2|1204|5352
+bikjump|3|1405|5953
+bikjump|4|1710|6341
+cheng|1|1153|5728
+cheng|2|1402|6634
+cheng|3|1744|7170
+cheng|4|1936|7773
+chispa|1|1109|5158
+chispa|2|1321|6193
+chispa|3|1402|6433
+chispa|4|1782|7450
+cinnamon|2|1111|4751
+cinnamon|3|1151|5770
+cinnamon|4|1187|5770
+clarabit|1|1134|5210
+clarabit|2|1166|6014
+clarabit|3|1345|6407
+clarabit|4|1501|6863
+critter|1|1203|6822
+critter|2|1618|7519
+critter|3|1938|8196
+critter|4|2037|8557
+cyrano|1|1184|5587
+cyrano|2|1392|6688
+cyrano|3|1929|7420
+cyrano|4|2033|7945
+daydreamer|2|1358|6362
+daydreamer|3|1381|6984
+daydreamer|4|1629|7462
+deepfish|1|1354|6531
+deepfish|2|1621|7560
+deepfish|3|1887|8013
+deepfish|4|2100|8622
+discocheck|1|1131|6351
+discocheck|2|1380|6591
+discocheck|3|1613|7064
+discocheck|4|1817|7223
+fruit|1|1407|6758
+fruit|2|1501|6986
+fruit|3|1783|7446
+fruit|4|1937|8046
+gaia|2|1080|5734
+gaia|3|1346|6582
+gaia|4|1766|7039
+garbochess|1|1149|5640
+garbochess|2|1387|6501
+garbochess|3|1737|7231
+garbochess|4|2010|7933
+gaviota|1|1166|6503
+gaviota|2|1407|7127
+gaviota|3|1625|7437
+gaviota|4|2026|7957
+glaurung|2|1403|6994
+glaurung|3|1743|7578
+glaurung|4|2033|7945
+greko|1|1151|5552
+greko|2|1227|6282
+greko|3|1673|6861
+greko|4|1931|7518
+hamsters|1|1142|5779
+hamsters|2|1386|6365
+hamsters|3|1649|7011
+hamsters|4|1938|7457
+komodo|1|1187|6636
+komodo|2|1514|7336
+komodo|3|1633|7902
+komodo|4|2036|8226
+lime|1|1146|5251
+lime|2|1209|6154
+lime|3|1500|6907
+lime|4|1783|7499
+pawny|2|1086|6474
+pawny|3|1346|6879
+pawny|4|1503|7217
+rhetoric|1|1147|5719
+rhetoric|2|1371|6866
+rhetoric|3|1514|7049
+rhetoric|4|1937|7585
+rodent|2|1119|6490
+rodent|3|1492|7185
+rodent|4|1720|7519
+rybka|1|1877|8203
+rybka|2|2083|8675
+rybka|3|2237|9063
+rybka|4|2290|9490
+simplex|1|1126|4908
+simplex|2|1203|5868
+simplex|3|1403|6525
+simplex|4|1757|7265
+stockfish|1|1200|6419
+stockfish|2|1285|6252
+stockfish|3|1382|6516
+stockfish|4|1561|6796
+texel|1|1165|6036
+texel|2|1401|7026
+texel|3|1506|7255
+texel|4|1929|7813
+toga|1|1202|6066
+toga|2|1497|6984
+toga|3|2031|7639
+toga|4|2038|8254
+ufim|1|1214|6161
+ufim|2|1415|7260
+ufim|3|2014|8032
+ufim|4|2104|8363
+umko|1|1151|6004
+umko|2|1385|6869
+umko|3|1883|7462
+umko|4|2081|7887"""
+    li = []
+    for linea in x.split("\n"):
+        clave, depth, fide, sts = linea.split("|")
+        depth = int(depth)
+        sts = int(sts)
+        fide = int(fide)
+        elo = int((fide + 0.2065 * sts + 154.51) / 2)
+        li.append((elo, clave, depth))
+    return li
 
 class MotorElo:
     def __init__(self, elo, nombre, clave, depth):
@@ -35,109 +162,35 @@ class MotorElo:
 
 class GestorElo(Gestor.Gestor):
     def valores(self):
-        lit = ( _("Monkey"),
-                _("Donkey"),
-                _("Bull"),
-                _("Wolf"),
-                _("Lion"),
-                _("Rat"),
-                _("Snake"),
-        )
+        lit = ("Monkey",
+               "Donkey",
+               "Bull",
+               "Wolf",
+               "Lion",
+               "Rat",
+               "Snake",
+               )
 
         self.liMotores = []
         for x in range(1, 8):
-            self.liMotores.append(MotorElo(x * 108 + 50, lit[x - 1], x - 1, 0))
+            self.liMotores.append(MotorElo(x * 108 + 50, _F(lit[x - 1]), lit[x - 1], 0))
 
         def m(elo, clave, depth):
             self.liMotores.append(MotorElo(elo, Util.primeraMayuscula(clave), clave, depth))
 
-        m(1029, "gaia", 1)
-        m(1046, "pawny", 1)
-        m(1053, "tarrasch", 2)
-        m(1060, "tarrasch", 3)
-        # m( 1063, "daydreamer", 2 ) juega muy mal
-        m(1087, "lime", 1)
-        m(1100, "clarabit", 1)
-        m(1104, "chispa", 1)
-        m(1146, "alaric", 1)
-        m(1146, "bikjump", 1)
-        m(1166, "pawny", 2)
-        m(1178, "gaia", 2)
-        m(1200, "garbochess", 1)
-        m(1215, "chispa", 2)
-        m(1227, "bikjump", 2)
-        m(1237, "umko", 1)
-        m(1251, "clarabit", 2)
-        m(1274, "cyrano", 1)
-        m(1278, "ufim", 1)
-        m(1296, "alaric", 2)
-        m(1303, "toga", 1)
-        m(1318, "tarrasch", 4)
-        m(1325, "stockfish", 1)
-        m(1337, "lime", 2)
-        m(1396, "komodo", 1)
-        m(1403, "gaia", 3)
-        m(1406, "critter", 1)
-        m(1423, "clarabit", 3)
-        m(1423, "pawny", 3)
-        m(1435, "glaurung", 2)
-        m(1438, "garbochess", 2)
-        m(1470, "bikjump", 3)
-        m(1477, "glaurung", 1)
-        m(1479, "chispa", 3)
-        m(1497, "lime", 3)
-        m(1511, "ufim", 2)
-        m(1519, "alaric", 3)
-        m(1521, "umko", 2)
-        m(1526, "stockfish", 2)
-        m(1546, "toga", 2)
-        m(1548, "komodo", 2)
-        m(1555, "cyrano", 2)
-        m(1558, "daydreamer", 3)
-        m(1575, "critter", 2)
-        m(1602, "pawny", 4)
-        m(1626, "clarabit", 4)
-        m(1646, "gaia", 4)
-        m(1683, "stockfish", 3)
-        m(1685, "bikjump", 4)
-        m(1685, "glaurung", 3)
-        m(1690, "daydreamer", 4)
-        m(1702, "garbochess", 3)
-        m(1727, "alaric", 4)
-        m(1744, "umko", 3)
-        m(1746, "komodo", 3)
-        m(1754, "lime", 4)
-        m(1759, "cyrano", 3)
-        m(1781, "toga", 3)
-        m(1783, "chispa", 4)
-        m(1798, "critter", 3)
-        m(1805, "stockfish", 4)
-        m(1830, "rybka", 1)
-        m(1849, "ufim", 3)
-        m(1854, "glaurung", 4)
-        m(1879, "garbochess", 4)
-        m(1901, "komodo", 4)
-        m(1908, "umko", 4)
-        m(1925, "critter", 4)
-        m(1928, "rybka", 2)
-        m(1933, "toga", 4)
-        m(1933, "ufim", 4)
-        m(1955, "cyrano", 4)
-        m(2026, "rybka", 3)
-        m(2055, "rybka", 4)
+        for elo, clave, depth in listaMotoresElo():
+            m(elo, clave, depth)
 
-        li = []
         for k, v in self.configuracion.dicRivales.iteritems():
             if v.elo > 2000:
-                li.append((v.clave, v.elo))
-        li = sorted(li, key=operator.itemgetter(1))
-        for clave, elo in li:
-            m(elo, clave, None)  # ponemos depth a None, para diferenciar del 0 de los motores internos
+                m(v.elo, v.clave, None)  # ponemos depth a None, para diferenciar del 0 de los motores internos
+
+        self.liMotores.sort(key=lambda x: x.elo)
 
         self.liT = (
             (0, 50, 3), (20, 53, 5), (40, 58, 4), (60, 62, 4), (80, 66, 5), (100, 69, 4), (120, 73, 3), (140, 76, 3),
-            (160, 79, 3), (180, 82, 2), (200, 84, 9), (300, 93, 4), (400, 97, 3) )
-        self.liK = ( (0, 60), (800, 50), (1200, 40), (1600, 30), (2000, 30), (2400, 10) )
+            (160, 79, 3), (180, 82, 2), (200, 84, 9), (300, 93, 4), (400, 97, 3))
+        self.liK = ((0, 60), (800, 50), (1200, 40), (1600, 30), (2000, 30), (2400, 10))
 
     def calcDifElo(self, eloJugador, eloRival, resultado):
         if resultado == kGanamos:
@@ -211,8 +264,6 @@ class GestorElo(Gestor.Gestor):
             self.partida.pendienteApertura = aplazamiento["PENDIENTEAPERTURA"]
             self.partida.apertura = None if aplazamiento["APERTURA"] is None else self.listaAperturasStd.dic[
                 aplazamiento["APERTURA"]]
-            self.apertura = Apertura.AperturaPol(100)  # 100 is any number
-            self.apertura.recuperaEstado(aplazamiento["ESTADOAPERTURA"])
 
             self.datosMotor = MotorElo(aplazamiento["ELO"], aplazamiento["NOMBRE"], aplazamiento["CLAVE"],
                                        aplazamiento["DEPTH"])
@@ -220,9 +271,11 @@ class GestorElo(Gestor.Gestor):
             self.datosMotor.ppierde = aplazamiento["PPIERDE"]
             self.datosMotor.ptablas = aplazamiento["PTABLAS"]
             self.datosMotor.siInterno = False
+            self.apertura = Apertura.AperturaPol(100, elo=self.datosMotor.elo)
+            self.apertura.recuperaEstado(aplazamiento["ESTADOAPERTURA"])
         else:
-            self.apertura = Apertura.AperturaPol(datosMotor.depthOpen)
             self.datosMotor = datosMotor
+            self.apertura = Apertura.AperturaPol(100, elo=self.datosMotor.elo)
 
         eloengine = self.datosMotor.elo
         eloplayer = self.configuracion.eloActivo(siCompetitivo)
@@ -231,7 +284,10 @@ class GestorElo(Gestor.Gestor):
 
         self.siRivalInterno = self.datosMotor.siInterno
         if self.siRivalInterno:
-            self.xrival = MotorInternoGM.GestorMotor(self.datosMotor.clave, self)
+            rival = self.configuracion.buscaRival("irina")
+            depth = 2 if self.datosMotor.clave in ("Rat", "Snake") else 1
+            self.xrival = self.procesador.creaGestorMotor(rival, None, depth)
+            self.xrival.set_option("Personality", self.datosMotor.clave)
 
         else:
             rival = self.configuracion.buscaRival(self.datosMotor.clave)
@@ -258,20 +314,20 @@ class GestorElo(Gestor.Gestor):
         self.ponPiezasAbajo(siBlancas)
         self.quitaAyudas(True, siQuitarAtras=siCompetitivo)
         self.mostrarIndicador(True)
-        rotulo = "%s: <b>%s</b>" % (_("Opponent"), self.datosMotor.rotulo() )
+        rotulo = "%s: <b>%s</b>" % (_("Opponent"), self.datosMotor.rotulo())
         self.ponRotulo1(rotulo)
 
         nbsp = "&nbsp;" * 3
 
-        txt = "%s:%+d%s%s:%+d%s%s:%+d" % ( _("Win"), self.datosMotor.pgana, nbsp,
-                                           _("Draw"), self.datosMotor.ptablas, nbsp,
-                                           _("Lost"), self.datosMotor.ppierde )
+        txt = "%s:%+d%s%s:%+d%s%s:%+d" % (_("Win"), self.datosMotor.pgana, nbsp,
+                                          _("Draw"), self.datosMotor.ptablas, nbsp,
+                                          _("Lost"), self.datosMotor.ppierde)
 
         self.ponRotulo2("<center>%s</center>" % txt)
         self.pgnRefresh(True)
         self.ponCapInfoPorDefecto()
 
-        #-Aplazamiento 2/2--------------------------------------------------
+        # -Aplazamiento 2/2--------------------------------------------------
         if aplazamiento:
             self.mueveJugada(kMoverFinal)
 
@@ -281,12 +337,12 @@ class GestorElo(Gestor.Gestor):
 
     def ponToolBar(self):
         if self.pteToolRendirse:
-            liTool = ( k_cancelar, k_aplazar, k_atras, k_configurar, k_utilidades )
+            liTool = (k_cancelar, k_aplazar, k_atras, k_configurar, k_utilidades)
         else:
             if self.siCompetitivo:
-                liTool = ( k_rendirse, k_tablas, k_aplazar, k_configurar, k_utilidades )
+                liTool = (k_rendirse, k_tablas, k_aplazar, k_configurar, k_utilidades)
             else:
-                liTool = ( k_rendirse, k_tablas, k_aplazar, k_atras, k_configurar, k_utilidades )
+                liTool = (k_rendirse, k_tablas, k_aplazar, k_atras, k_configurar, k_utilidades)
 
         self.pantalla.ponToolBar(liTool)
         self.pantalla.mostrarOpcionToolbar(k_tablas, not self.siRivalInterno)
@@ -371,7 +427,7 @@ class GestorElo(Gestor.Gestor):
         numJugadas = self.partida.numJugadas()
 
         if numJugadas > 0:
-            jgUltima = self.partida.liJugadas[-1]
+            jgUltima = self.partida.last_jg()
             if jgUltima:
                 if jgUltima.siJaqueMate:
                     self.ponResultado(kGanaRival if self.siJugamosConBlancas == siBlancas else kGanamos)
@@ -449,46 +505,20 @@ class GestorElo(Gestor.Gestor):
             self.activaColor(siBlancas)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
+        if self.siApertura:
+            self.siApertura = self.apertura.compruebaHumano(self.fenUltimo(), desde, hasta)
 
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
+        self.movimientosPiezas(jg.liMovs)
 
-        if self.siTeclaPanico:
-            self.sigueHumano()
-            return False
-
-        if siBien:
-
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
-
-            if self.siApertura:
-                self.siApertura = self.apertura.compruebaHumano(self.fenUltimo(), desde, hasta)
-
-            self.movimientosPiezas(jg.liMovs)
-
-            self.partida.ultPosicion = jg.posicion
-            self.masJugada(jg, True)
-            self.error = ""
-            self.siguienteJugada()
-            return True
-        else:
-            self.sigueHumano()
-            self.error = mens
-            return False
+        self.partida.ultPosicion = jg.posicion
+        self.masJugada(jg, True)
+        self.error = ""
+        self.siguienteJugada()
+        return True
 
     def masJugada(self, jg, siNuestra):
 
@@ -497,7 +527,7 @@ class GestorElo(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -645,7 +675,7 @@ class GestorElo(Gestor.Gestor):
         lik.close()
 
         dd = Util.DicSQL(self.configuracion.fichEstadElo, tabla="color")
-        clave = "%s-%d" % (self.datosMotor.nombre, self.datosMotor.depth if self.datosMotor.depth else 0 )
+        clave = "%s-%d" % (self.datosMotor.nombre, self.datosMotor.depth if self.datosMotor.depth else 0)
         dd[clave] = self.siJugamosConBlancas
         dd.close()
 
@@ -722,4 +752,3 @@ class GestorElo(Gestor.Gestor):
             # diff = 400 if user > otro else -400
 
             # return (score - expected(diff))*k;
-

@@ -1,12 +1,11 @@
 import time
 
+from Code import ControlPosicion
+from Code import Gestor
+from Code import PGN
+from Code.QT import Iconos
+from Code import Util
 from Code.Constantes import *
-import Code.ControlPosicion as ControlPosicion
-import Code.Util as Util
-import Code.Jugada as Jugada
-import Code.PGN as PGN
-import Code.Gestor as Gestor
-import Code.QT.Iconos as Iconos
 
 class GestorVariantes(Gestor.Gestor):
     def inicio(self, fen, lineaPGN, okMasOpciones, siBlancasAbajo, siEngineActivo=False):
@@ -41,7 +40,7 @@ class GestorVariantes(Gestor.Gestor):
         self.siRevision = False
 
         self.siVolteoAutomatico = False
-        self.pantalla.ponToolBar(( k_aceptar, k_cancelar, k_atras, k_reiniciar, k_configurar, k_utilidades ))
+        self.pantalla.ponToolBar((k_aceptar, k_cancelar, k_atras, k_reiniciar, k_configurar, k_utilidades))
 
         self.siJugamosConBlancas = siBlancasAbajo
         self.pantalla.activaJuego(True, False, siAyudas=False)
@@ -58,7 +57,7 @@ class GestorVariantes(Gestor.Gestor):
 
         if self.partida.numJugadas():
             self.mueveJugada(kMoverInicio)
-            jg = self.partida.liJugadas[0]
+            jg = self.partida.jugada(0)
             self.ponFlechaSC(jg.desde, jg.hasta)
             self.desactivaTodas()
         else:
@@ -101,9 +100,9 @@ class GestorVariantes(Gestor.Gestor):
             liMasOpciones = []
             if self.okMasOpciones:
                 liMasOpciones = (
-                    ( "libros", _("Consult a book"), Iconos.Libros() ),
-                    ( None, None, None ),
-                    ( "bookguide", _("Personal Opening Guide"), Iconos.BookGuide() ),
+                    ("libros", _("Consult a book"), Iconos.Libros()),
+                    (None, None, None),
+                    ("bookguide", _("Personal Opening Guide"), Iconos.BookGuide()),
                 )
             resp = self.utilidades(liMasOpciones)
             if resp == "libros":
@@ -157,7 +156,7 @@ class GestorVariantes(Gestor.Gestor):
                 self.tablero.rotaTablero()
 
         if self.partida.numJugadas() > 0:
-            jgUltima = self.partida.liJugadas[-1]
+            jgUltima = self.partida.last_jg()
             if jgUltima:
                 if jgUltima.siJaqueMate:
                     self.ponResultado(kGanaRival, jgUltima.posicion.siBlancas)
@@ -181,32 +180,21 @@ class GestorVariantes(Gestor.Gestor):
         self.refresh()
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                return False
-
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-
-        if siBien:
-
-            self.movimientosPiezas(jg.liMovs)
-
-            self.partida.ultPosicion = jg.posicion
-            self.masJugada(jg)
-            self.error = ""
-            if self.siJuegaMotor:
-                self.siJuegaMotor = False
-                self.desactivaTodas()
-                self.juegaRival()
-                self.siJuegaMotor = True  # Como juega por mi pasa por aqui, para que no se meta en un bucle infinito
-
-            self.siguienteJugada()
-            return True
-        else:
-            self.error = mens
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
+        self.movimientosPiezas(jg.liMovs)
+
+        self.partida.ultPosicion = jg.posicion
+        self.masJugada(jg)
+        if self.siJuegaMotor:
+            self.siJuegaMotor = False
+            self.desactivaTodas()
+            self.juegaRival()
+            self.siJuegaMotor = True  # Como juega por mi pasa por aqui, para que no se meta en un bucle infinito
+
+        self.siguienteJugada()
+        return True
 
     def masJugada(self, jg):
 
@@ -219,7 +207,7 @@ class GestorVariantes(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -316,7 +304,7 @@ class GestorVariantes(Gestor.Gestor):
         mt = _X(_("Disable %1"), mt) if self.siJuegaMotor else _X(_("Enable %1"), mt)
 
         liMasOpciones = (
-            ( "motor", mt, Iconos.Motores() ),
+            ("motor", mt, Iconos.Motores()),
         )
         resp = Gestor.Gestor.configurar(self, liMasOpciones, siCambioTutor=True)
 
@@ -378,4 +366,3 @@ class GestorVariantes(Gestor.Gestor):
         self.ponRotulo1(dic["ROTULO1"])
         self.siJuegaMotor = True
         self.configuracion.escVariables("ENG_VARIANTES", dic)
-

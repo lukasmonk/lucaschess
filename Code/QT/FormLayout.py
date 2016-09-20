@@ -34,13 +34,13 @@ import os
 
 from PyQt4 import QtCore, QtGui
 
-import Code.QT.QTUtil2 as QTUtil2
-import Code.Util as Util
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code import Util
 
-separador = (None,None)
+separador = (None, None)
 SPINBOX, COMBOBOX, COLORBOX, DIAL, EDITBOX, FICHERO, FONTCOMBOBOX, CHSPINBOX = range(8)
 
 class Spinbox:
@@ -133,7 +133,7 @@ class BotonFichero(QtGui.QPushButton):
     def cambiaFichero(self):
         titulo = _("File to save") if self.siSave else _("File to read")
         fbusca = self.fichero if self.fichero else self.ficheroDefecto
-        filtro = self.extension if "(" in self.extension else  (
+        filtro = self.extension if "(" in self.extension else (
             _("File") + " %s (*.%s)" % (self.extension, self.extension))
         if self.siSave:
             resp = QTUtil2.salvaFichero(self, titulo, fbusca, filtro)
@@ -187,14 +187,14 @@ class LBotonFichero(QtGui.QHBoxLayout):
             menu = Controles.Menu(self.parent, puntos=8)
             menu.setToolTip(_("To choose: <b>left button</b> <br>To erase: <b>right button</b>"))
             for fichero in self.liHistorico:
-                menu.opcion( fichero, fichero, Iconos.PuntoAzul())
+                menu.opcion(fichero, fichero, Iconos.PuntoAzul())
 
             resp = menu.lanza()
             if resp:
                 if menu.siIzq:
                     self.boton.ponFichero(resp)
                 elif menu.siDer:
-                    if QTUtil2.pregunta(self.parent, _("Do you want to remove file %s from the list?")%resp):
+                    if QTUtil2.pregunta(self.parent, _("Do you want to remove file %s from the list?") % resp):
                         del self.liHistorico[self.liHistorico.index(resp)]
 
     def cancelar(self):
@@ -623,7 +623,7 @@ class FormDialog(QtGui.QDialog):
 
     def __init__(self, data, title="", comment="",
                  icon=None, parent=None, siDefecto=True, dispatch=None):
-        super(FormDialog, self).__init__(parent, QtCore.Qt.Window)
+        super(FormDialog, self).__init__(parent, QtCore.Qt.Dialog)
 
         # Form
         if isinstance(data[0][0], (list, tuple)):
@@ -701,4 +701,3 @@ def fedit(data, title="", comment="", icon=None, parent=None, siDefecto=False, a
         QtCore.QCoreApplication.processEvents()
         QtGui.QApplication.processEvents()
         return dialog.get()
-

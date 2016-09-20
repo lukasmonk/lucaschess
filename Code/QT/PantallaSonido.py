@@ -1,23 +1,23 @@
+import collections
 import os
 import time
-import collections
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Sonido as Sonido
-import Code.TrListas as TrListas
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.TabTipos as TabTipos
-import Code.QT.TabElementos as TabElementos
-import Code.QT.Grid as Grid
-import Code.QT.Columnas as Columnas
-import Code.QT.QTVarios as QTVarios
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import TabElementos
+from Code.QT import TabTipos
+from Code import Sonido
+from Code import TrListas
+from Code import Util
+from Code import VarGen
 
 class MesaSonido(QtGui.QGraphicsView):
     def __init__(self, parent):
@@ -47,7 +47,7 @@ class MesaSonido(QtGui.QGraphicsView):
 
         self.cajonSC = TabElementos.CajaSC(self.escena, cajon)
 
-        def tiempoSC(x, y, linea, min, max, rutina, color):
+        def tiempoSC(x, y, linea, minim, maxim, rutina, color):
             tt = TabTipos.Texto()
             tt.tipoLetra = TabTipos.TipoLetra("Courier New", 10)
             tt.posicion.ancho = 68
@@ -58,8 +58,8 @@ class MesaSonido(QtGui.QGraphicsView):
             tt.posicion.x = x
             tt.posicion.y = y
             tt.linea = linea
-            tt.min = x + min
-            tt.max = x + max
+            tt.min = x + minim
+            tt.max = x + maxim
             tt.rutina = rutina
             sc = TabElementos.TiempoSC(self.escena, tt)
             sc.ponCentesimas(0)
@@ -115,7 +115,7 @@ class MesaSonido(QtGui.QGraphicsView):
         self.txtDuracion.ponCentesimas(self.txtFinal.calcCentesimas() - self.txtInicio.calcCentesimas())
 
     def ponCentesimas(self, centesimas):
-        for x in ( self.txtActual, self.txtDuracion, self.txtFinal, self.txtInicio ):
+        for x in (self.txtActual, self.txtDuracion, self.txtFinal, self.txtInicio):
             x.ponCentesimas(centesimas)
             if centesimas == 0:
                 x.posInicial()
@@ -137,7 +137,7 @@ class MesaSonido(QtGui.QGraphicsView):
         return self.txtInicio.siMovido() or self.txtFinal.siMovido()
 
     def activaEdicion(self, siActivar):
-        for x in ( self.txtActual, self.txtFinal, self.txtInicio ):
+        for x in (self.txtActual, self.txtFinal, self.txtInicio):
             x.activa(siActivar)
 
 class WEdicionSonido(QTVarios.WDialogo):
@@ -207,18 +207,18 @@ class WEdicionSonido(QTVarios.WDialogo):
 
         self.dicTB = {}
 
-        liOpciones = ( ( _("Accept"), Iconos.S_Aceptar(), self.ks_aceptar ),
-                       ( _("Cancel"), Iconos.S_Cancelar(), self.ks_cancelar ),
-                       ( _("Recording Mic"), Iconos.S_Microfono(), self.ks_microfono ),
-                       ( _("Read wav"), Iconos.S_LeerWav(), self.ks_wav ),
-                       ( _("Listen"), Iconos.S_Play(), self.ks_play ),
-                       ( _("End"), Iconos.S_StopPlay(), self.ks_stopplay ),
-                       ( _("End"), Iconos.S_StopMicrofono(), self.ks_stopmic ),
-                       ( _("Begin"), Iconos.S_Record(), self.ks_record ),
-                       ( _("Cancel"), Iconos.S_Cancelar(), self.ks_cancelmic ),
-                       ( _("Delete"), Iconos.S_Limpiar(), self.ks_limpiar ),
-                       ( _("Save wav"), Iconos.Grabar(), self.ks_grabar ),
-        )
+        liOpciones = ((_("Accept"), Iconos.S_Aceptar(), self.ks_aceptar),
+                      (_("Cancel"), Iconos.S_Cancelar(), self.ks_cancelar),
+                      (_("Recording Mic"), Iconos.S_Microfono(), self.ks_microfono),
+                      (_("Read wav"), Iconos.S_LeerWav(), self.ks_wav),
+                      (_("Listen"), Iconos.S_Play(), self.ks_play),
+                      (_("End"), Iconos.S_StopPlay(), self.ks_stopplay),
+                      (_("End"), Iconos.S_StopMicrofono(), self.ks_stopmic),
+                      (_("Begin"), Iconos.S_Record(), self.ks_record),
+                      (_("Cancel"), Iconos.S_Cancelar(), self.ks_cancelmic),
+                      (_("Delete"), Iconos.S_Limpiar(), self.ks_limpiar),
+                      (_("Save wav"), Iconos.Grabar(), self.ks_grabar),
+                      )
 
         for titulo, icono, clave in liOpciones:
             accion = QtGui.QAction(titulo, None)
@@ -284,10 +284,10 @@ class WEdicionSonido(QTVarios.WDialogo):
             self.siPlay = False
 
     def microfono(self):
-        self.ponToolBar(( self.ks_cancelmic, None, self.ks_record ))
+        self.ponToolBar((self.ks_cancelmic, None, self.ks_record))
 
     def micRecord(self):
-        self.ponToolBar(( self.ks_cancelmic, None, self.ks_stopmic ))
+        self.ponToolBar((self.ks_cancelmic, None, self.ks_stopmic))
         self.siGrabando = True
         self.siCancelado = False
 
@@ -346,7 +346,7 @@ class WEdicionSonido(QTVarios.WDialogo):
 
     def play(self):
         self.mesa.activaEdicion(False)
-        self.ponToolBar(( self.ks_stopplay, ))
+        self.ponToolBar((self.ks_stopplay,))
 
         centDesde, centHasta = self.mesa.limites(False)
         self.taller.playInicio(centDesde, centHasta)
@@ -390,10 +390,10 @@ class WSonidos(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, icono, extparam)
 
         # Toolbar
-        liAcciones = (  ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-                        ( _("Modify"), Iconos.Modificar(), "modificar" ), None,
-                        ( _("Listen"), Iconos.S_Play(), "play" ),
-        )
+        liAcciones = ((_("Close"), Iconos.MainMenu(), "terminar"), None,
+                      (_("Modify"), Iconos.Modificar(), "modificar"), None,
+                      (_("Listen"), Iconos.S_Play(), "play"),
+                      )
         tb = Controles.TB(self, liAcciones)
 
         # Lista
@@ -531,7 +531,7 @@ class WSonidos(QTVarios.WDialogo):
             t = TrListas.letterPiece(c)
             self.liSonidos.append([c, t, None])
 
-        for c in ( "O-O", "O-O-O", "=", "x", "#", "+" ):
+        for c in ("O-O", "O-O-O", "=", "x", "#", "+"):
             self.liSonidos.append([c, c, None])
 
         self.liSonidos.append([None, "", None])
@@ -554,14 +554,14 @@ class WSonidosGuion(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         # Toolbar
-        liAcciones = (  ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-                        ( _("New"), Iconos.Nuevo(), "nuevo" ),
-                        ( _("Modify"), Iconos.Modificar(), "modificar" ), None,
-                        ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-                        ( _("Up"), Iconos.Arriba(), "arriba" ),
-                        ( _("Down"), Iconos.Abajo(), "abajo" ), None,
-                        ( _("Listen"), Iconos.S_Play(), "play" ),
-        )
+        liAcciones = ((_("Close"), Iconos.MainMenu(), "terminar"), None,
+                      (_("New"), Iconos.Nuevo(), "nuevo"),
+                      (_("Modify"), Iconos.Modificar(), "modificar"), None,
+                      (_("Remove"), Iconos.Borrar(), "borrar"), None,
+                      (_("Up"), Iconos.Arriba(), "arriba"),
+                      (_("Down"), Iconos.Abajo(), "abajo"), None,
+                      (_("Listen"), Iconos.S_Play(), "play"),
+                      )
         tb = Controles.TB(self, liAcciones)
 
         # Lista
@@ -665,4 +665,3 @@ class WSonidosGuion(QTVarios.WDialogo):
                 if not siSeguir:
                     break
             ts.playFinal()
-

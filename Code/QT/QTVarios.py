@@ -1,22 +1,18 @@
-import os
-import collections
-import codecs
 import base64
-from encodings.aliases import aliases
-import chardet.universaldetector
+import codecs
+import collections
+import os
 
 from PyQt4 import QtCore, QtGui, QtSvg
 
-import Code.Util as Util
-import Code.VarGen as VarGen
-import Code.BaseConfig as BaseConfig
-import Code.PGN as PGN
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.FormLayout as FormLayout
+from Code import BaseConfig
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code import Util
+from Code import VarGen
 
 class DragUna(Controles.LB):
     def __init__(self, owner, pmVacio):
@@ -27,10 +23,10 @@ class DragUna(Controles.LB):
         Controles.LB.__init__(self, owner)
         self.ponImagen(pmVacio)
 
-    def pon(self, pixmap, tooltip, id):
+    def pon(self, pixmap, tooltip, xid):
         if pixmap:
             self.ponImagen(pixmap)
-        self.id = id
+        self.id = xid
         self.setToolTip(tooltip)
         self.pixmap = pixmap
 
@@ -73,18 +69,18 @@ class DragBanda(QtGui.QWidget):
 
         # Los dividimos por tipos
         dic = collections.OrderedDict()
-        for id, (nom, pm, tipo) in self.dicDatos.iteritems():
+        for xid, (nom, pm, tipo) in self.dicDatos.iteritems():
             if tipo not in dic:
                 dic[tipo] = collections.OrderedDict()
-            dic[tipo][id] = (nom, pm)
+            dic[tipo][xid] = (nom, pm)
 
         menu = LCMenu(self)
         dicmenu = {}
-        for id, (nom, pm, tp) in self.dicDatos.iteritems():
+        for xid, (nom, pm, tp) in self.dicDatos.iteritems():
             if tp not in dicmenu:
                 dicmenu[tp] = menu.submenu(tp, Iconos.PuntoVerde())
                 menu.separador()
-            dicmenu[tp].opcion(id, nom, QtGui.QIcon(pm))
+            dicmenu[tp].opcion(xid, nom, QtGui.QIcon(pm))
         if lb.id is not None:
             menu.separador()
             menu.opcion(-1, _("Edit"), Iconos.Modificar())
@@ -107,18 +103,18 @@ class DragBanda(QtGui.QWidget):
 
         # Los dividimos por tipos
         dic = collections.OrderedDict()
-        for id, (nom, pm, tipo) in self.dicDatos.iteritems():
+        for xid, (nom, pm, tipo) in self.dicDatos.iteritems():
             if tipo not in dic:
                 dic[tipo] = collections.OrderedDict()
-            dic[tipo][id] = (nom, pm)
+            dic[tipo][xid] = (nom, pm)
 
         menu = LCMenu(self)
         dicmenu = {}
-        for id, (nom, pm, tp) in self.dicDatos.iteritems():
+        for xid, (nom, pm, tp) in self.dicDatos.iteritems():
             if tp not in dicmenu:
                 dicmenu[tp] = menu.submenu(tp, Iconos.PuntoVerde())
                 menu.separador()
-            dicmenu[tp].opcion((id, tp), nom, QtGui.QIcon(pm))
+            dicmenu[tp].opcion((xid, tp), nom, QtGui.QIcon(pm))
         for clave, nombre, icono in masOpciones:
             menu.separador()
             menu.opcion(clave, nombre, icono)
@@ -130,17 +126,17 @@ class DragBanda(QtGui.QWidget):
     def iniActualizacion(self):
         self.setControl = set()
 
-    def actualiza(self, id, nombre, pixmap, tipo):
-        self.dicDatos[id] = (nombre, pixmap, tipo)
-        self.setControl.add(id)
+    def actualiza(self, xid, nombre, pixmap, tipo):
+        self.dicDatos[xid] = (nombre, pixmap, tipo)
+        self.setControl.add(xid)
 
     def finActualizacion(self):
         st = set()
-        for id in self.dicDatos:
-            if id not in self.setControl:
-                st.add(id)
-        for id in st:
-            del self.dicDatos[id]
+        for xid in self.dicDatos:
+            if xid not in self.setControl:
+                st.add(xid)
+        for xid in st:
+            del self.dicDatos[xid]
 
         for n, lb in enumerate(self.liLB):
             if lb.id is not None:
@@ -149,12 +145,12 @@ class DragBanda(QtGui.QWidget):
                 else:
                     self.pon(lb.id, n)
 
-    def pon(self, id, a):
+    def pon(self, xid, a):
         if a < len(self.liLB):
-            if id in self.dicDatos:
-                nom, pm, tipo = self.dicDatos[id]
+            if xid in self.dicDatos:
+                nom, pm, tipo = self.dicDatos[xid]
                 lb = self.liLB[a]
-                lb.pon(pm, nom, id)
+                lb.pon(pm, nom, xid)
 
     def idLB(self, num):
         if 0 <= num < len(self.liLB):
@@ -167,8 +163,8 @@ class DragBanda(QtGui.QWidget):
         return li
 
     def recuperar(self, li):
-        for id, a in li:
-            self.pon(id, a)
+        for xid, a in li:
+            self.pon(xid, a)
 
     def startDrag(self, lb):
 
@@ -189,7 +185,7 @@ class DragBanda(QtGui.QWidget):
 class WDialogo(QtGui.QDialog):
     def __init__(self, pantalla, titulo, icono, extparam):
 
-        assert len(titulo)==0 or pantalla is not None
+        assert len(titulo) == 0 or pantalla is not None
 
         super(WDialogo, self).__init__(pantalla)
 
@@ -236,25 +232,35 @@ class WDialogo(QtGui.QDialog):
         else:
             return None
 
-    def recuperarVideo(self, siTam=True, anchoDefecto=None, altoDefecto=None):
+    def recuperarVideo(self, siTam=True, anchoDefecto=None, altoDefecto=None, dicDef=None):
 
         dic = self.recuperarDicVideo()
+        if not dic:
+            dic = dicDef
         wE, hE = QTUtil.tamEscritorio()
         if dic:
             wE, hE = QTUtil.tamEscritorio()
-            x, y = dic["_POSICION_"].split(",")
-            x = int(x)
-            y = int(y)
-            if not ( 0 <= x <= (wE - 50) ):
-                x = 0
-            if not ( 0 <= y <= (hE - 50) ):
-                y = 0
-            self.move(x, y)
+            if "_POSICION_" in dic:
+                x, y = dic["_POSICION_"].split(",")
+                x = int(x)
+                y = int(y)
+                if not (0 <= x <= (wE - 50)):
+                    x = 0
+                if not (0 <= y <= (hE - 50)):
+                    y = 0
+                self.move(x, y)
+            for grid in self.liGrids:
+                grid.recuperarVideo(dic)
+                grid.ponAnchosColumnas()
+            for sp, name in self.liSplitters:
+                k = "SP_%s" % name
+                if k in dic:
+                    sp.setSizes(dic[k])
             if siTam:
                 if "_SIZE_" not in dic:
-                    w, h = self.width(),self.height()
+                    w, h = self.width(), self.height()
                     for k in dic:
-                        if k.startswith( "_TAMA" ):
+                        if k.startswith("_TAMA"):
                             w, h = dic[k].split(",")
                 else:
                     w, h = dic["_SIZE_"].split(",")
@@ -269,13 +275,6 @@ class WDialogo(QtGui.QDialog):
                 elif h < 20:
                     h = 20
                 self.resize(w, h)
-            for grid in self.liGrids:
-                grid.recuperarVideo(dic)
-                grid.ponAnchosColumnas()
-            for sp, name in self.liSplitters:
-                k = "SP_%s" % name
-                if k in dic:
-                    sp.setSizes(dic[k])
             return True
         else:
             if anchoDefecto or altoDefecto:
@@ -296,8 +295,8 @@ class BlancasNegras(QtGui.QDialog):
         super(BlancasNegras, self).__init__(parent)
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
-        icoP = VarGen.todasPiezas.iconoDefecto("P")
-        icop = VarGen.todasPiezas.iconoDefecto("p")
+        icoP = VarGen.todasPiezas.iconoDefecto("K")
+        icop = VarGen.todasPiezas.iconoDefecto("k")
         self.setWindowTitle(_("Choose Color"))
         self.setWindowIcon(icoP)
 
@@ -325,8 +324,8 @@ class BlancasNegrasTiempo(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
-        icoP = VarGen.todasPiezas.iconoDefecto("P")
-        icop = VarGen.todasPiezas.iconoDefecto("p")
+        icoP = VarGen.todasPiezas.iconoDefecto("K")
+        icop = VarGen.todasPiezas.iconoDefecto("k")
         self.setWindowTitle(_("Choose Color"))
         self.setWindowIcon(icoP)
 
@@ -343,19 +342,22 @@ class BlancasNegrasTiempo(QtGui.QDialog):
         self.gbT = Controles.GB(self, _("Time"), ly).conectar(self.cambiaTiempo)
         self.cambiaTiempo()
 
+        # Fast moves
+        self.chb_fastmoves = Controles.CHB(self, _("Fast moves"), False)
+
         self.color = None
 
         ly = Colocacion.H().control(btBlancas).control(btNegras)
         ly.margen(10)
-        layout = Colocacion.V().otro(ly).espacio(10).control(self.gbT).margen(5)
+        layout = Colocacion.V().otro(ly).espacio(10).control(self.gbT).control(self.chb_fastmoves).margen(5)
         self.setLayout(layout)
 
     def resultado(self):
-        return self.color, self.gbT.isChecked(), self.edMinutos.valor(), self.edSegundos.valor()
+        return self.color, self.gbT.isChecked(), self.edMinutos.valor(), self.edSegundos.valor(), self.chb_fastmoves.valor()
 
     def cambiaTiempo(self):
         si = self.gbT.isChecked()
-        for control in ( self.edMinutos, self.lbMinutos, self.edSegundos, self.lbSegundos ):
+        for control in (self.edMinutos, self.lbMinutos, self.edSegundos, self.lbSegundos):
             control.setVisible(si)
 
     def blancas(self):
@@ -411,13 +413,13 @@ def tiempo(owner, minMinutos=1, minSegundos=0, maxMinutos=999, maxSegundos=999):
         return w.resultado()
     return None
 
-def lyBotonesMovimiento(owner, clave, siLibre=True, siMas=False, siTiempo=True, \
+def lyBotonesMovimiento(owner, clave, siLibre=True, siMas=False, siTiempo=True,
                         siGrabar=False, siGrabarTodos=False, siJugar=False, rutina=None, tamIcon=16,
                         liMasAcciones=None):
     liAcciones = []
 
     def x(tit, tr, icono):
-        liAcciones.append(( tr, icono, clave + tit ))
+        liAcciones.append((tr, icono, clave + tit))
 
     # liAcciones.append( None )
     x("MoverInicio", _("First move"), Iconos.MoverInicio())
@@ -441,7 +443,7 @@ def lyBotonesMovimiento(owner, clave, siLibre=True, siMas=False, siTiempo=True, 
         x("MoverGrabar", _("Save"), Iconos.MoverGrabar())
         liAcciones.append(None)
     if siGrabarTodos:
-        liAcciones.append(( _("Save") + "++", Iconos.MoverGrabarTodos(), clave + "MoverGrabarTodos" ))
+        liAcciones.append((_("Save") + "++", Iconos.MoverGrabarTodos(), clave + "MoverGrabarTodos"))
         liAcciones.append(None)
     if siMas:
         x("MoverMas", _("New analysis"), Iconos.MoverMas())
@@ -965,22 +967,25 @@ class LCMenu(Controles.Menu):
         # sc.pixelMetric = pixelMetric
         # menu.setStyle(sc)
 
-class ImportarFicheroPGN(QtGui.QDialog):
-    def __init__(self, parent):
+class ImportarFichero(QtGui.QDialog):
+    def __init__(self, parent, titulo, siErroneos, icono):
         QtGui.QDialog.__init__(self, parent)
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
-        self.setWindowTitle(_("PGN file"))
-        self.setWindowIcon(Iconos.PGN())
+        self.setWindowTitle(titulo)
+        self.setWindowIcon(icono)
         self.fontB = f = Controles.TipoLetra(puntos=10, peso=75)
+
+        self.siErroneos = siErroneos
 
         self.siCancelado = False
 
         lbRotLeidos = Controles.LB(self, _("Games read") + ":").ponFuente(f)
         self.lbLeidos = Controles.LB(self, "0").ponFuente(f)
 
-        lbRotErroneos = Controles.LB(self, _("Erroneous") + ":").ponFuente(f)
-        self.lbErroneos = Controles.LB(self, "0").ponFuente(f)
+        if siErroneos:
+            lbRotErroneos = Controles.LB(self, _("Erroneous") + ":").ponFuente(f)
+            self.lbErroneos = Controles.LB(self, "0").ponFuente(f)
 
         self.lbRotDuplicados = Controles.LB(self, _("Duplicated") + ":").ponFuente(f)
         self.lbDuplicados = Controles.LB(self, "0").ponFuente(f)
@@ -993,7 +998,8 @@ class ImportarFicheroPGN(QtGui.QDialog):
         # Tiempo
         ly = Colocacion.G().margen(20)
         ly.controld(lbRotLeidos, 0, 0).controld(self.lbLeidos, 0, 1)
-        ly.controld(lbRotErroneos, 1, 0).controld(self.lbErroneos, 1, 1)
+        if siErroneos:
+            ly.controld(lbRotErroneos, 1, 0).controld(self.lbErroneos, 1, 1)
         ly.controld(self.lbRotDuplicados, 2, 0).controld(self.lbDuplicados, 2, 1)
         ly.controld(lbRotImportados, 3, 0).controld(self.lbImportados, 3, 1)
 
@@ -1036,11 +1042,27 @@ class ImportarFicheroPGN(QtGui.QDialog):
         def pts(x): return "{:,}".format(x).replace(",", ".")
 
         self.lbLeidos.ponTexto(pts(leidos))
-        self.lbErroneos.ponTexto(pts(erroneos))
+        if self.siErroneos:
+            self.lbErroneos.ponTexto(pts(erroneos))
         self.lbDuplicados.ponTexto(pts(duplicados))
         self.lbImportados.ponTexto(pts(importados))
         QTUtil.refreshGUI()
         return not self.siCancelado
+
+class ImportarFicheroPGN(ImportarFichero):
+    def __init__(self, parent):
+        ImportarFichero.__init__(self, parent, _("PGN file"), True, Iconos.PGN())
+
+class ImportarFicheroFNS(ImportarFichero):
+    def __init__(self, parent):
+        ImportarFichero.__init__(self, parent, _("FNS file"), True, Iconos.Fichero())
+
+class ImportarFicheroDB(ImportarFichero):
+    def __init__(self, parent):
+        ImportarFichero.__init__(self, parent, _("Database file"), False, Iconos.Database())
+
+    def actualiza(self, leidos, duplicados, importados):
+        return ImportarFichero.actualiza(self, leidos, 0, duplicados, importados)
 
 class MensajeFics(QtGui.QDialog):
     def __init__(self, parent, mens):
@@ -1130,90 +1152,34 @@ class MensajeFide(QtGui.QDialog):
         self.siFinalizado = True
         QTUtil.refreshGUI()
 
-def savePGN( owner, pgn ):
+def select_pgn(wowner):
     configuracion = VarGen.configuracion
-    dicVariables = configuracion.leeVariables("SAVEPGN")
+    path = QTUtil2.leeFichero(wowner, configuracion.dirPGN, "pgn")
+    if path:
+        carpeta, fichero = os.path.split(path)
+        if configuracion.dirPGN != carpeta:
+            configuracion.dirPGN = carpeta
+            configuracion.graba()
+    return path
 
-    liGen = [(None, None)]
+def select_ext(wowner, ext):
+    configuracion = VarGen.configuracion
+    path = QTUtil2.leeFichero(wowner, configuracion.dirSalvados, ext)
+    if path:
+        carpeta, fichero = os.path.split(path)
+        if configuracion.dirSalvados != carpeta:
+            configuracion.dirSalvados = carpeta
+            configuracion.graba()
+    return path
 
-    liHistorico = dicVariables.get("LIHISTORICO")
-
-    config = FormLayout.Fichero(_("File to save"), "pgn", True, liHistorico=liHistorico, anchoMinimo=300)
-    liGen.append(( config, "" ))
-
-    #Codec
-    liCodecs = [k for k in set(v for k,v in aliases.iteritems())]
-    liCodecs.sort()
-    liCodecs = [(k,k) for k in liCodecs]
-    liCodecs.insert( 0, (_("Same as file"), "file" ) )
-    liCodecs.insert( 0, ("%s: UTF-8"%_("By default"), "default" ) )
-    config = FormLayout.Combobox(_("Write with the codec"), liCodecs)
-    codec = dicVariables.get("CODEC", "default")
-    liGen.append(( config, codec ))
-
-    #Overwrite
-    liGen.append( ( _("Overwrite"), dicVariables.get("OVERWRITE", False)) )
-
-    #Remove comments
-    liGen.append( ( _("Remove comments and variations"), dicVariables.get("REMCOMMENTSVAR", False)) )
-
-    # Editamos
-    resultado = FormLayout.fedit(liGen, title=_("Save PGN"), parent=owner, icon=Iconos.PGN())
-    if resultado is None:
-        return
-
-    accion, liResp = resultado
-    fichero, codec, overwrite, remcommentsvar = liResp
-    if not fichero:
-        return
-    if not liHistorico:
-        liHistorico = []
-    if fichero in liHistorico:
-        del liHistorico[liHistorico.index(fichero)]
-        chardet
-    liHistorico.insert(0,fichero)
-
-    dicVariables["LIHISTORICO"] = liHistorico[:20]
-    dicVariables["CODEC"] = codec
-    dicVariables["OVERWRITE"] = overwrite
-    dicVariables["REMCOMMENTSVAR"] = remcommentsvar
-
-    configuracion.escVariables("SAVEPGN",dicVariables)
-    carpeta, name = os.path.split(fichero)
-    if carpeta != configuracion.dirSalvados:
-        configuracion.dirSalvados = carpeta
-        configuracion.graba()
-
-    if remcommentsvar:
-        pgn = PGN.rawPGN(pgn)
-    pgn = pgn.replace( "\n", "\r\n" )
-
-    modo = "w" if overwrite else "a"
-    if not overwrite:
-        if not Util.existeFichero(fichero):
-            modo = "w"
-    if codec == "default":
-        codec = "utf-8"
-    elif codec == "file":
-        codec = "utf-8"
-        if Util.existeFichero(fichero):
-            with open(fichero) as f:
-                u = chardet.universaldetector.UniversalDetector()
-                for n, x in enumerate(f):
-                    u.feed(x)
-                    if n == 1000:
-                        break
-                u.close()
-                codec = u.result.get("encoding", "utf-8")
-
-    try:
-        f = codecs.open( fichero, modo, codec, 'ignore' )
-        if modo == "a":
-            f.write( "\r\n\r\n" )
-        f.write(pgn)
-        f.close()
-        QTUtil2.mensajeTemporal( owner, _( "Saved" ), 1.2 )
-    except:
-        QTUtil.ponPortapapeles(pgn)
-        QTUtil2.mensError(owner, "%s : %s\n\n%s" % (_("Unable to save"), fichero, _("It is saved in the clipboard to paste it wherever you want.") ))
-
+def list_irina():
+    return (
+        ("Monkey", _("Monkey"), Iconos.Monkey()),
+        ("Donkey", _("Donkey"), Iconos.Donkey()),
+        ("Bull", _("Bull"), Iconos.Bull()),
+        ("Wolf", _("Wolf"), Iconos.Wolf()),
+        ("Lion", _("Lion"), Iconos.Lion()),
+        ("Rat", _("Rat"), Iconos.Rat()),
+        ("Snake", _("Snake"), Iconos.Snake()),
+        ("Steven", _("Steven"), Iconos.Steven())
+    )

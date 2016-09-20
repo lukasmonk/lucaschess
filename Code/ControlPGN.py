@@ -1,8 +1,8 @@
 import collections
 
+from Code import PGNreader
+from Code import Util
 from Code.Constantes import *
-import Code.Util as Util
-import Code.PGNreader as PGNreader
 
 class ControlPGN:
     def __init__(self, gestor):
@@ -98,7 +98,7 @@ class ControlPGN:
         tam_lj = len(lj)
         if tam_lj:
 
-            siUltimo = ( pos + 1 ) >= tam_lj
+            siUltimo = (pos + 1) >= tam_lj
             if siUltimo:
                 pos = tam_lj - 1
 
@@ -142,14 +142,14 @@ class ControlPGN:
         if pos >= self.gestor.partida.numJugadas():
             pos = self.gestor.partida.numJugadas() - 1
 
-        return pos, self.gestor.partida.liJugadas[pos]
+        return pos, self.gestor.partida.jugada(pos)
 
     def actual(self):
         tipoJuego = self.gestor.tipoJuego
 
         if tipoJuego == kJugGM:
             return self.actualGM()
-        elif tipoJuego in (kJugPGN, kJugSolo, kJugXFCC):
+        elif tipoJuego in (kJugPGN, kJugSolo, kJugXFCC, kJugRoute):
             return self.gestor.actualPGN()
 
         if tipoJuego == kJugRemoto:
@@ -181,11 +181,11 @@ class ControlPGN:
             negras = jugador
         hoy = Util.hoy()
         resp = '[Event "%s"]\n' % _("Lucas Chess")
-        # ~ Site (lugar): el lugar donde el evento se llevo a cabo.
+        # Site (lugar): el lugar donde el evento se llevo a cabo.
         # Esto debe ser en formato "Ciudad, Region PAIS", donde PAIS es el codigo del mismo
         # en tres letras de acuerdo al codigo del Comite Olimpico Internacional. Como ejemplo: "Mexico, D.F. MEX".
         resp += '[Date "%d.%02d.%02d"]\n' % (hoy.year, hoy.month, hoy.day)
-        #~ Round (ronda): La ronda original de la partida.
+        # Round (ronda): La ronda original de la partida.
         resp += '[White "%s"]\n' % blancas
         resp += '[Black "%s"]\n' % negras
         resp += '[Result "%s"]\n' % r
@@ -219,8 +219,8 @@ class ControlPGN:
 
         dmore = getattr(self.gestor, "pgnLabelsAdded", None)
         if dmore:
-            for k,v in dmore().iteritems():
-                resp += '[%s "%s"]\n'%(k,v)
+            for k, v in dmore().iteritems():
+                resp += '[%s "%s"]\n' % (k, v)
 
         resp += "\n" + self.gestor.partida.pgnBase()
         if not resp.endswith(r):
@@ -229,7 +229,6 @@ class ControlPGN:
         return resp
 
     def actualGM(self):
-
         gm = self.gestor.gm
         motorGM = self.gestor.motorGM
 
@@ -282,4 +281,3 @@ class ControlPGN:
             else:
                 break
         return dic
-

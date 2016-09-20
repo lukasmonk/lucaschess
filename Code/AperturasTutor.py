@@ -39,4 +39,3 @@ class JuegaAperturaStd:
             return False
         self.activa = self.ultMov > self.movActual
         return self.activa
-

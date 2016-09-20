@@ -1,8 +1,8 @@
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTUtil as QTUtil
+from Code.QT import Colocacion
+from Code.QT import QTUtil
+from Code import VarGen
 
 class CapturaLista(QtGui.QWidget):
     def __init__(self, wParent, tablero):
@@ -61,7 +61,7 @@ class CapturaLista(QtGui.QWidget):
         for color in (True, False):
             ly = dlayout[color] = Colocacion.V().margen(0)
             for pieza, numero in self.li:
-                if color == False:
+                if not color:
                     pieza = pieza.lower()
                 for i in range(numero):
                     ly.control(self.dic[pieza][i])
@@ -121,4 +121,3 @@ class CapturaLista(QtGui.QWidget):
                         liDif.append((pieza.lower(), vB))
 
             self.ponLI(liDif)
-

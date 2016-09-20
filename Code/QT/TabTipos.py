@@ -15,7 +15,7 @@ class Posicion:
 
     def __str__(self):
         txt = ""
-        for var in ( "x", "y", "ancho", "alto", "angulo", "orden" ):
+        for var in ("x", "y", "ancho", "alto", "angulo", "orden"):
             txt += "%s : %s\n" % (var, str(getattr(self, var)))
         return txt
 
@@ -32,7 +32,7 @@ class TipoLetra:
         cursiva = 1 if self.siCursiva else 0
         subrayado = 1 if self.siSubrayado else 0
         tachado = 1 if self.siTachado else 0
-        return "%s,%d,-1,5,%d,%d,%d,%d,0,0" % ( self.nombre, self.puntos, self.peso, cursiva, subrayado, tachado )
+        return "%s,%d,-1,5,%d,%d,%d,%d,0,0" % (self.nombre, self.puntos, self.peso, cursiva, subrayado, tachado)
 
     def copia(self):
         t = TipoLetra(self.nombre, self.puntos, self.peso, self.siCursiva, self.siSubrayado, self.siTachado)
@@ -43,8 +43,8 @@ class Bloque:
         self.siMovible = False
         for num, dato in enumerate(self.liVars):
             var, tipo, ini = dato
-            exec ( "self.%s=ini" % var )
-            self.liVars[num] = ( var, tipo )
+            exec ("self.%s=ini" % var)
+            self.liVars[num] = (var, tipo)
 
     def tipoqt(self):
         return {1: QtCore.Qt.SolidLine, 2: QtCore.Qt.DashLine, 3: QtCore.Qt.DotLine,
@@ -60,12 +60,12 @@ class Bloque:
 class Texto(Bloque):
     def __init__(self):
         self.liVars = [
-            ( "tipoLetra", "o", TipoLetra() ),
-            ( "posicion", "o", Posicion(0, 0, 80, 16, 0)),
-            ( "alineacion", "t", "i" ),
-            ( "colorTexto", "n", 0 ),
-            ( "colorFondo", "n", 0xFFFFFF ),
-            ( "valor", "tn", "")
+            ("tipoLetra", "o", TipoLetra()),
+            ("posicion", "o", Posicion(0, 0, 80, 16, 0)),
+            ("alineacion", "t", "i"),
+            ("colorTexto", "n", 0),
+            ("colorFondo", "n", 0xFFFFFF),
+            ("valor", "tn", "")
         ]
         Bloque.__init__(self)
 
@@ -82,8 +82,8 @@ class Texto(Bloque):
 class Imagen(Bloque):
     def __init__(self):
         self.liVars = [
-            ( "posicion", "o", Posicion(0, 0, 80, 80, 0) ),
-            ( "pixmap", "t", None ),
+            ("posicion", "o", Posicion(0, 0, 80, 80, 0)),
+            ("pixmap", "t", None),
         ]
         Bloque.__init__(self)
 
@@ -96,12 +96,12 @@ class Imagen(Bloque):
 class Caja(Bloque):
     def __init__(self):
         self.liVars = [
-            ( "posicion", "o", Posicion(0, 0, 80, 80, 0) ),
-            ( "color", "n", 0 ),
-            ( "colorRelleno", "n", -1 ),
-            ( "grosor", "n", 1 ),
-            ( "redEsquina", "n", 0 ),
-            ( "tipo", "n", 1 ),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine, 0=NoPen
+            ("posicion", "o", Posicion(0, 0, 80, 80, 0)),
+            ("color", "n", 0),
+            ("colorRelleno", "n", -1),
+            ("grosor", "n", 1),
+            ("redEsquina", "n", 0),
+            ("tipo", "n", 1),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine, 0=NoPen
         ]
         Bloque.__init__(self)
 
@@ -118,46 +118,46 @@ class Caja(Bloque):
 class Circulo(Bloque):
     def __init__(self):
         self.liVars = [
-            ( "posicion", "o", Posicion(0, 0, 80, 80, 0) ),
-            ( "color", "n", 0 ),
-            ( "colorRelleno", "n", -1 ),
-            ( "grosor", "n", 1 ),
-            ( "grados", "n", 0 ),
-            ( "tipo", "n", 1 ),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine, 0=Sin borde
+            ("posicion", "o", Posicion(0, 0, 80, 80, 0)),
+            ("color", "n", 0),
+            ("colorRelleno", "n", -1),
+            ("grosor", "n", 1),
+            ("grados", "n", 0),
+            ("tipo", "n", 1),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine, 0=Sin borde
         ]
         Bloque.__init__(self)
 
 class Pieza(Bloque):
     def __init__(self):
         self.liVars = [
-            ( "posicion", "o", Posicion(0, 0, 80, 1, 0) ),
-            ( "pieza", "t", "p" ),
-            ( "fila", "n", 1 ),
-            ( "columna", "n", 1 ),
+            ("posicion", "o", Posicion(0, 0, 80, 1, 0)),
+            ("pieza", "t", "p"),
+            ("fila", "n", 1),
+            ("columna", "n", 1),
         ]
         Bloque.__init__(self)
 
 class Flecha(Bloque):
     def __init__(self):
         self.liVars = [
-            ( "posicion", "o", Posicion(0, 0, 80, 1, 0) ),
-            ( "a1h8", "c", "a1h8" ),
-            ( "grosor", "n", 1 ),  # ancho del trazo
-            ( "altocabeza", "n", 15 ),  # alto de la cabeza
-            ( "tipo", "n", 1 ),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine
-            ( "destino", "t", "c" ),  # c = centro, m = minimo
-            ( "anchoCasilla", "n", 1 ),
-            ( "color", "n", 0 ),
-            ( "colorinterior", "n", -1 ),  # si es cerrada
-            ( "colorinterior2", "n", -1 ),  # para el gradiente
-            ( "opacidad", "n", 1.0 ),
-            ( "redondeos", "l", False ),
-            ( "forma", "t", "a" ),
+            ("posicion", "o", Posicion(0, 0, 80, 1, 0)),
+            ("a1h8", "c", "a1h8"),
+            ("grosor", "n", 1),  # ancho del trazo
+            ("altocabeza", "n", 15),  # alto de la cabeza
+            ("tipo", "n", 1),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine
+            ("destino", "t", "c"),  # c = centro, m = minimo
+            ("anchoCasilla", "n", 1),
+            ("color", "n", 0),
+            ("colorinterior", "n", -1),  # si es cerrada
+            ("colorinterior2", "n", -1),  # para el gradiente
+            ("opacidad", "n", 1.0),
+            ("redondeos", "l", False),
+            ("forma", "t", "a"),
             # a = abierta -> , c = cerrada la cabeza, 1 = poligono cuadrado, 2 = poligono 1 punto base, 3 = poligono 1 punto base cabeza
-            ( "ancho", "n", 10 ),  # ancho de la base de la flecha si es un poligono
-            ( "vuelo", "n", 5 ),  # ancho adicional en la base
-            ( "descuelgue", "n", 2 ),  # angulo de la base de la cabeza
-            ( "png", "c", "" )  # png para usar como boton
+            ("ancho", "n", 10),  # ancho de la base de la flecha si es un poligono
+            ("vuelo", "n", 5),  # ancho adicional en la base
+            ("descuelgue", "n", 2),  # angulo de la base de la cabeza
+            ("png", "c", "")  # png para usar como boton
         ]
         Bloque.__init__(self)
 
@@ -185,17 +185,17 @@ class Flecha(Bloque):
 class Marco(Bloque):
     def __init__(self):
         self.liVars = [
-            ( "posicion", "o", Posicion(0, 0, 80, 80, 0) ),
-            ( "a1h8", "c", "a1h8" ),
-            ( "color", "n", 0 ),
-            ( "colorinterior", "n", -1 ),
-            ( "colorinterior2", "n", -1 ),  # para el gradiente
-            ( "grosor", "n", 1 ),
-            ( "redEsquina", "n", 0 ),
-            ( "tipo", "n", 1 ),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine, 0=Sin borde
-            ( "opacidad", "n", 1.0 ),
-            ( "anchoCasilla", "n", 1 ),
-            ( "png", "c", "" )  # png para usar como boton
+            ("posicion", "o", Posicion(0, 0, 80, 80, 0)),
+            ("a1h8", "c", "a1h8"),
+            ("color", "n", 0),
+            ("colorinterior", "n", -1),
+            ("colorinterior2", "n", -1),  # para el gradiente
+            ("grosor", "n", 1),
+            ("redEsquina", "n", 0),
+            ("tipo", "n", 1),  # 1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine, 0=Sin borde
+            ("opacidad", "n", 1.0),
+            ("anchoCasilla", "n", 1),
+            ("png", "c", "")  # png para usar como boton
         ]
         Bloque.__init__(self)
 
@@ -203,14 +203,14 @@ class SVG(Bloque):
     def __init__(self):
         # orden por debajo de las piezas
         self.liVars = [
-            ( "posicion", "o", Posicion(0, 0, 80, 80, 0, 9) ),
-            ( "fa1h8", "c", "0.0,0.0,0.0,0.0" ),
+            ("posicion", "o", Posicion(0, 0, 80, 80, 0, 9)),
+            ("fa1h8", "c", "0.0,0.0,0.0,0.0"),
             # se indica en unidades de ancho de casilla, podra tener valores negativos para que se pueda mover fuera de pantalla
-            ( "xml", "c", "" ),
-            ( "opacidad", "n", 1.0 ),
-            ( "anchoCasilla", "n", 1 ),
-            ( "psize", "n", 100 ),  # ajustetama_o
-            ( "png", "c", "" )  # png para usar como boton
+            ("xml", "c", ""),
+            ("opacidad", "n", 1.0),
+            ("anchoCasilla", "n", 1),
+            ("psize", "n", 100),  # ajustetama_o
+            ("png", "c", "")  # png para usar como boton
         ]
         Bloque.__init__(self)
 
@@ -218,15 +218,14 @@ class Marker(Bloque):
     def __init__(self):
         # orden por debajo de las piezas
         self.liVars = [
-            ( "posicion", "o", Posicion(0, 0, 80, 80, 0, 9) ),
-            ( "fa1h8", "c", "0.0,0.0,0.0,0.0" ),
+            ("posicion", "o", Posicion(0, 0, 80, 80, 0, 9)),
+            ("fa1h8", "c", "0.0,0.0,0.0,0.0"),
             # se indica en unidades de ancho de casilla, podra tener valores negativos para que se pueda mover fuera de pantalla
-            ( "xml", "c", "" ),
-            ( "opacidad", "n", 1.0 ),
-            ( "anchoCasilla", "n", 1 ),
-            ( "psize", "n", 100 ),  # % ajustetama_o
-            ( "poscelda", "n", 1 ),  # 0 = Up-Left 1 = Up-Right 2 = Down-Right 3 = Down-Left
-            ( "png", "c", "" )  # png para usar como boton
+            ("xml", "c", ""),
+            ("opacidad", "n", 1.0),
+            ("anchoCasilla", "n", 1),
+            ("psize", "n", 100),  # % ajustetama_o
+            ("poscelda", "n", 1),  # 0 = Up-Left 1 = Up-Right 2 = Down-Right 3 = Down-Left
+            ("png", "c", "")  # png para usar como boton
         ]
         Bloque.__init__(self)
-

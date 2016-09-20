@@ -1,16 +1,16 @@
 import time
 
+from Code import ControlPosicion
+from Code import Gestor
+from Code import Jugada
+from Code import PGN
+from Code.QT import DatosNueva
+from Code.QT import Iconos
+from Code.QT import PantallaGM
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
 from Code.Constantes import *
-import Code.ControlPosicion as ControlPosicion
-import Code.Jugada as Jugada
-import Code.PGN as PGN
-import Code.Gestor as Gestor
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaGM as PantallaGM
-import Code.QT.DatosNueva as DatosNueva
-import Code.QT.Iconos as Iconos
 
 class GestorEntTac(Gestor.Gestor):
     def inicio(self, tactica, posSiguiente=None):
@@ -57,9 +57,9 @@ class GestorEntTac(Gestor.Gestor):
             if nli >= 3:
                 solucion = li[2]
                 if solucion:
-                    self.dicDirigidoFen = PGN.leeEntDirigido(fenInicial, solucion)
+                    self.dicDirigidoFenM2 = PGN.leeEntDirigidoM2(fenInicial, solucion)
 
-                ## Partida original
+                # Partida original
                 if nli >= 4:
                     pgn = PGN.UnPGN()
                     if nli > 4:
@@ -168,15 +168,15 @@ class GestorEntTac(Gestor.Gestor):
 
     def ponSiguiente(self):
         if self.posSiguiente == self.numPosiciones:
-            txt = "%s: <big>%s</big>" % (_("Next"), _("Endgame") )
+            txt = "%s: <big>%s</big>" % (_("Next"), _("Endgame"))
             color = "DarkMagenta"
         else:
             txt = "%s: %d" % (_("Next"), self.posSiguiente + 1)
             color = "red" if self.posSiguiente <= self.posActual else "blue"
 
         self.ponRotulo2(
-            '<table border="1" with="100%%" align="center" cellpadding="5" cellspacing="0"><tr><td  align="center"><h4>%s: %d/%d<br><font color="%s">%s</font></h4></td></tr></table>' % (
-                _("Current position"), self.posActual + 1, self.numPosiciones, color, txt))
+                '<table border="1" with="100%%" align="center" cellpadding="5" cellspacing="0"><tr><td  align="center"><h4>%s: %d/%d<br><font color="%s">%s</font></h4></td></tr></table>' % (
+                    _("Current position"), self.posActual + 1, self.numPosiciones, color, txt))
 
     def ponPenalizacion(self):
 
@@ -226,7 +226,7 @@ class GestorEntTac(Gestor.Gestor):
             Gestor.Gestor.rutinaAccionDef(self, clave)
 
     def controlTeclado(self, nkey):
-        if nkey in ( 43, 16777239 ):  # pulsado + o avpag
+        if nkey in (43, 16777239):  # pulsado + o avpag
             if self.estado == kFinJuego:
                 self.ent_siguiente()
         elif nkey == 80:
@@ -281,10 +281,10 @@ class GestorEntTac(Gestor.Gestor):
         siRival = siBlancas == self.siRivalConBlancas
 
         if siRival:
-            fen = self.partida.ultPosicion.fen()
+            fenM2 = self.partida.ultPosicion.fenM2()
             siPiensaRival = False
-            if fen in self.dicDirigidoFen:
-                liOpciones = self.dicDirigidoFen[fen]
+            if fenM2 in self.dicDirigidoFenM2:
+                liOpciones = self.dicDirigidoFenM2[fenM2]
                 if liOpciones:
                     liJugadas = []
                     siEncontradoMain = False
@@ -329,8 +329,8 @@ class GestorEntTac(Gestor.Gestor):
         else:
 
             if not self.siSeguirJugando:
-                fen = self.partida.ultPosicion.fen()
-                if fen not in self.dicDirigidoFen:
+                fenM2 = self.partida.ultPosicion.fenM2()
+                if fenM2 not in self.dicDirigidoFenM2:
                     return self.finLinea()
 
             self.siJuegaHumano = True
@@ -347,7 +347,7 @@ class GestorEntTac(Gestor.Gestor):
 
         liOpciones = [k_mainmenu, k_reiniciar, k_cambiar]
 
-        if not ( self.siTerminada() and len(self.liVariantes) == 0 ):
+        if not (self.siTerminada() and len(self.liVariantes) == 0):
             liOpciones.append(k_variantes)
 
         if not self.siShowText:
@@ -369,35 +369,15 @@ class GestorEntTac(Gestor.Gestor):
         return
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-        if desde == hasta:
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
-            return False
+        movimiento = jg.movimiento()
 
-        movimiento = desde + hasta
-
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
-        if coronacion:
-            movimiento += coronacion
-
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-        if not siBien:
-            self.ponPosicion(self.partida.ultPosicion)
-            self.sigueHumano()
-            return False
-
-        fen = self.partida.ultPosicion.fen()
-        if fen in self.dicDirigidoFen:
-            liOpciones = self.dicDirigidoFen[fen]
+        fenM2 = self.partida.ultPosicion.fenM2()
+        if fenM2 in self.dicDirigidoFenM2:
+            liOpciones = self.dicDirigidoFenM2[fenM2]
             if len(liOpciones) > 1:
                 self.guardaVariantes()
             liMovs = []
@@ -446,7 +426,7 @@ class GestorEntTac(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
 
         resp = self.partida.si3repetidas()
         if resp:
@@ -480,8 +460,8 @@ class GestorEntTac(Gestor.Gestor):
                 self.siAnalizadoTutor = False
             else:
 
-                fen = self.partida.ultPosicion.fen()
-                if not ( fen in self.dicDirigidoFen ):
+                fenM2 = self.partida.ultPosicion.fenM2()
+                if not (fenM2 in self.dicDirigidoFenM2):
                     self.analizaTutor()  # Que analice antes de activar humano, para que no tenga que esperar
                     self.siAnalizadoTutor = True
 
@@ -540,7 +520,7 @@ class GestorEntTac(Gestor.Gestor):
         njug = self.partida.numJugadas()
         siBlancas = self.partida.siBlancas()
         if njug:
-            jg = self.partida.liJugadas[-1]
+            jg = self.partida.last_jg()
             numj = self.partida.primeraJugada() + (njug + 1) / 2 - 1
             titulo = "%d." % numj
             if siBlancas:
@@ -552,20 +532,20 @@ class GestorEntTac(Gestor.Gestor):
         for tit, txtp, siBlancas in self.liVariantes:
             if titulo == tit:
                 return
-        self.liVariantes.append((titulo, self.partida.guardaEnTexto(), siBlancas ))
+        self.liVariantes.append((titulo, self.partida.guardaEnTexto(), siBlancas))
 
     def compruebaComentarios(self):
         if not self.partida.liJugadas:
             return
-        fen = self.partida.ultPosicion.fen()
-        if fen not in self.dicDirigidoFen:
+        fenM2 = self.partida.ultPosicion.fenM2()
+        if fenM2 not in self.dicDirigidoFenM2:
             return
-        jg = self.partida.liJugadas[-1]
+        jg = self.partida.last_jg()
         mv = jg.movimiento()
-        fen = jg.posicion.fen()
-        for k, liOpciones in self.dicDirigidoFen.iteritems():
+        fenM2 = jg.posicion.fenM2()
+        for k, liOpciones in self.dicDirigidoFenM2.iteritems():
             for siMain, jg1 in liOpciones:
-                if jg1.posicion.fen() == fen and jg1.movimiento() == mv:
+                if jg1.posicion.fenM2() == fenM2 and jg1.movimiento() == mv:
                     if jg1.critica and not jg.critica:
                         jg.critica = jg1.critica
                     if jg1.comentario and not jg.comentario:
@@ -573,4 +553,3 @@ class GestorEntTac(Gestor.Gestor):
                     if jg1.variantes and not jg.variantes:
                         jg.variantes = jg1.variantes
                     break
-

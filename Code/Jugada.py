@@ -1,8 +1,8 @@
 import cPickle
 
-import Code.VarGen as VarGen
-import Code.ControlPosicion as ControlPosicion
-import Code.TrListas as TrListas
+from Code import ControlPosicion
+from Code import TrListas
+from Code import VarGen
 
 NOABANDONO, ABANDONO, ABANDONORIVAL = "N", "S", "R"
 
@@ -30,7 +30,7 @@ class Jugada:
         self.siAbandono = NOABANDONO
         self.siDesconocido = False  # Si ha sido una terminacion de partida, por causas desconocidas
         self.pgnBase = posicionBase.pgn(desde, hasta, coronacion)
-        self.liMovs = [( "b", hasta ), ( "m", desde, hasta )]
+        self.liMovs = [("b", hasta), ("m", desde, hasta)]
         if self.posicion.liExtras:
             self.liMovs.extend(self.posicion.liExtras)
 
@@ -116,7 +116,10 @@ class Jugada:
 
     def etiquetaSP(self):
         p = self.posicionBase
-        return "%d.%s %s" % (p.jugadas, "" if p.siBlancas else "...", self.pgnSP() )
+        return "%d.%s %s" % (p.jugadas, "" if p.siBlancas else "...", self.pgnSP())
+
+    def numMove(self):
+        return self.posicionBase.jugadas
 
     def listaSonidos(self):
         pgn = self.pgnBase
@@ -138,7 +141,7 @@ class Jugada:
             liInicial = list(pgn)
             if liInicial and liInicial[-1] == "x":
                 liInicial.append(self.posicionBase.casillas[self.hasta])
-            if (not liInicial) or ( not liInicial[0].isupper() ):
+            if (not liInicial) or (not liInicial[0].isupper()):
                 liInicial.insert(0, "P")
         if self.siJaqueMate:
             liFinal.append("#")
@@ -268,7 +271,7 @@ class Jugada:
         if len(li) > 20:
             self.siTablasAcuerdo = xL(20)
 
-        self.liMovs = [( "b", self.hasta ), ( "m", self.desde, self.hasta )]
+        self.liMovs = [("b", self.hasta), ("m", self.desde, self.hasta)]
         if self.posicion.liExtras:
             self.liMovs.extend(self.posicion.liExtras)
 
@@ -290,7 +293,7 @@ class Jugada:
             mas = "Tablas por acuerdo"
         else:
             mas = ""
-        return "%s %s %s: %s" % ( self.desde, self.hasta, mas, self.posicion.fen() )
+        return "%s %s %s: %s" % (self.desde, self.hasta, mas, self.posicion.fen())
 
     def borraVariantesLC(self):
         li = self.variantes.split("\n\n")
@@ -318,9 +321,9 @@ class Jugada:
                 t = t.rstrip("0")
                 if t[-1] == ".":
                     t = t[:-1]
-                etiT = "%s %s" % ( _("Second(s)"), t )
+                etiT = "%s %s" % (_("Second(s)"), t)
             elif mrm.maxProfundidad:
-                etiT = "%s %d" % ( _("Depth"), mrm.maxProfundidad )
+                etiT = "%s %d" % (_("Depth"), mrm.maxProfundidad)
             else:
                 etiT = ""
             etiT = " " + nombre + " " + etiT
@@ -351,8 +354,7 @@ class Jugada:
         n = 1 if self.posicionBase.siBlancas else 2
         if siUnMove:
             li = li[:n]
-        variante = (" ".join(li[:n]) + comentario + " ".join(li[n:])).replace("\n", " ").replace("\r", "").replace("  ",
-                                                                                                                   " ").strip()
+        variante = (" ".join(li[:n]) + comentario + " ".join(li[n:])).replace("\n", " ").replace("\r", "").replace("  ", " ").strip()
         variantes = self.variantes
         if variantes:
             if variante in variantes:  # Sin repetidos
@@ -362,7 +364,7 @@ class Jugada:
             variantes = variante
         self.variantes = variantes
 
-    def borraCV( self ):
+    def borraCV(self):
         self.variantes = ""
         self.comentario = ""
         self.critica = ""

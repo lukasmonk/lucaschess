@@ -1,17 +1,18 @@
 import atexit
-import sqlite3
 import os
+import sqlite3
 
-import Code.VarGen as VarGen
-import Code.ControlPosicion as ControlPosicion
-import Code.AperturasStd as AperturasStd
-import Code.Movimientos as Movimientos
-import Code.Books as Books
-import Code.Util as Util
-import Code.PGNreader as PGNreader
+import LCEngine
+
+from Code import AperturasStd
+from Code import Books
+from Code import ControlPosicion
+from Code import PGNreader
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
 import Code.SQL.DBF as SQLDBF
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
+from Code import Util
+from Code import VarGen
 
 class UnMove:
     def __init__(self, bookGuide, father):
@@ -35,7 +36,7 @@ class UnMove:
 
         if father:
             self._siBlancas = not father.siBlancas()
-            self._numJugada = father.numJugada() + ( 1 if self._siBlancas else 0 )
+            self._numJugada = father.numJugada() + (1 if self._siBlancas else 0)
         else:  # root
             self._siBlancas = False
             self._numJugada = 0
@@ -232,7 +233,7 @@ class UnMove:
         return li
 
     def allPV(self):
-        return Movimientos.xpv2pv(self._xpv)
+        return LCEngine.xpv2pv(self._xpv)
 
     def allPGN(self):
         li = []
@@ -427,7 +428,7 @@ class BookGuide:
             cp.posInicial()
             for pos, pv in enumerate(liPV):
                 desde, hasta, coronacion = pv[:2], pv[2:4], pv[4:]
-                seq = seqFather + Movimientos.pv2xpv(pv)
+                seq = seqFather + LCEngine.pv2xpv(pv)
                 cp.mover(desde, hasta, coronacion)
 
                 if seq not in dRegs:
@@ -461,7 +462,8 @@ class BookGuide:
 
     def creaTabla(self):
         cursor = self.conexion.cursor()
-        sql = "CREATE TABLE %s( XPV TEXT UNIQUE,PV VARCHAR(5),NAG INTEGER,ADV INTEGER,COMMENT TEXT,FEN VARCHAR,MARK VARCHAR, POS INTEGER,GRAPHICS TEXT,XDATA BLOB);" % self.tablaDatos
+        sql = ("CREATE TABLE %s( XPV TEXT UNIQUE,PV VARCHAR(5),NAG INTEGER,ADV INTEGER,COMMENT TEXT,"
+               "FEN VARCHAR,MARK VARCHAR, POS INTEGER,GRAPHICS TEXT,XDATA BLOB);") % self.tablaDatos
         cursor.execute(sql)
         self.conexion.commit()
         cursor.close()
@@ -490,7 +492,7 @@ class BookGuide:
         dbf = SQLDBF.DBF(self.conexion, self.tablaDatos, select)
         dnag = {"!!": 3, "!": 1, "?": 2, "??": 4, "!?": 5, "?!": 6}
 
-        for n, g in enumerate(PGNreader.readGames(ficheroPGN, siFast=False)):
+        for n, g in enumerate(PGNreader.readGames(ficheroPGN)):
 
             if not dlTmp.actualiza(n + 1, erroneos, duplicados, importados):
                 break
@@ -509,7 +511,7 @@ class BookGuide:
                         break
                     seqM1 = seq
                     pv = mv.pv
-                    seq += Movimientos.pv2xpv(pv)
+                    seq += LCEngine.pv2xpv(pv)
                     reg = SQLDBF.Almacen()
                     reg.PV = pv
                     reg.XPV = seq
@@ -581,7 +583,7 @@ class BookGuide:
                 reg = SQLDBF.Almacen()
                 lireg.append(reg)
                 reg.PV = pv
-                seqN = seq + Movimientos.pv2xpv(pv)
+                seqN = seq + LCEngine.pv2xpv(pv)
                 reg.XPV = seqN
                 reg.COMMENT = ""
                 reg.NAG = 0
@@ -723,7 +725,7 @@ class BookGuide:
             li = cursor.fetchone()
             if li:
                 rowidTo = li[0]
-                sql = "DELETE FROM %s WHERE rowid = %d" % ( nameTo, rowidTo )
+                sql = "DELETE FROM %s WHERE rowid = %d" % (nameTo, rowidTo)
                 cursor.execute(sql)
             sql = "INSERT INTO %s SELECT * FROM %s WHERE %s.ROWID = %d;" % (nameTo, nameFrom, nameFrom, rowid)
             cursor.execute(sql)
@@ -782,15 +784,15 @@ class BookGuide:
             reg.GRAPHICS = uno.graphics()
             reg.XDATA = Util.var2blob(uno.xdata())
             if uno.rowid() is None:
-                id = dbf.insertarSoloReg(reg)
-                uno.rowid(id)
+                xid = dbf.insertarSoloReg(reg)
+                uno.rowid(xid)
             else:
                 dbf.modificarROWID(uno.rowid(), reg)
         dbf.cerrar()
 
     def dameMovimiento(self, father, pv):
         mv = UnMove(self, father)
-        xpv = father.xpv() + Movimientos.pv2xpv(pv)
+        xpv = father.xpv() + LCEngine.pv2xpv(pv)
         mv.xpv(xpv)
         mv.pv(pv)
         cp = ControlPosicion.ControlPosicion()
@@ -936,4 +938,3 @@ class DBanalisis:
                 numActivo -= 1
         dic["ACTIVO"] = numActivo
         self.db[fenM2] = dic
-

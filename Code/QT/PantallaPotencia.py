@@ -1,29 +1,29 @@
+import atexit
+import base64
+import datetime
 import random
 import time
-import atexit
-import datetime
-import base64
 
 from PyQt4 import QtGui, QtCore
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.Jugada as Jugada
-import Code.Partida as Partida
-import Code.Analisis as Analisis
-import Code.SQL.Base as Base
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.FormLayout as FormLayout
-import Code.QT.Tablero as Tablero
+from Code import Analisis
+from Code import ControlPosicion
+from Code import Jugada
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code.SQL import Base
+from Code import Util
+from Code import VarGen
 
-def lee1LineaMFN(linea):
+def lee_1_linea_mfn(linea):
     cabs, pv, jugada = linea.strip().split("||")
     dic = Util.SymbolDict()
     for x in cabs.split("|"):
@@ -42,25 +42,25 @@ def lee1LineaMFN(linea):
     info = "<b>%s - %s (%s)</b>    %s (%s) " % (white, black, result, event, date,)
     return p, dic, info, int(jugada), linea
 
-def leeLineaMFN():
-    npos = random.randint(0, 2999)
+def lee_linea_mfn():
+    npos = random.randint(0, 9999)
     with open("./IntFiles/games.mfn") as f:
         for num, linea in enumerate(f):
             if num == npos:
-                return lee1LineaMFN(linea)
+                return lee_1_linea_mfn(linea)
 
-def leeVariasLineasMFN(nlineas): # PantallaDailyTest
-    liPos = random.sample(range(0,2999),nlineas)
-    liFEN = []
+def lee_varias_lineas_mfn(nlineas):  # PantallaDailyTest
+    lipos = random.sample(range(0, 9999), nlineas)
+    lifen = []
     with open("./IntFiles/games.mfn") as f:
         for num, linea in enumerate(f):
-            if num in liPos:
+            if num in lipos:
                 cabs, pv, jugada = linea.strip().split("||")
                 p = Partida.Partida()
                 p.leerPV(pv)
                 fen = p.jugada(int(jugada)).posicion.fen()
-                liFEN.append(fen)
-    return liFEN
+                lifen.append(fen)
+    return lifen
 
 class PotenciaHistorico:
     def __init__(self, fichero):
@@ -69,7 +69,7 @@ class PotenciaHistorico:
         self.tabla = "datos"
 
         if not self.db.existeTabla(self.tabla):
-            self.creaTabla()
+            self.crea_tabla()
 
         self.dbf = self.db.dbf(self.tabla, "REF,FECHA,SCORE,MOTOR,SEGUNDOS,MIN_MIN,MIN_MAX,LINE", orden="FECHA DESC")
 
@@ -85,7 +85,7 @@ class PotenciaHistorico:
             self.dbf = None
         self.db.cerrar()
 
-    def creaTabla(self):
+    def crea_tabla(self):
         tb = Base.TablaBase(self.tabla)
         tb.nuevoCampo("FECHA", "VARCHAR", notNull=True, primaryKey=True)
         tb.nuevoCampo("REF", "INTEGER")
@@ -104,7 +104,7 @@ class PotenciaHistorico:
     def goto(self, num):
         self.dbf.goto(num)
 
-    def ponOrden(self, clave):
+    def pon_orden(self, clave):
         nat, orden = self.orden
         if clave == nat:
             orden = "DESC" if orden == "ASC" else "ASC"
@@ -117,10 +117,12 @@ class PotenciaHistorico:
         self.dbf.leer()
         self.dbf.gotop()
 
-    def fecha2txt(self, fecha):
+    @staticmethod
+    def fecha2txt(fecha):
         return "%4d%02d%02d%02d%02d%02d" % (fecha.year, fecha.month, fecha.day, fecha.hour, fecha.minute, fecha.second)
 
-    def txt2fecha(self, txt):
+    @staticmethod
+    def txt2fecha(txt):
         def x(d, h): return int(txt[d:h])
 
         year = x(0, 4)
@@ -131,8 +133,6 @@ class PotenciaHistorico:
         second = x(12, 14)
         fecha = datetime.datetime(year, month, day, hour, minute, second)
         return fecha
-
-        self.dbf = self.db.dbf(self.tabla, "", orden="fecha desc")
 
     def append(self, fecha, score, motor, segundos, min_min, min_max, linea, ref):
 
@@ -159,8 +159,8 @@ class PotenciaHistorico:
         reg.FECHA = self.txt2fecha(reg.FECHA)
         return reg
 
-    def borrarLista(self, liNum):
-        self.dbf.borrarLista(liNum)
+    def borrar_lista(self, linum):
+        self.dbf.borrarLista(linum)
         self.dbf.pack()
         self.dbf.leer()
 
@@ -170,31 +170,31 @@ class EDCelda(Controles.ED):
         Controles.ED.focusOutEvent(self, event)
 
 class WEdMove(QtGui.QWidget):
-    def __init__(self, owner, conj_piezas, siBlancas):
+    def __init__(self, owner, conj_piezas, si_blancas):
         QtGui.QWidget.__init__(self)
 
         self.owner = owner
 
         self.conj_piezas = conj_piezas
 
-        self.filaPromocion = (7, 8) if siBlancas else (2, 1)
+        self.filaPromocion = (7, 8) if si_blancas else (2, 1)
 
-        self.menuPromocion = self.creaMenuPiezas("QRBN ", siBlancas)
+        self.menuPromocion = self.creaMenuPiezas("QRBN ", si_blancas)
 
         self.promocion = " "
 
         self.origen = EDCelda(self, "").caracteres(2).controlrx("(|[a-h][1-8])").anchoFijo(
-            24).alinCentrado().capturaCambiado(self.miraPromocion)
+                24).alinCentrado().capturaCambiado(self.miraPromocion)
 
         self.flecha = flecha = Controles.LB(self).ponImagen(Iconos.pmMover())
 
         self.destino = EDCelda(self, "").caracteres(2).controlrx("(|[a-h][1-8])").anchoFijo(
-            24).alinCentrado().capturaCambiado(self.miraPromocion)
+                24).alinCentrado().capturaCambiado(self.miraPromocion)
 
         self.pbPromocion = Controles.PB(self, "", self.pulsadoPromocion, plano=False).anchoFijo(24)
 
         ly = Colocacion.H().relleno().control(self.origen).espacio(2).control(flecha).espacio(2).control(
-            self.destino).control(self.pbPromocion).margen(0).relleno()
+                self.destino).control(self.pbPromocion).margen(0).relleno()
         self.setLayout(ly)
 
         self.miraPromocion()
@@ -288,7 +288,7 @@ class WBlqMove(QtGui.QWidget):
         self.cancelar = Controles.LB(self, "").ponImagen(Iconos.pmCancelarPeque())
         self.aceptar = Controles.LB(self, "").ponImagen(Iconos.pmAceptarPeque())
         ly = Colocacion.H().control(self.aceptar).control(self.cancelar).control(self.wm).control(self.an).control(
-            self.ms).relleno().margen(0)
+                self.ms).relleno().margen(0)
         self.setLayout(ly)
 
         self.ms.hide()
@@ -319,7 +319,7 @@ class WBlqMove(QtGui.QWidget):
         return self.wm.resultado()
 
     def ponPuntos(self, puntos):
-        self.ms.ponTexto("%s: %d/100" % (_("Points"), puntos ))
+        self.ms.ponTexto("%s: %d/100" % (_("Points"), puntos))
         self.ms.show()
         self.an.show()
 
@@ -360,11 +360,11 @@ class WPotenciaBase(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), self.terminar ), None,
-            ( _("Remove"), Iconos.Borrar(), self.borrar ), None,
-            ( _("Configuration"), Iconos.Opciones(), self.configurar ), None,
-            ( _("Repeat"), Iconos.Pelicula_Repetir(), self.repetir ), None,
-            ( _("Start"), Iconos.Empezar(), self.empezar ),
+            (_("Close"), Iconos.MainMenu(), self.terminar), None,
+            (_("Start"), Iconos.Empezar(), self.empezar),
+            (_("Remove"), Iconos.Borrar(), self.borrar), None,
+            (_("Configuration"), Iconos.Opciones(), self.configurar), None,
+            (_("Repeat"), Iconos.Pelicula_Repetir(), self.repetir), None,
         )
         self.tb = Controles.TBrutina(self, liAcciones)
         # self.ponToolBar([self.terminar, self.empezar, self.repetir, self.configurar, self.borrar])
@@ -382,8 +382,8 @@ class WPotenciaBase(QTVarios.WDialogo):
 
     def gridDobleClickCabecera(self, grid, oColumna):
         clave = oColumna.clave
-        if clave in ( "FECHA", "SCORE", "REF" ):
-            self.historico.ponOrden(clave)
+        if clave in ("FECHA", "SCORE", "REF"):
+            self.historico.pon_orden(clave)
             self.ghistorico.gotop()
             self.ghistorico.refresh()
 
@@ -444,7 +444,7 @@ class WPotenciaBase(QTVarios.WDialogo):
         li = self.ghistorico.recnosSeleccionados()
         if len(li) > 0:
             if QTUtil2.pregunta(self, _("Do you want to delete all selected records?")):
-                self.historico.borrarLista(li)
+                self.historico.borrar_lista(li)
         self.ghistorico.gotop()
         self.ghistorico.refresh()
 
@@ -459,18 +459,18 @@ class WPotenciaBase(QTVarios.WDialogo):
         for nombre, clave in self.configuracion.comboMotoresMultiPV10():
             liCombo.append((clave, nombre))
 
-        liGen.append(( _("Engine") + ":", liCombo ))
+        liGen.append((_("Engine") + ":", liCombo))
 
         # # Segundos a pensar el tutor
         config = FormLayout.Spinbox(_("Duration of engine analysis (secs)"), 1, 99, 50)
-        liGen.append(( config, self.segundos ))
+        liGen.append((config, self.segundos))
 
-        ## Minutos
+        # Minutos
         config = FormLayout.Spinbox(_("Minimum minutes"), 0, 99, 50)
-        liGen.append(( config, self.min_min ))
+        liGen.append((config, self.min_min))
 
         config = FormLayout.Spinbox(_("Maximum minutes"), 0, 99, 50)
-        liGen.append(( config, self.min_max ))
+        liGen.append((config, self.min_max))
 
         # Editamos
         resultado = FormLayout.fedit(liGen, title=_("Configuration"), parent=self, icon=Iconos.Opciones())
@@ -510,8 +510,8 @@ class WPotencia(QTVarios.WDialogo):
 
         super(WPotencia, self).__init__(owner, _("Determine your calculating power"), Iconos.Potencia(), "potencia")
 
-        self.partida, self.dicPGN, info, self.jugadaInicial, self.linea = lee1LineaMFN(
-            linea) if linea else leeLineaMFN()
+        self.partida, self.dicPGN, info, self.jugadaInicial, self.linea = lee_1_linea_mfn(
+                linea) if linea else lee_linea_mfn()
         self.fen = self.partida.jugada(self.jugadaInicial).posicion.fen()
         self.ref = ref
 
@@ -557,9 +557,9 @@ class WPotencia(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), self.terminar ),
-            ( _("Cancel"), Iconos.Cancelar(), self.cancelar ),
-            ( _("Check"), Iconos.Check(), self.comprobar ),
+            (_("Close"), Iconos.MainMenu(), self.terminar),
+            (_("Cancel"), Iconos.Cancelar(), self.cancelar),
+            (_("Check"), Iconos.Check(), self.comprobar),
         )
         self.tb = Controles.TBrutina(self, liAcciones)
 
@@ -778,12 +778,12 @@ class WPotencia(QTVarios.WDialogo):
 
             enr = menr(cK, cQ)
             if enr:
-                mens += "  %s : %s" % ( color, enr )
+                mens += "  %s : %s" % (color, enr)
             enr = menr(cKR, cQR)
             if enr:
-                mens += " %s : %s" % ( colorR, enr )
+                mens += " %s : %s" % (colorR, enr)
         if cp.alPaso != "-":
-            mens += "     %s : %s" % ( _("En passant"), cp.alPaso )
+            mens += "     %s : %s" % (_("En passant"), cp.alPaso)
 
         if mens:
             mens = "<b>%s</b><br>" % mens

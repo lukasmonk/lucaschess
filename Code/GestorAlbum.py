@@ -1,11 +1,8 @@
+from Code import Albums
+from Code import Gestor
+from Code import Jugada
+from Code.QT import QTUtil2
 from Code.Constantes import *
-
-import Code.Jugada as Jugada
-import Code.Albums as Albums
-
-import Code.Gestor as Gestor
-
-import Code.QT.QTUtil2 as QTUtil2
 
 class GestorAlbum(Gestor.Gestor):
     def inicio(self, album, cromo, aplazamiento=None):
@@ -15,10 +12,7 @@ class GestorAlbum(Gestor.Gestor):
             cromo = aplazamiento["CROMO"]
             self.reinicio = aplazamiento
         else:
-            dic = {}
-            dic["ALBUM"] = album
-            dic["CROMO"] = cromo
-            self.reinicio = dic
+            self.reinicio = {"ALBUM": album, "CROMO": cromo}
 
         siBlancas = cromo.siBlancas
 
@@ -44,7 +38,7 @@ class GestorAlbum(Gestor.Gestor):
             self.listaAperturasStd.asignaApertura(self.partida)
 
         self.xrival = Albums.GestorMotorAlbum(self, self.cromo)
-        self.pantalla.ponToolBar(( k_rendirse, k_aplazar, k_configurar, k_utilidades ))
+        self.pantalla.ponToolBar((k_rendirse, k_aplazar, k_configurar, k_utilidades))
 
         self.pantalla.activaJuego(True, False, siAyudas=False)
         self.ponMensajero(self.mueveHumano)
@@ -58,7 +52,7 @@ class GestorAlbum(Gestor.Gestor):
         self.pgnRefresh(True)
         self.ponCapInfoPorDefecto()
 
-        #-Aplazamiento 2/2--------------------------------------------------
+        # -Aplazamiento 2/2--------------------------------------------------
         if aplazamiento:
             self.mueveJugada(kMoverFinal)
             self.siPrimeraJugadaHecha = True
@@ -137,7 +131,7 @@ class GestorAlbum(Gestor.Gestor):
         numJugadas = self.partida.numJugadas()
 
         if numJugadas > 0:
-            jgUltima = self.partida.liJugadas[-1]
+            jgUltima = self.partida.last_jg()
             if jgUltima:
                 if jgUltima.siJaqueMate:
                     self.ponResultado(kGanaRival if self.siJugamosConBlancas == siBlancas else kGanamos)
@@ -177,46 +171,19 @@ class GestorAlbum(Gestor.Gestor):
             self.activaColor(siBlancas)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
+        self.movimientosPiezas(jg.liMovs)
 
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-
-        if self.siTeclaPanico:
-            self.sigueHumano()
-            return False
-
-        if siBien:
-
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
-
-            self.movimientosPiezas(jg.liMovs)
-
-            self.partida.ultPosicion = jg.posicion
-            self.masJugada(jg, True)
-            self.error = ""
-            self.siguienteJugada()
-            return True
-        else:
-            self.sigueHumano()
-            self.error = mens
-            return False
+        self.partida.ultPosicion = jg.posicion
+        self.masJugada(jg, True)
+        self.error = ""
+        self.siguienteJugada()
+        return True
 
     def masJugada(self, jg, siNuestra):
-
         if not self.siPrimeraJugadaHecha:
             self.siPrimeraJugadaHecha = True
 
@@ -225,7 +192,7 @@ class GestorAlbum(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -288,7 +255,7 @@ class GestorAlbum(Gestor.Gestor):
             mensaje = _X(_("Congratulations you have a new sticker %1."), self.cromo.nombre)
             self.cromo.hecho = True
             self.album.guarda()
-            if self.album.compruebaTerminado():
+            if self.album.test_finished():
                 mensaje += "\n\n%s" % _("You have finished this album.")
                 nuevo = self.album.siguiente
                 if nuevo:
@@ -316,4 +283,4 @@ class GestorAlbum(Gestor.Gestor):
         self.guardarGanados(quien == kGanamos)
         QTUtil2.mensaje(self.pantalla, mensaje)
         self.ponFinJuego()
-        self.pantalla.ponToolBar(( k_mainmenu, k_configurar, k_utilidades ))
+        self.pantalla.ponToolBar((k_mainmenu, k_configurar, k_utilidades))

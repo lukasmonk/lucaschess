@@ -1,14 +1,14 @@
 from PyQt4 import QtGui, QtCore
 
-import Code.VarGen as VarGen
-import Code.ControlPosicion as ControlPosicion
-import Code.Jugada as Jugada
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Tablero as Tablero
-import Code.QT.Iconos as Iconos
-import Code.QT.FormLayout as FormLayout
+from Code import ControlPosicion
+from Code import Jugada
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import VarGen
 
 class LBPGN(Controles.LB):
     def mouseReleaseEvent(self, event):
@@ -58,16 +58,18 @@ class WInfomove(QtGui.QWidget):
 
         self.lbPGN = LBPGN("").anchoFijo(self.tablero.ancho).ponWrap()
         self.lbPGN.colocate = self.colocatePartida
+        self.lbPGN.setStyleSheet("QWidget { border-style: groove; border-width: 2px; border-color: LightSlateGray; padding: 8px;}")
+        self.lbPGN.ponTipoLetra(puntos=10)
 
         if siMoves:
             tree = winBookGuide.wmoves.tree
             # Valoracion
-            liOpciones = [( tit[0], k, tit[1] ) for k, tit in tree.dicValoracion.iteritems()]
+            liOpciones = [(tit[0], k, tit[1]) for k, tit in tree.dicValoracion.iteritems()]
             self.lbValoracion = Controles.LB(self, _("Rating") + ":")
             self.cbValoracion = Controles.CB(self, liOpciones, 0).capturaCambiado(self.cambiadoValoracion)
 
             # Ventaja
-            liOpciones = [( tit, k, icon ) for k, (tit, icon) in tree.dicVentaja.iteritems()]
+            liOpciones = [(tit, k, icon) for k, (tit, icon) in tree.dicVentaja.iteritems()]
             self.lbVentaja = Controles.LB(self, _("Advantage") + ":")
             self.cbVentaja = Controles.CB(self, liOpciones, 0).capturaCambiado(self.cambiadoVentaja)
 
@@ -77,6 +79,10 @@ class WInfomove(QtGui.QWidget):
             lyVal = Colocacion.H().control(self.lbValoracion).control(self.cbValoracion).relleno()
             lyVen = Colocacion.H().control(self.lbVentaja).control(self.cbVentaja).relleno()
             lyEd = Colocacion.V().otro(lyVal).otro(lyVen).control(self.emComentario)
+        else:
+            self.lbOpening = Controles.LB(self).alinCentrado().ponWrap()
+            self.lbOpening.ponTipoLetra(puntos=10, peso=200)
+            lyO = Colocacion.H().relleno().control(self.lbOpening).relleno()
 
         lyt = Colocacion.H().relleno().control(self.tablero).relleno()
 
@@ -85,6 +91,8 @@ class WInfomove(QtGui.QWidget):
         layout = Colocacion.V()
         layout.otro(lyt)
         layout.otro(lybt)
+        if not siMoves:
+            layout.otro(lyO)
         layout.otro(lya)
         if siMoves:
             layout.otro(lyEd)
@@ -105,6 +113,22 @@ class WInfomove(QtGui.QWidget):
     def modoPartida(self, partida, jugada):
         self.usoNormal = False
         self.partida = partida
+        if partida.apertura:
+            txt = partida.apertura.trNombre
+            if partida.pendienteApertura:
+                txt += " ..."
+            if not self.siMoves:
+                self.lbOpening.ponTexto(txt)
+        else:
+            if not self.siMoves:
+                self.lbOpening.ponTexto("")
+        self.colocatePartida(jugada)
+        self.camposEdicion(False)
+
+    def modoFEN(self, partida, fen, jugada):
+        self.usoNormal = False
+        self.partida = partida
+        self.lbOpening.ponTexto(fen)
         self.colocatePartida(jugada)
         self.camposEdicion(False)
 
@@ -156,7 +180,7 @@ class WInfomove(QtGui.QWidget):
             self.cbVentaja.setVisible(siVisible)
             self.emComentario.setVisible(siVisible)
 
-    def mueveHumano(self, desde, hasta):
+    def mueveHumano(self, desde, hasta, coronacion=""):
 
         if self.cpActual.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.cpActual.siBlancas)
@@ -208,7 +232,7 @@ class WInfomove(QtGui.QWidget):
                 xp = '<span style="color:blue">%s</span>' % xp
             li.append(xp)
         pgn = " ".join(li)
-        self.lbPGN.ponTexto("<center><b>%s</b></center>" % (pgn, ))
+        self.lbPGN.ponTexto(pgn)
 
     def colocatePartida(self, pos):
         if not self.partida.numJugadas():
@@ -224,28 +248,35 @@ class WInfomove(QtGui.QWidget):
 
         numJugada = p.primeraJugada()
         pgn = ""
+        style_number = "color:teal; font-weight: bold;"
+        style_moves = "color:black;"
+        style_select = "color:navy;font-weight: bold;"
         if p.siEmpiezaConNegras:
-            pgn += "%d... " % numJugada
+            pgn += '<span style="%s">%d...</span>' % (style_number, numJugada)
             numJugada += 1
             salta = 1
         else:
             salta = 0
         for n, jg in enumerate(p.liJugadas):
             if n % 2 == salta:
-                pgn += "%d." % numJugada
+                pgn += '<span style="%s">%d.</span>' % (style_number, numJugada)
                 numJugada += 1
 
             xp = jg.pgnSP()
             if n == pos:
-                xp = '<span style="color:blue">%s</span>' % xp
-            pgn += xp + " "
+                xp = '<span style="%s">%s </span>' % (style_select, xp)
+            else:
+                xp = '<span style="%s">%s </span>' % (style_moves, xp)
 
-        self.lbPGN.ponTexto("<center><b>%s</b></center>" % (pgn, ))
+            pgn += xp
 
-        if pos < 0:
-            return self.MoverInicio()
+        self.lbPGN.ponTexto(pgn)
 
         self.posJugada = pos
+
+        if pos < 0:
+            self.tablero.ponPosicion(self.partida.iniPosicion)
+            return
 
         jugada = self.partida.jugada(self.posJugada)
         posicion = jugada.posicion
@@ -256,6 +287,7 @@ class WInfomove(QtGui.QWidget):
         self.tablero.desactivaTodas()
 
     def MoverInicio(self):
+        self.colocatePartida(-1)
         if self.usoNormal:
             self.posHistoria = -1
             posicion = ControlPosicion.ControlPosicion().posInicial()
@@ -298,7 +330,7 @@ class WInfomove(QtGui.QWidget):
             if resp == "otro":
                 liGen = [(None, None)]
                 config = FormLayout.Editbox(_("Duration of interval (secs)"), 40, tipo=float)
-                liGen.append(( config, self.intervalo / 1000.0 ))
+                liGen.append((config, self.intervalo / 1000.0))
                 resultado = FormLayout.fedit(liGen, title=_("Interval"), parent=self, icon=Iconos.MoverTiempo())
                 if resultado is None:
                     return
@@ -310,8 +342,8 @@ class WInfomove(QtGui.QWidget):
                     return
 
             self.siReloj = True
-            if self.siMoves and (self.posHistoria >= len(self.historia) - 1):
-                self.MoverInicio()
+            # if self.siMoves and (self.posHistoria >= len(self.historia) - 1):
+            self.MoverInicio()
             self.lanzaReloj()
 
     def lanzaReloj(self):

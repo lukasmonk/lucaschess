@@ -2,29 +2,29 @@ import os
 
 from PyQt4 import QtGui
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.CPU as CPU
-import Code.ControlPosicion as ControlPosicion
-import Code.TabVisual as TabVisual
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Tablero as Tablero
-import Code.QT.QTVarios as QTVarios
-import Code.QT.PantallaTabVFlechas as PantallaTabVFlechas
-import Code.QT.PantallaTabVMarcos as PantallaTabVMarcos
-import Code.QT.PantallaTabVSVGs as PantallaTabVSVGs
-import Code.QT.PantallaTabVMarkers as PantallaTabVMarkers
-import Code.QT.PantallaTabVPartidas as PantallaTabVPartidas
-import Code.QT.PantallaPGN as PantallaPGN
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Delegados as Delegados
-import Code.QT.FormLayout as FormLayout
-import Code.QT.WinPosition as WinPosition
+from Code import CPU
+from Code import ControlPosicion
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaPGN
+from Code.QT import PantallaTabVFlechas
+from Code.QT import PantallaTabVMarcos
+from Code.QT import PantallaTabVMarkers
+from Code.QT import PantallaTabVPartidas
+from Code.QT import PantallaTabVSVGs
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import TabVisual
+from Code import Util
+from Code import VarGen
+from Code import XVoyager
 
 class WTabDirector(QTVarios.WDialogo):
     def __init__(self, tableroOwner):
@@ -37,15 +37,15 @@ class WTabDirector(QTVarios.WDialogo):
         extparam = "tabdirector"
         QTVarios.WDialogo.__init__(self, tableroOwner, titulo, icono, extparam)
 
-        liAcciones = [( _("Quit"), Iconos.MainMenu(), self.terminar ), None,
-                      ( _("Arrows"), Iconos.Flechas(), self.flechas ), None,
-                      ( _("Boxes"), Iconos.Marcos(), self.marcos ), None,
-                      ( _("Images"), Iconos.SVGs(), self.svgs ), None,
-                      ( _("Markers"), Iconos.Markers(), self.markers ), None,
+        liAcciones = [(_("Close"), Iconos.MainMenu(), self.terminar), None,
+                      (_("Arrows"), Iconos.Flechas(), self.flechas), None,
+                      (_("Boxes"), Iconos.Marcos(), self.marcos), None,
+                      (_("Images"), Iconos.SVGs(), self.svgs), None,
+                      (_("Markers"), Iconos.Markers(), self.markers), None,
                       None,
-                      ( _("Clipboard"), Iconos.Clip(), self.portapapeles ), None,
-                      ( _("Save") + " png", Iconos.GrabarFichero(), self.grabarFichero ), None,
-        ]
+                      (_("Clipboard"), Iconos.Clip(), self.portapapeles), None,
+                      (_("Save") + " png", Iconos.GrabarFichero(), self.grabarFichero), None,
+                      ]
         tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=32)
 
         pbLimpia = Controles.PB(self, _("Clean main board"), self.limpiaTableroOwner, plano=False)
@@ -74,17 +74,17 @@ class WTabDirector(QTVarios.WDialogo):
         listaPiezas = QTVarios.ListaPiezas(self, "P,N,B,R,Q,K,p,n,b,r,q,k", self.tablero, 18, margen=0)
 
         # Guion
-        liAcciones = [( _("New"), Iconos.Nuevo(), self.gnuevo ),
-                      ( _("Insert"), Iconos.Insertar(), self.ginsertar ),
-                      ( _("Copy"), Iconos.Copiar(), self.gcopiar ), None,
-                      ( _("Remove"), Iconos.Borrar(), self.gborrar ), None,
-                      ( _("Up"), Iconos.Arriba(), self.garriba ),
-                      ( _("Down"), Iconos.Abajo(), self.gabajo ), None,
-                      ( _("Mark"), Iconos.Marcar(), self.gmarcar ), None,
-                      ( _("Save"), Iconos.Grabar(), self.ggrabarGuion ),
-                      ( _("Open"), Iconos.Recuperar(), self.grecuperarGuion ), None,
-                      ( _("Remove script"), Iconos.Delete(), self.geliminarGuion )
-        ]
+        liAcciones = [(_("New"), Iconos.Nuevo(), self.gnuevo),
+                      (_("Insert"), Iconos.Insertar(), self.ginsertar),
+                      (_("Copy"), Iconos.Copiar(), self.gcopiar), None,
+                      (_("Remove"), Iconos.Borrar(), self.gborrar), None,
+                      (_("Up"), Iconos.Arriba(), self.garriba),
+                      (_("Down"), Iconos.Abajo(), self.gabajo), None,
+                      (_("Mark"), Iconos.Marcar(), self.gmarcar), None,
+                      (_("Save"), Iconos.Grabar(), self.ggrabarGuion),
+                      (_("Open"), Iconos.Recuperar(), self.grecuperarGuion), None,
+                      (_("Remove script"), Iconos.Delete(), self.geliminarGuion)
+                      ]
         tbGuion = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=20)
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("DIRECTOR", "0", 20, siCentrado=True, siChecked=True)
@@ -203,10 +203,10 @@ class WTabDirector(QTVarios.WDialogo):
         elif clave == "DIRECTOR":
             return self.guion.marcadoOwner(fila)
 
-    def pulsadoItemSC(self, id):
+    def pulsadoItemSC(self, xid):
         for n in range(len(self.guion)):
             tarea = self.guion.tarea(n)
-            if tarea.id() == id:
+            if tarea.id() == xid:
                 if tarea.tp() in "FMSX":
                     tarea.coordina()
                     break
@@ -232,9 +232,9 @@ class WTabDirector(QTVarios.WDialogo):
 
         elif evento == t.EVENTO_FUNCION:
             funcion, desde, hasta = envio
-            id = self.dragBanda.idLB(funcion)
-            if id:
-                self.dispatchDrop(desde, id, hasta)
+            xid = self.dragBanda.idLB(funcion)
+            if xid:
+                self.dispatchDrop(desde, xid, hasta)
 
         self.miraCambios()
 
@@ -245,13 +245,13 @@ class WTabDirector(QTVarios.WDialogo):
             self.tablero.cambiaPieza(desde, pieza)
             self.tablero.activaTodas()
             tp = "C"
-            id = pieza
+            xid = pieza
             a1h8 = desde
 
         elif dato.startswith("_"):
             li = dato.split("_")
             tp = li[1]
-            id = int(li[2])
+            xid = int(li[2])
             if hasta:
                 a1h8 = desde + hasta
             else:
@@ -270,25 +270,25 @@ class WTabDirector(QTVarios.WDialogo):
                 elif tp == "X":
                     a1h8 = desde + desde
 
-        self.creaTarea(tp, id, a1h8, -1)
+        self.creaTarea(tp, xid, a1h8, -1)
 
-    def creaTareaBase(self, tp, id, a1h8, fila):
+    def creaTareaBase(self, tp, xid, a1h8, fila):
 
-        tpid = tp, id
+        tpid = tp, xid
         if tp == "P":
             tarea = TabVisual.GT_PiezaMueve()
             tarea.desdeHasta(a1h8[:2], a1h8[2:])
         elif tp == "C":
             tarea = TabVisual.GT_PiezaCrea()
             tarea.desde(a1h8)
-            tarea.pieza(id)
+            tarea.pieza(xid)
         elif tp == "B":
             tarea = TabVisual.GT_PiezaBorra()
             tarea.desde(a1h8)
-            tarea.pieza(id)
+            tarea.pieza(xid)
         else:
             if tp == "F":
-                regFlecha = self.dbFlechas[id]
+                regFlecha = self.dbFlechas[xid]
                 if regFlecha is None:
                     return None, None
                 regFlecha.tpid = tpid
@@ -296,7 +296,7 @@ class WTabDirector(QTVarios.WDialogo):
                 sc = self.tablero.creaFlecha(regFlecha)
                 tarea = TabVisual.GT_Flecha()
             elif tp == "M":
-                regMarco = self.dbMarcos[id]
+                regMarco = self.dbMarcos[xid]
                 if regMarco is None:
                     return None, None
                 regMarco.tpid = tpid
@@ -304,7 +304,7 @@ class WTabDirector(QTVarios.WDialogo):
                 sc = self.tablero.creaMarco(regMarco)
                 tarea = TabVisual.GT_Marco()
             elif tp == "S":
-                regSVG = self.dbSVGs[id]
+                regSVG = self.dbSVGs[xid]
                 if regSVG is None:
                     return None, None
                 regSVG.tpid = tpid
@@ -312,7 +312,7 @@ class WTabDirector(QTVarios.WDialogo):
                 sc = self.tablero.creaSVG(regSVG, siEditando=True)
                 tarea = TabVisual.GT_SVG()
             elif tp == "X":
-                regMarker = self.dbMarkers[id]
+                regMarker = self.dbMarkers[xid]
                 if regMarker is None:
                     return None, None
                 regMarker.tpid = tpid
@@ -323,16 +323,16 @@ class WTabDirector(QTVarios.WDialogo):
             tarea.itemSC(sc)
 
         tarea.marcado(True)
-        tarea.registro((tp, id, a1h8))
+        tarea.registro((tp, xid, a1h8))
         fila = self.guion.nuevaTarea(tarea, fila)
 
         return tarea, fila
 
-    def creaTarea(self, tp, id, a1h8, fila):
-        tarea, fila = self.creaTareaBase(tp, id, a1h8, fila)
+    def creaTarea(self, tp, xid, a1h8, fila):
+        tarea, fila = self.creaTareaBase(tp, xid, a1h8, fila)
         if tarea is None:
             return
-        tarea.registro((tp, id, a1h8))
+        tarea.registro((tp, xid, a1h8))
         self.g_guion.goto(fila, 0)
 
         self.ponMarcado(fila, True)
@@ -342,7 +342,7 @@ class WTabDirector(QTVarios.WDialogo):
     def editaNombre(self, nombre):
         liGen = [(None, None)]
         config = FormLayout.Editbox(_("Name"), ancho=160)
-        liGen.append((config, nombre ))
+        liGen.append((config, nombre))
         ico = Iconos.Grabar()
 
         resultado = FormLayout.fedit(liGen, title=_("Name"), parent=self, icon=ico)
@@ -362,7 +362,7 @@ class WTabDirector(QTVarios.WDialogo):
 
         if tipo == "PI":
             fen = self.tablero.fenActual()
-            fen = WinPosition.editarPosicion(self, VarGen.configuracion, fen)
+            fen = XVoyager.xVoyagerFEN(self, VarGen.configuracion, fen)
             if fen is None:
                 return None
 
@@ -431,14 +431,14 @@ class WTabDirector(QTVarios.WDialogo):
         if siExtendido:
             mp = _("Move piece")
             masMenu = [
-                ( ("_P_0", mp), mp, Iconos.PuntoAzul() ),
+                (("_P_0", mp), mp, Iconos.PuntoAzul()),
             ]
             masMenu.extend([
-                ( ("SP", "PI"), _("Start position"), Iconos.Datos() ),
-                ( ("SP", "PA"), _("Current position"), Iconos.Copiar() ),
-                ( ("SP", "PP"), _("Paste FEN position"), Iconos.Pegar16() ),
-                ( ("SP", "PGNF"), _("Read PGN"), Iconos.PGN_Importar() ),
-                ( ("SP", "PGNP"), _("Paste PGN"), Iconos.Pegar16() ),
+                (("SP", "PI"), _("Start position"), Iconos.Datos()),
+                (("SP", "PA"), _("Current position"), Iconos.Copiar()),
+                (("SP", "PP"), _("Paste FEN position"), Iconos.Pegar16()),
+                (("SP", "PGNF"), _("Read PGN"), Iconos.PGN_Importar()),
+                (("SP", "PGNP"), _("Paste PGN"), Iconos.Pegar16()),
             ])
         else:
             masMenu = []
@@ -475,10 +475,10 @@ class WTabDirector(QTVarios.WDialogo):
         liGen = [(None, None)]
 
         config = FormLayout.Casillabox(_("From square"))
-        liGen.append(( config, desde ))
+        liGen.append((config, desde))
 
         config = FormLayout.Casillabox(_("To square"))
-        liGen.append(( config, hasta ))
+        liGen.append((config, hasta))
 
         resultado = FormLayout.fedit(liGen, title=titulo, parent=self)
         if resultado:
@@ -495,13 +495,12 @@ class WTabDirector(QTVarios.WDialogo):
             xid, tit = resp
             li = xid.split("_")
             tp = li[1]
-            id = int(li[2])
+            xid = int(li[2])
             desde, hasta = self.desdeHasta(tit, self.ultDesde, self.ultHasta)
             if desde:
                 fila = self.g_guion.recno() if siInsertar else -1
-                self.creaTarea(tp, id, desde + hasta, fila)
+                self.creaTarea(tp, xid, desde + hasta, fila)
 
-    # #--------------------------------------------------------------------------------------------------------------------------------
     def gnuevo(self):
         self.gmas(False)
 
@@ -514,9 +513,9 @@ class WTabDirector(QTVarios.WDialogo):
             sc = self.guion.itemTarea(fila)
             if sc:
                 bd = sc.bloqueDatos
-                tp, id = bd.tpid
+                tp, xid = bd.tpid
                 a1h8 = bd.a1h8
-                self.creaTarea(tp, id, a1h8, fila + 1)
+                self.creaTarea(tp, xid, a1h8, fila + 1)
 
     def gborrar(self):
         li = self.g_guion.recnosSeleccionados()
@@ -557,7 +556,7 @@ class WTabDirector(QTVarios.WDialogo):
                     tarea.coordina()
 
             elif isinstance(tarea, TabVisual.GT_Posicion):
-                fen = WinPosition.editarPosicion(self, VarGen.configuracion, tarea.fen())
+                fen = XVoyager.xVoyagerFEN(self, VarGen.configuracion, tarea.fen())
                 if fen is not None:
                     tarea.fen(fen)
 
@@ -576,7 +575,7 @@ class WTabDirector(QTVarios.WDialogo):
         liGen = [(None, None)]
 
         config = FormLayout.Editbox(_("Name"), ancho=160)
-        liGen.append((config, self.nomGuion ))
+        liGen.append((config, self.nomGuion))
 
         resultado = FormLayout.fedit(liGen, title=_("Name"), parent=self)
         if resultado:
@@ -618,8 +617,8 @@ class WTabDirector(QTVarios.WDialogo):
             self.tablero.crea()
             for reg in li:
                 if reg._registro:
-                    tp, id, a1h8 = reg._registro
-                    tarea, fila = self.creaTareaBase(tp, id, a1h8, -1)
+                    tp, xid, a1h8 = reg._registro
+                    tarea, fila = self.creaTareaBase(tp, xid, a1h8, -1)
                     if tarea is None:
                         continue
                     tarea.recupera(reg)
@@ -758,31 +757,31 @@ class WTabDirector(QTVarios.WDialogo):
     def editarBanda(self, cid):
         li = cid.split("_")
         tp = li[1]
-        id = int(li[2])
+        xid = int(li[2])
         ok = False
         if tp == "F":
-            regFlecha = self.dbFlechas[id]
+            regFlecha = self.dbFlechas[xid]
             w = PantallaTabVFlechas.WTV_Flecha(self, regFlecha, True)
             if w.exec_():
-                self.dbFlechas[id] = w.regFlecha
+                self.dbFlechas[xid] = w.regFlecha
                 ok = True
         elif tp == "M":
-            regMarco = self.dbMarcos[id]
+            regMarco = self.dbMarcos[xid]
             w = PantallaTabVMarcos.WTV_Marco(self, regMarco)
             if w.exec_():
-                self.dbMarcos[id] = w.regMarco
+                self.dbMarcos[xid] = w.regMarco
                 ok = True
         elif tp == "S":
-            regSVG = self.dbSVGs[id]
+            regSVG = self.dbSVGs[xid]
             w = PantallaTabVSVGs.WTV_SVG(self, regSVG)
             if w.exec_():
-                self.dbSVGs[id] = w.regSVG
+                self.dbSVGs[xid] = w.regSVG
                 ok = True
         elif tp == "X":
-            regMarker = self.dbMarkers[id]
+            regMarker = self.dbMarkers[xid]
             w = PantallaTabVMarkers.WTV_Marker(self, regMarker)
             if w.exec_():
-                self.dbMarkers[id] = w.regMarker
+                self.dbMarkers[xid] = w.regMarker
                 ok = True
 
         if ok:
@@ -897,49 +896,49 @@ class WTabDirector(QTVarios.WDialogo):
         for flecha in self.listaFlechas():
             pm = QtGui.QPixmap()
             pm.loadFromData(flecha.png, "PNG")
-            id = "_F_%d" % flecha.id
+            xid = "_F_%d" % flecha.id
             nombre = flecha.nombre
-            self.dragBanda.actualiza(id, nombre, pm, tipo)
+            self.dragBanda.actualiza(xid, nombre, pm, tipo)
 
         tipo = _("Boxes")
         for marco in self.listaMarcos():
             pm = QtGui.QPixmap()
             pm.loadFromData(marco.png, "PNG")
-            id = "_M_%d" % marco.id
+            xid = "_M_%d" % marco.id
             nombre = marco.nombre
-            self.dragBanda.actualiza(id, nombre, pm, tipo)
+            self.dragBanda.actualiza(xid, nombre, pm, tipo)
 
         tipo = _("Images")
         for svg in self.listaSVGs():
             pm = QtGui.QPixmap()
             pm.loadFromData(svg.png, "PNG")
-            id = "_S_%d" % svg.id
+            xid = "_S_%d" % svg.id
             nombre = svg.nombre
-            self.dragBanda.actualiza(id, nombre, pm, tipo)
+            self.dragBanda.actualiza(xid, nombre, pm, tipo)
 
         tipo = _("Markers")
         for marker in self.listaMarkers():
             pm = QtGui.QPixmap()
             pm.loadFromData(marker.png, "PNG")
-            id = "_X_%d" % marker.id
+            xid = "_X_%d" % marker.id
             nombre = marker.nombre
-            self.dragBanda.actualiza(id, nombre, pm, tipo)
+            self.dragBanda.actualiza(xid, nombre, pm, tipo)
 
         self.dragBanda.finActualizacion()
 
         dicCampos = {
             "F": ("nombre", "altocabeza", "tipo", "destino", "color", "colorinterior", "colorinterior2", "opacidad",
                   "redondeos", "forma", "ancho", "vuelo", "descuelgue"),
-            "M": ( "nombre", "color", "colorinterior", "colorinterior2", "grosor", "redEsquina", "tipo", "opacidad" ),
-            "S": ( "nombre", "opacidad", ),
-            "X": ( "nombre", "opacidad" )
+            "M": ("nombre", "color", "colorinterior", "colorinterior2", "grosor", "redEsquina", "tipo", "opacidad"),
+            "S": ("nombre", "opacidad",),
+            "X": ("nombre", "opacidad")
         }
         dicDB = {"F": self.dbFlechas, "M": self.dbMarcos, "S": self.dbSVGs, "X": self.dbMarkers}
         for k, sc in self.tablero.dicMovibles.iteritems():
             bd = sc.bloqueDatos
             try:
-                tp, id = bd.tpid
-                bdn = dicDB[tp][id]
+                tp, xid = bd.tpid
+                bdn = dicDB[tp][xid]
                 for campo in dicCampos[tp]:
                     setattr(bd, campo, getattr(bdn, campo))
                 sc.update()
@@ -968,7 +967,7 @@ class WTabDirector(QTVarios.WDialogo):
                         dc = ord(desde[0]) - ord(hasta[0])
                         df = int(desde[1]) - int(hasta[1])
                         # Maxima distancia = 9.9 ( 9,89... sqrt(7**2+7**2)) = 4 segundos
-                        dist = ( dc ** 2 + df ** 2 ) ** 0.5
+                        dist = (dc ** 2 + df ** 2) ** 0.5
                         segundos = 4.0 * dist / 9.9
 
                     cpu.muevePieza(movim[1], movim[2], siExclusiva=False, segundos=segundos)
@@ -997,4 +996,3 @@ class WTabDirector(QTVarios.WDialogo):
                     tablero.muevePieza(movim[1], movim[2])
                 elif movim[0] == "c":
                     tablero.cambiaPieza(movim[1], movim[2])
-

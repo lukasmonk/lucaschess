@@ -1,11 +1,10 @@
-import Code.VarGen as VarGen
-import Code.Partida as Partida
-import Code.ControlPosicion as ControlPosicion
-
-import Code.QT.Iconos as Iconos
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaParamAnalisis as PantallaParamAnalisis
+from Code import ControlPosicion
+from Code import Partida
+from Code.QT import Iconos
+from Code.QT import PantallaParamAnalisis
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import VarGen
 
 class Analisis:
     def __init__(self, wowner, bookGuide, dispatchAnalisis, procesador):
@@ -113,7 +112,7 @@ class Analisis:
         import Code.Variantes as Variantes
 
         Variantes.editaVarianteMoves(self.procesador, self.pantalla, True, fen, lineaPGN,
-                                     titulo="%s %s" % (rm.nombre, rm.texto() ))
+                                     titulo="%s %s" % (rm.nombre, rm.texto()))
 
     def siMiraKibitzers(self):
         return False  # Compatibilidad para que funcione showAnalisis

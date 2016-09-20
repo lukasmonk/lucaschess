@@ -1,28 +1,27 @@
-from Code.Constantes import *
+import LCEngine
 
-import Code.LCOS as LCOS
-import Code.XMotor as XMotor
-import Code.XMotorRespuesta as XMotorRespuesta
+from Code import XMotor
+from Code import XMotorRespuesta
+from Code.Constantes import *
 
 class GestorMotor:
     def __init__(self, procesador, confMotor):
         self.procesador = procesador
 
-        self.siIniMotor = False
+        self.motor = None
         self.confMotor = confMotor
         self.nombre = confMotor.nombre
         self.clave = confMotor.clave
-        self.siMultiPV = False
-        self.siMaximizaMultiPV = False
+        self.nMultiPV = 0
 
-        self.priority = LCOS.NORMAL
+        self.priority = XMotor.PRIORITY_NORMAL
 
-        self.dispatch = None
+        self.dispatching = None
 
     def opciones(self, tiempoJugada, profundidad, siMultiPV):
         self.motorTiempoJugada = tiempoJugada
         self.motorProfundidad = profundidad
-        self.siMultiPV = siMultiPV
+        self.nMultiPV = self.confMotor.multiPV if siMultiPV else 0
 
         self.siInfinito = self.clave == "tarrasch"
 
@@ -37,72 +36,68 @@ class GestorMotor:
         self.priority = priority
 
     def maximizaMultiPV(self):
-        self.siMaximizaMultiPV = True
-        self.siMultiPV = True
+        self.nMultiPV = 9999
 
     def ponGuiDispatch(self, rutina, whoDispatch=None):
-        if not self.siIniMotor:
-            self.iniciarMotor()
-        self.motor.ponGuiDispatch(rutina, whoDispatch)
+        if self.motor:
+            self.motor.ponGuiDispatch(rutina, whoDispatch)
+        else:
+            self.dispatching = rutina, whoDispatch
 
     def actMultiPV(self, xMultiPV):
         self.confMotor.actMultiPV(xMultiPV)
-        if not self.siIniMotor:
-            self.iniciarMotor()
+        self.testEngine()
         self.motor.ponMultiPV(self.confMotor.multiPV)
 
+    def anulaMultiPV(self):
+        self.nMultiPV = 0
+
+    def setMultiPV(self, nMultiPV):
+        self.nMultiPV = nMultiPV
+
     def quitaGuiDispatch(self):
-        if self.siIniMotor:
+        if self.motor:
             self.motor.guiDispatch = None
 
-    def iniciarMotor(self, nMultiPV=0):
-        self.siIniMotor = True
-
-        if self.siMultiPV:
-            if self.siMaximizaMultiPV and self.confMotor.maxMultiPV:
-                nMultiPV = self.confMotor.maxMultiPV
-            else:
-                if nMultiPV == 0:
-                    nMultiPV = self.confMotor.multiPV
-                else:
-                    if self.confMotor.multiPV < nMultiPV:
-                        nMultiPV = self.confMotor.multiPV
+    def testEngine(self, nMultiPV=0):
+        if self.motor:
+            return
+        if self.nMultiPV:
+            self.nMultiPV = min(self.nMultiPV, self.confMotor.maxMultiPV)
 
         exe = self.confMotor.ejecutable()
         liUCI = self.confMotor.liUCI
-        self.motor = XMotor.XMotor(self.nombre, exe, liUCI, nMultiPV, priority=self.priority)
+        self.motor = XMotor.XMotor(self.nombre, exe, liUCI, self.nMultiPV, priority=self.priority)
         if self.confMotor.siDebug:
             self.motor.siDebug = True
             self.motor.nomDebug = self.confMotor.nomDebug
+        if self.dispatching:
+            rutina, whoDispatch = self.dispatching
+            self.motor.ponGuiDispatch(rutina, whoDispatch)
 
     def juegaSegundos(self, segundos):
-        if not self.siIniMotor:
-            self.iniciarMotor()
+        self.testEngine()
         partida = self.procesador.gestor.partida
         if self.siInfinito:  # problema tarrasch
-            mrm = self.motor.mejorMovInfinitoTiempoP(partida, segundos * 1000)
+            mrm = self.motor.bestmove_infinite(partida, segundos * 1000)
         else:
-            mrm = self.motor.mejorMovP(partida, segundos * 1000, None)
+            mrm = self.motor.bestmove_game(partida, segundos * 1000, None)
         return mrm.mejorMov() if mrm else None
 
     def juega(self, nAjustado=0):
         return self.juegaPartida(self.procesador.gestor.partida, nAjustado)
 
     def juegaPartida(self, partida, nAjustado=0):
-        if not self.siIniMotor:
-            self.iniciarMotor()
+        self.testEngine()
 
         if self.siInfinito:  # problema tarrasch
             if self.motorProfundidad:
-                mrm = self.motor.mejorMovInfinitoP(partida, self.motorProfundidad)
+                mrm = self.motor.bestmove_infinite_depth(partida, self.motorProfundidad)
             else:
-                mrm = self.motor.mejorMovInfinitoTiempoP(partida, self.motorTiempoJugada)
+                mrm = self.motor.bestmove_infinite(partida, self.motorTiempoJugada)
 
         else:
-            mrm = self.motor.mejorMovP(partida, self.motorTiempoJugada, self.motorProfundidad)
-
-        if mrm is None:
-            return None
+            mrm = self.motor.bestmove_game(partida, self.motorTiempoJugada, self.motorProfundidad)
 
         if nAjustado:
             mrm.partida = partida
@@ -116,13 +111,12 @@ class GestorMotor:
     def juegaTiempo(self, tiempoBlancas, tiempoNegras, tiempoJugada, nAjustado=0):
         if self.motorTiempoJugada or self.motorProfundidad:
             return self.juega(nAjustado)
-        if not self.siIniMotor:
-            self.iniciarMotor()
+        self.testEngine()
         tiempoBlancas = int(tiempoBlancas * 1000)
         tiempoNegras = int(tiempoNegras * 1000)
         tiempoJugada = int(tiempoJugada * 1000)
         partida = self.procesador.gestor.partida
-        mrm = self.motor.mejorMovTiempoP(partida, tiempoBlancas, tiempoNegras, tiempoJugada)
+        mrm = self.motor.bestmove_time(partida, tiempoBlancas, tiempoNegras, tiempoJugada)
         if mrm is None:
             return None
 
@@ -136,39 +130,36 @@ class GestorMotor:
             return mrm.mejorMov()
 
     def juegaTiempoTorneo(self, tiempoBlancas, tiempoNegras, tiempoJugada):
-        if not self.siIniMotor:
-            self.iniciarMotor()
+        self.testEngine()
+        if self.motor.pondering:
+            self.motor.stop_ponder()
         partida = self.procesador.gestor.partida
         if self.motorTiempoJugada or self.motorProfundidad:
-            mrm = self.motor.mejorMovP(partida, self.motorTiempoJugada, self.motorProfundidad)
+            mrm = self.motor.bestmove_game(partida, self.motorTiempoJugada, self.motorProfundidad)
         else:
             tiempoBlancas = int(tiempoBlancas * 1000)
             tiempoNegras = int(tiempoNegras * 1000)
             tiempoJugada = int(tiempoJugada * 1000)
-            mrm = self.motor.mejorMovTiempoP(partida, tiempoBlancas, tiempoNegras, tiempoJugada)
+            mrm = self.motor.bestmove_time(partida, tiempoBlancas, tiempoNegras, tiempoJugada)
+        if self.motor and self.motor.ponder: # test si self.motor, ya que puede haber terminado en el ponder
+            self.motor.run_ponder(partida, mrm)
         return mrm
 
     def analiza(self, fen):
-        if not self.siIniMotor:
-            self.iniciarMotor()
-        return self.motor.mejorMovF(fen, self.motorTiempoJugada, self.motorProfundidad)
+        self.testEngine()
+        return self.motor.bestmove_fen(fen, self.motorTiempoJugada, self.motorProfundidad)
 
     def valora(self, posicion, desde, hasta, coronacion):
-        if not self.siIniMotor:
-            self.iniciarMotor()
-        if not hasattr(self, "ml"):
-            self.ml = self.procesador.gestor.ml  # Motor interno en gestor.py
+        self.testEngine()
 
         posicionNueva = posicion.copia()
         posicionNueva.mover(desde, hasta, coronacion)
 
         fen = posicionNueva.fen()
-        self.ml.ponFen(fen)
-
-        if self.ml.siTerminada():
+        if LCEngine.fenTerminado(fen):
             return None
 
-        mrm = self.motor.mejorMovF(fen, self.motorTiempoJugada, self.motorProfundidad)
+        mrm = self.motor.bestmove_fen(fen, self.motorTiempoJugada, self.motorProfundidad)
         rm = mrm.mejorMov()
         rm.cambiaColor(posicion)
         mv = desde + hasta + (coronacion if coronacion else "")
@@ -180,31 +171,25 @@ class GestorMotor:
         return rm
 
     def control(self, fen, profundidad):
-        if not self.siIniMotor:
-            self.iniciarMotor()
-
-        return self.motor.mejorMovF(fen, 0, profundidad)
+        self.testEngine()
+        return self.motor.bestmove_fen(fen, 0, profundidad)
 
     def terminar(self):
-        if self.siIniMotor:
-            self.motor.apagar()
-            self.siIniMotor = False  # necesario si se quiere reusar
+        if self.motor:
+            self.motor.close()
+            self.motor = None
 
     def analizaJugada(self, jg, tiempo, depth=0, brDepth=5, brPuntos=50):
-        if not self.siIniMotor:
-            self.iniciarMotor()
+        self.testEngine()
 
-        resp = self.motor.mejorMovF(jg.posicionBase.fen(), tiempo, depth, siReturnTxt=True)
-        if resp is None:
-            return None
-        mrm, txt = resp
+        mrm = self.motor.bestmove_fen(jg.posicionBase.fen(), tiempo, depth, is_savelines=True)
         mv = jg.movimiento()
         if not mv:
             return mrm, 0
         rm, n = mrm.buscaRM(jg.movimiento())
         if rm:
             if n == 0:
-                mrm.miraBrilliancies(txt, brDepth, brPuntos)
+                mrm.miraBrilliancies(brDepth, brPuntos)
             return mrm, n
 
         # No esta considerado, obliga a hacer el analisis de nuevo desde posicion
@@ -217,7 +202,7 @@ class GestorMotor:
         else:
             posicion = jg.posicion
 
-            mrm1 = self.motor.mejorMovF(posicion.fen(), tiempo, depth)
+            mrm1 = self.motor.bestmove_fen(posicion.fen(), tiempo, depth)
             if mrm1 and mrm1.liMultiPV:
                 rm = mrm1.liMultiPV[0]
                 rm.cambiaColor(posicion)
@@ -234,34 +219,38 @@ class GestorMotor:
         return mrm, pos
 
     def analizaVariante(self, jg, tiempo, siBlancas):
-        if not self.siIniMotor:
-            self.iniciarMotor()
+        self.testEngine()
 
-        mrm = self.motor.mejorMovF(jg.posicion.fen(), tiempo, None)
+        mrm = self.motor.bestmove_fen(jg.posicion.fen(), tiempo, None)
         if mrm.liMultiPV:
             rm = mrm.liMultiPV[0]
-            if siBlancas != jg.posicion.siBlancas:
-                if rm.mate:
-                    rm.mate += +1 if rm.mate > 0 else -1
+            # if siBlancas != jg.posicion.siBlancas:
+            #     if rm.mate:
+            #         rm.mate += +1 if rm.mate > 0 else -1
         else:
             rm = XMotorRespuesta.RespuestaMotor("", siBlancas)
         return rm
 
     def ac_inicio(self, partida):
-        if not self.siIniMotor:
-            self.iniciarMotor()
-
+        self.testEngine()
         self.motor.ac_inicio(partida)
 
     def ac_minimo(self, minTiempo, lockAC):
+        self.testEngine()
         return self.motor.ac_minimo(minTiempo, lockAC)
 
     def ac_minimoTD(self, minTiempo, minDepth, lockAC):
+        self.testEngine()
         return self.motor.ac_minimoTD(minTiempo, minDepth, lockAC)
 
     def ac_estado(self):
+        self.testEngine()
         return self.motor.ac_estado()
 
     def ac_final(self, minTiempo):
+        self.testEngine()
         return self.motor.ac_final(minTiempo)
 
+    def set_option(self, name, value):
+        self.testEngine()
+        self.motor.set_option(name, value)

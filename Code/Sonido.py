@@ -1,16 +1,15 @@
-import sys
-import wave
-import audioop
 import StringIO
-import subprocess
+import audioop
+import wave
 
 import pyaudio
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.QT.QTUtil as QTUtil
+from Code.QT import QTUtil
+from Code import Util
+from Code import VarGen
+from Code import XRun
 
-class RunSound():
+class RunSound:
     def __init__(self):
         VarGen.runSound = self
         self.replay = None
@@ -207,7 +206,7 @@ class Orden:
         self.dv["__CLAVE__"] = self.clave
         return self.dv
 
-class Replay():
+class Replay:
     DATABASE = "D"
     PLAY_ESPERA = "P"
     PLAY_SINESPERA = "N"
@@ -228,12 +227,7 @@ class Replay():
         self.escribe(orden)
         self.siSonando = False
 
-        if sys.argv[0].endswith(".py"):
-            li = ["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", "-sound", fdb]
-        else:
-            li = ["Lucas.exe" if VarGen.isWindows else "Lucas", "-sound", fdb]
-
-        self.popen = subprocess.Popen(li)
+        self.popen = XRun.run_lucas("-sound", fdb)
 
     def escribe(self, orden):
         self.ipc.push(orden.bloqueEnvio())
@@ -282,4 +276,3 @@ class Replay():
             self.siSonando = False
 
             self.escribe(orden)
-

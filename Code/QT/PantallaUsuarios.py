@@ -1,14 +1,17 @@
 import os
+import shutil
 
-import Code.Usuarios as Usuarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTUtil as QTUtil
-import Code.QT.Grid as Grid
-import Code.QT.Columnas as Columnas
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Delegados as Delegados
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Usuarios
+from Code.QT import FormLayout
 
 class WUsuarios(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -23,18 +26,18 @@ class WUsuarios(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, icono, extparam)
 
         # Toolbar
-        liAcciones = (  ( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                        ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-                        ( _("New"), Iconos.Nuevo(), "nuevo" ), None,
-                        ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-        )
-        tb = Controles.TB(self, liAcciones)
+        liAcciones = ((_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                      (_("New"), Iconos.Nuevo(), self.nuevo), None,
+                      (_("Remove"), Iconos.Borrar(), self.borrar), None,
+                      )
+        tb = Controles.TBrutina(self, liAcciones)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("NUMERO", _("N."), 40, siCentrado=True)
         oColumnas.nueva("USUARIO", _("User"), 140, edicion=Delegados.LineaTextoUTF8())
-        oColumnas.nueva("PASSWORD", _("Password"), 100, edicion=Delegados.LineaTextoUTF8(siPassword=True))
+        # oColumnas.nueva("PASSWORD", _("Password"), 100, edicion=Delegados.LineaTextoUTF8(siPassword=True))
 
         self.grid = Grid.Grid(self, oColumnas, siEditable=True)
 
@@ -53,15 +56,15 @@ class WUsuarios(QTVarios.WDialogo):
             self.resize(310, 400)
 
     def leeUsuarios(self):
-        self.liUsuarios = Usuarios.listaUsuarios()
-        if self.liUsuarios is None:
+        self.liUsuarios = Usuarios.Usuarios().lista
+        if not self.liUsuarios:
             usuario = Usuarios.Usuario()
             usuario.numero = 0
-            usuario.nombre = self.configuracion.jugador
             usuario.password = ""
             self.liUsuarios = [usuario]
 
         main = self.liUsuarios[0]
+        main.nombre = self.configuracion.jugador
         # Para que al pedir la password siempre en el idioma del main en principio solo hace falta el password pero por si acaso se cambia de opinion
         main.trlucas = _("Lucas Chess")
         main.trusuario = _("User")
@@ -69,18 +72,9 @@ class WUsuarios(QTVarios.WDialogo):
         main.traceptar = _("Accept")
         main.trcancelar = _("Cancel")
 
-    def procesarTB(self):
-        accion = self.sender().clave
-        if accion == "aceptar":
-            self.guardarVideo()
-            self.aceptar()
-        elif accion == "cancelar":
-            self.guardarVideo()
-            self.reject()
-        elif accion == "nuevo":
-            self.nuevo()
-        elif accion == "borrar":
-            self.borrar()
+    def cancelar(self):
+        self.guardarVideo()
+        self.reject()
 
     def nuevo(self):
 
@@ -88,15 +82,15 @@ class WUsuarios(QTVarios.WDialogo):
         for usuario in self.liUsuarios:
             li.append(usuario.numero)
 
-        plantilla = self.configuracion.carpetaUsers + "/%d"
+        # plantilla = self.configuracion.carpetaUsers + "/%d"
         numero = 1
-        while (numero in li) or os.path.isdir(plantilla % numero):
+        while (numero in li):# or os.path.isdir(plantilla % numero):
             numero += 1
 
         usuario = Usuarios.Usuario()
         usuario.nombre = _X(_("User %1"), str(numero))
         usuario.numero = numero
-        usuario.clave = ""
+        usuario.password = ""
 
         self.liUsuarios.append(usuario)
         self.grid.refresh()
@@ -106,12 +100,18 @@ class WUsuarios(QTVarios.WDialogo):
     def aceptar(self):
         self.grid.goto(len(self.liUsuarios) - 1, 1)
         self.grid.setFocus()
-        Usuarios.guardaUsuarios(self.liUsuarios)
+        self.guardarVideo()
+        Usuarios.Usuarios().guardaLista(self.liUsuarios)
         self.accept()
 
     def borrar(self):
         fila = self.grid.recno()
         if fila > 0:
+            usuario = self.liUsuarios[fila]
+            carpeta = "%s/users/%d/"%(self.configuracion.carpeta, usuario.numero)
+            if os.path.isdir(carpeta):
+                if QTUtil2.pregunta(self, _("Do you want to remove all data of this user?")):
+                    shutil.rmtree(carpeta)
             del self.liUsuarios[fila]
             self.grid.refresh()
             self.grid.setFocus()
@@ -128,8 +128,8 @@ class WUsuarios(QTVarios.WDialogo):
                 usuario.nombre = valor
             else:
                 QTUtil.beep()
-        else:
-            usuario.password = valor
+        # else:
+        #     usuario.password = valor
 
     def gridDato(self, grid, fila, oColumna):
         clave = oColumna.clave
@@ -138,10 +138,67 @@ class WUsuarios(QTVarios.WDialogo):
             return str(usuario.numero) if usuario.numero else "-"
         elif clave == "USUARIO":
             return usuario.nombre
-        if clave == "PASSWORD":
-            return "x" * len(usuario.password)
+        # if clave == "PASSWORD":
+        #     return "x" * len(usuario.password)
 
 def editaUsuarios(procesador):
     w = WUsuarios(procesador)
     if w.exec_():
         pass
+
+def setPassword(procesador):
+    configuracion = procesador.configuracion
+
+    npos = 0
+    user = configuracion.user
+    liUsuarios = Usuarios.Usuarios().lista
+    if user:
+        numero = int(user)
+        for n, usu in enumerate(liUsuarios):
+            if usu.numero == numero:
+                npos = n
+                break
+        if npos == 0:
+            return
+    else:
+        if not liUsuarios:
+            usuario = Usuarios.Usuario()
+            usuario.numero = 0
+            usuario.password = ""
+            usuario.nombre = configuracion.jugador
+            liUsuarios = [usuario]
+
+    usuario = liUsuarios[npos]
+
+    while True:
+        liGen = [FormLayout.separador]
+
+        config = FormLayout.Editbox(_("Current"), ancho=120, siPassword=True)
+        liGen.append((config, ""))
+
+        config = FormLayout.Editbox(_("New"), ancho=120, siPassword=True)
+        liGen.append((config, ""))
+
+        config = FormLayout.Editbox(_("Repeat"), ancho=120, siPassword=True)
+        liGen.append((config, ""))
+
+        resultado = FormLayout.fedit(liGen, title=_("Set password"), parent=procesador.pantalla, icon=Iconos.Password())
+
+        if resultado:
+            previa, nueva, repite = resultado[1]
+
+            error = ""
+            if previa != usuario.password:
+                error = _("Current password is not correct")
+            else:
+                if nueva != repite:
+                    error = _("New password and repetition are not the same")
+
+            if error:
+                QTUtil2.mensError(procesador.pantalla, error)
+
+            else:
+                usuario.password = nueva
+                Usuarios.Usuarios().guardaLista(liUsuarios)
+                return
+

@@ -1,22 +1,22 @@
-import os
 import operator
+import os
 import random
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Books as Books
-import Code.EnginesMicElo as EnginesMicElo
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.QTVarios as QTVarios
-import Code.MotoresExternos as MotoresExternos
+from Code import Books
+from Code import EnginesMicElo
+from Code import MotoresExternos
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Util
+from Code import VarGen
 
 class WMotores(QTVarios.WDialogo):
     def __init__(self, owner, ficheroMExternos):
@@ -33,13 +33,14 @@ class WMotores(QTVarios.WDialogo):
 
         # Toolbar
         liAcciones = [
-            ( _("Close"), Iconos.MainMenu(), self.terminar ), None,
-            ( _("New"), Iconos.TutorialesCrear(), self.nuevo ), None,
-            ( _("Modify"), Iconos.Modificar(), self.modificar ), None,
-            ( _("Remove"), Iconos.Borrar(), self.borrar ), None,
-            ( _("Copy"), Iconos.Copiar(), self.copiar ), None,
-            ( _("Up"), Iconos.Arriba(), self.arriba ), None,
-            ( _("Down"), Iconos.Abajo(), self.abajo ), None,
+            (_("Close"), Iconos.MainMenu(), self.terminar), None,
+            (_("New"), Iconos.TutorialesCrear(), self.nuevo), None,
+            (_("Modify"), Iconos.Modificar(), self.modificar), None,
+            (_("Remove"), Iconos.Borrar(), self.borrar), None,
+            (_("Copy"), Iconos.Copiar(), self.copiar), None,
+            (_("Import"), Iconos.MasDoc(), self.importar), None,
+            (_("Up"), Iconos.Arriba(), self.arriba), None,
+            (_("Down"), Iconos.Abajo(), self.abajo), None,
         ]
         tb = Controles.TBrutina(self, liAcciones)
 
@@ -167,6 +168,49 @@ class WMotores(QTVarios.WDialogo):
                 self.grid.gobottom(0)
                 self.grabar()
 
+    def importar(self):
+        menu = QTVarios.LCMenu(self)
+        lista = VarGen.configuracion.comboMotores()
+        nico = QTVarios.rondoPuntos()
+        for nombre, clave in lista:
+            menu.opcion(clave, nombre, nico.otro())
+
+        resp = menu.lanza()
+        if not resp:
+            return
+
+        cm = VarGen.configuracion.buscaRival(resp)
+        me = MotoresExternos.MotorExterno()
+        me.exe = cm.ejecutable()
+        me.alias = cm.clave
+        me.idName = cm.nombre
+        me.nombre = cm.nombre
+        me.clave = cm.clave
+        me.idAuthor = cm.autor
+        me.idInfo = ""
+        me.liOpciones = []
+        me.maxMultiPV = cm.maxMultiPV
+        me.multiPV = cm.multiPV
+        me.elo = cm.elo
+        me.leerUCI(me.exe)
+        for op in me.liOpciones:
+            for comando, valor in cm.liUCI:
+                if op.nombre == comando:
+                    if op.tipo == "check":
+                        op.valor = valor.lower() == "true"
+                    elif op.tipo == "spin":
+                        op.valor = int(valor)
+                    else:
+                        op.valor = valor
+                    break
+
+        w = WMotor(self, self.listaMotores, me)
+        if w.exec_():
+            self.listaMotores.nuevo(me)
+            self.grid.refresh()
+            self.grid.gobottom(0)
+            self.grabar()
+
 class WMotor(QtGui.QDialog):
     def __init__(self, wParent, listaMotores, motorExterno, siTorneo=False):
 
@@ -175,7 +219,7 @@ class WMotor(QtGui.QDialog):
         self.setWindowTitle(motorExterno.idName)
         self.setWindowIcon(Iconos.Motor())
         self.setWindowFlags(
-            QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
+                QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
 
         scrollArea = genOpcionesME(self, motorExterno)
 
@@ -215,15 +259,15 @@ class WMotor(QtGui.QDialog):
             btNuevoBook = Controles.PB(self, "", self.nuevoBook, plano=False).ponIcono(Iconos.Nuevo(), tamIcon=16)
             # # Respuesta rival
             li = (
-                (_("Uniform random"), "au" ),
-                (_("Proportional random"), "ap" ),
-                (_("Always the highest percentage"), "mp" ),
+                (_("Uniform random"), "au"),
+                (_("Proportional random"), "ap"),
+                (_("Always the highest percentage"), "mp"),
             )
             self.cbBooksRR = QTUtil2.comboBoxLB(self, li, motorExterno.bookRR())
             lyBook = Colocacion.H().control(lbBook).control(self.cbBooks).control(self.cbBooksRR).control(
-                btNuevoBook).relleno()
+                    btNuevoBook).relleno()
             lyDT = Colocacion.H().control(lbDepth).control(self.sbDepth).espacio(40).control(lbTime).control(
-                self.sbTime).relleno()
+                    self.sbTime).relleno()
             lyTorneo = Colocacion.V().otro(lyDT).otro(lyBook)
 
         # Layout
@@ -260,7 +304,7 @@ class WMotor(QtGui.QDialog):
         for motor in self.liMotores:
             if (self.motorExterno != motor) and (motor.alias == alias):
                 QTUtil2.mensError(self, _(
-                    "There is already another engine with the same alias, the alias must change in order to have both."))
+                        "There is already another engine with the same alias, the alias must change in order to have both."))
                 return
         self.motorExterno.alias = alias
         self.motorExterno.idInfo = self.emInfo.texto()
@@ -288,7 +332,7 @@ def genOpcionesME(owner, motorExterno):
         if tipo == "spin":
             control = QTUtil2.spinBoxLB(owner, opcion.valor, opcion.min, opcion.max,
                                         maxTam=50 if opcion.max < 1000 else 80)
-            lb.ponTexto("%s [%d-%d] :" % ( opcion.nombre, opcion.min, opcion.max ))
+            lb.ponTexto("%s [%d-%d] :" % (opcion.nombre, opcion.min, opcion.max))
         elif tipo == "check":
             control = Controles.CHB(owner, " ", opcion.valor)
         elif tipo == "combo":
@@ -297,7 +341,7 @@ def genOpcionesME(owner, motorExterno):
                 liVars.append((var, var))
             control = Controles.CB(owner, liVars, opcion.valor)
         elif tipo == "string":
-            control = Controles.ED(owner, opcion.valor)  # todo check si cambiar self por None no causa problemas
+            control = Controles.ED(owner, opcion.valor)
         elif tipo == "button":
             control = Controles.CHB(owner, " ", opcion.valor)
 
@@ -347,11 +391,13 @@ def selectEngine(wowner):
     VarGen.configuracion.escVariables("FOLDER_ENGINES", folderEngines)
 
     # Leemos el UCI
+    um = QTUtil2.unMomento(wowner)
     me = MotoresExternos.MotorExterno()
-    if not me.leerUCI(exeMotor):
+    resp = me.leerUCI(exeMotor)
+    um.final()
+    if not resp:
         QTUtil2.mensaje(wowner, _X(_("The file %1 does not correspond to a UCI engine type."), exeMotor))
         return None
-
     return me
 
 class WEligeMotorElo(QTVarios.WDialogo):
@@ -371,12 +417,12 @@ class WEligeMotorElo(QTVarios.WDialogo):
         self.tipo = tipo
 
         # Toolbar
-        liAcciones = [( _("Choose"), Iconos.Aceptar(), self.elegir ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), self.cancelar ), None,
-                      ( _("Random opponent"), Iconos.FAQ(), self.selectRandom ), None,
-        ]
+        liAcciones = [(_("Choose"), Iconos.Aceptar(), self.elegir), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                      (_("Random opponent"), Iconos.FAQ(), self.selectRandom), None,
+                      ]
         if self.siMicElo:
-            liAcciones.append(( _("Reset"), Iconos.Reiniciar(), self.reset ))
+            liAcciones.append((_("Reset"), Iconos.Reiniciar(), self.reset))
             liAcciones.append(None)
 
         self.tb = Controles.TBrutina(self, liAcciones)
@@ -388,14 +434,14 @@ class WEligeMotorElo(QTVarios.WDialogo):
             dicValores = {}
 
         liFiltro = (
-                        ( "---", None ),
-                        ( ">=", ">" ),
-                        ( "<=", "<" ),
-                        ( "+-100", "100" ),
-                        ( "+-200", "200" ),
-                        ( "+-400", "400" ),
-                        ( "+-800", "800" ),
-                    )
+            ("---", None),
+            (">=", ">"),
+            ("<=", "<"),
+            ("+-100", "100"),
+            ("+-200", "200"),
+            ("+-400", "400"),
+            ("+-800", "800"),
+        )
 
         self.cbElo = Controles.CB(self, liFiltro, None).capturaCambiado(self.filtrar)
 
@@ -415,14 +461,14 @@ class WEligeMotorElo(QTVarios.WDialogo):
             st = set()
             for mt in self.liMotores:
                 mt.liCaract = li = mt.idInfo.split("\n")
-                mt.txtCaract = ", ".join([ _F(x) for x in li])
+                mt.txtCaract = ", ".join([_F(x) for x in li])
                 for x in li:
                     if x not in st:
                         st.add(x)
-                        liCaract.append( (_F(x), x) )
-            liCaract.sort( key=lambda x: x[1] )
-            liCaract.insert(0, ("---", None) )
-            self.cbCaract = Controles.CB(self,liCaract,None).capturaCambiado(self.filtrar)
+                        liCaract.append((_F(x), x))
+            liCaract.sort(key=lambda x: x[1])
+            liCaract.insert(0, ("---", None))
+            self.cbCaract = Controles.CB(self, liCaract, None).capturaCambiado(self.filtrar)
 
         ly = Colocacion.H().control(lbElo).control(self.cbElo).control(self.sbElo)
         if self.siMic:
@@ -462,7 +508,7 @@ class WEligeMotorElo(QTVarios.WDialogo):
         self.recuperarVideo()
 
     def removeReset(self):
-        self.tb.setAccionVisible(self.reset,False)
+        self.tb.setAccionVisible(self.reset, False)
 
     def filtrar(self):
         cb = self.cbElo.valor()
@@ -473,16 +519,16 @@ class WEligeMotorElo(QTVarios.WDialogo):
         else:
             self.sbElo.setDisabled(False)
             if cb == ">":
-                self.liMotoresActivos = [ x for x in self.liMotores if x.elo >= elo ]
+                self.liMotoresActivos = [x for x in self.liMotores if x.elo >= elo]
             elif cb == "<":
-                self.liMotoresActivos = [ x for x in self.liMotores if x.elo <= elo ]
+                self.liMotoresActivos = [x for x in self.liMotores if x.elo <= elo]
             elif cb in ("100", "200", "400", "800"):
                 mx = int(cb)
-                self.liMotoresActivos = [ x for x in self.liMotores if abs(x.elo-elo) <= mx ]
+                self.liMotoresActivos = [x for x in self.liMotores if abs(x.elo - elo) <= mx]
         if self.siMic:
             cc = self.cbCaract.valor()
             if cc:
-                self.liMotoresActivos = [ mt for mt in self.liMotoresActivos if cc in mt.liCaract ]
+                self.liMotoresActivos = [mt for mt in self.liMotoresActivos if cc in mt.liCaract]
         self.grid.refresh()
 
     def reset(self):
@@ -586,17 +632,20 @@ def eligeMotorMicElo(gestor, elo):
 def eligeMotorEntMaq(pantalla):
     titulo = _("Choose the opponent")
     icono = Iconos.EloTimed()
+
     class GestorTmp:
+
         def __init__(self):
             self.pantalla = pantalla
             self.configuracion = VarGen.configuracion
+
         def listaMotores(self, elo):
             li = EnginesMicElo.listaCompleta()
             numX = len(li)
             for num, mt in enumerate(li):
                 mt.siJugable = True
                 mt.siOut = False
-                mt.numero = numX-num
+                mt.numero = numX - num
             return li
 
     w = WEligeMotorElo(GestorTmp(), 1600, titulo, icono, "MICPER")

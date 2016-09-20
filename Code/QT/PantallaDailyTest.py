@@ -2,20 +2,20 @@ import os.path
 import random
 import time
 
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.Jugada as Jugada
-import Code.Analisis as Analisis
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.FormLayout as FormLayout
-import Code.QT.Tablero as Tablero
-import Code.QT.PantallaPotencia as PantallaPotencia
+from Code import Analisis
+from Code import ControlPosicion
+from Code import Jugada
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaPotencia
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import Util
 
 # liFens = []
 
@@ -46,10 +46,10 @@ class WDailyTestBase(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), self.terminar ), None,
-            ( _("Configuration"), Iconos.Opciones(), self.configurar ), None,
-            ( _("Start"), Iconos.Empezar(), self.empezar ), None,
-            ( _("Remove"), Iconos.Borrar(), self.borrar ), None,
+            (_("Close"), Iconos.MainMenu(), self.terminar), None,
+            (_("Start"), Iconos.Empezar(), self.empezar), None,
+            (_("Configuration"), Iconos.Opciones(), self.configurar), None,
+            (_("Remove"), Iconos.Borrar(), self.borrar), None,
         )
         tb = Controles.TBrutina(self, liAcciones)
 
@@ -127,20 +127,20 @@ class WDailyTestBase(QTVarios.WDialogo):
         for nombre, clave in self.configuracion.comboMotoresMultiPV10():
             liCombo.append((clave, nombre))
 
-        liGen.append(( _("Engine") + ":", liCombo ))
+        liGen.append((_("Engine") + ":", liCombo))
 
         # # Segundos a pensar el tutor
         config = FormLayout.Spinbox(_("Duration of engine analysis (secs)"), 1, 99, 50)
-        liGen.append(( config, self.segundos ))
+        liGen.append((config, self.segundos))
 
-        ## Pruebas
+        # Pruebas
         config = FormLayout.Spinbox(_("N. of tests"), 1, 40, 40)
-        liGen.append(( config, self.pruebas ))
+        liGen.append((config, self.pruebas))
 
-        ## Fichero
+        # Fichero
         config = FormLayout.Fichero(_("File"), "%s (*.fns);;%s PGN (*.pgn)" % (_("List of FENs"), _("File")), False,
                                     anchoMinimo=280)
-        liGen.append(( config, self.fns ))
+        liGen.append((config, self.fns))
 
         # Editamos
         resultado = FormLayout.fedit(liGen, title=_("Configuration"), parent=self, icon=Iconos.Opciones())
@@ -188,7 +188,7 @@ class WDailyTestBase(QTVarios.WDialogo):
                     linea = linea.strip()
                     if linea[0].isalnum() and \
                             linea[-1].isdigit() and \
-                            ( (" w " in linea) or (" b " in linea) ) and \
+                            ((" w " in linea) or (" b " in linea)) and \
                                     linea.count("/") == 7:
                         li.append(linea)
                 f.close()
@@ -198,7 +198,7 @@ class WDailyTestBase(QTVarios.WDialogo):
                 self.fns = ""
 
         if not liR:
-            liR = PantallaPotencia.leeVariasLineasMFN(self.pruebas)
+            liR = PantallaPotencia.lee_varias_lineas_mfn(self.pruebas)
 
         # liR = liFens
         w = WDailyTest(self, liR, self.motor, self.segundos, self.fns)
@@ -244,10 +244,10 @@ class WDailyTest(QTVarios.WDialogo):
         # Tool bar
         liAcciones = (
             # ( _( "Start" ), Iconos.Empezar(), "empezar" ),
-            ( _("Analysis"), Iconos.Tutor(), "analizar" ),
-            ( _("Cancel"), Iconos.Cancelar(), "cancelar" ),
-            ( _("Continue"), Iconos.Pelicula_Seguir(), "seguir" ),
-            ( _("Resign"), Iconos.Abandonar(), "abandonar" ),
+            (_("Analysis"), Iconos.Tutor(), "analizar"),
+            (_("Cancel"), Iconos.Cancelar(), "cancelar"),
+            (_("Continue"), Iconos.Pelicula_Seguir(), "seguir"),
+            (_("Resign"), Iconos.Abandonar(), "abandonar"),
         )
         self.tb = Controles.TB(self, liAcciones)
 
@@ -323,12 +323,12 @@ class WDailyTest(QTVarios.WDialogo):
 
             enr = menr(cK, cQ)
             if enr:
-                mens += "<br>%s : %s" % ( color, enr )
+                mens += "<br>%s : %s" % (color, enr)
             enr = menr(cKR, cQR)
             if enr:
-                mens += "<br>%s : %s" % ( colorR, enr )
+                mens += "<br>%s : %s" % (colorR, enr)
         if cp.alPaso != "-":
-            mens += "<br>     %s : %s" % ( _("En passant"), cp.alPaso )
+            mens += "<br>     %s : %s" % (_("En passant"), cp.alPaso)
 
         self.lbColor.ponTexto(mens)
 
@@ -350,7 +350,7 @@ class WDailyTest(QTVarios.WDialogo):
         mtiempos = t * 1.0 / self.nFens
 
         hoy = Util.hoy()
-        fecha = "%d%02d%02d" % ( hoy.year, hoy.month, hoy.day )
+        fecha = "%d%02d%02d" % (hoy.year, hoy.month, hoy.day)
         datos = {}
         datos["FECHA"] = hoy
         datos["MOTOR"] = self.xtutor.clave
@@ -366,7 +366,7 @@ class WDailyTest(QTVarios.WDialogo):
         self.lbColor.ponTexto("")
         self.lbJuego.ponTexto("")
 
-        mens = "<h3>%s : %0.2f</h3><h3>%s : %0.2f</h3>" % (_("Points lost"), mpuntos, _("Time in seconds"), mtiempos )
+        mens = "<h3>%s : %0.2f</h3><h3>%s : %0.2f</h3>" % (_("Points lost"), mpuntos, _("Time in seconds"), mtiempos)
         QTUtil2.mensaje(self, mens, _("Result"), siResalta=False)
 
         self.accept()
@@ -445,7 +445,7 @@ class WDailyTest(QTVarios.WDialogo):
                 cptsc = ini + cptsc + fin
 
             mens += "<tr><td>%s</td><td>%s</td><td align=\"right\">%s</td><td>%s</td><td align=\"right\">%s</td></tr>" % (
-                pgn, dosp, cpts, dosi, cptsc )
+                pgn, dosp, cpts, dosi, cptsc)
         mens += "</table></center>"
 
         self.liPV.append(pv)

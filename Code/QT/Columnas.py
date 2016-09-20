@@ -2,7 +2,7 @@ import copy
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
+from Code import VarGen
 
 class Columna:
     """
@@ -128,13 +128,13 @@ class Columna:
         @param dic: diccionario con los datos del modulo al que pertenece la columna.
         """
 
-        id = grid.id
+        xid = grid.id
 
         def x(c, v):
-            if id is None:
-                k = "%s.%s" % ( self.clave, c )
+            if xid is None:
+                k = "%s.%s" % (self.clave, c)
             else:
-                k = "%s.%s.%s" % ( self.clave, c, id )
+                k = "%s.%s.%s" % (self.clave, c, xid)
 
             dic[k] = v
 
@@ -160,12 +160,12 @@ class Columna:
 
         @param dic: diccionario con los datos del modulo al que pertenece la columna.
         """
-        id = grid.id
+        xid = grid.id
 
         def x(varTxt, varInt, tipo="t"):
-            clave = "%s.%s" % ( self.clave, varTxt )
-            if id:
-                clave += ".%s" % id
+            clave = "%s.%s" % (self.clave, varTxt)
+            if xid:
+                clave += ".%s" % xid
             if clave in dic:
                 v = dic[clave]
                 if tipo == "n":
@@ -201,7 +201,7 @@ class Columna:
         """
         try:
             if self.siFormExec:
-                exec ( self.formula, {}, dicLocals )
+                exec (self.formula, {}, dicLocals)
                 if "resultado" in dicLocals:
                     resultado = str(dicLocals["resultado"])
                 else:

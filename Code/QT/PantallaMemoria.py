@@ -3,13 +3,13 @@ import time
 
 from PyQt4 import QtCore, QtGui
 
-import Code.ControlPosicion as ControlPosicion
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Tablero as Tablero
+from Code import ControlPosicion
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
 
 class WDatos(QtGui.QDialog):
     def __init__(self, wParent, txtcategoria, maxNivel):
@@ -81,7 +81,7 @@ class WMemoria(QTVarios.WDialogo):
 
         # Ayuda
         lbAyuda = Controles.LB(self, _(
-            "<ul><li><b>Add piece</b> : Right mouse button on empty square</li><li><b>Copy piece</b> : Left mouse button on empty square</li><li><b>Move piece</b> : Drag and drop piece with left mouse button</li><li><b>Delete piece</b> : Right mouse button on occupied square</li></ul>"))
+                "<ul><li><b>Add piece</b> : Right mouse button on empty square</li><li><b>Copy piece</b> : Left mouse button on empty square</li><li><b>Move piece</b> : Drag and drop piece with left mouse button</li><li><b>Delete piece</b> : Right mouse button on occupied square</li></ul>"))
         ly = Colocacion.H().control(lbAyuda)
         self.gbAyuda = Controles.GB(self, _("Help"), ly)
 
@@ -93,10 +93,10 @@ class WMemoria(QTVarios.WDialogo):
 
         # Rotulo de tiempo
         self.rotuloDispone = Controles.LB(self,
-            _X(_("You have %1 seconds to remember the position of %2 pieces"), str(self.segundos),
-               str(self.nivel + 3))).ponWrap().ponFuente(f).alinCentrado()
+                                          _X(_("You have %1 seconds to remember the position of %2 pieces"), str(self.segundos),
+                                             str(self.nivel + 3))).ponWrap().ponFuente(f).alinCentrado()
         self.rotuloDispone1 = Controles.LB(self, _("when you know you can press the Continue button")).ponWrap().ponFuente(
-            f).alinCentrado()
+                f).alinCentrado()
         ly = Colocacion.V().control(self.rotuloDispone).control(self.rotuloDispone1)
         self.gbTiempo = Controles.GB(self, "", ly)
 
@@ -104,13 +104,13 @@ class WMemoria(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Start"), Iconos.Empezar(), "empezar" ),
-            ( _("Continue"), Iconos.Pelicula_Seguir(), "seguir" ),
-            ( _("Check"), Iconos.Check(), "comprobar" ),
-            ( _("Target"), Iconos.Verde32(), "objetivo" ),
-            ( _("Wrong"), Iconos.Rojo32(), "nuestro" ),
-            ( _("Repeat"), Iconos.Pelicula_Repetir(), "repetir" ),
-            ( _("Resign"), Iconos.Abandonar(), "abandonar" ),
+            (_("Start"), Iconos.Empezar(), "empezar"),
+            (_("Continue"), Iconos.Pelicula_Seguir(), "seguir"),
+            (_("Check"), Iconos.Check(), "comprobar"),
+            (_("Target"), Iconos.Verde32(), "objetivo"),
+            (_("Wrong"), Iconos.Rojo32(), "nuestro"),
+            (_("Repeat"), Iconos.Pelicula_Repetir(), "repetir"),
+            (_("Resign"), Iconos.Abandonar(), "abandonar"),
         )
         self.tb = tb = Controles.TB(self, liAcciones)
         self.ponToolBar(["empezar"])
@@ -166,13 +166,13 @@ class WMemoria(QTVarios.WDialogo):
 
         liOpciones = []
         if not siK:
-            liOpciones.append(( _("King"), "K"))
+            liOpciones.append((_("King"), "K"))
         liOpciones.extend(
-            [( _("Queen"), "Q"), (_("Rook"), "R"), (_("Bishop"), "B"), (_("Knight"), "N"), (_("Pawn"), "P")])
+                [(_("Queen"), "Q"), (_("Rook"), "R"), (_("Bishop"), "B"), (_("Knight"), "N"), (_("Pawn"), "P")])
         if not sik:
-            liOpciones.append(( _("King"), "k"))
+            liOpciones.append((_("King"), "k"))
         liOpciones.extend(
-            [( _("Queen"), "q"), (_("Rook"), "r"), (_("Bishop"), "b"), (_("Knight"), "n"), (_("Pawn"), "p")])
+                [(_("Queen"), "q"), (_("Rook"), "r"), (_("Bishop"), "b"), (_("Knight"), "n"), (_("Pawn"), "p")])
 
         for txt, pieza in liOpciones:
             icono = self.tablero.piezas.icono(pieza)
@@ -250,7 +250,7 @@ class WMemoria(QTVarios.WDialogo):
         self.ponToolBar(["seguir"])
 
         self.rotuloDispone.ponTexto(
-            _X(_("You have %1 seconds to remember the position of %2 pieces"), str(self.segundos), str(self.nivel + 3)))
+                _X(_("You have %1 seconds to remember the position of %2 pieces"), str(self.segundos), str(self.nivel + 3)))
         self.rotuloDispone1.ponTexto(_("when you know you can press the Continue button"))
         self.rotuloDispone1.show()
         self.rotuloDispone1.show()
@@ -271,7 +271,7 @@ class WMemoria(QTVarios.WDialogo):
         self.ponToolBar(["comprobar"])
 
         self.rotuloDispone1.ponTexto(
-            _X(_("When you've loaded the %1 pieces you can click the Check button"), str(self.nivel + 3)))
+                _X(_("When you've loaded the %1 pieces you can click the Check button"), str(self.nivel + 3)))
         self.rotuloDispone.setVisible(False)
 
         self.iniTiempo = time.time()
@@ -337,7 +337,7 @@ class WMemoria(QTVarios.WDialogo):
 
     def repetir(self):
         self.rotuloDispone.ponTexto(
-            _X(_("You have %1 seconds to remember the position of %2 pieces"), str(self.segundos), str(self.nivel + 3)))
+                _X(_("You have %1 seconds to remember the position of %2 pieces"), str(self.segundos), str(self.nivel + 3)))
         self.rotuloDispone.show()
         self.rotuloDispone1.hide()
         self.gbTiempo.show()
@@ -348,8 +348,8 @@ class WMemoria(QTVarios.WDialogo):
         self.tiempoPendiente -= 1
 
         self.rotuloDispone.ponTexto(
-            _X(_("You have %1 seconds to remember the position of %2 pieces"), str(self.tiempoPendiente),
-               str(self.nivel + 3)))
+                _X(_("You have %1 seconds to remember the position of %2 pieces"), str(self.tiempoPendiente),
+                   str(self.nivel + 3)))
         if self.tiempoPendiente == 0:
             self.seguir()
 

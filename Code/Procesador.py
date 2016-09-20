@@ -1,61 +1,69 @@
-import sys
 import os
 import random
+import sys
 
+from Code import Albums
+from Code import CPU
+from Code import Configuracion
+from Code import ControlPosicion
+from Code import Entrenamientos
+from Code import GestorAlbum
+from Code import GestorElo
+from Code import GestorEntMaq
+from Code import GestorEntPos
+from Code import GestorEverest
+from Code import GestorFideFics
+from Code import GestorMateMap
+from Code import GestorMicElo
+from Code import GestorNueva
+from Code import GestorPGN
+from Code import GestorPerson
+from Code import GestorRoutes
+from Code import GestorSolo
+from Code import GestorPartida
+from Code import GestorTorneo
+from Code import Presentacion
+from Code import GestorWashing
+from Code.QT import DatosNueva
+from Code.QT import Iconos
+from Code.QT import Info
+from Code.QT import Pantalla
+from Code.QT import PantallaAlbumes
+from Code.QT import PantallaAperturas
+from Code.QT import PantallaBMT
+from Code.QT import PantallaColores
+from Code.QT import PantallaConfig
+from Code.QT import PantallaEntMaq
+from Code.QT import PantallaEverest
+from Code.QT import PantallaFavoritos
+from Code.QT import PantallaMotores
+from Code.QT import PantallaRoutes
+from Code.QT import PantallaSTS
+from Code.QT import PantallaSonido
+from Code.QT import PantallaTorneos
+from Code.QT import PantallaUsuarios
+from Code.QT import PantallaWashing
+from Code.QT import PantallaWorkMap
+from Code.QT import Piezas
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import WBDatabase
+# from Code.QT import WBDatabaseFEN # TODO
+from Code.QT import WBGuide
+from Code import Routes
+from Code import Util
+from Code import VarGen
+from Code import XGestorMotor
+from Code import XMotor
 from Code.Constantes import *
-import Code.Configuracion as Configuracion
-import Code.VarGen as VarGen
-import Code.LCOS as LCOS
-import Code.ControlPosicion as ControlPosicion
-import Code.XGestorMotor as XGestorMotor
-import Code.Util as Util
-import Code.CPU as CPU
-import Code.Presentacion as Presentacion
-import Code.Albums as Albums
-import Code.Entrenamientos as Entrenamientos
-import Code.GestorMateMap as GestorMateMap
-import Code.GestorNueva as GestorNueva
-import Code.GestorEntPos as GestorEntPos
-import Code.GestorElo as GestorElo
-import Code.GestorMicElo as GestorMicElo
-import Code.GestorFideFics as GestorFideFics
-import Code.GestorSolo as GestorSolo
-# import Code.GestorXFCC as GestorXFCC
-import Code.GestorPGN as GestorPGN
-import Code.GestorEntMaq as GestorEntMaq
-import Code.GestorTorneo as GestorTorneo
-import Code.GestorAlbum as GestorAlbum
-import Code.QT.Piezas as Piezas
-import Code.QT.DatosNueva as DatosNueva
-import Code.QT.Pantalla as Pantalla
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Iconos as Iconos
-import Code.QT.PantallaConfig as PantallaConfig
-import Code.QT.PantallaMotores as PantallaMotores
-import Code.QT.PantallaSonido as PantallaSonido
-import Code.QT.PantallaColores as PantallaColores
-# import Code.QT.PantallaXFCC as PantallaXFCC
-import Code.QT.Info as Info
-import Code.QT.PantallaEntMaq as PantallaEntMaq
-import Code.QT.PantallaUsuarios as PantallaUsuarios
-import Code.QT.PantallaAperturas as PantallaAperturas
-import Code.QT.PantallaFavoritos as PantallaFavoritos
-import Code.QT.PantallaTorneos as PantallaTorneos
-import Code.QT.PantallaSTS as PantallaSTS
-import Code.QT.PantallaAlbumes as PantallaAlbumes
-import Code.QT.WBGuide as WBGuide
-import Code.QT.WBDatabase as WBDatabase
-import Code.QT.WBDatabaseFEN as WBDatabaseFEN
-import Code.QT.PantallaWorkMap as PantallaWorkMap
-import Code.QT.PantallaVoice as PantallaVoice
-import Code.QT.PantallaBMT as PantallaBMT
 
-class Procesador():
+class Procesador:
     """
     Vinculo entre pantalla y gestores
     """
+    def __init__(self):
+        self.liEngines = []
 
     def iniciaConUsuario(self, user):
 
@@ -64,8 +72,8 @@ class Procesador():
         self.web = "http://www-lucaschess.rhcloud.com"
         self.blog = "http://lucaschess.blogspot.com"
 
-        self.liOpcionesInicio = [   k_terminar, k_play, k_competicion, k_elo,
-                                    k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
+        self.liOpcionesInicio = [k_terminar, k_play, k_competicion, k_elo,
+                                 k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
 
         self.configuracion = Configuracion.Configuracion(user)
         self.configuracion.start(self.version)
@@ -84,6 +92,7 @@ class Procesador():
 
         self.xrival = None
         self.xtutor = None  # creaTutor lo usa asi que hay que definirlo antes
+        self.xanalyzer = None  # cuando se juega GestorEntMaq y el tutor danzando a toda maquina, se necesita otro diferente
 
         self.replay = None
         self.replayBeep = None
@@ -91,7 +100,6 @@ class Procesador():
         self.liKibitzersActivas = []
 
         self.liEngines = []
-        self.xtutor = None
 
     def setVersion(self, version):
         self.version = version
@@ -132,9 +140,9 @@ class Procesador():
                 elif comandoL.endswith(".lcg"):
                     self.externDatabase(comando)
                     return
-                elif comandoL.endswith(".lcf"):
-                    self.externDatabaseFEN(comando)
-                    return
+                # elif comandoL.endswith(".lcf"): # TODO
+                #     self.externDatabaseFEN(comando)
+                #     return
                 elif comandoL.endswith(".bmt"):
                     self.inicio()
                     self.externBMT(comando)
@@ -217,7 +225,10 @@ class Procesador():
             self.gestor = GestorNueva.GestorNueva(self)
             self.gestor.inicio(categoria, nivel, siBlancas, puntos, aplazamiento)
         elif tipoJuego == kJugEntMaq:
-            self.entrenaMaquina(None, aplazamiento)
+            if aplazamiento["MODO"] == "Basic":
+                self.entrenaMaquina(None, aplazamiento)
+            else:
+                self.playPersonAplazada(aplazamiento)
         elif tipoJuego == kJugElo:
             self.gestor = GestorElo.GestorElo(self)
             self.gestor.inicio(None, aplazamiento["SICOMPETITIVO"], aplazamiento)
@@ -233,12 +244,13 @@ class Procesador():
             self.jugarSolo(fichero=sys.argv[1])
         elif tipoJuego in (kJugFics, kJugFide):
             self.gestor = GestorFideFics.GestorFideFics(self)
-            self.gestor.selecciona("Fics" if tipoJuego == kJugFics else "Fide" )
+            self.gestor.selecciona("Fics" if tipoJuego == kJugFics else "Fide")
             self.gestor.inicio(aplazamiento["IDGAME"], aplazamiento["SICOMPETITIVO"], aplazamiento=aplazamiento)
 
     def XTutor(self):
-        if not self.xtutor:
-            self.creaXTutor()
+        # if not self.xtutor:
+            # self.creaXTutor()
+        self.cambiaXTutor()
         return self.xtutor
 
     def creaXTutor(self):
@@ -247,7 +259,7 @@ class Procesador():
         if self.configuracion.tutorMultiPV == 0:
             xtutor.maximizaMultiPV()
         else:
-            xtutor.actMultiPV(self.configuracion.tutorMultiPV)
+            xtutor.setMultiPV(self.configuracion.tutorMultiPV)
 
         self.xtutor = xtutor
         VarGen.xtutor = xtutor
@@ -258,8 +270,33 @@ class Procesador():
         if self.xtutor:
             self.xtutor.terminar()
         self.creaXTutor()
+        self.cambiaXAnalyzer()
 
-    def creaGestorMotor(self, confMotor, tiempo, nivel, siMultiPV=False, priority=LCOS.NORMAL):
+    def XAnalyzer(self):
+        if not self.xanalyzer:
+            self.creaXAnalyzer()
+        self.cambiaXAnalyzer()
+        return self.xanalyzer
+
+    def creaXAnalyzer(self):
+        xanalyzer = XGestorMotor.GestorMotor(self, self.configuracion.tutor)
+        xanalyzer.opciones(self.configuracion.tiempoTutor, None, True)
+        if self.configuracion.tutorMultiPV == 0:
+            xanalyzer.maximizaMultiPV()
+        else:
+            xanalyzer.setMultiPV(self.configuracion.tutorMultiPV)
+
+        self.xanalyzer = xanalyzer
+        VarGen.xanalyzer = xanalyzer
+
+        self.liEngines.append(xanalyzer)
+
+    def cambiaXAnalyzer(self):
+        if self.xanalyzer:
+            self.xanalyzer.terminar()
+        self.creaXAnalyzer()
+
+    def creaGestorMotor(self, confMotor, tiempo, nivel, siMultiPV=False, priority=XMotor.PRIORITY_NORMAL):
         xgestor = XGestorMotor.GestorMotor(self, confMotor)
         xgestor.opciones(tiempo, nivel, siMultiPV)
         xgestor.setPriority(priority)
@@ -267,8 +304,8 @@ class Procesador():
         return xgestor
 
     def pararMotores(self):
-        for xmotor in self.liEngines:
-            xmotor.terminar()
+        for xgestormotor in self.liEngines:
+            xgestormotor.terminar()
         self.liEngines = []
 
     def cambiaRival(self, nuevo):
@@ -280,66 +317,77 @@ class Procesador():
 
     def menuPlay(self):
         menu = QTVarios.LCMenu(self.pantalla)
-        menu.opcion(k_libre, _("Play against an engine of your choice"), Iconos.Libre())
+        menu.opcion(("free", None), _("Play against an engine of your choice"), Iconos.Libre())
         menu.separador()
 
         # Principiantes ----------------------------------------------------------------------------------------
         menu1 = menu.submenu(_("Opponents for young players"), Iconos.RivalesMP())
 
-        menu1.opcion(1000 + kMP_1, _("Monkey"), Iconos.Monkey())
-        menu1.opcion(1000 + kMP_2, _("Donkey"), Iconos.Donkey())
-        menu1.opcion(1000 + kMP_3, _("Bull"), Iconos.Bull())
-        menu1.opcion(1000 + kMP_4, _("Wolf"), Iconos.Wolf())
-        menu1.opcion(1000 + kMP_5, _("Lion"), Iconos.Lion())
-        menu1.opcion(1000 + kMP_6, _("Rat"), Iconos.Rat())
-        menu1.opcion(1000 + kMP_7, _("Snake"), Iconos.Snake())
+        for name, trans, ico in QTVarios.list_irina():
+            menu1.opcion(("person", name), trans, ico)
         menu1.separador()
 
         menu2 = menu1.submenu(_("Albums of animals"), Iconos.Penguin())
         albumes = Albums.AlbumesAnimales()
-        dic = albumes.listaMenu()
+        dic = albumes.list_menu()
         anterior = None
         for animal in dic:
             siDeshabilitado = False
             if anterior and not dic[anterior]:
                 siDeshabilitado = True
-            menu2.opcion(( "animales", animal ), _F(animal), Iconos.icono(animal), siDeshabilitado=siDeshabilitado)
+            menu2.opcion(("animales", animal), _F(animal), Iconos.icono(animal), siDeshabilitado=siDeshabilitado)
             anterior = animal
         menu1.separador()
 
         menu2 = menu1.submenu(_("Albums of vehicles"), Iconos.Wheel())
         albumes = Albums.AlbumesVehicles()
-        dic = albumes.listaMenu()
+        dic = albumes.list_menu()
         anterior = None
         for character in dic:
             siDeshabilitado = False
             if anterior and not dic[anterior]:
                 siDeshabilitado = True
-            menu2.opcion(( "vehicles", character ), _F(character), Iconos.icono(character),
+            menu2.opcion(("vehicles", character), _F(character), Iconos.icono(character),
                          siDeshabilitado=siDeshabilitado)
             anterior = character
 
         resp = menu.lanza()
         if resp:
-            if resp == k_libre:
-                self.procesarAccion(resp)
+            tipo, rival = resp
+            if tipo == "free":
+                self.procesarAccion(k_libre)
 
-            elif type(resp) == int:
-                rival = resp - 1000
-                uno = QTVarios.blancasNegrasTiempo(self.pantalla)
-                if uno:
-                    siBlancas, siTiempo, minutos, segundos = uno
-                    if siBlancas is not None:
-                        if not siTiempo:
-                            minutos = None
-                            segundos = None
-                        self.entrenaRivalesMPC(siBlancas, rival, rival >= kMP_6, minutos, segundos)
-            else:
-                tipo, cual = resp
-                if tipo == "animales":
-                    self.albumAnimales(cual)
-                elif tipo == "vehicles":
-                    self.albumVehicles(cual)
+            elif tipo == "person":
+                self.playPerson(rival)
+            elif tipo == "animales":
+                self.albumAnimales(rival)
+            elif tipo == "vehicles":
+                self.albumVehicles(rival)
+
+    def playPersonAplazada(self, aplazamiento):
+        self.gestor = GestorPerson.GestorPerson(self)
+        self.gestor.inicio(None, aplazamiento=aplazamiento)
+
+    def playPerson(self, rival):
+        uno = QTVarios.blancasNegrasTiempo(self.pantalla)
+        if not uno:
+            return
+        siBlancas, siTiempo, minutos, segundos, fastmoves = uno
+        if siBlancas is None:
+            return
+
+        dic = {}
+        dic["SIBLANCAS"] = siBlancas
+        dic["RIVAL"] = rival
+
+        dic["SITIEMPO"] = siTiempo and minutos > 0
+        dic["MINUTOS"] = minutos
+        dic["SEGUNDOS"] = segundos
+
+        dic["FASTMOVES"] = fastmoves
+
+        self.gestor = GestorPerson.GestorPerson(self)
+        self.gestor.inicio(dic)
 
     def reabrirAlbum(self, album):
         tipo, nombre = album.claveDB.split("_")
@@ -350,8 +398,8 @@ class Procesador():
 
     def albumAnimales(self, animal):
         albumes = Albums.AlbumesAnimales()
-        album = albumes.getAlbum(animal)
-        album.compruebaTerminado()
+        album = albumes.get_album(animal)
+        album.test_finished()
         cromo, siRebuild = PantallaAlbumes.eligeCromo(self.pantalla, self, album)
         if cromo is None:
             if siRebuild:
@@ -364,8 +412,8 @@ class Procesador():
 
     def albumVehicles(self, character):
         albumes = Albums.AlbumesVehicles()
-        album = albumes.getAlbum(character)
-        album.compruebaTerminado()
+        album = albumes.get_album(character)
+        album.test_finished()
         cromo, siRebuild = PantallaAlbumes.eligeCromo(self.pantalla, self, album)
         if cromo is None:
             if siRebuild:
@@ -426,30 +474,22 @@ class Procesador():
         menu1.opcion(self.size_main, _("Main board"), Iconos.PuntoVerde())
         menu1.separador()
         menu2 = menu1.submenu(_("Tutor board"), Iconos.PuntoAzul())
-        for txt, size in (   ( _("Large"), 64 ),
-                             ( _("Medium"), 48 ),
-                             ( _("Medium-small"), 32 ),
-                             ( _("Small"), 24 ),
-                             ( _("Very small"), 16 ) ):
-            menu2.opcion( (self.size_tutor, size), txt, Iconos.PuntoNaranja())
+        for txt, size in ((_("Large"), 64),
+                          (_("Medium"), 48),
+                          (_("Medium-small"), 32),
+                          (_("Small"), 24),
+                          (_("Very small"), 16)):
+            menu2.opcion((self.size_tutor, size), txt, Iconos.PuntoNaranja())
             menu2.separador()
 
         menu.separador()
         menu1 = menu.submenu(_("Sound"), Iconos.SoundTool())
         menu1.opcion(self.sonidos, _("Custom sounds"), Iconos.S_Play())
-        if self.configuracion.voice:
-            menu1.separador()
-            menu2 = menu1.submenu(_("Test voice"), Iconos.S_Microfono())
-            menu2.opcion( (self.voice, "word"), _("Words"), Iconos.Words())
-            menu2.opcion( (self.voice, "position"), _("Positions"), Iconos.Voyager())
-            menu2.opcion( (self.voice, "pgn"), _("Games"), Iconos.InformacionPGN())
-        menu1.separador()
-        menu2 = menu1.submenu(_("Import voices"), Iconos.Importar())
-        menu2.opcion( (self.voiceImport, "en_us"), _("English") + " US", Iconos.PuntoVerde() )
-        menu2.opcion( (self.voiceImport, "es"), _("Spanish"), Iconos.PuntoRojo() )
-
         menu.separador()
         menu.opcion(self.favoritos, _("Training favorites"), Iconos.Corazon())
+
+        menu.separador()
+        menu.opcion(self.setPassword, _("Set password"), Iconos.Password())
 
         if self.configuracion.siMain:
             menu.separador()
@@ -493,24 +533,13 @@ class Procesador():
         w = PantallaSonido.WSonidos(self)
         w.exec_()
 
-    def voice(self, tipo):
-        if tipo == "word":
-            w = PantallaVoice.WVoiceWordsTest(self)
-        elif tipo == "position":
-            w = PantallaVoice.WVoicePositionsTest(self)
-        elif tipo == "pgn":
-            w = PantallaVoice.WVoicePGNsTest(self)
-        w.exec_()
-
-    def voiceImport( self, lng):
-        PantallaVoice.importVoice(self.pantalla, lng, self.configuracion)
-
     def favoritos(self):
         PantallaFavoritos.miraFavoritos(self.entrenamientos)
 
     def folder_change(self):
         carpeta = QTUtil2.leeCarpeta(self.pantalla, self.configuracion.carpeta,
-                                     _("Change the folder where all data is saved") + "\n" + _("Be careful please"))
+                                     _("Change the folder where all data is saved") + "\n" + _(
+                                         "Be careful please"))
         if carpeta:
             if os.path.isdir(carpeta):
                 self.configuracion.changeActiveFolder(carpeta)
@@ -538,6 +567,9 @@ class Procesador():
 
     def usuarios(self):
         PantallaUsuarios.editaUsuarios(self)
+
+    def setPassword(self):
+        PantallaUsuarios.setPassword(self)
 
     def elo(self):
         menu = QTVarios.LCMenu(self.pantalla)
@@ -591,14 +623,14 @@ class Procesador():
     def ficselo(self, siCompetitivo, nivel):
         self.gestor = GestorFideFics.GestorFideFics(self)
         self.gestor.selecciona("Fics")
-        id = self.gestor.eligeJuego(siCompetitivo, nivel)
-        self.gestor.inicio(id, siCompetitivo)
+        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
+        self.gestor.inicio(xid, siCompetitivo)
 
     def fideelo(self, siCompetitivo, nivel):
         self.gestor = GestorFideFics.GestorFideFics(self)
         self.gestor.selecciona("Fide")
-        id = self.gestor.eligeJuego(siCompetitivo, nivel)
-        self.gestor.inicio(id, siCompetitivo)
+        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
+        self.gestor.inicio(xid, siCompetitivo)
 
     def trainingMap(self, mapa):
         resp = PantallaWorkMap.train_map(self, mapa)
@@ -628,16 +660,8 @@ class Procesador():
 
         menu1 = menu.submenu(_("Database"), Iconos.Database())
         menu1.opcion("database", _("Complete games"), Iconos.DatabaseC())
-        menu1.separador()
-        menu1.opcion("databaseFEN", _("Positions"), Iconos.DatabaseF())
-        menu.separador()
-
-        menu1 = menu.submenu(_("Engines"), Iconos.Motores())
-        menu1.opcion("torneos", _("Tournaments between engines"), Iconos.Torneos())
-        menu1.separador()
-        menu1.opcion("motores", _("External engines"), Iconos.Motores())
-        menu1.separador()
-        menu1.opcion("sts", _("STS: Strategic Test Suite"), Iconos.STS())
+        # menu1.separador()
+        # menu1.opcion("databaseFEN", _("Positions"), Iconos.DatabaseF()) # TODO
         menu.separador()
 
         menu1 = menu.submenu(_("Openings"), Iconos.Aperturas())
@@ -647,25 +671,13 @@ class Procesador():
         menu.separador()
         menu.separador()
 
-        # menu1 = menu.submenu(_("Correspondence Chess"), Iconos.XFCC())
-        # liRemoves = []
-        # for f in Util.listfiles(self.configuracion.carpeta, "*.xfcc"):
-            # nomf = os.path.basename(f)[:-5]
-            # x = nomf.rfind("_")
-            # if x > 0:
-                # user = nomf[x + 1:].lower()
-                # server = nomf[:x]
-                # menu1.opcion("xfcc|%s|%s|%s" % (user, server, f), "%s: %s" % (server, user), Iconos.PuntoAzul())
-                # menu1.separador()
-                # liRemoves.append((user, server, f))
-
-        # menu1.opcion("xfcc_nuevo", _("New link"), Iconos.Mas())
-        # if liRemoves:
-            # menu1.separador()
-            # menu2 = menu1.submenu(_("Remove"), Iconos.Delete())
-            # for user, server, f in liRemoves:
-                # menu2.opcion("del_xfcc|%s|%s|%s" % (user, server, f), "%s: %s" % (server, user), Iconos.PuntoNaranja())
-                # menu2.separador()
+        menu1 = menu.submenu(_("Engines"), Iconos.Motores())
+        menu1.opcion("torneos", _("Tournaments between engines"), Iconos.Torneos())
+        menu1.separador()
+        menu1.opcion("sts", _("STS: Strategic Test Suite"), Iconos.STS())
+        menu1.separador()
+        menu1.opcion("motores", _("External engines"), Iconos.Motores())
+        menu.separador()
 
         resp = menu.lanza()
         if resp:
@@ -684,20 +696,14 @@ class Procesador():
 
             elif resp == "database":
                 self.database()
-            elif resp == "databaseFEN":
-                self.databaseFEN()
+            # elif resp == "databaseFEN": # TODO
+            #     self.databaseFEN()
 
             elif resp == "aperturaspers":
                 self.aperturaspers()
             elif resp == "bookguide":
                 w = WBGuide.WBGuide(self.pantalla, self)
                 w.exec_()
-
-            # elif resp.startswith("xfcc"):
-                # self.xfcc(resp)
-
-            # elif resp.startswith("del_xfcc"):
-                # self.xfccDel(resp)
 
     def externBMT(self, fichero):
         self.configuracion.ficheroBMT = fichero
@@ -712,39 +718,14 @@ class Procesador():
         w = WBDatabase.WBDatabase(self.pantalla, self)
         w.exec_()
 
-    def externDatabaseFEN(self, fichero):
-        self.configuracion.ficheroDBgamesFEN = fichero
-        self.databaseFEN()
-        self.procesarAccion(k_terminar)
+    # def externDatabaseFEN(self, fichero): # TODO
+    #     self.configuracion.ficheroDBgamesFEN = fichero
+    #     self.databaseFEN()
+    #     self.procesarAccion(k_terminar)
 
-    def databaseFEN(self):
-        w = WBDatabaseFEN.WBDatabaseFEN(self.pantalla, self)
-        w.exec_()
-
-    # def xfcc(self, orden):
-        # dicServ = GestorXFCC.dicServers()
-        # if orden == "xfcc_nuevo":
-            # resp = PantallaXFCC.newServerUser(self.pantalla, dicServ)
-            # if resp:
-                # server, user, password = resp
-                # db = GestorXFCC.DB_XFCC(self.configuracion.carpeta, server, user, dicServ[server], password)
-            # else:
-                # return
-        # else:
-            # nada, user, server, fich = orden.split("|")
-            # for k in dicServ:
-                # if k.lower() == server.lower():
-                    # server = k
-                    # break
-            # db = GestorXFCC.DB_XFCC(self.configuracion.carpeta, server, user, dicServ[server])
-        # if PantallaXFCC.pantallaXFCC(self, db):
-            # self.gestor = GestorXFCC.GestorXFCC(self)
-            # self.gestor.inicio(db)
-
-    # def xfccDel(self, orden):
-        # nada, user, server, fich = orden.split("|")
-        # if QTUtil2.pregunta(self.pantalla, _X(_("Delete %1?"), "%s: %s" % (server, user))):
-            # os.remove(fich)
+    # def databaseFEN(self): # TODO
+    #     w = WBDatabaseFEN.WBDatabaseFEN(self.pantalla, self)
+    #     w.exec_()
 
     def torneos(self):
         xjugar = PantallaTorneos.torneos(self.pantalla)
@@ -810,30 +791,69 @@ class Procesador():
         self.gestor.ponEntreno(entreno)
         self.gestor.inicio(posicion, nPosiciones, titentreno, liEntrenamientos, jump=jump)
 
-    def informacion(self):
+    def playRoute(self, route):
+        if route.state == Routes.BETWEEN:
+            self.gestor = GestorRoutes.GestorRoutesTactics(self)
+            self.estado = kJugando
+            self.tipoJuego = kJugEntPos
+            self.gestor.inicio(route)
+        elif route.state == Routes.ENDING:
+            self.gestor = GestorRoutes.GestorRoutesEndings(self)
+            self.estado = kJugando
+            self.tipoJuego = kJugEntPos
+            self.gestor.inicio(route)
+        elif route.state == Routes.PLAYING:
+            self.gestor = GestorRoutes.GestorRoutesPlay(self)
+            self.estado = kJugando
+            self.tipoJuego = kJugEntMaq
+            self.gestor.inicio(route)
 
+    def showRoute(self):
+        PantallaRoutes.train_train(self)
+
+    def playEverest(self, recno):
+        self.gestor = GestorEverest.GestorEverest(self)
+        self.estado = kJugando
+        self.tipoJuego = kJugEntMaq
+        self.gestor.inicio(recno)
+
+    def showEverest(self, recno):
+        if PantallaEverest.show_expedition(self.pantalla, self.configuracion, recno):
+            self.playEverest(recno)
+
+    def showTurnOnLigths(self, name):
+        self.entrenamientos.turn_on_lights(name)
+
+    def playWashing(self):
+        GestorWashing.gestorWashing(self)
+
+    def showWashing(self):
+        if PantallaWashing.pantallaWashing(self):
+            self.playWashing()
+
+    def informacion(self):
         liBlog = (
-            ( "Director ", "http://lucaschess.blogspot.com.es/2012/05/director.html" ),
+            ("Director", "http://lucaschess.blogspot.com.es/2012/05/director.html"),
             ("Tactical training with your own blunders",
-             "http://lucaschess.blogspot.com.es/2011/11/tactical-training-with-your-own.html" ),
-            ( "Announcements sounds", "http://lucaschess.blogspot.com.es/2011/10/announcements-sounds.html" ),
+             "http://lucaschess.blogspot.com.es/2011/11/tactical-training-with-your-own.html"),
+            ("Announcements sounds", "http://lucaschess.blogspot.com.es/2011/10/announcements-sounds.html"),
             ("Personalities in Game against an engine of your choice",
-             "http://lucaschess.blogspot.com.es/2011/09/version-60-beta-1-personalities.html" ),
+             "http://lucaschess.blogspot.com.es/2011/09/version-60-beta-1-personalities.html"),
             ("Training favourites and Your daily test",
-             "http://lucaschess.blogspot.com.es/2011/09/version-60-dev4-with-favourites-and.html" ),
+             "http://lucaschess.blogspot.com.es/2011/09/version-60-dev4-with-favourites-and.html"),
             (
                 "Captured material panel",
-                "http://lucaschess.blogspot.com.es/2011/06/version-53-captures-and-more.html" ),
+                "http://lucaschess.blogspot.com.es/2011/06/version-53-captures-and-more.html"),
             ("Learn openings by repetition",
-             "http://lucaschess.blogspot.com.es/2011/06/version-52-standard-openings.html" ),
-            ( "Kibitzers", "http://lucaschess.blogspot.com.es/2011/06/version-51-with-kibitzers.html" ),
+             "http://lucaschess.blogspot.com.es/2011/06/version-52-standard-openings.html"),
+            ("Kibitzers", "http://lucaschess.blogspot.com.es/2011/06/version-51-with-kibitzers.html"),
             ("Training mate positions",
-             "http://lucaschess.blogspot.com.es/2011/03/new-option-training-mate-positions.html" ),
+             "http://lucaschess.blogspot.com.es/2011/03/new-option-training-mate-positions.html"),
         )
 
         menu = QTVarios.LCMenu(self.pantalla)
 
-        menu.opcion( "docs", _("Documents"), Iconos.Ayuda())
+        menu.opcion("docs", _("Documents"), Iconos.Ayuda())
         menu.separador()
         menu.opcion("web", _("Homepage"), Iconos.Web())
         menu.separador()
@@ -843,8 +863,6 @@ class Procesador():
         for txt, lnk in liBlog:
             menu1.opcion(lnk, txt, Iconos.PuntoAzul())
         menu.separador()
-        # menu.opcion("downloads", _("Downloads"), Iconos.Downloads())
-        # menu.separador()
         menu.opcion("mail", _("Contact") + " (%s)" % "lukasmonk@gmail.com", Iconos.Mail())
         menu.separador()
 
@@ -863,8 +881,6 @@ class Procesador():
             VarGen.startfile(resp)
         elif resp == "web":
             VarGen.startfile("%s/index?lang=%s" % (self.web, self.configuracion.traductor))
-        # elif resp == "downloads":
-            # VarGen.startfile("https://2dc90e9d4d8c66f3ab71f42ff9cd1b6ab1f26543.googledrive.com/host/0B0D6J3YCrUoublFqc0VGZWw3VVU/release/")
         elif resp == "mail":
             VarGen.startfile("mailto:lukasmonk@gmail.com")
 
@@ -912,7 +928,6 @@ class Procesador():
         return ProcesadorVariantes(wpantalla, liKibitzersActivas, xtutor, self.liEngines)
 
     def gestorUnPGN(self, wpantalla, pgn, jugadaInicial=None, siGrabar=True):
-
         clonProcesador = ProcesadorVariantes(wpantalla, self.liKibitzersActivas, self.xtutor, self.liEngines)
 
         clonProcesador.gestor = GestorSolo.GestorSolo(clonProcesador)
@@ -922,35 +937,16 @@ class Procesador():
 
         return getattr(clonProcesador, "valorPGN", (None, None, None))
 
-    def entrenaRivalesMPC(self, siBlancas, rival, siApertura, nMinutos, nSegundos):
+    def gestorPartida(self, wpantalla, partidaCompleta, siCompleta):
+        clonProcesador = ProcesadorVariantes(wpantalla, self.liKibitzersActivas, self.xtutor, self.liEngines)
 
-        dic = {}
-        dic["SIBLANCAS"] = siBlancas
-        dic["COLOR"] = "B" if siBlancas else "N"
-        dic["FEN"] = ""
-        dic["AYUDAS"] = 0
-        dic["APERTURA"] = None
-        dic["SIAPERTURA"] = siApertura
+        clonProcesador.gestor = GestorPartida.GestorPartida(clonProcesador)
+        clonProcesador.gestor.inicio(partidaCompleta, siCompleta)
 
-        dr = dic["RIVAL"] = {}
-        dr["MOTOR"] = rival
-        dr["TIEMPO"] = 0
-        dr["PROFUNDIDAD"] = 0
-
-        dr = dic["TUTOR"] = {}
-
-        dr["MOTOR"] = self.configuracion.tutor.claveReal()
-        dr["TIEMPO"] = self.configuracion.tiempoTutor / 100
-        dr["PROFUNDIDAD"] = 0
-
-        dic["SITIEMPO"] = nMinutos > 0
-        if dic["SITIEMPO"]:
-            dic["MINUTOS"] = nMinutos
-            dic["SEGUNDOS"] = nSegundos
-
-        dic["ATRAS"] = True
-
-        self.entrenaMaquina(dic)
+        if clonProcesador.pantalla.muestraVariantes(clonProcesador.gestor.tituloVentana()):
+            return clonProcesador.gestor.partida
+        else:
+            return None
 
     def saveAsPKS(self, estado, partida, pgn):
         dic = GestorSolo.pgn_pks(estado, pgn)
@@ -958,16 +954,22 @@ class Procesador():
 
         return dic
 
-        # def saveAsJSON(self, estado, partida, pgn):
-        # dic = GestorSolo.pgn_json(estado, pgn)
-        # return dic
+    # def saveAsJSON(self, estado, partida, pgn):
+    #     dic = GestorSolo.pgn_json(estado, pgn)
+    #     return dic
 
 class ProcesadorVariantes(Procesador):
+
     def __init__(self, wpantalla, liKibitzersActivas, xtutor, liEngines):
         self.liKibitzersActivas = liKibitzersActivas
 
         # self.configuracion = copy.deepcopy( VarGen.configuracion )
         self.configuracion = VarGen.configuracion
+
+        self.liOpcionesInicio = [k_terminar, k_play, k_competicion, k_elo,
+                                 k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
+
+        self.siPresentacion = False
 
         self.pantalla = Pantalla.Pantalla(self, wpantalla)
         self.pantalla.ponGestor(self)
@@ -977,9 +979,11 @@ class ProcesadorVariantes(Procesador):
         self.teclaPanico = None
         self.xtutor = xtutor
         self.xrival = None
+        self.xanalyzer = None
 
         self.replayBeep = None
 
+        self.posicionInicial = None
+
         self.cpu = CPU.CPU(self.pantalla)
         self.liEngines = liEngines
-

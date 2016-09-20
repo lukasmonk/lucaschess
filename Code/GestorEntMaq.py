@@ -1,27 +1,26 @@
-
+import LCEngine
 from PyQt4 import QtCore
 
+from Code import Analisis
+from Code import Apertura
+from Code import Books
+from Code import ControlPosicion
+from Code import DGT
+from Code import Gestor
+from Code import Jugada
+from Code import Partida
+from Code import Personalidades
+from Code.QT import Iconos
+from Code.QT import Motores
+from Code.QT import PantallaBooks
+from Code.QT import PantallaEntMaq
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Tutor
+from Code import Util
+from Code import VarGen
+from Code import XMotorRespuesta
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Apertura as Apertura
-import Code.ControlPosicion as ControlPosicion
-import Code.Partida as Partida
-import Code.Jugada as Jugada
-import Code.MotorInternoGM as MotorInternoGM
-import Code.Tutor as Tutor
-import Code.XMotorRespuesta as XMotorRespuesta
-import Code.Books as Books
-import Code.MotorInterno as MotorInterno
-import Code.DGT as DGT
-import Code.Gestor as Gestor
-import Code.Personalidades as Personalidades
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Iconos as Iconos
-import Code.QT.PantallaEntMaq as PantallaEntMaq
-import Code.QT.PantallaBooks as PantallaBooks
-import Code.QT.Motores as Motores
 
 class GestorEntMaq(Gestor.Gestor):
     def inicio(self, dic, aplazamiento=None, siPrimeraJugadaHecha=False):
@@ -38,7 +37,7 @@ class GestorEntMaq(Gestor.Gestor):
         self.siAnalizando = False
         self.timekeeper = Util.Timekeeper()
 
-        self.summary = {} # numJugada : "a"ccepted, "s"ame, "r"ejected, dif points, time used
+        self.summary = {}  # numJugada : "a"ccepted, "s"ame, "r"ejected, dif points, time used
         self.siSummary = dic.get("SUMMARY", False)
 
         siBlancas = dic["SIBLANCAS"]
@@ -54,9 +53,7 @@ class GestorEntMaq(Gestor.Gestor):
         self.noMolestar = 0
         self.resignPTS = -99999  # never
 
-        self.siAperturaStd = None
-        self.apertura = None
-        self.siApertura = False
+        self.aperturaObl = self.aperturaStd = None
 
         self.fen = dic["FEN"]
         if self.fen:
@@ -67,24 +64,19 @@ class GestorEntMaq(Gestor.Gestor):
             if "MOVE" in dic:
                 self.partida.leerPV(dic["MOVE"])
         else:
-            self.siApertura = True
+            if dic["APERTURA"]:
+                self.aperturaObl = Apertura.JuegaApertura(dic["APERTURA"].a1h8)
+                self.primeroBook = False  # la apertura es obligatoria
 
         self.pensando(True)
-        if self.siApertura:
-            if dic["APERTURA"]:
-                self.apertura = Apertura.JuegaApertura(dic["APERTURA"].a1h8)
-                self.siAperturaStd = True
-            else:
-                self.apertura = Apertura.AperturaPol(100)  # lee las aperturas
 
         self.book = dic.get("BOOK", None)
         elo = getattr(self.cm, "elo", 0)
-        self.maxMoveBook = elo/200 if 0 <= elo <= 1700 else 9999
+        self.maxMoveBook = elo / 200 if 0 <= elo <= 1700 else 9999
         if self.book:
             self.book.polyglot()
             self.bookRR = dic.get("BOOKRR", "mp")
             self.bookMandatory = dic.get("BOOKMANDATORY", False)
-            self.siApertura = True
         elif dic["RIVAL"].get("TIPO", None) in (Motores.MICGM, Motores.MICPER):
             if self.cm.book:
                 self.book = Books.Libro("P", self.cm.book, self.cm.book, True)
@@ -109,21 +101,20 @@ class GestorEntMaq(Gestor.Gestor):
         if mx > -1:
             self.alturaRotulo3(nBoxHeight)
 
-        self.nAjustarFuerza = dic.get("AJUSTAR", kAjustarMejor)
-        if self.nAjustarFuerza == kAjustarPlayer:
-            self.siApertura = False
-
         dr = dic["RIVAL"]
-        motor = dr["MOTOR"]
-        self.siRivalInterno = type(motor) == type(1)
-        if self.siRivalInterno:
-            self.xrival = MotorInternoGM.GestorMotor(motor, self)
-            self.siApertura = dic["SIAPERTURA"]
+        rival = dr["CM"]
+
+        if dr["TIPO"] == Motores.ELO:
+            r_t = 0
+            r_p = rival.fixed_depth
+            self.nAjustarFuerza = kAjustarMejor
 
         else:
-            rival = dr["CM"]
             r_t = dr["TIEMPO"] * 100  # Se guarda en decimas -> milesimas
             r_p = dr["PROFUNDIDAD"]
+            self.nAjustarFuerza = dic.get("AJUSTAR", kAjustarMejor)
+
+        if not self.xrival: # reiniciando is not None
             if r_t <= 0:
                 r_t = None
             if r_p <= 0:
@@ -133,9 +124,11 @@ class GestorEntMaq(Gestor.Gestor):
             self.xrival = self.procesador.creaGestorMotor(rival, r_t, r_p, self.nAjustarFuerza != kAjustarMejor)
             if self.nAjustarFuerza != kAjustarMejor:
                 self.xrival.maximizaMultiPV()
-            self.resignPTS = dr["RESIGN"]
+        self.resignPTS = dr["RESIGN"]
 
-            self.xrival.ponGuiDispatch(self.guiDispatch, whoDispatch=False)
+        self.siBookAjustarFuerza = self.nAjustarFuerza != kAjustarMejor
+
+        self.xrival.ponGuiDispatch(self.guiDispatch, whoDispatch=False)
 
         self.xtutor.ponGuiDispatch(self.guiDispatch, whoDispatch=True)
 
@@ -161,7 +154,6 @@ class GestorEntMaq(Gestor.Gestor):
         # -Aplazamiento 1/2--------------------------------------------------
         if aplazamiento:
             self.partida.recuperaDeTexto(aplazamiento["JUGADAS"])
-            self.siApertura = False  # Si no no arranca correctamente, no tiene sentido que se aplace en la apertura
             self.partida.pendienteApertura = aplazamiento["PENDIENTEAPERTURA"]
             self.partida.apertura = None if aplazamiento["APERTURA"] is None else self.listaAperturasStd.dic[
                 aplazamiento["APERTURA"]]
@@ -189,7 +181,7 @@ class GestorEntMaq(Gestor.Gestor):
         if not self.siAtras:
             del li[3]
         self.pantalla.ponToolBar(li)
-        self.pantalla.mostrarOpcionToolbar(k_tablas, not self.siRivalInterno)
+        self.pantalla.mostrarOpcionToolbar(k_tablas, True)
 
         self.pantalla.activaJuego(True, self.siTiempo)
 
@@ -202,10 +194,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.quitaAyudas(siQuitarAtras=not self.siAtras)
         self.ponPiezasAbajo(siBlancas)
 
-        if self.siRivalInterno:
-            self.pantalla.base.lbRotulo1.ponImagen(self.xrival.imagen)
-        else:
-            self.ponRotuloBasico()
+        self.ponRotuloBasico()
         if self.ayudasPGN:
             self.ponRotulo2(_("Tutor") + ": <b>" + self.xtutor.nombre)
         else:
@@ -215,7 +204,7 @@ class GestorEntMaq(Gestor.Gestor):
 
         self.pgnRefresh(True)
 
-        #-Aplazamiento 2/2--------------------------------------------------
+        # -Aplazamiento 2/2--------------------------------------------------
         if aplazamiento or "MOVE" in dic:
             self.mueveJugada(kMoverFinal)
 
@@ -326,9 +315,9 @@ class GestorEntMaq(Gestor.Gestor):
 
         elif clave == k_configurar:
             liMasOpciones = []
-            if self.estado == kJugando and not self.siRivalInterno:
+            if self.estado == kJugando:
                 liMasOpciones.append((None, None, None))
-                liMasOpciones.append(( "rival", _("Change opponent"), Iconos.Motor() ))
+                liMasOpciones.append(("rival", _("Change opponent"), Iconos.Motor()))
             resp = self.configurar(liMasOpciones, siSonidos=True, siCambioTutor=self.ayudasPGN > 0)
             if resp == "rival":
                 self.cambioRival()
@@ -336,11 +325,11 @@ class GestorEntMaq(Gestor.Gestor):
         elif clave == k_utilidades:
             liMasOpciones = []
             if self.siJuegaHumano or self.siTerminada():
-                liMasOpciones.append(( "libros", _("Consult a book"), Iconos.Libros() ))
-                liMasOpciones.append(( None, None, None ))
-                liMasOpciones.append(( "bookguide", _("Personal Opening Guide"), Iconos.BookGuide() ))
-                liMasOpciones.append(( None, None, None ))
-                liMasOpciones.append(( "play", _('Play current position'), Iconos.MoverJugar() ))
+                liMasOpciones.append(("libros", _("Consult a book"), Iconos.Libros()))
+                liMasOpciones.append((None, None, None))
+                liMasOpciones.append(("bookguide", _("Personal Opening Guide"), Iconos.BookGuide()))
+                liMasOpciones.append((None, None, None))
+                liMasOpciones.append(("play", _('Play current position'), Iconos.MoverJugar()))
 
             resp = self.utilidades(liMasOpciones)
             if resp == "libros":
@@ -375,13 +364,15 @@ class GestorEntMaq(Gestor.Gestor):
         aplazamiento["EMDIC"] = self.reinicio
 
         aplazamiento["TIPOJUEGO"] = self.tipoJuego
+        aplazamiento["MODO"] = "Basic"
+
         aplazamiento["SIBLANCAS"] = self.siJugamosConBlancas
         aplazamiento["JUGADAS"] = self.partida.guardaEnTexto()
         aplazamiento["SITUTOR"] = self.siTutorActivado
         aplazamiento["AYUDAS"] = self.ayudas
         aplazamiento["SUMMARY"] = self.summary
 
-        aplazamiento["SIAPERTURA"] = self.siApertura
+        aplazamiento["SIAPERTURA"] = self.aperturaStd is not None
         aplazamiento["PENDIENTEAPERTURA"] = self.partida.pendienteApertura
         aplazamiento["APERTURA"] = self.partida.apertura.a1h8 if self.partida.apertura else None
 
@@ -395,7 +386,6 @@ class GestorEntMaq(Gestor.Gestor):
 
     def aplazar(self):
         if QTUtil2.pregunta(self.pantalla, _("Do you want to adjourn the game?")):
-
             self.configuracion.graba(self.genAplazamiento())
             self.pantalla.accept()
 
@@ -404,7 +394,10 @@ class GestorEntMaq(Gestor.Gestor):
         self.pantalla.ponToolBar((k_peliculaSeguir,))
 
     def seguir(self):
+        siabajo = self.tablero.siBlancasAbajo
         self.inicio(None, self.pausaReg, siPrimeraJugadaHecha=True)
+        if siabajo != self.tablero.siBlancasAbajo:
+            self.tablero.rotaTablero()
 
     def finalX(self):
         return self.finalizar()
@@ -462,7 +455,6 @@ class GestorEntMaq(Gestor.Gestor):
                 self.ayudas -= 1
             self.ponAyudasEM()
             self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
-            self.siApertura = False
             if not self.fen:
                 self.listaAperturasStd.asignaApertura(self.partida)
             self.ponteAlFinal()
@@ -477,7 +469,6 @@ class GestorEntMaq(Gestor.Gestor):
             if not resp:
                 self.book = None
                 self.ponRotuloBasico()
-                self.siApertura = False
 
     def reOpenBook(self):
         self.book = self.reinicio.get("BOOK", None)
@@ -496,24 +487,8 @@ class GestorEntMaq(Gestor.Gestor):
 
         siBlancas = self.partida.siBlancas()
 
-        if self.partida.numJugadas() > 0:
-            jgUltima = self.partida.liJugadas[-1]
-            if jgUltima:
-                if jgUltima.siJaqueMate:
-                    self.ponResultado(kGanaRival if self.siJugamosConBlancas == siBlancas else kGanamos)
-                    return
-                if jgUltima.siAhogado:
-                    self.ponResultado(kTablas)
-                    return
-                if jgUltima.siTablasRepeticion:
-                    self.ponResultado(kTablasRepeticion)
-                    return
-                if jgUltima.siTablas50:
-                    self.ponResultado(kTablas50)
-                    return
-                if jgUltima.siTablasFaltaMaterial:
-                    self.ponResultado(kTablasFaltaMaterial)
-                    return
+        if self.checkFinal(siBlancas):
+            return
 
         self.ponIndicador(siBlancas)
         self.refresh()
@@ -524,85 +499,11 @@ class GestorEntMaq(Gestor.Gestor):
             self.testBook()
 
         if siRival:
-            self.pensando(True)
-            self.desactivaTodas()
-
-            self.relojStart(False)
-
-            siEncontrada = False
-            if self.siApertura:
-                if self.partida.ultPosicion.jugadas >= self.maxMoveBook:
-                    self.siApertura = False
-                else:
-                    if self.siAperturaStd:
-                        siEncontrada, desde, hasta, coronacion = self.apertura.juegaMotor(self.fenUltimo())
-                    else:
-                        if self.book:  # Sin apertura estandar, con apertura y libro
-                            siEncontrada, desde, hasta, coronacion = self.eligeJugadaBook()
-                            if siEncontrada:
-                                self.siApertura = False  # para que no haya problemas de busqueda futura, ya seguimos siempre el libro
-                        if not siEncontrada:  # Nada en el libro en su caso buscamos la apertura normal
-                            if self.nAjustarFuerza:
-                                siEncontrada, desde, hasta, coronacion = self.eligeJugadaBookAjustada()
-                            if not siEncontrada and self.apertura:
-                                siEncontrada, desde, hasta, coronacion = self.apertura.juegaMotor(self.fenUltimo())
-                                if not siEncontrada:
-                                    self.siApertura = False
-
-                if not siEncontrada and self.book:  # Sin apertura y con libro
-                    siEncontrada, desde, hasta, coronacion = self.eligeJugadaBook()
-
-            if siEncontrada:
-                self.rmRival = XMotorRespuesta.RespuestaMotor("Apertura", self.siRivalConBlancas)
-                self.rmRival.desde = desde
-                self.rmRival.hasta = hasta
-                self.rmRival.coronacion = coronacion
-
-            else:
-                self.siApertura = False
-                self.timekeeper.start()
-                if self.siTiempo:
-                    tiempoBlancas = self.tiempo[True].tiempoPendiente
-                    tiempoNegras = self.tiempo[False].tiempoPendiente
-
-                    self.rmRival = self.xrival.juegaTiempo(tiempoBlancas, tiempoNegras, self.segundosJugada,
-                                                           nAjustado=self.nAjustarFuerza)
-                    if self.estado == kFinJuego:
-                        return
-                    if self.nAjustarFuerza == kAjustarPlayer:
-                        self.rmRival = self.ajustaPlayer(self.rmRival)
-
-                else:
-                    if self.siRivalInterno:
-                        self.rmRival = self.xrival.juega()
-                    else:
-                        self.rmRival = self.xrival.juegaPartida(self.partida, nAjustado=self.nAjustarFuerza)
-                        if self.nAjustarFuerza == kAjustarPlayer:
-                            self.rmRival = self.ajustaPlayer(self.rmRival)
-                self.setSummary( "TIMERIVAL", self.timekeeper.stop() )
-
-                self.liRMrival.append(self.rmRival)
-                if not self.valoraRMrival():  # def valoraRMrival specific, no es necesario pasar self.siRivalConBlancas
-                    self.relojStop(False)
-                    self.pensando(False)
-                    return
-
-            self.relojStop(False)
-
-            self.pensando(False)
-            if self.estado != kFinJuego:
-                resp = self.mueveRival(self.rmRival)
-
-                if resp:
-                    self.siguienteJugada()
+            if self.juegaRival():
+                self.siguienteJugada()
 
         else:
-            self.siJuegaHumano = True
-            self.analizaTutorInicio()
-
-            self.relojStart(True)
-            self.timekeeper.start()
-            self.activaColor(siBlancas)
+            self.juegaHumano(siBlancas)
 
     def setSummary(self, key, value):
         njug = self.partida.numJugadas()
@@ -613,7 +514,7 @@ class GestorEntMaq(Gestor.Gestor):
     def analizaTutorInicio(self):
         self.siAnalizando = False
         self.siAnalizadoTutor = False
-        if self.siApertura or not self.siTutorActivado or self.ayudasPGN <= 0:
+        if self.aperturaObl or not self.siTutorActivado or self.ayudasPGN <= 0:
             return
         if self.continueTt:
             if not self.siTerminada():
@@ -652,26 +553,23 @@ class GestorEntMaq(Gestor.Gestor):
     def ajustaPlayer(self, mrm):
         posicion = self.partida.ultPosicion
 
-        mi = MotorInterno.MotorInterno()
-        mi.ponFen(posicion.fen())
-
-        li = mi.dameMovimientos()
+        LCEngine.setFen(posicion.fen())
+        li = LCEngine.getExMoves()
 
         liOpciones = []
         for rm in mrm.liMultiPV:
-            liOpciones.append((rm, "%s (%s)" % (posicion.pgnSP(rm.desde, rm.hasta, rm.coronacion), rm.abrTexto()) ))
+            liOpciones.append((rm, "%s (%s)" % (posicion.pgnSP(rm.desde, rm.hasta, rm.coronacion), rm.abrTexto())))
             mv = rm.movimiento()
             for x in range(len(li)):
-                if li[x].pv() == mv:
+                if li[x].movimiento() == mv:
                     del li[x]
                     break
 
         for mj in li:
             rm = XMotorRespuesta.RespuestaMotor("", posicion.siBlancas)
-            pv = mj.pv()
-            rm.desde = pv[:2]
-            rm.hasta = pv[2:4]
-            rm.coronacion = pv[4:]
+            rm.desde = mj.desde()
+            rm.hasta = mj.hasta()
+            rm.coronacion = mj.coronacion()
             rm.puntos = None
             liOpciones.append((rm, posicion.pgnSP(rm.desde, rm.hasta, rm.coronacion)))
 
@@ -692,11 +590,6 @@ class GestorEntMaq(Gestor.Gestor):
             resp = menu.lanza()
             if resp:
                 return resp
-
-    def valoraRMrival(self):
-        if self.siRivalInterno or self.resignPTS < -1500:  # then not ask for draw
-            return True
-        return Gestor.Gestor.valoraRMrival(self, self.siRivalConBlancas)
 
     def eligeJugadaBookBase(self, book, bookRR):
         jugadas = self.partida.ultPosicion.jugadas
@@ -732,159 +625,221 @@ class GestorEntMaq(Gestor.Gestor):
         book.polyglot()
         return self.eligeJugadaBookBase(book, "pr")
 
-    def mueveHumano(self, desde, hasta, coronacion=None):
-        if self.siJuegaHumano:
-            self.paraHumano()
+    def juegaHumano(self, siBlancas):
+        self.siJuegaHumano = True
+        self.analizaTutorInicio()
+
+        self.relojStart(True)
+        self.timekeeper.start()
+        self.activaColor(siBlancas)
+
+    def juegaRival(self):
+        self.pensando(True)
+        self.desactivaTodas()
+
+        self.relojStart(False)
+
+        desde = hasta = coronacion = ""
+        siEncontrada = False
+
+        if self.aperturaObl:
+            siEncontrada, desde, hasta, coronacion = self.aperturaObl.juegaMotor(self.fenUltimo())
+            if not siEncontrada:
+                self.aperturaObl = None
+
+        if not siEncontrada and self.book:
+            if self.partida.ultPosicion.jugadas < self.maxMoveBook:
+                siEncontrada, desde, hasta, coronacion = self.eligeJugadaBook()
+            if not siEncontrada:
+                self.book = None
+
+        if not siEncontrada and self.aperturaStd:
+            siEncontrada, desde, hasta, coronacion = self.aperturaStd.juegaMotor(self.fenUltimo())
+            if not siEncontrada:
+                self.aperturaStd = None
+
+        if not siEncontrada and self.siBookAjustarFuerza:
+            siEncontrada, desde, hasta, coronacion = self.eligeJugadaBookAjustada()  # libro de la personalidad
+            if not siEncontrada:
+                self.siBookAjustarFuerza = False
+
+        if siEncontrada:
+            self.rmRival = XMotorRespuesta.RespuestaMotor("Apertura", self.siRivalConBlancas)
+            self.rmRival.desde = desde
+            self.rmRival.hasta = hasta
+            self.rmRival.coronacion = coronacion
+
         else:
-            self.sigueHumano()
+            self.timekeeper.start()
+            if self.siTiempo:
+                tiempoBlancas = self.tiempo[True].tiempoPendiente
+                tiempoNegras = self.tiempo[False].tiempoPendiente
+
+                self.rmRival = self.xrival.juegaTiempo(tiempoBlancas, tiempoNegras, self.segundosJugada,
+                                                       nAjustado=self.nAjustarFuerza)
+                if self.estado == kFinJuego:
+                    return True
+                if self.nAjustarFuerza == kAjustarPlayer:
+                    self.rmRival = self.ajustaPlayer(self.rmRival)
+
+            else:
+                self.rmRival = self.xrival.juegaPartida(self.partida, nAjustado=self.nAjustarFuerza)
+                if self.nAjustarFuerza == kAjustarPlayer:
+                    self.rmRival = self.ajustaPlayer(self.rmRival)
+            self.setSummary("TIMERIVAL", self.timekeeper.stop())
+
+        self.relojStop(False)
+        self.pensando(False)
+
+        self.liRMrival.append(self.rmRival)
+        if not (self.resignPTS < -1500):  # then not ask for draw
+            if not self.valoraRMrival(self.siRivalConBlancas):
+                return True
+
+        siBien, self.error, jg = Jugada.dameJugada(self.partida.ultPosicion, self.rmRival.desde, self.rmRival.hasta, self.rmRival.coronacion)
+        if siBien:
+            self.partida.ultPosicion = jg.posicion
+            self.masJugada(jg, False)
+            self.movimientosPiezas(jg.liMovs, True)
+            return True
+        else:
             return False
 
-        movimiento = desde + hasta
+    def sigueHumanoAnalisis(self):
+        self.analizaTutorInicio()
+        Gestor.Gestor.sigueHumano(self)
 
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
-        if coronacion:
-            movimiento += coronacion
+    def mueveHumano(self, desde, hasta, coronacion=None):
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
+            return False
 
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
+        movimiento = jg.movimiento()
 
         siAnalisis = False
+
+        siElegido = False
+
+        if self.book and self.bookMandatory:
+            fen = self.fenUltimo()
+            listaJugadas = self.book.miraListaJugadas(fen)
+            if listaJugadas:
+                li = []
+                for apdesde, aphasta, apcoronacion, nada, nada1 in listaJugadas:
+                    mx = apdesde + aphasta + apcoronacion
+                    if mx.strip().lower() == movimiento:
+                        siElegido = True
+                        break
+                    li.append((apdesde, aphasta, False))
+                if not siElegido:
+                    self.tablero.ponFlechasTmp(li)
+                    self.sigueHumano()
+                    return False
+
+        if not siElegido and self.aperturaObl:
+            fenBase = self.fenUltimo()
+            if self.aperturaObl.compruebaHumano(fenBase, desde, hasta):
+                siElegido = True
+            else:
+                apdesde, aphasta = self.aperturaObl.desdeHastaActual(fenBase)
+                if apdesde is None:
+                    self.aperturaObl = None
+                else:
+                    self.tablero.ponFlechasTmp(((apdesde, aphasta, False),))
+                    self.sigueHumano()
+                    return False
+
+        if not siElegido and self.aperturaStd:
+            fenBase = self.fenUltimo()
+            if self.aperturaStd.compruebaHumano(fenBase, desde, hasta):
+                siElegido = True
+            else:
+                if not self.aperturaStd.isActive(fenBase):
+                    self.aperturaStd = None
 
         if self.siTeclaPanico:
             self.sigueHumano()
             return False
 
-        if siBien:
-            siElegido = False
-
-            if self.book and self.bookMandatory:
-                fen = self.fenUltimo()
-                listaJugadas = self.book.miraListaJugadas(fen)
-                if listaJugadas:
-                    li = []
-                    for apdesde, aphasta, apcoronacion, nada, nada1 in listaJugadas:
-                        mx = apdesde + aphasta + apcoronacion
-                        if mx.strip().lower() == movimiento:
-                            siElegido = True
-                            break
-                        li.append((apdesde, aphasta, False))
-                    if not siElegido:
-                        self.tablero.ponFlechasTmp(li)
-                        self.sigueHumano()
-                        return False
-
-            if not siElegido and self.siApertura:
-                fenBase = self.fenUltimo()
-                if self.siAperturaStd:
-                    if self.apertura.compruebaHumano(fenBase, desde, hasta):
-                        siElegido = True
-                    else:
-                        if self.apertura.activa:
-                            apdesde, aphasta = self.apertura.desdeHastaActual(fenBase)
-
-                            self.tablero.ponFlechasTmp(((apdesde, aphasta, False),))
-                            self.sigueHumano()
-                            return False
-                if not siElegido and self.apertura and self.apertura.compruebaHumano(fenBase, desde, hasta):
-                    siElegido = True
-
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
-
-            if not siElegido and self.siTutorActivado:
-                self.analizaTutorFinal()
-                rmUser, n = self.mrmTutor.buscaRM(movimiento)
+        self.analizaTutorFinal()  # tiene que acabar siempre
+        if not siElegido and self.siTutorActivado:
+            rmUser, n = self.mrmTutor.buscaRM(movimiento)
+            if not rmUser:
+                rmUser = self.xtutor.valora(self.partida.ultPosicion, desde, hasta, jg.coronacion)
                 if not rmUser:
-                    rmUser = self.xtutor.valora(self.partida.ultPosicion, desde, hasta, coronacion)
-                    if not rmUser:
-                        return False
-                    self.mrmTutor.agregaRM(rmUser)
-                siAnalisis = True
-                pointsBest, pointsUser = self.mrmTutor.difPointsBest(movimiento)
-                self.setSummary("POINTSBEST", pointsBest)
-                self.setSummary("POINTSUSER", pointsUser)
-                if (pointsBest-pointsUser)>0:
-                    if not jg.siJaqueMate:
-                        siTutor = True
-                        if self.chance:
-                            num = self.mrmTutor.numMejorMovQue(movimiento)
-                            if num:
-                                rmTutor = self.mrmTutor.rmBest()
-                                rmUser, n = self.mrmTutor.buscaRM(movimiento)
-                                menu = QTVarios.LCMenu(self.pantalla)
-                                submenu = menu.submenu(_("There are %d best moves") % num, Iconos.Motor())
-                                submenu.opcion("tutor", "%s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()), Iconos.Tutor())
-                                submenu.separador()
-                                submenu.opcion("try", _("Try again"), Iconos.Atras())
-                                submenu.separador()
-                                submenu.opcion("user", "%s (%s)" % (_("Select my move"), rmUser.abrTextoBase()),
-                                               Iconos.Player())
-                                self.pantalla.cursorFueraTablero()
-                                resp = menu.lanza()
-                                if resp == "try":
-                                    self.sigueHumano()
-                                    return False
-                                elif resp == "user":
-                                    siTutor = False
-                                elif resp != "tutor":
-                                    self.sigueHumano()
-                                    return False
-                        if siTutor:
-                            tutor = Tutor.Tutor(self, self, jg, desde, hasta, False)
+                    self.sigueHumanoAnalisis()
+                    return False
+                self.mrmTutor.agregaRM(rmUser)
+            siAnalisis = True
+            pointsBest, pointsUser = self.mrmTutor.difPointsBest(movimiento)
+            self.setSummary("POINTSBEST", pointsBest)
+            self.setSummary("POINTSUSER", pointsUser)
+            if (pointsBest - pointsUser) > 0:
+                if not jg.siJaqueMate:
+                    siTutor = True
+                    if self.chance:
+                        num = self.mrmTutor.numMejorMovQue(movimiento)
+                        if num:
+                            rmTutor = self.mrmTutor.rmBest()
+                            rmUser, n = self.mrmTutor.buscaRM(movimiento)
+                            menu = QTVarios.LCMenu(self.pantalla)
+                            submenu = menu.submenu(_("There are %d best moves") % num, Iconos.Motor())
+                            submenu.opcion("tutor", "%s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()), Iconos.Tutor())
+                            submenu.separador()
+                            submenu.opcion("try", _("Try again"), Iconos.Atras())
+                            submenu.separador()
+                            submenu.opcion("user", "%s (%s)" % (_("Select my move"), rmUser.abrTextoBase()),
+                                           Iconos.Player())
+                            self.pantalla.cursorFueraTablero()
+                            resp = menu.lanza()
+                            if resp == "try":
+                                self.sigueHumanoAnalisis()
+                                return False
+                            elif resp == "user":
+                                siTutor = False
+                            elif resp != "tutor":
+                                self.sigueHumanoAnalisis()
+                                return False
 
-                            if self.siApertura:
-                                liApPosibles = self.listaAperturasStd.listaAperturasPosibles(self.partida)
-                            else:
-                                liApPosibles = None
+                    if siTutor:
+                        tutor = Tutor.Tutor(self, self, jg, desde, hasta, False)
 
-                            if tutor.elegir(self.ayudas > 0, liApPosibles=liApPosibles):
-                                if self.ayudas > 0:  # doble entrada a tutor.
-                                    self.reponPieza(desde)
-                                    self.ayudas -= 1
-                                    desde = tutor.desde
-                                    hasta = tutor.hasta
-                                    coronacion = tutor.coronacion
-                                    siBien, mens, jgTutor = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta,
-                                                                              coronacion)
-                                    if siBien:
-                                        jg = jgTutor
-                                        self.setSummary("SELECTTUTOR", True)
-                            if self.configuracion.guardarVariantesTutor:
-                                tutor.ponVariantes(jg, 1 + self.partida.numJugadas() / 2)
+                        if self.aperturaStd:
+                            liApPosibles = self.listaAperturasStd.listaAperturasPosibles(self.partida)
+                        else:
+                            liApPosibles = None
 
-                            del tutor
+                        if tutor.elegir(self.ayudas > 0, liApPosibles=liApPosibles):
+                            if self.ayudas > 0:  # doble entrada a tutor.
+                                self.reponPieza(desde)
+                                self.ayudas -= 1
+                                desde = tutor.desde
+                                hasta = tutor.hasta
+                                coronacion = tutor.coronacion
+                                siBien, mens, jgTutor = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
+                                if siBien:
+                                    jg = jgTutor
+                                    self.setSummary("SELECTTUTOR", True)
+                        if self.configuracion.guardarVariantesTutor:
+                            tutor.ponVariantes(jg, 1 + self.partida.numJugadas() / 2)
 
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
+                        del tutor
 
-            self.setSummary( "TIMEUSER", self.timekeeper.stop() )
-            self.relojStop(True)
+        self.setSummary("TIMEUSER", self.timekeeper.stop())
+        self.relojStop(True)
 
-            if self.siApertura and self.siAperturaStd:
-                self.siApertura = self.apertura.activa
+        self.movimientosPiezas(jg.liMovs)
 
-            self.movimientosPiezas(jg.liMovs)
+        if siAnalisis:
+            rm, nPos = self.mrmTutor.buscaRM(jg.movimiento())
+            if rm:
+                jg.analisis = self.mrmTutor, nPos
 
-            if siAnalisis:
-                rm, nPos = self.mrmTutor.buscaRM(jg.movimiento())
-                if rm:
-                    jg.analisis = self.mrmTutor, nPos
-
-            self.partida.ultPosicion = jg.posicion
-            self.masJugada(jg, True)
-            self.error = ""
-            self.siguienteJugada()
-            return True
-        else:
-            self.error = mens
-            self.sigueHumano()
-            return False
+        self.partida.ultPosicion = jg.posicion
+        self.masJugada(jg, True)
+        self.error = ""
+        self.siguienteJugada()
+        return True
 
     def masJugada(self, jg, siNuestra):
         if not self.siPrimeraJugadaHecha:
@@ -895,7 +850,7 @@ class GestorEntMaq(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -925,25 +880,6 @@ class GestorEntMaq(Gestor.Gestor):
 
         self.refresh()
 
-    def mueveRival(self, respMotor):
-
-        desde = respMotor.desde
-        hasta = respMotor.hasta
-
-        coronacion = respMotor.coronacion
-
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-        if siBien:
-            self.partida.ultPosicion = jg.posicion
-            self.masJugada(jg, False)
-            self.movimientosPiezas(jg.liMovs, True)
-            self.error = ""
-
-            return True
-        else:
-            self.error = mens
-            return False
-
     def saveSummary(self):
         if not self.siSummary or not self.summary:
             return
@@ -954,6 +890,7 @@ class GestorEntMaq(Gestor.Gestor):
         st_reject = 0
         nt_accept = 0
         nt_reject = 0
+        j_sum = 0
 
         time_user = 0.0
         ntime_user = 0
@@ -963,7 +900,7 @@ class GestorEntMaq(Gestor.Gestor):
         for njg, d in self.summary.iteritems():
             if "POINTSBEST" in d:
                 j_num += 1
-                p = d["POINTSBEST"]-d["POINTSUSER"]
+                p = d["POINTSBEST"] - d["POINTSUSER"]
                 if p:
                     if d.get("SELECTTUTOR", False):
                         st_accept += p
@@ -971,6 +908,7 @@ class GestorEntMaq(Gestor.Gestor):
                     else:
                         st_reject += p
                         nt_reject += 1
+                    j_sum += p
                 else:
                     j_same += 1
             if "TIMERIVAL" in d:
@@ -985,20 +923,46 @@ class GestorEntMaq(Gestor.Gestor):
             comment += "\n"
 
         if j_num:
-            comment += _("Tutor")+": %s\n"%self.xtutor.nombre
-            comment += _("Number of moves")+":%d\n"%j_num
-            comment += _("Same move")+":%d (%0.2f%%)\n"%(j_same, j_same*1.0/j_num)
-            comment += _("Accepted")+":%d (%0.2f%%) %s: %0.2f\n"%(nt_accept, nt_accept*1.0/j_num, _("Average points"), st_accept*1.0/nt_accept if nt_accept else 0.0)
-            comment += _("Rejected")+":%d (%0.2f%%) %s: %0.2f\n"%(nt_reject, nt_reject*1.0/j_num, _("Average points"), st_reject*1.0/nt_reject if nt_reject else 0.0)
+            comment += _("Tutor") + ": %s\n" % self.xtutor.nombre
+            comment += _("Number of moves") + ":%d\n" % j_num
+            comment += _("Same move") + ":%d (%0.2f%%)\n" % (j_same, j_same * 1.0 / j_num)
+            comment += _("Accepted") + ":%d (%0.2f%%) %s: %0.2f\n" % (nt_accept, nt_accept * 1.0 / j_num,
+                                                                      _("Average points lost"), st_accept * 1.0 / nt_accept if nt_accept else 0.0)
+            comment += _("Rejected") + ":%d (%0.2f%%) %s: %0.2f\n" % (nt_reject, nt_reject * 1.0 / j_num,
+                                                                      _("Average points lost"), st_reject * 1.0 / nt_reject if nt_reject else 0.0)
+            comment += _("Total") + ":%d (100%%) %s: %0.2f\n" % (j_num, _("Average points lost"), j_sum * 1.0 / j_num)
 
         if ntime_user or ntime_rival:
-            comment += _("Average time (seconds)")+":\n"
+            comment += _("Average time (seconds)") + ":\n"
             if ntime_user:
-                comment += "%s: %0.2f\n"%(self.configuracion.jugador, time_user/ntime_user)
+                comment += "%s: %0.2f\n" % (self.configuracion.jugador, time_user / ntime_user)
             if ntime_rival:
-                comment += "%s: %0.2f\n"%(self.xrival.nombre, time_rival/ntime_rival)
+                comment += "%s: %0.2f\n" % (self.xrival.nombre, time_rival / ntime_rival)
 
         self.partida.firstComment = comment
+
+    def checkFinal(self, siBlancas):
+        if self.partida.numJugadas() == 0:
+            return False
+
+        jgUltima = self.partida.last_jg()
+        if jgUltima:
+            if jgUltima.siJaqueMate:
+                self.ponResultado(kGanaRival if self.siJugamosConBlancas == siBlancas else kGanamos)
+                return True
+            if jgUltima.siAhogado:
+                self.ponResultado(kTablas)
+                return True
+            if jgUltima.siTablasRepeticion:
+                self.ponResultado(kTablasRepeticion)
+                return True
+            if jgUltima.siTablas50:
+                self.ponResultado(kTablas50)
+                return True
+            if jgUltima.siTablasFaltaMaterial:
+                self.ponResultado(kTablasFaltaMaterial)
+                return True
+        return False
 
     def ponResultado(self, quien):
         self.estado = kFinJuego
@@ -1038,12 +1002,12 @@ class GestorEntMaq(Gestor.Gestor):
         elif quien == kGanamosTiempo:
             mensaje = _X(_("Congratulations, you win %1 on time."), nombreContrario)
             self.resultado = kGanamos
-            self.partida.liJugadas[-1].comentario = _X(_("%1 has won on time."), self.configuracion.jugador)
+            self.partida.last_jg().comentario = _X(_("%1 has won on time."), self.configuracion.jugador)
 
         elif quien == kGanaRivalTiempo:
             mensaje = _X(_("%1 has won on time."), nombreContrario)
             self.resultado = kGanaRival
-            self.partida.liJugadas[-1].comentario = _X(_("%1 has won on time."), nombreContrario)
+            self.partida.last_jg().comentario = _X(_("%1 has won on time."), nombreContrario)
 
         self.guardarGanados(quien == kGanamos)
         if quien != kGanaRivalTiempo:  # Ya que el mensaje ya se ha usado, para a_adir minutos
@@ -1052,16 +1016,6 @@ class GestorEntMaq(Gestor.Gestor):
             self.reiniciar(False)
         else:
             self.ponFinJuego()
-
-    def ponFinJuego(self):
-        self.pensando(False)
-        if self.siTiempo:
-            self.pantalla.paraReloj()
-        if self.siAnalizando:
-            self.siAnalizando = False
-            self.xtutor.ac_final(-1)
-        self.quitaRotulo3()
-        Gestor.Gestor.ponFinJuego(self)
 
     def ponAyudasEM(self):
         self.ponAyudas(self.ayudas, siQuitarAtras=not self.siAtras)
@@ -1079,11 +1033,9 @@ class GestorEntMaq(Gestor.Gestor):
             self.siAtras = dic["ATRAS"]
             if self.siAtras:
                 self.pantalla.ponToolBar(
-                    ( k_mainmenu, k_rendirse, k_atras, k_reiniciar, k_aplazar, k_configurar, k_utilidades ))
+                        (k_mainmenu, k_rendirse, k_atras, k_reiniciar, k_aplazar, k_configurar, k_utilidades))
             else:
-                self.pantalla.ponToolBar(( k_mainmenu, k_rendirse, k_reiniciar, k_aplazar, k_configurar, k_utilidades ))
-
-            self.rmRival = None
+                self.pantalla.ponToolBar((k_mainmenu, k_rendirse, k_reiniciar, k_aplazar, k_configurar, k_utilidades))
 
             self.nAjustarFuerza = dic["AJUSTAR"]
 
@@ -1103,6 +1055,8 @@ class GestorEntMaq(Gestor.Gestor):
 
             self.xrival.siBlancas = not siBlancas
 
+            self.rmRival = None
+
             rival = self.xrival.nombre
             jugador = self.configuracion.jugador
             bl, ng = jugador, rival
@@ -1121,12 +1075,14 @@ class GestorEntMaq(Gestor.Gestor):
                 self.siguienteJugada()
 
     def guiDispatch(self, rm):
+        if self.estado != kJugando:
+            return
         if self.siJuegaHumano:
-            if not rm.whoDispatch: # juega humano y el rm es del rival
+            if not rm.whoDispatch:  # juega humano y el rm es del rival
                 return True
             tp = self.thoughtTt
         else:
-            if rm.whoDispatch: # juega rival y el rm es del humano
+            if rm.whoDispatch:  # juega rival y el rm es del humano
                 return True
             tp = self.thoughtOp
             if tp > -1 and self.nArrows:
@@ -1136,20 +1092,20 @@ class GestorEntMaq(Gestor.Gestor):
             if rm.time or rm.depth:
                 colorEngine = "DarkBlue" if self.siJuegaHumano else "brown"
                 if rm.nodes:
-                    nps = "/%d"%rm.nps if rm.nps else ""
-                    nodes = " | %d%s"%(rm.nodes, nps)
+                    nps = "/%d" % rm.nps if rm.nps else ""
+                    nodes = " | %d%s" % (rm.nodes, nps)
                 else:
                     nodes = ""
-                seldepth = "/%d"%rm.seldepth if rm.seldepth else ""
+                seldepth = "/%d" % rm.seldepth if rm.seldepth else ""
                 li = [
-                        '<span style="color:%s">%s'%(colorEngine, rm.nombre),
-                        '<b>%s</b> | <b>%d</b>%s | <b>%d"</b>%s'%( rm.abrTextoBase(),
-                                                                    rm.depth, seldepth,
-                                                                    rm.time // 1000,
-                                                                    nodes
-                                                                    )
+                    '<span style="color:%s">%s' % (colorEngine, rm.nombre),
+                    '<b>%s</b> | <b>%d</b>%s | <b>%d"</b>%s' % (rm.abrTextoBase(),
+                                                                rm.depth, seldepth,
+                                                                rm.time // 1000,
+                                                                nodes
+                                                                )
 
-                    ]
+                ]
                 if tp:
                     pv = rm.pv
                     if tp < 999:
@@ -1158,17 +1114,35 @@ class GestorEntMaq(Gestor.Gestor):
                             pv = " ".join(li1[:tp])
                     p = Partida.Partida(self.partida.ultPosicion)
                     p.leerPV(pv)
-                    li.append( p.pgnBaseRAW() )
-                self.ponRotulo3("<br>".join(li)+"</span>")
+                    li.append(p.pgnBaseRAW())
+                self.ponRotulo3("<br>".join(li) + "</span>")
 
         return True
 
     def pgnLabelsAdded(self):
         d = {}
         if self.nAjustarFuerza != kAjustarMejor:
-            pers = Personalidades.Personalidades(None,self.configuracion)
+            pers = Personalidades.Personalidades(None, self.configuracion)
             label = pers.label(self.nAjustarFuerza)
             if label:
                 d["Strength"] = label
         return d
 
+    def analizaPosicion(self, fila, clave):
+        if fila < 0:
+            return
+
+        jg, siBlancas, siUltimo, tam_lj, pos = self.dameJugadaEn(fila, clave)
+        if not jg:
+            return
+
+        maxRecursion = 9999
+
+        if not (hasattr(jg, "analisis") and jg.analisis):
+            me = QTUtil2.mensEspera.inicio(self.pantalla, _("Analyzing the move...."), posicion="ad")
+            mrm, pos = self.xanalyzer.analizaJugada(jg, self.xanalyzer.motorTiempoJugada, self.xanalyzer.motorProfundidad)
+            jg.analisis = mrm, pos
+            me.final()
+
+        Analisis.muestraAnalisis(self.procesador, self.xanalyzer, jg, self.tablero.siBlancasAbajo, maxRecursion, pos)
+        self.ponVista()

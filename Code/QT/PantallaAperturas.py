@@ -4,23 +4,23 @@ import subprocess
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Jugada as Jugada
-import Code.Partida as Partida
-import Code.AperturasStd as AperturasStd
-import Code.ControlPosicion as ControlPosicion
-import Code.Variantes as Variantes
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Tablero as Tablero
-import Code.QT.Delegados as Delegados
-import Code.QT.Grid as Grid
-import Code.QT.Columnas as Columnas
-import Code.QT.FormLayout as FormLayout
+from Code import AperturasStd
+from Code import ControlPosicion
+from Code import Jugada
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import Util
+from Code import VarGen
+from Code import Variantes
 
 class WAperturas(QTVarios.WDialogo):
     def __init__(self, owner, configuracion, bloqueApertura):
@@ -44,8 +44,6 @@ class WAperturas(QTVarios.WDialogo):
 
         # Current pgn
         self.lbPGN = Controles.LB(self, "").ponWrap().ponTipoLetra(puntos=10, peso=75)
-        ly = Colocacion.H().control(self.lbPGN)
-        gbPGN = Controles.GB(self, _("Current opening"), ly)
 
         # Movimiento
         self.siMoviendoTiempo = False
@@ -55,15 +53,15 @@ class WAperturas(QTVarios.WDialogo):
 
         # Tool bar
         tb = Controles.TBrutina(self)
-        tb.new( _("Accept"), Iconos.Aceptar(), self.aceptar )
-        tb.new( _("Cancel"), Iconos.Cancelar(), self.cancelar )
-        tb.new( _("Reinit"), Iconos.Reiniciar(), self.resetPartida )
-        tb.new( _("Takeback"), Iconos.Atras(), self.atras )
-        tb.new( _("Remove"), Iconos.Borrar(), self.borrar )
+        tb.new(_("Accept"), Iconos.Aceptar(), self.aceptar)
+        tb.new(_("Cancel"), Iconos.Cancelar(), self.cancelar)
+        tb.new(_("Reinit"), Iconos.Reiniciar(), self.resetPartida)
+        tb.new(_("Takeback"), Iconos.Atras(), self.atras)
+        tb.new(_("Remove"), Iconos.Borrar(), self.borrar)
 
         # Lista Aperturas
         oColumnas = Columnas.ListaColumnas()
-        dicTipos = {"b": Iconos.pmEstrella(), "n": Iconos.pmPuntoAzul(), "l": Iconos.pmNaranja()}
+        dicTipos = {"b": Iconos.pmSun(), "n": Iconos.pmPuntoAzul(), "l": Iconos.pmNaranja()}
         oColumnas.nueva("TIPO", "", 24, edicion=Delegados.PmIconosBMT(dicIconos=dicTipos))
         oColumnas.nueva("OPENING", _("Possible continuation"), 480)
 
@@ -75,7 +73,7 @@ class WAperturas(QTVarios.WDialogo):
         gbDerecha = Controles.GB(self, "", lyD)
 
         # # Izquierda
-        lyI = Colocacion.V().control(self.tablero).otro(lyBM).control(gbPGN)
+        lyI = Colocacion.V().control(self.tablero).otro(lyBM).control(self.lbPGN)
         gbIzquierda = Controles.GB(self, "", lyI)
 
         splitter = QtGui.QSplitter(self)
@@ -83,15 +81,16 @@ class WAperturas(QTVarios.WDialogo):
         splitter.addWidget(gbDerecha)
         self.registrarSplitter(splitter, "splitter")
 
-        ## Completo
+        # Completo
         ly = Colocacion.H().control(splitter).margen(3)
         self.setLayout(ly)
-
-        self.recuperarVideo(siTam=True)
 
         self.ponActivas()
         self.resetPartida()
         self.actualizaPosicion()
+
+        dic = {'_SIZE_': '916,444', 'SP_splitter': [356, 548]}
+        self.recuperarVideo(dicDef=dic)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
         self.tablero.desactivaTodas()
@@ -137,13 +136,13 @@ class WAperturas(QTVarios.WDialogo):
         self.posCurrent += 1
         if self.posCurrent < self.partida.numJugadas():
             self.partida.liJugadas = self.partida.liJugadas[:self.posCurrent]
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         self.ponActivas()
 
     def ponActivas(self):
         li = self.apStd.listaAperturasPosibles(self.partida, True)
         if li:
-            li = sorted(li, key=lambda ap: ("A" if ap.siBasic else "Z" ) + ap.pgn)
+            li = sorted(li, key=lambda ap: ("A" if ap.siBasic else "Z") + ap.pgn)
         else:
             li = []
         self.liActivas = li
@@ -161,6 +160,11 @@ class WAperturas(QTVarios.WDialogo):
         self.actualizaPosicion()
         self.grid.refresh()
         self.grid.gotop()
+
+        w = self.width()
+        self.adjustSize()
+        if self.width() != w:
+            self.resize(w, self.height())
 
     def actualizaPosicion(self):
         if self.posCurrent > -1:
@@ -259,11 +263,11 @@ class WAperturas(QTVarios.WDialogo):
             ap = AperturasStd.AperturasStd(_("Unknown"))
             ap.a1h8 = self.partida.pv()
         else:
-            if not self.partida.jugada(-1).siApertura:
+            if not self.partida.last_jg().siApertura:
                 p = Partida.Partida()
                 p.leerPV(ap.a1h8)
                 ap.a1h8 = self.partida.pv()
-                ap.trNombre += " + %s" % ( self.partida.pgnSP()[len(p.pgnSP()) + 1:], )
+                ap.trNombre += " + %s" % (self.partida.pgnSP()[len(p.pgnSP()) + 1:],)
 
         ap.pgn = self.partida.pgnSP()
         return ap
@@ -280,12 +284,12 @@ class EntrenamientoApertura(QTVarios.WDialogo):
         self.liBloques = self.leeBloques(dicDatos.get("LISTA", []))
 
         # Toolbar
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), self.aceptar ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), self.cancelar ), None,
-                      ( _("Add"), Iconos.Nuevo(), self.nueva ), None,
-                      ( _("Modify"), Iconos.Modificar(), self.modificar ), None,
-                      ( _("Remove"), Iconos.Borrar(), self.borrar ), None,
-        ]
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                      (_("Add"), Iconos.Nuevo(), self.nueva), None,
+                      (_("Modify"), Iconos.Modificar(), self.modificar), None,
+                      (_("Remove"), Iconos.Borrar(), self.borrar), None,
+                      ]
         tb = Controles.TBrutina(self, liAcciones)
 
         lbNombre = Controles.LB(self, _("Name") + ": ")
@@ -338,7 +342,7 @@ class EntrenamientoApertura(QTVarios.WDialogo):
                 nap = len(ap.pgn)
                 pgnSP = p.pgnSP()
                 if len(pgnSP) > nap:
-                    ap.trNombre += " + %s" % (pgnSP[nap + 1:], )
+                    ap.trNombre += " + %s" % (pgnSP[nap + 1:],)
             ap.pgn = p.pgnSP()
             li.append(ap)
         return li
@@ -413,17 +417,17 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         # Toolbar
-        liAcciones = [( _("Close"), Iconos.MainMenu(), self.terminar ), None,
-                      ( _("Train"), Iconos.Entrenar(), self.entrenar ), None,
-                      ( _("New"), Iconos.TutorialesCrear(), self.nuevo ), None,
-                      ( _("Modify"), Iconos.Modificar(), self.modificar ), None,
-                      ( _("Remove"), Iconos.Borrar(), self.borrar ), None,
-                      ( _("Copy"), Iconos.Copiar(), self.copiar ), None,
-                      ( _("Up"), Iconos.Arriba(), self.arriba ), None,
-                      ( _("Down"), Iconos.Abajo(), self.abajo ), None,
-                      ( "+" + _("Openings"), Iconos.Recuperar(), self.masaperturas ), None,
-                      ( _("Polyglot book"), Iconos.Libros(), self.polyglot ), None
-        ]
+        liAcciones = [(_("Close"), Iconos.MainMenu(), self.terminar), None,
+                      (_("Train"), Iconos.Entrenar(), self.entrenar), None,
+                      (_("New"), Iconos.TutorialesCrear(), self.nuevo), None,
+                      (_("Modify"), Iconos.Modificar(), self.modificar), None,
+                      (_("Remove"), Iconos.Borrar(), self.borrar), None,
+                      (_("Copy"), Iconos.Copiar(), self.copiar), None,
+                      (_("Up"), Iconos.Arriba(), self.arriba), None,
+                      (_("Down"), Iconos.Abajo(), self.abajo), None,
+                      ("+" + _("Openings"), Iconos.Recuperar(), self.masaperturas), None,
+                      (_("Book"), Iconos.Libros(), self.polyglot, _("Create a polyglot book")), None
+                      ]
         tb = Controles.TBrutina(self, liAcciones)
 
         # Lista
@@ -471,7 +475,7 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
         me = QTUtil2.unMomento(self)
 
         # Determinamos el fichero de trabajo
-        plTMP = "deleteme_%d.pgn"
+        plTMP = self.procesador.configuracion.ficheroTemporal("deleteme_%d.pgn")
         n = 0
         while True:
             fichTMP = plTMP % n
@@ -491,9 +495,9 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
 
         # Ejecutamos
         if VarGen.isWindows:
-            exe = 'EnginesWindows/polyglot/polyglot.exe'
+            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
         else:
-            exe = 'EnginesLinux/polyglot/polyglot'
+            exe = 'Engines/Linux/_tools/polyglot/polyglot'
         li = [os.path.abspath(exe),
               'make-book',
               "-pgn", fichTMP,
@@ -502,7 +506,6 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
               "-min-game", "1",
               "-uniform"]
         Util.borraFichero(fbin)
-
         process = subprocess.Popen(li, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         me.final()
@@ -549,9 +552,9 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
 
         liJ = [(_("White"), "BLANCAS"), (_("Black"), "NEGRAS"), (_("White & Black"), "AMBOS")]
         config = FormLayout.Combobox(_("Play with"), liJ)
-        liGen.append(( config, jugamos ))
+        liGen.append((config, jugamos))
 
-        liR = [( _("Undefined"), 0 )]
+        liR = [(_("Undefined"), 0)]
 
         for x in range(4):
             liR.append((str(x + 1), x + 1))
@@ -559,7 +562,7 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
         for x in range(5, 105, 5):
             liR.append((str(x), x))
         config = FormLayout.Combobox(_("Model"), liR)
-        liGen.append(( config, repeticiones ))
+        liGen.append((config, repeticiones))
 
         # Editamos
         resultado = FormLayout.fedit(liGen, title=_("Train"), parent=self, anchoMinimo=360, icon=Iconos.Entrenar())
@@ -687,13 +690,13 @@ class AperturasPersonales(QTVarios.WDialogo):
 
         # Toolbar
         tb = Controles.TBrutina(self)
-        tb.new( _("Close"), Iconos.MainMenu(), self.terminar )
-        tb.new( _("New"), Iconos.TutorialesCrear(), self.nuevo )
-        tb.new( _("Modify"), Iconos.Modificar(), self.modificar )
-        tb.new( _("Remove"), Iconos.Borrar(), self.borrar )
-        tb.new( _("Copy"), Iconos.Copiar(), self.copiar )
-        tb.new( _("Up"), Iconos.Arriba(), self.arriba )
-        tb.new( _("Down"), Iconos.Abajo(), self.abajo )
+        tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
+        tb.new(_("New"), Iconos.TutorialesCrear(), self.nuevo)
+        tb.new(_("Modify"), Iconos.Modificar(), self.modificar)
+        tb.new(_("Remove"), Iconos.Borrar(), self.borrar)
+        tb.new(_("Copy"), Iconos.Copiar(), self.copiar)
+        tb.new(_("Up"), Iconos.Arriba(), self.arriba)
+        tb.new(_("Down"), Iconos.Abajo(), self.abajo)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()
@@ -774,10 +777,10 @@ class AperturasPersonales(QTVarios.WDialogo):
 
         # Datos
         liGen = [(None, None)]
-        liGen.append(( _("Name") + ":", nombre ))
+        liGen.append((_("Name") + ":", nombre))
         config = FormLayout.Editbox("ECO", ancho=30, rx="[A-Z, a-z][0-9][0-9]")
-        liGen.append((config, eco ))
-        liGen.append(( _("Add to standard list") + ":", estandar ))
+        liGen.append((config, eco))
+        liGen.append((_("Add to standard list") + ":", estandar))
 
         # Editamos
         resultado = FormLayout.fedit(liGen, title=titulo, parent=self, anchoMinimo=460, icon=Iconos.Apertura())

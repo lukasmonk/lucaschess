@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 isLinux = sys.platform == "linux2"
 if isLinux:
@@ -18,8 +18,7 @@ todasPiezas = None
 
 tbook = "Openings/GMopenings.bin"
 tbookPTZ = "Openings/fics15.bin"
-
+tbookI = "Openings/irina.bin"
 xtutor = None
 
-XSEP=chr(183)
-
+XSEP = chr(183)

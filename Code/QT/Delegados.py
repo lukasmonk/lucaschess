@@ -6,7 +6,7 @@ import os
 
 from PyQt4 import QtCore, QtGui, QtSvg
 
-import Code.QT.Iconos as Iconos
+from Code.QT import Iconos
 
 dicPM = {}
 dicPZ = {}
@@ -114,6 +114,9 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
         self.siFondo = siFondo
         QtGui.QStyledItemDelegate.__init__(self, None)
 
+    def setWhite(self, isWhite):
+        self.siBlancas = isWhite
+
     def rehazPosicion(self):
         posicion = self.bloquePieza.posicion
         self.setPos(posicion.x, posicion.y)
@@ -168,7 +171,7 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
         documentPGN = QtGui.QTextDocument()
         documentPGN.setDefaultFont(option.font)
         if color:
-            pgn = '<font color="%s"><b>%s</b></font>' % ( color, pgn )
+            pgn = '<font color="%s"><b>%s</b></font>' % (color, pgn)
         documentPGN.setHtml(pgn)
         wPGN = documentPGN.idealWidth()
         hPGN = documentPGN.size().height()
@@ -179,7 +182,7 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
             documentINFO = QtGui.QTextDocument()
             documentINFO.setDefaultFont(option.font)
             if color:
-                info = '<font color="%s"><b>%s</b></font>' % ( color, info )
+                info = '<font color="%s"><b>%s</b></font>' % (color, info)
             documentINFO.setHtml(info)
             wINFO = documentINFO.idealWidth()
 
@@ -197,7 +200,7 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
         if self.siAlineacion:
             alineacion = index.model().getAlineacion(index)
             if alineacion == "i":
-                x = xTotal+3
+                x = xTotal + 3
             elif alineacion == "d":
                 x = xTotal + (wTotal - ancho - 3)
 
@@ -269,3 +272,26 @@ class PmIconosBMT(QtGui.QStyledItemDelegate):
         painter.drawPixmap(4, 1, self.dicIconos[pos])
         painter.restore()
 
+class PmIconosColor(QtGui.QStyledItemDelegate):
+    """ Usado en TurnOnLigths"""
+    def __init__(self, parent=None):
+        QtGui.QStyledItemDelegate.__init__(self, parent)
+
+        self.dicIconos = {"0": Iconos.pmGris32(),
+                          "1": Iconos.pmAmarillo32(),
+                          "2": Iconos.pmNaranja32(),
+                          "3": Iconos.pmVerde32(),
+                          "4": Iconos.pmAzul32(),
+                          "5": Iconos.pmMagenta32(),
+                          "6": Iconos.pmRojo32(),
+                          "7": Iconos.pmLight32()
+                          }
+
+    def paint(self, painter, option, index):
+        pos = str(index.model().data(index, QtCore.Qt.DisplayRole))
+        if pos not in self.dicIconos:
+            return
+        painter.save()
+        painter.translate(option.rect.x(), option.rect.y())
+        painter.drawPixmap(4, 4, self.dicIconos[pos])
+        painter.restore()

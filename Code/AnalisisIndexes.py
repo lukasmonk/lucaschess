@@ -1,5 +1,6 @@
-import Code.VarGen as VarGen
-import Code.SAK as SAK
+import LCEngine
+
+from Code import VarGen
 
 def calc_formula(cual, cp, mrm):  # , limit=200.0):
     f = open("./IntFiles/Formulas/%s.formula" % cual, "rb")
@@ -19,9 +20,7 @@ def calc_formula(cual, cp, mrm):  # , limit=200.0):
             else:
                 pieb += 1
                 matb += m
-    sak = SAK.sak
-    sak.setFEN(cp.fen())
-    mov = len(sak.getMoves())
+    mov = LCEngine.setFen(cp.fen())
     base = mrm.liMultiPV[0].puntosABS()
     siBlancas = cp.siBlancas
 
@@ -39,19 +38,27 @@ def calc_formula(cual, cp, mrm):  # , limit=200.0):
     if not siBlancas:
         plm += 1
 
-    li = (  ("xpiec", piew if siBlancas else pieb),
-            ("xpie", piew + pieb),
-            ("xmov", mov),
-            ("xeval", base if siBlancas else -base),
-            ("xstm", +1 if siBlancas else -1),
-            ("xplm", plm),
+    # xshow: Factor de conversion a puntos para mostrar
+    xshow = +1 if siBlancas else -1
+    if not VarGen.configuracion.centipawns:
+        xshow = 0.01*xshow
+
+    li = (
+        ("xpiec", piew if siBlancas else pieb),
+        ("xpie", piew + pieb),
+        ("xmov", mov),
+        ("xeval", base if siBlancas else -base),
+        ("xstm", +1 if siBlancas else -1),
+        ("xplm", plm),
+        ("xshow", xshow),
     )
     for k, v in li:
         if k in formula:
             formula = formula.replace(k, "%d.0" % v)
-    li = (  ("xgmo", gmo),
-            ("xmat", mat),
-            ("xpow", matw if siBlancas else matb),
+    li = (
+        ("xgmo", gmo),
+        ("xmat", mat),
+        ("xpow", matw if siBlancas else matb),
     )
     for k, v in li:
         if k in formula:
@@ -169,10 +176,56 @@ def get_materialasymmetry(cp, mrm):
 def tp_materialasymmetry(cp, mrm):
     return tp_formula(_("Material asymmetry"), calc_materialasymmetry, cp, mrm)
 
-# #=========================================================================================
-
 def calc_gamestage(cp, mrm):
     return calc_formula("gamestage", cp, mrm)
+
+# def get_test1(cp, mrm):
+#     return txt_formula("Test 1", calc_test1, cp, mrm)
+
+# def tp_test1(cp, mrm):
+#     return tp_formula("Test 1", calc_test1, cp, mrm)
+
+# def calc_test1(cp, mrm):
+#     return calc_formula("test1", cp, mrm)
+
+# def get_test1(cp, mrm):
+#     return txt_formula("Test 1", calc_test1, cp, mrm)
+
+# def tp_test2(cp, mrm):
+#     return tp_formula("Test 2", calc_test2, cp, mrm)
+
+# def calc_test2(cp, mrm):
+#     return calc_formula("test2", cp, mrm)
+
+# def get_test2(cp, mrm):
+#     return txt_formula("Test 2", calc_test2, cp, mrm)
+
+# def tp_test3(cp, mrm):
+#     return tp_formula("Test 3", calc_test3, cp, mrm)
+
+# def calc_test3(cp, mrm):
+#     return calc_formula("test3", cp, mrm)
+
+# def get_test3(cp, mrm):
+#     return txt_formula("Test 3", calc_test3, cp, mrm)
+
+# def tp_test4(cp, mrm):
+#     return tp_formula("Test 4", calc_test4, cp, mrm)
+
+# def calc_test4(cp, mrm):
+#     return calc_formula("test4", cp, mrm)
+
+# def get_test4(cp, mrm):
+#     return txt_formula("Test 4", calc_test4, cp, mrm)
+
+# def tp_test5(cp, mrm):
+#     return tp_formula("Test 5", calc_test5, cp, mrm)
+
+# def calc_test5(cp, mrm):
+#     return calc_formula("test5", cp, mrm)
+
+# def get_test5(cp, mrm):
+#     return txt_formula("Test 5", calc_test5, cp, mrm)
 
 def get_gamestage(cp, mrm):
     xgst = calc_gamestage(cp, mrm)
@@ -267,17 +320,14 @@ def genIndexes(partida):
     plantillaC = inicio + resto % ("%s", "%s", "%s")
     # plantillaP = inicio + resto%("%.02f%%", "%.02f%%", "%.02f%%")
 
-    cab = (plantillaC % ( _("Result of analysis"), cw, cb, ct )).replace("<td", "<th")
+    cab = (plantillaC % (_("Result of analysis"), cw, cb, ct)).replace("<td", "<th")
     txt = plantillaL % (_("Average lost scores"), average[True], cpt, average[False], cpt, averageT, cpt)
     txt += plantillaD % (_("Domination"), domination[True], domination[False])
     txt += plantillaC % (_("Complexity"), xac(complexity[True]), xac(complexity[False]), xac(complexityT))
-    txt += plantillaC % (
-        _("Efficient mobility"), xac(efficientmobility[True]), xac(efficientmobility[False]), xac(efficientmobilityT) )
-    txt += plantillaC % ( _("Narrowness"), xac(narrowness[True]), xac(narrowness[False]), xac(narrownessT) )
-    txt += plantillaC % (
-        _("Pieces activity"), xac(piecesactivity[True]), xac(piecesactivity[False]), xac(piecesactivityT) )
-    txt += plantillaC % (
-        _("Exchange tendency"), xac(exchangetendency[True]), xac(exchangetendency[False]), xac(exchangetendencyT) )
+    txt += plantillaC % (_("Efficient mobility"), xac(efficientmobility[True]), xac(efficientmobility[False]), xac(efficientmobilityT))
+    txt += plantillaC % (_("Narrowness"), xac(narrowness[True]), xac(narrowness[False]), xac(narrownessT))
+    txt += plantillaC % (_("Pieces activity"), xac(piecesactivity[True]), xac(piecesactivity[False]), xac(piecesactivityT))
+    txt += plantillaC % (_("Exchange tendency"), xac(exchangetendency[True]), xac(exchangetendency[False]), xac(exchangetendencyT))
 
     txtHTML = '<table border="1" cellpadding="5" cellspacing="1" >%s%s</table>' % (cab, txt)
     # Analisis.csv_formula(partida)
@@ -296,13 +346,10 @@ def genIndexes(partida):
     txt += plantillaC % (_("Complexity"), xac(complexity[True]),
                          xac(complexity[False]),
                          xac(complexityT))
-    txt += plantillaC % ( _("Narrowness"), xac(narrowness[True]), xac(narrowness[False]), xac(narrownessT) )
-    txt += plantillaC % (_("Efficient mobility"), xac(efficientmobility[True]), xac(efficientmobility[False]),
-                         xac(efficientmobilityT) )
-    txt += plantillaC % (
-        _("Pieces activity"), xac(piecesactivity[True]), xac(piecesactivity[False]), xac(piecesactivityT) )
-    txt += plantillaC % (
-        _("Exchange tendency"), xac(exchangetendency[True]), xac(exchangetendency[False]), xac(exchangetendencyT) )
+    txt += plantillaC % (_("Narrowness"), xac(narrowness[True]), xac(narrowness[False]), xac(narrownessT))
+    txt += plantillaC % (_("Efficient mobility"), xac(efficientmobility[True]), xac(efficientmobility[False]), xac(efficientmobilityT))
+    txt += plantillaC % (_("Pieces activity"), xac(piecesactivity[True]), xac(piecesactivity[False]), xac(piecesactivityT))
+    txt += plantillaC % (_("Exchange tendency"), xac(exchangetendency[True]), xac(exchangetendency[False]), xac(exchangetendencyT))
     txtRAW = txt
 
     # if QTUtil2.pregunta(gestor.pantalla, "%s\n\n\n%s" % (txt, _("Add this text to the last move analyzed?") )):

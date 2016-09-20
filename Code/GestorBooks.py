@@ -1,11 +1,11 @@
 import random
 
+from Code import Gestor
+from Code import Jugada
+from Code.QT import PantallaBooks
+from Code.QT import QTUtil2
+from Code import XMotorRespuesta
 from Code.Constantes import *
-import Code.Jugada as Jugada
-import Code.XMotorRespuesta as XMotorRespuesta
-import Code.Gestor as Gestor
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaBooks as PantallaBooks
 
 class GestorBooks(Gestor.Gestor):
     def inicio(self, libro, siBlancas, jugContrario, jugJugador):
@@ -27,7 +27,7 @@ class GestorBooks(Gestor.Gestor):
         self.siJugamosConBlancas = siBlancas
         self.siRivalConBlancas = not siBlancas
 
-        self.pantalla.ponToolBar(( k_mainmenu, k_reiniciar, k_configurar, k_utilidades ))
+        self.pantalla.ponToolBar((k_mainmenu, k_reiniciar, k_configurar, k_utilidades))
         self.pantalla.activaJuego(True, False, siAyudas=False)
         self.ponMensajero(self.mueveHumano)
         self.ponPosicion(self.partida.ultPosicion)
@@ -154,25 +154,8 @@ class GestorBooks(Gestor.Gestor):
         return resp
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
-            return False
-
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
-
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-
-        if not siBien:
-            self.sigueHumano()
-            self.error = mens
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
         siEncontrado = False
@@ -180,7 +163,7 @@ class GestorBooks(Gestor.Gestor):
         if coronacion is None:
             coronacion = ""
         for jdesde, jhasta, jcoronacion, jpgn, peso in self.listaJugadas:
-            if desde == jdesde and hasta == jhasta and coronacion == jcoronacion:
+            if desde == jdesde and hasta == jhasta and jg.coronacion == jcoronacion:
                 siEncontrado = True
                 actpeso = peso
                 break
@@ -230,7 +213,7 @@ class GestorBooks(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -285,7 +268,7 @@ class GestorBooks(Gestor.Gestor):
                     self.movimientos = 0
                     self.partida.ultPosicion = self.partida.iniPosicion
                 else:
-                    jg = self.partida.liJugadas[-1]
+                    jg = self.partida.last_jg()
                     self.aciertos = jg.aciertos
                     self.movimientos = jg.movimientos
                     self.partida.ultPosicion = jg.posicion
@@ -338,7 +321,7 @@ class GestorBooks(Gestor.Gestor):
     def txtAciertos(self):
         if self.movimientos:
             return "%s : %d/%d (%0.2f%%)" % (
-                _("Hints"), self.aciertos, self.movimientos, 100.0 * self.aciertos / self.movimientos )
+                _("Hints"), self.aciertos, self.movimientos, 100.0 * self.aciertos / self.movimientos)
         else:
             return ""
 
@@ -348,7 +331,6 @@ class GestorBooks(Gestor.Gestor):
 
         txt = self.txtAciertos()
 
-        mensaje = "%s\n%s\n" % (_("Line completed"), txt )
+        mensaje = "%s\n%s\n" % (_("Line completed"), txt)
 
         QTUtil2.mensaje(self.pantalla, mensaje)
-

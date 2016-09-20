@@ -1,10 +1,10 @@
 from PyQt4 import QtGui
 
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil2 as QTUtil2
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
 
 class TConf(QtGui.QWidget):
     def __init__(self, dicValoracion, dicVentaja):
@@ -130,4 +130,3 @@ class WTraining(QTVarios.WDialogo):
             return
         self.siAceptado = True
         self.accept()
-

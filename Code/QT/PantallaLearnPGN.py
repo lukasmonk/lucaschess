@@ -2,20 +2,20 @@ import time
 
 from PyQt4 import QtGui, QtCore
 
-import Code.Util as Util
-import Code.Partida as Partida
-import Code.TrListas as TrListas
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.PantallaPGN as PantallaPGN
-import Code.QT.FormLayout as FormLayout
-import Code.QT.Tablero as Tablero
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaPGN
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import TrListas
+from Code import Util
 
 class LearnPGNs(Util.DicSQL):
     def __init__(self, fichero):
@@ -48,8 +48,8 @@ class LearnPGNs(Util.DicSQL):
 class WLearnBase(QTVarios.WDialogo):
     def __init__(self, procesador):
 
-        titulo = _("Learn a game")
-        QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, Iconos.PGN(), "learngame")
+        titulo = _("Memorize a game")
+        QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, Iconos.LearnGame(), "learngame")
 
         self.procesador = procesador
         self.configuracion = procesador.configuracion
@@ -63,7 +63,7 @@ class WLearnBase(QTVarios.WDialogo):
             oColumnas.nueva(clave, rotulo, 80, siCentrado=siCentrado)
 
         # # Claves segun orden estandar
-        liBasic = ("EVENT", "SITE", "DATE", "ROUND", "WHITE", "BLACK", "RESULT", "ECO", "FEN", "WHITEELO", "BLACKELO" )
+        liBasic = ("EVENT", "SITE", "DATE", "ROUND", "WHITE", "BLACK", "RESULT", "ECO", "FEN", "WHITEELO", "BLACKELO")
         for clave in liBasic:
             rotulo = TrListas.pgnLabel(clave)
             creaCol(clave, rotulo, clave != "EVENT")
@@ -72,12 +72,12 @@ class WLearnBase(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-            ( _("New"), Iconos.TutorialesCrear(), "nuevo" ), None,
-            ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-            ( _("Start"), Iconos.Empezar(), "empezar" ),
+            (_("Close"), Iconos.MainMenu(), self.terminar), None,
+            (_("New"), Iconos.Nuevo(), self.nuevo), None,
+            (_("Remove"), Iconos.Borrar(), self.borrar), None,
+            (_("Learn"), Iconos.Empezar(), self.empezar),
         )
-        self.tb = Controles.TB(self, liAcciones)
+        self.tb = Controles.TBrutina(self, liAcciones)
 
         # Colocamos
         lyTB = Colocacion.H().control(self.tb).margen(0)
@@ -100,9 +100,6 @@ class WLearnBase(QTVarios.WDialogo):
         col = oColumna.clave
         reg = self.db.leeRegistro(fila)
         return reg.get(col, "")
-
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
 
     def terminar(self):
         self.guardarVideo()
@@ -164,9 +161,9 @@ class WLearn1(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-            ( _("Train"), Iconos.Entrenar(), "empezar" ), None,
-            ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
+            (_("Close"), Iconos.MainMenu(), "terminar"), None,
+            (_("Train"), Iconos.Empezar(), "empezar"), None,
+            (_("Remove"), Iconos.Borrar(), "borrar"), None,
         )
         self.tb = Controles.TB(self, liAcciones)
 
@@ -187,7 +184,7 @@ class WLearn1(QTVarios.WDialogo):
         def x(k):
             return r.get(k, "")
 
-        return "%s-%s : %s %s %s" % (x("WHITE"), x("BLACK"), x("DATE"), x("EVENT"), x("SITE") )
+        return "%s-%s : %s %s %s" % (x("WHITE"), x("BLACK"), x("DATE"), x("EVENT"), x("SITE"))
 
     def gridNumDatos(self, grid):
         return len(self.liIntentos)
@@ -198,7 +195,7 @@ class WLearn1(QTVarios.WDialogo):
 
         if col == "DATE":
             f = reg["DATE"]
-            return "%02d/%02d/%d-%02d:%02d" % (f.day, f.month, f.year, f.hour, f.minute )
+            return "%02d/%02d/%d-%02d:%02d" % (f.day, f.month, f.year, f.hour, f.minute)
         if col == "LEVEL":
             return str(reg["LEVEL"])
         if col == "COLOR":
@@ -304,19 +301,19 @@ class WLearnPuente(QTVarios.WDialogo):
         self.tableroIni.crea()
         self.tableroIni.ponMensajero(self.mueveHumano, None)
         self.lbIni = Controles.LB(self).alinCentrado().ponColorFondoN("#076C9F", "#EFEFEF").anchoMinimo(
-            self.tableroIni.ancho)
+                self.tableroIni.ancho)
         lyIni = Colocacion.V().control(self.tableroIni).control(self.lbIni)
 
         self.tableroFin = Tablero.TableroEstatico(self, confTablero)
         self.tableroFin.crea()
         self.lbFin = Controles.LB(self).alinCentrado().ponColorFondoN("#076C9F", "#EFEFEF").anchoMinimo(
-            self.tableroFin.ancho)
+                self.tableroFin.ancho)
         lyFin = Colocacion.V().control(self.tableroFin).control(self.lbFin)
 
         # Rotulo tiempo
         f = Controles.TipoLetra(puntos=30, peso=75)
         self.lbReloj = Controles.LB(self, "00:00").ponFuente(f).alinCentrado().ponColorFondoN("#076C9F",
-                                                                                        "#EFEFEF").anchoMinimo(200)
+                                                                                              "#EFEFEF").anchoMinimo(200)
         self.lbReloj.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
 
         # Movimientos
@@ -350,28 +347,28 @@ class WLearnPuente(QTVarios.WDialogo):
 
         if tipo == self.INICIO:
             liAcciones = (
-                ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-                ( _("Reinit"), Iconos.Reiniciar(), "reset" ), None,
-                ( _("Help"), Iconos.AyudaGR(), "ayuda" ), None,
+                (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
+                (_("Reinit"), Iconos.Reiniciar(), "reset"), None,
+                (_("Help"), Iconos.AyudaGR(), "ayuda"), None,
             )
         elif tipo == self.FINAL_JUEGO:
             liAcciones = (
-                ( _("Quit"), Iconos.MainMenu(), "final" ), None,
-                ( _("Reinit"), Iconos.Reiniciar(), "reset" ), None,
-                ( _("Replay game"), Iconos.Pelicula(), "replay" ), None,
+                (_("Close"), Iconos.MainMenu(), "final"), None,
+                (_("Reinit"), Iconos.Reiniciar(), "reset"), None,
+                (_("Replay game"), Iconos.Pelicula(), "replay"), None,
             )
         elif tipo == self.REPLAY:
             liAcciones = (
-                ( _("Cancel"), Iconos.Cancelar(), "repCancelar" ), None,
-                ( _("Reinit"), Iconos.Inicio(), "repReiniciar" ), None,
-                ( _("Slow"), Iconos.Pelicula_Lento(), "repSlow" ), None,
-                ( _("Pause"), Iconos.Pelicula_Pausa(), "repPause" ), None,
-                ( _("Fast"), Iconos.Pelicula_Rapido(), "repFast" ), None,
+                (_("Cancel"), Iconos.Cancelar(), "repCancelar"), None,
+                (_("Reinit"), Iconos.Inicio(), "repReiniciar"), None,
+                (_("Slow"), Iconos.Pelicula_Lento(), "repSlow"), None,
+                (_("Pause"), Iconos.Pelicula_Pausa(), "repPause"), None,
+                (_("Fast"), Iconos.Pelicula_Rapido(), "repFast"), None,
             )
         elif tipo == self.REPLAY_CONTINUE:
             liAcciones = (
-                ( _("Cancel"), Iconos.Cancelar(), "repCancelar" ), None,
-                ( _("Continue"), Iconos.Pelicula_Seguir(), "repContinue" ), None,
+                (_("Cancel"), Iconos.Cancelar(), "repCancelar"), None,
+                (_("Continue"), Iconos.Pelicula_Seguir(), "repContinue"), None,
             )
         self.tb.reset(liAcciones)
 
@@ -448,7 +445,7 @@ class WLearnPuente(QTVarios.WDialogo):
         njg = self.repJugada if self.repWorking else self.movActual - 1
         txtPGN = self.partida.pgnSP(hastaJugada=njg)
         texto = "<big><center><b>%s</b>: %d<br><b>%s</b>: %d</center><br><br>%s</big>" % (
-            _("Errors"), self.errors, _("Hints"), self.hints, txtPGN )
+            _("Errors"), self.errors, _("Hints"), self.hints, txtPGN)
         self.lbInfo.ponTexto(texto)
 
     def siguiente(self):
@@ -557,4 +554,3 @@ class WLearnPuente(QTVarios.WDialogo):
             s -= m * 60
 
             self.lbReloj.ponTexto("%02d:%02d" % (m, s))
-

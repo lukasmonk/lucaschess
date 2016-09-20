@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui, QtSvg
 
-import Code.QT.TabBloques as TabBloques
+from Code.QT import TabBloques
 
 class SVGSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueImgSVG, rutinaPulsada=None, siEditando=False):
@@ -112,7 +112,7 @@ class SVGSC(TabBloques.BloqueEspSC):
 
     def mouseMoveEvent(self, event):
         event.ignore()
-        if not (self.siMove or self.tpSize ):
+        if not (self.siMove or self.tpSize):
             return
 
         p = event.scenePos()

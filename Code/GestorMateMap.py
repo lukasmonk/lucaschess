@@ -1,12 +1,11 @@
+from Code import ControlPosicion
+from Code import Gestor
+from Code import Jugada
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
 from Code.Constantes import *
-import Code.ControlPosicion as ControlPosicion
-import Code.Jugada as Jugada
-import Code.Gestor as Gestor
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
 
 class GestorMateMap(Gestor.Gestor):
-
     def inicio(self, workmap):
         self.workmap = workmap
 
@@ -67,7 +66,7 @@ class GestorMateMap(Gestor.Gestor):
         self.mostrarIndicador(True)
         self.ponPiezasAbajo(siBlancas)
         self.ponRotulo1(etiqueta)
-        self.ponRotulo2( workmap.nameAim() )
+        self.ponRotulo2(workmap.nameAim())
         self.pgnRefresh(True)
         QTUtil.xrefreshGUI()
 
@@ -123,7 +122,7 @@ class GestorMateMap(Gestor.Gestor):
         siBlancas = self.partida.ultPosicion.siBlancas
 
         if self.partida.numJugadas() > 0:
-            jgUltima = self.partida.liJugadas[-1]
+            jgUltima = self.partida.last_jg()
             if jgUltima.siJaqueMate:
                 self.ponResultado(kGanamos if self.siJugamosConBlancas == jgUltima.siBlancas() else kGanaRival)
                 return
@@ -168,39 +167,18 @@ class GestorMateMap(Gestor.Gestor):
             self.rivalPensando = False
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
-        movimiento = desde + hasta
-
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
-        if coronacion:
-            movimiento += coronacion
-
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-
-        if siBien:
-            self.movimientosPiezas(jg.liMovs)
-            self.masJugada(jg, True)
-            self.error = ""
-            self.siguienteJugada()
-            return True
-        else:
-            self.sigueHumano()
-            self.error = mens
-            return False
+        self.movimientosPiezas(jg.liMovs)
+        self.masJugada(jg, True)
+        self.error = ""
+        self.siguienteJugada()
+        return True
 
     def masJugada(self, jg, siNuestra):
-        self.partida.liJugadas.append(jg)
-        self.partida.ultPosicion = jg.posicion
+        self.partida.append_jg(jg)
 
         # Preguntamos al mono si hay movimiento
         if self.siTerminada():
@@ -262,7 +240,7 @@ class GestorMateMap(Gestor.Gestor):
 
         mensaje = _("Game ended")
         if quien == kGanamos:
-            mensaje = _("Congratulations you have win %s.")%self.workmap.nameAim()
+            mensaje = _("Congratulations you have win %s.") % self.workmap.nameAim()
             self.workmap.winAim(self.partida.pv())
 
         QTUtil2.mensaje(self.pantalla, mensaje)
@@ -273,4 +251,3 @@ class GestorMateMap(Gestor.Gestor):
     def analizaPosicion(self, fila, clave):
         if self.resultado == kGanamos:
             Gestor.Gestor.analizaPosicion(self, fila, clave)
-

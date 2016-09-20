@@ -1,13 +1,13 @@
-import os
 import collections
+import os
 
+from Code import ControlPosicion
+from Code import Jugada
+from Code import PGNreader
+from Code import Partida
+from Code.QT import QTUtil2
 import Code.SQL.Base as SQLBase
-import Code.Partida as Partida
-import Code.PGNreader as PGNreader
-import Code.ControlPosicion as ControlPosicion
-import Code.Jugada as Jugada
-import Code.Util as Util
-import Code.QT.QTUtil2 as QTUtil2
+from Code import Util
 
 class UnPGN:
     def __init__(self, dic=None):
@@ -39,6 +39,7 @@ class UnPGN:
             cpActual.leeFen(mv.fen)
             jg = Jugada.Jugada()
             jg.ponDatos(cpBase, cpActual, mv.desde, mv.hasta, mv.coronacion)
+
             if mv.criticas:
                 li = []
                 for una in mv.criticas:
@@ -59,7 +60,7 @@ class UnPGN:
                 for una in mv.variantes:
                     li.append(una.toPGN())
                 jg.variantes = "\n\n".join(li)
-            p.liJugadas.append(jg)
+            p.append_jg(jg)
         if game.moves:
             p.ultPosicion = cpActual if game.moves.liMoves else cp.copia()
         self.partida = p
@@ -174,7 +175,7 @@ class PGN:
         titulo = os.path.basename(fichero)
         tmpBP = QTUtil2.BarraProgreso(ventana, titulo, _("Working..."), Util.tamFichero(fichero)).mostrar()
 
-        dClaves = Util.SymbolDict()  # contiene tama_o maximo de los campos a mostrar
+        dClaves = Util.SymbolDict()  # contiene tam maximo de los campos a mostrar
 
         def iniDB():
             fichDB = uno["PATHDB"]
@@ -250,15 +251,13 @@ class PGN:
 
         return True
 
-def leeEntDirigido(fen, solucion):
-    """
-    Utilizado en GestorEntPos y GestorEntTac, para crear un diccionario y usarlo en un entrenamiento dirigido
-    """
-
+def leeEntDirigidoBase(fen, solucion):
     dicDirigidoFen = collections.OrderedDict()
 
     pgn = UnPGN()
     pgn.leeTexto('[FEN "%s"]\n%s' % (fen, solucion))
+
+    st = set()
 
     def hazPartida(partida, siMain):
         for jg in partida.liJugadas:
@@ -275,9 +274,13 @@ def leeEntDirigido(fen, solucion):
                     siMas = False
                     if siMain:
                         liDDF[n] = (siMain, jg)
+                        if siMain:
+                            st.add(fenBase)
                         break
             if siMas:
                 liDDF.append((siMain, jg))
+                if siMain:
+                    st.add(fenBase)
 
             variantes = jg.variantes
             if variantes:
@@ -289,7 +292,35 @@ def leeEntDirigido(fen, solucion):
     partida = pgn.partida
     hazPartida(partida, True)
 
-    return dicDirigidoFen
+    return dicDirigidoFen, len(st)
+
+def leeEntDirigido(fen, solucion):
+    """
+    Utilizado en GestorEntPos y GestorEntTac, para crear un diccionario y usarlo en un entrenamiento dirigido
+    """
+    return leeEntDirigidoBase(fen, solucion)[0]
+
+def leeEntDirigidoM2(fen, solucion):
+    dic = leeEntDirigidoBase(fen, solucion)[0]
+    d = collections.OrderedDict()
+    if dic:
+        for fen in dic:
+            sp1 = fen.rfind(" ")
+            sp2 = fen.rfind(" ", 0, sp1)
+            fenM2 = fen[:sp2]
+            d[fenM2] = dic[fen]
+    return d
+
+def leeEntDirigidoBaseM2(fen, solucion):
+    dic, nMoves = leeEntDirigidoBase(fen, solucion)
+    d = collections.OrderedDict()
+    if dic:
+        for fen in dic:
+            sp1 = fen.rfind(" ")
+            sp2 = fen.rfind(" ", 0, sp1)
+            fenM2 = fen[:sp2]
+            d[fenM2] = dic[fen]
+    return d, nMoves
 
 def rawPGN(pgn):
     g = PGNreader.read1Game(pgn)
@@ -297,8 +328,8 @@ def rawPGN(pgn):
     p.leerPV(g.pv())
 
     txt = ""
-    for k,v in g.labels.iteritems():
-        txt += "[%s \"%s\"]\n"%(k,v)
+    for k, v in g.labels.iteritems():
+        txt += "[%s \"%s\"]\n" % (k, v)
     txt += "\n\n"
     txt += p.pgnBase()
 

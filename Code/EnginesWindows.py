@@ -2,15 +2,21 @@
 
 import collections
 
-import Code.BaseConfig as BaseConfig
+from Code import BaseConfig
 
 def leeRivales():
     dicRivales = collections.OrderedDict()
 
     def mas(cm):
         dicRivales[cm.clave] = cm
+        # p-rint """["%s", "%s", "%s"],"""%(cm.nombre, cm.autor, cm.url)
 
     ConfigMotor = BaseConfig.ConfigMotor
+    cm = ConfigMotor("acqua", "Giovanni Di Maria", "20160918", "http://www.elektrosoft.it/scacchi/acqua/acqua.asp")
+    cm.path = "acqua.exe"
+    cm.elo = 844
+    mas(cm)
+
     cm = ConfigMotor("tarrasch", "Bill Forster", "ToyEngine Beta V0.905", "http://www.triplehappy.com/")
     cm.path = "TarraschToyEngine.exe"
     cm.elo = 1481
@@ -63,12 +69,12 @@ def leeRivales():
     cm.ordenUCI("Ponder", "false")
     mas(cm)
 
-    cm = ConfigMotor("simplex", "Antonio Torrecillas", "0.9.8", "http://sites.google.com/site/barajandotrebejos/" )
+    cm = ConfigMotor("simplex", "Antonio Torrecillas", "0.9.8", "http://sites.google.com/site/barajandotrebejos/")
     cm.path = "Windows/simplex-098-32-ja.exe"
     cm.elo = 2396
     mas(cm)
 
-    cm = ConfigMotor("greko", "Vladimir Medvedev", "12", "http://sourceforge.net/projects/greko")
+    cm = ConfigMotor("greko", "Vladimir Medvedev", "12.9", "http://sourceforge.net/projects/greko")
     cm.path = "12/GreKo.exe"
     cm.elo = 2508
     mas(cm)
@@ -136,14 +142,14 @@ def leeRivales():
     cm.ordenUCI("Ponder", "false")
     mas(cm)
 
-    cm = ConfigMotor("rhetoric", "Alberto Sanjuan", "1.4.1", "http://www.chessrhetoric.com/")
+    cm = ConfigMotor("rhetoric", "Alberto Sanjuan", "1.4.3", "http://www.chessrhetoric.com/")
     cm.path = "Rhetoric_x32.exe"
-    cm.elo = 2750
+    cm.elo = 2810
     cm.ordenUCI("Hash", "32")
     cm.ponMultiPV(1, 4)
     mas(cm)
 
-    cm = ConfigMotor("cheng", "Martin Sedlák", "4 0.38", "http://www.vlasak.biz/cheng")
+    cm = ConfigMotor("cheng", "Martin Sedlák", "4 0.39", "http://www.vlasak.biz/cheng")
     cm.path = "cheng4.exe"
     cm.elo = 2750
     cm.ponMultiPV(20, 256)
@@ -168,8 +174,8 @@ def leeRivales():
     cm.ordenUCI("Hash", "32")
     mas(cm)
 
-    cm = ConfigMotor("discocheck", "Lucas Braesch", "5.2", "https://github.com/lucasart")
-    cm.path = "DiscoCheck52_x32.exe"
+    cm = ConfigMotor("discocheck", "Lucas Braesch", "5.2.1", "https://github.com/lucasart")
+    cm.path = "DiscoCheck.exe"
     cm.elo = 2890
     mas(cm)
 
@@ -179,18 +185,20 @@ def leeRivales():
     cm.ponMultiPV(20, 32)
     mas(cm)
 
-    cm = ConfigMotor("toga", "WHMoweryJr,Thomas Gaksch,Fabien Letouzey", "deepTogaNPS 1.9.6", "http://www.computerchess.info/tdbb/phpBB3/viewtopic.php?f=9&t=357")
+    cm = ConfigMotor("toga", "WHMoweryJr,Thomas Gaksch,Fabien Letouzey", "deepTogaNPS 1.9.6",
+                     "http://www.computerchess.info/tdbb/phpBB3/viewtopic.php?f=9&t=357")
     cm.path = "DeepToga1.9.6nps.exe"
     cm.elo = 2843
     cm.ordenUCI("Hash", "32")
     cm.ponMultiPV(20, 40)
     mas(cm)
 
-    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman", "7a 32bit", "http://komodochess.com/")
-    cm.path = "komodo-7-32bit.exe"
+    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman, Mark Lefler", "8 32bit", "http://komodochess.com/")
+    cm.path = "komodo-8-32bit.exe"
+    cm.path_64 = "komodo-8-64bit.exe", "8 64bit"
     cm.ordenUCI("Ponder", "false")
-    cm.ordenUCI("Hash", "32")
-    cm.elo = 3053
+    cm.ordenUCI("Hash", "64")
+    cm.elo = 3181
     cm.ponMultiPV(20, 99)
     mas(cm)
 
@@ -203,7 +211,7 @@ def leeRivales():
     cm.ponMultiPV(20, 100)
     mas(cm)
 
-    cm = ConfigMotor("critter", "Richard Vida", "1.6a 32bits", "http://www.vlasak.biz/critter/")
+    cm = ConfigMotor("critter", "Richard Vida", "1.6a 32bit", "http://www.vlasak.biz/critter/")
     cm.path = "Critter_1.6a_32bit.exe"
     cm.elo = 3091
     cm.ordenUCI("Hash", "32")
@@ -211,7 +219,7 @@ def leeRivales():
     cm.ponMultiPV(20, 100)
     mas(cm)
 
-    cm = ConfigMotor("texel", "Peter Österlund", "1.05", "http://web.comhem.se/petero2home/javachess/index.html#texel")
+    cm = ConfigMotor("texel", "Peter Österlund", "1.05 32bit", "http://web.comhem.se/petero2home/javachess/index.html#texel")
     cm.path = "texel32old.exe"
     cm.elo = 3100
     cm.ordenUCI("Hash", "32")
@@ -219,13 +227,44 @@ def leeRivales():
     cm.ponMultiPV(20, 256)
     mas(cm)
 
-    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "6", "http://stockfishchess.org/")
-    cm.path = "Windows\stockfish-6-32.exe"
+    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "7 32bit", "http://stockfishchess.org/")
+    cm.path = "Windows/stockfish 7 32bit.exe"
+    cm.path_64 = "Windows/stockfish 7 x64 bmi2.exe", "7 64bit bmi2"
     cm.elo = 3300
     cm.ordenUCI("Ponder", "false")
-    cm.ordenUCI("Hash", "32")
+    cm.ordenUCI("Hash", "64")
     cm.ordenUCI("Threads", "1")
     cm.ponMultiPV(20, 500)
+    mas(cm)
+
+    cm = ConfigMotor("deepfish", "Tord Romstad, Marco Costalba, Joona Kiiski, fork by Marco Zerbinati", "7 32bit", "https://github.com/Zerbinati/DeepFishMZ")
+    cm.path = "windows/DeepFishMZ 32.exe"
+    cm.path_64 = "windows/DeepFishMZ 64 BMI2.exe", "7 64bit bmi2"
+    cm.elo = 3200
+    cm.ordenUCI("Ponder", "false")
+    cm.ordenUCI("Hash", "64")
+    cm.ordenUCI("Threads", "1")
+    cm.ponMultiPV(20, 500)
+    mas(cm)
+
+    cm = ConfigMotor("gull", "Vadim Demichev", "3 32bit", "https://sourceforge.net/projects/gullchess/")
+    cm.path = "Gull 3 w32 XP.exe"
+    cm.elo = 3125
+    cm.ordenUCI("Hash", "32")
+    cm.ordenUCI("Threads", "1")
+    cm.ponMultiPV(20, 64)
+    mas(cm)
+
+    cm = ConfigMotor("irina", "Lucas Monge", "0.12", "")
+    cm.path = "irina.exe"
+    cm.elo = 1200
+    mas(cm)
+
+    cm = ConfigMotor("rodentII", "Pawel Koziol", "0.9.3", "http://www.pkoziol.cal24.pl/rodent/rodent.htm")
+    cm.path = "rodentII_x32.exe"
+    cm.path_64 = "rodentII_x64.exe", "0.9.3 64bit"
+    cm.elo = 2866
+    cm.ordenUCI("Hash", "64")
     mas(cm)
 
     return dicRivales
@@ -234,23 +273,22 @@ def dicMotoresFixedElo():
     d = leeRivales()
     dic = {}
     for nm, desde, hasta in (
-                                ("amyan", 1000, 2400),
-                                ("rhetoric", 1300, 2600),
-                                ("cheng", 800, 2500),
-                                ("greko", 1600, 2400),
-                                ("hamsters", 1000, 2000),
-                                ("rybka", 1200, 2400),
-                                ("ufim", 700, 2000),
-                                ("discocheck", 1500, 2700),
-                                ("rodent", 600, 2600),
-                            ):
-        for elo in range(desde, hasta+100, 100):
+            ("rodent", 600, 2600),
+            ("amyan", 1000, 2400),
+            ("rhetoric", 1300, 2600),
+            ("cheng", 800, 2500),
+            ("greko", 1600, 2400),
+            ("hamsters", 1000, 2000),
+            ("rybka", 1200, 2400),
+            ("ufim", 700, 2000),
+    ):
+        for elo in range(desde, hasta + 100, 100):
             cm = d[nm].clona()
             if elo not in dic:
                 dic[elo] = []
             cm.ordenUCI("UCI_Elo", str(elo))
             cm.ordenUCI("UCI_LimitStrength", "true")
-            cm.nombre += " (%d)"%elo
-            cm.clave += " (%d)"%elo
+            cm.nombre += " (%d)" % elo
+            cm.clave += " (%d)" % elo
             dic[elo].append(cm)
     return dic

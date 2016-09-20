@@ -1,23 +1,6 @@
-import codecs
+import LCEngine
 
-import Code.Util as Util
-import Code.SAK as SAK
-import chardet.universaldetector
-
-def openCodec(fich):
-    f = open(fich)
-
-    u = chardet.universaldetector.UniversalDetector()
-
-    for n, x in enumerate(f):
-        u.feed(x)
-        if n == 1000:
-            break
-    f.close()
-    u.close()
-
-    encoding = u.result.get("encoding", "latin-1")
-    return codecs.open(fich, "r", encoding, 'ignore')
+from Code import Util
 
 class Move:
     def __init__(self):
@@ -86,7 +69,7 @@ class Moves:
                 desde = pos
                 hasta = pos
                 pos += 1
-                while pos < ntxt and txt[pos] in "abcdefghKQRBN12345678xX-Oo=p":
+                while pos < ntxt and txt[pos] in "abcdefghKQRBN12345678xX-Oo=p+":
                     hasta += 1
                     pos += 1
 
@@ -113,7 +96,10 @@ class Moves:
                 if "-" in x:
                     x = x.replace("-", "")
                     mv.pgn = x
-                if not (x in ("ep", "e.p.", "e.p", "ep." )):
+                if x.endswith("e.p."):
+                    x = x[:-4]
+                    mv.pgn = x
+                if x and not (x in ("ep", "e.p.", "e.p", "ep.")):
                     self.liMoves.append(mv)
 
             elif c == "$":
@@ -210,11 +196,11 @@ class Moves:
             else:
                 pos += 1
 
-        SAK.sak.setFEN(fen)
+        LCEngine.setFen(fen)
         fenPrev = fen
         for mv in self.liMoves:
             mv.fenPrev = fenPrev
-            pv = SAK.sak.pgn2pv(mv.pgn)
+            pv = LCEngine.lc_pgn2pv(mv.pgn)
             if len(pv) < 4:
                 return False
             mv.pv = pv
@@ -222,7 +208,9 @@ class Moves:
             mv.hasta = pv[2:4]
             mv.coronacion = pv[4:]
 
-            fenPrev = SAK.sak.getFEN()
+            if not LCEngine.movePV(mv.desde, mv.hasta, mv.coronacion):
+                return False
+            fenPrev = LCEngine.getFen()
             mv.fen = fenPrev
 
         # Se hace separado para que no influya
@@ -236,128 +224,6 @@ class Moves:
                 mv.variantes = livar
 
         return True
-
-    def readFast(self, fen, txt):
-        ntxt = len(txt)
-        pos = 0
-
-        SAK.sak.setFEN(fen)
-        lip = []
-        while pos < ntxt:
-            c = txt[pos]
-
-            if c in "123456789":
-                pos += 1
-                while pos < ntxt and txt[pos] in "1234567890.":
-                    pos += 1
-            elif c in "abcdfghKQRBNOo":
-                desde = pos
-                hasta = pos
-                pos += 1
-                while pos < ntxt and txt[pos] in "abcdefghKQRBN12345678xX-Oo=p":
-                    hasta += 1
-                    pos += 1
-
-                x = txt[desde:hasta + 1]
-                if "-" in x:
-                    if "0" in x:
-                        x = x.replace("0", "O")
-                    elif "o" in x:
-                        x = x.replace("o", "O")
-                    elif x[0] != "O":
-                        x = x.replace("-", "")
-                pv = SAK.sak.pgn2pv(x)
-                if len(pv) < 4:
-                    return None
-                lip.append(pv)
-
-            elif c == "e":
-                desde = pos
-                hasta = pos
-                pos += 1
-                while pos < ntxt and txt[pos] in "abcdefghKQRBN12345678xX-=p.":
-                    hasta += 1
-                    pos += 1
-
-                x = txt[desde:hasta + 1]
-                if "-" in x:
-                    x = x.replace("-", "")
-                if not (x in ("ep", "e.p.", "e.p", "ep." )):
-                    pv = SAK.sak.pgn2pv(x)
-                    if len(pv) < 4:
-                        return None
-                    lip.append(pv)
-
-            elif c == "(":
-                pos += 1
-                hasta = pos
-                par = 1
-                coment = 0
-                while pos < ntxt:
-                    c = txt[pos]
-                    if coment:
-                        if c == "{":
-                            coment += 1
-                        elif c == "}":
-                            coment -= 1
-                    else:
-                        if c == "(":
-                            par += 1
-                        elif c == ")":
-                            par -= 1
-                            if par == 0:
-                                break
-                        elif c == "{":
-                            coment = 1
-                    hasta += 1
-                    pos += 1
-
-            elif c == "{":
-                pos += 1
-                hasta = pos
-                par = 1
-                while pos < ntxt:
-                    c = txt[pos]
-                    if c == "{":
-                        par += 1
-                    elif c == "}":
-                        par -= 1
-                        if par == 0:
-                            break
-                    hasta += 1
-                    pos += 1
-
-            elif c == "$":
-                pos += 1
-                hasta = pos
-                while pos < ntxt and txt[pos].isdigit():
-                    hasta += 1
-                    pos += 1
-
-            elif c == ";":
-                pos += 1
-                while pos < ntxt and txt[pos] != "\n":
-                    pos += 1
-
-            elif c == "0":
-                desde = pos
-                hasta = pos
-                pos += 1
-                while pos < ntxt and txt[pos] in "-0Oo":
-                    hasta += 1
-                    pos += 1
-
-                x = txt[desde:hasta + 1]
-                x = x.replace("0", "O").upper()
-                if len(x) in (3, 5):
-                    pv = SAK.sak.pgn2pv(x)
-                    if len(pv) < 4:
-                        return None
-                    lip.append(pv)
-
-            else:
-                pos += 1
-        return " ".join(lip)
 
 class Game:
     def __init__(self):
@@ -391,11 +257,6 @@ class Game:
             self.erroneo = True
         self.pvT = " ".join([move.pv for move in self.moves.liMoves if move.pv])
 
-    def readBodyFast(self, body):
-        self.pgn += "\n\n" + body + "\n"
-        self.pvT = self.moves.readFast(self.fen, body)
-        self.erroneo = self.pvT is None
-
     def pv(self):
         return self.pvT
 
@@ -406,6 +267,7 @@ def read1Game(pgn):
     pgnCab = []
     pgnMov = []
     siCab = True
+    siMov = False
     for linea in pgn.split("\n"):
         linea = linea.strip()
         if siCab:
@@ -424,63 +286,53 @@ def read1Game(pgn):
     g.readBody("\n".join(pgnMov))
     return g
 
-def readGames(pgnfile, siFast=True):
-    f = openCodec(pgnfile)
-    pgnCab = []
-    pgnMov = []
-    siBCab = True
-    siCab = False
-    nbytes = 0
-    for linea in f:
-        nbytes += len(linea)
-        linea = linea.strip()
-        if siBCab:
-            if linea and linea[0] == "[":
-                pgnCab = [linea, ]
-                siBCab = False
-                siCab = True
-        elif siCab:
-            if linea:
-                if linea[0] == "[":
-                    pgnCab.append(linea)
+def readGames(pgnfile):
+    with Util.OpenCodec(pgnfile) as f:
+        pgnCab = []
+        pgnMov = []
+        siBCab = True
+        siCab = False
+        siMov = False
+        nbytes = 0
+        for linea in f:
+            nbytes += len(linea)
+            linea = linea.strip()
+            if siBCab:
+                if linea and linea[0] == "[":
+                    pgnCab = [linea, ]
+                    siBCab = False
+                    siCab = True
+            elif siCab:
+                if linea:
+                    if linea[0] == "[":
+                        pgnCab.append(linea)
+                    else:
+                        siCab = False
+                        siMov = True
+                        pgnMov = [linea, ]
+            elif siMov:
+                if linea:
+                    if linea[0] == '[' and linea.endswith("]"):
+                        g = Game()
+                        g.nbytes = nbytes
+                        g.readLabels(pgnCab)
+                        g.readBody("\n".join(pgnMov))
+                        yield g
+                        pgnCab = [linea, ]
+                        siCab = True
+                    else:
+                        pgnMov.append(linea)
                 else:
-                    siCab = False
-                    siMov = True
-                    pgnMov = [linea, ]
-        elif siMov:
-            if linea:
-                if linea[0] == '[' and linea.endswith("]"):
                     g = Game()
                     g.nbytes = nbytes
                     g.readLabels(pgnCab)
-                    if siFast:
-                        g.readBodyFast("\n".join(pgnMov))
-                    else:
-                        g.readBody("\n".join(pgnMov))
-                    yield g
-                    pgnCab = [linea, ]
-                    siCab = True
-                else:
-                    pgnMov.append(linea)
-            else:
-                g = Game()
-                g.nbytes = nbytes
-                g.readLabels(pgnCab)
-                if siFast:
-                    g.readBodyFast("\n".join(pgnMov))
-                else:
                     g.readBody("\n".join(pgnMov))
-                yield g
-                siBCab = True
+                    yield g
+                    siBCab = True
 
-    if not siBCab:
-        g = Game()
-        g.nbytes = nbytes
-        g.readLabels(pgnCab)
-        if siFast:
-            g.readBodyFast("\n".join(pgnMov))
-        else:
+        if not siBCab:
+            g = Game()
+            g.nbytes = nbytes
+            g.readLabels(pgnCab)
             g.readBody("\n".join(pgnMov))
-        yield g
-    f.close()
-
+            yield g

@@ -1,23 +1,23 @@
-import os
-import copy
 import codecs
+import copy
+import os
 
 from PyQt4 import QtCore, QtGui
 
-import Code.TabVisual as TabVisual
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.TabTipos as TabTipos
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Tablero as Tablero
-import Code.QT.FormLayout as FormLayout
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import TabTipos
+from Code.QT import Tablero
+from Code import TabVisual
+from Code import Util
+from Code import VarGen
 
 class WTV_Marker(QtGui.QDialog):
     def __init__(self, owner, regMarker, xml=None, nombre=None):
@@ -35,9 +35,9 @@ class WTV_Marker(QtGui.QDialog):
             if nombre:
                 regMarker.nombre = nombre
 
-        liAcciones = [( _("Save"), Iconos.Aceptar(), self.grabar ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), self.reject ), None,
-        ]
+        liAcciones = [(_("Save"), Iconos.Aceptar(), self.grabar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.reject), None,
+                      ]
         tb = Controles.TBrutina(self, liAcciones)
 
         # Tablero
@@ -51,29 +51,29 @@ class WTV_Marker(QtGui.QDialog):
 
         # nombre del svg que se usara en los menus del tutorial
         config = FormLayout.Editbox(_("Name"), ancho=120)
-        liGen.append((config, regMarker.nombre ))
+        liGen.append((config, regMarker.nombre))
 
         # ( "opacidad", "n", 1.0 ),
         config = FormLayout.Dial(_("Degree of transparency"), 0, 99)
-        liGen.append(( config, 100 - int(regMarker.opacidad * 100) ))
+        liGen.append((config, 100 - int(regMarker.opacidad * 100)))
 
         # ( "psize", "n", 100 ),
         config = FormLayout.Spinbox(_("Size") + " %", 1, 1600, 50)
-        liGen.append(( config, regMarker.psize ))
+        liGen.append((config, regMarker.psize))
 
         # ( "poscelda", "n", 1 ),
         li = (
-            ( "%s-%s" % (_("Top"), _("Left")), 0),
-            ( "%s-%s" % (_("Top"), _("Right")), 1),
-            ( "%s-%s" % (_("Bottom"), _("Left")), 2),
-            ( "%s-%s" % (_("Bottom"), _("Right")), 3),
+            ("%s-%s" % (_("Top"), _("Left")), 0),
+            ("%s-%s" % (_("Top"), _("Right")), 1),
+            ("%s-%s" % (_("Bottom"), _("Left")), 2),
+            ("%s-%s" % (_("Bottom"), _("Right")), 3),
         )
         config = FormLayout.Combobox(_("Position in the square"), li)
-        liGen.append(( config, regMarker.poscelda ))
+        liGen.append((config, regMarker.poscelda))
 
         # orden
         config = FormLayout.Combobox(_("Order concerning other items"), QTUtil2.listaOrdenes())
-        liGen.append(( config, regMarker.posicion.orden ))
+        liGen.append((config, regMarker.posicion.orden))
 
         self.form = FormLayout.FormWidget(liGen, dispatch=self.cambios)
 
@@ -143,16 +143,16 @@ class WTV_Markers(QTVarios.WDialogo):
         oColumnas.nueva("NUMERO", _("N."), 60, siCentrado=True)
         oColumnas.nueva("NOMBRE", _("Name"), 256)
 
-        self.grid = Grid.Grid(self, oColumnas, id="M", siSelecFilas=True)
+        self.grid = Grid.Grid(self, oColumnas, xid="M", siSelecFilas=True)
 
         liAcciones = [
-            ( _("Quit"), Iconos.MainMenu(), self.terminar ), None,
-            ( _("New"), Iconos.Nuevo(), self.mas ), None,
-            ( _("Remove"), Iconos.Borrar(), self.borrar ), None,
-            ( _("Modify"), Iconos.Modificar(), self.modificar ), None,
-            ( _("Copy"), Iconos.Copiar(), self.copiar ), None,
-            ( _("Up"), Iconos.Arriba(), self.arriba ), None,
-            ( _("Down"), Iconos.Abajo(), self.abajo ), None,
+            (_("Close"), Iconos.MainMenu(), self.terminar), None,
+            (_("New"), Iconos.Nuevo(), self.mas), None,
+            (_("Remove"), Iconos.Borrar(), self.borrar), None,
+            (_("Modify"), Iconos.Modificar(), self.modificar), None,
+            (_("Copy"), Iconos.Copiar(), self.copiar), None,
+            (_("Up"), Iconos.Arriba(), self.arriba), None,
+            (_("Down"), Iconos.Abajo(), self.abajo), None,
         ]
         tb = Controles.TBrutina(self, liAcciones)
         tb.setFont(flb)
@@ -290,9 +290,9 @@ class WTV_Markers(QTVarios.WDialogo):
             w = WTV_Marker(self, self.liPMarkers[fila])
             if w.exec_():
                 regMarker = w.regMarker
-                id = regMarker.id
+                xid = regMarker.id
                 self.liPMarkers[fila] = regMarker
-                self.dbMarkers[id] = regMarker
+                self.dbMarkers[xid] = regMarker
                 self.grid.refresh()
                 self.grid.setFocus()
                 self.gridCambiadoRegistro(self.grid, fila, None)
@@ -309,10 +309,10 @@ class WTV_Markers(QTVarios.WDialogo):
                         return True
                 return False
 
-            nombre = "%s-%d" % (regMarker.nombre, n )
+            nombre = "%s-%d" % (regMarker.nombre, n)
             while siEstaNombre(nombre):
                 n += 1
-                nombre = "%s-%d" % (regMarker.nombre, n )
+                nombre = "%s-%d" % (regMarker.nombre, n)
             regMarker.nombre = nombre
             regMarker.id = Util.nuevoID()
             regMarker.ordenVista = self.liPMarkers[-1].ordenVista + 1

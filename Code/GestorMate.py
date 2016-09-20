@@ -1,22 +1,20 @@
 import time
 
+from Code import ControlPosicion
+from Code import Gestor
+from Code import Jugada
+from Code import Partida
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code import Util
 from Code.Constantes import *
-
-import Code.Util as Util
-import Code.Gestor as Gestor
-import Code.ControlPosicion as ControlPosicion
-import Code.Partida as Partida
-import Code.Jugada as Jugada
-
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.FormLayout as FormLayout
-import Code.QT.Iconos as Iconos
 
 class ConfigNivel:
     def __init__(self, mate):
         self.mate = mate
 
-        eduardo = "Trainings/From Eduardo Sadier 131279 positions of mate in two.fns"
+        eduardo = "Trainings/From Eduardo Sadier/145032 positions of mate in two.fns"
         pascal3 = "Trainings/From Pascal Georges in Scid/Mate in 3.fns"
         pascal4 = "Trainings/From Pascal Georges in Scid/Mate in 4 and more.fns"
         dicFicheros = {1: eduardo, 2: eduardo, 3: pascal3, 4: pascal4}
@@ -30,20 +28,20 @@ class ConfigNivel:
         liDepth = [2, 4, 6, 10]
         self.depth = liDepth[mate - 1]
 
-        fmt = "./IntFiles/Mate/mate%d.lst"%mate
+        fmt = "./IntFiles/Mate/mate%d.lst" % mate
         with open(fmt) as f:
             dic = {}
             for nlinea, linea in enumerate(f):
                 linea = linea.strip()
                 if linea:
-                    dic[nlinea] = [ uno.split(",") for uno in linea.split("|") ]
+                    dic[nlinea] = [uno.split(",") for uno in linea.split("|")]
 
         # dic = Util.recuperaVar("./IntFiles/mate.nvd")
         self.dicMate = dic
         self.nivelMaximo = len(self.dicMate) / 10
 
     def dameFenPV(self, nivel, bloque):
-        return self.dicMate[nivel*10 + bloque]
+        return self.dicMate[nivel * 10 + bloque]
 
 class MateBloque:
     def __init__(self):
@@ -55,7 +53,7 @@ class MateBloque:
         self.tiempo = tiempo
 
     def siTerminado(self):
-        return not ( (self.errores is None) or (self.errores > 0) )
+        return not ((self.errores is None) or (self.errores > 0))
 
 class MateNivel:
     def __init__(self, nivel):
@@ -289,7 +287,7 @@ class GestorMate(Gestor.Gestor):
         self.ponRotuloBloque(False)
         self.pantalla.base.pgn.show()
 
-        self.pantalla.ponToolBar(( k_terminar, k_mateNivel ))
+        self.pantalla.ponToolBar((k_terminar, k_mateNivel))
         self.desactivaTodas()
         self.estado = kFinJuego
         self.refresh()
@@ -305,10 +303,10 @@ class GestorMate(Gestor.Gestor):
         liGen = [(None, None)]
 
         config = FormLayout.Spinbox(_("Level"), 1, ult_nivel, 50)
-        liGen.append(( config, ult_nivel ))
+        liGen.append((config, ult_nivel))
 
         config = FormLayout.Spinbox(_("Block"), 1, 10, 50)
-        liGen.append(( config, ult_bloque ))
+        liGen.append((config, ult_bloque))
 
         resultado = FormLayout.fedit(liGen, title=_("Level"), parent=self.pantalla, icon=Iconos.Jugar())
 
@@ -324,7 +322,7 @@ class GestorMate(Gestor.Gestor):
     def ponRotuloNivel(self):
         nivel = self.controlMate.mateNivel.nivel
 
-        txt = "%s : %d/%d" % ( _("Level"), nivel + 1, self.controlMate.configNivel.nivelMaximo )
+        txt = "%s : %d/%d" % (_("Level"), nivel + 1, self.controlMate.configNivel.nivelMaximo)
 
         self.lbNivel.ponTexto(txt)
         self.lbNivel.show()
@@ -338,7 +336,7 @@ class GestorMate(Gestor.Gestor):
             totbloques = self.controlMate.configNivel.posicionesNivel
 
             txt += "<h3>%s : %d </h3><h3> %s : %d </h3><h3> %d / %d</h3>" % (
-                _("Block"), bloque, _("Errors"), errores, posicion, totbloques )
+                _("Block"), bloque, _("Errors"), errores, posicion, totbloques)
         self.pantalla.ponRotulo1(txt + "</center>")
 
     def siguienteMate(self):
@@ -347,7 +345,7 @@ class GestorMate(Gestor.Gestor):
             # Hemos terminado el bloque
             siRecord, tiempo = self.controlMate.final(self.errores)
             txt = "<center><h3> %s : %d</h3><h3>%s : %d </h3></center>" % (
-                _("Errors"), self.errores, _("Second(s)"), tiempo )
+                _("Errors"), self.errores, _("Second(s)"), tiempo)
 
             if siRecord:
                 txt += "<h3>%s</h3>" % _("Congratulations you have achieved a new record in this block.")
@@ -408,6 +406,7 @@ class GestorMate(Gestor.Gestor):
         self.siAyuda = False
 
         self.ponRotuloBloque(True)
+        # self.miraKibitzers(None, None)
 
         self.refresh()
 
@@ -429,18 +428,13 @@ class GestorMate(Gestor.Gestor):
         self.siguienteMate()
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                return False
-
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-        if not siBien:
+        self.siJuegaHumano = True  # necesario para el check
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
         self.partida.ultPosicion = jg.posicion
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.siAyuda:
             self.tablero.quitaFlechas()
         self.movimientosPiezas(jg.liMovs, False)
@@ -461,7 +455,7 @@ class GestorMate(Gestor.Gestor):
 
         siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
         self.partida.ultPosicion = jg.posicion
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         self.ponFlechaSC(jg.desde, jg.hasta)
         self.movimientosPiezas(jg.liMovs, False)
         if self.siTerminada():
@@ -474,4 +468,3 @@ class GestorMate(Gestor.Gestor):
             self.finJuego()
             return
         self.jugar(fila)
-

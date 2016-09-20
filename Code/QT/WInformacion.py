@@ -2,12 +2,12 @@ import os
 
 from PyQt4 import QtGui
 
-import Code.TrListas as TrListas
-import Code.VarGen as VarGen
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Controles as Controles
-import Code.QT.Iconos as Iconos
-import Code.QT.QTVarios as QTVarios
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTVarios
+from Code import TrListas
+from Code import VarGen
 
 class InformacionPGN(QtGui.QWidget):
     def __init__(self, wParent):
@@ -39,19 +39,19 @@ class InformacionPGN(QtGui.QWidget):
             if x:
                 fsvg = "%s/$%d.svg" % (carpNAGs, x)
                 if os.path.isfile(fsvg):
-                    liOpciones.append(("$%d : %s" % ( x, dicNAGs[x]), str(x), QTVarios.fsvg2ico(fsvg, 16)))
+                    liOpciones.append(("$%d : %s" % (x, dicNAGs[x]), str(x), QTVarios.fsvg2ico(fsvg, 16)))
                 else:
-                    liOpciones.append(("$%d : %s" % ( x, dicNAGs[x]), str(x)))
+                    liOpciones.append(("$%d : %s" % (x, dicNAGs[x]), str(x)))
         self.maxNAGs = 10
         self.liNAGs = []
         for x in range(self.maxNAGs):
             cb = Controles.CB(self, liOpciones, "").ponAnchoMinimo().capturaCambiado(self.valoracionCambiada).ponFuente(
-                f9)
+                    f9)
             if x:
                 cb.hide()
             self.liNAGs.append(cb)
 
-        liOpciones = [(x, x) for x in ("-", "!", "!!", "?", "??", "!?", "?!" )]
+        liOpciones = [(x, x) for x in ("-", "!", "!!", "?", "??", "!?", "?!")]
         self.valoracionDirecta = Controles.CB(self, liOpciones, "-").ponAnchoFijo(42).capturaCambiado(self.valoracionDirectaCambiada)
 
         lyH = Colocacion.H().control(self.valoracionDirecta).control(self.liNAGs[0])
@@ -63,17 +63,17 @@ class InformacionPGN(QtGui.QWidget):
 
         # Comentarios
         self.comentario = Controles.EM(self, siHTML=False).capturaCambios(self.comentarioCambiado).ponFuente(
-            ftxt).anchoMinimo(200)
+                ftxt).anchoMinimo(200)
 
         ly = Colocacion.H().control(self.comentario)
         self.gbComentario = Controles.GB(self, _("Comments"), ly).ponFuente(f)
 
         # Variantes
         liAcciones = (
-            ( _("Append"), Iconos.Mas(), "tbMasVariante" ), None,
-            ( "%s+%s" % (_("Append"), _("Engine")), Iconos.MasR(), "tbMasVarianteR" ), None,
-            ( _("Edit"), Iconos.ComentarioEditar(), "tbEditarVariante" ), None,
-            ( _("Remove"), Iconos.Borrar(), "tbBorrarVariante" ), None,
+            (_("Append"), Iconos.Mas(), "tbMasVariante"), None,
+            ("%s+%s" % (_("Append"), _("Engine")), Iconos.MasR(), "tbMasVarianteR"), None,
+            (_("Edit"), Iconos.ComentarioEditar(), "tbEditarVariante"), None,
+            (_("Remove"), Iconos.Borrar(), "tbBorrarVariante"), None,
         )
         tbVariantes = Controles.TB(self, liAcciones, siTexto=False, tamIcon=16)
 
@@ -139,7 +139,7 @@ class InformacionPGN(QtGui.QWidget):
         self.gbVariantes.setVisible(siJG)
 
         if siJG:
-            self.gbComentario.ponTexto("%s - %s" % ( _("Move"), _("Comments")))
+            self.gbComentario.ponTexto("%s - %s" % (_("Move"), _("Comments")))
             if apertura:
                 self.lbApertura.ponTexto(apertura)
                 if jg.siApertura:
@@ -160,7 +160,7 @@ class InformacionPGN(QtGui.QWidget):
             self.valoracionDirecta.ponValor(jg.criticaDirecta if jg.criticaDirecta else "-")
 
         else:
-            self.gbComentario.ponTexto("%s - %s" % ( _("Game"), _("Comments")))
+            self.gbComentario.ponTexto("%s - %s" % (_("Game"), _("Comments")))
             if partida:
                 self.comentario.ponTexto(partida.firstComment)
 
@@ -241,4 +241,3 @@ class InformacionPGN(QtGui.QWidget):
         fen = jg.posicionBase.fen()
 
         return Variantes.editaVariante(gestor.procesador, gestor, fen, linea, siEngineActivo=siEngineActivo)
-

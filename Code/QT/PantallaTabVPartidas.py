@@ -1,16 +1,13 @@
-import Code.VarGen as VarGen
-
-import Code.PGN as PGN
-
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Controles as Controles
-import Code.QT.Iconos as Iconos
-
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Tablero as Tablero
+from Code import PGN
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import VarGen
 
 def texto2partida(owner, texto):
     pgn = PGN.UnPGN()
@@ -32,12 +29,12 @@ class W_EligeMovimientos(QTVarios.WDialogo):
         self.partida = partida
         self.siEmpiezaConNegras = partida.siEmpiezaConNegras
         siTodos = True
-        self.liElegidos = [siTodos] * len(partida.liJugadas)
+        self.liElegidos = [siTodos] * len(partida)
 
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "reject" ), None,
-                      ( _("Mark"), Iconos.Marcar(), "marcar" ), None,
-        ]
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), "aceptar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "reject"), None,
+                      (_("Mark"), Iconos.Marcar(), "marcar"), None,
+                      ]
         tb = Controles.TB(self, liAcciones)
 
         # Tablero
@@ -78,7 +75,7 @@ class W_EligeMovimientos(QTVarios.WDialogo):
         self.accept()
 
     def gridNumDatos(self, grid):
-        return len(self.partida.liJugadas)
+        return len(self.partida)
 
     def gridDato(self, grid, fila, oColumna):
         clave = oColumna.clave
@@ -89,8 +86,8 @@ class W_EligeMovimientos(QTVarios.WDialogo):
                 fila += 1
             return str(fila / 2 + 1)
         else:
-            valor = self.partida.liJugadas[fila].pgnSP()
-            siBlancas = self.partida.liJugadas[fila].posicionBase.siBlancas
+            valor = self.partida.jugada(fila).pgnSP()
+            siBlancas = self.partida.jugada(fila).posicionBase.siBlancas
             if clave == "BLANCAS":
                 return valor if siBlancas else ""
             else:
@@ -112,7 +109,7 @@ class W_EligeMovimientos(QTVarios.WDialogo):
             self.pgn.refresh()
 
     def gridCambiadoRegistro(self, grid, fil, columna):
-        jg = self.partida.liJugadas[fil]
+        jg = self.partida.jugada(fil)
         self.tablero.ponPosicion(jg.posicion)
         self.tablero.ponFlechaSC(jg.desde, jg.hasta)
         self.pgn.setFocus()

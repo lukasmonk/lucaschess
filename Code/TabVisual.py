@@ -1,9 +1,9 @@
 import copy
 
-import Code.Util as Util
-import Code.Jugada as Jugada
-import Code.TrListas as TrListas
-import Code.QT.TabTipos as TabTipos
+from Code import Jugada
+from Code.QT import TabTipos
+from Code import TrListas
+from Code import Util
 
 class PFlecha(TabTipos.Flecha):
     def __init__(self):
@@ -434,4 +434,3 @@ class Guion:
         tarea.recupera(reg)
         self.nuevaTarea(tarea, -1)
         return tarea
-

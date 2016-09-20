@@ -1,22 +1,22 @@
 from PyQt4 import QtCore, QtGui
 
-import Code.Util as Util
-import Code.VarGen as VarGen
-import Code.Partida as Partida
-import Code.Analisis as Analisis
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Tablero as Tablero
-import Code.QT.Grid as Grid
-import Code.QT.Columnas as Columnas
+from Code import Analisis
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import Util
+from Code import VarGen
 
 class WJuicio(QTVarios.WDialogo):
-    def __init__(self, gestor, xmotor, nombreOP, posicion, mrm, rmOP, rmUsu, analisis):
-        self.siCompetitivo = gestor.siCompetitivo
+    def __init__(self, gestor, xmotor, nombreOP, posicion, mrm, rmOP, rmUsu, analisis, siCompetitivo=None):
+        self.siCompetitivo = gestor.siCompetitivo if siCompetitivo is None else siCompetitivo
         self.nombreOP = nombreOP
         self.posicion = posicion
         self.rmOP = rmOP
@@ -39,7 +39,7 @@ class WJuicio(QTVarios.WDialogo):
 
         self.lbComentario = Controles.LB(self, "").ponTipoLetra(puntos=10).alinCentrado()
 
-        confTablero = VarGen.configuracion.confTablero("JUICIO", 32)
+        confTablero = gestor.configuracion.confTablero("JUICIO", 32)
         self.tablero = Tablero.Tablero(self, confTablero)
         self.tablero.crea()
         self.tablero.ponerPiezasAbajo(posicion.siBlancas)
@@ -47,8 +47,8 @@ class WJuicio(QTVarios.WDialogo):
         self.lbMotor = Controles.LB(self).alinCentrado()
         self.lbTiempo = Controles.LB(self).alinCentrado()
 
-        liMas = ( (_("Close"), "close", Iconos.Delete() ), )
-        lyBM, tbBM = QTVarios.lyBotonesMovimiento(self, "", siLibre=True, tamIcon=24, siMas=True, liMasAcciones=liMas)
+        liMas = ((_("Close"), "close", Iconos.AceptarPeque()),)
+        lyBM, tbBM = QTVarios.lyBotonesMovimiento(self, "", siLibre=False, tamIcon=24, siMas=gestor.continueTt, liMasAcciones=liMas)
 
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("POSREAL", "#", 40, siCentrado=True)
@@ -132,7 +132,6 @@ class WJuicio(QTVarios.WDialogo):
                 ultPts = p
                 posReal += 1
 
-            txt = ""
             siOP = rm.pv == self.rmOP.pv
             siUsu = rm.pv == self.rmUsu.pv
             if siOP and siUsu:
@@ -186,7 +185,7 @@ class WJuicio(QTVarios.WDialogo):
     def mueve(self, siInicio=False, nSaltar=0, siFinal=False, siBase=False):
         if nSaltar:
             pos = self.posMueve + nSaltar
-            if  0 <= pos < self.maxMoves:
+            if 0 <= pos < self.maxMoves:
                 self.posMueve = pos
             else:
                 return False
@@ -196,8 +195,8 @@ class WJuicio(QTVarios.WDialogo):
             self.posMueve = -1
         elif siFinal:
             self.posMueve = self.maxMoves - 1
-        if len(self.partida.liJugadas):
-            jg = self.partida.liJugadas[self.posMueve if self.posMueve > -1 else 0]
+        if len(self.partida):
+            jg = self.partida.jugada(self.posMueve if self.posMueve > -1 else 0)
             if siBase:
                 self.tablero.ponPosicion(jg.posicionBase)
             else:
@@ -253,7 +252,7 @@ class WJuicio(QTVarios.WDialogo):
         self.grid.refresh()
 
     def mueveLibre(self):
-        jg = self.partida.liJugadas[self.posMueve]
+        jg = self.partida.jugada(self.posMueve)
         pts = self.listaRM[self.grid.recno()].rm.texto()
         Analisis.AnalisisVariantes(self, self.xmotor, jg, self.posicion.siBlancas, pts)
 
@@ -282,4 +281,3 @@ class MensajeF(QtGui.QDialog):
         QTUtil.refreshGUI()
         self.exec_()
         QTUtil.refreshGUI()
-

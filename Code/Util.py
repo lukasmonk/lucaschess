@@ -1,19 +1,22 @@
-import os
-import gc
 import atexit
-import cPickle
 import base64
-import datetime
-import hashlib
-import random
-import sqlite3
-import zlib
+import cPickle
 import codecs
-import time
-import glob
-import shutil
 import collections
+import datetime
+import gc
+import glob
+import hashlib
+import os
+import random
+import shutil
+import sqlite3
+import time
+import zlib
+import threading
 from itertools import izip, cycle
+
+import chardet.universaldetector
 
 def xor_crypt(data, key):
     """
@@ -28,38 +31,30 @@ def xor_crypt(data, key):
 def nuevoID():
     d = datetime.datetime.now()
     r = random.randint
-    t = (((((r(1, d.year) * 12 + r(1,
-                                   d.month)) * 31 + d.day) * 24 + d.hour) * 60 + d.minute) * 60 + d.second) * 1000 + r(
-        1, d.microsecond + 737) / 1000
+    t = (((((r(1, d.year) * 12 + r(1, d.month)) * 31 + d.day) * 24 + d.hour) * 60 + d.minute) * 60 + d.second) * 1000 + r(1, d.microsecond + 737) / 1000
     return t
 
 def guardaDIC(dic, fich):
-    f = open(fich, "w")
-    f.write(base64.encodestring(cPickle.dumps(dic)))
-    f.close()
+    with open(fich, "w") as q:
+        q.write(base64.encodestring(cPickle.dumps(dic)))
 
 def recuperaDIC(fich):
     try:
-        f = open(fich, "r")
-        s = f.read()
-        f.close()
-
+        with open(fich) as f:
+            s = f.read()
         dic = cPickle.loads(base64.decodestring(s))
     except:
         dic = None
     return dic
 
 def guardaVar(fich, v):
-    f = open(fich, "w")
-    f.write(cPickle.dumps(v))
-    f.close()
+    with open(fich, "w") as q:
+        q.write(cPickle.dumps(v))
 
 def recuperaVar(fich):
     try:
-        f = open(fich, "r")
-        s = f.read()
-        f.close()
-
+        with open(fich) as f:
+            s = f.read()
         v = cPickle.loads(s)
     except:
         v = None
@@ -75,6 +70,26 @@ def blob2var(blob):
         return None
     varp = zlib.decompress(blob)
     return cPickle.loads(varp)
+
+def dic2blob(dic):
+    varp = str(dic).replace(', ', ',').replace(': ', ':')
+    varz = zlib.compress(varp, 7)
+    return sqlite3.Binary(varz)
+
+def blob2dic(blob):
+    if blob is None:
+        return {}
+    varp = zlib.decompress(blob)
+    return eval(varp)
+
+def str2blob(varp):
+    varz = zlib.compress(varp, 7)
+    return sqlite3.Binary(varz)
+
+def blob2str(blob):
+    if blob is None:
+        return ""
+    return str(zlib.decompress(blob))
 
 def dic2txt(dic):
     return base64.encodestring(cPickle.dumps(dic)).replace("\n", "|")
@@ -106,10 +121,21 @@ def hoy():
     return datetime.datetime.now()
 
 def dtos(f):
-    return "%04d%02d%02d" % (f.year, f.month, f.day )
+    return "%04d%02d%02d" % (f.year, f.month, f.day)
+
+def stod(txt):
+    if txt and len(txt) == 8 and txt.isdigit():
+        return datetime.date(int(txt[:4]), int(txt[4:6]), int(txt[6:]))
+    return None
 
 def dtosext(f):
-    return "%04d%02d%02d%02d%02d%02d" % (f.year, f.month, f.day, f.hour, f.minute, f.second )
+    return "%04d%02d%02d%02d%02d%02d" % (f.year, f.month, f.day, f.hour, f.minute, f.second)
+
+def stodext(txt):
+    if txt and len(txt) == 14 and txt.isdigit():
+        return datetime.datetime(int(txt[:4]), int(txt[4:6]), int(txt[6:8]),
+                                 int(txt[8:10]), int(txt[10:12]), int(txt[12:]))
+    return None
 
 def primeraMayuscula(txt):
     return txt[0].upper() + txt[1:]
@@ -122,7 +148,7 @@ def huella():
 def microsegundosRnd():
     d = datetime.datetime.now()
     return random.randint(0, 1000) + 1000 * (
-        d.microsecond + 1000000 * (d.second + 60 * ( d.minute + 60 * ( d.hour + 24 * d.toordinal() ) ) ))
+        d.microsecond + 1000000 * (d.second + 60 * (d.minute + 60 * (d.hour + 24 * d.toordinal()))))
 
 def fileNext(folder, base, ext):
     n = 1
@@ -296,6 +322,13 @@ def creaCarpeta(carpeta):
     except:
         pass
 
+def secs2str(s):
+    m = s/60
+    s = s%60
+    h = m/60
+    m = m%60
+    return "%02d:%02d:%02d" % (h, m, s)
+
 class ListaNumerosImpresion:
     def __init__(self, txt):
         # Formas
@@ -305,7 +338,7 @@ class ListaNumerosImpresion:
         #   4. -<num>           4, <num>, 0
         self.lista = []
         if txt:
-            txt = txt.replace("--", "-").replace(",,", ",")
+            txt = txt.replace("--", "-").replace(",,", ",").replace(" ", "")
 
             for bloque in txt.split(","):
 
@@ -355,6 +388,9 @@ class ListaNumerosImpresion:
 
         return False
 
+    def selected(self, lista):
+        return [x for x in lista if self.siEsta(x)]
+
 def speed():
     t = time.time()
     for x in xrange(100000):
@@ -363,7 +399,7 @@ def speed():
         gc.enable()
     return time.time() - t
 
-class SymbolDict():
+class SymbolDict:
     def __init__(self, dic=None):
         self._dic = {}
         self._keys = []
@@ -491,7 +527,7 @@ class Timer:
         if segs <= 0.0:
             segs = 0.0
         tp = int(segs)
-        txt = "%02d:%02d" % ( int(tp / 60), tp % 60 )
+        txt = "%02d:%02d" % (int(tp / 60), tp % 60)
         return txt
 
     def ponSegExtra(self, segs):
@@ -547,11 +583,11 @@ class Timer:
         hors = mins / 60
         mins -= hors * 60
 
-        return "%d:%02d:%02d" % ( hors, mins, segs )
+        return "%d:%02d:%02d" % (hors, mins, segs)
 
     def siAgotado(self):
         if self.marcaTiempo:
-            if (self.tiempoPendiente - ( time.time() - self.marcaTiempo )) <= 0.0:
+            if (self.tiempoPendiente - (time.time() - self.marcaTiempo)) <= 0.0:
                 return True
         else:
             return self.tiempoPendiente <= 0.0
@@ -560,7 +596,7 @@ class Timer:
     def isZeitnot(self):
         if self.marcaZeitnot:
             if self.marcaTiempo:
-                t = self.tiempoPendiente - ( time.time() - self.marcaTiempo )
+                t = self.tiempoPendiente - (time.time() - self.marcaTiempo)
             else:
                 t = self.tiempoPendiente
             if t > 0:
@@ -578,7 +614,7 @@ class Timer:
 
     def paraMarcador(self, tiempoJugada):
         if self.marcaTiempo:
-            self.tiempoPendiente -= ( time.time() - self.marcaTiempo ) - tiempoJugada
+            self.tiempoPendiente -= (time.time() - self.marcaTiempo) - tiempoJugada
             self.marcaTiempo = None
 
     def tiempoAplazamiento(self):
@@ -592,7 +628,9 @@ def fideELO(eloJugador, eloRival, resultado):
         resultado = 0.5
     else:
         resultado = 0.0
-    if eloJugador <= 2100:
+    if eloJugador <= 1200:
+        k = 40.0
+    elif eloJugador <= 2100:
         k = 32.0
     elif eloRival < 2400:
         k = 24.0
@@ -687,50 +725,50 @@ def creaID():
     return cr
 
 # ~ import subprocess
-#~ class Proceso():
+# ~ class Proceso():
 
-#~ def __init__( self, exe ):
-#~ self.setWorkingDirectory ( os.path.abspath(os.path.dirname(exe)) )
-#~ if "critter" in exe.lower():
-#~ startupinfo = subprocess.STARTUPINFO()
-#~ startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-#~ startupinfo.wShowWindow = subprocess.SW_HIDE
-#~ self.popen = p = subprocess.Popen("", executable=exe, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=False, startupinfo=startupinfo)
-#~ else:
-#~ self.popen = p = subprocess.Popen( "", executable=exe, shell=True, \
-#~ stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
-#~ self.stdin = p.stdin
-#~ self.stdout = p.stdout
+# ~ def __init__( self, exe ):
+# ~ self.setWorkingDirectory ( os.path.abspath(os.path.dirname(exe)) )
+# ~ if "critter" in exe.lower():
+# ~ startupinfo = subprocess.STARTUPINFO()
+# ~ startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+# ~ startupinfo.wShowWindow = subprocess.SW_HIDE
+# ~ self.popen = p = subprocess.Popen("", executable=exe, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=False, startupinfo=startupinfo)
+# ~ else:
+# ~ self.popen = p = subprocess.Popen( "", executable=exe, shell=True, \
+# ~ stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
+# ~ self.stdin = p.stdin
+# ~ self.stdout = p.stdout
 
-#~ def escribeLinea( self, linea ):
-#~ self.stdin.write( linea + "\n" )
+# ~ def escribeLinea( self, linea ):
+# ~ self.stdin.write( linea + "\n" )
 
-#~ def esperaRespuesta( self, x=None ):
-#~ return self.stdout.readline()
+# ~ def esperaRespuesta( self, x=None ):
+# ~ return self.stdout.readline()
 
-#~ def terminar( self ):
-#~ try:
-#~ self.popen.terminate()
-#~ except:
-#~ pass
+# ~ def terminar( self ):
+# ~ try:
+# ~ self.popen.terminate()
+# ~ except:
+# ~ pass
 
-#~ from ctypes import *
-#~ from ctypes.wintypes import *
-#~ class MEMORYSTATUS(Structure):
-#~ _fields_ = [
-#~ ('dwLength', DWORD),
-#~ ('dwMemoryLoad', DWORD),
-#~ ('dwTotalPhys', DWORD),
-#~ ('dwAvailPhys', DWORD),
-#~ ('dwTotalPageFile', DWORD),
-#~ ('dwAvailPageFile', DWORD),
-#~ ('dwTotalVirtual', DWORD),
-#~ ('dwAvailVirtual', DWORD),
-#~ ]
-#~ def winmem():
-#~ x = MEMORYSTATUS()
-#~ windll.kernel32.GlobalMemoryStatus(byref(x))
-#~ return x
+# ~ from ctypes import *
+# ~ from ctypes.wintypes import *
+# ~ class MEMORYSTATUS(Structure):
+# ~ _fields_ = [
+# ~ ('dwLength', DWORD),
+# ~ ('dwMemoryLoad', DWORD),
+# ~ ('dwTotalPhys', DWORD),
+# ~ ('dwAvailPhys', DWORD),
+# ~ ('dwTotalPageFile', DWORD),
+# ~ ('dwAvailPageFile', DWORD),
+# ~ ('dwTotalVirtual', DWORD),
+# ~ ('dwAvailVirtual', DWORD),
+# ~ ]
+# ~ def winmem():
+# ~ x = MEMORYSTATUS()
+# ~ windll.kernel32.GlobalMemoryStatus(byref(x))
+# ~ return x
 
 # def detectCPUs():
 # """
@@ -898,8 +936,8 @@ class LIdisk:
         cursor.close()
         self._conexion.commit()
 
-    def __getitem__(self, id):
-        sql = "select DATO from datos where ROWID=%d" % (id + 1,)
+    def __getitem__(self, xid):
+        sql = "select DATO from datos where ROWID=%d" % (xid + 1,)
         cursor = self._conexion.cursor()
         cursor.execute(sql)
         dato = cursor.fetchone()
@@ -919,7 +957,7 @@ class LIdisk:
             self._conexion.close()
             self._conexion = None
 
-class DicRaw():
+class DicRaw:
     def __init__(self, nomDB, tabla="Data"):
         self.table = tabla
 
@@ -997,6 +1035,12 @@ class DicRaw():
         liKeys = [reg[0] for reg in cursor.fetchall()]
         cursor.close()
         return liKeys
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, xtype, value, traceback):
+        self.close()
 
 class DicBLOB(object):
     def __init__(self, nomDB, tabla="Datos"):
@@ -1093,5 +1137,104 @@ class Timekeeper:
         if self._begin:
             b = self._begin
             self._begin = None
-            return time.time()-b
+            return time.time() - b
+
+class OpenCodec:
+    def __init__(self, path):
+        with open(path) as f:
+            u = chardet.universaldetector.UniversalDetector()
+            for n, x in enumerate(f):
+                u.feed(x)
+                if n == 500:
+                    break
+            u.close()
+
+        encoding = u.result.get("encoding", "latin-1")
+        self.f = codecs.open(path, "r", encoding, 'ignore')
+
+    def __enter__(self):
+        return self.f
+
+    def __exit__(self, xtype, value, traceback):
+        self.f.close()
+
+def txt_encoding(txt):
+    u = chardet.universaldetector.UniversalDetector()
+    u.feed(txt)
+    u.close()
+
+    return u.result.get("encoding", "latin-1")
+
+def file_encoding(fich, chunk=3000):
+    with open(fich) as f:
+        u = chardet.universaldetector.UniversalDetector()
+        u.feed(f.read(chunk))
+        u.close()
+
+    return u.result.get("encoding", "ascii")
+
+class RowidReader():
+    def __init__(self, nomFichero, tabla):
+        self.nomFichero = nomFichero
+        self.tabla = tabla
+        self.where = None
+        self.order = None
+        self.running = False
+        self.liRowids = []
+        self.chunk = 2000
+
+    def setOrder(self, order):
+        self.order = order
+
+    def setWhere(self, where):
+        self.where = where
+
+    def run(self, liRowids, filter, order ):
+        self.stopnow()
+        self.where = filter
+        self.order = order
+        self.running = True
+        self.stop = False
+        self.liRowids = liRowids
+        self.lock = threading.Lock()
+        self.thread = threading.Thread(target=self._run_thread)
+        self.thread.daemon = True
+        self.thread.start()
+
+    def _run_thread(self):
+        conexion = sqlite3.connect(self.nomFichero)
+        sql = "SELECT ROWID FROM %s"%self.tabla
+        if self.where:
+            sql += " WHERE %s"%self.where
+        if self.order:
+            sql += " ORDER BY %s"%self.order
+        cursor = conexion.cursor()
+        cursor.execute(sql)
+        ch = random.randint(100,300)
+        while not self.stop:
+            li = cursor.fetchmany(ch)
+            if li:
+                self.lock.acquire()
+                self.liRowids.extend([x[0] for x in li])
+                self.lock.release()
+            if len(li) < ch:
+                break
+            ch = self.chunk
+        cursor.close()
+        conexion.close()
+        self.running = False
+
+    def terminado(self):
+        return not self.running
+
+    def stopnow(self):
+        if self.running:
+            self.stop = True
+            self.thread.join()
+
+    def reccount(self):
+        return len(self.liRowids)
+
+def is64Windows():
+    return 'PROGRAMFILES(X86)' in os.environ
 

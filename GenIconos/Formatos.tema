@@ -134,7 +134,7 @@ Mate silk brick.png
 EloTimed qt4 datetimeedit.png
 
 PGN nuvola kappfinder.png
-PGN_Importar nuvola folder_orange_open.png
+PGN_Importar qt4 newdirectory-32.png
 
 AyudaGR nuvola khelpcenter64.png
 BotonAyuda ultimate gnome-system-config.png
@@ -183,6 +183,7 @@ Pelicula_Seguir woocons Button_Play.png
 Pelicula_Rapido woocons Button_Add.png
 Pelicula_Lento woocons Button_White_Remove.png
 Pelicula_Repetir woocons Button_White_Load.png
+Pelicula_PGN qt4 view-page-sided-32.png
 
 Memoria nuvola bell.png
 
@@ -219,6 +220,9 @@ Clip nuvola attach.png
 Fics lucas fics.png
 Fide nuvola package_games_strategy.png
 
+FichPGN nuvola package_games_strategy.png
+
+
 Flechas gnome 64px-Gnome-go-jump.png
 Marcos ultimate help-browser.png
 SVGs ultimate image-svg+xml.png
@@ -232,8 +236,13 @@ Rojo nuvola ledred.png
 Gris nuvola ledgray.png
 Estrella silk star.png
 
+Amarillo32 nuvola ledyellow32.png
+Naranja32 nuvola ledorange32.png
 Verde32 nuvola ledgreen32.png
+Azul32 nuvola ledblue32.png
+Magenta32 nuvola ledpurple32.png
 Rojo32 nuvola ledred32.png
+Gris32 nuvola ledgray32.png
 
 PuntoBlanco silk bullet_white.png
 PuntoAmarillo silk bullet_yellow.png
@@ -257,6 +266,7 @@ MasR qt4 addtab(3)R.png
 
 MasDoc woocons file_Add.png
 
+NuevaDB gnome 64px-Gnome-text-x-preview_qt.png
 Potencia silk lightning.png
 Sorpresa silk emoticon_surprised.png
 Sonrisa silk emoticon_smile.png
@@ -371,6 +381,7 @@ Tiger cartoon/animals Tiger.png
 Turkey cartoon/animals Turkey.png
 Turtle cartoon/animals Turtle.png
 Wolf cartoon/animals Wolf.png
+Steven cartoon Knight.png
 
 Wheel vehicles Wheel.png
 Wheelchair vehicles Wheelchair.png
@@ -415,6 +426,8 @@ MotoresExternos nuvola kcmdf.png
 Database qt4 icon_list-all.png
 DatabaseC qt4 icon_list-allm.png
 DatabaseF qt4 icon_list-allf.png
+DatabaseCNew qt4 icon_list-allmNew.png
+DatabaseMas qt4 icon_list-allm_f.png
 
 Atacante visualpharm outline_star-26.png
 Atacada visualpharm delete_shield-26.png
@@ -454,3 +467,45 @@ SoundTool nuvola artsaudiomanager.png
 Importar nuvola folder_red.png
 
 Voyager1 qt4 ship0029.png
+Train otros BSicon_MBAHN.png
+
+Play woocons Button_Play.png
+
+Measure gnome 32px-Gnome-software-update-availableD.png
+
+PlayGame gnome 64px-Gnome-accessories-text-editor.png
+
+Scanner windows8 scanner-26.png
+Menos qt4 minus(3)R.png
+
+School windows8 school-32.png
+Law windows8 law-32.png
+LearnGame windows8 literature-32.png
+University windows8 university-32.png
+Longhaul windows8 diploma2-32.png
+
+Trekking windows8 trekking-32.png
+
+Password windows8 lock-32.png
+
+SQL_RAW gnome 64px-Gnome-accessories-text-editor.png
+
+Sun silk weather_sun.png
+
+#Think nuvola kservices16.png
+
+Light silk lightbulb.png
+Light32 nuvola cache32.png
+
+TOL windows8 idea-32.png
+Uned windows8 university-32.png
+Uwe windows8 biotech-32.png
+
+#ThinkingTutor windows8 research-26.png
+#ThinkingEngine windows8 engine-26.png
+Thinking windows8 private-26.png
+
+
+WashingMachine windows8 washing_machine-32.png
+
+

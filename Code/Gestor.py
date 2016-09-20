@@ -1,37 +1,38 @@
-import os
-import time
 import codecs
+import os
 import random
-import sys
-import subprocess
+import time
 
+import LCEngine
+
+from Code import Analisis
+from Code import AnalisisIndexes
+from Code import AperturasStd
+from Code import ControlPGN
+from Code import DGT
+from Code import Jugada
+from Code import Partida
+from Code.QT import Histogram
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import PantallaAnalisis
+from Code.QT import PantallaArbol
+from Code.QT import PantallaArbolBook
+from Code.QT import PantallaColores
+from Code.QT import PantallaSavePGN
+from Code.QT import PantallaTutor
+from Code.QT import Pelicula
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import WBGuide
+from Code import Util
+from Code import VarGen
+from Code import XKibitzers
+from Code import XRun
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.AnalisisGraph as AnalisisGraph
-import Code.AnalisisIndexes as AnalisisIndexes
-import Code.QT.PantallaAnalisis as PantallaAnalisis
-import Code.Partida as Partida
-import Code.Jugada as Jugada
-import Code.ControlPGN as ControlPGN
-import Code.Analisis as Analisis
-import Code.MotorInterno as MotorInterno
-import Code.SAK as SAK
-import Code.AperturasStd as AperturasStd
-import Code.XKibitzers as XKibitzers
-import Code.DGT as DGT
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Iconos as Iconos
-import Code.QT.PantallaTutor as PantallaTutor
-import Code.QT.Pelicula as Pelicula
-import Code.QT.PantallaColores as PantallaColores
-import Code.QT.PantallaArbol as PantallaArbol
-import Code.QT.PantallaArbolBook as PantallaArbolBook
-import Code.QT.WBGuide as WBGuide
 
-class Gestor():
+class Gestor:
     def __init__(self, procesador):
 
         self.fen = None
@@ -49,13 +50,11 @@ class Gestor():
 
         self.tipoJuego = None
         self.ayudas = None
+        self.ayudasPGN = 0
 
         self.resultado = kDesconocido
 
         self.categoria = None
-
-        self.ml = MotorInterno.MotorInterno()
-        self.sak = SAK.sak
 
         self.pantalla.ponGestor(self)
 
@@ -71,6 +70,7 @@ class Gestor():
         self.pgn = ControlPGN.ControlPGN(self)
 
         self.xtutor = procesador.XTutor()
+        self.xanalyzer = procesador.XAnalyzer()
         self.xrival = None
 
         self.teclaPanico = 32
@@ -87,6 +87,7 @@ class Gestor():
         self.pantalla.ajustaTam()
 
         self.tablero.exePulsadoNum = self.exePulsadoNum
+        self.tablero.exePulsadaLetra = self.exePulsadaLetra
 
         self.siRevision = True  # controla si hay mostrar el rotulo de revisando
 
@@ -99,6 +100,8 @@ class Gestor():
         # x Control del tutor
         #  asi sabemos si ha habido intento de analisis previo (por ejemplo el usuario mientras piensa decide activar el tutor)
         self.siIniAnalizaTutor = False
+
+        self.continueTt = not self.configuracion.notbackground
 
         # Atajos raton:
         self.atajosRatonDestino = None
@@ -133,30 +136,30 @@ class Gestor():
         liPlayer = []
         for mov in liMoves:
             if mov.mate():
-                liPlayer.append(( mov.hasta(), "P#" ))
+                liPlayer.append((mov.hasta(), "P#"))
             elif mov.jaque():
-                liPlayer.append(( mov.hasta(), "P+" ))
+                liPlayer.append((mov.hasta(), "P+"))
             elif mov.captura():
-                liPlayer.append(( mov.hasta(), "Px" ))
+                liPlayer.append((mov.hasta(), "Px"))
         fen = posicion.fen()
         if "w" in fen:
             fen = fen.replace(" w ", " b ")
         else:
             fen = fen.replace(" b ", " w ")
-        siJaque = self.sak.isCheck()
-        self.sak.setFEN(fen)
-        liO = self.sak.getExMoves()
+        siJaque = LCEngine.isCheck()
+        LCEngine.setFen(fen)
+        liO = LCEngine.getExMoves()
         liRival = []
         for mov in liO:
             if not siJaque:
                 if mov.mate():
-                    liRival.append(( mov.hasta(), "R#" ))
+                    liRival.append((mov.hasta(), "R#"))
                 elif mov.jaque():
-                    liRival.append(( mov.hasta(), "R+" ))
+                    liRival.append((mov.hasta(), "R+"))
                 elif mov.captura():
-                    liPlayer.append(( mov.hasta(), "Rx" ))
+                    liPlayer.append((mov.hasta(), "Rx"))
             elif mov.captura():
-                liPlayer.append(( mov.hasta(), "Rx" ))
+                liPlayer.append((mov.hasta(), "Rx"))
 
         liC.extend(liRival)
         liC.extend(liPlayer)
@@ -171,8 +174,8 @@ class Gestor():
         else:
             posicion = self.partida.iniPosicion
 
-        self.sak.setFEN(posicion.fen())
-        li = self.sak.getExMoves()
+        LCEngine.setFen(posicion.fen())
+        li = LCEngine.getExMoves()
         if not li:
             return None
 
@@ -210,7 +213,7 @@ class Gestor():
             siO = (origen == a1) if origen else None
             siD = (destino == h8) if destino else None
 
-            if (siO and siD) or ( (siO is None) and siD ) or ( (siD is None) and siO ):
+            if (siO and siD) or ((siO is None) and siD) or ((siD is None) and siO):
                 t = (a1, h8)
                 if not (t in liC):
                     liC.append(t)
@@ -238,8 +241,8 @@ class Gestor():
             return
 
         posicion = self.partida.ultPosicion
-        self.sak.setFEN(posicion.fen())
-        li = self.sak.getExMoves()
+        LCEngine.setFen(posicion.fen())
+        li = LCEngine.getExMoves()
         if not li:
             return
 
@@ -276,8 +279,10 @@ class Gestor():
 
         if not siPredictivo:
             if self.atajosRatonOrigen and self.atajosRatonDestino:
-                # self.tablero.muevePiezaTemporal(self.atajosRatonOrigen, self.atajosRatonDestino)
-                self.tablero.mensajero(self.atajosRatonOrigen, self.atajosRatonDestino)
+                self.tablero.muevePiezaTemporal(self.atajosRatonOrigen, self.atajosRatonDestino)
+                if not self.tablero.mensajero(self.atajosRatonOrigen, self.atajosRatonDestino):
+                    self.tablero.reponPieza(self.atajosRatonOrigen)
+                self.atajosRatonReset()
             elif not self.atajosRatonOrigen:
                 self.atajosRatonReset()
             elif self.configuracion.showCandidates:
@@ -294,7 +299,6 @@ class Gestor():
         # else tipo = predictivo
         # Si no es posible el movimiento -> y estan los dos -> reset + nuevo intento
         # Miramos todos los movimientos que cumplan
-
         liC = []
         for mov in li:
             a1 = mov.desde()
@@ -302,7 +306,7 @@ class Gestor():
             siO = (self.atajosRatonOrigen == a1) if self.atajosRatonOrigen else None
             siD = (self.atajosRatonDestino == h8) if self.atajosRatonDestino else None
 
-            if (siO and siD) or ( (siO is None) and siD ) or ( (siD is None) and siO ):
+            if (siO and siD) or ((siO is None) and siD) or ((siD is None) and siO):
                 t = (a1, h8)
                 if not (t in liC):
                     liC.append(t)
@@ -315,10 +319,12 @@ class Gestor():
         elif nlc == 1:
             desde, hasta = liC[0]
             self.tablero.muevePiezaTemporal(desde, hasta)
-            self.tablero.mensajero(desde, hasta)
+            if not self.tablero.mensajero(desde, hasta):
+                    self.tablero.reponPieza(desde)
+            self.atajosRatonReset()
         elif self.configuracion.showCandidates:
 
-            #-CONTROL-
+            # -CONTROL-
             if hasattr(self.pgn, "jugada"):  # gestor60 no tiene por ejemplo
                 if self.atajosRatonOrigen:
                     liC = [(hasta, "C") for desde, hasta in liC]
@@ -330,7 +336,7 @@ class Gestor():
     def repiteUltimaJugada(self):
         # Gestor ent tac + ent pos si hay partida
         if self.partida.numJugadas():
-            jg = self.partida.jugada(-1)
+            jg = self.partida.last_jg()
             self.tablero.ponPosicion(jg.posicionBase)
             self.tablero.ponFlechaSC(jg.desde, jg.hasta)
             QTUtil.refreshGUI()
@@ -342,9 +348,6 @@ class Gestor():
             self.tablero.ponPosicion(jg.posicion)
 
     def movimientosPiezas(self, liMovs, siMovTemporizado=False):
-        """
-        Hace los movimientos de piezas en el tablero
-        """
         if siMovTemporizado and self.configuracion.efectosVisuales:
 
             rapidez = self.configuracion.rapidezMovPiezas * 1.0 / 100.0
@@ -360,7 +363,7 @@ class Gestor():
                         dc = ord(desde[0]) - ord(hasta[0])
                         df = int(desde[1]) - int(hasta[1])
                         # Maxima distancia = 9.9 ( 9,89... sqrt(7**2+7**2)) = 4 segundos
-                        dist = ( dc ** 2 + df ** 2 ) ** 0.5
+                        dist = (dc ** 2 + df ** 2) ** 0.5
                         segundos = 4.0 * dist / (9.9 * rapidez)
                     if self.procesador.gestor:
                         cpu.muevePieza(movim[1], movim[2], siExclusiva=False, segundos=segundos)
@@ -406,7 +409,7 @@ class Gestor():
         return self.pgn.numDatos()
 
     def ponVista(self):
-        if (self.pantalla.siCapturas or self.pantalla.siInformacionPGN or self.liKibitzersActivas):
+        if self.pantalla.siCapturas or self.pantalla.siInformacionPGN or self.liKibitzersActivas:
             if not hasattr(self.pgn, "jugada"):  # gestor60 por ejemplo
                 return
             fila, columna = self.pantalla.pgnPosActual()
@@ -438,7 +441,7 @@ class Gestor():
         return (self.estado == kFinJuego) or \
                self.tipoJuego in (
                    kJugEntPos, kJugPGN, kJugEntMaq, kJugEntTac, kJugGM, kJugSolo, kJugBooks, kJugAperturas,
-                   kJugXFCC ) or \
+                   kJugXFCC) or \
                (self.tipoJuego in (kJugElo, kJugMicElo) and not self.siCompetitivo)
 
     def miraKibitzers(self, jg, columnaClave):
@@ -475,15 +478,6 @@ class Gestor():
 
     def pensando(self, siPensando):
         self.pantalla.pensando(siPensando)
-        # def pensando( self, siPensando ):
-        # if siPensando:
-        # if self.um:
-        # self.um.final()
-        # self.um = self.unMomento()
-        # else:
-        # if self.um:
-        # self.um.final()
-        # self.um = None
 
     def ponActivarTutor(self, siActivar):
         self.pantalla.ponActivarTutor(siActivar)
@@ -543,7 +537,7 @@ class Gestor():
                 return
         if self.configuracion.siSuenaJugada:
             if self.partida.numJugadas():
-                jg = self.partida.liJugadas[-1]
+                jg = self.partida.jugada(-1)
                 self.runSound.playLista(jg.listaSonidos())
         elif self.configuracion.siSuenaBeep:
             self.runSound.playBeep()
@@ -645,7 +639,7 @@ class Gestor():
 
     def ponteAlPrincipioColor(self):
         if self.partida.liJugadas:
-            jg = self.partida.liJugadas[0]
+            jg = self.partida.jugada(0)
             self.ponPosicion(jg.posicion)
             self.pantalla.base.pgn.goto(0, 2 if jg.posicion.siBlancas else 1)
             self.tablero.ponFlechaSC(jg.desde, jg.hasta)
@@ -701,20 +695,6 @@ class Gestor():
         self.pantalla.activaInformacionPGN(False)
         self.informacionActivable = siActivable
 
-        # def vista( self ):
-        # menu = QTVarios.LCMenu()
-
-        # menu.opcion( "pgn", _( "PGN information" ), Iconos.InformacionPGNUno() )
-        # menu.separador()
-        # menu.opcion( "capturas", _( "Captured material" ), Iconos.Capturas() )
-
-        # resp = menu.lanza()
-        # if resp == "pgn":
-        # self.pantalla.activaInformacionPGN()
-        # elif resp == "capturas":
-        # self.pantalla.activaCapturas()
-        # self.ponVista()
-
     def guardarPGN(self):
         conf = self.configuracion
 
@@ -728,7 +708,7 @@ class Gestor():
             except:
                 QTUtil.ponPortapapeles(self.pgn.actual())
                 QTUtil2.mensError(self.pantalla, "%s : %s\n\n%s" % (_("Unable to save"), conf.salvarFichero, _(
-                    "It is saved in the clipboard to paste it wherever you want.") ))
+                        "It is saved in the clipboard to paste it wherever you want.")))
 
     def guardarGanados(self, siGanado):
 
@@ -798,7 +778,7 @@ class Gestor():
         siUltimo = (pos + 1) >= tam_lj
         if siUltimo:
             pos = tam_lj - 1
-        return pos, self.partida.liJugadas[pos] if tam_lj else None
+        return pos, self.partida.jugada(pos) if tam_lj else None
 
     def fenActivo(self):
         pos, jg = self.jugadaActiva()
@@ -827,9 +807,9 @@ class Gestor():
             pos += 1
         if self.partida.siEmpiezaConNegras:
             pos -= 1
-        tam_lj = self.partida.numJugadas()
+        tam_lj = len(self.partida)
         if 0 <= pos < tam_lj:
-            return self.partida.liJugadas[pos].posicionBase.fen()
+            return self.partida.jugada(pos).posicionBase.fen()
         else:
             return self.partida.iniPosicion.fen()
 
@@ -869,7 +849,7 @@ class Gestor():
             return
         siUltimo = (pos + 1) >= tam_lj
 
-        jg = self.partida.liJugadas[pos]
+        jg = self.partida.jugada(pos)
         return jg, siBlancas, siUltimo, tam_lj, pos
 
     def ayudaMover(self, maxRecursion):
@@ -885,15 +865,16 @@ class Gestor():
             return
 
         # siShift, siControl, siAlt = QTUtil.kbdPulsado() # Antes de que analice
-
         jg, siBlancas, siUltimo, tam_lj, pos = self.dameJugadaEn(fila, clave)
+        if not jg:
+            return
 
         if self.estado == kFinJuego:
             maxRecursion = 9999
         else:
             if not (self.tipoJuego in [kJugEntPos, kJugPGN, kJugEntMaq, kJugGM, kJugSolo, kJugBooks, kJugAperturas,
-                                       kJugEntTac, kJugXFCC] or \
-                            (self.tipoJuego in [kJugElo, kJugMicElo] and not self.siCompetitivo)):
+                                       kJugEntTac, kJugXFCC] or
+                        (self.tipoJuego in [kJugElo, kJugMicElo] and not self.siCompetitivo)):
                 if siUltimo or self.ayudas == 0:
                     return
                 maxRecursion = tam_lj - pos - 3  # %#
@@ -917,13 +898,13 @@ class Gestor():
         self.procesador.cambiaRival(nuevo)
 
     def pelicula(self):
-        resp = Pelicula.paramPelicula(self.pantalla)
+        resp = Pelicula.paramPelicula(self.configuracion, self.pantalla)
         if resp is None:
             return
 
-        segundos, siInicio = resp
+        segundos, siInicio, siPGN = resp
 
-        self.xpelicula = Pelicula.Pelicula(self, segundos, siInicio)
+        self.xpelicula = Pelicula.Pelicula(self, segundos, siInicio, siPGN)
 
     def ponRutinaAccionDef(self, rutina):
         self.xRutinaAccionDef = rutina
@@ -944,95 +925,38 @@ class Gestor():
             return False
         return self.finalX()
 
-    def ponFlechas(self, fen, siMB, si2):
-        self.ml.ponFen(fen)
-        self.ml.calculaEstado()
-        if si2:
-            li = self.ml.listaCapturas2(siMB, False)
-        else:
-            li = self.ml.listaCapturas(siMB)
-
-        for m in li:
-            if si2:
-                m1, m2 = m
-                pv = m1.pv()
-                d = pv[:2]
-                h = pv[2:4]
-                self.tablero.creaFlechaMov(d, h, "b")
-                pv = m2.pv()
-                d = pv[:2]
-                h = pv[2:4]
-                self.tablero.creaFlechaMov(d, h, "c")
-            else:
-                pv = m.pv()
-                d = pv[:2]
-                h = pv[2:4]
-                self.tablero.creaFlechaMov(d, h, "c")
-
     def exePulsadoNum(self, siActivar, numero):
-        if numero in [1, 2, 7, 8]:
+        if numero in [1, 8]:
             if siActivar:
                 # Que jugada esta en el tablero
                 fen = self.fenActivoConInicio()
                 siBlancas = " w " in fen
-                if siBlancas:
-                    siMB = numero in [1, 2]
+                if numero == 1:
+                    siMB = siBlancas
                 else:
-                    siMB = numero in [7, 8]
-                si2 = numero in [2, 7]
+                    siMB = not siBlancas
                 self.tablero.quitaFlechas()
                 if self.tablero.flechaSC:
                     self.tablero.flechaSC.hide()
-                self.ponFlechas(fen, siMB, si2)
+                li = LCEngine.getCaptures(fen, siMB)
+                for m in li:
+                    d = m.desde()
+                    h = m.hasta()
+                    self.tablero.creaFlechaMov(d, h, "c")
             else:
                 self.tablero.quitaFlechas()
                 if self.tablero.flechaSC:
                     self.tablero.flechaSC.show()
 
-    def trasteros(self, orden):
-
-        if orden == "nuevo":
-            resp = QTUtil2.salvaFichero(self.pantalla, _("Boxrooms PGN"), self.configuracion.dirSalvados,
-                                        _("File") + " pgn (*.pgn)", False)
-            if resp:
-                carpeta, trastero = os.path.split(resp)
-                if carpeta != self.configuracion.dirSalvados:
-                    self.configuracion.dirSalvados = carpeta
-                    self.configuracion.graba()
-
-                orden = None
-                for n, (carpeta1, trastero1) in enumerate(self.configuracion.liTrasteros):
-                    if carpeta1.lower() == carpeta.lower() and trastero1.lower() == trastero.lower():
-                        orden = len(self.configuracion.liTrasteros) - 1
-                        break
-
-                if orden is None:
-                    self.configuracion.liTrasteros.append((carpeta, trastero))
-                    self.configuracion.graba()
-                    orden = len(self.configuracion.liTrasteros) - 1
-                self.trasteros(str(orden))  # para que grabe
-
-        elif orden.startswith("quitar"):
-            nquitar = int(orden[7:])
-            del self.configuracion.liTrasteros[nquitar]
-            self.configuracion.graba()
-
-        else:
-            carpeta, trastero = self.configuracion.liTrasteros[int(orden)]
-            fichero = os.path.join(carpeta, trastero)
-            dato = self.listado("pgn")
-            if os.path.isfile(fichero):
-                dato = "\n" * 2 + dato
-            try:
-                f = codecs.open(fichero, "a", 'utf-8', 'ignore')
-                f.write(dato)
-                f.close()
-                QTUtil2.mensaje(self.pantalla, _X(_("Saved to %1"), fichero.replace("/", "\\")))
-            except:
-                QTUtil2.mensError(self.pantalla, "%s : %s\n" % ( _("Unable to save"), fichero.replace("/", "\\") ))
+    def exePulsadaLetra(self, siActivar, letra):
+        if siActivar:
+            dic = { 'a':kMoverInicio,
+                    'b':kMoverAtras, 'c':kMoverAtras, 'd':kMoverAtras,
+                    'e':kMoverAdelante, 'f':kMoverAdelante, 'g':kMoverAdelante,
+                    'h':kMoverFinal }
+            self.mueveJugada(dic[letra])
 
     def kibitzers(self, liKibitzers, orden):
-
         if orden == "nueva":
             liKibitzers = XKibitzers.nuevaKibitzer(self.pantalla, self.configuracion)
             if liKibitzers:
@@ -1059,6 +983,35 @@ class Gestor():
         self.siJuegaHumano = True
         self.activaColor(self.partida.ultPosicion.siBlancas)
 
+    def checkMueveHumano(self, desde, hasta, coronacion):
+        if self.siJuegaHumano:
+            self.paraHumano()
+        else:
+            self.sigueHumano()
+            return None
+
+        movimiento = desde + hasta
+
+        # Peon coronando
+        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
+            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
+            if coronacion is None:
+                self.sigueHumano()
+                return None
+        if coronacion:
+            movimiento += coronacion
+
+        if self.siTeclaPanico:
+            self.sigueHumano()
+            return None
+
+        siBien, self.error, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
+        if siBien:
+            return jg
+        else:
+            self.sigueHumano()
+            return None
+
     def librosConsulta(self, siEnVivo):
         w = PantallaArbolBook.PantallaArbolBook(self, siEnVivo)
         if w.exec_():
@@ -1072,7 +1025,6 @@ class Gestor():
                 QTUtil2.mensError(self.pantalla, _("Error, could not detect the DGT board driver."))
 
     def dgt(self, quien, a1h8):
-
         if self.tablero.mensajero and self.tablero.siActivasPiezas:
             if quien == "whiteMove":
                 if not self.tablero.siActivasPiezasColor:
@@ -1099,7 +1051,7 @@ class Gestor():
 
     def juegaPorMi(self):
         if self.siJuegaPorMi and self.estado == kJugando and (
-                    self.ayudas or self.tipoJuego in (kJugEntMaq, kJugSolo, kJugEntPos, kJugEntTac) ):
+                    self.ayudas or self.tipoJuego in (kJugEntMaq, kJugSolo, kJugEntPos, kJugEntTac)):
             if not self.siTerminada():
                 mrm = self.analizaTutor()
                 rm = mrm.mejorMov()
@@ -1117,10 +1069,6 @@ class Gestor():
         self.juegaPorMi()
 
     def configurar(self, liMasOpciones=None, siCambioTutor=False, siSonidos=False, siBlinfold=True):
-
-        icoNegro = Iconos.PuntoNegro()
-        icoVerde = Iconos.PuntoVerde()
-
         menu = QTVarios.LCMenu(self.pantalla)
 
         # Vista
@@ -1157,28 +1105,7 @@ class Gestor():
         # Sonidos
         if siSonidos:
             menu.separador()
-            menuSonido = menu.submenu(_("Sounds"), Iconos.S_Play())
-
-            def ico_tit(si):
-                return (icoNegro, _("Sound off in :")) if not si else (icoVerde, _("Sound on in :"))
-
-            ico, tit = ico_tit(self.configuracion.siSuenaBeep)
-            menuSonido.opcion("sonido_beep", tit + " " + _("Beep after opponent's move"), ico)
-
-            menuSonido.separador()
-
-            ico, tit = ico_tit(self.configuracion.siSuenaResultados)
-            menuSonido.opcion("sonido_resultado", tit + " " + _("Results"), ico)
-
-            menuSonido.separador()
-
-            ico, tit = ico_tit(self.configuracion.siSuenaJugada)
-            menuSonido.opcion("sonido_jugada", tit + " " + _("Rival moves"), ico)
-
-            menuSonido.separador()
-
-            ico, tit = ico_tit(self.configuracion.siSuenaNuestro)
-            menuSonido.opcion("sonido_jugador", tit + " " + _("Activate sounds with our moves"), ico)
+            menu.opcion("sonido", _("Sounds"), Iconos.S_Play())
 
         # Cambio de tutor
         if siCambioTutor:
@@ -1229,19 +1156,8 @@ class Gestor():
                 DGT.cambiarON_OFF()
                 self.compruebaDGT()
 
-            elif resp.startswith("trastero"):
-                self.trasteros(resp[9:])
-
-            elif resp.startswith("sonido_"):
-                if resp.endswith("jugada"):
-                    self.configuracion.siSuenaJugada = not self.configuracion.siSuenaJugada
-                elif resp.endswith("resultado"):
-                    self.configuracion.siSuenaResultados = not self.configuracion.siSuenaResultados
-                elif resp.endswith("beep"):
-                    self.configuracion.siSuenaBeep = not self.configuracion.siSuenaBeep
-                elif resp.endswith("jugador"):
-                    self.configuracion.siSuenaNuestro = not self.configuracion.siSuenaNuestro
-                self.configuracion.graba()
+            elif resp == "sonido":
+                self.config_sonido()
 
             elif resp == "tutor":
                 self.cambioTutor()
@@ -1265,6 +1181,25 @@ class Gestor():
 
         return None
 
+    def config_sonido(self):
+        separador = FormLayout.separador
+        liSon = [separador]
+        liSon.append(separador)
+        liSon.append((_("Beep after opponent's move") + ":", self.configuracion.siSuenaBeep))
+        liSon.append(separador)
+        liSon.append((None, _("Sound on in") + ":"))
+        liSon.append((_("Results") + ":", self.configuracion.siSuenaResultados))
+        liSon.append((_("Rival moves") + ":", self.configuracion.siSuenaJugada))
+        liSon.append(separador)
+        liSon.append((_("Activate sounds with our moves") + ":", self.configuracion.siSuenaNuestro))
+        liSon.append(separador)
+        resultado = FormLayout.fedit(liSon, title=_("Sounds"), parent=self.pantalla, anchoMinimo=200,
+                                     icon=Iconos.S_Play())
+        if resultado:
+            self.configuracion.siSuenaBeep, self.configuracion.siSuenaResultados, \
+            self.configuracion.siSuenaJugada, self.configuracion.siSuenaNuestro = resultado[1]
+            self.configuracion.graba()
+
     def utilidades(self, liMasOpciones=None, siArbol=True):
 
         menu = QTVarios.LCMenu(self.pantalla)
@@ -1277,7 +1212,6 @@ class Gestor():
         icoCamara = Iconos.Camara()
         icoClip = Iconos.Clip()
         icoAzul = Iconos.PuntoAzul()
-        icoTras = Iconos.Trastero()
         icoNegro = Iconos.PuntoNegro()
         icoVerde = Iconos.PuntoVerde()
         icoNaranja = Iconos.PuntoNaranja()
@@ -1290,9 +1224,7 @@ class Gestor():
 
         menuGR = menu.submenu(_("Save"), icoGrabar)
 
-        menuPGN = menuGR.submenu(_("PGN Format"), icoAzul)
-        menuPGN.opcion("pgnfichero", trFichero, icoFichero)
-        menuPGN.opcion("pgnportapapeles", trPortapapeles, icoClip)
+        menuGR.opcion("pgnfichero", _("PGN Format"), icoAzul)
 
         menuGR.separador()
 
@@ -1313,35 +1245,15 @@ class Gestor():
 
         menuGR.separador()
 
-        # menuGR.opcion("jsonfichero", _("JSON Format"), Iconos.JuegaSolo())
-
-        # menuGR.separador()
-
         menuV = menuGR.submenu(_("Board -> Image"), icoCamara)
         menuV.opcion("volfichero", trFichero, icoFichero)
         menuV.opcion("volportapapeles", trPortapapeles, icoClip)
-
-        menuGR.separador()
-
-        liTras = self.configuracion.liTrasteros
-        menuTras = menuGR.submenu(_("Boxrooms PGN"), Iconos.Trasteros())
-        for ntras, uno in enumerate(liTras):
-            carpeta, trastero = uno
-            menuTras.opcion("trastero_%d" % ntras, "%s  (%s)" % (trastero, carpeta), icoTras)
-        menuTras.separador()
-        menuTras.opcion("trastero_nuevo", _("New boxroom"), Iconos.Trastero_Nuevo())
-        if liTras:
-            icoQuitar = Iconos.Trastero_Quitar()
-            menuTrasQ = menuTras.submenu(_("Remove boxroom from the list (not deleting it)"), icoQuitar)
-            for ntras, uno in enumerate(liTras):
-                carpeta, trastero = uno
-                menuTrasQ.opcion("trastero_quitar_%d" % ntras, "%s  (%s)" % (trastero, carpeta), icoQuitar)
 
         menu.separador()
 
         # Analizar
         if siJugadas:
-            if not ( self.tipoJuego in ( kJugElo, kJugMicElo) and self.siCompetitivo and self.estado == kJugando ):
+            if not (self.tipoJuego in (kJugElo, kJugMicElo) and self.siCompetitivo and self.estado == kJugando):
                 nAnalisis = 0
                 for jg in self.partida.liJugadas:
                     if jg.analisis:
@@ -1382,7 +1294,7 @@ class Gestor():
 
         # Juega por mi
         if self.siJuegaPorMi and self.estado == kJugando and (
-                    self.ayudas or self.tipoJuego in (kJugEntMaq, kJugSolo, kJugEntPos, kJugEntTac) ):
+                    self.ayudas or self.tipoJuego in (kJugEntMaq, kJugSolo, kJugEntPos, kJugEntTac)):
             menu.separador()
             menu.opcion("juegapormi", _("Plays instead of me") + "  [^1]", Iconos.JuegaPorMi()),
 
@@ -1445,24 +1357,28 @@ class Gestor():
         elif resp == "pksfichero":
             self.salvaPKS()
 
-            # elif resp == "jsonfichero":
-            # self.salvaJSON()
+        elif resp == "pgnfichero":
+            self.salvaPGN()
 
-        else:
+        elif resp.startswith("fen") or resp.starswith("fns"):
             extension = resp[:3]
-            siFichero = resp.endswith("fichero")
-            self.salvaFEN_PGN(extension, siFichero)
+            si_fichero = resp.endswith("fichero")
+            self.salvaFEN_FNS(extension, si_fichero)
+
         return None
 
     def showAnalisis(self):
         um = self.procesador.unMomento()
-        alm = AnalisisGraph.genSVG(self.partida)
+        alm = Histogram.genHistograms(self.partida, self.configuracion.centipawns)
         alm.indexesHTML, alm.indexesRAW = AnalisisIndexes.genIndexes(self.partida)
         um.final()
         PantallaAnalisis.showGraph(self.pantalla, self, alm, Analisis.muestraAnalisis)
 
     def salvaPKS(self):
         pgn = self.listado("pgn")
+        # p rint "jjjjjjjjjjjjjjjjjjjjj-abajo"
+        # dic = self.procesador.saveAsJSON(self.estado, self.partida, pgn)
+        # p rint str(dic)
         dic = self.procesador.saveAsPKS(self.estado, self.partida, pgn)
         extension = "pks"
         fichero = self.configuracion.dirJS
@@ -1495,53 +1411,19 @@ class Gestor():
 
             break
 
-            # def salvaJSON(self):
-            # pgn = self.listado("pgn")
-            # dic = self.procesador.saveAsJSON(self.estado, self.partida, pgn)
-            # import json
-            # data = json.dumps(dic, indent=4)
-            # extension = "json"
-            # fichero = self.configuracion.dirJS
-            # while True:
-            # fichero = QTUtil2.salvaFichero(self.pantalla, _("File to save"), fichero,
-            # _("File") + " %s (*.%s)" % (extension, extension),
-            # siConfirmarSobreescritura=True)
-            # if fichero:
-            # fichero = str(fichero)
-            # if os.path.isfile(fichero):
-            # yn = QTUtil2.preguntaCancelar(self.pantalla,
-            # _X(_("The file %1 already exists, what do you want to do?"), fichero),
-            # si=_("Overwrite"), no=_("Choose another"))
-            # if yn is None:
-            # break
-            # if not yn:
-            # continue
-            # direc = os.path.dirname(fichero)
-            # if direc != self.configuracion.dirJS:
-            # self.configuracion.dirJS = direc
-            # self.configuracion.graba()
+    def salvaPGN(self):
+        w = PantallaSavePGN.WSave(self.pantalla, self.pgn.actual(), self.configuracion)
+        w.exec_()
 
-            # f = open(fichero, "wb")
-            # f.write(data)
-            # f.close()
-
-            # nombre = os.path.basename(fichero)
-            # QTUtil2.mensajeTemporal(self.pantalla, _X(_("Saved to %1"), nombre), 0.8)
-            # return
-
-            # break
-
-    def salvaFEN_PGN(self, extension, siFichero):
+    def salvaFEN_FNS(self, extension, siFichero):
         dato = self.listado(extension)
         if siFichero:
-            if extension == "pgn":
-                QTVarios.savePGN( self.pantalla, self.pgn.actual())
-                return
 
             resp = QTUtil2.salvaFichero(self.pantalla, _("File to save"), self.configuracion.dirSalvados,
                                         _("File") + " %s (*.%s)" % (extension, extension), False)
             if resp:
                 try:
+
                     modo = "w"
                     if Util.existeFichero(resp):
                         yn = QTUtil2.preguntaCancelar(self.pantalla,
@@ -1563,7 +1445,7 @@ class Gestor():
                 except:
                     QTUtil.ponPortapapeles(dato)
                     QTUtil2.mensError(self.pantalla, "%s : %s\n\n%s" % (
-                        _("Unable to save"), resp, _("It is saved in the clipboard to paste it wherever you want.") ))
+                        _("Unable to save"), resp, _("It is saved in the clipboard to paste it wherever you want.")))
 
         else:
             QTUtil.ponPortapapeles(dato)
@@ -1602,7 +1484,7 @@ class Gestor():
                 p = self.partida.copiaDesde(nj + 1)
                 siguientes = p.pgnBaseRAW(p.iniPosicion.jugadas).replace("|", "-")
 
-            txt = "%s||%s|%s\n" % ( fen, siguientes, pgn )
+            txt = "%s||%s|%s\n" % (fen, siguientes, pgn)
             QTUtil.ponPortapapeles(txt)
             QTUtil2.mensajeTemporal(self.pantalla, _("It is saved in the clipboard to paste it wherever you want."), 2)
 
@@ -1635,7 +1517,7 @@ class Gestor():
                 if rm.puntosABS() > limite:
                     siAcepta = False
         if siAcepta:
-            self.partida.liJugadas[-1].siTablasAcuerdo = True
+            self.partida.last_jg().siTablasAcuerdo = True
             self.ponResultado(kTablas)
         else:
             QTUtil2.mensaje(self.pantalla, _("Sorry, but the engine doesn't accept a draw right now."))
@@ -1680,7 +1562,7 @@ class Gestor():
         if siDraw:
             resp = QTUtil2.pregunta(self.pantalla, _X(_("%1 proposes draw, do you accept it?"), self.xrival.nombre))
             if resp:
-                self.partida.liJugadas[-1].siTablasAcuerdo = True
+                self.partida.last_jg().siTablasAcuerdo = True
                 self.ponResultado(kTablas)
                 return False
             else:
@@ -1694,9 +1576,9 @@ class Gestor():
             self.utilidades(siArbol=False)
         else:
             liMasOpciones = (
-                ( "libros", _("Consult a book"), Iconos.Libros() ),
-                ( None, None, None ),
-                ( "bookguide", _("Personal Opening Guide"), Iconos.BookGuide() ),
+                ("libros", _("Consult a book"), Iconos.Libros()),
+                (None, None, None),
+                ("bookguide", _("Personal Opening Guide"), Iconos.BookGuide()),
             )
 
             resp = self.utilidades(liMasOpciones, siArbol=True)
@@ -1726,10 +1608,10 @@ class Gestor():
 
     def saveSelectedPosition(self, lineaTraining):
         # Llamado desde GestorEnPos and GestorEntTac, para salvar la posicion tras pulsar una P
-        f = open(self.configuracion.ficheroSelectedPositions, "ab")
+        f = codecs.open(self.configuracion.ficheroSelectedPositions, "ab", "utf-8")
         f.write(lineaTraining + "\n")
         f.close()
-        QTUtil2.mensajeTemporal(self.pantalla, _('Position saved in "Selected positions" file.'), 2)
+        QTUtil2.mensajeTemporal(self.pantalla, _('Position saved in "%s" file.'%self.configuracion.ficheroSelectedPositions), 2)
         self.procesador.entrenamientos.menu = None
 
     def jugarPosicionActual(self):
@@ -1742,14 +1624,8 @@ class Gestor():
             else:
                 jg = self.partida.jugada(nj)
                 fen = jg.posicionBase.fen()
-            li = []
-            if sys.argv[0].endswith(".py"):
-                li.append("pythonw.exe" if VarGen.isWindows else "python")
-                li.append("Lucas.py")
-            else:
-                li.append("Lucas.exe" if VarGen.isWindows else "Lucas")
-            li.extend(["-play", fen])
-            subprocess.Popen(li)
+
+            XRun.run_lucas("-play", fen)
 
     def showPV(self, pv, nArrows):
         if not pv:
@@ -1774,99 +1650,3 @@ class Gestor():
                 cambio = salto
             tipo = "ms" if tipo == "mt" else "mt"
         return True
-
-    # def savePGN( self ):
-        # QTVarios.savePGN( self.pantalla, self.pgn.actual())
-
-        # dicVariables = self.configuracion.leeVariables("SAVEPGN")
-
-        # liGen = [(None, None)]
-
-        # liHistorico = dicVariables.get("LIHISTORICO")
-
-        # config = FormLayout.Fichero(_("File to save"), "pgn", True, liHistorico=liHistorico, anchoMinimo=300)
-        # liGen.append(( config, "" ))
-
-        # #Codec
-        # liCodecs = [k for k in set(v for k,v in aliases.iteritems())]
-        # liCodecs.sort()
-        # liCodecs = [(k,k) for k in liCodecs]
-        # liCodecs.insert( 0, (_("Same as file"), "file" ) )
-        # liCodecs.insert( 0, ("%s: UTF-8"%_("By default"), "default" ) )
-        # config = FormLayout.Combobox(_("Write with the codec"), liCodecs)
-        # codec = dicVariables.get("CODEC", "default")
-        # liGen.append(( config, codec ))
-
-        # #Overwrite
-        # liGen.append( ( _("Overwrite"), dicVariables.get("OVERWRITE", False)) )
-
-        # #Remove comments
-        # liGen.append( ( _("Remove comments and variations"), dicVariables.get("REMCOMMENTSVAR", False)) )
-
-        # # Editamos
-        # resultado = FormLayout.fedit(liGen, title=_("Save PGN"), parent=self.pantalla, icon=Iconos.PGN())
-        # if resultado is None:
-            # return
-
-        # accion, liResp = resultado
-        # fichero, codec, overwrite, remcommentsvar = liResp
-        # if not fichero:
-            # return
-        # if not liHistorico:
-            # liHistorico = []
-        # if fichero in liHistorico:
-            # del liHistorico[liHistorico.index(fichero)]
-        # liHistorico.insert(0,fichero)
-
-        # dicVariables["LIHISTORICO"] = liHistorico[:20]
-        # dicVariables["CODEC"] = codec
-        # dicVariables["OVERWRITE"] = overwrite
-        # dicVariables["REMCOMMENTSVAR"] = remcommentsvar
-
-        # self.configuracion.escVariables("SAVEPGN",dicVariables)
-        # carpeta, name = os.path.split(fichero)
-        # if carpeta != self.configuracion.dirSalvados:
-            # self.configuracion.dirSalvados = carpeta
-            # self.configuracion.graba()
-
-        # if remcommentsvar:
-            # p = partida.copia()
-            # p.borraCV( )
-            # x = self.partida
-            # self.partida = p
-            # pgn = self.pgn.actual()
-            # self.partida = x
-        # else:
-            # pgn = self.pgn.actual()
-        # pgn = pgn.replace( "\n", "\r\n" )
-
-        # modo = "w" if overwrite else "a"
-        # if not overwrite:
-            # if not Util.existeFichero(fichero):
-                # modo = "w"
-        # if codec == "default":
-            # codec = "utf-8"
-        # elif code == "file":
-            # codec = "utf-8"
-            # if Util.existeFichero(fichero):
-                # f = open(fich)
-                # u = chardet.universaldetector.UniversalDetector()
-                # for n, x in enumerate(f):
-                    # u.feed(x)
-                    # if n == 1000:
-                        # break
-                # f.close()
-                # u.close()
-                # codec = u.result.get("encoding", "utf-8")
-
-        # try:
-            # f = codecs.open( fichero, modo, codec, 'ignore' )
-            # if modo == "a":
-                # f.write( "\r\n\r\n" )
-            # f.write(pgn)
-            # f.close()
-            # QTUtil2.mensajeTemporal( self.pantalla, _( "Saved" ), 1.2 )
-        # except:
-            # QTUtil.ponPortapapeles(pgn)
-            # QTUtil2.mensError(self.pantalla, "%s : %s\n\n%s" % (_("Unable to save"), fichero, _("It is saved in the clipboard to paste it wherever you want.") ))
-

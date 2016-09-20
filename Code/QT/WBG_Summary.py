@@ -2,17 +2,19 @@ import os
 
 from PyQt4 import QtGui
 
-import Code.VarGen as VarGen
-import Code.Partida as Partida
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.FormLayout as FormLayout
-import Code.QT.Grid as Grid
-import Code.QT.Columnas as Columnas
-import Code.QT.WBG_Comun as WBG_Comun
+from Code import AperturasStd
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import WBG_Comun
 
 class WSummary(QtGui.QWidget):
     def __init__(self, procesador, winBookGuide, dbGames, siMoves=True):
@@ -29,19 +31,28 @@ class WSummary(QtGui.QWidget):
         self.analisisMRM = None
         self.siMoves = siMoves
         self.procesador = procesador
+        configuracion = procesador.configuracion
+
+        self.aperturasStd = AperturasStd.ListaAperturasStd(configuracion, False, False)
+
+        self.siFigurinesPGN = procesador.configuracion.figurinesPGN
 
         self.pvBase = ""
 
         self.orden = ["games", False]
 
         self.lbName = Controles.LB(self, "").ponWrap().alinCentrado().ponColorFondoN("white", "#4E5A65").ponTipoLetra(
-            puntos=10 if siMoves else 16)
+                puntos=10 if siMoves else 16)
         if not siMoves:
             self.lbName.hide()
 
         # Grid
         oColumnas = Columnas.ListaColumnas()
-        oColumnas.nueva("move", _("Move"), 60)
+        oColumnas.nueva("numero", _("N."), 35, siCentrado=True)
+        self.delegadoMove = Delegados.EtiquetaPGN(True if self.siFigurinesPGN else None)
+        oColumnas.nueva("move", _("Move"), 60, edicion=self.delegadoMove)
+        dicTipos = {"t": Iconos.pmTransposition(),}
+        oColumnas.nueva("trans", "", 24, edicion=Delegados.PmIconosBMT(dicIconos=dicTipos))
         oColumnas.nueva("analisis", _("Analysis"), 60, siDerecha=True)
         oColumnas.nueva("games", _("Games"), 70, siDerecha=True)
         oColumnas.nueva("pgames", "% " + _("Games"), 70, siDerecha=True, siCentrado=True)
@@ -54,23 +65,23 @@ class WSummary(QtGui.QWidget):
         oColumnas.nueva("pdrawwin", "%% %s" % _("W+D"), 60, siDerecha=True)
         oColumnas.nueva("pdrawlost", "%% %s" % _("L+D"), 60, siDerecha=True)
 
-        self.grid = Grid.Grid(self, oColumnas, id="summary", siSelecFilas=True)
+        self.grid = Grid.Grid(self, oColumnas, xid="summary", siSelecFilas=True)
+        self.grid.tipoLetra(puntos=configuracion.puntosPGN)
+        self.grid.ponAltoFila(configuracion.altoFilaPGN)
 
         # ToolBar
-        liAcciones = [( _("Previous"), Iconos.AnteriorF(), "anterior" ),
-                      ( _("Next"), Iconos.SiguienteF(), "siguiente" ), None,
-                      ( _("Analyze"), Iconos.Analizar(), "analizar" ), None,
-                      ( _("Rebuild"), Iconos.Reindexar(), "reindexar" ), None,
-                      (_("Summary filtering by player") if siMoves else _("By player"), Iconos.Player(),
-                       "reindexarPlayer" ), None,
-        ]
+        liAcciones = [(_("Close"), Iconos.MainMenu(), winBookGuide.terminar), None,
+                      (_("Total"), Iconos.Inicio(), self.inicio), None,
+                      (_("Previous"), Iconos.AnteriorF(), self.anterior),
+                      (_("Next"), Iconos.SiguienteF(), self.siguiente), None,
+                      (_("Analyze"), Iconos.Analizar(), self.analizar), None,
+                      (_("Rebuild"), Iconos.Reindexar(), self.reindexar), None,
+                      ]
         if siMoves:
-            liAcciones.append((
-                _("Create a new guide based in these games") if siMoves else _("Create"), Iconos.BookGuide(),
-                "create" ))
+            liAcciones.append((_("Create a new guide based in these games") if siMoves else _("Create"), Iconos.BookGuide(), self.createGuide))
             liAcciones.append(None)
 
-        self.tb = Controles.TB(self, liAcciones, tamIcon=20, siTexto=not self.siMoves)
+        self.tb = Controles.TBrutina(self, liAcciones, tamIcon=20, siTexto=not self.siMoves)
         if self.siMoves:
             self.tb.vertical()
 
@@ -86,7 +97,7 @@ class WSummary(QtGui.QWidget):
         self.setLayout(layout)
 
         self.qtColor = (
-            QTUtil.qtColorRGB(221, 255, 221), QTUtil.qtColorRGB(247, 247, 247), QTUtil.qtColorRGB(255, 217, 217) )
+            QTUtil.qtColorRGB(221, 255, 221), QTUtil.qtColorRGB(247, 247, 247), QTUtil.qtColorRGB(255, 217, 217))
 
     def gridDobleClickCabecera(self, grid, oColumna):
         clave = oColumna.clave
@@ -125,15 +136,39 @@ class WSummary(QtGui.QWidget):
     def gridNumDatos(self, grid):
         return len(self.liMoves)
 
+    def gridTeclaControl(self, grid, k, siShift, siControl, siAlt):
+        if k == 16777220:
+            self.siguiente()
+
+    def gridBotonDerecho(self, grid, fila, columna, modificadores):
+        alm = self.liMoves[fila]["alm"]
+        if not alm or len(alm.LIALMS) < 2:
+            return
+
+        menu = QTVarios.LCMenu(self)
+        rondo = QTVarios.rondoPuntos()
+        for ralm in alm.LIALMS:
+            menu.opcion(ralm, Partida.pv_pgn(None, ralm.PV), rondo.otro())
+            menu.separador()
+        resp = menu.lanza()
+        if resp:
+            self.liMoves[fila]["pv"] = resp.PV
+            self.cambiaInfoMove()
+
     def gridDato(self, grid, nfila, ocol):
         clave = ocol.clave
+        if clave == "trans":
+            alm = self.liMoves[nfila]["alm"]
+            return "t" if (alm and len(alm.LIALMS) > 1) else "-"
         v = self.liMoves[nfila][clave]
-        if clave == "move":
-            return v
-        elif clave.startswith("p"):
+        if clave.startswith("p"):
             return "%.01f %%" % v
         elif clave == "analisis":
             return v.abrTextoBase() if v else ""
+        elif clave == "numero":
+            if self.siFigurinesPGN:
+                self.delegadoMove.setWhite("..." not in v)
+            return v
         else:
             return str(v)
 
@@ -153,15 +188,12 @@ class WSummary(QtGui.QWidget):
 
     def gridColorFondo(self, grid, nfila, ocol):
         clave = ocol.clave
-        if clave in ( "pwin", "pdraw", "plost" ):
+        if clave in ("pwin", "pdraw", "plost"):
             dic = self.posicionFila(nfila)
             n = dic[clave[1:]]
             return self.qtColor[n]
 
         return None
-
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
 
     def popPV(self, pv):
         if pv:
@@ -178,7 +210,6 @@ class WSummary(QtGui.QWidget):
 
         fila = self.grid.recno()
         wk = self.liMoves[fila]
-        pv = wk["pv"]
 
         rmAnalisis = wk["analisis"]
         siShowMoves = rmAnalisis is not None
@@ -190,9 +221,13 @@ class WSummary(QtGui.QWidget):
         resp = analisis.menuAnalizar(self.fenM2, None, siShowMoves)
         if resp:
             partida = wk["partida"]
-            fen = partida.jugada(-1).posicionBase.fen()
+            fen = partida.last_jg().posicionBase.fen()
             pv = wk["pv"]
             analisis.exeAnalizar(self.fenM2, resp, None, fen, pv, rmAnalisis)
+
+    def inicio(self):
+        self.actualizaPV(None)
+        self.cambiaInfoMove()
 
     def anterior(self):
         if self.pvBase:
@@ -205,11 +240,39 @@ class WSummary(QtGui.QWidget):
     def siguiente(self):
         recno = self.grid.recno()
         if recno >= 0:
-            pv = self.liMoves[recno]["pv"]
+            dic = self.liMoves[recno]
+            pv = dic["pv"]
+            if pv.count(" ") > 0:
+                pv = "%s %s" % (self.pvBase, dic["pvmove"])  # transposition case
             self.actualizaPV(pv)
             self.cambiaInfoMove()
 
-    def create(self):
+    def ponPV(self, pvMirar):
+        if not pvMirar:
+            self.actualizaPV(None)
+            self.cambiaInfoMove()
+        else:
+            self.analisisMRM = None
+            dicAnalisis = {}
+            self.fenM2 = None
+            if pvMirar is not None:
+                p = Partida.Partida()
+                if pvMirar:
+                    p.leerPV(pvMirar)
+                self.fenM2 = p.ultPosicion.fenM2()
+                self.analisisMRM = self.bookGuide.dbAnalisis.mrm(self.fenM2)
+                if self.analisisMRM:
+                    for rm in self.analisisMRM.liMultiPV:
+                        dicAnalisis[rm.movimiento()] = rm
+            li = pvMirar.split(" ")
+            self.pvBase = " ".join(li[:-1])
+            busca = li[-1]
+            self.liMoves = self.dbGames.getSummary(pvMirar, dicAnalisis, self.siFigurinesPGN)
+            for fila, move in enumerate(self.liMoves):
+                if move["pvmove"] == busca:
+                    self.grid.goto(fila, 0)
+
+    def createGuide(self):
         name = os.path.basename(self.dbGames.nomFichero)[:-4]
         maxdepth = self.dbGames.depthStat()
         depth = maxdepth
@@ -220,7 +283,7 @@ class WSummary(QtGui.QWidget):
 
         while True:
             liGen = [(None, None)]
-            liGen.append(( _("Name") + ":", name ))
+            liGen.append((_("Name") + ":", name))
 
             liGen.append((FormLayout.Spinbox(_("Depth"), 2, maxdepth, 50), depth))
 
@@ -231,20 +294,20 @@ class WSummary(QtGui.QWidget):
             liGen.append((None, None))
 
             liPointV = [pointview,
-                        ( 0, _("White") ),
-                        ( 1, _("Black") ),
-                        ( 2, "%s + %s" % (_("White"), _("Draw") ) ),
-                        ( 3, "%s + %s" % (_("Black"), _("Draw") ) ),
-            ]
+                        (0, _("White")),
+                        (1, _("Black")),
+                        (2, "%s + %s" % (_("White"), _("Draw"))),
+                        (3, "%s + %s" % (_("Black"), _("Draw"))),
+                        ]
             liGen.append((_("Point of view") + ":", liPointV))
 
             liGen.append((None, None))
 
             if mov:
                 liInicio = [inicio,
-                            ( 0, _("The beginning") ),
-                            ( 1, _("Current move") ),
-                ]
+                            (0, _("The beginning")),
+                            (1, _("Current move")),
+                            ]
                 liGen.append((_("Start from") + ":", liInicio))
 
             resultado = FormLayout.fedit(liGen, title=_("Create new guide"), parent=self, anchoMinimo=460,
@@ -299,12 +362,11 @@ class WSummary(QtGui.QWidget):
 
         # Select depth
         liGen = [(None, None)]
-        liGen.append(( None, _("Select the number of moves <br> for each game to be considered") ))
+        liGen.append((None, _("Select the number of moves <br> for each game to be considered")))
         liGen.append((None, None))
 
-        li = [(str(n), n) for n in range(3, 255)]
-        config = FormLayout.Combobox(_("Depth"), li)
-        liGen.append(( config, self.dbGames.depthStat() ))
+        config = FormLayout.Spinbox(_("Depth"), 3, 255, 50)
+        liGen.append((config, self.dbGames.depthStat()))
 
         resultado = FormLayout.fedit(liGen, title=_("Rebuild"), parent=self, icon=Iconos.Reindexar())
         if resultado is None:
@@ -328,61 +390,7 @@ class WSummary(QtGui.QWidget):
 
         self.dbGames.recrearSTAT(dispatch, depth)
         bpTmp.cerrar()
-        self.grid.refresh()
-
-    def reindexarPlayer(self):
-        dic = VarGen.configuracion.leeVariables("reindexplayer")
-
-        # Select depth
-        liGen = [(None, None)]
-        liGen.append(( _("Player (wildcards=*)"), dic.get("player", "")))
-        liGen.append((None, None))
-        liGen.append(( None, _("Select the number of moves <br> for each game to be considered") ))
-        liGen.append((None, None))
-
-        li = [(str(n), n) for n in range(3, 255)]
-        config = FormLayout.Combobox(_("Depth"), li)
-        liGen.append(( config, dic.get("depth", 30) ))
-
-        resultado = FormLayout.fedit(liGen, title=_("Summary filtering by player"), parent=self,
-                                     icon=Iconos.Reindexar())
-        if resultado is None:
-            return None
-
-        accion, liResp = resultado
-
-        dic["player"] = player = liResp[0]
-        if not player:
-            return
-        dic["depth"] = depth = liResp[1]
-
-        VarGen.configuracion.escVariables("reindexplayer", dic)
-
-        class CLT:
-            pass
-
-        clt = CLT()
-        clt.RECCOUNT = 0
-        clt.SICANCELADO = False
-
-        bpTmp = QTUtil2.BarraProgreso1(self, _("Rebuilding"))
-        bpTmp.mostrar()
-
-        def dispatch(recno, reccount):
-            if reccount != clt.RECCOUNT:
-                clt.RECCOUNT = reccount
-                bpTmp.ponTotal(reccount)
-            bpTmp.pon(recno)
-            if bpTmp.siCancelado():
-                clt.SICANCELADO = True
-
-            return not clt.SICANCELADO
-
-        self.dbGames.recrearSTATplayer(dispatch, depth, player)
-        bpTmp.cerrar()
-        if clt.SICANCELADO:
-            self.dbGames.ponSTATbase()
-        self.grid.refresh()
+        self.inicio()
 
     def movActivo(self):
         recno = self.grid.recno()
@@ -427,7 +435,7 @@ class WSummary(QtGui.QWidget):
             if self.analisisMRM:
                 for rm in self.analisisMRM.liMultiPV:
                     dicAnalisis[rm.movimiento()] = rm
-        self.liMoves = self.dbGames.getSummary(pvMirar, dicAnalisis)
+        self.liMoves = self.dbGames.getSummary(pvMirar, dicAnalisis, self.siFigurinesPGN)
 
         self.grid.refresh()
         self.grid.gotop()
@@ -448,6 +456,7 @@ class WSummary(QtGui.QWidget):
             p = Partida.Partida()
             p.leerPV(pv)
             p.siTerminada()
+            self.aperturasStd.asignaApertura(p)
             self.infoMove.modoPartida(p, 9999)
             self.setFocus()
             self.grid.setFocus()

@@ -1,19 +1,18 @@
 from PyQt4 import QtGui
 
-import Code.DBgamesFEN as DBgamesFEN
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTVarios as QTVarios
-import Code.QT.WBG_GamesFEN as WBG_GamesFEN
-import Code.QT.WBG_InfoMove as WBG_InfoMove
+from Code import DBgamesFEN
+from Code.QT import Colocacion
+from Code.QT import Iconos
+from Code.QT import QTVarios
+from Code.QT import WBG_GamesFEN
+from Code.QT import WBG_InfoMove
 
 class WBDatabaseFEN(QTVarios.WDialogo):
     def __init__(self, wParent, procesador):
 
         icono = Iconos.DatabaseF()
         extparam = "databasepositions"
-        titulo = _("Positions database")
+        titulo = _("Positions Database")
         QTVarios.WDialogo.__init__(self, wParent, titulo, icono, extparam)
 
         self.procesador = procesador
@@ -29,14 +28,10 @@ class WBDatabaseFEN(QTVarios.WDialogo):
 
         self.ultFocus = None
 
-        self.tab = Controles.Tab()
-        self.tab.nuevaTab(self.wgamesFEN, _("Games"))
-        self.tab.ponTipoLetra(puntos=procesador.configuracion.puntosTB)
-
         self.infoMove = WBG_InfoMove.WInfomove(self, siMoves=False)
 
         self.splitter = splitter = QtGui.QSplitter(self)
-        splitter.addWidget(self.tab)
+        splitter.addWidget(self.wgamesFEN)
         splitter.addWidget(self.infoMove)
 
         layout = Colocacion.H().control(splitter).margen(5)
@@ -64,8 +59,6 @@ class WBDatabaseFEN(QTVarios.WDialogo):
         self.setdbGames()
 
     def setdbGames(self):
-        self.dbGamesFEN.leer()
-        self.tab.ponValor(0, "%s: %s" % (_("Database"), self.dbGamesFEN.rotulo() ))
         self.wgamesFEN.setdbGames(self.dbGamesFEN)
 
     def inicializa(self):
@@ -90,4 +83,3 @@ class WBDatabaseFEN(QTVarios.WDialogo):
 
     def closeEvent(self, event):
         self.salvar()
-

@@ -2,9 +2,9 @@
 Navegacion por una tabla de datos mediante instrucciones tipo xBase.
 """
 
-import time
 import collections
 import sqlite3
+import time
 
 class Almacen:
     pass
@@ -187,14 +187,14 @@ class DBF:
         Lectura de un registro, y asignacion a las variables = campos.
         """
         self.ID = self.liIDs[numRecno][0]
-        self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % ( self.select, self.ctabla, self.ID ))
+        self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % (self.select, self.ctabla, self.ID))
         liValores = self.cursor.fetchone()
         for numCampo, campo in enumerate(self.liCampos):
             setattr(self, campo, liValores[numCampo])
 
     def leeOtroCampo(self, recno, campo):
-        id = self.rowid(recno)
-        self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % ( campo, self.ctabla, id ))
+        xid = self.rowid(recno)
+        self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % (campo, self.ctabla, xid))
         liValores = self.cursor.fetchone()
         return liValores[0]
 
@@ -225,14 +225,14 @@ class DBF:
         """
         return self.liIDs[numRecno][0]
 
-    def buscarID(self, id):
+    def buscarID(self, xid):
         """
         Busca el recno de un ID.
 
-        @param id: numero de id.
+        @param xid: numero de id.
         """
         for r in range(self.reccount()):
-            if self.rowid(r) == id:
+            if self.rowid(r) == xid:
                 return r
         return -1
 
@@ -264,7 +264,7 @@ class DBF:
         for n, recno in enumerate(listaRecnos):
             if dispatch:
                 dispatch(n)
-            cSQL = "DELETE FROM %s WHERE rowid = %d" % ( self.ctabla, self.rowid(recno) )
+            cSQL = "DELETE FROM %s WHERE rowid = %d" % (self.ctabla, self.rowid(recno))
             self.cursor.execute(cSQL)
         self.conexion.commit()
 
@@ -273,12 +273,12 @@ class DBF:
         self.conexion.commit()
 
     def borrarConFiltro(self, filtro):
-        cSQL = "DELETE FROM %s WHERE %s" % ( self.ctabla, filtro )
+        cSQL = "DELETE FROM %s WHERE %s" % (self.ctabla, filtro)
         self.cursor.execute(cSQL)
         self.conexion.commit()
 
     def borrarROWID(self, rowid):
-        cSQL = "DELETE FROM %s WHERE rowid = %d" % ( self.ctabla, rowid )
+        cSQL = "DELETE FROM %s WHERE rowid = %d" % (self.ctabla, rowid)
         self.cursor.execute(cSQL)
         self.conexion.commit()
 
@@ -322,7 +322,7 @@ class DBF:
         campos = campos[:-1]
         values = values[:-1]
 
-        cSQL = "insert into %s(%s) values(%s)" % ( self.ctabla, campos, values)
+        cSQL = "insert into %s(%s) values(%s)" % (self.ctabla, campos, values)
         self.cursor.execute(cSQL, liValues)
 
         idNuevo = self.cursor.lastrowid
@@ -350,7 +350,7 @@ class DBF:
         campos = campos[:-1]
         values = values[:-1]
 
-        cSQL = "insert into %s(%s) values(%s)" % ( self.ctabla, campos, values)
+        cSQL = "insert into %s(%s) values(%s)" % (self.ctabla, campos, values)
         self.cursor.execute(cSQL, liValues)
 
         idNuevo = self.cursor.lastrowid
@@ -381,7 +381,7 @@ class DBF:
         campos = campos[:-1]
         values = values[:-1]
 
-        cSQL = "insert into %s(%s) values(%s)" % ( self.ctabla, campos, values)
+        cSQL = "insert into %s(%s) values(%s)" % (self.ctabla, campos, values)
         self.cursor.execute(cSQL, liValues)
 
         idNuevo = self.cursor.lastrowid
@@ -411,7 +411,7 @@ class DBF:
 
         liError = []
 
-        cSQL = "insert into %s(%s) values(%s)" % ( self.ctabla, campos, values)
+        cSQL = "insert into %s(%s) values(%s)" % (self.ctabla, campos, values)
 
         for n, reg in enumerate(lista):
             liValues = []
@@ -439,7 +439,7 @@ class DBF:
         campos = campos[:-1]
         values = values[:-1]
 
-        cSQL = "insert into %s(%s) values(%s)" % ( self.ctabla, campos, values)
+        cSQL = "insert into %s(%s) values(%s)" % (self.ctabla, campos, values)
         self.cursor.execute(cSQL, liValues)
 
         if siCommit:
@@ -479,7 +479,7 @@ class DBF:
 
             rid = self.rowid(recno)
 
-            cSQL = "UPDATE %s SET %s WHERE ROWID = %d" % ( self.ctabla, campos, rid )
+            cSQL = "UPDATE %s SET %s WHERE ROWID = %d" % (self.ctabla, campos, rid)
             self.cursor.execute(cSQL, liValues)
 
             self.conexion.commit()
@@ -516,7 +516,7 @@ class DBF:
 
         campos = campos[:-1]
 
-        cSQL = "UPDATE %s SET %s WHERE ROWID = %d" % ( self.ctabla, campos, rowid )
+        cSQL = "UPDATE %s SET %s WHERE ROWID = %d" % (self.ctabla, campos, rowid)
         self.cursor.execute(cSQL, liValues)
 
         self.conexion.commit()
@@ -553,7 +553,7 @@ class DBF:
             if dispatch:
                 dispatch(n)
             if rowid:
-                cSQL = "DELETE FROM %s WHERE rowid = %d" % ( self.ctabla, rowid )
+                cSQL = "DELETE FROM %s WHERE rowid = %d" % (self.ctabla, rowid)
                 self.cursor.execute(cSQL)
         self.conexion.commit()
 

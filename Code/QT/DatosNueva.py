@@ -1,13 +1,13 @@
 from PyQt4 import QtCore, QtGui
 
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Info as Info
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.FormLayout as FormLayout
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import Info
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
 
 def datos(wParent, configuracion, procesador):
     # Primero determinamos la categoria
@@ -46,9 +46,9 @@ def dameCategoria(wParent, configuracion, procesador):
             txt += " %s %d" % (_("Level"), nm)
         if nh:
             if "B" in nh:
-                txt += " +%s:%d" % ( _("White"), nm + 1)
+                txt += " +%s:%d" % (_("White"), nm + 1)
             if "N" in nh:
-                txt += " +%s:%d" % ( _("Black"), nm + 1)
+                txt += " +%s:%d" % (_("Black"), nm + 1)
 
                 # if "B" not in nh:
                 # txt += "  ...  %s:%d"%( _( "White" )[0],nm+1)
@@ -76,7 +76,7 @@ def dameCategoria(wParent, configuracion, procesador):
     for grupo in configuracion.grupos.liGrupos:
         nombre = _X(_("%1 group"), grupo.nombre)
         if grupo.minPuntos > 0:
-            nombre += " (+%d %s)" % (grupo.minPuntos, _("pts") )
+            nombre += " (+%d %s)" % (grupo.minPuntos, _("pts"))
 
         siDes = (grupo.minPuntos > puntuacion)
         if siDes:
@@ -105,7 +105,8 @@ def dameCategoria(wParent, configuracion, procesador):
         titulo = _("Competition")
         ancho, alto = QTUtil.tamEscritorio()
         ancho = min(ancho, 700)
-        txt = _("<br><b>The aim is to obtain the highest possible score</b> :<ul><li>The current point score is displayed in the title bar.</li><li>To obtain points it is necessary to win on different levels in different categories.</li><li>To overcome a level it is necessary to win against the engine with white and with black.</li><li>The categories are ranked in the order of the following table:</li><ul><li><b>Beginner</b> : 5</li><li><b>Amateur</b> : 10</li><li><b>Master candidate</b> : 20</li><li><b>Master</b> : 40</li><li><b>Grandmaster candidate</b> : 80</li><li><b>Grandmaster</b> : 160</li></ul><li>The score for each game is calculated by multiplying the playing level with the score of the category.</li><li>The engines are divided into groups.</li><li>To be able to play with an opponent of a particular group a minimum point score is required. The required score is shown next to the group label.</li></ul>")
+        txt = _(
+            "<br><b>The aim is to obtain the highest possible score</b> :<ul><li>The current point score is displayed in the title bar.</li><li>To obtain points it is necessary to win on different levels in different categories.</li><li>To overcome a level it is necessary to win against the engine with white and with black.</li><li>The categories are ranked in the order of the following table:</li><ul><li><b>Beginner</b> : 5</li><li><b>Amateur</b> : 10</li><li><b>Candidate Master</b> : 20</li><li><b>Master</b> : 40</li><li><b>International Master</b> : 80</li><li><b>Grandmaster</b> : 160</li></ul><li>The score for each game is calculated by multiplying the playing level with the score of the category.</li><li>The engines are divided into groups.</li><li>To be able to play with an opponent of a particular group a minimum point score is required. The required score is shown next to the group label.</li></ul>")
         Info.info(wParent, _("Lucas Chess"), titulo, txt, ancho, Iconos.pmAyudaGR())
         return None
 
@@ -153,26 +154,26 @@ class wDatos(QtGui.QDialog):
 
         # Rival
         rival = configuracion.rival
-        lbRMotor = Controles.LB(self, "<b>%s</b> : %s" % ( _("Engine"), rival.nombre )).ponFuente(flb).ponWrap().anchoFijo(
-            400)
-        lbRAutor = Controles.LB(self, "<b>%s</b> : %s" % ( _("Author"), rival.autor )).ponFuente(flb).ponWrap().anchoFijo(400)
+        lbRMotor = Controles.LB(self, "<b>%s</b> : %s" % (_("Engine"), rival.nombre)).ponFuente(flb).ponWrap().anchoFijo(
+                400)
+        lbRAutor = Controles.LB(self, "<b>%s</b> : %s" % (_("Author"), rival.autor)).ponFuente(flb).ponWrap().anchoFijo(400)
         lbRWeb = Controles.LB(self,
-            '<b>%s</b> : <a href="%s">%s</a>' % ( _("Web"), rival.url, rival.url )).ponWrap().anchoFijo(400).ponFuente(
-            flb)
+                              '<b>%s</b> : <a href="%s">%s</a>' % (_("Web"), rival.url, rival.url)).ponWrap().anchoFijo(400).ponFuente(
+                flb)
 
         ly = Colocacion.V().control(lbRMotor).control(lbRAutor).control(lbRWeb).margen(10)
         gbR = Controles.GB(self, _("Opponent"), ly).ponFuente(f)
 
         # Tutor
         tutor = configuracion.tutor
-        lbTMotor = Controles.LB(self, "<b>%s</b> : %s" % ( _("Engine"), tutor.nombre )).ponFuente(flb).ponWrap().anchoFijo(
-            400)
-        lbTAutor = Controles.LB(self, "<b>%s</b> : %s" % ( _("Author"), tutor.autor )).ponFuente(flb).ponWrap().anchoFijo(400)
+        lbTMotor = Controles.LB(self, "<b>%s</b> : %s" % (_("Engine"), tutor.nombre)).ponFuente(flb).ponWrap().anchoFijo(
+                400)
+        lbTAutor = Controles.LB(self, "<b>%s</b> : %s" % (_("Author"), tutor.autor)).ponFuente(flb).ponWrap().anchoFijo(400)
         siURL = hasattr(tutor, "url")
         if siURL:
             lbTWeb = Controles.LB(self,
-                '<b>%s</b> : <a href="%s">%s</a>' % ( "Web", tutor.url, tutor.url )).ponWrap().anchoFijo(400).ponFuente(
-                flb)
+                                  '<b>%s</b> : <a href="%s">%s</a>' % ("Web", tutor.url, tutor.url)).ponWrap().anchoFijo(400).ponFuente(
+                    flb)
 
         ly = Colocacion.V().control(lbTMotor).control(lbTAutor)
         if siURL:
@@ -186,7 +187,7 @@ class wDatos(QtGui.QDialog):
         lyNivel = Colocacion.H().control(lb).control(self.ed).espacio(10).control(self.lbPuntos).relleno()
 
         vlayout = Colocacion.V().otro(lyNivel).espacio(10).control(gbColor).espacio(10).control(gbR).espacio(
-            10).control(gbT).margen(30)
+                10).control(gbT).margen(30)
 
         layout = Colocacion.V().control(tb).otro(vlayout).margen(3)
 
@@ -208,7 +209,7 @@ class wDatos(QtGui.QDialog):
             color = "B" if self.rbBlancas.isChecked() else "N"
             if color not in self.maxNivelHecho:
                 p = self.maxPuntos
-        self.lbPuntos.setText("%d %s" % (p, _("points") ))
+        self.lbPuntos.setText("%d %s" % (p, _("points")))
         self.puntos = p
 
 def numEntrenamiento(wParent, titulo, hasta, etiqueta=None, pos=None, mensAdicional=None):
@@ -256,26 +257,25 @@ class WNumEntrenamiento(QtGui.QDialog):
         self.accept()
 
 def numPosicion(wParent, titulo, nFEN, pos):
-
     liGen = [FormLayout.separador]
 
-    label = "%s (1..%d)"%(_("Select position"), nFEN)
+    label = "%s (1..%d)" % (_("Select position"), nFEN)
     liGen.append((FormLayout.Spinbox(label, 1, nFEN, 50), pos))
 
     liGen.append(FormLayout.separador)
 
-    li = [   ( _("Sequential"), "s"),
-             ( _("Random"), "r"),
-             ( _("Random with same sequence based on position"), "rk" )
-    ]
-    liGen.append( (FormLayout.Combobox(_("Type"), li), "s") )
+    li = [(_("Sequential"), "s"),
+          (_("Random"), "r"),
+          (_("Random with same sequence based on position"), "rk")
+          ]
+    liGen.append((FormLayout.Combobox(_("Type"), li), "s"))
 
     liGen.append(FormLayout.separador)
 
-    liGen.append( (_("Jump to the next after solve")+":", False))
+    liGen.append((_("Jump to the next after solve") + ":", False))
 
     resultado = FormLayout.fedit(liGen, title=titulo, parent=wParent, anchoMinimo=200,
-                                     icon=Iconos.Entrenamiento())
+                                 icon=Iconos.Entrenamiento())
     if resultado:
         posicion, tipo, jump = resultado[1]
         return posicion, tipo, jump

@@ -3,8 +3,8 @@ import time
 
 from PyQt4 import QtCore
 
-import Code.Tareas as Tareas
-import Code.QT.QTUtil as QTUtil
+from Code.QT import QTUtil
+from Code import Tareas
 
 class CPU:
     def __init__(self, pantalla):

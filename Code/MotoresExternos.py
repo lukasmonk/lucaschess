@@ -1,9 +1,9 @@
 import os
 
-import Code.Util as Util
-import Code.BaseConfig as BaseConfig
-import Code.XMotor as XMotor
-import Code.VarGen as VarGen
+from Code import BaseConfig
+from Code import Util
+from Code import VarGen
+from Code import XMotor
 
 class OpcionUCI:
     def leeTXT(self, txt):
@@ -12,6 +12,8 @@ class OpcionUCI:
         self.nombre = li[1]
         self.default = li[2]
         self.valor = li[3]
+        # if self.default != self.valor:
+        #     p rint self.nombre+":"+self.valor,
 
         if self.tipo == "spin":
             self.default = int(self.default)
@@ -163,24 +165,23 @@ class MotorExterno:
         self.liOpciones = []
 
         motor = XMotor.XMotor("-", exe)
-
-        uci = motor.uci
-        self.idName = "-"
-        self.idAuthor = "-"
-        for linea in uci.split("\n"):
-            linea = linea.strip()
-            if linea.startswith("id name"):
-                self.idName = linea[8:]
-            elif linea.startswith("id author"):
-                self.idAuthor = linea[10:]
-            elif linea.startswith("option name "):
-                op = OpcionUCI()
-                if op.lee(linea):
-                    self.liOpciones.append(op)
-        self.alias = self.idName
-        self.clave = self.idName
-        motor.apagar()
-        return len(uci) > 0
+        if motor.uci_ok:
+            self.idName = "-"
+            self.idAuthor = "-"
+            for linea in motor.uci_lines:
+                linea = linea.strip()
+                if linea.startswith("id name"):
+                    self.idName = linea[8:]
+                elif linea.startswith("id author"):
+                    self.idAuthor = linea[10:]
+                elif linea.startswith("option name "):
+                    op = OpcionUCI()
+                    if op.lee(linea):
+                        self.liOpciones.append(op)
+            self.alias = self.idName
+            self.clave = self.idName
+        motor.close()
+        return motor.uci_ok
 
     def save(self):
         dic = {}
@@ -208,6 +209,19 @@ class MotorExterno:
         self.multiPV = 0
         txtop = dic["OPCIONES"]
         self.liOpciones = []
+
+        # if self.nombre.startswith("GreKo 12"):
+        #     li = txtop.split("|")
+        #     c = ""
+        #     for n in li:
+        #         l = n.split(VarGen.XSEP)
+        #         nombre = l[1]
+        #         default = l[2]
+        #         valor = l[3]
+        #         if default != valor:
+        #             c += "| %s=%s "%(nombre,valor)
+
+        #     p rint self.alias, self.elo, c
 
         for parte in txtop.split("|"):
             if parte:
@@ -256,7 +270,7 @@ class ListaMotoresExternos:
                         self.liMotores.append(me)
                         # li = me.idInfo.split("\n")
                         # for x in li:
-                            # st.add(x)
+                        # st.add(x)
                     else:
                         siGrabar = True
             f.close()
@@ -330,4 +344,3 @@ def buscaRivalExt(nomMotor):
         cm = ConfigMotor(me)
         return cm
     return None
-

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import operator
-import copy
 import base64
+import copy
+import operator
 
+from Code.QT import Iconos
+from Code.QT import TabTipos
+from Code import TrListas
+from Code import Util
+from Code import VarGen
 from Code.Constantes import *
-import Code.QT.TabTipos as TabTipos
-import Code.QT.Iconos as Iconos
-import Code.Util as Util
-import Code.VarGen as VarGen
-import Code.TrListas as TrListas
 
 class Grupo:
     def __init__(self, nombre, desde, hasta, minPuntos, liRivales):
@@ -199,6 +199,7 @@ class ConfigMotorBase:
         self.maxMultiPV = 0
         self.siDebug = False
         self.siExterno = False
+        self.path_64 = None
 
     def debug(self, txt):
         self.siDebug = True
@@ -238,8 +239,9 @@ class ConfigMotor(ConfigMotorBase):
         else:
             self.carpeta = clave
 
-        self.nombre = Util.primeraMayuscula(self.carpeta) + " " + self.version
         self.siExterno = False
+
+        self._nombre = None
 
     def graba(self):
         return self.clave + "#" + self.categorias.graba()
@@ -248,9 +250,26 @@ class ConfigMotor(ConfigMotorBase):
         clave, txtCat = txt.split("#")
         self.categorias.lee(txtCat)
 
+    def test_bmi2(self):
+        if self.path_64 and VarGen.configuracion.bmi2:
+            self.path, self.version = self.path_64
+            self.path_64 = None
+
+    @property
+    def nombre(self):
+        self.test_bmi2()
+        if self._nombre:
+            return self._nombre
+        return Util.primeraMayuscula(self.carpeta) + " " + self.version
+
+    @nombre.setter
+    def nombre(self, value):
+        self._nombre = value
+
     def ejecutable(self):
+        self.test_bmi2()
         tipo = "Linux" if VarGen.isLinux else "Windows"
-        return "./Engines%s/%s/%s" % ( tipo, self.carpeta, self.path )
+        return "./Engines/%s/%s/%s" % (tipo, self.carpeta, self.path)
 
     def puntuacion(self):
         return self.categorias.puntuacion()
@@ -259,7 +278,7 @@ class ConfigMotor(ConfigMotorBase):
         puntos = self.puntuacion()
         eti = self.nombre
         if puntos:
-            eti += " [%d %s]" % (puntos, _("pts") )
+            eti += " [%d %s]" % (puntos, _("pts"))
         return eti
 
     def maxNivelCategoria(self, categoria):
@@ -632,7 +651,7 @@ class ConfigTablero:
               + self._tema.graba() + "·" \
               + self._base.graba()
         return "A" + base64.encodestring(
-            txt)  # nuevo metodo ya que daba problemas la grabacion de tableros en sqlite+cpickle
+                txt)  # nuevo metodo ya que daba problemas la grabacion de tableros en sqlite+cpickle
 
     def grabaTema(self):
         return self._tema.graba()
@@ -659,8 +678,8 @@ class ConfigTablero:
                 self._tema._siTemaDefecto = False
             self._base.lee(li[3])
 
-    def copia(self, id):
-        ct = ConfigTablero(id, self._anchoPiezaDef)
+    def copia(self, xid):
+        ct = ConfigTablero(xid, self._anchoPiezaDef)
         ct.lee(self.graba())
         return ct
 
@@ -855,4 +874,3 @@ class ConfigTablero:
         else:
             self._base._sepLetras = valor
         return self._base._nCoordenadas
-

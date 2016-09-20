@@ -2,16 +2,16 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
-import Code.VarGen as VarGen
-import Code.ControlPosicion as ControlPosicion
-import Code.Partida as Partida
-import Code.Books as Books
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Tablero as Tablero
+from Code import Books
+from Code import ControlPosicion
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import VarGen
 
 class UnMove:
     def __init__(self, listaMovesPadre, book, fenBase, movBook):
@@ -87,7 +87,7 @@ class UnMove:
             posicion = self.partida.iniPosicion
             desde, hasta = None, None
         else:
-            jg = self.partida.liJugadas[self.posActual]
+            jg = self.partida.jugada(self.posActual)
             posicion = jg.posicion
             desde = jg.desde
             hasta = jg.hasta
@@ -244,12 +244,12 @@ class WMoves(QtGui.QWidget):
         # ToolBar
         tb = Controles.TBrutina(self, siTexto=False, tamIcon=16)
         if siEnviar:
-            tb.new( _("Accept"), Iconos.Aceptar(), self.owner.aceptar )
-            tb.new( _("Cancel"), Iconos.Cancelar(), self.owner.cancelar )
+            tb.new(_("Accept"), Iconos.Aceptar(), self.owner.aceptar)
+            tb.new(_("Cancel"), Iconos.Cancelar(), self.owner.cancelar)
         else:
-            tb.new( _("Quit"), Iconos.MainMenu(), self.owner.cancelar )
-        tb.new( _("Open new branch"), Iconos.Mas(), self.rama )
-        tb.new( _("Books"), Iconos.Libros(), self.owner.menuLibros )
+            tb.new(_("Close"), Iconos.MainMenu(), self.owner.cancelar)
+        tb.new(_("Open new branch"), Iconos.Mas(), self.rama)
+        tb.new(_("Books"), Iconos.Libros(), self.owner.menuLibros)
 
         layout = Colocacion.V().control(tb).control(self.tree).margen(1)
 
@@ -486,4 +486,3 @@ class PantallaArbolBook(QTVarios.WDialogo):
                 return
             if book == self.book:
                 return
-

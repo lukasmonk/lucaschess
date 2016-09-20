@@ -1,0 +1,79 @@
+                                     Komodo Option Settings
+
+
+
+1. Table Memory: The default value 64 is recommended for blitz games where 
+
+the hash size should be in the 128 to 512 MB range. 128 is recommended for 
+
+intermediate level games such as 15 minutes to one hour per side, where hash 
+
+table size might be one to four GB. For standard games such as two hours per 
+
+side or more we suggest 256 for Table Memory, when hash size is usually 4 GB 
+
+or more. In the TCEC we used 256. 
+
+
+
+2. Drawscore. The default value, negative 7, is appropriate when playing 
+
+against most other strong computer programs with the exception of close rivals,
+
+when zero should be best. A larger negative value like -15 is suggested for 
+
+playing against older or much weaker engines or against human Grandmasters. 
+
+Even larger negative values are best for most human opponents, unless you want 
+
+to brag about how you got a draw against Komodo due to a repetition of position 
+
+early in the game! In the TCEC we used the default negative 7 in the first stage, 
+
+gradually reducing to zero for the final.
+
+      
+
+3. Time Usage Aggressiveness: The default zero is considered best when there 
+
+is no lag to worry about, although it is likely that the value is not optimum 
+
+for longer time control games. When playing on a server where there is lag, a 
+
+negative value (-3 is suggested by one of our testers) makes sense to avoid 
+
+lag-induced severe time pressure. For TCEC we used zero. 
+
+
+4. Move Overhead Milliseconds: Here too the default should be fine on most 
+
+computers and GUIs when there is no lag, but if you discover that the engine 
+
+occasionally forfeits on time on your system try doubling the default. When 
+
+there is server lag a much larger value should be used, one that is somewhat 
+
+larger than the average lag. Thus if lag averages around a tenth of a second 
+
+a setting of 150 might be reasonable. There is some overlap between this parameter 
+
+and the previous one; a large enough setting here might make it unnecessary to 
+
+use a negative value for Time Usage for example. For TCEC we used the default. 
+
+
+
+5. The King Table Multiplier (ktabm) parameters are what we believe to be best 
+
+for bullet chess, but it is possible that other values might work better in 
+
+longer games. 
+
+
+
+6. Threads: For maximum performance, set the number of threads to match the number 
+
+of cores on your computer, not the number of threads. Modern Intel -based computers 
+
+may have for example 4 cores but 8 threads; set number of Threads to 4, not to 8.  
+

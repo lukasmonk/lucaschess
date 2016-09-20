@@ -2,23 +2,23 @@ import os
 
 from PyQt4 import QtCore, QtGui
 
+from Code import Books
+from Code import ControlPosicion
+from Code import Personalidades
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import Motores
+from Code.QT import PantallaAperturas
+from Code.QT import PantallaMotores
+from Code.QT import PantallaTutor
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Util
+from Code import XVoyager
 from Code.Constantes import *
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.Books as Books
-import Code.Personalidades as Personalidades
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.PantallaAperturas as PantallaAperturas
-import Code.QT.PantallaMotores as PantallaMotores
-import Code.QT.Motores as Motores
-import Code.QT.PantallaTutor as PantallaTutor
-import Code.QT.FormLayout as FormLayout
-import Code.QT.WinPosition as WinPosition
 
 class WEntMaquina(QTVarios.WDialogo):
     def __init__(self, procesador, titulo):
@@ -34,10 +34,10 @@ class WEntMaquina(QTVarios.WDialogo):
 
         # Toolbar
 
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), self.aceptar ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), self.cancelar ), None,
-                      ( _("Configurations"), Iconos.Configurar(), self.configuraciones ), None,
-        ]
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                      (_("Configurations"), Iconos.Configurar(), self.configuraciones), None,
+                      ]
         tb = Controles.TBrutina(self, liAcciones)
 
         # Tab
@@ -88,7 +88,7 @@ class WEntMaquina(QTVarios.WDialogo):
         self.rbNegras.setIcon(QTVarios.fsvg2ico("Pieces/Chessicons/bp.svg", 64))
         self.rbRandom = Controles.RB(self, _("Random"))
         hbox = Colocacion.H().relleno().control(self.rbBlancas).espacio(30).control(self.rbNegras).espacio(30).control(
-            self.rbRandom).relleno()
+                self.rbRandom).relleno()
         _label(lyG, _("Select color"), hbox)
 
         # Motores
@@ -110,12 +110,12 @@ class WEntMaquina(QTVarios.WDialogo):
         self.cbAjustarRival = Controles.CB(self, liAjustes, kAjustarMejor).capturaCambiado(self.ajustesCambiado)
         lbAjustarRival = Controles.LB2P(self, _("Set strength"))
         btAjustarRival = Controles.PB(self, _("Personality"), self.cambiaPersonalidades, plano=True).ponIcono(
-            Iconos.Mas(), tamIcon=16)
+                Iconos.Mas(), tamIcon=16)
 
-        ## Resign
+        # Resign
         lbResign = Controles.LB2P(self, _("Resign/draw by engine"))
-        liResign = ((_("Very early"), -100 ),
-                    (_("Early"), -300 ),
+        liResign = ((_("Very early"), -100),
+                    (_("Early"), -300),
                     (_("Average"), -500),
                     (_("Late"), -800),
                     (_("Very late"), -1000),
@@ -140,10 +140,10 @@ class WEntMaquina(QTVarios.WDialogo):
         self.cbChance = Controles.CHB(self, _("Second chance"), True)
         btTutorChange = Controles.PB(self, _("Tutor change"), self.tutorChange, plano=False).ponIcono(Iconos.Tutor(), tamIcon=16)
 
-        liThinks = [(_("Nothing"), -1), (_("Score"), 0 )]
+        liThinks = [(_("Nothing"), -1), (_("Score"), 0)]
         for i in range(1, 5):
             liThinks.append(("%d %s" % (i, _("ply") if i == 1 else _("plies")), i))
-        liThinks.append((_("All"), 9999 ))
+        liThinks.append((_("All"), 9999))
 
         lb = Controles.LB(self, _("It is showed") + ":")
         self.cbThoughtTt = Controles.CB(self, liThinks, -1)
@@ -216,9 +216,9 @@ class WEntMaquina(QTVarios.WDialogo):
         self.fen = ""
         self.btPosicionQuitar = Controles.PB(self, "", self.posicionQuitar).ponIcono(Iconos.Motor_No())
         self.btPosicionPegar = Controles.PB(self, "", self.posicionPegar).ponIcono(Iconos.Pegar16()).ponToolTip(
-            _("Paste FEN position"))
+                _("Paste FEN position"))
         hbox = Colocacion.H().relleno().control(self.btPosicionQuitar).control(self.btPosicion).control(
-            self.btPosicionPegar).relleno()
+                self.btPosicionPegar).relleno()
         _label(lyG, _("Start position"), hbox)
 
         # Aperturas
@@ -227,31 +227,31 @@ class WEntMaquina(QTVarios.WDialogo):
         self.btAperturasFavoritas = Controles.PB(self, "", self.aperturasFavoritas).ponIcono(Iconos.Favoritos())
         self.btAperturasQuitar = Controles.PB(self, "", self.aperturasQuitar).ponIcono(Iconos.Motor_No())
         hbox = Colocacion.H().relleno().control(self.btAperturasQuitar).control(self.btApertura).control(
-            self.btAperturasFavoritas).relleno()
+                self.btAperturasFavoritas).relleno()
         _label(lyG, _("Opening"), hbox)
 
         # Libros
         fvar = self.configuracion.ficheroBooks
         self.listaLibros = Books.ListaLibros()
         self.listaLibros.recuperaVar(fvar)
-        ## Comprobamos que todos esten accesibles
+        # Comprobamos que todos esten accesibles
         self.listaLibros.comprueba()
         li = [(x.nombre, x) for x in self.listaLibros.lista]
         libInicial = li[0][1] if li else None
         self.cbBooks = QTUtil2.comboBoxLB(self, li, libInicial)
         self.btNuevoBook = Controles.PB(self, "", self.nuevoBook, plano=True).ponIcono(Iconos.Mas(), tamIcon=16)
         self.chbBookMandatory = Controles.CHB(self, _("Mandatory"), False)
-        ## Respuesta rival
+        # Respuesta rival
         li = (
-            (_("Selected by the player"), "su" ),
-            (_("Uniform random"), "au" ),
-            (_("Proportional random"), "ap" ),
-            (_("Always the highest percentage"), "mp" ),
+            (_("Selected by the player"), "su"),
+            (_("Uniform random"), "au"),
+            (_("Proportional random"), "ap"),
+            (_("Always the highest percentage"), "mp"),
         )
         self.cbBooksRR = QTUtil2.comboBoxLB(self, li, "mp")
         self.lbBooksRR = Controles.LB2P(self, _("Opponent's move"))
         hbox = Colocacion.H().relleno().control(self.cbBooks).control(self.btNuevoBook).control(
-            self.chbBookMandatory).relleno()
+                self.chbBookMandatory).relleno()
         hboxRR = Colocacion.H().relleno().control(self.lbBooksRR).control(self.cbBooksRR).relleno()
         hboxV = Colocacion.V().otro(hbox).otro(hboxRR)
         self.chbBook = _label(lyG, _("Book"), hboxV, siCheck=True)
@@ -356,10 +356,16 @@ class WEntMaquina(QTVarios.WDialogo):
         self.edRtiempo.setEnabled(num == 0)
 
     def posicionEditar(self):
-        resp = WinPosition.editarPosicion(self, self.configuracion, self.fen)
+        resp = XVoyager.xVoyagerFEN(self, self.configuracion, self.fen)
         if resp is not None:
             self.fen = resp
             self.muestraPosicion()
+        self.procesador.pantalla.raise_()
+        self.procesador.pantalla.show()
+        self.procesador.pantalla.activateWindow()
+        # self.raise_()
+        # self.show()
+        # self.activateWindow()
 
     def posicionPegar(self):
         texto = QTUtil.traePortapapeles()
@@ -441,7 +447,7 @@ class WEntMaquina(QTVarios.WDialogo):
 
     def creaDic(self):
         dic = {}
-        dic["COLOR"] = "B" if self.rbBlancas.isChecked() else ( "N" if self.rbNegras.isChecked() else "R" )
+        dic["COLOR"] = "B" if self.rbBlancas.isChecked() else ("N" if self.rbNegras.isChecked() else "R")
         dic["FEN"] = self.fen
         dic["APERTURA"] = self.bloqueApertura
 
@@ -512,7 +518,7 @@ class WEntMaquina(QTVarios.WDialogo):
         self.sbArrows.ponValor(dic.get("ARROWS", 7))
         self.cbThoughtOp.ponValor(dic.get("THOUGHTOP", -1))
         self.cbThoughtTt.ponValor(dic.get("THOUGHTTT", -1))
-        self.sbBoxHeight.ponValor(dic.get("BOXHEIGHT", 32))
+        self.sbBoxHeight.ponValor(dic.get("BOXHEIGHT", 64))
         self.cbContinueTt.setChecked(dic.get("CONTINUETT", True))
         self.cbChance.setChecked(dic.get("2CHANCE", True))
         self.chbSummary.setChecked(dic.get("SUMMARY", False))
@@ -624,9 +630,9 @@ class WCambioRival(QtGui.QDialog):
         self.personalidades = Personalidades.Personalidades(self, configuracion)
 
         # Toolbar
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-        ]
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), "aceptar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
+                      ]
         tb = Controles.TB(self, liAcciones)
 
         # Blancas o negras
@@ -661,11 +667,11 @@ class WCambioRival(QtGui.QDialog):
         btAjustarRival.ponToolTip(_("Personalities"))
 
         # Layout
-        ## Color
+        # Color
         hbox = Colocacion.H().relleno().control(self.rbBlancas).espacio(30).control(self.rbNegras).relleno()
         gbColor = Controles.GB(self, _("Play with"), hbox)
 
-        ## Atras
+        # Atras
         hbox = Colocacion.H().espacio(10).control(self.cbAtras)
         gbAtras = Controles.GB(self, _("Takeback"), hbox).alinCentrado()
 
@@ -675,8 +681,8 @@ class WCambioRival(QtGui.QDialog):
             gbColor.hide()
             gbAtras.hide()
 
-        ## Motores
-        ### Rival
+        # Motores
+        # Rival
         ly = Colocacion.G()
         ly.controlc(self.btRival, 0, 0, 1, 4)
         ly.controld(lbTiempoSegundosR, 1, 0).controld(self.edRtiempo, 1, 1)
@@ -794,7 +800,7 @@ def dameMinutosExtra(pantalla):
     liGen = [(None, None)]
 
     config = FormLayout.Spinbox(_("Extra minutes for the player"), 1, 99, 50)
-    liGen.append(( config, 5 ))
+    liGen.append((config, 5))
 
     resultado = FormLayout.fedit(liGen, title=_("Time"), parent=pantalla, icon=Iconos.MoverTiempo())
     if resultado:

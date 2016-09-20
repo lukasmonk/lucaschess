@@ -4,8 +4,8 @@ Rutinas internas para la conexion con DGTEBDLL.dll
 
 import ctypes
 
-import Code.VarGen as VarGen
-import Code.Util as Util
+from Code import Util
+from Code import VarGen
 
 DGT_ON = "DGT.ON"
 
@@ -80,22 +80,17 @@ def registerBlackMoveInputFunc(dato):
 # Activar/desactivar/reactivar
 
 def activar():
-    def mira(path):
+    dgt = None
+    for path in ("",
+                 "C:/Program Files (x86)/DGT Projects/",
+                 "C:/Program Files (x86)/Common Files/DGT Projects/"):
         try:
             dgt = ctypes.WinDLL(path + "DGTEBDLL.dll")
+            break
         except:
-            dgt = None
-        return dgt
-
-    dgt = mira("")
+            pass
     if dgt is None:
-        dgt = mira("C:/Program Files (x86)/DGT Projects/")
-        if dgt is None:
-            dgt = mira("C:/Program Files/DGT Projects/")
-            if dgt is None:
-                return False
-
-    # log( "activar" )
+        return False
 
     VarGen.dgt = dgt
 
@@ -284,4 +279,3 @@ def fen2xdgt(fen):
         resp += str(num)
     li[0] = resp
     return " ".join(li)
-

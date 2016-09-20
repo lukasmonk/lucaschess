@@ -11,7 +11,7 @@ class BMT(SQLBase.DBBase):
         if not self.existeTabla(self.tabla):
             cursor = self.conexion.cursor()
             for sql in (
-                    "CREATE TABLE %s( ESTADO VARCHAR(1),ORDEN INTEGER,NOMBRE TEXT,EXTRA TEXT,TOTAL INTEGER,HECHOS INTEGER," \
+                    "CREATE TABLE %s( ESTADO VARCHAR(1),ORDEN INTEGER,NOMBRE TEXT,EXTRA TEXT,TOTAL INTEGER,HECHOS INTEGER,"
                     "PUNTOS INTEGER,MAXPUNTOS INTEGER,FINICIAL VARCHAR(8),FFINAL VARCHAR(8),SEGUNDOS INTEGER,REPE INTEGER,BMT_LISTA BLOB,HISTORIAL BLOB);",
                     "CREATE INDEX [NOMBRE] ON '%s'(ORDEN DESC,NOMBRE);"):
                 cursor.execute(sql % self.tabla)
@@ -57,7 +57,7 @@ class BMT_Uno:
 
     def condiciones(self):
         try:
-            return "%s - %d %s" % (self.mrm.nombre, self.mrm.tiempo / 1000, _("Second(s)") ) if self.mrm.nombre else ""
+            return "%s - %d %s" % (self.mrm.nombre, self.mrm.tiempo / 1000, _("Second(s)")) if self.mrm.nombre else ""
         except:
             return ""
 
@@ -109,7 +109,7 @@ class BMT_Lista:
         return True
 
     def compruebaPartida(self, clpartida, txtPartida):
-        if not clpartida in self.dicPartidas:
+        if clpartida not in self.dicPartidas:
             self.dicPartidas[clpartida] = txtPartida
 
     def dameUno(self, num):
@@ -159,4 +159,3 @@ class BMT_Lista:
                 uno.reiniciar()
                 nv.nuevo(uno)
         return nv
-

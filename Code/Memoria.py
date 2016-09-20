@@ -1,8 +1,7 @@
-import Code.Util as Util
+from Code.QT import PantallaMemoria
+from Code import Util
 
-import Code.QT.PantallaMemoria as PantallaMemoria
-
-class Memoria():
+class Memoria:
     def __init__(self, procesador):
 
         self.procesador = procesador
@@ -89,7 +88,7 @@ class Memoria():
 
         li = []
 
-        f = open("./Trainings/Checkmates by Eduardo Sadier/131279 positions of mate in two.fns", "rb")
+        f = open("./Trainings/Checkmates by Eduardo Sadier/145032 positions of mate in two.fns", "rb")
         for l in f:
             if l:
                 pz = 0
@@ -106,4 +105,3 @@ class Memoria():
         me.final()
 
         return li
-

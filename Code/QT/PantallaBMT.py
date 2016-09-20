@@ -3,25 +3,25 @@ import time
 
 from PyQt4 import QtCore
 
+from Code import Analisis
+from Code import BMT
+from Code import ControlPGN
+from Code import ControlPosicion
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import TrListas
+from Code import Util
 from Code.Constantes import *
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.ControlPGN as ControlPGN
-import Code.Partida as Partida
-import Code.BMT as BMT
-import Code.Analisis as Analisis
-import Code.TrListas as TrListas
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Delegados as Delegados
-import Code.QT.Tablero as Tablero
-import Code.QT.FormLayout as FormLayout
 
 class WHistorialBMT(QTVarios.WDialogo):
     def __init__(self, owner, dbf):
@@ -37,11 +37,11 @@ class WHistorialBMT(QTVarios.WDialogo):
         self.liHistorial = Util.blob2var(dbf.leeOtroCampo(self.recnoActual, "HISTORIAL"))
         self.maxPuntos = dbf.MAXPUNTOS
         if bmt_lista.siTerminada():
-            dic = {}
-            dic["FFINAL"] = dbf.FFINAL
-            dic["ESTADO"] = dbf.ESTADO
-            dic["PUNTOS"] = dbf.PUNTOS
-            dic["SEGUNDOS"] = dbf.SEGUNDOS
+            dic = {"FFINAL": dbf.FFINAL,
+                   "ESTADO": dbf.ESTADO,
+                   "PUNTOS": dbf.PUNTOS,
+                   "SEGUNDOS": dbf.SEGUNDOS
+                   }
             self.liHistorial.append(dic)
 
         # Dialogo ---------------------------------------------------------------
@@ -52,7 +52,7 @@ class WHistorialBMT(QTVarios.WDialogo):
 
         # Toolbar
         tb = Controles.TBrutina(self)
-        tb.new(_("Quit"), Iconos.MainMenu(), self.terminar)
+        tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()
@@ -61,7 +61,7 @@ class WHistorialBMT(QTVarios.WDialogo):
         oColumnas.nueva("TIEMPO", _("Time"), 80, siCentrado=True)
         oColumnas.nueva("FFINAL", _("End date"), 90, siCentrado=True)
 
-        self.grid = grid = Grid.Grid(self, oColumnas, id=False, siEditable=True)
+        self.grid = grid = Grid.Grid(self, oColumnas, xid=False, siEditable=True)
         # n = grid.anchoColumnas()
         # grid.setMinimumWidth( n + 20 )
         self.registrarGrid(grid)
@@ -87,25 +87,25 @@ class WHistorialBMT(QTVarios.WDialogo):
             return dic["ESTADO"]
 
         elif col == "HECHOS":
-            return "%d" % ( dic["HECHOS"] )
+            return "%d" % (dic["HECHOS"])
 
         elif col == "PUNTOS":
             p = dic["PUNTOS"]
             m = self.maxPuntos
             porc = p * 100 / m
-            return "%d/%d=%d" % ( p, m, porc ) + "%"
+            return "%d/%d=%d" % (p, m, porc) + "%"
 
         elif col == "FFINAL":
             f = dic["FFINAL"]
-            return "%s-%s-%s" % ( f[6:], f[4:6], f[:4]) if f  else ""
+            return "%s-%s-%s" % (f[6:], f[4:6], f[:4]) if f else ""
 
         elif col == "TIEMPO":
             s = dic["SEGUNDOS"]
             if not s:
                 s = 0
-            min = s / 60
-            s = s % 60
-            return "%d' %d\"" % (min, s) if min else "%d\"" % s
+            m = s / 60
+            s %= 60
+            return "%d' %d\"" % (m, s) if m else "%d\"" % s
 
 class WEntrenarBMT(QTVarios.WDialogo):
     def __init__(self, owner, dbf):
@@ -230,12 +230,12 @@ class WEntrenarBMT(QTVarios.WDialogo):
 
         # Tool bar ---------------------------------------------------------------
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ),
-            ( _("Next"), Iconos.Siguiente(), "seguir" ),
-            ( _("Repeat"), Iconos.Pelicula_Repetir(), "repetir" ),
-            ( _("Resign"), Iconos.Abandonar(), "abandonar" ),
-            ( _("Start"), Iconos.Empezar(), "empezar" ),
-            ( _("Actual game"), Iconos.PartidaOriginal(), "original" ),
+            (_("Close"), Iconos.MainMenu(), "terminar"),
+            (_("Next"), Iconos.Siguiente(), "seguir"),
+            (_("Repeat"), Iconos.Pelicula_Repetir(), "repetir"),
+            (_("Resign"), Iconos.Abandonar(), "abandonar"),
+            (_("Start"), Iconos.Empezar(), "empezar"),
+            (_("Actual game"), Iconos.PartidaOriginal(), "original"),
         )
         self.tb = Controles.TB(self, liAcciones)
 
@@ -260,7 +260,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
     def muestraControles(self, si):
         for control in (
                 self.lbJuegan, self.tablero, self.lbPuntos, self.lbSegundos, self.lbPrimera, self.lbCondiciones,
-                self.pgn, self.gbRM ):
+                self.pgn, self.gbRM):
             control.setVisible(si)
 
     def procesarTB(self):
@@ -397,7 +397,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
         self.teclaPulsada("V", event.key())
 
     def tableroWheelEvent(self, nada, siAdelante):
-        self.teclaPulsada("T", 16777236 if siAdelante else 16777234)
+        self.teclaPulsada("T", 16777234 if siAdelante else 16777236)
 
     def gridDato(self, grid, fila, oColumna):
         return self.controlPGN.dato(fila, oColumna.clave)
@@ -526,7 +526,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
         if self.iniTiempo:
             segundos += int(time.time() - self.iniTiempo)
         minutos = segundos / 60
-        segundos = segundos - minutos * 60
+        segundos -= minutos * 60
 
         if minutos:
             eti = "%d'%d\"" % (minutos, segundos)
@@ -557,7 +557,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
         partida.recuperaDeTexto(rm.txtPartida)
 
         bt = self.liBTrm[num]
-        txt = "%d: %s = %s" % ( rm.nivelBMT + 1, partida.liJugadas[0].pgnSP(), rm.abrTexto() )
+        txt = "%d: %s = %s" % (rm.nivelBMT + 1, partida.jugada(0).pgnSP(), rm.abrTexto())
         if rm.siPrimero:
             txt = "%s *" % txt
             self.lbPrimera.setVisible(True)
@@ -613,7 +613,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
                 if rm.siElegida:
                     partida.reset(self.posicion)
                     partida.leerPV(rm.pv)
-                    baseTxt += " - " + partida.liJugadas[0].pgnSP()
+                    baseTxt += " - " + partida.jugada(0).pgnSP()
                 bt.ponTexto(baseTxt)
             else:
                 bt.setVisible(False)
@@ -713,7 +713,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
         for n, bt in enumerate(self.liBTrm):
             f = bt.font()
             siBold = f.bold()
-            if ( num == n and not siBold ) or ( num != n and siBold ):
+            if (num == n and not siBold) or (num != n and siBold):
                 f.setBold(not siBold)
                 bt.setFont(f)
             bt.setAutoDefault(num == n)
@@ -758,7 +758,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
             return
         siUltimo = (pos + 1) >= tam_lj
 
-        jg = self.partida.liJugadas[pos]
+        jg = self.partida.jugada(pos)
         return jg, siBlancas, siUltimo, tam_lj, pos
 
     def analizaPosicion(self, fila, clave):
@@ -791,15 +791,15 @@ class WBMT(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         # Toolbar
-        liAcciones = [( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-                      ( _("Play"), Iconos.Entrenar(), "entrenar" ), None,
-                      ( _("New"), Iconos.TutorialesCrear(), "nuevo" ), None,
-                      ( _("Modify"), Iconos.Modificar(), "modificar" ), None,
-                      ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-                      ( _("Track record"), Iconos.Historial(), "historial" ), None,
-                      ( _("Utilities"), Iconos.Utilidades(), "utilidades" ),
-        ]
-        tb = Controles.TB(self, liAcciones)
+        liAcciones = [(_("Close"), Iconos.MainMenu(), self.terminar), None,
+                      (_("Play"), Iconos.Empezar(), self.entrenar), None,
+                      (_("New"), Iconos.Nuevo(), self.nuevo), None,
+                      (_("Modify"), Iconos.Modificar(), self.modificar), None,
+                      (_("Remove"), Iconos.Borrar(), self.borrar), None,
+                      (_("Track record"), Iconos.Historial(), self.historial), None,
+                      (_("Utilities"), Iconos.Utilidades(), self.utilidades),
+                      ]
+        tb = Controles.TBrutina(self, liAcciones)
 
         self.tab = tab = Controles.Tab()
 
@@ -813,7 +813,7 @@ class WBMT(QTVarios.WDialogo):
         oColumnas.nueva("REPETICIONES", _("Rep."), 50, siCentrado=True)
         oColumnas.nueva("ORDEN", _("Order"), 70, siCentrado=True)
 
-        self.grid = grid = Grid.Grid(self, oColumnas, id="P", siEditable=False, siSelecFilas=True,
+        self.grid = grid = Grid.Grid(self, oColumnas, xid="P", siEditable=False, siSelecFilas=True,
                                      siSeleccionMultiple=True)
         self.registrarGrid(grid)
         tab.nuevaTab(grid, _("Pending"))
@@ -830,7 +830,7 @@ class WBMT(QTVarios.WDialogo):
         oColumnas.nueva("REPETICIONES", _("Rep."), 50, siCentrado=True)
         oColumnas.nueva("ORDEN", _("Order"), 70, siCentrado=True)
 
-        self.gridT = gridT = Grid.Grid(self, oColumnas, id="T", siEditable=True, siSelecFilas=True,
+        self.gridT = gridT = Grid.Grid(self, oColumnas, xid="T", siEditable=True, siSelecFilas=True,
                                        siSeleccionMultiple=True)
         self.registrarGrid(gridT)
         tab.nuevaTab(gridT, _("Finished"))
@@ -851,9 +851,6 @@ class WBMT(QTVarios.WDialogo):
     def titulo(self):
         fdir, fnam = os.path.split(self.configuracion.ficheroBMT)
         return "%s : %s (%s)" % (_("Find best move"), fnam, fdir)
-
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
 
     def terminar(self):
         self.bmt.cerrar()
@@ -957,10 +954,10 @@ class WBMT(QTVarios.WDialogo):
         # # Tutor
         li = self.configuracion.ayudaCambioTutor()
         li[0] = motor
-        liGen.append(( _("Engine") + ":", li ))
+        liGen.append((_("Engine") + ":", li))
 
-        ## Decimas de segundo a pensar el tutor
-        liGen.append(( _("Duration of engine analysis (secs)") + ":", tiempo / 1000.0 ))
+        # Decimas de segundo a pensar el tutor
+        liGen.append((_("Duration of engine analysis (secs)") + ":", tiempo / 1000.0))
 
         liGen.append((None, None))
 
@@ -1006,7 +1003,7 @@ class WBMT(QTVarios.WDialogo):
                     ant_movimiento = rm.movimiento()
                     break
 
-            tmpBP.mensaje(mensaje + " %d/%d" % ( pos, tamLista))
+            tmpBP.mensaje(mensaje + " %d/%d" % (pos, tamLista))
             tmpBP.pon(pos)
             if tmpBP.siCancelado():
                 siCancelado = True
@@ -1080,9 +1077,9 @@ class WBMT(QTVarios.WDialogo):
         li = []
         for x in range(dbf.reccount()):
             dbf.goto(x)
-            li.append( (dbf.NOMBRE, x) )
+            li.append((dbf.NOMBRE, x))
 
-        li.sort( key=lambda x: x[0])
+        li.sort(key=lambda x: x[0])
 
         siReverse = self.dicReverse.get(grid.id, False)
         self.dicReverse[grid.id] = not siReverse
@@ -1160,10 +1157,10 @@ class WBMT(QTVarios.WDialogo):
             return
         reg = dbf.registroActual()  # Importante ya que dbf puede cambiarse mientras se edita
         liGen = [(None, None)]
-        config = FormLayout.Editbox("<div align=\"right\">" + _("List of positions") + "<br>" + \
-                                    _("By example:") + " -5,7-9,14,19-", \
+        config = FormLayout.Editbox("<div align=\"right\">" + _("List of positions") + "<br>" +
+                                    _("By example:") + " -5,7-9,14,19-",
                                     rx="[0-9,\-,\,]*")
-        liGen.append((config, "" ))
+        liGen.append((config, ""))
 
         resultado = FormLayout.fedit(liGen, title=reg.NOMBRE, parent=self, anchoMinimo=200, icon=Iconos.Opciones())
 
@@ -1214,7 +1211,7 @@ class WBMT(QTVarios.WDialogo):
 
         liGen.append((_("Extra info.") + ":", extra))
 
-        liGen.append(( FormLayout.Editbox(_("Order"), tipo=int, ancho=50), orden ))
+        liGen.append((FormLayout.Editbox(_("Order"), tipo=int, ancho=50), orden))
 
         titulo = "%s (%d)" % (_("Joining selected training"), len(li))
         resultado = FormLayout.fedit(liGen, title=titulo, parent=self, anchoMinimo=560, icon=Iconos.Opciones())
@@ -1327,13 +1324,13 @@ class WBMT(QTVarios.WDialogo):
 
             liGen.append((_("Extra info.") + ":", extra))
 
-            liGen.append(( FormLayout.Editbox(_("Order"), tipo=int, ancho=50), orden ))
+            liGen.append((FormLayout.Editbox(_("Order"), tipo=int, ancho=50), orden))
 
             resultado = FormLayout.fedit(liGen, title=nombre, parent=self, anchoMinimo=560, icon=Iconos.Opciones())
 
             if resultado:
                 accion, liGen = resultado
-                liCamposValor = ( ( "NOMBRE", liGen[0].strip() ), ( "EXTRA", liGen[1] ), ( "ORDEN", liGen[2] ) )
+                liCamposValor = (("NOMBRE", liGen[0].strip()), ("EXTRA", liGen[1]), ("ORDEN", liGen[2]))
                 self.grabaCampos(grid, recno, liCamposValor)
 
     def releer(self):
@@ -1420,31 +1417,31 @@ class WBMT(QTVarios.WDialogo):
             if grid.id == "T":
                 return "%d" % dbf.TOTAL
             else:
-                return "%d/%d" % ( dbf.HECHOS, dbf.TOTAL )
+                return "%d/%d" % (dbf.HECHOS, dbf.TOTAL)
 
         elif col == "PUNTOS":
             p = dbf.PUNTOS
             m = dbf.MAXPUNTOS
             if grid.id == "T":
                 porc = p * 100 / m
-                return "%d/%d=%d" % ( p, m, porc ) + "%"
+                return "%d/%d=%d" % (p, m, porc) + "%"
             else:
-                return "%d/%d" % ( p, m )
+                return "%d/%d" % (p, m)
 
         elif col == "EXTRA":
             return dbf.EXTRA
 
         elif col == "FFINAL":
             f = dbf.FFINAL
-            return "%s-%s-%s" % ( f[6:], f[4:6], f[:4]) if f  else ""
+            return "%s-%s-%s" % (f[6:], f[4:6], f[:4]) if f else ""
 
         elif col == "TIEMPO":
             s = dbf.SEGUNDOS
             if not s:
                 s = 0
-            min = s / 60
-            s = s % 60
-            return "%d' %d\"" % (min, s) if min else "%d\"" % s
+            m = s / 60
+            s %= 60
+            return "%d' %d\"" % (m, s) if m else "%d\"" % s
 
         elif col == "REPETICIONES":
             return str(dbf.REPE)
@@ -1506,15 +1503,15 @@ class WBMT(QTVarios.WDialogo):
             # # Tutor
             li = self.configuracion.ayudaCambioTutor()
             li[0] = motor
-            liGen.append(( _("Engine") + ":", li ))
+            liGen.append((_("Engine") + ":", li))
 
-            ## Decimas de segundo a pensar el tutor
-            liGen.append(( _("Duration of engine analysis (secs)") + ":", tiempo / 1000.0 ))
+            # Decimas de segundo a pensar el tutor
+            liGen.append((_("Duration of engine analysis (secs)") + ":", tiempo / 1000.0))
 
             liGen.append((None, None))
 
             liGen.append((FormLayout.Spinbox(_("From number"), 1, nFEN, 50), 1))
-            liGen.append((FormLayout.Spinbox(_("To number"), 1, nFEN, 50), nFEN if nFEN < 20 else 20 ))
+            liGen.append((FormLayout.Spinbox(_("To number"), 1, nFEN, 50), nFEN if nFEN < 20 else 20))
 
             resultado = FormLayout.fedit(liGen, title=nombre, parent=self, anchoMinimo=560, icon=Iconos.Opciones())
 
@@ -1560,7 +1557,7 @@ class WBMT(QTVarios.WDialogo):
 
             fen = liFEN[n]
 
-            tmpBP.mensaje(mensaje + " %d/%d" % ( n + 2 - desde, nDH))
+            tmpBP.mensaje(mensaje + " %d/%d" % (n + 2 - desde, nDH))
             tmpBP.pon(n + 2 - desde)
             if tmpBP.siCancelado():
                 siCancelado = True
@@ -1628,4 +1625,3 @@ class WBMT(QTVarios.WDialogo):
 def pantallaBMT(procesador):
     w = WBMT(procesador)
     w.exec_()
-

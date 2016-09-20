@@ -1,20 +1,21 @@
-import random
-import time
 import atexit
 import datetime
+import random
+import time
 
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.Movimientos as Movimientos
-import Code.SQL.Base as Base
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Tablero as Tablero
+import LCEngine
+
+from Code import ControlPosicion
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code.SQL import Base
+from Code import Util
 
 class HorsesHistorico:
     def __init__(self, fichero, test):
@@ -126,9 +127,9 @@ class WHorsesBase(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-            ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-            ( _("Start"), Iconos.Empezar(), "empezar" ),
+            (_("Close"), Iconos.MainMenu(), "terminar"), None,
+            (_("Start"), Iconos.Empezar(), "empezar"),
+            (_("Remove"), Iconos.Borrar(), "borrar"), None,
         )
         self.tb = Controles.TB(self, liAcciones)
         self.ponToolBar(["terminar", "empezar", "borrar"])
@@ -146,7 +147,7 @@ class WHorsesBase(QTVarios.WDialogo):
 
     def gridDobleClickCabecera(self, grid, oColumna):
         clave = oColumna.clave
-        if clave in ( "FECHA", "MOVES", "HINTS" ):
+        if clave in ("FECHA", "MOVES", "HINTS"):
             self.historico.ponOrden(clave)
             self.ghistorico.gotop()
             self.ghistorico.refresh()
@@ -223,14 +224,14 @@ class WHorses(QTVarios.WDialogo):
         self.tablero.ponMensajero(self.mueveHumano)
 
         # Rotulo tiempo
-        self.lbInformacion = Controles.LB(self, _("Goal: to pursue the king up to the square a8")).alinCentrado()
+        self.lbInformacion = Controles.LB(self, _("Goal: to capture the king up to the square a8")).alinCentrado()
         self.lbMoves = Controles.LB(self, "")
 
         # Tool bar
         liAcciones = (
-            ( _("Cancel"), Iconos.Cancelar(), "cancelar" ),
-            ( _("Reinit"), Iconos.Reiniciar(), "reiniciar" ),
-            ( _("Help"), Iconos.AyudaGR(), "ayuda" ),
+            (_("Cancel"), Iconos.Cancelar(), "cancelar"),
+            (_("Reinit"), Iconos.Reiniciar(), "reiniciar"),
+            (_("Help"), Iconos.AyudaGR(), "ayuda"),
         )
         self.tb = Controles.TB(self, liAcciones)
 
@@ -269,16 +270,16 @@ class WHorses(QTVarios.WDialogo):
 
         posDesde = self.camino[0 if self.baseUnica else self.posActual]
         posHasta = self.camino[self.posActual + 1]
-        tlist = Movimientos.liNMinimo(posDesde, posHasta, self.celdas_ocupadas)
+        tlist = LCEngine.liNMinimo(posDesde, posHasta, self.celdas_ocupadas)
         self.numMoves = len(tlist[0]) - 1
         self.movesParcial = 0
 
         cp = self.cpInicial.copia()
 
         self.posTemporal = posDesde
-        ca = Movimientos.posA1(posDesde)
+        ca = LCEngine.posA1(posDesde)
         cp.casillas[ca] = "N" if self.siBlancas else "n"
-        cs = Movimientos.posA1(posHasta)
+        cs = LCEngine.posA1(posHasta)
         cp.casillas[cs] = "k" if self.siBlancas else "K"
 
         self.cpActivo = cp
@@ -307,10 +308,10 @@ class WHorses(QTVarios.WDialogo):
         self.guardarVideo()
         self.accept()
 
-    def mueveHumano(self, desde, hasta):
-        p0 = Movimientos.a1Pos(desde)
-        p1 = Movimientos.a1Pos(hasta)
-        if p1 in Movimientos.dicN[p0]:
+    def mueveHumano(self, desde, hasta, coronacion=""):
+        p0 = LCEngine.a1Pos(desde)
+        p1 = LCEngine.a1Pos(hasta)
+        if p1 in LCEngine.dicN[p0]:
             self.moves += 1
             self.movesParcial += 1
             self.ponNumMoves()
@@ -338,11 +339,11 @@ class WHorses(QTVarios.WDialogo):
             celdas_ocupadas = []
         elif self.test == 2:  # 4 peones
             celdas_ocupadas = [18, 21, 25, 27, 28, 30, 42, 45, 49, 51, 52, 54]
-            for a1 in ( "c3", "c6", "f3", "f6" ):
+            for a1 in ("c3", "c6", "f3", "f6"):
                 casillas[a1] = "p" if self.siBlancas else "P"
         elif self.test == 3:  # levitt
             ch = celdas_ocupadas = [27]
-            for li in Movimientos.dicQ[27]:
+            for li in LCEngine.dicQ[27]:
                 for x in li:
                     ch.append(x)
 
@@ -405,14 +406,14 @@ class WHorses(QTVarios.WDialogo):
         self.ponSiguiente()
         pa = self.camino[0 if self.baseUnica else self.posActual]
         ps = self.camino[self.posActual + 1]
-        tlist = Movimientos.liNMinimo(pa, ps, self.celdas_ocupadas)
+        tlist = LCEngine.liNMinimo(pa, ps, self.celdas_ocupadas)
         if self.nayuda >= len(tlist):
             self.nayuda = 0
 
         li = tlist[self.nayuda]
         for x in range(len(li) - 1):
-            d = Movimientos.posA1(li[x])
-            h = Movimientos.posA1(li[x + 1])
+            d = LCEngine.posA1(li[x])
+            h = LCEngine.posA1(li[x + 1])
             self.tablero.creaFlechaMov(d, h, "2")
         self.nayuda += 1
 

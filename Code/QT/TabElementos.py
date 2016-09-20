@@ -1,8 +1,8 @@
 from PyQt4 import QtCore, QtGui
 
+from Code.QT import Controles
+from Code.QT import QTUtil
 from Code.Constantes import *
-import Code.QT.Controles as Controles
-import Code.QT.QTUtil as QTUtil
 
 class BloqueSC(QtGui.QGraphicsItem):
     def __init__(self, escena, posicion):
@@ -249,7 +249,7 @@ class TiempoSC(BloqueSC):
     def texto(self):
         t = self.calcCentesimas()
         cent = t % 100
-        t = t / 100
+        t /= 100
         mins = t / 60
         t -= mins * 60
         seg = t
@@ -297,12 +297,12 @@ class TiempoSC(BloqueSC):
                 w = 1
                 h = 50
             elif linea == "d":
-                x = x + w
-                y = y - 10
+                x += w
+                y -= 10
                 w = 1
                 h = 32
             elif linea == "i":
-                y = y - 10
+                y -= 10
                 w = 1
                 h = 32
             rect = QtCore.QRectF(x, y, w, h)
@@ -377,4 +377,3 @@ class PixmapSC(BloqueSC):
 
     def paint(self, painter, option, widget):
         painter.drawPixmap(self.rect, self.pixmap, self.pmRect)
-

@@ -68,10 +68,7 @@ def hazInfo( siPyside ) :
 # Fin especiales ----------------------------------------------------------------------------------------------
 
 import os, os.path
-import glob
-import datetime, time
-import shutil
-import win32file, win32con
+
 
 def hazFich( fichero, siPyside ) :
     if fichero.endswith( ".py" ):

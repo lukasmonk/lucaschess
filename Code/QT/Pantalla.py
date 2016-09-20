@@ -1,12 +1,11 @@
 from PyQt4 import QtCore, QtGui
 
-import Code.Voice as Voice
-import Code.QT.Iconos as Iconos
-import Code.QT.Colocacion as Colocacion
-import Code.QT.WBase as WBase
-import Code.QT.WInformacion as WInformacion
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTVarios as QTVarios
+from Code.QT import Colocacion
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTVarios
+from Code.QT import WBase
+from Code.QT import WInformacion
 
 class EstadoWindow:
     def __init__(self, x):
@@ -41,6 +40,8 @@ class Pantalla(QTVarios.WDialogo):
 
         self.timer = None
         self.siTrabajando = False
+
+        self.cursorthinking = QtGui.QCursor(Iconos.pmThinking())
 
         self.onTop = False
 
@@ -91,13 +92,6 @@ class Pantalla(QTVarios.WDialogo):
             self.trayIcon = None
 
         self.resizing = None
-
-        self.cursorPensando = QtGui.QCursor(QtCore.Qt.BusyCursor)
-
-        Voice.runVoice.setConf(self, False)
-
-    def voice(self, txt):
-        Voice.runVoice.voiceDispatch(txt)
 
     def onTopWindow(self):
         self.onTop = not self.onTop
@@ -197,7 +191,7 @@ class Pantalla(QTVarios.WDialogo):
 
         self.setWindowTitle(titulo)
 
-        self.exec_()
+        return self.exec_()
 
     def ajustaTam(self):
         if self.isMaximized():
@@ -244,10 +238,10 @@ class Pantalla(QTVarios.WDialogo):
 
     def ponRevision(self, siponer):
         return
-        if siponer:
-            self.base.lbRevision.show()
-        else:
-            self.base.lbRevision.hide()
+        # if siponer:
+        #     self.base.lbRevision.show()
+        # else:
+        #     self.base.lbRevision.hide()
 
     def ponActivarTutor(self, siActivar):
         self.base.ponActivarTutor(siActivar)
@@ -377,8 +371,7 @@ class Pantalla(QTVarios.WDialogo):
 
     def pensando(self, siPensando):
         if siPensando:
-            QtGui.QApplication.setOverrideCursor(self.cursorPensando)
+            QtGui.QApplication.setOverrideCursor(self.cursorthinking)
         else:
             QtGui.QApplication.restoreOverrideCursor()
         self.refresh()
-

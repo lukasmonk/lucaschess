@@ -4,9 +4,9 @@
 import os
 import random
 
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.VarGen as VarGen
+from Code import ControlPosicion
+from Code import Util
+from Code import VarGen
 
 class ListaLibros:
     def __init__(self):
@@ -35,7 +35,7 @@ class ListaLibros:
     def alMenosUno(self):
         if len(self.lista) == 0:
             bookdef = VarGen.tbook
-            b = Libro("P", bookdef.split("/")[1], bookdef, True)
+            b = Libro("P", bookdef.split("/")[1][:-4], bookdef, True)
             self.lista.append(b)
 
     def modoAnalisis(self, apli):
@@ -84,9 +84,9 @@ class ListaLibros:
                     w = entry.weight
                     pc = w * 100.0 / total if total else "?"
                     pgn = posicion.pgnSP(pv[:2], pv[2:4], pv[4:])
-                    liResp.append((pv if siPV else None, "%-5s -%7.02f%% -%7d" % ( pgn, pc, w), ico))
+                    liResp.append((pv if siPV else None, "%-5s -%7.02f%% -%7d" % (pgn, pc, w), ico))
             else:
-                liResp.append((None, _("No result"), "c" ))
+                liResp.append((None, _("No result"), "c"))
 
         return liResp
 
@@ -136,7 +136,7 @@ class ListaLibros:
                         pct = w * 100.0 / total if total else "-"
                         pvt = entry.pv()
                         pgn = posicion.pgnSP(pvt[:2], pvt[2:4], pvt[4:])
-                        liOp.append("%-5s -%7.02f%% -%7d" % ( pgn, pct, w))
+                        liOp.append("%-5s -%7.02f%% -%7d" % (pgn, pct, w))
                         if pv == pvt:
                             ok = True
                             pc = pct
@@ -153,7 +153,7 @@ class ListaLibros:
                     puntos = "%7.02f%%" % pc if ok else "   ???"
 
                     liResp.append(
-                        ("%d|%d" % (nlibro, njug), "%s%-5s%s - %s" % ( previo, pgn, posterior, puntos), ico, liOp))
+                            ("%d|%d" % (nlibro, njug), "%s%-5s%s - %s" % (previo, pgn, posterior, puntos), ico, liOp))
                     if not ok:
                         break
 
@@ -199,7 +199,7 @@ class Libro:
             pc = w * 100.0 / total if total else "?"
             desde, hasta, coronacion = pv[:2], pv[2:4], pv[4:]
             pgn = posicion.pgnSP(desde, hasta, coronacion)
-            listaJugadas.append(( desde, hasta, coronacion, "%-5s -%7.02f%% -%7d" % ( pgn, pc, w), 1.0 * w / maxim ))
+            listaJugadas.append((desde, hasta, coronacion, "%-5s -%7.02f%% -%7d" % (pgn, pc, w), 1.0 * w / maxim))
         return listaJugadas
 
     def eligeJugadaTipo(self, fen, tipo):
@@ -561,7 +561,7 @@ class Polyglot:
         16292452481085749975L,
         16488107566197090L, 2060923303336906913L, 14929791059677233801L, 15052228947759922034L, 8630622898638529667L,
         7467898009369859339L,
-        17930561480947107081L, 18287077397422080L, )
+        17930561480947107081L, 18287077397422080L,)
 
     randomPiece = random64
     randomCastle = random64[768:]
@@ -746,4 +746,3 @@ class Polyglot:
         # pgn = posicion.pgnSP( desde, hasta, coronacion )
         # listaJugadas.append( ( desde, hasta, coronacion, "%-5s -%7.02f%% -%7d"%( pgn, pc, w), 1.0*w/maxim ) )
         # return listaJugadas
-

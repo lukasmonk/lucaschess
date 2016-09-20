@@ -1,26 +1,26 @@
+import StringIO
+import collections
 import copy
 import os
-import collections
-import StringIO
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import Piezas
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import TabElementos
+from Code.QT import TabFlechas
+from Code.QT import TabMarcos
+from Code.QT import TabMarker
+from Code.QT import TabSVG
+from Code.QT import TabTipos
+from Code import Util
+from Code import VarGen
 from Code.Constantes import *
-import Code.Util as Util
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.TabTipos as TabTipos
-import Code.QT.TabElementos as TabElementos
-import Code.QT.TabFlechas as TabFlechas
-import Code.QT.TabMarcos as TabMarcos
-import Code.QT.TabSVG as TabSVG
-import Code.QT.TabMarker as TabMarker
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Piezas as Piezas
 
 class RegKB:
     def __init__(self, key, flags):
@@ -32,7 +32,7 @@ class Tablero(QtGui.QGraphicsView):
         super(Tablero, self).__init__(None)
 
         self.setRenderHints(
-            QtGui.QPainter.Antialiasing | QtGui.QPainter.TextAntialiasing | QtGui.QPainter.SmoothPixmapTransform)
+                QtGui.QPainter.Antialiasing | QtGui.QPainter.TextAntialiasing | QtGui.QPainter.SmoothPixmapTransform)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setDragMode(self.NoDrag)
@@ -112,6 +112,7 @@ class Tablero(QtGui.QGraphicsView):
             ok = True
             if key == 67:  # C salvar PGN
                 self.salvaPGN(siClipboard=siCtrl)
+
             elif key == 73:  # I copiar tablero
                 self.salvaEnImagen(siCtrl=siCtrl)
             elif key == 83:  # S copiar tablero en fichero
@@ -119,8 +120,13 @@ class Tablero(QtGui.QGraphicsView):
                                             "%s PNG (*.png)" % _("File"), False)
                 if resp:
                     self.salvaEnImagen(resp, "png", siCtrl=siCtrl)
-            elif key == 70:  # F girar tablero
-                self.intentaRotarTablero(None)
+            elif key == 70:  # Alt-F girar tablero ALt-Ctrl-F = copy FEN to clipboard
+                if siCtrl:
+                    QTUtil.ponPortapapeles(self.ultPosicion.fen())
+                    QTUtil2.mensajeTemporal(self.pantalla, _("FEN is in clipboard"), 1)
+                else:
+                    self.intentaRotarTablero(None)
+
             elif key == 68:  # D director director
                 if not self.siTableroDirector():
                     self.lanzaDirector()
@@ -151,8 +157,8 @@ class Tablero(QtGui.QGraphicsView):
                     if c.isdigit():
                         desde = chr(self.kb_buffer[0].key).lower() + c
                         pz = self.dameNomPiezaEn(desde)
-                        if pz and ( (self.siActivasPiezasColor and pz.isupper()) or \
-                                            ( not self.siActivasPiezasColor and pz.islower()) ):
+                        if pz and ((self.siActivasPiezasColor and pz.isupper()) or
+                                       (not self.siActivasPiezasColor and pz.islower())):
                             self.kb_buffer.append(RegKB(key, flags))
                             self.markPosition(desde)
                         else:
@@ -186,14 +192,17 @@ class Tablero(QtGui.QGraphicsView):
                         self.kb_buffer[2] = RegKB(key, flags)
                     return
 
+    def sizeHint(self):
+        return QtCore.QSize(self.ancho+6, self.ancho+6)
+
+    # def adjustSize(self):
+    #     return
+
     def keyPressEvent(self, event):
         k = event.key()
         m = int(event.modifiers())
         event.ignore()
         self.exec_kb_buffer(k, m)
-
-    def adjustSize(self):
-        return
 
     def activaMenuVisual(self, siActivar):
         self.siMenuVisual = siActivar
@@ -257,6 +266,7 @@ class Tablero(QtGui.QGraphicsView):
         self.colorFrontera = self.confTablero.colorFrontera()
 
         self.exePulsadoNum = None
+        self.exePulsadaLetra = None
         self.atajosRaton = None
         self.siActivasPiezas = False  # Control adicional, para responder a eventos del raton
         self.siActivasPiezasColor = None
@@ -376,8 +386,7 @@ class Tablero(QtGui.QGraphicsView):
         baseCasillasF = TabTipos.Caja()
         baseCasillasF.grosor = self.tamFrontera
         baseCasillasF.posicion.x = baseCasillasF.posicion.y = self.margenCentro - self.tamFrontera + 1
-        baseCasillasF.posicion.alto = baseCasillasF.posicion.ancho = self.anchoCasilla * 8 + 4 + (
-                                                                                                     self.tamFrontera - 1) * 2
+        baseCasillasF.posicion.alto = baseCasillasF.posicion.ancho = self.anchoCasilla * 8 + 4 + (self.tamFrontera - 1) * 2
         baseCasillasF.posicion.orden = 2
         baseCasillasF.colorRelleno = self.colorFrontera
         baseCasillasF.redEsquina = self.tamFrontera
@@ -476,11 +485,11 @@ class Tablero(QtGui.QGraphicsView):
 
                 if self.nCoordenadas > 0:  # 2 o 3 o 4 o 5 o 6
                     d = {  # hS,     vO,     hN,     vE
-                           2: ( True, True, False, False ),
-                           3: ( False, True, True, False ),
-                           4: ( True, True, True, True ),
-                           5: ( False, False, True, True ),
-                           6: ( True, False, False, True ),
+                        2: (True, True, False, False),
+                        3: (False, True, True, False),
+                        4: (True, True, True, True),
+                        5: (False, False, True, True),
+                        6: (True, False, False, True),
                     }
                     liCo = d[self.nCoordenadas]
                     hor = coord.copia()
@@ -490,13 +499,13 @@ class Tablero(QtGui.QGraphicsView):
 
                     if liCo[0]:
                         hor.posicion.y = hyS
-                        horSC = TabElementos.TextoSC(self.escena, hor)
+                        horSC = TabElementos.TextoSC(self.escena, hor, self.pulsadaLetra)
                         self.liCoordenadasHorizontales.append(horSC)
 
                     if liCo[2]:
                         hor = hor.copia()
                         hor.posicion.y = hyN
-                        horSC = TabElementos.TextoSC(self.escena, hor)
+                        horSC = TabElementos.TextoSC(self.escena, hor, self.pulsadaLetra)
                         self.liCoordenadasHorizontales.append(horSC)
 
                     ver = coord.copia()
@@ -548,8 +557,8 @@ class Tablero(QtGui.QGraphicsView):
         if not self.siMaximizado():
             menu.opcion("size", _("Change board size"), Iconos.TamTablero())
             menu.separador()
-        menu.opcion("foto", _("Board -> Image"), Iconos.Camara())
-        menu.separador()
+        # menu.opcion("foto", _("Board -> Image"), Iconos.Camara())
+        # menu.separador()
 
         if not self.siTableroDirector():
             menu.opcion("director", _("Director") + " [D]", Iconos.Director())
@@ -621,12 +630,12 @@ class Tablero(QtGui.QGraphicsView):
         elif resp == "director":
             self.lanzaDirector()
 
-        elif resp == "foto":
-            import Code.QT.PantallaTabVisual as PantallaTabVisual
+        # elif resp == "foto":
+        #     import Code.QT.PantallaTabVisual as PantallaTabVisual
 
-            w = PantallaTabVisual.WTabVisual(self)
-            w.exec_()
-            QTUtil.refreshGUI()
+        #     w = PantallaTabVisual.WTabVisual(self)
+        #     w.exec_()
+        #     QTUtil.refreshGUI()
 
         elif resp.startswith("def_"):
             self.confTablero.porDefecto(resp[4:])
@@ -736,6 +745,7 @@ class Tablero(QtGui.QGraphicsView):
         f = chr(48 + yc)
         c = chr(96 + xc)
         a1h8 = c + f
+
         self.liMouse.append(a1h8)
 
         if self.atajosRaton:
@@ -850,7 +860,7 @@ class Tablero(QtGui.QGraphicsView):
                     return
 
         elif hasattr(self.pantalla, "tableroWheelEvent"):
-            self.pantalla.tableroWheelEvent(self, event.delta() > 0)
+            self.pantalla.tableroWheelEvent(self, event.delta() < 0)
 
     def siTableroDirector(self):
         return self.confTablero.id() == "Director"
@@ -866,19 +876,19 @@ class Tablero(QtGui.QGraphicsView):
             if li:
                 for tpid, funcion in li:
                     tp = tpid[1]
-                    id = tpid[3:]
+                    xid = tpid[3:]
                     if tp == "F":
-                        regFlecha = dbFlechas[id]
+                        regFlecha = dbFlechas[xid]
                         if regFlecha is None:
                             continue
                         self.dicF1_F10[funcion] = tp, regFlecha
                     elif tp == "M":
-                        regMarco = dbMarcos[id]
+                        regMarco = dbMarcos[xid]
                         if regMarco is None:
                             continue
                         self.dicF1_F10[funcion] = tp, regMarco
                     elif tp == "S":
-                        regSVG = dbSVGs[id]
+                        regSVG = dbSVGs[xid]
                         if regSVG is None:
                             continue
                         self.dicF1_F10[funcion] = tp, regSVG
@@ -1164,6 +1174,11 @@ class Tablero(QtGui.QGraphicsView):
     def num2alg(self, fila, columna):
         return chr(96 + columna) + str(fila)
 
+    def alg2num(self, a1):
+        x = self.columna2punto(ord(a1[0])-96)
+        y = self.fila2punto(ord(a1[1])-48)
+        return x, y
+
     def intentaMover(self, piezaSC, posCursor, eventButton):
         pieza = piezaSC.bloquePieza
         desde = self.num2alg(pieza.fila, pieza.columna)
@@ -1176,7 +1191,15 @@ class Tablero(QtGui.QGraphicsView):
         if cx in range(1, 9) and cy in range(1, 9):
             hasta = self.num2alg(cy, cx)
 
-            self.mensajero(desde, hasta)
+            x = self.columna2punto(cx)
+            y = self.fila2punto(cy)
+            piezaSC.setPos(x, y)
+            if hasta == desde:
+                return
+
+            if not self.mensajero(desde, hasta):
+                x, y = self.alg2num(desde)
+                piezaSC.setPos(x, y)
 
             # -CONTROL-
             self.resetMouse()
@@ -1386,7 +1409,7 @@ class Tablero(QtGui.QGraphicsView):
 
     def peonCoronando(self, siBlancas):
         menu = QTVarios.LCMenu(self)
-        for txt, pieza in ( ( _("Queen"), "Q"), (_("Rook"), "R"), (_("Bishop"), "B"), (_("Knight"), "N") ):
+        for txt, pieza in ((_("Queen"), "Q"), (_("Rook"), "R"), (_("Bishop"), "B"), (_("Knight"), "N")):
             if not siBlancas:
                 pieza = pieza.lower()
             menu.opcion(pieza, txt, self.piezas.icono(pieza))
@@ -1406,6 +1429,12 @@ class Tablero(QtGui.QGraphicsView):
             return
         if self.exePulsadoNum:
             self.exePulsadoNum(siActivar, int(numero))
+
+    def pulsadaLetra(self, siIzq, siActivar, letra):
+        if not siIzq:  # si es derecho lo dejamos para el menu visual, y el izquierdo solo muestra capturas, si se quieren ver movimientos, que active show candidates
+            return
+        if self.exePulsadaLetra:
+            self.exePulsadaLetra(siActivar, letra)
 
     def salvaEnImagen(self, fichero=None, tipo=None, siCtrl=False):
         if siCtrl:
@@ -1446,9 +1475,9 @@ class Tablero(QtGui.QGraphicsView):
             self.flechaSC.show()
 
         byte_array = QtCore.QByteArray()
-        buffer = QtCore.QBuffer(byte_array)
-        buffer.open(QtCore.QIODevice.WriteOnly)
-        thumb.save(buffer, 'PNG')
+        xbuffer = QtCore.QBuffer(byte_array)
+        xbuffer.open(QtCore.QIODevice.WriteOnly)
+        thumb.save(xbuffer, 'PNG')
 
         string_io = StringIO.StringIO(byte_array)
         contents = string_io.getvalue()
@@ -1544,7 +1573,7 @@ class Tablero(QtGui.QGraphicsView):
                     tp = "S"
                 else:
                     continue
-                li.append((tp, v.bloqueDatos ))
+                li.append((tp, v.bloqueDatos))
 
             return Util.var2txt(li)
         else:
@@ -1634,16 +1663,16 @@ class WTamTablero(QtGui.QDialog):
 
         self.antes = ap
 
-        liTams = [( _("Very large"), 80 ),
-                  ( _("Large"), 64 ),
-                  ( _("Medium"), 48 ),
-                  ( _("Medium-small"), 32 ),
-                  ( _("Small"), 24 ),
-                  ( _("Very small"), 16 ),
-                  ( _("Custom size"), 0 ),
-                  ( _("Initial size"), -1 ),
-                  ( _("Default"), -2 ),
-        ]
+        liTams = [(_("Very large"), 80),
+                  (_("Large"), 64),
+                  (_("Medium"), 48),
+                  (_("Medium-small"), 32),
+                  (_("Small"), 24),
+                  (_("Very small"), 16),
+                  (_("Custom size"), 0),
+                  (_("Initial size"), -1),
+                  (_("Default"), -2),
+                  ]
 
         self.cb = Controles.CB(self, liTams, self.anchoParaCB(ap)).capturaCambiado(self.cambiadoTamCB)
 
@@ -1666,7 +1695,7 @@ class WTamTablero(QtGui.QDialog):
         self.tablero.permitidoResizeExterno(False)
 
     def anchoParaCB(self, ap):
-        return ap if ap in ( 80, 64, 48, 32, 24, 16 ) else 0
+        return ap if ap in (80, 64, 48, 32, 24, 16) else 0
 
     def colocate(self):
         self.show()  # Necesario para que calcule bien el tama_o antes de colocar
@@ -1905,7 +1934,7 @@ class TableroVisual(Tablero):
                     menu = QTVarios.LCMenu(self)
                     icoAzul = Iconos.PuntoAzul()
                     for uno in li:
-                        menu.opcion(uno, uno.nombre() + " %d" % (uno.idMovible), icoAzul)
+                        menu.opcion(uno, uno.nombre() + " %d" % uno.idMovible, icoAzul)
                     p = QtGui.QCursor.pos()
                     elegido = menu.lanza()
                     if elegido is not None:
@@ -2046,4 +2075,3 @@ class TableroDirector(TableroVisual):
                 self.dispatchEventos(self.EVENTO_FUNCION, (f - 1, desde, hasta))
         else:
             Tablero.keyPressEvent(self, event)
-

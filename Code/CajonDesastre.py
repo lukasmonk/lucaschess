@@ -1,13 +1,14 @@
+import base64
+import cPickle
 import os
 import shutil
 import sqlite3
-import cPickle
-import base64
 
-import Code.VarGen as VarGen
-import Code.BaseConfig as BaseConfig
-import Code.Util as Util
-import Code.Movimientos as Movimientos
+import LCEngine
+
+from Code import BaseConfig
+from Code import Util
+from Code import VarGen
 
 def compruebaCambioCarpetas(configuracion):
     usrdata = configuracion.carpeta
@@ -308,8 +309,8 @@ def compruebaCambioVersion(configuracion):
     if os.path.isfile(v54):
         dic = Util.recuperaDIC(v54)
 
-        def convierteTablero(id, tamDef, txt):
-            ct = BaseConfig.ConfigTablero(id, tamDef)
+        def convierteTablero(xid, tamDef, txt):
+            ct = BaseConfig.ConfigTablero(xid, tamDef)
             tema = ct._tema
             base = ct._base
             li = txt.split("#")
@@ -318,12 +319,13 @@ def compruebaCambioVersion(configuracion):
                 tema._colorExterior = int(li[0])
                 ct.anchoPieza(int(li[1]))
                 tipoPieza = li[2]
-                dic = {"c": "Chessicons",
-                       "m": "Merida",
-                       "i": "Internet",
-                       "s": "Spatial",
-                       "f": "Fantasy",
-                       "n": "NikNak",
+                dic = {
+                    "c": "Chessicons",
+                    "m": "Merida",
+                    "i": "Internet",
+                    "s": "Spatial",
+                    "f": "Fantasy",
+                    "n": "NikNak",
                 }
                 base._nomPiezas = dic.get(tipoPieza, "NikNak")
                 tema._colorBlancas = int(li[3])
@@ -433,7 +435,7 @@ class GMconvert:
         for fich in os.listdir(self.carpeta):
             f4 = fich[-4:].lower()
             fichero = os.path.join(self.carpeta, fich)
-            if os.path.isfile(fichero) and f4 in ( ".gmi", ".gmb", ".gmw" ):
+            if os.path.isfile(fichero) and f4 in (".gmi", ".gmb", ".gmw"):
                 try:
                     shutil.move(fichero, os.path.join(dbak, fich))
                 except:
@@ -442,7 +444,7 @@ class GMconvert:
     def borraFicheros(self):
         for fich in os.listdir(self.carpeta):
             f4 = fich[-4:].lower()
-            if os.path.isfile(fich) and f4 in ( ".gmi", ".gmb", ".gmw" ):
+            if os.path.isfile(fich) and f4 in (".gmi", ".gmb", ".gmw"):
                 fichero = os.path.join(self.carpeta, fich)
                 try:
                     os.remove(fichero)
@@ -479,7 +481,7 @@ class GMconvert:
                         datos = liPartidas[numSiError]
                         repe += 1
                     datos = datos.replace("|", "-").replace(VarGen.XSEP, "|")
-                    q.write("%s||%s\n" % (Movimientos.pv2xpv(pv.strip()), datos))
+                    q.write("%s||%s\n" % (LCEngine.pv2xpv(pv.strip()), datos))
                 q.close()
 
     def leePartidasPV(self, gm, dicPVs, siBlancas):

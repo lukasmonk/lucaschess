@@ -50,4 +50,3 @@ class BloqueEspSC(QtGui.QGraphicsItem):
 
     def boundingRect(self):
         return self.rect
-

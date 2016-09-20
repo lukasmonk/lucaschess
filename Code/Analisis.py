@@ -1,33 +1,32 @@
-import os
-import copy
 import codecs
+import copy
+import os
 
-from Code.Constantes import *
-import Code.Util as Util
-import Code.Partida as Partida
-import Code.Jugada as Jugada
-import Code.BMT as BMT
-import Code.AnalisisIndexes as AnalisisIndexes
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaAnalisis as PantallaAnalisis
-import Code.QT.PantallaPGN as PantallaPGN
-import Code.QT.PantallaParamAnalisis as PantallaParamAnalisis
+from Code import AnalisisIndexes
+from Code import BMT
+from Code import Jugada
+from Code import Partida
+from Code.QT import PantallaAnalisis
+from Code.QT import PantallaPGN
+from Code.QT import PantallaParamAnalisis
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code import Util
 
 class AnalizaPartida:
-    def __init__(self, procesador, alm, siMasivo, liJugadas=None):
+    def __init__(self, procesador, alm, is_massiv, li_moves=None):
         self.procesador = procesador
         self.alm = alm
-        self.siMasivo = siMasivo
+        self.siMasivo = is_massiv
 
         self.configuracion = procesador.configuracion
-        confMotor = copy.deepcopy(self.configuracion.buscaMotor(alm.motor))
+        conf_engine = copy.deepcopy(self.configuracion.buscaMotor(alm.motor))
         if alm.multiPV:
-            confMotor.actMultiPV(alm.multiPV)
-        self.xgestor = procesador.creaGestorMotor(confMotor, alm.tiempo, alm.depth, True, priority=alm.priority)
+            conf_engine.actMultiPV(alm.multiPV)
+        self.xgestor = procesador.creaGestorMotor(conf_engine, alm.tiempo, alm.depth, True, priority=alm.priority)
         self.tiempo = alm.tiempo
         self.depth = alm.depth
-        self.siVariantes = (not siMasivo) and alm.masvariantes
+        self.siVariantes = (not is_massiv) and alm.masvariantes
 
         # Asignacion de variables para blunders:
         # kblunders: puntos de perdida para considerar un blunder
@@ -73,13 +72,13 @@ class AnalizaPartida:
         # siBorrarPrevio: si la partida tiene un analisis previo, se determina si se hace o no
         self.blancas = alm.blancas
         self.negras = alm.negras
-        self.liJugadores = alm.liJugadores if siMasivo else None
+        self.liJugadores = alm.liJugadores if is_massiv else None
         self.libroAperturas = alm.libroAperturas
         if self.libroAperturas:
             self.libroAperturas.polyglot()
-        self.listaElegidas = liJugadas
+        self.listaElegidas = li_moves
         self.desdeelfinal = alm.desdeelfinal
-        self.siBorrarPrevio = True if siMasivo else alm.siBorrarPrevio
+        self.siBorrarPrevio = True if is_massiv else alm.siBorrarPrevio
 
     def terminarBMT(self, bmt_lista, nombre):
         """
@@ -212,7 +211,7 @@ FILESW=%s:100
         if mj:  # blunder
             p.reset(jg.posicionBase)
             p.leerPV(rm.pv)
-            jg0 = p.liJugadas[0]
+            jg0 = p.jugada(0)
             jg0.comentario = rm.texto()
             variante = p.pgnBaseRAW()
 
@@ -227,21 +226,21 @@ FILESW=%s:100
             mas = " *"
             result = "*"
 
-        jg0 = p.liJugadas[0]
+        jg0 = p.jugada(0)
         t = "%0.2f" % (float(self.tiempo) / 1000.0,)
         t = t.rstrip("0")
         if t[-1] == ".":
             t = t[:-1]
-        etiT = "%s %s" % ( t, _("Second(s)") )
+        etiT = "%s %s" % (t, _("Second(s)"))
 
-        jg0.comentario = "%s %s: %s\n" % ( nombre, etiT, rm.texto() )
+        jg0.comentario = "%s %s: %s\n" % (nombre, etiT, rm.texto())
         if mj:
             jg0.variantes = variante
 
         cab = ""
         for k, v in dicCab.iteritems():
             ku = k.upper()
-            if ku not in ( "RESULT", "FEN" ):
+            if ku not in ("RESULT", "FEN"):
                 cab += '[%s "%s"]\n' % (k, v)
         # Nos protegemos de que se hayan escrito en el pgn original de otra forma
         cab += '[FEN "%s"]\n' % fen
@@ -311,14 +310,15 @@ FILESW=%s:100
         self.siBMTblunders = False
         self.siBMTbrilliancies = False
 
-        siBP2 = hasattr(tmpBP,
-                        "bp2")  # Para diferenciar el analisis de una partida que usa una progressbar unica del analisis de muchas, que usa doble
+        siBP2 = hasattr(tmpBP, "bp2")  # Para diferenciar el analisis de una partida que usa una progressbar unica del
+
+        # analisis de muchas, que usa doble
 
         def guiDispatch(rm):
             return not tmpBP.siCancelado()
 
-        self.xgestor.ponGuiDispatch(
-            guiDispatch)  # Dispatch del motor, si esta puesto a 4 minutos por ejemplo que compruebe si se ha indicado que se cancele.
+        self.xgestor.ponGuiDispatch(guiDispatch)  # Dispatch del motor, si esta puesto a 4 minutos por ejemplo que
+        # compruebe si se ha indicado que se cancele.
 
         siBlunders = self.kblunders > 0
         siBrilliancies = self.fnsbrilliancies or self.pgnbrilliancies or self.bmtbrilliancies
@@ -361,7 +361,7 @@ FILESW=%s:100
                         else:
                             xblancas = False
 
-        if not ( xblancas or xnegras ):
+        if not (xblancas or xnegras):
             return
 
         clpartida = Util.microsegundosRnd()
@@ -369,7 +369,7 @@ FILESW=%s:100
         siPonerPGNOriginalBlunders = False
         siPonerPGNOriginalBrilliancies = False
 
-        nJugadas = len(partida.liJugadas)
+        nJugadas = len(partida)
         if self.listaElegidas:
             liJugadas = self.listaElegidas
         else:
@@ -384,7 +384,7 @@ FILESW=%s:100
                     return
 
                 # # Si esta en el libro
-                jg = partida.liJugadas[njg]
+                jg = partida.jugada(njg)
                 if xlibroAperturas.miraListaJugadas(jg.posicionBase.fen()):
                     liBorrar.append(pos)
                     continue
@@ -410,8 +410,7 @@ FILESW=%s:100
                 self.xgestor.quitaGuiDispatch()
                 return
 
-            jg = partida.liJugadas[njg]
-
+            jg = partida.jugada(njg)
             if siBP2:
                 tmpBP.pon(2, npos + 1)
             else:
@@ -437,12 +436,12 @@ FILESW=%s:100
                 if not xnegras:
                     continue
 
-            ## previos
+            # -# previos
             if not self.siBorrarPrevio:
                 if jg.analisis:
                     continue
 
-            ## Procesamos
+            # -# Procesamos
             resp = self.xgestor.analizaJugada(jg, self.tiempo, depth=self.depth, brDepth=self.dpbrilliancies,
                                               brPuntos=self.ptbrilliancies)
             if not resp:
@@ -515,7 +514,7 @@ FILESW=%s:100
 
         self.xgestor.quitaGuiDispatch()
 
-class UnaMuestra():
+class UnaMuestra:
     def __init__(self, mAnalisis, mrm, posElegida, numero, xmotor):
 
         self.mAnalisis = mAnalisis
@@ -544,9 +543,9 @@ class UnaMuestra():
             t = t.rstrip("0")
             if t[-1] == ".":
                 t = t[:-1]
-            etiT = "%s: %s" % ( _("Second(s)"), t )
+            etiT = "%s: %s" % (_("Second(s)"), t)
         elif self.mrm.maxProfundidad:
-            etiT = "%s: %d" % ( _("Depth"), self.mrm.maxProfundidad )
+            etiT = "%s: %d" % (_("Depth"), self.mrm.maxProfundidad)
         else:
             etiT = ""
         return etiT
@@ -562,7 +561,7 @@ class UnaMuestra():
 
             txt = rm.abrTextoBase()
             if txt:
-                txt = "(%s)"%txt
+                txt = "(%s)" % txt
             if self.siFigurines:
                 nombre = pb.pgn(desde, hasta, coronacion) + txt
 
@@ -648,11 +647,11 @@ class UnaMuestra():
         return self.posMovActual >= self.partida.numJugadas() - 1
 
     def fenActual(self):
-        jg = self.partida.liJugadas[self.posMovActual if self.posMovActual > 0 else 0]
+        jg = self.partida.jugada(self.posMovActual if self.posMovActual > 0 else 0)
         return jg.posicion.fen()
 
     def analizaExterior(self, wowner, siBlancas):
-        jg = self.partida.liJugadas[self.posMovActual if self.posMovActual >= 0 else 0]
+        jg = self.partida.jugada(self.posMovActual if self.posMovActual >= 0 else 0)
         pts = self.puntuacionActual()
         AnalisisVariantes(wowner, self.xmotor, jg, siBlancas, pts, maxRecursion=self.mAnalisis.maxRecursion)
 
@@ -660,7 +659,7 @@ class UnaMuestra():
         siW = self.jg.posicionBase.siBlancas
         nombre = self.etiquetaMotor()
         tiempo = self.etiquetaTiempo()
-        comentario = " {%s %s %s} " % ( rm.abrTexto(), nombre, tiempo )
+        comentario = " {%s %s %s} " % (rm.abrTexto(), nombre, tiempo)
         jugada = partida.pgnBaseRAW(self.mAnalisis.posJugada / 2 + 1)
         li = jugada.split(" ")
         n = 1 if siW else 2
@@ -680,7 +679,7 @@ class UnaMuestra():
     def ponVistaGestor(self):
         self.mAnalisis.procesador.gestor.ponVista()
 
-class MuestraAnalisis():
+class MuestraAnalisis:
     def __init__(self, procesador, jg, maxRecursion, posJugada):
 
         self.procesador = procesador
@@ -745,7 +744,7 @@ def muestraAnalisis(procesador, xtutor, jg, siBlancas, maxRecursion, posJugada, 
         if not xtutor or xmotor.clave != xtutor.clave:
             xmotor.terminar()
 
-class AnalisisVariantes():
+class AnalisisVariantes:
     def __init__(self, owner, xtutor, jg, siBlancas, cPuntosBase, maxRecursion=100000):
 
         self.owner = owner
@@ -803,13 +802,13 @@ class AnalisisVariantes():
 
         self.partidaTutor = Partida.Partida(jgNueva.posicion).leerPV(self.rm.pv)
 
-        if len(self.partidaTutor.liJugadas):
-            self.w.tableroT.ponPosicion(self.partidaTutor.liJugadas[0].posicion)
+        if len(self.partidaTutor):
+            self.w.tableroT.ponPosicion(self.partidaTutor.jugada(0).posicion)
 
         self.w.ponPuntuacion(self.rm.texto())
 
         self.posTutor = 0
-        self.maxTutor = len(self.partidaTutor.liJugadas)
+        self.maxTutor = len(self.partidaTutor)
 
         self.mueveTutor(siInicio=True)
 
@@ -846,7 +845,7 @@ class AnalisisVariantes():
             elif accion == "MoverLibre":
                 self.analizaExterior(maxRecursion)
             elif accion == "MoverFEN":
-                jg = self.partidaTutor.liJugadas[self.posTutor]
+                jg = self.partidaTutor.jugada(self.posTutor)
                 QTUtil.ponPortapapeles(jg.posicion.fen())
                 QTUtil2.mensajeTemporal(self.w, _("FEN is in clipboard"), 1)
 
@@ -862,7 +861,7 @@ class AnalisisVariantes():
         elif siFinal:
             self.posTutor = self.maxTutor - 1
         if self.partidaTutor.numJugadas():
-            jg = self.partidaTutor.liJugadas[self.posTutor]
+            jg = self.partidaTutor.jugada(self.posTutor)
             if siBase:
                 self.w.tableroT.ponPosicion(jg.posicionBase)
             else:
@@ -906,7 +905,7 @@ class AnalisisVariantes():
             self.tiempoFuncion(nSaltar=1)
 
     def analizaExterior(self, maxRecursion):
-        jg = self.partidaTutor.liJugadas[self.posTutor]
+        jg = self.partidaTutor.jugada(self.posTutor)
         pts = self.rm.texto()
         AnalisisVariantes(self.w, self.xtutor, jg, self.siBlancas, pts, maxRecursion)
 
@@ -946,8 +945,8 @@ def analizaPartida(gestor):
     ap = AnalizaPartida(procesador, alm, False, liJugadas)
 
     def dispatchBP(pos, ntotal, njg):
-        tmpBP.mensaje(mensaje + " %d/%d" % ( pos + 1, ntotal))
-        jg = partida.liJugadas[njg]
+        tmpBP.mensaje(mensaje + " %d/%d" % (pos + 1, ntotal))
+        jg = partida.jugada(njg)
         gestor.ponPosicion(jg.posicion)
         gestor.pantalla.pgnColocate(njg / 2, (njg + 1) % 2)
         gestor.tablero.ponFlechaSC(jg.desde, jg.hasta)
@@ -998,4 +997,3 @@ def analizaPartida(gestor):
     if notCanceled:
         if alm.showGraphs:
             gestor.showAnalisis()
-

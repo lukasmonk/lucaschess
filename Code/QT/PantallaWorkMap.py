@@ -1,20 +1,20 @@
 from PyQt4 import QtGui, QtSvg
 
-import Code.Partida as Partida
-import Code.ControlPosicion as ControlPosicion
-import Code.Analisis as Analisis
-import Code.Jugada as Jugada
-import Code.WorkMap as WorkMap
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Tablero as Tablero
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Delegados as Delegados
-import Code.QT.FormLayout as FormLayout
+from Code import Analisis
+from Code import ControlPosicion
+from Code import Jugada
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import WorkMap
 
 class WMap(QTVarios.WDialogo):
     def __init__(self, procesador, mapa):
@@ -33,13 +33,13 @@ class WMap(QTVarios.WDialogo):
         oColumnas.nueva("TIPO", "", 24, edicion=Delegados.PmIconosBMT(), siCentrado=True)
         oColumnas.nueva("SELECT", _("Select one to play"), 150)
 
-        self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, id="W")
+        self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, xid="W")
 
         self.registrarGrid(self.grid)
 
         liAcciones = (
-            ( _("Close"), Iconos.MainMenu(), self.terminar ), None,
-            ( _("Play"), Iconos.Entrenar(), self.play ), None,
+            (_("Close"), Iconos.MainMenu(), self.terminar), None,
+            (_("Play"), Iconos.Empezar(), self.play), None,
         )
         tbWork = Controles.TBrutina(self, liAcciones, tamIcon=24)
 
@@ -67,14 +67,14 @@ class WMap(QTVarios.WDialogo):
         oColumnas.nueva("DEND", _("Ending date"), 110, siCentrado=True)
         oColumnas.nueva("RESULT", _("Result"), 110, siCentrado=True)
 
-        self.gridData = Grid.Grid(self, oColumnas, siSelecFilas=True, id="H")
+        self.gridData = Grid.Grid(self, oColumnas, siSelecFilas=True, xid="H")
         self.registrarGrid(self.gridData)
 
-        liAcciones = (  (_("Close"), Iconos.MainMenu(), self.terminar ), None,
-                        (_("Select"), Iconos.Seleccionar(), self.data_select), None,
-                        (_("New"), Iconos.NuevoMas(), self.data_new), None,
-                        (_("Remove"), Iconos.Borrar(), self.data_remove), None,
-        )
+        liAcciones = ((_("Close"), Iconos.MainMenu(), self.terminar), None,
+                      (_("Select"), Iconos.Seleccionar(), self.data_select), None,
+                      (_("New"), Iconos.NuevoMas(), self.data_new), None,
+                      (_("Remove"), Iconos.Borrar(), self.data_remove), None,
+                      )
         tb = Controles.TBrutina(self, liAcciones, tamIcon=24)
 
         ly = Colocacion.V().control(tb).control(self.gridData)
@@ -102,11 +102,11 @@ class WMap(QTVarios.WDialogo):
         menu = QTVarios.LCMenu(self)
 
         menu1 = menu.submenu(_("Checkmates in GM games"), Iconos.GranMaestro())
-        menu1.opcion( "mate_basic", _( "Basic" ), Iconos.PuntoAzul() )
+        menu1.opcion("mate_basic", _("Basic"), Iconos.PuntoAzul())
         menu1.separador()
-        menu1.opcion( "mate_easy", _( "Easy" ), Iconos.PuntoAmarillo() )
-        menu1.opcion( "mate_medium", _( "Medium" ), Iconos.PuntoNaranja() )
-        menu1.opcion( "mate_hard", _( "Hard" ), Iconos.PuntoRojo() )
+        menu1.opcion("mate_easy", _("Easy"), Iconos.PuntoAmarillo())
+        menu1.opcion("mate_medium", _("Medium"), Iconos.PuntoNaranja())
+        menu1.opcion("mate_hard", _("Hard"), Iconos.PuntoRojo())
 
         menu.separador()
         menu.opcion("sts_basic", _("STS: Strategic Test Suite"), Iconos.STS())
@@ -116,7 +116,7 @@ class WMap(QTVarios.WDialogo):
             tipo, model = resp.split("_")
             if tipo == "sts":
                 liGen = [(None, None)]
-                liR = [ (str(x), x) for x in range(1, 100) ]
+                liR = [(str(x), x) for x in range(1, 100)]
                 config = FormLayout.Combobox(_("Model"), liR)
                 liGen.append((config, "1"))
                 resultado = FormLayout.fedit(liGen, title=_("STS: Strategic Test Suite"), parent=self, anchoMinimo=160, icon=Iconos.Maps())
@@ -124,7 +124,7 @@ class WMap(QTVarios.WDialogo):
                     return
                 accion, liResp = resultado
                 model = liResp[0]
-            self.workmap.nuevo(tipo,model)
+            self.workmap.nuevo(tipo, model)
             self.activaWorkmap()
 
     def doWork(self, fila):
@@ -162,7 +162,7 @@ class WMap(QTVarios.WDialogo):
     def data_remove(self):
         raw = self.workmap.db.listaRaws[self.gridData.recno()]
         if raw["ACTIVE"] != "X":
-            if QTUtil2.pregunta(self, _X(_("Delete %1?"), _( "this work"))):
+            if QTUtil2.pregunta(self, _X(_("Delete %1?"), _("this work"))):
                 self.workmap.db.borra(raw["ROWID"])
                 self.gridData.refresh()
 
@@ -172,14 +172,14 @@ class WMap(QTVarios.WDialogo):
         hechos, total = self.workmap.done()
         info = self.workmap.info()
         tipo = self.workmap.db.getTipo()
-        txt = '<b><span style="color:#C156F8">%s: %s</span>'%(_("Active"), current ) if current else ""
-        txt += '<br><span style="color:brown">%s: %s</span></b>'%(_("Type"), tipo ) + \
-               '<br><span style="color:teal">%s: %d/%d</span></b>'%(_("Done"), hechos, total ) + \
-               '<br><span style="color:blue">%s: %s</span></b>'%(_("Result"), info )
+        txt = '<b><span style="color:#C156F8">%s: %s</span>' % (_("Active"), current) if current else ""
+        txt += '<br><span style="color:brown">%s: %s</span></b>' % (_("Type"), tipo) + \
+               '<br><span style="color:teal">%s: %d/%d</span></b>' % (_("Done"), hechos, total) + \
+               '<br><span style="color:blue">%s: %s</span></b>' % (_("Result"), info)
         self.lbInfo.ponTexto(txt)
 
-    def lanza( self, fila ):
-        siHecho = self.workmap.setAimFila( fila )
+    def lanza(self, fila):
+        siHecho = self.workmap.setAimFila(fila)
         if siHecho:
             self.workmap.resetWidget()
             self.informacion()
@@ -190,13 +190,13 @@ class WMap(QTVarios.WDialogo):
 
     def gridDobleClick(self, grid, fila, columna):
         if grid == self.grid:
-            self.lanza( fila )
+            self.lanza(fila)
         else:
             self.data_select()
 
     def play(self):
         fila = self.grid.recno()
-        self.lanza( fila )
+        self.lanza(fila)
 
     def terminar(self):
         self.guardarVideo()
@@ -333,7 +333,7 @@ class WUnSTSMap(QTVarios.WDialogo):
 
         mens = "<h2>%s</h2><br>" % self.alm.name
 
-        mens += '<table><tr><th>%s</th><th>%s</th></tr>'%(_("Move"), _("Points"))
+        mens += '<table><tr><th>%s</th><th>%s</th></tr>' % (_("Move"), _("Points"))
         mx = 0
         ok = False
         stylePV = ' style="color:red;"'
@@ -343,20 +343,20 @@ class WUnSTSMap(QTVarios.WDialogo):
                 mas = stylePV
             else:
                 mas = ""
-            pgn = Partida.pv_pgn(self.alm.fen,pv)
-            mens += '<tr%s><td align="center">%s</td><td align="right">%d</td></tr>'%(mas,pgn,points)
+            san = Partida.pv_san(self.alm.fen, pv)
+            mens += '<tr%s><td align="center">%s</td><td align="right">%d</td></tr>' % (mas, san, points)
             if points > mx:
                 mx = points
         if not ok:
-            pgn = Partida.pv_pgn(self.alm.fen,donePV)
-            mens += '<tr%s><td align="center">%s</td><td align="right">%d</td></tr>'%(stylePV,pgn,0)
+            san = Partida.pv_san(self.alm.fen, donePV)
+            mens += '<tr%s><td align="center">%s</td><td align="right">%d</td></tr>' % (stylePV, san, 0)
         mens += "</table>"
 
         self.alm.donePV = donePV
-        self.alm.puntos = dicResults.get(donePV,0)
+        self.alm.puntos = dicResults.get(donePV, 0)
         self.alm.total = mx
 
-        mens += "<br><h2>%s: %d/%d</h2>"%(_("Points"), self.alm.puntos, self.alm.total)
+        mens += "<br><h2>%s: %d/%d</h2>" % (_("Points"), self.alm.puntos, self.alm.total)
         self.lbJuego.ponTexto(mens)
 
         self.workmap.winAim(donePV)
@@ -367,6 +367,6 @@ class WUnSTSMap(QTVarios.WDialogo):
                                  9999999, 1, pantalla=self, siGrabar=False)
 
 def train_map(procesador, mapa):
-    w = WMap(procesador,mapa)
+    w = WMap(procesador, mapa)
     w.exec_()
     return w.playCurrent

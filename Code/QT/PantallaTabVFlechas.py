@@ -2,25 +2,25 @@ import copy
 
 from PyQt4 import QtCore, QtGui
 
-import Code.TabVisual as TabVisual
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.TabTipos as TabTipos
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Tablero as Tablero
-import Code.QT.FormLayout as FormLayout
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import TabTipos
+from Code.QT import Tablero
+from Code import TabVisual
+from Code import Util
+from Code import VarGen
 
 def tiposDestino():
     li = (
-        ( _("To center"), "c" ),
-        ( _("To closest point"), "m" ),
+        (_("To center"), "c"),
+        (_("To closest point"), "m"),
     )
     return li
 
@@ -37,9 +37,9 @@ class WTV_Flecha(QtGui.QDialog):
         if not regFlecha:
             regFlecha = TabVisual.PFlecha()
 
-        liAcciones = [( _("Save"), Iconos.Aceptar(), "grabar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "reject" ), None,
-        ]
+        liAcciones = [(_("Save"), Iconos.Aceptar(), "grabar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "reject"), None,
+                      ]
         tb = Controles.TB(self, liAcciones)
 
         # Tablero
@@ -55,75 +55,75 @@ class WTV_Flecha(QtGui.QDialog):
         if siNombre:
             # nombre de la flecha que se usara en los menus del tutorial
             config = FormLayout.Editbox(_("Name"), ancho=120)
-            liGen.append((config, regFlecha.nombre ))
+            liGen.append((config, regFlecha.nombre))
 
         # ( "forma", "t", "a" ), # a = abierta -> , c = cerrada la cabeza, p = poligono cuadrado,
         liFormas = (
-            ( _("Opened"), "a"),
-            ( _("Head closed"), "c"),
-            ( _("Polygon  1"), "1"),
-            ( _("Polygon  2"), "2"),
-            ( _("Polygon  3"), "3"),
+            (_("Opened"), "a"),
+            (_("Head closed"), "c"),
+            (_("Polygon  1"), "1"),
+            (_("Polygon  2"), "2"),
+            (_("Polygon  3"), "3"),
         )
         config = FormLayout.Combobox(_("Form"), liFormas)
-        liGen.append(( config, regFlecha.forma ))
+        liGen.append((config, regFlecha.forma))
 
         # ( "tipo", "n", Qt.SolidLine ), #1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine
         config = FormLayout.Combobox(_("Line Type"), QTUtil2.tiposDeLineas())
-        liGen.append(( config, regFlecha.tipo ))
+        liGen.append((config, regFlecha.tipo))
 
         # liGen.append( (None,None) )
 
         # ( "color", "n", 0 ),
         config = FormLayout.Colorbox(_("Color"), 80, 20)
-        liGen.append(( config, regFlecha.color ))
+        liGen.append((config, regFlecha.color))
 
         # ( "colorinterior", "n", -1 ), # si es cerrada
         config = FormLayout.Colorbox(_("Internal color"), 80, 20, siChecked=True)
-        liGen.append(( config, regFlecha.colorinterior ))
+        liGen.append((config, regFlecha.colorinterior))
 
         # ( "opacidad", "n", 1.0 ),
         config = FormLayout.Dial(_("Degree of transparency"), 0, 99)
-        liGen.append(( config, 100 - int(regFlecha.opacidad * 100) ))
+        liGen.append((config, 100 - int(regFlecha.opacidad * 100)))
 
         # liGen.append( (None,None) )
 
         # ( "redondeos", "l", False ),
-        liGen.append(( _("Rounded edges"), regFlecha.redondeos ))
+        liGen.append((_("Rounded edges"), regFlecha.redondeos))
 
         # ( "grosor", "n", 1 ), # ancho del trazo
         config = FormLayout.Spinbox(_("Thickness"), 1, 20, 50)
-        liGen.append(( config, regFlecha.grosor ))
+        liGen.append((config, regFlecha.grosor))
 
         # liGen.append( (None,None) )
 
         # ( "altocabeza", "n", 1 ), # altura de la cabeza
         config = FormLayout.Spinbox(_("Head height"), 0, 100, 50)
-        liGen.append(( config, regFlecha.altocabeza ))
+        liGen.append((config, regFlecha.altocabeza))
 
         # ( "ancho", "n", 10 ), # ancho de la base de la flecha si es un poligono
         config = FormLayout.Spinbox(_("Base width"), 1, 100, 50)
-        liGen.append(( config, regFlecha.ancho ))
+        liGen.append((config, regFlecha.ancho))
 
         # ( "vuelo", "n", 5 ), # vuelo de la flecha respecto al ancho de la base
         config = FormLayout.Spinbox(_("Additional width of the base of the head"), 1, 100, 50)
-        liGen.append(( config, regFlecha.vuelo ))
+        liGen.append((config, regFlecha.vuelo))
 
         # ( "descuelgue", "n", 2 ), # vuelo hacia arriba
         config = FormLayout.Spinbox(_("Height of the base angle of the head"), -100, 100, 50)
-        liGen.append(( config, regFlecha.descuelgue ))
+        liGen.append((config, regFlecha.descuelgue))
 
         # liGen.append( (None,None) )
 
         # ( "destino", "t", "c" ), # c = centro, m = minimo
         config = FormLayout.Combobox(_("Target position"), tiposDestino())
-        liGen.append(( config, regFlecha.destino ))
+        liGen.append((config, regFlecha.destino))
 
         # liGen.append( (None,None) )
 
         # orden
         config = FormLayout.Combobox(_("Order concerning other items"), QTUtil2.listaOrdenes())
-        liGen.append(( config, regFlecha.posicion.orden ))
+        liGen.append((config, regFlecha.posicion.orden))
 
         self.form = FormLayout.FormWidget(liGen, dispatch=self.cambios)
 
@@ -213,16 +213,16 @@ class WTV_Flechas(QTVarios.WDialogo):
         oColumnas.nueva("NUMERO", _("N."), 60, siCentrado=True)
         oColumnas.nueva("NOMBRE", _("Name"), 256)
 
-        self.grid = Grid.Grid(self, oColumnas, id="F", siSelecFilas=True)
+        self.grid = Grid.Grid(self, oColumnas, xid="F", siSelecFilas=True)
 
         liAcciones = [
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-            ( _("New"), Iconos.Nuevo(), "mas" ), None,
-            ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-            ( _("Modify"), Iconos.Modificar(), "modificar" ), None,
-            ( _("Copy"), Iconos.Copiar(), "copiar" ), None,
-            ( _("Up"), Iconos.Arriba(), "arriba" ), None,
-            ( _("Down"), Iconos.Abajo(), "abajo" ), None,
+            (_("Close"), Iconos.MainMenu(), "terminar"), None,
+            (_("New"), Iconos.Nuevo(), "mas"), None,
+            (_("Remove"), Iconos.Borrar(), "borrar"), None,
+            (_("Modify"), Iconos.Modificar(), "modificar"), None,
+            (_("Copy"), Iconos.Copiar(), "copiar"), None,
+            (_("Up"), Iconos.Arriba(), "arriba"), None,
+            (_("Down"), Iconos.Abajo(), "abajo"), None,
         ]
         tb = Controles.TB(self, liAcciones)
         tb.setFont(flb)
@@ -310,8 +310,8 @@ class WTV_Flechas(QTVarios.WDialogo):
         if fila >= 0:
             if QTUtil2.pregunta(self, _X(_("Delete the arrow %1?"), self.liPFlechas[fila].nombre)):
                 regFlecha = self.liPFlechas[fila]
-                id = regFlecha.id
-                del self.dbFlechas[id]
+                xid = regFlecha.id
+                del self.dbFlechas[xid]
                 del self.liPFlechas[fila]
                 self.grid.refresh()
                 self.grid.setFocus()
@@ -322,9 +322,9 @@ class WTV_Flechas(QTVarios.WDialogo):
             w = WTV_Flecha(self, self.liPFlechas[fila], True)
             if w.exec_():
                 regFlecha = w.regFlecha
-                id = regFlecha.id
+                xid = regFlecha.id
                 self.liPFlechas[fila] = regFlecha
-                self.dbFlechas[id] = regFlecha
+                self.dbFlechas[xid] = regFlecha
                 self.grid.refresh()
                 self.grid.setFocus()
                 self.gridCambiadoRegistro(self.grid, fila, None)
@@ -341,10 +341,10 @@ class WTV_Flechas(QTVarios.WDialogo):
                 return False
 
             n = 1
-            nombre = "%s-%d" % (regFlecha.nombre, n )
+            nombre = "%s-%d" % (regFlecha.nombre, n)
             while siEstaNombre(nombre):
                 n += 1
-                nombre = "%s-%d" % (regFlecha.nombre, n )
+                nombre = "%s-%d" % (regFlecha.nombre, n)
             regFlecha.nombre = nombre
             regFlecha.id = Util.nuevoID()
             regFlecha.ordenVista = self.liPFlechas[-1].ordenVista + 1

@@ -1,16 +1,18 @@
 import random
 import time
 
-import Code.Util as Util
-import Code.SAK as SAK
-import Code.ControlPosicion as ControlPosicion
-import Code.QT.Iconos as Iconos
-import Code.QT.QTUtil2 as QTUtil2
+import LCEngine
+
+from Code import ControlPosicion
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code import Util
 
 class GestorM1:
-    def __init__( self, procesador ):
+    def __init__(self, procesador):
         self.pantalla = procesador.pantalla
         self.tablero = self.pantalla.tablero
+        self.procesador = procesador
 
         fmt = "./IntFiles/Mate/mate1.lst"
         with open(fmt) as f:
@@ -20,12 +22,12 @@ class GestorM1:
         uno = random.choice(li)
         fen, mv0 = uno.split(",")
         fen += " w - - 1 1"
-        SAK.sak.setFEN(fen)
-        liMv = SAK.sak.getExMoves()
+        LCEngine.setFen(fen)
+        liMv = LCEngine.getExMoves()
         self.liMovs = []
         for mv in liMv:
             if mv.mate():
-                self.liMovs.append( mv.movimiento() )
+                self.liMovs.append(mv.movimiento())
 
         self.cp = ControlPosicion.ControlPosicion()
         self.cp.leeFen(fen)
@@ -34,16 +36,16 @@ class GestorM1:
 
         self.siBlancas = " w " in fen
         self.tablero.bloqueaRotacion(False)
-        self.tablero.ponMensajero( self.mueveHumano )
+        self.tablero.ponMensajero(self.mueveHumano)
         self.tablero.ponPosicion(self.cp)
-        self.tablero.ponerPiezasAbajo( self.siBlancas )
-        self.tablero.activaColor( self.siBlancas )
+        self.tablero.ponerPiezasAbajo(self.siBlancas)
+        self.tablero.activaColor(self.siBlancas)
         self.tablero.ponIndicador(self.siBlancas)
 
     def muestraMensaje(self):
         tm = time.time() - self.iniTime
 
-        mensaje = "%s: %0.02f"%(_("Time"), tm)
+        mensaje = "%s: %0.02f" % (_("Time"), tm)
         if tm < 10.0:
             pmImagen = Iconos.pmSol()
         elif tm < 20.0:
@@ -70,11 +72,12 @@ class GestorM1:
         for mov in self.liMovs:
             if mov.lower() == movimiento:
                 self.tablero.desactivaTodas()
-                self.cp.mover(desde,hasta,coronacion)
+                self.cp.mover(desde, hasta, coronacion)
                 self.tablero.ponPosicion(self.cp)
-                self.tablero.ponFlechaSC( desde, hasta )
+                self.tablero.ponFlechaSC(desde, hasta)
 
                 self.muestraMensaje()
+                self.__init__(self.procesador)
                 return True
 
         return False
@@ -151,4 +154,3 @@ def partidaDia(procesador, hx):
             cpu.toolTip(texto, padre=hx)
 
             # hx = cpu.duerme( 3.0, padre = hx )
-

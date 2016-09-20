@@ -120,8 +120,8 @@ def anchoEscritorio():
 def altoEscritorio():
     return QtGui.QDesktopWidget().availableGeometry().height()
 
-def salirAplicacion(id):
-    QtGui.QApplication.exit(id)
+def salirAplicacion(xid):
+    QtGui.QApplication.exit(xid)
 
 def ponPortapapeles(dato, tipo="t"):
     cb = QtGui.QApplication.clipboard()

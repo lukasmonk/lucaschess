@@ -1,7 +1,7 @@
 from operator import attrgetter
 
-import Code.Util as Util
-import Code.TrListas as TrListas
+from Code import TrListas
+from Code import Util
 
 class AperturaStd:
     def __init__(self, clave):
@@ -38,7 +38,7 @@ class ListaAperturasStd:
 
         if siBasic:
             for bl in self.dic.itervalues():
-                bl.trOrdena = ( "A" if bl.siBasic else "B" ) + bl.trNombre.upper()
+                bl.trOrdena = ("A" if bl.siBasic else "B") + bl.trNombre.upper()
             self.hijos = self.ordena(self.hijos, 0)
 
     def ordena(self, hijos, n):
@@ -138,7 +138,7 @@ class ListaAperturasStd:
             if a1h8 in self.dic:
                 partida.apertura = self.dic[a1h8]
                 for nP in range(nj + 1):
-                    partida.liJugadas[nP].siApertura = True
+                    partida.jugada(nP).siApertura = True
                 noHayMas = True
                 for k in self.dic:
                     if k.startswith(a1h8) and k != a1h8:
@@ -177,7 +177,7 @@ class ListaAperturasStd:
         lik = self.dic.keys()
         lik.sort()
 
-        siBasic = len(partida.liJugadas) == 0
+        siBasic = len(partida) == 0
         if siTodas:
             siBasic = False
 
@@ -197,4 +197,3 @@ class ListaAperturasStd:
                     li.append(ap)
 
         return li if li else None
-

@@ -1,6 +1,6 @@
 import __builtin__
-import os
 import gettext
+import os
 
 def _F(txt):
     return _(txt)
@@ -38,4 +38,3 @@ def install(lang=None):
     __builtin__.__dict__['_X'] = _X
     __builtin__.__dict__['_F'] = _F
     __builtin__.__dict__['_SP'] = _SP
-

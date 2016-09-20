@@ -1,9 +1,9 @@
-import os
 import collections
+import os
 
-import Code.Util as Util
-import Code.VarGen as VarGen
-import Code.MotoresExternos as MotoresExternos
+from Code import MotoresExternos
+from Code import Util
+from Code import VarGen
 
 class Elem:
     def __init__(self, linea):
@@ -54,7 +54,7 @@ class Group:
 
     @property
     def name(self):
-        num,nom = self._name.split(".")
+        num, nom = self._name.split(".")
         return _F(nom.strip())
 
     def element(self, num):
@@ -158,7 +158,7 @@ class Results:
     def resoultGroup(self, ngroup):
         return self._liResultGroups[ngroup]
 
-class Work():
+class Work:
     def __init__(self, ngroups):
         self.me = None
         self.ref = ""
@@ -184,7 +184,7 @@ class Work():
         self.liGroupActive = dic["GROUPACTIVE"]
         self.me = MotoresExternos.MotorExterno()
         self.me.restore(dic["ENGINE"])
-        self.workTime = dic.get("WORKTIME",0.0)
+        self.workTime = dic.get("WORKTIME", 0.0)
 
     def save(self):
         dic = {}
@@ -238,7 +238,7 @@ class Work():
         resoultGroup.elem(nfen, a1h8)
         self.workTime += ts
 
-class Works():
+class Works:
     def __init__(self):
         self.lista = []
 
@@ -360,6 +360,14 @@ class STS:
         else:
             return "-"
 
+            # def is_done_group(self, ngroup):
+            # if work.isGroupActive(ngroup):
+            # numPositions = work.numPositions()
+            # donePositionsGroup = work.donePositionsGroup(ngroup)
+            # return donePositionsGroup >= numPositions
+            # else:
+            # return False
+
     def donePoints(self, work, ngroup):
         if work.isGroupActive(ngroup):
             group = self.groups.group(ngroup)
@@ -438,7 +446,6 @@ class STS:
 
     def setResult(self, work, ngroup, nfen, a1h8, ts):
         work.setResult(ngroup, nfen, a1h8, ts)
-        self.save()
 
     def up(self, nwork):
         resp = self.works.up(nwork)

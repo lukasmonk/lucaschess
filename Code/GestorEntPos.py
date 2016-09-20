@@ -1,22 +1,22 @@
-import os
 import codecs
+import os
 
+from Code import ControlPosicion
+from Code import Gestor
+from Code import Jugada
+from Code import PGN
+from Code import Partida
+from Code.QT import DatosNueva
+from Code.QT import Iconos
+from Code.QT import PantallaGM
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import TrListas
+from Code import Tutor
+from Code import Util
+from Code import VarGen
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.Partida as Partida
-import Code.Jugada as Jugada
-import Code.Tutor as Tutor
-import Code.PGN as PGN
-import Code.TrListas as TrListas
-import Code.Gestor as Gestor
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaGM as PantallaGM
-import Code.QT.DatosNueva as DatosNueva
-import Code.QT.Iconos as Iconos
 
 class GestorEntPos(Gestor.Gestor):
     def ponEntreno(self, entreno):
@@ -76,10 +76,10 @@ class GestorEntPos(Gestor.Gestor):
                 if nli >= 3:
                     solucion = li[2]
                     if solucion:
-                        self.dicDirigidoFen = PGN.leeEntDirigido(fenInicial, solucion)
-                        self.siDirigido = self.dicDirigidoFen and len(self.dicDirigidoFen) > 0
+                        self.dicDirigidoFenM2 = PGN.leeEntDirigidoM2(fenInicial, solucion)
+                        self.siDirigido = len(self.dicDirigidoFenM2) > 0
 
-                    ## Partida original
+                    # Partida original
                     if nli >= 4:
                         if nli > 4:
                             txt = "|".join(li[3:])
@@ -145,10 +145,9 @@ class GestorEntPos(Gestor.Gestor):
         liOpciones = [k_mainmenu, k_cambiar, k_reiniciar, k_atras]
         if self.dicEtiquetasPGN:
             liOpciones.append(k_pgnInformacion)
-        if self.numEntrenos > 1:
-            liOpciones.append(k_anterior)
-            liOpciones.append(k_siguiente)
         liOpciones.extend((k_configurar, k_utilidades))
+        if self.numEntrenos > 1:
+            liOpciones.extend((k_anterior, k_siguiente))
         self.liOpcionesToolBar = liOpciones
         self.pantalla.ponToolBar(liOpciones)
 
@@ -203,7 +202,7 @@ class GestorEntPos(Gestor.Gestor):
             if "/Tactics/" in self.entreno:
                 liMasOpciones = ()
             else:
-                liMasOpciones = (( "tactics", _("Create tactics training"), Iconos.Tacticas() ),)
+                liMasOpciones = (("tactics", _("Create tactics training"), Iconos.Tacticas()),)
 
             resp = self.utilidades(liMasOpciones)
             if resp == "tactics":
@@ -212,7 +211,7 @@ class GestorEntPos(Gestor.Gestor):
         elif clave == k_pgnInformacion:
             self.pgnInformacionMenu(self.dicEtiquetasPGN)
 
-        elif clave in ( k_siguiente, k_anterior ):
+        elif clave in (k_siguiente, k_anterior):
             self.ent_siguiente(clave)
 
         elif clave == k_peliculaSeguir:
@@ -232,7 +231,7 @@ class GestorEntPos(Gestor.Gestor):
     def ent_siguiente(self, tipo):
         if not (self.siJuegaHumano or self.estado == kFinJuego):
             return
-        pos = self.posEntreno + ( +1 if tipo == k_siguiente else -1 )
+        pos = self.posEntreno + (+1 if tipo == k_siguiente else -1)
         if pos > self.numEntrenos:
             pos = 1
         elif pos == 0:
@@ -240,12 +239,14 @@ class GestorEntPos(Gestor.Gestor):
         self.inicio(pos, self.numEntrenos, self.titEntreno, self.liEntrenos, self.siTutorActivado, self.jump)
 
     def controlTeclado(self, nkey):
-        if nkey in ( 43, 16777239 ):  # pulsado + o avpag
+        if nkey in (43, 16777239):  # pulsado + o avpag
             self.ent_siguiente(k_siguiente)
-        elif nkey in ( 45, 16777238 ):  # pulsado - o repag
+        elif nkey in (45, 16777238):  # pulsado - o repag
             self.ent_siguiente(k_anterior)
-        elif nkey == 80:
-            self.saveSelectedPosition(self.fenInicial)
+        elif nkey == 80: # P: salva
+            li = self.fenInicial.split("|")
+            li[2] = self.partida.pgnBaseRAW()
+            self.saveSelectedPosition("|".join(li))
 
     def finPartida(self):
         self.procesador.inicio()
@@ -283,7 +284,7 @@ class GestorEntPos(Gestor.Gestor):
         siBlancas = self.partida.ultPosicion.siBlancas
 
         if self.partida.numJugadas() > 0:
-            jgUltima = self.partida.liJugadas[-1]
+            jgUltima = self.partida.last_jg()
             if jgUltima.siJaqueMate:
                 self.ponResultado(kGanaRival if self.siJugamosConBlancas == siBlancas else kGanamos)
                 return
@@ -314,8 +315,8 @@ class GestorEntPos(Gestor.Gestor):
             self.piensaHumano(siBlancas)
 
     def piensaHumano(self, siBlancas):
-        fen = self.partida.ultPosicion.fen()
-        if self.siDirigido and (fen in self.dicDirigidoFen) and not self.dicDirigidoFen[fen] and self.siTutorActivado:
+        fenM2 = self.partida.ultPosicion.fenM2()
+        if self.siDirigido and (fenM2 in self.dicDirigidoFenM2) and not self.dicDirigidoFenM2[fenM2] and self.siTutorActivado:
             self.lineaTerminadaOpciones()
             return
 
@@ -326,10 +327,10 @@ class GestorEntPos(Gestor.Gestor):
     def piensaRival(self):
         self.rivalPensando = True
         pensarRival = True
-        fen = self.partida.ultPosicion.fen()
+        fenM2 = self.partida.ultPosicion.fenM2()
         if self.siDirigido and self.siTutorActivado:
-            if fen in self.dicDirigidoFen:
-                liOpciones = self.dicDirigidoFen[fen]
+            if fenM2 in self.dicDirigidoFenM2:
+                liOpciones = self.dicDirigidoFenM2[fenM2]
                 if liOpciones:
                     liJugadas = []
                     for siMain, jg in liOpciones:
@@ -347,9 +348,9 @@ class GestorEntPos(Gestor.Gestor):
                         self.guardaVariantes()
                     pensarRival = False
             if pensarRival and self.siDirigidoSeguir is None:
-                if not self.lineaTerminadaOpciones():
-                    self.rivalPensando = False
-                    return
+                self.lineaTerminadaOpciones()
+                self.rivalPensando = False
+                return
 
         if pensarRival:
             self.pensando(True)
@@ -384,113 +385,92 @@ class GestorEntPos(Gestor.Gestor):
             QTUtil2.mensajeTemporal(self.pantalla, _("This line training is completed."), 0.7)
             if not self.siTerminada():
                 if k_peliculaSeguir not in self.liOpcionesToolBar:
-                    self.liOpcionesToolBar.append(k_peliculaSeguir)
+                    self.liOpcionesToolBar.insert(4, k_peliculaSeguir)
                     self.pantalla.ponToolBar(self.liOpcionesToolBar)
             return False
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
-        movimiento = desde + hasta
+        movimiento = jg.movimiento()
 
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
-        if coronacion:
-            movimiento += coronacion
-
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
+        siMirarTutor = self.siTutorActivado
 
         if self.siTeclaPanico:
             self.sigueHumano()
             return False
 
-        if siBien:
-            siMirarTutor = self.siTutorActivado
+        if siMirarTutor:
 
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
+            fenM2 = self.partida.ultPosicion.fenM2()
+            if self.siDirigido and (fenM2 in self.dicDirigidoFenM2):
+                liOpciones = self.dicDirigidoFenM2[fenM2]
+                if len(liOpciones) > 1:
+                    self.guardaVariantes()
+                liMovs = []
+                siEsta = False
+                posMain = None
+                for siMain, jg1 in liOpciones:
+                    mv = jg1.movimiento()
+                    if siMain:
+                        posMain = mv[:2]
 
-            if siMirarTutor:
-                fen = self.partida.ultPosicion.fen()
-                if self.siDirigido and (fen in self.dicDirigidoFen):
-                    liOpciones = self.dicDirigidoFen[fen]
-                    if len(liOpciones) > 1:
-                        self.guardaVariantes()
-                    liMovs = []
-                    siEsta = False
-                    posMain = None
-                    for siMain, jg1 in liOpciones:
-                        mv = jg1.movimiento()
-                        if siMain:
-                            posMain = mv[:2]
-
-                        if mv.lower() == movimiento.lower():
-                            if self.siDirigidoVariantes:
-                                siEsta = True
-                            else:
-                                siEsta = siMain
-                            if siEsta:
-                                break
-                        liMovs.append((jg1.desde, jg1.hasta, siMain))
-
-                    if not siEsta:
-                        self.ponPosicion(self.partida.ultPosicion)
-                        if posMain and posMain != movimiento[:2]:
-                            self.tablero.markPosition(posMain)
+                    if mv.lower() == movimiento.lower():
+                        if self.siDirigidoVariantes:
+                            siEsta = True
                         else:
-                            self.tablero.ponFlechasTmp(liMovs)
-                        self.sigueHumano()
-                        return False
+                            siEsta = siMain
+                        if siEsta:
+                            break
+                    liMovs.append((jg1.desde, jg1.hasta, siMain))
 
-                else:
-                    if not self.siAnalizadoTutor:
-                        self.analizaTutor()
-                    if self.mrmTutor.mejorMovQue(movimiento):
-                        if not jg.siJaqueMate:
-                            tutor = Tutor.Tutor(self, self, jg, desde, hasta, False)
+                if not siEsta:
+                    self.ponPosicion(self.partida.ultPosicion)
+                    if posMain and posMain != movimiento[:2]:
+                        self.tablero.markPosition(posMain)
+                    else:
+                        self.tablero.ponFlechasTmp(liMovs)
+                    self.sigueHumano()
+                    return False
 
-                            if tutor.elegir(True):
-                                self.reponPieza(desde)
-                                desde = tutor.desde
-                                hasta = tutor.hasta
-                                coronacion = tutor.coronacion
-                                siBien, mens, jgTutor = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta,
-                                                                          coronacion)
-                                if siBien:
-                                    jg = jgTutor
+            else:
+                if not self.siAnalizadoTutor:
+                    self.analizaTutor()
+                if self.mrmTutor.mejorMovQue(movimiento):
+                    if not jg.siJaqueMate:
+                        tutor = Tutor.Tutor(self, self, jg, desde, hasta, False)
 
-                            del tutor
-                self.mrmTutor = None
+                        if tutor.elegir(True):
+                            self.reponPieza(desde)
+                            desde = tutor.desde
+                            hasta = tutor.hasta
+                            coronacion = tutor.coronacion
+                            siBien, mens, jgTutor = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta,
+                                                                      coronacion)
+                            if siBien:
+                                jg = jgTutor
 
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
+                        del tutor
+            self.mrmTutor = None
 
-            self.movimientosPiezas(jg.liMovs)
-
-            self.partida.ultPosicion = jg.posicion
-            self.masJugada(jg, True)
-            self.error = ""
-
-            self.siguienteJugada()
-            return True
-        else:
+        if self.siTeclaPanico:
             self.sigueHumano()
-            self.error = mens
             return False
+
+        self.movimientosPiezas(jg.liMovs)
+
+        self.partida.ultPosicion = jg.posicion
+        self.masJugada(jg, True)
+        self.error = ""
+
+        self.siguienteJugada()
+        return True
 
     def masJugada(self, jg, siNuestra):
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         self.partida.ultPosicion = jg.posicion
 
         # Preguntamos al mono si hay movimiento
@@ -540,7 +520,7 @@ class GestorEntPos(Gestor.Gestor):
 
             self.error = ""
 
-            if self.siDirigido and ( self.partida.ultPosicion.fen() not in self.dicDirigidoFen ):
+            if self.siDirigido and (self.partida.ultPosicion.fenM2() not in self.dicDirigidoFenM2):
                 self.lineaTerminadaOpciones()
 
             return True
@@ -576,7 +556,7 @@ class GestorEntPos(Gestor.Gestor):
         njug = self.partida.numJugadas()
         siBlancas = self.partida.siBlancas()
         if njug:
-            jg = self.partida.liJugadas[-1]
+            jg = self.partida.last_jg()
             numj = self.partida.primeraJugada() + (njug + 1) / 2 - 1
             titulo = "%d." % numj
             if siBlancas:
@@ -588,7 +568,7 @@ class GestorEntPos(Gestor.Gestor):
         for tit, txtp, siBlancas in self.liVariantes:
             if titulo == tit:
                 return
-        self.liVariantes.append((titulo, self.partida.guardaEnTexto(), siBlancas ))
+        self.liVariantes.append((titulo, self.partida.guardaEnTexto(), siBlancas))
 
         if len(self.liVariantes) == 1:
             if k_variantes not in self.liOpcionesToolBar:
@@ -627,15 +607,15 @@ class GestorEntPos(Gestor.Gestor):
     def compruebaComentarios(self):
         if not self.partida.liJugadas or not self.siDirigido:
             return
-        fen = self.partida.ultPosicion.fen()
-        if fen not in self.dicDirigidoFen:
+        fenM2 = self.partida.ultPosicion.fenM2()
+        if fenM2 not in self.dicDirigidoFenM2:
             return
-        jg = self.partida.liJugadas[-1]
+        jg = self.partida.last_jg()
         mv = jg.movimiento()
-        fen = jg.posicion.fen()
-        for k, liOpciones in self.dicDirigidoFen.iteritems():
+        fenM2 = jg.posicion.fenM2()
+        for k, liOpciones in self.dicDirigidoFenM2.iteritems():
             for siMain, jg1 in liOpciones:
-                if jg1.posicion.fen() == fen and jg1.movimiento() == mv:
+                if jg1.posicion.fenM2() == fenM2 and jg1.movimiento() == mv:
                     if jg1.critica and not jg.critica:
                         jg.critica = jg1.critica
                     if jg1.comentario and not jg.comentario:
@@ -725,10 +705,9 @@ class GestorEntPos(Gestor.Gestor):
 
         Util.dic8ini(nomIni, dicIni)
 
-        QTUtil2.mensaje(self.pantalla, _X(_("Tactic training %1 created."), nomDir) + "<br>" + \
+        QTUtil2.mensaje(self.pantalla, _X(_("Tactic training %1 created."), nomDir) + "<br>" +
                         _X(_(
-                            "You can access this training from menu Trainings-Learn tactics by repetition-%1"),
-                           nomDir))
+                                "You can access this training from menu Trainings-Learn tactics by repetition-%1"),
+                                nomDir))
 
         self.procesador.entrenamientos.rehaz()
-

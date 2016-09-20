@@ -1,18 +1,18 @@
-import random
-import datetime
 import collections
 import copy
+import datetime
+import random
 
+import LCEngine
+
+from Code import Apertura
+from Code import Gestor
+from Code import Partida
+from Code.QT import PantallaJuicio
+from Code.QT import QTUtil2
+from Code.SQL import Base
+from Code import Util
 from Code.Constantes import *
-import Code.Util as Util
-import Code.Partida as Partida
-import Code.Jugada as Jugada
-import Code.Movimientos as Movimientos
-import Code.SQL.Base as Base
-import Code.Apertura as Apertura
-import Code.Gestor as Gestor
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaJuicio as PantallaJuicio
 
 class GestorFideFics(Gestor.Gestor):
     def selecciona(self, tipo):
@@ -42,7 +42,7 @@ class GestorFideFics(Gestor.Gestor):
         self.siCompetitivo = siCompetitivo
         color = self.determinaColor(nivel)
         db = Base.DBBase(self._db)
-        dbf = db.dbfT("data", "ROWID", condicion="LEVEL=%d AND WHITE=%d" % (nivel, 1 if color else 0 ))
+        dbf = db.dbfT("data", "ROWID", condicion="LEVEL=%d AND WHITE=%d" % (nivel, 1 if color else 0))
         dbf.leer()
         reccount = dbf.reccount()
 
@@ -52,10 +52,10 @@ class GestorFideFics(Gestor.Gestor):
         # f = open("12001.pgn","wb")
         # for recno in range(1,reccount+1):
         # dbf.goto(recno)
-        # pv = Movimientos.xpv2pv(dbf.MOVS)
+        # pv = LCEngine.xpv2pv(dbf.MOVS)
         # # if pv.startswith( "d2d4" ) and "RaulJRojel" in dbf.CABS and "tunante" in dbf.CABS:
         # # break
-        # pv = Movimientos.xpv2pv(dbf.MOVS)
+        # pv = LCEngine.xpv2pv(dbf.MOVS)
         # if pv.startswith( "d2d4" ):
         # p = Partida.Partida()
         # p.leerPV(pv)
@@ -68,14 +68,14 @@ class GestorFideFics(Gestor.Gestor):
 
         recno = random.randint(1, reccount)
         dbf.goto(recno)
-        id = dbf.ROWID
+        xid = dbf.ROWID
         dbf.cerrar()
         db.cerrar()
-        return id
+        return xid
 
-    def readID(self, id):
+    def readID(self, xid):
         db = Base.DBBase(self._db)
-        dbf = db.dbfT("data", "LEVEL,WHITE,CABS,MOVS", condicion="ROWID=%d" % id)
+        dbf = db.dbfT("data", "LEVEL,WHITE,CABS,MOVS", condicion="ROWID=%d" % xid)
         dbf.leer()
         dbf.gotop()
 
@@ -85,7 +85,7 @@ class GestorFideFics(Gestor.Gestor):
         self.siJugamosConBlancas = siBlancas
         self.siRivalConBlancas = not siBlancas
 
-        pv = Movimientos.xpv2pv(dbf.MOVS)
+        pv = LCEngine.xpv2pv(dbf.MOVS)
         self.partidaObj = Partida.Partida()
         self.partidaObj.leerPV(pv)
         self.posJugadaObj = 0
@@ -157,15 +157,15 @@ class GestorFideFics(Gestor.Gestor):
         self.ponPiezasAbajo(self.siJugamosConBlancas)
         self.quitaAyudas(True, siQuitarAtras=siCompetitivo)
         self.mostrarIndicador(True)
-        rotulo = "%s: <b>%d</b> | %s: <b>%d</b>" % (self._titulo, self.eloUsu, _("Elo rival"), self.eloObj )
-        rotulo += " | %+d %+d %+d" % ( self.pwin, self.pdraw, self.plost )
+        rotulo = "%s: <b>%d</b> | %s: <b>%d</b>" % (self._titulo, self.eloUsu, _("Elo rival"), self.eloObj)
+        rotulo += " | %+d %+d %+d" % (self.pwin, self.pdraw, self.plost)
         self.ponRotulo1(rotulo)
 
         self.ponRotulo2("")
         self.pgnRefresh(True)
         self.ponCapInfoPorDefecto()
 
-        #-Aplazamiento 2/2--------------------------------------------------
+        # -Aplazamiento 2/2--------------------------------------------------
         if aplazamiento:
             self.mueveJugada(kMoverFinal)
             self.ponPuntos()
@@ -175,13 +175,13 @@ class GestorFideFics(Gestor.Gestor):
         self.siguienteJugada()
 
     def ponPuntos(self):
-        self.ponRotulo2("%s : <b>%d</b>" % ( _("Points"), self.puntos ))
+        self.ponRotulo2("%s : <b>%d</b>" % (_("Points"), self.puntos))
 
     def ponToolBar(self):
         if self.siCompetitivo:
-            liTool = ( k_rendirse, k_aplazar, k_configurar, k_utilidades )
+            liTool = (k_rendirse, k_aplazar, k_configurar, k_utilidades)
         else:
-            liTool = ( k_rendirse, k_aplazar, k_atras, k_configurar, k_utilidades )
+            liTool = (k_rendirse, k_aplazar, k_atras, k_configurar, k_utilidades)
 
         self.pantalla.ponToolBar(liTool)
 
@@ -293,33 +293,14 @@ class GestorFideFics(Gestor.Gestor):
 
             self.siJuegaHumano = True
             self.pensando(True)
-            self.analizaInicio()
+            if self.continueTt:
+                self.analizaInicio()
             self.activaColor(siBlancas)
             self.pensando(False)
 
     def mueveHumano(self, desde, hasta, coronacion=""):
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
-            return False
-
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
-
-        siBien, mens, jgUsu = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-
-        if not siBien:
-            self.sigueHumano()
-            self.error = mens
-            return False
-
-        if self.siTeclaPanico:
-            self.sigueHumano()
+        jgUsu = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jgUsu:
             return False
 
         jgObj = self.partidaObj.jugada(self.posJugadaObj)
@@ -340,17 +321,18 @@ class GestorFideFics(Gestor.Gestor):
             siBookUsu = self.book.compruebaHumano(fen, desde, hasta)
             siBookObj = self.book.compruebaHumano(fen, jgObj.desde, jgObj.hasta)
             if siBookUsu:
-                comentarioUsu = _( "book move")
+                comentarioUsu = _("book move")
             if siBookObj:
-                comentarioObj = _( "book move")
+                comentarioObj = _("book move")
             if siBookUsu and siBookObj:
                 if jgObj.movimiento() == jgUsu.movimiento():
                     comentario = "%s: %s" % (_("Same book move"), jgObj.pgnSP())
                 else:
                     bmove = _("book move")
                     comentario = "%s: %s %s\n%s: %s %s" % (self.nombreObj, jgObj.pgnSP(), bmove,
-                                                                self.configuracion.jugador, jgUsu.pgnSP(), bmove)
-                QTUtil2.mensajeTemporal(self.pantalla, comentario, 2)
+                                                           self.configuracion.jugador, jgUsu.pgnSP(), bmove)
+                w = PantallaJuicio.MensajeF(self.pantalla, comentario)
+                w.mostrar()
                 siAnalizaJuez = False
             else:
                 siAnalizaJuez = True
@@ -387,15 +369,15 @@ class GestorFideFics(Gestor.Gestor):
             self.puntos += dpts
             self.ponPuntos()
 
-            comentarioUsu += " %s"%(rmUsu.abrTexto())
-            comentarioObj += " %s"%(rmObj.abrTexto())
+            comentarioUsu += " %s" % (rmUsu.abrTexto())
+            comentarioObj += " %s" % (rmObj.abrTexto())
 
-            comentarioPuntos = "%s = %d %+d %+d = %d"%(_("Points"), self.puntos-dpts, rmUsu.puntosABS(),
-                                                            -rmObj.puntosABS(), self.puntos)
+            comentarioPuntos = "%s = %d %+d %+d = %d" % (_("Points"), self.puntos - dpts, rmUsu.puntosABS(),
+                                                         -rmObj.puntosABS(), self.puntos)
 
-            comentario = "%s: %s %s\n%s: %s %s\n%s"%( self.nombreObj, jgObj.pgnSP(), comentarioObj,
-                                                  self.configuracion.jugador, jgUsu.pgnSP(), comentarioUsu,
-                                                  comentarioPuntos )
+            comentario = "%s: %s %s\n%s: %s %s\n%s" % (self.nombreObj, jgObj.pgnSP(), comentarioObj,
+                                                       self.configuracion.jugador, jgUsu.pgnSP(), comentarioUsu,
+                                                       comentarioPuntos)
 
         self.analizaFinal()
 
@@ -419,8 +401,7 @@ class GestorFideFics(Gestor.Gestor):
             if self.posJugadaObj:
                 self.comentario = None
 
-        self.partida.liJugadas.append(jg)
-        self.partida.ultPosicion = jg.posicion
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
         self.movimientosPiezas(jg.liMovs, True)
@@ -496,12 +477,12 @@ class GestorFideFics(Gestor.Gestor):
         lik.close()
 
         dd = Util.DicSQL(self._fichEstad, tabla="color")
-        clave = "%s-%d" % ( self._TIPO, self.nivel)
+        clave = "%s-%d" % (self._TIPO, self.nivel)
         dd[clave] = self.siJugamosConBlancas
         dd.close()
 
     def determinaColor(self, nivel):
-        clave = "%s-%d" % ( self._TIPO, nivel)
+        clave = "%s-%d" % (self._TIPO, nivel)
         if not self.siCompetitivo:
             clave += "NC"
 
@@ -519,4 +500,3 @@ class GestorFideFics(Gestor.Gestor):
             self.ponteAlFinal()
             self.refresh()
             self.siguienteJugada()
-

@@ -1,18 +1,18 @@
-import os
-import shutil
 import codecs
 import collections
+import os
+import shutil
 
 from PyQt4 import QtCore, QtGui, QtSvg
 
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import QTVarios
+from Code import TrListas
+from Code import VarGen
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.TrListas as TrListas
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.FormLayout as FormLayout
 
 class ConjuntoPiezas:
     def __init__(self, nombre):
@@ -189,10 +189,10 @@ class WBlindfold(QTVarios.WDialogo):
         self.dicImgs = {}
 
         liOpciones = (
-            ( _("Hide"), HIDE ),
-            ( _("Green"), GREY ),
-            ( _("Checker"), CHECKER ),
-            ( _("Show"), SHOW ),
+            (_("Hide"), HIDE),
+            (_("Green"), GREY),
+            (_("Checker"), CHECKER),
+            (_("Show"), SHOW),
         )
         dicNomPiezas = TrListas.dicNomPiezas()
 
@@ -215,10 +215,10 @@ class WBlindfold(QTVarios.WDialogo):
 
         btSwap = Controles.PB(self, _("Swap"), self.swap, plano=False)
 
-        liAcciones = (  ( _("Save"), Iconos.Grabar(), "grabar" ), None,
-                        ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-                        ( _("Configurations"), Iconos.Opciones(), "configurations" ), None,
-        )
+        liAcciones = ((_("Save"), Iconos.Grabar(), "grabar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
+                      (_("Configurations"), Iconos.Opciones(), "configurations"), None,
+                      )
         tb = Controles.TB(self, liAcciones)
 
         ly = Colocacion.G()
@@ -298,7 +298,7 @@ class WBlindfold(QTVarios.WDialogo):
                 self.reset()
             else:
                 liGen = [(None, None)]
-                liGen.append(( _("Name") + ":", "" ))
+                liGen.append((_("Name") + ":", ""))
 
                 resultado = FormLayout.fedit(liGen, title=_("Save current configuration"), parent=self, anchoMinimo=460,
                                              icon=Iconos.TutorialesCrear())

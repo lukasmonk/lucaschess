@@ -1,14 +1,15 @@
-import os
 import codecs
+import os
 
-import Code.Util as Util
-import Code.Partida as Partida
-import Code.Analisis as Analisis
-import Code.MotorInterno as MotorInterno
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaTutor as PantallaTutor
+import LCEngine
 
-class Tutor():
+from Code import Analisis
+from Code import Partida
+from Code.QT import PantallaTutor
+from Code.QT import QTUtil2
+from Code import Util
+
+class Tutor:
     def __init__(self, procesador, gestor, jg, desde, hasta, siEntrenando):
         self.procesador = procesador
         self.gestor = gestor
@@ -31,8 +32,6 @@ class Tutor():
         self.listaRM = None  # necesario
 
         self.salvarCSV = gestor.configuracion.salvarCSV
-
-        self.ml = MotorInterno.MotorInterno()
 
         self.siMoviendoTiempo = False
 
@@ -71,7 +70,7 @@ class Tutor():
         siRival = self.rmRival and " " in self.rmRival.getPV()
 
         self.liApPosibles = liApPosibles
-        siApertura = not (liApPosibles is None )
+        siApertura = not (liApPosibles is None)
         if siApertura:
             siRival = False
 
@@ -80,7 +79,7 @@ class Tutor():
         self.cambiadoRM(0)
 
         self.partidaUsuario = Partida.Partida(self.jg.posicion)
-        self.partidaUsuario.liJugadas.append(self.jg)
+        self.partidaUsuario.append_jg(self.jg)
         self.partidaUsuario.leerPV(self.rmUsuario.getPV())
         self.posUsuario = 0
         self.maxUsuario = len(self.partidaUsuario.liJugadas)
@@ -100,7 +99,7 @@ class Tutor():
                 self.partidaRival = Partida.Partida(self.ultPosicion).leerPV(pvBloque)
                 self.posRival = 0
                 self.maxRival = len(self.partidaRival.liJugadas) - 1
-                if self.maxRival>= 0:
+                if self.maxRival >= 0:
                     self.tableroRival.ponPosicion(self.partidaRival.liJugadas[0].posicion)
                     self.mueveRival(True)
                     w.ponPuntuacionRival(self.rmRival.texto())
@@ -110,8 +109,8 @@ class Tutor():
 
         if w.exec_():
             if w.siElegidaApertura:
-                desde = self.partidaAperturas.liJugadas[0].desde
-                hasta = self.partidaAperturas.liJugadas[0].hasta
+                desde = self.partidaAperturas.jugada(0).desde
+                hasta = self.partidaAperturas.jugada(0).hasta
                 if desde == self.desde and hasta == self.hasta:
                     return False
                 self.desde = desde
@@ -142,7 +141,7 @@ class Tutor():
             self.partidaUsuario.siEmpiezaConNegras = not self.partidaUsuario.siEmpiezaConNegras
             txt = self.partidaUsuario.pgnBaseRAW(numJugada)
             puntos = self.rmUsuario.texto()
-            vusu = "%s : %s" % ( puntos, txt )
+            vusu = "%s : %s" % (puntos, txt)
             jg.variantes = vtut.replace("\n", "")
             jg.comentario = vusu.replace("\n", "")
 
@@ -155,7 +154,7 @@ class Tutor():
                 pv1 = rm.getPV().split(" ")[0]
                 desde = pv1[:2]
                 hasta = pv1[2:4]
-                coronacion = pv1[4] if len(pv1) == 5 else None
+                coronacion = pv1[4] if len(pv1) == 5 else ""
                 nombre = pb.pgnSP(desde, hasta, coronacion)
                 nombre += " " + rm.abrTexto()
 
@@ -171,7 +170,7 @@ class Tutor():
         self.w.ponPuntuacionTutor(rm.texto())
 
         self.posTutor = 0
-        self.maxTutor = len(self.partidaTutor.liJugadas)
+        self.maxTutor = len(self.partidaTutor)
         self.mueveTutor(True)
 
     def mueve(self, quien, que):
@@ -241,7 +240,7 @@ class Tutor():
         else:
             self.posUsuario = self.maxUsuario - 1
 
-        jg = self.partidaUsuario.liJugadas[self.posUsuario if self.posUsuario > -1 else 0]
+        jg = self.partidaUsuario.jugada(self.posUsuario if self.posUsuario > -1 else 0)
         if siBase:
             self.tableroUsuario.ponPosicion(jg.posicionBase)
         else:
@@ -262,7 +261,7 @@ class Tutor():
         else:
             self.posTutor = self.maxTutor - 1
 
-        jg = self.partidaTutor.liJugadas[self.posTutor if self.posTutor > -1 else 0]
+        jg = self.partidaTutor.jugada(self.posTutor if self.posTutor > -1 else 0)
         if siBase:
             self.tableroTutor.ponPosicion(jg.posicionBase)
         else:
@@ -283,7 +282,7 @@ class Tutor():
         else:
             self.posRival = self.maxRival - 1
 
-        jg = self.partidaRival.liJugadas[self.posRival if self.posRival > -1 else 0]
+        jg = self.partidaRival.jugada(self.posRival if self.posRival > -1 else 0)
         if siBase:
             self.tableroRival.ponPosicion(jg.posicionBase)
         else:
@@ -304,7 +303,7 @@ class Tutor():
         else:
             self.posApertura = self.maxApertura - 1
 
-        jg = self.partidaAperturas.liJugadas[self.posApertura if self.posApertura > -1 else 0]
+        jg = self.partidaAperturas.jugada(self.posApertura if self.posApertura > -1 else 0)
         if siBase:
             self.tableroAperturas.ponPosicion(jg.posicionBase)
         else:
@@ -321,46 +320,29 @@ class Tutor():
 
     def cambiarApertura(self, numero):
         self.partidaAperturas = Partida.Partida(self.ultPosicion).leerPV(self.liApPosibles[numero].a1h8)
-        self.tableroAperturas.ponPosicion(self.partidaAperturas.liJugadas[0].posicion)
-        self.maxApertura = len(self.partidaAperturas.liJugadas)
+        self.tableroAperturas.ponPosicion(self.partidaAperturas.jugada(0).posicion)
+        self.maxApertura = len(self.partidaAperturas)
         self.mueveApertura(siInicio=True)
 
     def opcionesAperturas(self):
-        return [( ap.trNombre, num ) for num, ap in enumerate(self.liApPosibles)]
+        return [(ap.trNombre, num) for num, ap in enumerate(self.liApPosibles)]
 
     def analiza(self, quien):
         if quien == "Tutor":
             rmTutor = self.listaRM[self.posRM][0]
-            jg = self.partidaTutor.liJugadas[self.posTutor]
+            jg = self.partidaTutor.jugada(self.posTutor)
             pts = rmTutor.texto()
         else:
-            jg = self.partidaUsuario.liJugadas[self.posUsuario]
+            jg = self.partidaUsuario.jugada(self.posUsuario)
             pts = self.rmUsuario.texto()
 
         Analisis.AnalisisVariantes(self.w, self.gestor.xtutor, jg, self.siBlancas, pts)
 
-    def ponFlechas(self, tablero, fen, siMB, siMovimientos):
-        self.ml.ponFen(fen)
-        self.ml.calculaEstado()
-        if siMovimientos:
-            li = self.ml.listaMovimientos() if siMB else self.ml.listaMovimientosOB()
-        else:
-            li = self.ml.listaCapturas(siMB)
-
-        tablero.quitaFlechas()
-        if tablero.flechaSC:
-            tablero.flechaSC.hide()
-        for m in li:
-            pv = m.pv()
-            d = pv[:2]
-            h = pv[2:4]
-            tablero.creaFlechaMov(d, h, "m" if siMovimientos else "c")
-
-    def exePulsadoNumTutor(self, siIzq, siActivar, numero):
+    def exePulsadoNumTutor(self, siActivar, numero):
         if numero in [1, 8]:
             if siActivar:
                 # Que jugada esta en el tablero
-                jg = self.partidaTutor.liJugadas[self.posTutor if self.posTutor > -1 else 0]
+                jg = self.partidaTutor.jugada(self.posTutor if self.posTutor > -1 else 0)
                 if self.posTutor == -1:
                     fen = jg.posicionBase.fen()
                 else:
@@ -370,17 +352,24 @@ class Tutor():
                     siMB = numero == 1
                 else:
                     siMB = numero == 8
-                self.ponFlechas(self.tableroTutor, fen, siMB, siIzq)
+                self.tableroTutor.quitaFlechas()
+                if self.tableroTutor.flechaSC:
+                    self.tableroTutor.flechaSC.hide()
+                li = LCEngine.getCaptures(fen, siMB)
+                for m in li:
+                    d = m.desde()
+                    h = m.hasta()
+                    self.tableroTutor.creaFlechaMov(d, h, "c")
             else:
                 self.tableroTutor.quitaFlechas()
                 if self.tableroTutor.flechaSC:
                     self.tableroTutor.flechaSC.show()
 
-    def exePulsadoNumUsuario(self, siIzq, siActivar, numero):
+    def exePulsadoNumUsuario(self, siActivar, numero):
         if numero in [1, 8]:
             if siActivar:
                 # Que jugada esta en el tablero
-                jg = self.partidaUsuario.liJugadas[self.posUsuario if self.posUsuario > -1 else 0]
+                jg = self.partidaUsuario.jugada(self.posUsuario if self.posUsuario > -1 else 0)
                 if self.posUsuario == -1:
                     fen = jg.posicionBase.fen()
                 else:
@@ -390,7 +379,14 @@ class Tutor():
                     siMB = numero == 1
                 else:
                     siMB = numero == 8
-                self.ponFlechas(self.tableroUsuario, fen, siMB, siIzq)
+                self.tableroUsuario.quitaFlechas()
+                if self.tableroUsuario.flechaSC:
+                    self.tableroUsuario.flechaSC.hide()
+                li = LCEngine.getCaptures(fen, siMB)
+                for m in li:
+                    d = m.desde()
+                    h = m.hasta()
+                    self.tableroUsuario.creaFlechaMov(d, h, "c")
             else:
                 self.tableroUsuario.quitaFlechas()
                 if self.tableroUsuario.flechaSC:
@@ -427,9 +423,8 @@ class Tutor():
                 f = codecs.open(self.salvarCSV, "a", "utf-8", 'ignore')
 
             f.write('%s;%s;"%s";"%s";%d;%d;"%s";%d;%d;"%s";%d\n' % (
-                fecha, hora, fen, suggested_move, suggested_move_puntos, suggested_move_mate, \
-                player_move, player_move_puntos, player_move_mate, tutor, tutor_tiempo ))
+                fecha, hora, fen, suggested_move, suggested_move_puntos, suggested_move_mate,
+                player_move, player_move_puntos, player_move_mate, tutor, tutor_tiempo))
             f.close()
         except:
             pass
-

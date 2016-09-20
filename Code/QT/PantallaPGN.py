@@ -1,27 +1,27 @@
-import os
-import copy
 import codecs
+import copy
+import os
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.SQL as SQL
-import Code.PGN as PGN
-import Code.GM as GM
-import Code.TrListas as TrListas
-import Code.ControlPosicion as ControlPosicion
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Grid as Grid
-import Code.QT.Columnas as Columnas
-import Code.QT.PantallaBooks as PantallaBooks
-import Code.QT.PantallaParamAnalisis as PantallaParamAnalisis
-import Code.QT.FormLayout as FormLayout
+from Code import ControlPosicion
+from Code import GM
+from Code import PGN
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaBooks
+from Code.QT import PantallaParamAnalisis
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import SQL
+from Code import TrListas
+from Code import Util
+from Code import VarGen
 
 class EstadoWpgn:
     def guarda(self, window, dbf):
@@ -91,7 +91,7 @@ class WElegir(QTVarios.WDialogo):
             oColumnas.nueva(clave, rotulo, tam * 6, siCentrado=siCentrado)
 
         # # Claves segun orden estandar
-        liBasic = ("EVENT", "SITE", "DATE", "ROUND", "WHITE", "BLACK", "RESULT", "ECO", "FEN", "WHITEELO", "BLACKELO" )
+        liBasic = ("EVENT", "SITE", "DATE", "ROUND", "WHITE", "BLACK", "RESULT", "ECO", "FEN", "WHITEELO", "BLACKELO")
         self.liOrdenClaves = []  # nos servira en el exterior, para paste pgn y para mostrar info
         for clave in liBasic:
             if clave in dClaves:
@@ -121,23 +121,23 @@ class WElegir(QTVarios.WDialogo):
 
         # Toolbar
         if siElegir:
-            liAcciones = [( _("Choose"), Iconos.Aceptar(), self.elegir ), None,
-                          ( _("Cancel"), Iconos.Cancelar(), self.cancelar ), None,
-                          ( _("First"), Iconos.Inicio(), self.grid.gotop ),
-                          ( _("Last"), Iconos.Final(), self.grid.gobottom ), None,
-                          ( _("Filter"), Iconos.Filtrar(), self.filtrar ), None,
-            ]
+            liAcciones = [(_("Choose"), Iconos.Aceptar(), self.elegir), None,
+                          (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                          (_("First"), Iconos.Inicio(), self.grid.gotop),
+                          (_("Last"), Iconos.Final(), self.grid.gobottom), None,
+                          (_("Filter"), Iconos.Filtrar(), self.filtrar), None,
+                          ]
         else:
             liAcciones = [
-                ( _("Close"), Iconos.MainMenu(), self.cancelar ), None,
-                ( _("View"), Iconos.Ver(), self.elegir ), None,
-                ( _("Edit"), Iconos.Modificar(), self.editar ), None,
-                ( _("Save"), Iconos.Grabar(), self.guardar ), None,
-                ( _("First"), Iconos.Inicio(), self.grid.gotop ),
-                ( _("Last"), Iconos.Final(), self.grid.gobottom ), None,
-                ( _("Filter"), Iconos.Filtrar(), self.filtrar ), None,
-                ( _("Remove"), Iconos.Borrar(), self.borrar ), None,
-                ( _("Utilities"), Iconos.Utilidades(), self.utilidades ), None
+                (_("Close"), Iconos.MainMenu(), self.cancelar), None,
+                (_("View"), Iconos.Ver(), self.elegir), None,
+                (_("Edit"), Iconos.Modificar(), self.editar), None,
+                (_("Save"), Iconos.Grabar(), self.guardar), None,
+                (_("First"), Iconos.Inicio(), self.grid.gotop),
+                (_("Last"), Iconos.Final(), self.grid.gobottom), None,
+                (_("Filter"), Iconos.Filtrar(), self.filtrar), None,
+                (_("Remove"), Iconos.Borrar(), self.borrar), None,
+                (_("Utilities"), Iconos.Utilidades(), self.utilidades), None
             ]
         tb = Controles.TBrutina(self, liAcciones)
 
@@ -151,7 +151,7 @@ class WElegir(QTVarios.WDialogo):
     def ponStatus(self):
         txt = "%s: %d" % (_("Games"), self.dbf.reccount())
         if self.dbf.condicion:
-            txt += " | %s: %s" % ( _("Filter"), self.dbf.condicion)
+            txt += " | %s: %s" % (_("Filter"), self.dbf.condicion)
         self.status.showMessage(txt, 0)
 
     def closeEvent(self, event):  # Cierre con X
@@ -287,7 +287,7 @@ class WElegir(QTVarios.WDialogo):
             except:
                 QTUtil.ponPortapapeles(dato)
                 QTUtil2.mensError(self, "%s : %s\n\n%s" % (
-                    _("Unable to save"), resp, _("It is saved in the clipboard to paste it wherever you want.") ))
+                    _("Unable to save"), resp, _("It is saved in the clipboard to paste it wherever you want.")))
 
             self.dbf.ponSelect(antSelect)
 
@@ -315,7 +315,7 @@ class WElegir(QTVarios.WDialogo):
             result = dic["RESULT"]
             if result:
                 result = result.replace(" ", "")
-                if result in ( "1-0", "0-1", "1/2-1/2" ):
+                if result in ("1-0", "0-1", "1/2-1/2"):
                     jugadas = dbf.leeOtroCampo(i, "PGN")
                     jg = jugadas.strip().replace("e.p.", "").replace("#+", "#")
                     if not jg.endswith(result):
@@ -377,13 +377,13 @@ class WElegir(QTVarios.WDialogo):
         liGen.append((_("Name") + ":", ""))
 
         liGen.append(("<div align=\"right\">" + _("Only player moves") + ":<br>%s</div>" % _(
-            "(You can add multiple aliases separated by ; and wildcards with * )"), ""))
+                "(You can add multiple aliases separated by ; and wildcards with * )"), ""))
 
-        liGen.append((_("Only selected games") + ":", len(liSelec) > 1 ))
+        liGen.append((_("Only selected games") + ":", len(liSelec) > 1))
 
         li = [1, (0, _("Both sides")), (1, _("Only the winning side")), (2, _("The winning side and both if drawn"))]
 
-        liGen.append((_("Which side") + ":", li ))
+        liGen.append((_("Which side") + ":", li))
 
         eti = _("Play like a grandmaster")
         eti = _X(_('Create training to %1'), eti)
@@ -501,7 +501,7 @@ class WElegir(QTVarios.WDialogo):
                     else:
                         liNoCreados.append(alm.tacticblunders)
 
-                for x in ( alm.pgnblunders, alm.fnsbrilliancies, alm.pgnbrilliancies):
+                for x in (alm.pgnblunders, alm.fnsbrilliancies, alm.pgnbrilliancies):
                     if x:
                         if Util.existeFichero(x):
                             liCreados.append(x)
@@ -644,25 +644,26 @@ class WFiltrar(QtGui.QDialog):
 
         self.setWindowTitle(_("Filter"))
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowIcon(Iconos.Filtrar())
 
         self.liFiltro = liFiltro
         nFiltro = len(liFiltro)
 
         liCampos = [(x.cabecera, x.clave) for x in oColumnas.liColumnas if x.clave != "numero"]
-        liCampos.insert(0, ( "", None ))
-        liCondicion = [( "", None ),
-                       ( _("Equal"), "=" ),
-                       ( _("Not equal"), "<>" ),
-                       ( _("Greater than"), ">" ),
-                       ( _("Less than"), "<" ),
-                       ( _("Greater than or equal"), ">=" ),
-                       ( _("Less than or equal"), "<=" ),
-                       ( _("Like (wildcard = *)"), "LIKE" ),
-                       ( _("Not like (wildcard = *)"), "NOT LIKE" )]
+        liCampos.insert(0, ("", None))
+        liCondicion = [("", None),
+                       (_("Equal"), "="),
+                       (_("Not equal"), "<>"),
+                       (_("Greater than"), ">"),
+                       (_("Less than"), "<"),
+                       (_("Greater than or equal"), ">="),
+                       (_("Less than or equal"), "<="),
+                       (_("Like (wildcard = *)"), "LIKE"),
+                       (_("Not like (wildcard = *)"), "NOT LIKE")]
 
-        liUnion = [( "", None ),
-                   ( _("AND"), "AND" ),
-                   ( _("OR"), "OR" )]
+        liUnion = [("", None),
+                   (_("AND"), "AND"),
+                   (_("OR"), "OR")]
 
         f = Controles.TipoLetra(puntos=12)  # 0, peso=75 )
 
@@ -676,7 +677,7 @@ class WFiltrar(QtGui.QDialog):
         ly = Colocacion.G()
         ly.controlc(lbUni, 0, 0).controlc(lbPar0, 0, 1).controlc(lbCol, 0, 2).controlc(lbCon, 0, 3).controlc(lbVal, 0,
                                                                                                              4).controlc(
-            lbPar1, 0, 5)
+                lbPar1, 0, 5)
 
         self.numC = 8
         liC = []
@@ -708,10 +709,10 @@ class WFiltrar(QtGui.QDialog):
         self.liC = liC
 
         # Toolbar
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), self.aceptar ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), self.reject ), None,
-                      ( _("Reinit"), Iconos.Reiniciar(), self.reiniciar ), None,
-        ]
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.reject), None,
+                      (_("Reinit"), Iconos.Reiniciar(), self.reiniciar), None,
+                      ]
         tb = Controles.TBrutina(self, liAcciones)
 
         # Layout
@@ -782,14 +783,72 @@ class WFiltrar(QtGui.QDialog):
                 where += " %s " % union
             if par0:
                 where += "("
-            if condicion in ( "=", "<>" ) and not valor:
+            if condicion in ("=", "<>") and not valor:
                 where += "(( %s %s ) OR (%s %s ''))" % (
-                    campo, "IS NULL" if condicion == "=" else "IS NOT NULL", campo, condicion )
+                    campo, "IS NULL" if condicion == "=" else "IS NOT NULL", campo, condicion)
             else:
-                where += "UPPER(%s) %s '%s'" % (campo, condicion, valor.upper())
+                valor = valor.upper()
+                if valor.isupper():
+                    where += "UPPER(%s) %s '%s'" % (campo, condicion, valor.upper())
+                else:
+                    where += "%s %s '%s'" % (campo, condicion, valor.upper())
             if par1:
                 where += ")"
         return where
+
+class EM_SQL(Controles.EM):
+    def __init__(self, owner, where, liCampos):
+        self.liCampos = liCampos
+        Controles.EM.__init__(self, owner, where, siHTML=False)
+
+    def mousePressEvent(self, event):
+        Controles.EM.mousePressEvent(self, event)
+        if event.button() == QtCore.Qt.RightButton:
+            menu = QTVarios.LCMenu(self)
+            rondo = QTVarios.rondoPuntos()
+            for txt, key in self.liCampos:
+                menu.opcion(key, txt, rondo.otro())
+            resp = menu.lanza()
+            if resp:
+                self.insertarTexto(resp)
+
+class WFiltrarRaw(QTVarios.WDialogo):
+    def __init__(self, wParent, oColumnas, where):
+        QtGui.QDialog.__init__(self, wParent)
+
+        QTVarios.WDialogo.__init__(self, wParent, _("Filter"), Iconos.Filtrar(), "rawfilter")
+
+        self.where = ""
+        liCampos = [(x.cabecera, x.clave) for x in oColumnas.liColumnas if x.clave != "numero"]
+
+        f = Controles.TipoLetra(puntos=12)  # 0, peso=75 )
+
+        lbRaw = Controles.LB(self, "%s:"%_("Raw SQL")).ponFuente(f)
+        self.edRaw = EM_SQL(self, where, liCampos).altoFijo(72).anchoMinimo(512).ponFuente(f)
+
+        lbHelp = Controles.LB(self, _("Right button to select a column of database")).ponFuente(f)
+        lyHelp = Colocacion.H().relleno().control(lbHelp).relleno()
+
+        ly = Colocacion.H().control(lbRaw).control(self.edRaw)
+
+        # Toolbar
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.reject), None,
+                      ]
+        tb = Controles.TBrutina(self, liAcciones)
+
+        # Layout
+        layout = Colocacion.V().control(tb).otro(ly).otro(lyHelp).margen(3)
+        self.setLayout(layout)
+
+        self.edRaw.setFocus()
+
+        self.recuperarVideo(siTam=False)
+
+    def aceptar(self):
+        self.where = self.edRaw.texto()
+        self.guardarVideo()
+        self.accept()
 
 def elegirPGN(owner, dbf, dClaves, gestor, estado, siElegir=False):
     w = WElegir(owner, dbf, dClaves, gestor, estado, siElegir)
@@ -864,7 +923,7 @@ def crearTactic(procesador, wowner, liRegistros, rutinaDatos):
 
     liJ = [(_("Default"), 0), (_("White"), 1), (_("Black"), 2)]
     config = FormLayout.Combobox(_("Point of view"), liJ)
-    liGen.append(( config, 0 ))
+    liGen.append((config, 0))
 
     eti = _("Create tactics training")
     resultado = FormLayout.fedit(liGen, title=eti, parent=wowner, anchoMinimo=460, icon=Iconos.Tacticas())
@@ -951,6 +1010,7 @@ def crearTactic(procesador, wowner, liRegistros, rutinaDatos):
         fen = dicValores.get("FEN")
         if not fen:
             fen = fen0
+
         event = xdic("EVENT")
         site = xdic("SITE")
         date = xdic("DATE")
@@ -988,7 +1048,7 @@ def crearTactic(procesador, wowner, liRegistros, rutinaDatos):
 
     Util.dic8ini(nomIni, dicIni)
 
-    QTUtil2.mensaje(wowner, _X(_("Tactic training %1 created."), menuname) + "<br>" + \
+    QTUtil2.mensaje(wowner, _X(_("Tactic training %1 created."), menuname) + "<br>" +
                     _X(_("You can access this training from menu Trainings-Learn tactics by repetition-%1"),
                        restDir))
 

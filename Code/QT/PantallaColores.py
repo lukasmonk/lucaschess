@@ -1,22 +1,22 @@
-import os
 import base64
+import os
 
 from PyQt4 import QtCore, QtGui
 
-import Code.ControlPosicion as ControlPosicion
-import Code.Util as Util
-import Code.VarGen as VarGen
-import Code.TrListas as TrListas
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Tablero as Tablero
-import Code.QT.PantallaTabVFlechas as PantallaTabVFlechas
-import Code.QT.QTVarios as QTVarios
-import Code.QT.TabFlechas as TabFlechas
-import Code.QT.FormLayout as FormLayout
+from Code import ControlPosicion
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import PantallaTabVFlechas
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import TabFlechas
+from Code.QT import Tablero
+from Code import TrListas
+from Code import Util
+from Code import VarGen
 
 class BotonTema(QtGui.QPushButton):
     def __init__(self, parent, rutina):
@@ -238,11 +238,11 @@ class WColores(QTVarios.WDialogo):
         self.siBase = tableroOriginal.confTablero._id == "BASE"
 
         # Temas #############################################################################################################################
-        liOpciones = [(_("Your themes"), self.configuracion.ficheroTemas )]
+        liOpciones = [(_("Your themes"), self.configuracion.ficheroTemas)]
         for x in Util.listdir("Themes"):
             if x.endswith("lktheme"):
                 ctema = x[:-8]
-                liOpciones.append((ctema, "Themes/" + x ))
+                liOpciones.append((ctema, "Themes/" + x))
 
         self.cbTemas = Controles.CB(self, liOpciones, liOpciones[0][1]).capturaCambiado(self.cambiadoTema)
         self.lbSecciones = Controles.LB(self, _("Section") + ":")
@@ -276,7 +276,7 @@ class WColores(QTVarios.WDialogo):
         self.btNegrasPNG = BotonImagen(self, self.confTablero.png64Negras, self.actualizaTablero, self.btNegras)
         self.dialNegrasTrans = DialNum(self, self.confTablero.transNegras, self.actualizaTablero)
 
-        ## Background
+        # Background
         lbFondo = creaLB(_("Background"))
         self.btFondo = BotonColor(self, self.confTablero.colorFondo, self.actualizaTablero)
         self.btFondoPNG = BotonImagen(self, self.confTablero.png64Fondo, self.actualizaTablero, self.btFondo)
@@ -285,21 +285,21 @@ class WColores(QTVarios.WDialogo):
 
         # Actual
         self.chbTemas = Controles.CHB(self, _("Default"), self.confTablero.siDefTema()).capturaCambiado(self,
-                                                                                                  self.defectoTemas)
+                                                                                                        self.defectoTemas)
         if self.siBase:
             self.chbTemas.ponValor(False)
             self.chbTemas.setVisible(False)
-        #Exterior
+        # Exterior
         lbExterior = creaLB(_("Outer Border"))
         self.btExterior = BotonColor(self, self.confTablero.colorExterior, self.actualizaTablero)
-        #Texto
+        # Texto
         lbTexto = creaLB(_("Coordinates"))
         self.btTexto = BotonColor(self, self.confTablero.colorTexto, self.actualizaTablero)
-        #Frontera
+        # Frontera
         lbFrontera = creaLB(_("Inner Border"))
         self.btFrontera = BotonColor(self, self.confTablero.colorFrontera, self.actualizaTablero)
 
-        #Flechas
+        # Flechas
         lbFlecha = creaLB(_("Move indicator"))
         self.lyF = BotonFlecha(self, self.confTablero.fTransicion, self.confTablero.flechaDefecto,
                                self.actualizaTablero)
@@ -317,11 +317,11 @@ class WColores(QTVarios.WDialogo):
         lyActual.control(self.chbTemas, 0, 0)
         lyActual.controlc(lbPNG, 0, 2).controlc(lbTrans, 0, 3)
         lyActual.controld(lbBlancas, 1, 0).control(self.btBlancas, 1, 1).otroc(self.btBlancasPNG, 1, 2).otroc(
-            self.dialBlancasTrans, 1, 3)
+                self.dialBlancasTrans, 1, 3)
         lyActual.controld(lbNegras, 2, 0).control(self.btNegras, 2, 1).otroc(self.btNegrasPNG, 2, 2).otroc(
-            self.dialNegrasTrans, 2, 3)
+                self.dialNegrasTrans, 2, 3)
         lyActual.controld(lbFondo, 3, 0).control(self.btFondo, 3, 1).otroc(self.btFondoPNG, 3, 2).control(
-            self.chbExtended, 3, 3)
+                self.chbExtended, 3, 3)
         lyActual.controld(lbExterior, 4, 0).control(self.btExterior, 4, 1)
         lyActual.controld(lbTexto, 5, 0).control(self.btTexto, 5, 1)
         lyActual.controld(lbFrontera, 6, 0).control(self.btFrontera, 6, 1)
@@ -355,14 +355,14 @@ class WColores(QTVarios.WDialogo):
 
         # Coordenadas
         lyG = Colocacion.G()
-        ## _nCoordenadas
+        # _nCoordenadas
         lbCoordenadas = creaLB(_("Number"))
         liOpciones = [("0", 0), ("4", 4), ("2a", 2), ("2b", 3), ("2c", 5), ("2d", 6)]
         self.cbCoordenadas = Controles.CB(self, liOpciones, self.confTablero.nCoordenadas()).capturaCambiado(self.actualizaTableroM)
         self.chbDefCoordenadas = xDefecto(self.confTablero.siDefCoordenadas())
         l2mas1(lyG, 0, lbCoordenadas, self.cbCoordenadas, self.chbDefCoordenadas)
 
-        ## _tipoLetra
+        # _tipoLetra
         lbTipoLetra = creaLB(_("Font"))
         self.cbTipoLetra = QtGui.QFontComboBox()
         self.cbTipoLetra.setEditable(False)
@@ -372,29 +372,29 @@ class WColores(QTVarios.WDialogo):
         self.chbDefTipoLetra = xDefecto(self.confTablero.siDefTipoLetra())
         l2mas1(lyG, 1, lbTipoLetra, self.cbTipoLetra, self.chbDefTipoLetra)
 
-        ## _cBold
+        # _cBold
         self.chbBold = Controles.CHB(self, _("Bold"), self.confTablero.siBold()).capturaCambiado(self, self.actualizaTableroM)
         self.chbDefBold = xDefecto(self.confTablero.siDefBold())
         l2mas1(lyG, 2, None, self.chbBold, self.chbDefBold)
 
-        ## _tamLetra
+        # _tamLetra
         lbTamLetra = creaLB(_("Size") + " %")
         self.sbTamLetra = Controles.SB(self, self.confTablero.tamLetra(), 1, 200).tamMaximo(50).capturaCambiado(
-            self.actualizaTableroM)
+                self.actualizaTableroM)
         self.chbDefTamLetra = xDefecto(self.confTablero.siDefTamLetra())
         l2mas1(lyG, 3, lbTamLetra, self.sbTamLetra, self.chbDefTamLetra)
 
-        ## _sepLetras
+        # _sepLetras
         lbSepLetras = creaLB(_("Separation") + " %")
         self.sbSepLetras = Controles.SB(self, self.confTablero.sepLetras(), -1000, 1000).tamMaximo(50).capturaCambiado(
-            self.actualizaTableroM)
+                self.actualizaTableroM)
         self.chbDefSepLetras = xDefecto(self.confTablero.siDefSepLetras())
         l2mas1(lyG, 4, lbSepLetras, self.sbSepLetras, self.chbDefSepLetras)
 
         gbCoordenadas = Controles.GB(self, _("Coordinates"), lyG)
 
         lyOtros = Colocacion.G()
-        ## _nomPiezas
+        # _nomPiezas
         li = []
         lbPiezas = creaLB(_("Pieces"))
         for x in Util.listdir("Pieces"):
@@ -405,17 +405,17 @@ class WColores(QTVarios.WDialogo):
         self.chbDefPiezas = xDefecto(self.confTablero.siDefPiezas())
         l2mas1(lyOtros, 0, lbPiezas, self.cbPiezas, self.chbDefPiezas)
 
-        ## _tamRecuadro
+        # _tamRecuadro
         lbTamRecuadro = creaLB(_("Outer Border Size") + " %")
         self.sbTamRecuadro = Controles.SB(self, self.confTablero.tamRecuadro(), 0, 10000).tamMaximo(50).capturaCambiado(
-            self.actualizaTableroM)
+                self.actualizaTableroM)
         self.chbDefTamRecuadro = xDefecto(self.confTablero.siDefTamRecuadro())
         l2mas1(lyOtros, 1, lbTamRecuadro, self.sbTamRecuadro, self.chbDefTamRecuadro)
 
-        ## _tamFrontera
+        # _tamFrontera
         lbTamFrontera = creaLB(_("Inner Border Size") + " %")
         self.sbTamFrontera = Controles.SB(self, self.confTablero.tamFrontera(), 0, 10000).tamMaximo(50).capturaCambiado(
-            self.actualizaTableroM)
+                self.actualizaTableroM)
         self.chbDefTamFrontera = xDefecto(self.confTablero.siDefTamFrontera())
         l2mas1(lyOtros, 2, lbTamFrontera, self.sbTamFrontera, self.chbDefTamFrontera)
 
@@ -431,25 +431,25 @@ class WColores(QTVarios.WDialogo):
         self.tablero.ponPosicion(cp)
         self.rehazFlechas()
 
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), "aceptar" ),
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), "aceptar"),
                       None,
-                      ( _("Cancel"), Iconos.Cancelar(), "cancelar" ),
+                      (_("Cancel"), Iconos.Cancelar(), "cancelar"),
                       None,
-                      ( _("Your themes"), Iconos.Temas(), "temas" ),
+                      (_("Your themes"), Iconos.Temas(), "temas"),
                       None,
-                      ( _("Import"), Iconos.Mezclar(), "importar" ),
+                      (_("Import"), Iconos.Mezclar(), "importar"),
                       None,
-                      ( _("Export"), Iconos.Grabar(), "exportar" ),
+                      (_("Export"), Iconos.Grabar(), "exportar"),
                       None,
-        ]
+                      ]
         tb = Controles.TB(self, liAcciones)
 
-        ## tam tablero
+        # tam tablero
         self.lbTamTablero = Controles.LB(self, "%d px" % self.tablero.width())
 
         # Juntamos
         lyT = Colocacion.V().control(tb).espacio(15).control(self.tablero).controli(self.lbTamTablero).relleno(
-            1).margen(3)
+                1).margen(3)
 
         self.tab = Controles.Tab()
         self.tab.nuevaTab(gbTemas, _("Themes"))
@@ -688,13 +688,13 @@ class WColores(QTVarios.WDialogo):
 
         ct = self.confTablero
         for chb, obj, xv in (
-                (self.chbDefCoordenadas, self.cbCoordenadas, ct.nCoordenadas ),
-                (self.chbDefBold, self.chbBold, ct.siBold ),
-                (self.chbDefTamLetra, self.sbTamLetra, ct.tamLetra ),
-                (self.chbDefSepLetras, self.sbSepLetras, ct.sepLetras ),
-                (self.chbDefPiezas, self.cbPiezas, ct.nomPiezas ),
-                (self.chbDefTamRecuadro, self.sbTamRecuadro, ct.tamRecuadro ),
-                (self.chbDefTamFrontera, self.sbTamFrontera, ct.tamFrontera ) ):
+                (self.chbDefCoordenadas, self.cbCoordenadas, ct.nCoordenadas),
+                (self.chbDefBold, self.chbBold, ct.siBold),
+                (self.chbDefTamLetra, self.sbTamLetra, ct.tamLetra),
+                (self.chbDefSepLetras, self.sbSepLetras, ct.sepLetras),
+                (self.chbDefPiezas, self.cbPiezas, ct.nomPiezas),
+                (self.chbDefTamRecuadro, self.sbTamRecuadro, ct.tamRecuadro),
+                (self.chbDefTamFrontera, self.sbTamFrontera, ct.tamFrontera)):
             if chb.valor():
                 obj.ponValor(xv())
                 obj.setEnabled(False)
@@ -812,11 +812,11 @@ class WColores(QTVarios.WDialogo):
 
         nombre = tema["NOMBRE"] if tema else ""
         config = FormLayout.Editbox(_("Name"), ancho=160)
-        liGen.append((config, nombre ))
+        liGen.append((config, nombre))
 
         seccion = tema.get("SECCION", "") if tema else ""
         config = FormLayout.Editbox(_("Section"), ancho=160)
-        liGen.append((config, seccion ))
+        liGen.append((config, seccion))
 
         ico = Iconos.Grabar() if tema else Iconos.GrabarComo()
 
@@ -842,22 +842,22 @@ def cambiaColoresPGN(ventana, configuracion):
 
     dicNAGs = TrListas.dicNAGs()
     config = FormLayout.Colorbox(dicNAGs[1], 80, 20, siSTR=True)
-    liGen.append(( config, configuracion.color_nag1 ))
+    liGen.append((config, configuracion.color_nag1))
 
     config = FormLayout.Colorbox(dicNAGs[2], 80, 20, siSTR=True)
-    liGen.append(( config, configuracion.color_nag2 ))
+    liGen.append((config, configuracion.color_nag2))
 
     config = FormLayout.Colorbox(dicNAGs[3], 80, 20, siSTR=True)
-    liGen.append(( config, configuracion.color_nag3 ))
+    liGen.append((config, configuracion.color_nag3))
 
     config = FormLayout.Colorbox(dicNAGs[4], 80, 20, siSTR=True)
-    liGen.append(( config, configuracion.color_nag4 ))
+    liGen.append((config, configuracion.color_nag4))
 
     config = FormLayout.Colorbox(dicNAGs[5], 80, 20, siSTR=True)
-    liGen.append(( config, configuracion.color_nag5 ))
+    liGen.append((config, configuracion.color_nag5))
 
     config = FormLayout.Colorbox(dicNAGs[6], 80, 20, siSTR=True)
-    liGen.append(( config, configuracion.color_nag6 ))
+    liGen.append((config, configuracion.color_nag6))
 
     resultado = FormLayout.fedit(liGen, title=_("PGN"), parent=ventana, icon=Iconos.Vista(), siDefecto=True)
     if resultado:
@@ -912,10 +912,9 @@ def eligeTema(parent, fichTema):
 
     return None if resp is None else liTemas[int(resp)]
 
-def nag2ico( nag, tam ):
-    with open("./IntFiles/NAGs/Color/nag_%d.svg"%nag) as f:
+def nag2ico(nag, tam):
+    with open("./IntFiles/NAGs/Color/nag_%d.svg" % nag) as f:
         dato = f.read()
-        color = getattr(VarGen.configuracion,"color_nag%d"%nag)
-        dato = dato.replace("#3139ae",color)
-    return QTVarios.svg2ico(dato,tam)
-
+        color = getattr(VarGen.configuracion, "color_nag%d" % nag)
+        dato = dato.replace("#3139ae", color)
+    return QTVarios.svg2ico(dato, tam)

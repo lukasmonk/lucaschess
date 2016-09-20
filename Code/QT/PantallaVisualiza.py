@@ -1,22 +1,20 @@
 import os.path
 import time
 
+import LCEngine
 from PyQt4 import QtCore
 
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.MotorInterno as MotorInterno
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.FormLayout as FormLayout
-import Code.QT.Tablero as Tablero
-
-# liFens = []
+from Code import ControlPosicion
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import Util
 
 class WControl(QTVarios.WDialogo):
     def __init__(self, procesador, path_bloque):
@@ -50,10 +48,10 @@ class WControl(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), self.terminar ), None,
-            ( _("Play"), Iconos.Empezar(), self.play ), None,
-            ( _("New"), Iconos.Nuevo(), self.new ), None,
-            ( _("Remove"), Iconos.Borrar(), self.remove ), None,
+            (_("Close"), Iconos.MainMenu(), self.terminar), None,
+            (_("Play"), Iconos.Empezar(), self.play), None,
+            (_("New"), Iconos.Nuevo(), self.new), None,
+            (_("Remove"), Iconos.Borrar(), self.remove), None,
         )
         self.tb = Controles.TBrutina(self, liAcciones)
 
@@ -91,7 +89,7 @@ class WControl(QTVarios.WDialogo):
                 v = "x %s" % v
         elif col == "LEVEL":
             v = _("Finished") if v == 0 else str(v)
-        elif col in ( "POSITION", "COLOR", "ISATTACKED", "ISATTACKING" ):
+        elif col in ("POSITION", "COLOR", "ISATTACKED", "ISATTACKING"):
             v = _("Yes") if v else _("No")
         return v
 
@@ -155,21 +153,21 @@ class WControl(QTVarios.WDialogo):
         config = FormLayout.Combobox(_("Site"), liSites)
         if sitePreNum == -1:
             sitePreNum = liSites[0][0]
-        liGen.append(( config, sitePreNum ))
+        liGen.append((config, sitePreNum))
 
         liGen.append((None, None))
 
         # # Intervals
-        liGen.append((None, _("Seconds of every glance") + ":" ))
+        liGen.append((None, _("Seconds of every glance") + ":"))
         liGen.append((FormLayout.Spinbox(_("Seconds"), 1, 100, 50), intervaloPre))
 
-        liTypes = (( _("By piece"), True ), ( _("Fixed"), False ))
+        liTypes = ((_("By piece"), True), (_("Fixed"), False))
         config = FormLayout.Combobox(_("Type"), liTypes)
-        liGen.append(( config, intervaloPorPiezaPre ))
+        liGen.append((config, intervaloPorPiezaPre))
 
         liGen.append((None, None))
 
-        liGen.append((None, _("Ask for") + ":" ))
+        liGen.append((None, _("Ask for") + ":"))
         liGen.append((_("Position") + ":", posicionPre))
         liGen.append((_("Square color") + ":", colorPre))
         liGen.append((_("Is attacked?") + ":", esatacadaPre))
@@ -360,13 +358,13 @@ class WPlay(QTVarios.WDialogo):
 
         bt = Controles.PB(self, _("End game"), self.terminar, plano=False).ponIcono(Iconos.FinPartida()).ponFuente(f)
         self.btTablero = Controles.PB(self, _("Go to board"), self.activaTablero, plano=False).ponIcono(
-            Iconos.Tablero()).ponFuente(f)
+                Iconos.Tablero()).ponFuente(f)
         self.btComprueba = Controles.PB(self, _("Test the solution"), self.compruebaSolucion, plano=False).ponIcono(
-            Iconos.Check()).ponFuente(f)
+                Iconos.Check()).ponFuente(f)
         self.btGotoNextLevel = Controles.PB(self, _("Go to next level"), self.gotoNextLevel, plano=False).ponIcono(
-            Iconos.GoToNext()).ponFuente(f)
+                Iconos.GoToNext()).ponFuente(f)
         ly0 = Colocacion.H().control(bt).relleno().control(self.btTablero).control(self.btComprueba).control(
-            self.btGotoNextLevel)
+                self.btGotoNextLevel)
 
         lyBase = Colocacion.H().control(self.gbTablero).control(self.gbSolucion)
 
@@ -405,9 +403,9 @@ class WPlay(QTVarios.WDialogo):
 
         mens = ""
         if cp.enroques:
-            if ("K" if cp.siBlancas else "k" ) in cp.enroques:
+            if ("K" if cp.siBlancas else "k") in cp.enroques:
                 mens = "O-O"
-            if ("Q" if cp.siBlancas else "q" ) in cp.enroques:
+            if ("Q" if cp.siBlancas else "q") in cp.enroques:
                 if mens:
                     mens += " + "
                 mens += "O-O-O"
@@ -554,15 +552,17 @@ class WPlay(QTVarios.WDialogo):
         self.gbTablero.setTitle(titulo)
 
     def calculaSolucion(self):
-        mi = MotorInterno.MotorInterno()
-        mi.ponFen(self.cp.fen())
-        mi.calculaEstado()
+        fenMB = self.cp.fen()
+        fenOB = fenMB.replace(" w ", " b ") if "w" in fenMB else fenMB.replace(" b ", " w ")
         stAttacKing = set()
         stAttacKed = set()
-        for bando in (True, False):
-            for mv in mi.listaCapturas(bando):
-                stAttacKing.add(mv.a1())
-                stAttacKed.add(mv.h8())
+        for fen in (fenMB, fenOB):
+            LCEngine.setFen(fen)
+            liMV = LCEngine.getExMoves()
+            for mv in liMV:
+                if mv.captura():
+                    stAttacKing.add(mv.desde())
+                    stAttacKed.add(mv.hasta())
 
         liSolucion = []
         for posicion, pieza in self.cp.casillas.iteritems():

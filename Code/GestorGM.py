@@ -1,15 +1,15 @@
-import random
 import copy
+import random
 
+from Code import Apertura
+from Code import GM
+from Code import Gestor
+from Code import Jugada
+from Code.QT import PantallaGM
+from Code.QT import PantallaJuicio
+from Code.QT import QTUtil2
+from Code import Util
 from Code.Constantes import *
-import Code.Util as Util
-import Code.Jugada as Jugada
-import Code.Apertura as Apertura
-import Code.GM as GM
-import Code.Gestor as Gestor
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaJuicio as PantallaJuicio
-import Code.QT.PantallaGM as PantallaGM
 
 class GestorGM(Gestor.Gestor):
     def inicio(self, record):
@@ -66,7 +66,7 @@ class GestorGM(Gestor.Gestor):
         self.siRivalConBlancas = not self.siBlancas
         self.pensando(False)
 
-        self.pantalla.ponToolBar(( k_mainmenu, k_reiniciar, k_configurar, k_utilidades ))
+        self.pantalla.ponToolBar((k_mainmenu, k_reiniciar, k_configurar, k_utilidades))
         self.pantalla.activaJuego(True, False)
         self.ponMensajero(self.mueveHumano)
         self.ponPosicion(self.partida.ultPosicion)
@@ -75,7 +75,7 @@ class GestorGM(Gestor.Gestor):
         self.ponPiezasAbajo(self.siBlancas)
         dic = GM.dicGM()
         self.nombreGM = dic[self.gm.lower()] if self.modo == "estandar" else self.gm
-        rotulo1 = _("Grandmaster") + ": <b>%s</b>" if self.modo == "estandar" else  "<b>%s</b>"
+        rotulo1 = _("Grandmaster") + ": <b>%s</b>" if self.modo == "estandar" else "<b>%s</b>"
         self.ponRotulo1(rotulo1 % self.nombreGM)
 
         self.nombreRival = ""
@@ -123,7 +123,7 @@ class GestorGM(Gestor.Gestor):
         siJugadas = self.partida.numJugadas() > 0
         if siJugadas and self.estado != kFinJuego:
             self.resultado = kDesconocido
-            self.partida.liJugadas[-1].siDesconocido = True
+            self.partida.last_jg().siDesconocido = True
             # self.guardarNoTerminados( )
             self.ponFinJuego()
         self.procesador.inicio()
@@ -262,31 +262,13 @@ class GestorGM(Gestor.Gestor):
             self.xtutor.terminar()
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
+        jgUsu = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jgUsu:
             return False
 
-        movimiento = desde + hasta
+        movimiento = jgUsu.movimiento()
         posicion = self.partida.ultPosicion
         analisis = None
-
-        # Peon coronando
-        if not coronacion and posicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(posicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
-        if coronacion:
-            movimiento += coronacion
-
-        siBien, mens, jgUsu = Jugada.dameJugada(posicion, desde, hasta, coronacion)
-
-        if not siBien:
-            self.sigueHumano()
-            self.error = mens
-            return False
 
         isValid = self.motorGM.isValidMove(movimiento)
 
@@ -349,16 +331,16 @@ class GestorGM(Gestor.Gestor):
 
             self.puntos += dpts
 
-            comentario0 = "<b>%s</b> : %s = %s<br>" % (self.configuracion.jugador, movUsu, rmUsu.texto() )
-            comentario0 += "<b>%s</b> : %s = %s<br>" % (self.nombreGM, movGM, rmGM.texto() )
-            comentario1 = "<br><b>%s</b> = %+d<br>" % ( _("Difference"), dpts )
-            comentario2 = "<b>%s</b> = %+d<br>" % ( _("Points accumulated"), self.puntos )
+            comentario0 = "<b>%s</b> : %s = %s<br>" % (self.configuracion.jugador, movUsu, rmUsu.texto())
+            comentario0 += "<b>%s</b> : %s = %s<br>" % (self.nombreGM, movGM, rmGM.texto())
+            comentario1 = "<br><b>%s</b> = %+d<br>" % (_("Difference"), dpts)
+            comentario2 = "<b>%s</b> = %+d<br>" % (_("Points accumulated"), self.puntos)
             self.textoPuntuacion = comentario2
             self.ponRotuloSecundario()
 
             if not isValid:
                 jgGM.comentario = (comentario0 + comentario1 + comentario2).replace("<b>", "").replace("</b>", "").replace(
-                    "<br>", "\n")
+                        "<br>", "\n")
 
         self.analizaFinal()
 
@@ -396,7 +378,7 @@ class GestorGM(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -424,7 +406,7 @@ class GestorGM(Gestor.Gestor):
         txt, porc, txtResumen = self.motorGM.resultado(self.partida)
         mensaje += "<br><br>" + txt
         if self.siJuez:
-            mensaje += "<br><br><b>%s</b> = %+d<br>" % ( _("Points accumulated"), self.puntos )
+            mensaje += "<br><br><b>%s</b> = %+d<br>" % (_("Points accumulated"), self.puntos)
 
         QTUtil2.mensaje(self.pantalla, mensaje, siResalta=False)
 

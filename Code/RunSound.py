@@ -1,11 +1,11 @@
+import StringIO
 import sys
 import time
 import wave
-import StringIO
 
 import pyaudio
 
-import Code.Util as Util
+from Code import Util
 
 DATABASE = "D"
 PLAY_ESPERA = "P"
@@ -18,7 +18,7 @@ class Orden:
         self.clave = ""
         self.dv = {}
 
-class Replay():
+class Replay:
     def __init__(self):
         self.CHUNK = 1024
 
@@ -36,7 +36,7 @@ class Replay():
         elif orden.clave in (PLAY_ESPERA, PLAY_SINESPERA):
 
             if "CLAVE" in dv:
-                li = ( dv["CLAVE"], )
+                li = (dv["CLAVE"],)
             else:
                 li = dv["LISTACLAVES"]
 
@@ -56,9 +56,9 @@ class Replay():
 
         db.close()
 
-    def add_bin(self, clave, bin):
+    def add_bin(self, clave, xbin):
 
-        f = StringIO.StringIO(bin)
+        f = StringIO.StringIO(xbin)
         self.add_wav(clave, f)
 
     def add_wav(self, clave, wav):
@@ -69,23 +69,22 @@ class Replay():
             self.dbw = {}
 
         p = pyaudio.PyAudio()
-        format = p.get_format_from_width(wf.getsampwidth())
+        xformat = p.get_format_from_width(wf.getsampwidth())
         channels = wf.getnchannels()
         rate = wf.getframerate()
         p.terminate()
 
-        self.dbw[clave] = ( format, channels, rate, wf.readframes(wf.getnframes()) )
+        self.dbw[clave] = (xformat, channels, rate, wf.readframes(wf.getnframes()))
         wf.close()
 
     def siClave(self, clave):
         return clave in self.dbw
 
     def play(self, io, liClaves):
-
         li = []
         for clave in liClaves:
             if clave in self.dbw:
-                format, channels, rate, frames = self.dbw[clave]
+                xformat, channels, rate, frames = self.dbw[clave]
                 li.append(frames)
         frames = "".join(li)
 
@@ -93,7 +92,7 @@ class Replay():
             return None
 
         p = pyaudio.PyAudio()
-        stream = p.open(format=format, channels=channels, rate=rate, output=True)
+        stream = p.open(format=xformat, channels=channels, rate=rate, output=True)
 
         nTam = len(frames)
         nPos = 0
@@ -105,7 +104,7 @@ class Replay():
             nPos = hasta
             orden = io.recibe()
             if orden:
-                if orden.clave in ( STOP, PLAY_SINESPERA, TERMINAR ):
+                if orden.clave in (STOP, PLAY_SINESPERA, TERMINAR):
                     break
 
         if orden is None:
@@ -115,7 +114,7 @@ class Replay():
 
         return orden
 
-class IO():
+class IO:
     def __init__(self, xcpu, fdb):
         self.ipc = Util.IPC(fdb, False)
         self.xcpu = xcpu
@@ -153,4 +152,3 @@ def run(fdb):
     io.run()
 
     ferr.close()
-

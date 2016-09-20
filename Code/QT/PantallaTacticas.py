@@ -1,14 +1,14 @@
 from PyQt4 import QtGui
 
-import Code.Util as Util
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Delegados as Delegados
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Util
 
 def consultaHistorico(pantalla, tactica, icono):
     w = WHistoricoTacticas(pantalla, tactica, icono)
@@ -37,10 +37,10 @@ class WHistoricoTacticas(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ),
-            ( _("Train"), Iconos.Entrenar(), "entrenar" ),
-            ( _("Remove"), Iconos.Borrar(), "borrar" ),
-            ( _("New"), Iconos.TutorialesCrear(), "nuevo" ),
+            (_("Close"), Iconos.MainMenu(), "terminar"),
+            (_("Train"), Iconos.Empezar(), "entrenar"),
+            (_("New"), Iconos.Nuevo(), "nuevo"),
+            (_("Remove"), Iconos.Borrar(), "borrar"),
         )
         self.tb = Controles.TB(self, liAcciones)
         accion = "nuevo" if tactica.terminada() else "entrenar"
@@ -85,7 +85,7 @@ class WHistoricoTacticas(QTVarios.WDialogo):
             t = int(dif.total_seconds())
             h = t / 3600
             m = (t - h * 3600) / 60
-            return "%d - %d:%02d" % (dif.days, h, m )
+            return "%d - %d:%02d" % (dif.days, h, m)
         elif col == "POSICIONES":
             if "POS" in reg:
                 posiciones = reg["POS"]
@@ -219,11 +219,11 @@ class WConfTactics(QtGui.QWidget):
         icoReset = Iconos.MoverAtras()
 
         def tbGen(prev):
-            liAcciones = (  ( _("Add"), icoMas, "%s_add" % prev ),
-                            ( _("Delete"), icoMenos, "%s_delete" % prev ), None,
-                            ( _("Delete all"), icoCancel, "%s_delete_all" % prev ), None,
-                            ( _("Reset"), icoReset, "%s_reset" % prev ), None,
-            )
+            liAcciones = ((_("Add"), icoMas, "%s_add" % prev),
+                          (_("Delete"), icoMenos, "%s_delete" % prev), None,
+                          (_("Delete all"), icoCancel, "%s_delete_all" % prev), None,
+                          (_("Reset"), icoReset, "%s_reset" % prev), None,
+                          )
             tb = Controles.TB(self, liAcciones, tamIcon=16, siTexto=False)
             return tb
 
@@ -239,7 +239,7 @@ class WConfTactics(QtGui.QWidget):
         oCol.nueva("NUMERO", _("Repetition"), 80, siCentrado=True)
         oCol.nueva("JUMPS_SEPARATION", _("Separation"), 80, siCentrado=True,
                    edicion=Delegados.LineaTexto(siEntero=True))
-        self.grid_jumps = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, id="j")
+        self.grid_jumps = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, xid="j")
         self.grid_jumps.setMinimumWidth(self.grid_jumps.anchoColumnas() + 20)
         ly = Colocacion.V().control(tb).control(self.grid_jumps)
         gbJumps = Controles.GB(self, _("Repetitions of each puzzle"), ly).ponFuente(f)
@@ -253,9 +253,9 @@ class WConfTactics(QtGui.QWidget):
         tb = tbGen("repeat")
         oCol = Columnas.ListaColumnas()
         oCol.nueva("NUMERO", _("Block"), 40, siCentrado=True)
-        self.liREPEATtxt = ( _("Original"), _("Random"), _("Previous") )
+        self.liREPEATtxt = (_("Original"), _("Random"), _("Previous"))
         oCol.nueva("REPEAT_ORDER", _("Order"), 100, siCentrado=True, edicion=Delegados.ComboBox(self.liREPEATtxt))
-        self.grid_repeat = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, id="r")
+        self.grid_repeat = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, xid="r")
         self.grid_repeat.setMinimumWidth(self.grid_repeat.anchoColumnas() + 20)
         ly = Colocacion.V().control(tb).control(self.grid_repeat)
         gbRepeat = Controles.GB(self, _("Blocks"), ly).ponFuente(f)
@@ -271,7 +271,7 @@ class WConfTactics(QtGui.QWidget):
         oCol.nueva("NUMERO", _("N."), 20, siCentrado=True)
         oCol.nueva("PENAL_POSITIONS", _("Positions"), 100, siCentrado=True, edicion=Delegados.LineaTexto(siEntero=True))
         oCol.nueva("PENAL_%", _("Affected"), 100, siCentrado=True)
-        self.grid_penal = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, id="p")
+        self.grid_penal = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, xid="p")
         self.grid_penal.setMinimumWidth(self.grid_penal.anchoColumnas() + 20)
         ly = Colocacion.V().control(tb).control(self.grid_penal)
         gbPenal = Controles.GB(self, _("Penalties"), ly).ponFuente(f)
@@ -284,11 +284,11 @@ class WConfTactics(QtGui.QWidget):
             self.liSHOWTEXT = tactica.SHOWTEXT[:]
         tb = tbGen("show")
         oCol = Columnas.ListaColumnas()
-        self.liSHOWTEXTtxt = ( _("No"), _("Yes") )
+        self.liSHOWTEXTtxt = (_("No"), _("Yes"))
         oCol.nueva("NUMERO", _("N."), 20, siCentrado=True)
         oCol.nueva("SHOW_VISIBLE", _("Visible"), 100, siCentrado=True, edicion=Delegados.ComboBox(self.liSHOWTEXTtxt))
         oCol.nueva("SHOW_%", _("Affected"), 100, siCentrado=True)
-        self.grid_show = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, id="s")
+        self.grid_show = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, xid="s")
         self.grid_show.setMinimumWidth(self.grid_show.anchoColumnas() + 20)
         ly = Colocacion.V().control(tb).control(self.grid_show)
         gbShow = Controles.GB(self, _("Show text associated with each puzzle"), ly).ponFuente(f)
@@ -313,7 +313,7 @@ class WConfTactics(QtGui.QWidget):
         oCol.nueva("TOTAL", _("Total"), 100, siCentrado=True)
         oCol.nueva("FROM", _("From"), 100, siCentrado=True, edicion=Delegados.LineaTexto(siEntero=True))
         oCol.nueva("TO", _("To"), 100, siCentrado=True, edicion=Delegados.LineaTexto(siEntero=True))
-        self.grid_files = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, id="f")
+        self.grid_files = Grid.Grid(self, oCol, siSelecFilas=True, siEditable=True, xid="f")
         self.grid_files.setMinimumWidth(self.grid_files.anchoColumnas() + 20)
         ly = Colocacion.V().control(self.grid_files)
         gbFiles = Controles.GB(self, _("FNS files"), ly).ponFuente(f)
@@ -342,16 +342,16 @@ class WConfTactics(QtGui.QWidget):
         getattr(self, self.sender().clave)()
 
     def gridNumDatos(self, grid):
-        id = grid.id
-        if id == "j":
+        xid = grid.id
+        if xid == "j":
             return len(self.liJUMPS)
-        if id == "r":
+        if xid == "r":
             return len(self.liREPEAT)
-        if id == "p":
+        if xid == "p":
             return len(self.liPENAL)
-        if id == "s":
+        if xid == "s":
             return len(self.liSHOWTEXT)
-        if id == "f":
+        if xid == "f":
             return len(self.liFILES)
 
     def etiPorc(self, fila, numFilas):
@@ -360,7 +360,7 @@ class WConfTactics(QtGui.QWidget):
         p = 100.0 / numFilas
         de = p * fila
         a = p * (fila + 1)
-        return "%d%%  -  %d%%" % ( int(de), int(a) )
+        return "%d%%  -  %d%%" % (int(de), int(a))
 
     def gridDato(self, grid, fila, oColumna):
         col = oColumna.clave
@@ -396,22 +396,22 @@ class WConfTactics(QtGui.QWidget):
             return str(self.liFILES[fila][3])
 
     def gridPonValor(self, grid, fila, oColumna, valor):
-        id = grid.id
-        if id == "j":
+        xid = grid.id
+        if xid == "j":
             self.liJUMPS[fila] = int(valor)
-        elif id == "r":
+        elif xid == "r":
             self.liREPEAT[fila] = self.liREPEATtxt.index(valor)
-        elif id == "p":
+        elif xid == "p":
             self.liPENAL[fila] = int(valor)
-        elif id == "s":
+        elif xid == "s":
             self.liSHOWTEXT[fila] = self.liSHOWTEXTtxt.index(valor)
-        elif id == "f":
+        elif xid == "f":
             col = oColumna.clave
             n = int(valor)
             if col == "WEIGHT":
                 if n > 0:
                     self.liFILES[fila][1] = n
-            elif n > 0 and n <= self.liFTOTAL[fila]:
+            elif 0 < n <= self.liFTOTAL[fila]:
                 if col == "FROM":
                     if n <= self.liFILES[fila][3]:
                         self.liFILES[fila][2] = n
@@ -546,10 +546,10 @@ class WEditaTactica(QTVarios.WDialogo):
 
         self.tactica = tactica
 
-        liAcciones = (  ( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                        ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-                        ( _("Help"), Iconos.AyudaGR(), "ayuda" ), None,
-        )
+        liAcciones = ((_("Accept"), Iconos.Aceptar(), "aceptar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
+                      (_("Help"), Iconos.AyudaGR(), "ayuda"), None,
+                      )
         tb = Controles.TB(self, liAcciones)
 
         self.wtactic = WConfTactics(self, tactica, ncopia)
@@ -610,4 +610,3 @@ def edita1tactica(owner, tactica, ncopia):
         return True
     else:
         return False
-

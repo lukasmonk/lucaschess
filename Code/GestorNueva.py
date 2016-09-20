@@ -1,16 +1,11 @@
+from Code import Apertura
+from Code import Gestor
+from Code import Jugada
+from Code.QT import QTUtil2
+from Code import Tutor
+from Code import VarGen
+from Code import XMotorRespuesta
 from Code.Constantes import *
-
-import Code.VarGen as VarGen
-
-import Code.Jugada as Jugada
-import Code.Tutor as Tutor
-import Code.XMotorRespuesta as XMotorRespuesta
-
-import Code.Apertura as Apertura
-
-import Code.Gestor as Gestor
-
-import Code.QT.QTUtil2 as QTUtil2
 
 class GestorNueva(Gestor.Gestor):
     def inicio(self, categoria, nivel, siBlancas, puntos, aplazamiento=None):
@@ -60,7 +55,7 @@ class GestorNueva(Gestor.Gestor):
             self.ayudas = aplazamiento["AYUDAS"]
 
         self.pantalla.ponToolBar(
-            ( k_cancelar, k_rendirse, k_atras, k_reiniciar, k_aplazar, k_configurar, k_utilidades  ))
+                (k_cancelar, k_rendirse, k_atras, k_reiniciar, k_aplazar, k_configurar, k_utilidades))
         self.pantalla.activaJuego(True, False)
         self.ponMensajero(self.mueveHumano)
         self.ponPosicion(self.partida.ultPosicion)
@@ -68,16 +63,16 @@ class GestorNueva(Gestor.Gestor):
         self.ponAyudas(self.ayudas)
         self.mostrarIndicador(True)
         rotulo = "%s: <b>%s</b><br>%s %s %d" % (
-            _("Opponent"), self.xrival.nombre, categoria.nombre(), _("Level"), nivel )
+            _("Opponent"), self.xrival.nombre, categoria.nombre(), _("Level"), nivel)
         if self.puntos:
-            rotulo += " (+%d %s)" % ( self.puntos, _("points") )
+            rotulo += " (+%d %s)" % (self.puntos, _("points"))
         self.ponRotulo1(rotulo)
         self.xrotulo2()
 
         self.pgnRefresh(True)
         self.ponCapInfoPorDefecto()
 
-        #-Aplazamiento 2/2--------------------------------------------------
+        # -Aplazamiento 2/2--------------------------------------------------
         if aplazamiento:
             self.mueveJugada(kMoverFinal)
 
@@ -156,7 +151,7 @@ class GestorNueva(Gestor.Gestor):
             if not QTUtil2.pregunta(self.pantalla, _("End game?")):
                 return False  # no termina
             self.resultado = kDesconocido
-            self.partida.liJugadas[-1].siDesconocido = True
+            self.partida.last_jg().siDesconocido = True
             self.guardarNoTerminados()
             self.ponFinJuego()
         else:
@@ -205,7 +200,7 @@ class GestorNueva(Gestor.Gestor):
         siBlancas = self.partida.ultPosicion.siBlancas
 
         if self.partida.numJugadas() > 0:
-            jgUltima = self.partida.liJugadas[-1]
+            jgUltima = self.partida.last_jg()
             if jgUltima:
                 if jgUltima.siJaqueMate:
                     self.ponResultado(kGanaRival if self.siJugamosConBlancas == siBlancas else kGanamos)
@@ -265,90 +260,55 @@ class GestorNueva(Gestor.Gestor):
             self.activaColor(siBlancas)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
+        siMirarTutor = self.siTutorActivado
+        movimiento = jg.movimiento()
+        coronacion = jg.coronacion
 
-        movimiento = desde + hasta
+        if self.siApertura:
+            if self.apertura.compruebaHumano(self.fenUltimo(), desde, hasta):
+                siMirarTutor = False
 
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
+        if siMirarTutor:
+            if not self.siAnalizadoTutor:
+                self.analizaTutor()
+                self.siAnalizadoTutor = True
+            if self.mrmTutor is None:
                 self.sigueHumano()
                 return False
-        if coronacion:
-            movimiento += coronacion
+            if self.mrmTutor.mejorMovQue(movimiento):
+                self.refresh()
+                if not jg.siJaqueMate:
+                    tutor = Tutor.Tutor(self, self, jg, desde, hasta, False)
 
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
+                    if self.siApertura:
+                        liApPosibles = self.listaAperturasStd.listaAperturasPosibles(self.partida)
+                    else:
+                        liApPosibles = None
 
-        if self.siTeclaPanico:
-            self.sigueHumano()
-            return False
+                    if tutor.elegir(self.ayudas > 0, liApPosibles=liApPosibles):
+                        if self.ayudas > 0:  # doble entrada a tutor.
+                            self.reponPieza(desde)
+                            self.ayudas -= 1
+                            desde = tutor.desde
+                            hasta = tutor.hasta
+                            coronacion = tutor.coronacion
+                            siBien, mens, jgTutor = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta,
+                                                                      coronacion)
+                            if siBien:
+                                jg = jgTutor
+                    elif self.configuracion.guardarVariantesTutor:
+                        tutor.ponVariantes(jg, 1 + self.partida.numJugadas() / 2)
 
-        if siBien:
+                    del tutor
 
-            siMirarTutor = self.siTutorActivado
-
-            if self.siApertura:
-                if self.apertura.compruebaHumano(self.fenUltimo(), desde, hasta):
-                    siMirarTutor = False
-
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
-
-            if siMirarTutor:
-                if not self.siAnalizadoTutor:
-                    self.analizaTutor()
-                    self.siAnalizadoTutor = True
-                if self.mrmTutor is None:
-                    self.sigueHumano()
-                    return False
-                if self.mrmTutor.mejorMovQue(movimiento):
-                    self.refresh()
-                    if not jg.siJaqueMate:
-                        tutor = Tutor.Tutor(self, self, jg, desde, hasta, False)
-
-                        if self.siApertura:
-                            liApPosibles = self.listaAperturasStd.listaAperturasPosibles(self.partida)
-                        else:
-                            liApPosibles = None
-
-                        if tutor.elegir(self.ayudas > 0, liApPosibles=liApPosibles):
-                            if self.ayudas > 0:  # doble entrada a tutor.
-                                self.reponPieza(desde)
-                                self.ayudas -= 1
-                                desde = tutor.desde
-                                hasta = tutor.hasta
-                                coronacion = tutor.coronacion
-                                siBien, mens, jgTutor = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta,
-                                                                          coronacion)
-                                if siBien:
-                                    jg = jgTutor
-                        elif self.configuracion.guardarVariantesTutor:
-                            tutor.ponVariantes(jg, 1 + self.partida.numJugadas() / 2)
-
-                        del tutor
-
-            if self.siTeclaPanico:
-                self.sigueHumano()
-                return False
-
-            self.movimientosPiezas(jg.liMovs)
-
-            self.partida.ultPosicion = jg.posicion
-            self.masJugada(jg, True)
-            self.error = ""
-            self.siguienteJugada()
-            return True
-        else:
-            self.error = mens
-            self.sigueHumano()
-            return False
+        self.movimientosPiezas(jg.liMovs)
+        self.partida.ultPosicion = jg.posicion
+        self.masJugada(jg, True)
+        self.siguienteJugada()
+        return True
 
     def masJugada(self, jg, siNuestra):
 
@@ -357,7 +317,7 @@ class GestorNueva(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -417,7 +377,7 @@ class GestorNueva(Gestor.Gestor):
 
         self.beepResultado(quien)
 
-        nombreContrario = "%s (%s %d)" % ( self.xrival.nombre, _("Level"), self.nivelJugado )
+        nombreContrario = "%s (%s %d)" % (self.xrival.nombre, _("Level"), self.nivelJugado)
 
         mensaje = _("Game ended")
 
@@ -427,7 +387,7 @@ class GestorNueva(Gestor.Gestor):
             hecho = "B" if self.siJugamosConBlancas else "N"
             if self.configuracion.rival.categorias.ponResultado(self.categoria, self.nivelJugado, hecho):
                 mensaje += "<br><br>%s: %d (%s)" % (
-                    _("Move to the next level"), self.categoria.nivelHecho + 1, self.categoria.nombre() )
+                    _("Move to the next level"), self.categoria.nivelHecho + 1, self.categoria.nombre())
             self.configuracion.graba()
             if self.puntos:
                 puntuacion = self.configuracion.puntuacion()
@@ -457,4 +417,3 @@ class GestorNueva(Gestor.Gestor):
         self.guardarGanados(quien == kGanamos)
         QTUtil2.mensaje(self.pantalla, mensaje)
         self.ponFinJuego()
-

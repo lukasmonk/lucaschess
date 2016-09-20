@@ -2,20 +2,20 @@ import copy
 
 from PyQt4 import QtCore, QtGui
 
-import Code.TabVisual as TabVisual
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.TabTipos as TabTipos
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Tablero as Tablero
-import Code.QT.FormLayout as FormLayout
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import TabTipos
+from Code.QT import Tablero
+from Code import TabVisual
+from Code import Util
+from Code import VarGen
 
 class WTV_Marco(QtGui.QDialog):
     def __init__(self, owner, regMarco):
@@ -28,9 +28,9 @@ class WTV_Marco(QtGui.QDialog):
         if not regMarco:
             regMarco = TabVisual.PMarco()
 
-        liAcciones = [( _("Save"), Iconos.Aceptar(), "grabar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "reject" ), None,
-        ]
+        liAcciones = [(_("Save"), Iconos.Aceptar(), "grabar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "reject"), None,
+                      ]
         tb = Controles.TB(self, liAcciones)
 
         # Tablero
@@ -44,35 +44,35 @@ class WTV_Marco(QtGui.QDialog):
 
         # nombre del marco que se usara en los menus del tutorial
         config = FormLayout.Editbox(_("Name"), ancho=120)
-        liGen.append((config, regMarco.nombre ))
+        liGen.append((config, regMarco.nombre))
 
         # ( "tipo", "n", Qt.SolidLine ), #1=SolidLine, 2=DashLine, 3=DotLine, 4=DashDotLine, 5=DashDotDotLine
         config = FormLayout.Combobox(_("Line Type"), QTUtil2.tiposDeLineas())
-        liGen.append(( config, regMarco.tipo ))
+        liGen.append((config, regMarco.tipo))
 
         # ( "color", "n", 0 ),
         config = FormLayout.Colorbox(_("Color"), 80, 20)
-        liGen.append(( config, regMarco.color ))
+        liGen.append((config, regMarco.color))
 
         # ( "colorinterior", "n", -1 ),
         config = FormLayout.Colorbox(_("Internal color"), 80, 20, siChecked=True)
-        liGen.append(( config, regMarco.colorinterior ))
+        liGen.append((config, regMarco.colorinterior))
 
         # ( "opacidad", "n", 1.0 ),
         config = FormLayout.Dial(_("Degree of transparency"), 0, 99)
-        liGen.append(( config, 100 - int(regMarco.opacidad * 100) ))
+        liGen.append((config, 100 - int(regMarco.opacidad * 100)))
 
         # ( "grosor", "n", 1 ), # ancho del trazo
         config = FormLayout.Spinbox(_("Thickness"), 1, 20, 50)
-        liGen.append(( config, regMarco.grosor ))
+        liGen.append((config, regMarco.grosor))
 
         # ( "redEsquina", "n", 0 ),
         config = FormLayout.Spinbox(_("Rounded corners"), 0, 100, 50)
-        liGen.append(( config, regMarco.redEsquina ))
+        liGen.append((config, regMarco.redEsquina))
 
         # orden
         config = FormLayout.Combobox(_("Order concerning other items"), QTUtil2.listaOrdenes())
-        liGen.append(( config, regMarco.posicion.orden ))
+        liGen.append((config, regMarco.posicion.orden))
 
         self.form = FormLayout.FormWidget(liGen, dispatch=self.cambios)
 
@@ -153,16 +153,16 @@ class WTV_Marcos(QTVarios.WDialogo):
         oColumnas.nueva("NUMERO", _("N."), 60, siCentrado=True)
         oColumnas.nueva("NOMBRE", _("Name"), 256)
 
-        self.grid = Grid.Grid(self, oColumnas, id="M", siSelecFilas=True)
+        self.grid = Grid.Grid(self, oColumnas, xid="M", siSelecFilas=True)
 
         liAcciones = [
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-            ( _("New"), Iconos.Nuevo(), "mas" ), None,
-            ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-            ( _("Modify"), Iconos.Modificar(), "modificar" ), None,
-            ( _("Copy"), Iconos.Copiar(), "copiar" ), None,
-            ( _("Up"), Iconos.Arriba(), "arriba" ), None,
-            ( _("Down"), Iconos.Abajo(), "abajo" ), None,
+            (_("Close"), Iconos.MainMenu(), "terminar"), None,
+            (_("New"), Iconos.Nuevo(), "mas"), None,
+            (_("Remove"), Iconos.Borrar(), "borrar"), None,
+            (_("Modify"), Iconos.Modificar(), "modificar"), None,
+            (_("Copy"), Iconos.Copiar(), "copiar"), None,
+            (_("Up"), Iconos.Arriba(), "arriba"), None,
+            (_("Down"), Iconos.Abajo(), "abajo"), None,
         ]
         tb = Controles.TB(self, liAcciones)
         tb.setFont(flb)
@@ -248,8 +248,8 @@ class WTV_Marcos(QTVarios.WDialogo):
         if fila >= 0:
             if QTUtil2.pregunta(self, _X(_("Delete box %1?"), self.liPMarcos[fila].nombre)):
                 regMarco = self.liPMarcos[fila]
-                id = regMarco.id
-                del self.dbMarcos[id]
+                xid = regMarco.id
+                del self.dbMarcos[xid]
                 del self.liPMarcos[fila]
                 self.grid.refresh()
                 self.grid.setFocus()
@@ -260,9 +260,9 @@ class WTV_Marcos(QTVarios.WDialogo):
             w = WTV_Marco(self, self.liPMarcos[fila])
             if w.exec_():
                 regMarco = w.regMarco
-                id = regMarco.id
+                xid = regMarco.id
                 self.liPMarcos[fila] = regMarco
-                self.dbMarcos[id] = regMarco
+                self.dbMarcos[xid] = regMarco
                 self.grid.refresh()
                 self.grid.setFocus()
                 self.gridCambiadoRegistro(self.grid, fila, None)
@@ -279,10 +279,10 @@ class WTV_Marcos(QTVarios.WDialogo):
                 return False
 
             n = 1
-            nombre = "%s-%d" % (regMarco.nombre, n )
+            nombre = "%s-%d" % (regMarco.nombre, n)
             while siEstaNombre(nombre):
                 n += 1
-                nombre = "%s-%d" % (regMarco.nombre, n )
+                nombre = "%s-%d" % (regMarco.nombre, n)
             regMarco.nombre = nombre
             regMarco.id = Util.nuevoID()
             regMarco.ordenVista = self.liPMarcos[-1].ordenVista + 1

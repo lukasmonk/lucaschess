@@ -2,7 +2,7 @@ import copy
 
 from PyQt4 import QtCore, QtGui
 
-import Code.QT.TabBloques as TabBloques
+from Code.QT import TabBloques
 
 class FlechaSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueFlecha, rutinaPulsada=None):
@@ -50,8 +50,8 @@ class FlechaSC(TabBloques.BloqueEspSC):
         elif bf.destino == "m":  # minimo
             min_v = 99999999999
             min_hx = min_hy = 0
-            for x in ( 3, 2, 1 ):  # 3/4 = izquierda 1/2 y 1/4 izquierda
-                for y in (3, 2, 1 ):  # 3/4 = arriba 1/2 y 1/4
+            for x in (3, 2, 1):  # 3/4 = izquierda 1/2 y 1/4 izquierda
+                for y in (3, 2, 1):  # 3/4 = arriba 1/2 y 1/4
                     hx = hc * ac - ac * x / 4
                     hy = hf * ac - ac * y / 4
                     v = (hx - dx) ** 2 + (hy - dy) ** 2
@@ -86,7 +86,7 @@ class FlechaSC(TabBloques.BloqueEspSC):
         self.posicion2xy()
 
     def contiene(self, p):
-        for x in ( self.poligonoSizeTop, self.poligonoSizeBottom, self.poligonoMove ):
+        for x in (self.poligonoSizeTop, self.poligonoSizeBottom, self.poligonoMove):
             if x:
                 if x.containsPoint(p, QtCore.Qt.OddEvenFill):
                     return True
@@ -108,7 +108,7 @@ class FlechaSC(TabBloques.BloqueEspSC):
 
     def mouseMoveEvent(self, event):
         event.ignore()
-        if not (self.siMove or self.siSizeTop or self.siSizeBottom ):
+        if not (self.siMove or self.siSizeTop or self.siSizeBottom):
             return
 
         p = event.scenePos()
@@ -319,7 +319,7 @@ def paintArrow(painter, bf):
             # tipo 3 base cabeza = un punto
             elif forma == "3":
                 painter.drawPolygon(
-                    QtGui.QPolygonF([p_base1, p_basecab, p_ala1, p_fin, p_ala2, p_basecab, p_base2, p_base1]))
+                        QtGui.QPolygonF([p_base1, p_basecab, p_ala1, p_fin, p_ala2, p_basecab, p_base2, p_base1]))
     return poligonoSizeBottom, poligonoMove, poligonoSizeTop
 
 def pixmapArrow(bf, width, height):

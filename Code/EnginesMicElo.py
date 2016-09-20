@@ -1,4 +1,4 @@
-import Code.MotoresExternos as MotoresExternos
+from Code import MotoresExternos
 
 def leeMicEngines():
     lme = MotoresExternos.ListaMotoresExternos("./IntFiles/michele.pkt")

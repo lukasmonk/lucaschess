@@ -1,15 +1,12 @@
+from Code import Books
+from Code import Gestor
+from Code import Jugada
+from Code import Partida
+from Code.QT import PantallaTorneos
+from Code import Util
+from Code import VarGen
+from Code import XGestorMotor
 from Code.Constantes import *
-
-import Code.VarGen as VarGen
-
-import Code.Util as Util
-import Code.Jugada as Jugada
-import Code.Books as Books
-import Code.XGestorMotor as XGestorMotor
-import Code.Partida as Partida
-import Code.QT.PantallaTorneos as PantallaTorneos
-
-import Code.Gestor as Gestor
 
 class GestorTorneo(Gestor.Gestor):
     def inicio(self, torneo, liGames):
@@ -25,7 +22,7 @@ class GestorTorneo(Gestor.Gestor):
         self.ponPiezasAbajo(True)
         self.mostrarIndicador(True)
         self.siTerminar = False
-        self.pantalla.ponToolBar(( k_cancelar, ))
+        self.pantalla.ponToolBar((k_cancelar,))
         self.colorJugando = True
         self.ponCapPorDefecto()
 
@@ -51,9 +48,10 @@ class GestorTorneo(Gestor.Gestor):
         self.maxSegundos = self.gm.minutos() * 60.0
         self.segundosJugada = self.gm.segundosJugada()
 
-        rival = {}
-        rival[True] = self.torneo.buscaHEngine(self.gm.hwhite())
-        rival[False] = self.torneo.buscaHEngine(self.gm.hblack())
+        rival = {
+            True: self.torneo.buscaHEngine(self.gm.hwhite()),
+            False: self.torneo.buscaHEngine(self.gm.hblack()),
+        }
 
         self.tiempo = {}
 
@@ -98,7 +96,7 @@ class GestorTorneo(Gestor.Gestor):
         bl = self.xmotor[True].nombre
         ng = self.xmotor[False].nombre
         self.pantalla.activaJuego(True, True, siAyudas=False)
-        self.ponRotulo1("<center><b>%s %d/%d</b></center>" % ( _("Game"), ngame, numGames))
+        self.ponRotulo1("<center><b>%s %d/%d</b></center>" % (_("Game"), ngame, numGames))
         self.ponRotulo2(None)
         self.quitaAyudas()
         self.pantalla.ponDatosReloj(bl, tpBL, ng, tpNG)
@@ -133,7 +131,7 @@ class GestorTorneo(Gestor.Gestor):
             result = self.finPorTiempo
 
         else:
-            jgUlt = self.partida.liJugadas[-1]
+            jgUlt = self.partida.last_jg()
             result = None
             if self.partida.siTerminada():
                 if jgUlt.siJaqueMate:
@@ -149,7 +147,7 @@ class GestorTorneo(Gestor.Gestor):
                     return False
                 mrm, pos = jgUlt.analisis
                 rmUlt = mrm.liMultiPV[pos]
-                jgAnt = self.partida.liJugadas[-2]
+                jgAnt = self.partida.jugada(-2)
                 if not jgAnt.analisis:
                     return False
                 mrm, pos = jgAnt.analisis
@@ -282,9 +280,13 @@ class GestorTorneo(Gestor.Gestor):
     def procesarAccion(self, clave):
         if clave == k_cancelar:
             self.siTerminar = True
+            self.xmotor[True].terminar()
+            self.xmotor[False].terminar()
 
     def finalX(self):
         self.siTerminar = True
+        self.xmotor[True].terminar()
+        self.xmotor[False].terminar()
         return False
 
     def eligeJugadaBook(self, book, tipo):
@@ -305,8 +307,7 @@ class GestorTorneo(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
-        self.partida.ultPosicion = jg.posicion
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -330,4 +331,3 @@ class GestorTorneo(Gestor.Gestor):
         self.pgnRefresh(self.partida.ultPosicion.siBlancas)
 
         self.refresh()
-

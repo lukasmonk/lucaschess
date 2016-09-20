@@ -2,54 +2,6 @@
 
 from PyQt4 import QtCore, QtGui
 
-# class Fecha(QtGui.QDateTimeEdit):
-    # def __init__(self, fecha=None):
-        # QtGui.QDateTimeEdit.__init__(self)
-
-        # self.setDisplayFormat("dd-MM-yyyy")
-
-        # self.setCalendarPopup(True)
-        # calendar = QtGui.QCalendarWidget()
-        # calendar.setFirstDayOfWeek(QtCore.Qt.Monday)
-        # calendar.setGridVisible(True)
-        # self.setCalendarWidget(calendar)
-
-        # if fecha:
-            # self.ponFecha(fecha)
-
-    # def fecha2date(self, fecha):
-        # date = QtCore.QDate()
-        # date.setDate(fecha.year, fecha.month, fecha.day)
-        # return date
-
-    # def ponFecha(self, fecha):
-        # self.setDate(self.fecha2date(fecha))
-        # return self
-
-    # def fecha(self):
-        # date = self.date()
-        # fecha = datetime.date(date.year(), date.month(), date.day())
-        # return fecha
-
-    # def minima(self, fecha):
-        # previa = self.date()
-        # fecha = self.fecha2date(fecha)
-
-        # if previa < fecha:
-            # self.ponFecha(fecha)
-
-        # self.setMinimumDate(fecha)
-        # return self
-
-    # def maxima(self, fecha):
-        # previa = self.date()
-        # fecha = self.fecha2date(fecha)
-        # if previa > fecha:
-            # self.ponFecha(fecha)
-
-        # self.setMaximumDate(fecha)
-        # return self
-
 class ED(QtGui.QLineEdit):
     """
     Control de entrada de texto en una linea.
@@ -380,7 +332,7 @@ class LB(QtGui.QLabel):
             QtGui.QLabel.__init__(self, parent)
 
         self.setOpenExternalLinks(True)
-        self.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
+        self.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByMouse)
 
     def ponTexto(self, texto):
         """
@@ -733,6 +685,11 @@ class EM(QtGui.QTextEdit):
         self.setFont(f)
         return self
 
+    def ponTipoLetra(self, nombre="", puntos=8, peso=50, siCursiva=False, siSubrayado=False, siTachado=False, txt=None):
+        f = TipoLetra(nombre, puntos, peso, siCursiva, siSubrayado, siTachado, txt)
+        self.setFont(f)
+        return self
+
     def ponWrap(self, siPoner):
         self.setWordWrapMode(QtGui.QTextOption.WordWrap if siPoner else QtGui.QTextOption.NoWrap)
         return self
@@ -947,10 +904,12 @@ class TBrutina(QtGui.QToolBar):
             self.dicTB = {}
             self.liAcciones = []
 
-    def new(self, titulo, icono, clave, sep=True):
+    def new(self, titulo, icono, clave, sep=True, toolTip=None):
         accion = QtGui.QAction(titulo, self.parent)
         accion.setIcon(icono)
         accion.setIconText(titulo)
+        if toolTip:
+            accion.setToolTip(toolTip)
         self.parent.connect(accion, QtCore.SIGNAL("triggered()"), clave)
         if self.f:
             accion.setFont(self.f)
@@ -967,9 +926,12 @@ class TBrutina(QtGui.QToolBar):
             if datos:
                 if type(datos) == int:
                     self.addWidget(LB("").anchoFijo(datos))
-                else:
+                elif len(datos) == 3:
                     titulo, icono, clave = datos
                     self.new(titulo, icono, clave, False)
+                else:
+                    titulo, icono, clave, toolTip = datos
+                    self.new(titulo, icono, clave, False, toolTip=toolTip)
             else:
                 self.addSeparator()
 
@@ -997,7 +959,7 @@ class TipoLetra(QtGui.QFont):
             cursiva = 1 if siCursiva else 0
             subrayado = 1 if siSubrayado else 0
             tachado = 1 if siTachado else 0
-            txt = "%s,%d,-1,5,%d,%d,%d,%d,0,0" % ( nombre, puntos, peso, cursiva, subrayado, tachado )
+            txt = "%s,%d,-1,5,%d,%d,%d,%d,0,0" % (nombre, puntos, peso, cursiva, subrayado, tachado)
         self.fromString(txt)
 
 class Tab(QtGui.QTabWidget):
@@ -1077,13 +1039,60 @@ class SL(QtGui.QSlider):
         self.setFixedWidth(tam)
         return self
 
-# class PRB(QtGui.QProgressBar):
+    # class PRB(QtGui.QProgressBar):
     # def __init__(self, minimo, maximo):
-        # QtGui.QProgressBar.__init__(self)
-        # self.setMinimum(minimo)
-        # self.setMaximum(maximo)
+    # QtGui.QProgressBar.__init__(self)
+    # self.setMinimum(minimo)
+    # self.setMaximum(maximo)
 
     # def ponFormatoValor(self):
-        # self.setFormat("%v")
-        # return self
+    # self.setFormat("%v")
+    # return self
 
+    # class Fecha(QtGui.QDateTimeEdit):
+    # def __init__(self, fecha=None):
+    # QtGui.QDateTimeEdit.__init__(self)
+
+    # self.setDisplayFormat("dd-MM-yyyy")
+
+    # self.setCalendarPopup(True)
+    # calendar = QtGui.QCalendarWidget()
+    # calendar.setFirstDayOfWeek(QtCore.Qt.Monday)
+    # calendar.setGridVisible(True)
+    # self.setCalendarWidget(calendar)
+
+    # if fecha:
+    # self.ponFecha(fecha)
+
+    # def fecha2date(self, fecha):
+    # date = QtCore.QDate()
+    # date.setDate(fecha.year, fecha.month, fecha.day)
+    # return date
+
+    # def ponFecha(self, fecha):
+    # self.setDate(self.fecha2date(fecha))
+    # return self
+
+    # def fecha(self):
+    # date = self.date()
+    # fecha = datetime.date(date.year(), date.month(), date.day())
+    # return fecha
+
+    # def minima(self, fecha):
+    # previa = self.date()
+    # fecha = self.fecha2date(fecha)
+
+    # if previa < fecha:
+    # self.ponFecha(fecha)
+
+    # self.setMinimumDate(fecha)
+    # return self
+
+    # def maxima(self, fecha):
+    # previa = self.date()
+    # fecha = self.fecha2date(fecha)
+    # if previa > fecha:
+    # self.ponFecha(fecha)
+
+    # self.setMaximumDate(fecha)
+    # return self

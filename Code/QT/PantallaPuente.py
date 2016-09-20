@@ -1,23 +1,23 @@
-import random
-import time
 import atexit
 import datetime
+import random
+import time
 
 from PyQt4 import QtGui
 
-import Code.Util as Util
-import Code.ControlPosicion as ControlPosicion
-import Code.SQL.Base as Base
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.PantallaPotencia as PantallaPotencia
-import Code.QT.Tablero as Tablero
+from Code import ControlPosicion
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaPotencia
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code.SQL import Base
+from Code import Util
 
 class PuenteHistorico:
     def __init__(self, fichero, nivel):
@@ -140,10 +140,10 @@ class WEdMove(QtGui.QWidget):
 
         self.destino = EDCelda(self, "").caracteres(2).controlrx("(|[a-h][1-8])").anchoFijo(32).alinCentrado().capturaCambiado(self.miraPromocion)
 
-        self.pbPromocion = Controles.PB(self, "", self.pulsadoPromocion, plano=False).anchoFijo(32)
+        self.pbPromocion = Controles.PB(self, "", self.pulsadoPromocion, plano=False).anchoFijo(24)
 
         ly = Colocacion.H().relleno().control(self.origen).espacio(2).control(flecha).espacio(2).control(
-            self.destino).control(self.pbPromocion).margen(0).relleno()
+                self.destino).control(self.pbPromocion).margen(0).relleno()
         self.setLayout(ly)
 
         self.miraPromocion()
@@ -243,7 +243,7 @@ class WEdMove(QtGui.QWidget):
 class WPuenteBase(QTVarios.WDialogo):
     def __init__(self, procesador, nivel):
 
-        titulo = "%s. %s %d" % (_("Moves between two positions"), _("Level"), nivel )
+        titulo = "%s. %s %d" % (_("Moves between two positions"), _("Level"), nivel)
         QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, Iconos.Puente(), "puenteBase")
 
         self.procesador = procesador
@@ -266,9 +266,9 @@ class WPuenteBase(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-            ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-            ( _("Start"), Iconos.Empezar(), "empezar" ),
+            (_("Close"), Iconos.MainMenu(), "terminar"), None,
+            (_("Start"), Iconos.Empezar(), "empezar"),
+            (_("Remove"), Iconos.Borrar(), "borrar"), None,
         )
         self.tb = Controles.TB(self, liAcciones)
         self.ponToolBar("terminar", "empezar", "borrar")
@@ -349,7 +349,7 @@ class WPuenteBase(QTVarios.WDialogo):
         self.tb.update()
 
     def dameOtro(self):
-        partida, dicPGN, info, jugadaInicial, linea = PantallaPotencia.leeLineaMFN()
+        partida, dicPGN, info, jugadaInicial, linea = PantallaPotencia.lee_linea_mfn()
         # Tenemos 10 jugadas validas desde jugadaInicial
         n = random.randint(jugadaInicial, jugadaInicial + 10 - self.nivel)
         fenIni = partida.jugada(n).posicionBase.fen()
@@ -426,14 +426,14 @@ class WPuente(QTVarios.WDialogo):
                                                                                                 tamIcon=32).ponFuente(f)
         self.btSeguir = Controles.PB(self, _("Continue"), self.seguir, plano=False).ponIcono(Iconos.Pelicula_Seguir(),
                                                                                              tamIcon=32).ponFuente(f)
-        self.btTerminar = Controles.PB(self, _("Quit"), self.terminar, plano=False).ponIcono(Iconos.MainMenu(),
-                                                                                             tamIcon=32).ponFuente(f)
+        self.btTerminar = Controles.PB(self, _("Close"), self.terminar, plano=False).ponIcono(Iconos.MainMenu(),
+                                                                                              tamIcon=32).ponFuente(f)
         self.btCancelar = Controles.PB(self, _("Cancel"), self.terminar, plano=False).ponIcono(Iconos.Cancelar(),
                                                                                                tamIcon=32).ponFuente(f)
 
         # Layout
         lyC = Colocacion.V().control(self.btCancelar).control(self.btTerminar).relleno().control(gbMovs).relleno(
-            1).control(self.btComprobar).control(self.btSeguir).relleno()
+                1).control(self.btComprobar).control(self.btSeguir).relleno()
         lyTM = Colocacion.H().control(self.tableroIni).otro(lyC).control(self.tableroFin).relleno()
 
         ly = Colocacion.V().otro(lyTM).controlc(self.lbInformacion).controlc(self.lbTiempo).relleno().margen(3)
@@ -591,12 +591,12 @@ class WPuente(QTVarios.WDialogo):
 
             enr = menr(cK, cQ)
             if enr:
-                mens += "  %s : %s" % ( color, enr )
+                mens += "  %s : %s" % (color, enr)
             enr = menr(cKR, cQR)
             if enr:
-                mens += " %s : %s" % ( colorR, enr )
+                mens += " %s : %s" % (colorR, enr)
         if cp.alPaso != "-":
-            mens += "     %s : %s" % ( _("En passant"), cp.alPaso )
+            mens += "     %s : %s" % (_("En passant"), cp.alPaso)
 
         if mens:
             mens = "<b>%s</b><br>" % mens

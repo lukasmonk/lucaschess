@@ -1,11 +1,10 @@
-import sys
 import datetime
-import subprocess
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.QT.FormLayout as FormLayout
-import Code.QT.Iconos as Iconos
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code import Util
+from Code import VarGen
+from Code import XRun
 
 def listaKibitzersRecuperar(configuracion):
     lista = Util.recuperaVar(configuracion.ficheroKibitzers)
@@ -21,22 +20,22 @@ def nuevaKibitzer(ventana, configuracion):
     liGen = [(None, None)]
 
     # # Nombre
-    liGen.append(( _("Kibitzer") + ":", "" ))
+    liGen.append((_("Kibitzer") + ":", ""))
 
-    ## Motor
+    # Motor
     config = FormLayout.Combobox(_("Engine"), configuracion.comboMotoresCompleto())
-    liGen.append(( config, "stockfish" ))
+    liGen.append((config, "stockfish"))
 
-    ## Tipo
+    # Tipo
     liTipos = ["M",
-               ( "M", _("Candidates") ),
-               ( "I", _("Indexes") ),
-               ( "S", _("Best move") ),
-               ( "L", _("Best move in one line") ),
-               ( "J", _("Select move") ),
-               ( "C", _("Threats") ),
-               ( "E", _("Stockfish eval") ),
-    ]
+               ("M", _("Candidates")),
+               ("I", _("Indexes") + " - RodentII" ),
+               ("S", _("Best move")),
+               ("L", _("Best move in one line")),
+               ("J", _("Select move")),
+               ("C", _("Threats")),
+               ("E", _("Stockfish eval")),
+               ]
     liGen.append((_("Type"), liTipos))
 
     # Editamos
@@ -48,6 +47,13 @@ def nuevaKibitzer(ventana, configuracion):
         kibitzer = resp[0]
         motor = resp[1]
         tipo = resp[2]
+
+        # Indexes only with Rodent II
+        if tipo == "I":
+            motor = "rodentII"
+            if not kibitzer: # para que no repita rodent II
+                kibitzer = _("Indexes") + " - RodentII"
+
         if not kibitzer:
             for xtipo, txt in liTipos[1:]:
                 if xtipo == tipo:
@@ -92,6 +98,8 @@ class XKibitzer:
         self.ipc = Util.IPC(fdb, True)
 
         motor = kibitzer["MOTOR"]
+        if kibitzer["TIPO"] == "I":
+            motor = "rodentII"
         configMotor = gestor.configuracion.buscaRivalExt(motor)
 
         orden = Orden()
@@ -104,12 +112,7 @@ class XKibitzer:
 
         self.escribe(orden)
 
-        if sys.argv[0].endswith(".py"):
-            li = ["pythonw.exe" if VarGen.isWindows else "python", "Lucas.py", "-kibitzer", fdb]
-        else:
-            li = ["Lucas.exe" if VarGen.isWindows else "Lucas", "-kibitzer", fdb]
-
-        self.popen = subprocess.Popen(li)
+        self.popen = XRun.run_lucas("-kibitzer", fdb)
 
     def escribe(self, orden):
         self.ipc.push(orden.bloqueEnvio())
@@ -140,4 +143,3 @@ class XKibitzer:
                 self.popen = None
             except:
                 pass
-

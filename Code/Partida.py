@@ -1,5 +1,7 @@
-import Code.ControlPosicion as ControlPosicion
-import Code.Jugada as Jugada
+from Code import Util
+from Code import ControlPosicion
+from Code import Jugada
+from Code import AperturasStd
 
 class Partida:
     def __init__(self, iniPosicion=None, fen=None):
@@ -38,6 +40,10 @@ class Partida:
         except:
             return None
 
+    def append_jg(self, jg):
+        self.liJugadas.append(jg)
+        self.ultPosicion = jg.posicion
+
     def siFenInicial(self):
         return self.iniPosicion.fen() == ControlPosicion.FEN_INICIAL
 
@@ -49,6 +55,12 @@ class Partida:
 
     def numJugadas(self):
         return len(self.liJugadas)
+
+    def __len__(self):
+        return len(self.liJugadas)
+
+    def last_jg(self):
+        return self.liJugadas[-1]
 
     def guardaEnTexto(self):
         txt = self.iniPosicion.fen() + "|"
@@ -62,6 +74,7 @@ class Partida:
     def leeOtra(self, otra):
         txt = otra.guardaEnTexto()
         self.recuperaDeTexto(txt)
+        self.apertura = otra.apertura
 
     def recuperaDeTexto(self, txt):
         li = txt.split("|")
@@ -95,8 +108,8 @@ class Partida:
         posicion = self.ultPosicion
         pv = []
         for mov in pvBloque.split(" "):
-            if len(mov) >= 4 and mov[0] in "abcdefgh" and mov[1] in "12345678" and mov[2] in "abcdefgh" and mov[
-                3] in "12345678":
+            if len(mov) >= 4 and mov[0] in "abcdefgh" and mov[1] in "12345678" and mov[2] in "abcdefgh" \
+                    and mov[3] in "12345678":
                 pv.append(mov)
             else:
                 break
@@ -183,7 +196,7 @@ class Partida:
         if siReplace or not self.firstComment:
             self.firstComment = txt
         else:
-            self.firstComment = "%s\n%s"%(self.firstComment.strip(), txt)
+            self.firstComment = "%s\n%s" % (self.firstComment.strip(), txt)
 
     def pgnSP(self, numJugada=None, hastaJugada=9999):
         if self.firstComment:
@@ -318,13 +331,65 @@ class Partida:
         else:
             jg.abandonaRival()
 
-    def borraCV(self ):
+    def borraCV(self):
         self.firstComment = ""
         for jugada in self.liJugadas:
-            jugada.borraCV( )
+            jugada.borraCV()
 
-def pv_pgn(fen,pv):
+def pv_san(fen, pv):
     p = Partida(fen=fen)
     p.leerPV(pv)
     jg = p.jugada(0)
     return jg.pgnSP()
+
+def pv_pgn(fen, pv):
+    p = Partida(fen=fen)
+    p.leerPV(pv)
+    return p.pgnSP()
+
+class PartidaCompleta(Partida):
+    def __init__(self, iniPosicion=None, fen=None, liTags=None):
+        self.liTags = liTags if liTags else []
+        Partida.__init__(self, iniPosicion=iniPosicion, fen=fen)
+
+    def iswhite(self):
+        return self.iniPosicion.siBlancas
+
+    def save(self):
+        return Util.dic2txt(self.liTags) + "]" + self.guardaEnTexto()
+
+    def restore(self, fromtxt):
+        n = fromtxt.find("]")
+        if n:
+            self.liTags = Util.txt2dic(fromtxt[:n])
+            self.recuperaDeTexto(fromtxt[n+1:])
+
+    def setTags(self, litags):
+        self.liTags = litags[:]
+
+    def getTAG(self, tag):
+        for k,v in self.liTags:
+            if k.upper() == tag:
+                return v
+        return ""
+
+    def readPGN(self, configuracion, pgn):
+        import Code.PGN as PGN # evita el circulo vicioso
+        unpgn = PGN.UnPGN()
+        unpgn.leeTexto(pgn)
+        self.recuperaDeTexto(unpgn.partida.guardaEnTexto())
+        self.asignaApertura(configuracion)
+
+        self.liTags = unpgn.listaCabeceras()
+        return self
+
+    def asignaApertura(self, configuracion):
+        ap = AperturasStd.ListaAperturasStd(configuracion, False, False)
+        ap.asignaApertura(self)
+
+    def pgn(self):
+        li = ['[%s "%s"]\n'%(k,v) for k,v in self.liTags]
+        txt = "".join(li)
+        txt += "\n%s"%self.pgnBase()
+        return txt
+

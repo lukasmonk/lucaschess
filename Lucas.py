@@ -8,15 +8,15 @@
 # Licence : GPL
 # ==============================================================================
 
+
 import os
+import sip
 import sys
 
 
 reload(sys)
 sys.setdefaultencoding("latin-1")
-sys.path.append(os.curdir)
-
-import sip
+sys.path.insert(0, os.curdir)
 
 sip.setapi('QDate', 2)
 sip.setapi('QDateTime', 2)
@@ -26,27 +26,26 @@ sip.setapi('QTime', 2)
 sip.setapi('QUrl', 2)
 sip.setapi('QVariant', 2)
 
-
-
-
-
-import Code.Traducir as Traducir
-Traducir.install()
-
 current_dir = os.path.dirname(sys.argv[0])
 if current_dir:
     os.chdir(current_dir)
 
+sys.path.append(os.path.join(current_dir, "Code"))
+
+import Code.Traducir as Traducir
+Traducir.install()
+
 nArgs = len(sys.argv)
 if nArgs == 1:
     import Code.Init
+
     Code.Init.init()
 
 elif nArgs >= 2:
     arg = sys.argv[1].lower()
-    if arg.endswith(".pgn") or arg.endswith(".pks") \
-            or arg.endswith(".lcg") or arg.endswith(".lcf") \
-            or arg == "-play" or arg.endswith(".bmt"):
+    if (arg.endswith(".pgn") or arg.endswith(".pks") or
+            arg.endswith(".lcg") or arg.endswith(".lcf") or
+            arg == "-play" or arg.endswith(".bmt")):
         import Code.Init
         Code.Init.init()
 
@@ -62,4 +61,6 @@ elif nArgs >= 2:
         import Code.RunVoyager
         Code.RunVoyager.run(sys.argv[2])
 
-
+    elif arg == "-scanner":
+        import Code.RunScanner
+        Code.RunScanner.run(sys.argv[2], sys.argv[3])  # fich, carpeta Scanners

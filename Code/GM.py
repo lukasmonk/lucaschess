@@ -1,10 +1,11 @@
-import os
 import operator
+import os
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Jugada as Jugada
-from Code.Movimientos import xpv2pv, pv2xpv
+from LCEngine import xpv2pv, pv2xpv
+
+from Code import Jugada
+from Code import Util
+from Code import VarGen
 
 class GMpartida:
     def __init__(self, linea):
@@ -32,15 +33,15 @@ class GMpartida:
 
     def rotulo(self, siGM=True):
         if siGM:
-            return _("Opponent") + ": <b>%s (%s)</b>" % ( self.oponent, self.date )
+            return _("Opponent") + ": <b>%s (%s)</b>" % (self.oponent, self.date)
         else:
-            return "%s (%s)" % ( self.oponent, self.date )
+            return "%s (%s)" % (self.oponent, self.date)
 
     def rotuloBasico(self, siGM=True):
         if siGM:
-            return _("Opponent") + ": %s (%s)" % ( self.oponent, self.date )
+            return _("Opponent") + ": %s (%s)" % (self.oponent, self.date)
         else:
-            return "%s (%s)" % ( self.oponent, self.date )
+            return "%s (%s)" % (self.oponent, self.date)
 
 class GM:
     def __init__(self, carpeta, gm):
@@ -195,7 +196,7 @@ def listaGM():
         if fich.endswith(".xgm"):
             gm = fich[:-4].lower()
             try:
-                li.append((dic[gm], gm, True, True ))
+                li.append((dic[gm], gm, True, True))
             except:
                 pass
     li = sorted(li, key=operator.itemgetter(0))
@@ -250,7 +251,7 @@ class FabGM:
 
     def masMadera(self, pgn, partida, result):
         dic = pgn.dic
-        if not ( "White" in dic) or not ( "Black" in dic ) or (result and not ( "Result" in dic )):
+        if not ("White" in dic) or not ("Black" in dic) or (result and not ("Result" in dic)):
             return
 
         if self.liJugadores:
@@ -293,7 +294,7 @@ class FabGM:
                             else:
                                 xblancas = True
 
-            if not ( xblancas or xnegras ):
+            if not (xblancas or xnegras):
                 return
 
             self.masMaderaUno(dic, partida, xblancas, xnegras, result)
@@ -317,14 +318,13 @@ class FabGM:
             siGanaBlancas = not siEmpate and result.startswith("1")
             siGanaNegras = not siEmpate and result.startswith("0")
             if tpResult == 1:
-                if not ((xblancas and siGanaBlancas) or (xnegras and siGanaNegras) ):
+                if not ((xblancas and siGanaBlancas) or (xnegras and siGanaNegras)):
                     return
             else:
-                if not ( siEmpate or (xblancas and siGanaBlancas) or (xnegras and siGanaNegras) ):
+                if not (siEmpate or (xblancas and siGanaBlancas) or (xnegras and siGanaNegras)):
                     return
         self.write("%s|%s|%s|%s|%s|%s|%s\n" % (pv2xpv(pk.strip()), event, oponente, date, eco, result, color))
 
     def xprocesa(self):
         self.close()
         return self.added
-

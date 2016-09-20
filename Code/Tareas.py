@@ -160,7 +160,7 @@ class TareaMuevePiezaV(TareaMuevePieza):
 
     def __str__(self):
         return _X(_("Move piece from %1 to %2 on %3 second (s)"), self.desdeA1H8, self.hastaA1H8,
-                  "%0.2f (%s)" % (self.vsegundos.valor, self.vsegundos.nombre ))
+                  "%0.2f (%s)" % (self.vsegundos.valor, self.vsegundos.nombre))
 
     def directo(self, tablero):
         tablero.muevePieza(self.desdeA1H8, self.hastaA1H8)

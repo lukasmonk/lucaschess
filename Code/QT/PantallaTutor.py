@@ -1,19 +1,18 @@
 from PyQt4 import QtCore
 
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import VarGen
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.QT.Iconos as Iconos
-import Code.QT.Tablero as Tablero
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Controles as Controles
-import Code.QT.FormLayout as FormLayout
 
 class PantallaTutor(QTVarios.WDialogo):
     def __init__(self, gestor, tutor, siRival, siAperturas, siBlancas, siPuntos):
-
         titulo = _("Analyzing your move")
         icono = Iconos.Tutor()
         extparam = "tutor"
@@ -35,17 +34,19 @@ class PantallaTutor(QTVarios.WDialogo):
         ae = QTUtil.anchoEscritorio()
         mx = 32 if ae > 1000 else 20
         confTablero = VarGen.configuracion.confTablero("TUTOR", mx)
+
         # Tableros
-        def creaTablero(nombre, si=True, siLibre=True, siPunto=False):
+
+        def creaTablero(nombre, si=True, siLibre=True, siMas=False):
             if not si:
                 return None, None, None
             tablero = Tablero.Tablero(self, confTablero)
             tablero.crea()
             tablero.ponerPiezasAbajo(siBlancas)
-            lytb, tb = QTVarios.lyBotonesMovimiento(self, nombre, siLibre)
+            lytb, tb = QTVarios.lyBotonesMovimiento(self, nombre, siLibre, siMas=siMas)
             return tablero, lytb, tb
 
-        self.tableroTutor, lytbTutor, self.tbTutor = creaTablero("tutor", siPunto=True)
+        self.tableroTutor, lytbTutor, self.tbTutor = creaTablero("tutor")
         self.tableroUsuario, lytbUsuario, self.tbUsuario = creaTablero("usuario")
         self.tableroRival, lytbRival, self.tbRival = creaTablero("rival", siRival)
         self.tableroApertura, lytbApertura, self.tbApertura = creaTablero("apertura", siAperturas, siLibre=False)
@@ -81,7 +82,7 @@ class PantallaTutor(QTVarios.WDialogo):
 
         lyUsuario = Colocacion.V().relleno().control(self.lbUsuarioPuntuacion).relleno()
         gbUsuario = Controles.GB(self, _("Your move"), lyUsuario).ponFuente(f).alinCentrado().conectar(
-            self.elegirUsuario)
+                self.elegirUsuario)
         self.lbUsuarioPuntuacion.setEnabled(True)
         btLibros = Controles.PB(self, _("Consult a book"), self.consultaLibro).ponPlano(False)
 
@@ -141,7 +142,7 @@ class PantallaTutor(QTVarios.WDialogo):
     def tableroWheelEvent(self, tablero, siAdelante):
         for t in ["Tutor", "Usuario", "Rival", "Apertura"]:
             if eval("self.tablero%s == tablero" % t):
-                self.exeTB(t.lower() + "Mover" + ("Adelante" if siAdelante else "Atras" ))
+                self.exeTB(t.lower() + "Mover" + ("Adelante" if siAdelante else "Atras"))
                 return
 
     def consultaLibro(self):
@@ -188,19 +189,19 @@ def cambioTutor(parent, configuracion):
     liGen = [(None, None)]
 
     # # Tutor
-    liGen.append(( _("Engine") + ":", configuracion.ayudaCambioTutor() ))
+    liGen.append((_("Engine") + ":", configuracion.ayudaCambioTutor()))
 
     # # Decimas de segundo a pensar el tutor
-    liGen.append(( _("Duration of engine analysis (secs)") + ":", float(configuracion.tiempoTutor / 1000.0) ))
-    li = [( _("Maximum"), 0)]
-    for x in ( 1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200 ):
+    liGen.append((_("Duration of engine analysis (secs)") + ":", float(configuracion.tiempoTutor / 1000.0)))
+    li = [(_("Maximum"), 0)]
+    for x in (1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200):
         li.append((str(x), x))
     config = FormLayout.Combobox(_("Number of moves evaluated by engine(MultiPV)"), li)
-    liGen.append(( config, configuracion.tutorMultiPV ))
+    liGen.append((config, configuracion.tutorMultiPV))
 
-    liGen.append(( None, _("Sensitivity") ))
-    liGen.append((FormLayout.Spinbox(_("Minimum difference in points"), 0, 1000, 70), configuracion.tutorDifPts ))
-    liGen.append((FormLayout.Spinbox(_("Minimum difference in %"), 0, 1000, 70), configuracion.tutorDifPorc ))
+    liGen.append((None, _("Sensitivity")))
+    liGen.append((FormLayout.Spinbox(_("Minimum difference in points"), 0, 1000, 70), configuracion.tutorDifPts))
+    liGen.append((FormLayout.Spinbox(_("Minimum difference in %"), 0, 1000, 70), configuracion.tutorDifPorc))
 
     # Editamos
     resultado = FormLayout.fedit(liGen, title=_("Tutor change"), parent=parent, anchoMinimo=460, icon=Iconos.Opciones())
@@ -208,7 +209,7 @@ def cambioTutor(parent, configuracion):
     if resultado:
         claveMotor, tiempo, multiPV, difpts, difporc = resultado[1]
         configuracion.tutor = configuracion.buscaTutor(claveMotor)
-        configuracion.tiempoTutor = int(tiempo*1000)
+        configuracion.tiempoTutor = int(tiempo * 1000)
         configuracion.tutorMultiPV = multiPV
         configuracion.tutorDifPts = difpts
         configuracion.tutorDifPorc = difporc

@@ -1,27 +1,20 @@
-import time
 import os
 import random
+import time
 
+import LCEngine
+
+from Code import ControlPosicion
+from Code import Gestor
+from Code.QT import DatosNueva
+from Code.QT import QTUtil2
+from Code import Util
 from Code.Constantes import *
-import Code.Util as Util
-import Code.Gestor as Gestor
-import Code.ControlPosicion as ControlPosicion
-import Code.QT.DatosNueva as DatosNueva
-import Code.QT.QTUtil2 as QTUtil2
 
 class Control60:
     def __init__(self, gestor, siJugador):
 
         self.db = Util.recuperaVar("./IntFiles/lista60.dkv")
-        # prnt len(self.db)
-        # t = 0
-        # b = 0
-        # for x in self.db:
-        # for y in x:
-        # if " b " in y:
-        # b += 1
-        # t += 1
-        # prnt t, b
         mas = "J" if siJugador else "R"
         self.fichPuntos = "%s/puntos60%s.dkv" % (gestor.configuracion.carpeta, mas)
         if os.path.isfile(self.fichPuntos):
@@ -84,7 +77,7 @@ class Control60:
             siRecord = True
 
         mensaje = "<b>%s</b> : %d<br><b>%s</b> : %d<br><b>%s</b> : %s" % (
-            _("Level"), numero + 1, _("Errors"), errores, _("Time"), ctiempo )
+            _("Level"), numero + 1, _("Errors"), errores, _("Time"), ctiempo)
         if siRecord:
             mensaje += "<br><br><b>%s</b><br>" % _("New record!")
             self.liPuntos[numero] = [tiempo, errores]
@@ -142,7 +135,7 @@ class Gestor60(Gestor.Gestor):
         self.procesador.inicio()
 
     def finJuego(self):
-        self.pantalla.ponToolBar(( k_mainmenu, k_jugar ))
+        self.pantalla.ponToolBar((k_mainmenu, k_jugar))
         self.desactivaTodas()
         self.estado = kFinJuego
 
@@ -156,7 +149,7 @@ class Gestor60(Gestor.Gestor):
             pos = self.pgn.primeroSinHacer() + 1
             numero = DatosNueva.numEntrenamiento(self.pantalla, _("Find all moves"),
                                                  pos, etiqueta=_("Level"), pos=pos, mensAdicional="<b>" + _(
-                    "Movements must be indicated in the following order: King, Queen, Rook, Bishop, Knight and Pawn.") + "</b>")
+                        "Movements must be indicated in the following order: King, Queen, Rook, Bishop, Knight and Pawn.") + "</b>")
             if numero is None:
                 return
             numero -= 1
@@ -174,8 +167,9 @@ class Gestor60(Gestor.Gestor):
         self.ponPosicion(cp)
         self.cp = cp
         self.refresh()
-        self.ml.ponFen(fen)
-        self.liMovs = self.ml.dameMovimientos()
+
+        LCEngine.setFen(fen)
+        self.liMovs = LCEngine.getExMoves()
 
         # Creamos un avariable para controlar que se mueven en orden
         d = {}
@@ -185,9 +179,8 @@ class Gestor60(Gestor.Gestor):
         for k in fchs:
             d[k] = ""
         for mov in self.liMovs:
-            mov.pon_a1h8()
             mov.siElegido = False
-            pz = mov.pz
+            pz = mov.pieza()
             d[pz] += pz
         self.ordenPZ = ""
         for k in fchs:
@@ -202,9 +195,9 @@ class Gestor60(Gestor.Gestor):
 
         mens = ""
         if cp.enroques:
-            if ("K" if cp.siBlancas else "k" ) in cp.enroques:
+            if ("K" if cp.siBlancas else "k") in cp.enroques:
                 mens = "O-O"
-            if ("Q" if cp.siBlancas else "q" ) in cp.enroques:
+            if ("Q" if cp.siBlancas else "q") in cp.enroques:
                 if mens:
                     mens += " + "
                 mens += "O-O-O"
@@ -219,14 +212,14 @@ class Gestor60(Gestor.Gestor):
         self.siBlancas = cp.siBlancas
         self.ponRotulo2n()
 
-        self.pantalla.ponToolBar(( k_abandonar, ))
+        self.pantalla.ponToolBar((k_abandonar,))
         self.pantalla.base.pgn.goto(numero, 0)
         self.activaColor(self.siBlancas)
 
     def ponRotulo2n(self):
-        self.pantalla.ponRotulo2("<h3>%s - %s %d - %s : %d</h3>" % ( _("White") if self.siBlancas else _("Black"),
-                                                                     _("Level"), self.nivel + 1, _("Errors"),
-                                                                     self.errores  ))
+        self.pantalla.ponRotulo2("<h3>%s - %s %d - %s : %d</h3>" % (_("White") if self.siBlancas else _("Black"),
+                                                                    _("Level"), self.nivel + 1, _("Errors"),
+                                                                    self.errores))
 
     def finalX(self):
         self.procesador.inicio()
@@ -238,9 +231,9 @@ class Gestor60(Gestor.Gestor):
             return
         a1h8 = desde + hasta
         for mov in self.liMovs:
-            if mov.a1h8 == a1h8:
+            if (mov.desde()+mov.hasta()) == a1h8:
                 if not mov.siElegido:
-                    if mov.pz == self.ordenPZ[0]:
+                    if mov.pieza() == self.ordenPZ[0]:
                         self.tablero.creaFlechaMulti(a1h8, False, opacidad=0.4)
                         mov.siElegido = True
                         self.ordenPZ = self.ordenPZ[1:]

@@ -1,14 +1,14 @@
 import random
 
+from Code import ControlPosicion
+from Code import Gestor
+from Code import Jugada
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Util
+from Code import XMotorRespuesta
 from Code.Constantes import *
-import Code.Util as Util
-import Code.Jugada as Jugada
-import Code.ControlPosicion as ControlPosicion
-import Code.XMotorRespuesta as XMotorRespuesta
-import Code.Gestor as Gestor
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Iconos as Iconos
 
 class GestorAperturas(Gestor.Gestor):
     def inicio(self, listaAperturasStd, ficheroDatos, lista, fila, jugamos, repeticiones, rep_actual):
@@ -26,7 +26,7 @@ class GestorAperturas(Gestor.Gestor):
         self.siJugamosConBlancas = jugamos != "NEGRAS"
         self.siRivalConBlancas = None if jugamos == "AMBOS" else not self.siJugamosConBlancas
 
-        self.pantalla.ponToolBar(( k_mainmenu, k_ayuda, k_reiniciar, k_configurar, k_utilidades, k_siguiente ))
+        self.pantalla.ponToolBar((k_mainmenu, k_ayuda, k_reiniciar, k_configurar, k_utilidades, k_siguiente))
         self.pantalla.activaJuego(True, False, siAyudas=False)
         self.ponMensajero(self.mueveHumano)
         self.ponPosicion(self.partida.ultPosicion)
@@ -69,7 +69,7 @@ class GestorAperturas(Gestor.Gestor):
             nombre = ""
             tt = ""
             for rx in lx:
-                tt = ("%s %s"%(tt, rx)).strip()
+                tt = ("%s %s" % (tt, rx)).strip()
                 if tt in dicStd:
                     nombre = dicStd[tt].nombre
             td = dic
@@ -179,36 +179,17 @@ class GestorAperturas(Gestor.Gestor):
         for pv in self.dicActual.keys():
             desde, hasta, coronacion = pv[:2], pv[2:4], pv[4:]
             pgn = posicion.pgnSP(desde, hasta, coronacion)
-            listaJugadas.append(( pv, desde, hasta, coronacion, pgn ))
+            listaJugadas.append((pv, desde, hasta, coronacion, pgn))
         return listaJugadas
 
     def mueveHumano(self, desde, hasta, coronacion=None):
-
-        if self.siJuegaHumano:
-            self.paraHumano()
-        else:
-            self.sigueHumano()
-            return False
-
-        # Peon coronando
-        if not coronacion and self.partida.ultPosicion.siPeonCoronando(desde, hasta):
-            coronacion = self.tablero.peonCoronando(self.partida.ultPosicion.siBlancas)
-            if coronacion is None:
-                self.sigueHumano()
-                return False
-
-        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-
-        if not siBien:
-            self.sigueHumano()
-            self.error = mens
+        jg = self.checkMueveHumano(desde, hasta, coronacion)
+        if not jg:
             return False
 
         siEncontrado = False
-        if coronacion is None:
-            coronacion = ""
         for pv, jdesde, jhasta, jcoronacion, jpgn in self.listaJugadas:
-            if desde == jdesde and hasta == jhasta and coronacion == jcoronacion:
+            if desde == jdesde and hasta == jhasta and jg.coronacion == jcoronacion:
                 siEncontrado = True
                 break
 
@@ -217,14 +198,13 @@ class GestorAperturas(Gestor.Gestor):
             self.sigueHumano()
             return False
 
-        self.ultPV = desde + hasta + coronacion
+        self.ultPV = jg.movimiento()
         self.ponRotulo2(self.txtAciertos())
 
         self.movimientosPiezas(jg.liMovs)
 
         self.partida.ultPosicion = jg.posicion
         self.masJugada(jg, True)
-        self.error = ""
         self.siguienteJugada()
         return True
 
@@ -235,7 +215,7 @@ class GestorAperturas(Gestor.Gestor):
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
 
-        self.partida.liJugadas.append(jg)
+        self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.listaAperturasStd.asignaApertura(self.partida)
 
@@ -291,9 +271,8 @@ class GestorAperturas(Gestor.Gestor):
             self.procesador.entrenamientos.aperturas()
             return
 
-        mensaje = "%s\n\n%s" % ( self.txtAciertos(), _("Do you want to continue?"))
+        mensaje = "%s\n\n%s" % (self.txtAciertos(), _("Do you want to continue?"))
 
         resp = QTUtil2.pregunta(self.pantalla, mensaje)
         if resp:
             self.reiniciar()
-

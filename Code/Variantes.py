@@ -1,4 +1,4 @@
-import Code.GestorVariantes as GestorVariantes
+from Code import GestorVariantes
 
 def editaVariante(procesador, gestorBase, fen, lineaPGN, titulo=None, siEngineActivo=False):
     wpantalla = procesador.pantalla

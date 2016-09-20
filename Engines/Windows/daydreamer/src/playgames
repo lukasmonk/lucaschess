@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+import optparse
+import os
+import sys
+from subprocess import Popen, PIPE
+
+concurrency = 3
+resign_moves = 4
+resign_score = 250
+chess_home = os.path.expanduser('~') + '/src/chess/'
+engine_prefix = chess_home
+cutechess_path = chess_home + 'cutechess-cli/cutechess-cli.sh'
+daydreamer_path = chess_home + 'daydreamer/'
+pgnin = chess_home + 'daydreamer/tests/openings.pgn'
+
+programs = {
+    'bison' : 'cmd=' + engine_prefix + 'bison/bison.sh  proto=uci',
+    'diablo64' : 'cmd=' + engine_prefix + 'diablo/diablo64.sh proto=uci',
+    'dirty' : 'cmd=' + engine_prefix + \
+            'dirty_acca3/dirty.sh proto=xboard name=Dirty',
+    'viper64' : 'cmd=' + engine_prefix + \
+            'viper/viper64.sh proto=uci option."Number of threads"=1',
+    'glaurung64' : 'cmd=' + engine_prefix + \
+            'glaurung121/glaurung64.sh proto=uci option."Number of threads"=1',
+    'hamsters' : 'cmd=' + engine_prefix + 'hamsters/hamster.sh proto=uci',
+    'cyrano' : 'cmd=' + engine_prefix + 'cyrano/cyrano.sh proto=uci',
+    'alaric' : 'cmd=' + engine_prefix + 'alaric/alaric.sh proto=uci',
+    'spike' : 'cmd=' + engine_prefix + 'spike/spike.sh proto=uci',
+    'protector' : 'cmd=' + engine_prefix + 'protector/protector.sh proto=uci',
+    'spark' : 'cmd=' + engine_prefix + 'spark/spark.sh proto=uci',
+    'komodo' : 'cmd=' + engine_prefix + 'komodo/komodo.sh proto=uci',
+}
+
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    parser = optparse.OptionParser(
+        formatter=optparse.TitledHelpFormatter(width=78),
+        add_help_option=None)
+
+    # define options here:
+    parser.add_option(
+        '--debug', action='store_true', dest='debug',
+        help='Show all input and output during games.')
+
+    settings, args = parser.parse_args(argv)
+
+    engines = args[0].split(',')
+    primary_engine, engines = engines[0], engines[1:]
+    timecontrol = args[1]
+    gamecount = args[2]
+    outfile_base = args[3]
+    if not programs.has_key(primary_engine):
+        pr_eng_str = 'dir=' + daydreamer_path + \
+                ' cmd=./' + primary_engine + ' proto=uci'
+    else:
+        pr_eng_str = programs[primary_engine]
+    for engine in engines:
+        if not programs.has_key(engine):
+            sec_eng_str = 'cmd=' + daydreamer_path + engine + ' proto=uci'
+        else:
+            sec_eng_str = programs[engine]
+        cutechess_args = '-concurrency ' + str(concurrency) + \
+                ' -pgnin ' + pgnin + \
+                ' -resign ' + str(resign_moves)+' '+str(resign_score) + ' ' \
+                ' -repeat ' + '-fcp ' + pr_eng_str + \
+                ' -scp ' + sec_eng_str + \
+                ' -both tc=' + timecontrol + \
+                ' -games ' + gamecount + ' -pgnout ' + \
+                outfile_base + '.pgn'
+        if settings.debug:
+            cutechess_args += ' -debug'
+        command = cutechess_path + " " + cutechess_args
+        print command
+        proc = Popen(command, shell=True)
+        os.waitpid(proc.pid, 0)
+
+if __name__ == "__main__":
+    status = main()
+    sys.exit(status)

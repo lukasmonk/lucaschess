@@ -1,13 +1,11 @@
-import time
-
 from PyQt4 import QtCore, QtGui
 
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code import VarGen
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.QT.QTUtil as QTUtil
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
 
 def dicTeclas():
     dic = {
@@ -45,18 +43,30 @@ def leeFichero(owner, carpeta, extension, titulo=None):
     # resp = resp[0] #+pyside
     return resp
 
+def creaFichero(owner, carpeta, extension, titulo=None):
+    titulo, filtro = _lfTituloFiltro(extension, titulo)
+    resp = QtGui.QFileDialog.getSaveFileName(owner, titulo, carpeta, filtro)
+    # if resp : #+pyside
+    # resp = resp[0] #+pyside
+    return resp
+
 def leeCreaFichero(owner, carpeta, extension, titulo=None):
     titulo, filtro = _lfTituloFiltro(extension, titulo)
-    fd = QtGui.QFileDialog(owner, titulo)
-    fd.setFilter(filtro)
-    fd.setDirectory(carpeta)
-    fd.setFileMode(fd.AnyFile)
-    # fd.setOptions(fd.ShowDirsOnly)
-    if fd.exec_():
-        fileNames = fd.selectedFiles()
-        return fileNames[0] if fileNames else None
-    else:
-        return None
+    resp = QtGui.QFileDialog.getSaveFileName(owner, titulo, carpeta, filtro,
+                                             options=QtGui.QFileDialog.DontConfirmOverwrite)
+    # if resp : #+pyside
+    # resp = resp[0] #+pyside
+    return resp
+    # titulo, filtro = _lfTituloFiltro(extension, titulo)
+    # fd = QtGui.QFileDialog(owner, titulo)
+    # fd.setFilter(filtro)
+    # fd.setDirectory(carpeta)
+    # fd.setFileMode(fd.AnyFile)
+    # if fd.exec_():
+    #     fileNames = fd.selectedFiles()
+    #     return fileNames[0] if fileNames else None
+    # else:
+    #     return None
 
 def salvaFichero(pantalla, titulo, carpeta, filtro, siConfirmarSobreescritura=True):
     if siConfirmarSobreescritura:
@@ -85,15 +95,15 @@ class MensEspera(QtGui.QWidget):
         self.owner = parent
 
         self.posicion = posicion
+        self.siCancelado = False
 
         self.lb = lb = Controles.LB(parent, resalta(mensaje)).ponFuente(Controles.TipoLetra(puntos=12)).ponWrap()
 
         if siCancelar:
-            self.siCancelado = False
             if not titCancelar:
                 titCancelar = _("Cancel")
             self.btCancelar = Controles.PB(self, titCancelar, rutina=self.cancelar, plano=False).ponIcono(
-                Iconos.Cancelar()).anchoFijo(100)
+                    Iconos.Cancelar()).anchoFijo(100)
 
         ly = Colocacion.G().control(lbi, 0, 0, 3, 1).control(lb, 1, 1)
         if siCancelar:
@@ -188,13 +198,25 @@ class ControlMensEspera:
         else:
             return False
 
+    def time(self, secs):
+        def test():
+            if not self.me:
+                return
+            self.ms -= 100
+            if self.cancelado() or self.ms <= 0:
+                self.ms = 0
+                self.final()
+                return
+            QtCore.QTimer.singleShot(100, test)
+
+        self.ms = secs * 1000
+        QtCore.QTimer.singleShot(100, test)
+
 mensEspera = ControlMensEspera()
 
 def mensajeTemporal(pantalla, mensaje, segundos, background=None, pmImagen=None):
-    cme = ControlMensEspera()
-    me = cme.inicio(pantalla, mensaje, background=background, pmImagen=pmImagen)
-    time.sleep(segundos)
-    me.final()
+    me = mensEspera.inicio(pantalla, mensaje, background=background, pmImagen=pmImagen, siCancelar=segundos > 3.0, titCancelar=_("Continue"))
+    me.time(segundos)
 
 class BarraProgreso2(QtGui.QDialog):
     def __init__(self, owner, titulo, formato1="%v/%m", formato2="%v/%m"):
@@ -330,20 +352,20 @@ class BarraProgreso1(QtGui.QDialog):
 class BarraProgreso(QtGui.QProgressDialog):
     # ~ bp = QTUtil2.BarraProgreso( self, "me", 5 ).mostrar()
     # ~ n = 0
-    #~ for n in range(5):
-    #~ prlk( n )
-    #~ bp.pon( n )
-    #~ time.sleep(1)
-    #~ if bp.siCancelado():
-    #~ break
-    #~ bp.cerrar()
+    # ~ for n in range(5):
+    # ~ prlk( n )
+    # ~ bp.pon( n )
+    # ~ time.sleep(1)
+    # ~ if bp.siCancelado():
+    # ~ break
+    # ~ bp.cerrar()
 
     def __init__(self, owner, titulo, mensaje, total):
         QtGui.QProgressDialog.__init__(self, mensaje, _("Cancel"), 0, total, owner)
         self.total = total
         self.actual = 0
         self.setWindowModality(QtCore.Qt.WindowModal)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
         self.setWindowTitle(titulo)
         self.owner = owner
 
@@ -383,7 +405,7 @@ class BarraProgreso(QtGui.QProgressDialog):
         self.pon(self.actual + 1)
 
 def resalta(mens, tipo=4):
-    return ("<h%d>%s</h%d>" % ( tipo, mens, tipo)).replace("\n", "<br>")
+    return ("<h%d>%s</h%d>" % (tipo, mens, tipo)).replace("\n", "<br>")
 
 def mensaje(parent, mens, titulo=None, siResalta=True, siArribaDerecha=False):
     w = Mensaje(parent, mens, titulo, siResalta)
@@ -459,13 +481,13 @@ def preguntaCancelar(parent, mens, si, no):
     return resp
 
 def tbAcceptCancel(parent, siDefecto=False, siReject=True):
-    liAcciones = [( _("Accept"), Iconos.Aceptar(), parent.aceptar ),
+    liAcciones = [(_("Accept"), Iconos.Aceptar(), parent.aceptar),
                   None,
-                  ( _("Cancel"), Iconos.Cancelar(), parent.reject if siReject else parent.cancelar ),
-    ]
+                  (_("Cancel"), Iconos.Cancelar(), parent.reject if siReject else parent.cancelar),
+                  ]
     if siDefecto:
         liAcciones.append(None)
-        liAcciones.append(( _("Default"), Iconos.Defecto(), parent.defecto ))
+        liAcciones.append((_("Default"), Iconos.Defecto(), parent.defecto))
     liAcciones.append(None)
 
     return Controles.TBrutina(parent, liAcciones)
@@ -507,12 +529,12 @@ def tbAcceptCancel(parent, siDefecto=False, siReject=True):
 
 def tiposDeLineas():
     li = (
-        ( _("No pen"), 0 ),
-        ( _("Solid line"), 1 ),
-        ( _("Dash line"), 2 ),
-        ( _("Dot line"), 3 ),
-        ( _("Dash dot line"), 4 ),
-        ( _("Dash dot dot line"), 5 ),
+        (_("No pen"), 0),
+        (_("Solid line"), 1),
+        (_("Dash line"), 2),
+        (_("Dot line"), 3),
+        (_("Dash dot line"), 4),
+        (_("Dash dot dot line"), 5),
     )
     return li
 
@@ -554,6 +576,5 @@ def analizando(owner):
 def ponIconosMotores(lista):
     liResp = []
     for titulo, clave in lista:
-        liResp.append((titulo, clave, Iconos.PuntoEstrella() if clave.startswith("*") else Iconos.PuntoVerde() ))
+        liResp.append((titulo, clave, Iconos.PuntoEstrella() if clave.startswith("*") else Iconos.PuntoVerde()))
     return liResp
-

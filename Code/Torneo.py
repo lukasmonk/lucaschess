@@ -1,11 +1,11 @@
-import os
 import copy
+import os
 import random
 
-import Code.Util as Util
-import Code.VarGen as VarGen
-import Code.Partida as Partida
-import Code.MotoresExternos as MotoresExternos
+from Code import MotoresExternos
+from Code import Partida
+from Code import Util
+from Code import VarGen
 
 class Engine(MotoresExternos.MotorExterno):
     def __init__(self):
@@ -235,11 +235,11 @@ class Game:
         rs = {0: "1/2-1/2", 1: "1-0", 2: "0-1"}[self.result()]
 
         li = [
-            ( "Event", torneo.nombre() ),
-            ( "Date", "%d.%02d.%02d" % (dt.year, dt.month, dt.day) ),
-            ( "White", enw.alias ),
-            ( "Black", enb.alias ),
-            ( "Result", rs ),
+            ("Event", torneo.nombre()),
+            ("Date", "%d.%02d.%02d" % (dt.year, dt.month, dt.day)),
+            ("White", enw.alias),
+            ("Black", enb.alias),
+            ("Result", rs),
         ]
         if not self._partida.siFenInicial():
             li.append(("FEN", self._partida.iniPosicion.fen()))
@@ -293,8 +293,8 @@ class Torneo:
         if self._fen:
             return self._fen
         if self._norman:
-            with open( "./IntFiles/40H-Openings.epd" ) as f:
-                lista = [ linea for linea in f.read().split("\n") if linea.strip() ]
+            with open("./IntFiles/40H-Openings.epd") as f:
+                lista = [linea for linea in f.read().split("\n") if linea.strip()]
                 fen = random.choice(lista)
                 fen = fen[:fen.index("id")].strip()
             return fen + " 0 1"
@@ -503,4 +503,3 @@ class Torneo:
                     liResult[pb]["PTS"] += 10
 
         return sorted(liResult, key=lambda x: x["PTS"], reverse=True)
-

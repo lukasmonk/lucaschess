@@ -1,10 +1,10 @@
 from PyQt4 import QtGui
 
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
 
 class WAlbum(QTVarios.WDialogo):
     def __init__(self, wowner, procesador, album):
@@ -26,7 +26,7 @@ class WAlbum(QTVarios.WDialogo):
         icoCaracol = Iconos.Caracol()
 
         for pos in range(ncromos):
-            cromo = album.getCromo(pos)
+            cromo = album.get_cromo(pos)
             if not cromo.hecho:
                 pte = True
 
@@ -94,4 +94,3 @@ def eligeCromo(wowner, procesador, album):
     w = WAlbum(wowner, procesador, album)
     w.exec_()
     return w.resultado
-

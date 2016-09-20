@@ -1,5 +1,5 @@
 import atexit
-import sqlite3 as sqlite
+import sqlite3
 
 import DBF
 import DBFcache
@@ -12,7 +12,7 @@ class DBBase:
 
     def __init__(self, nomFichero):
         self.nomFichero = unicode(nomFichero)
-        self.conexion = sqlite.connect(self.nomFichero)
+        self.conexion = sqlite3.connect(self.nomFichero)
         self.conexion.text_factory = lambda x: unicode(x, "utf-8", "ignore")
         atexit.register(self.cerrar)
 
@@ -67,6 +67,10 @@ class DBBase:
         cursor = self.conexion.cursor()
         tb.crearBase(cursor)
         cursor.close()
+        cursor = self.conexion.cursor()
+        cursor.execute("PRAGMA synchronous = NORMAL")
+        cursor.execute("PRAGMA page_size = 8192")
+        cursor.close()
 
 class TablaBase:
     """
@@ -87,7 +91,7 @@ class TablaBase:
 
         for x in self.liIndices:
             c = "UNIQUE" if x.siUnico else ""
-            cursor.execute("CREATE %s INDEX [%s] ON '%s'(%s);" % ( c, x.nombre, self.nombre, x.campos ))
+            cursor.execute("CREATE %s INDEX [%s] ON '%s'(%s);" % (c, x.nombre, self.nombre, x.campos))
 
     def nuevoCampo(self, nombre, tipo, notNull=False, primaryKey=False, autoInc=False):
         campo = Campo(nombre, tipo, notNull, primaryKey, autoInc)
@@ -117,7 +121,7 @@ class Campo:
             c += " PRIMARY KEY"
         if self.autoInc:
             c += " AUTOINCREMENT"
-        return "%s %s %s" % ( self.nombre, self.tipo, c )
+        return "%s %s %s" % (self.nombre, self.tipo, c)
 
 class Indice:
     """
@@ -128,3 +132,4 @@ class Indice:
         self.nombre = nombre
         self.campos = campos
         self.siUnico = siUnico
+

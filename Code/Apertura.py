@@ -1,9 +1,9 @@
 import random
 
-import Code.Books as Books
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Partida as Partida
+from Code import Books
+from Code import Partida
+from Code import Util
+from Code import VarGen
 
 class EtiApertura:
     def __init__(self, nombre, eco, a1h8, pgn):
@@ -17,10 +17,14 @@ class EtiApertura:
         self.liHijos.append(ea)
 
 class AperturaPol:
-    def __init__(self, maxNivel):
-        self.fichero = VarGen.tbookPTZ if 1 <= maxNivel <= 2 else VarGen.tbook
+    def __init__(self, maxNivel, elo=None):
+        if elo:
+            siPTZ = elo < 1700
+        else:
+            siPTZ = 1 <= maxNivel <= 2
+        self.fichero = VarGen.tbookPTZ if siPTZ else VarGen.tbook
         self.book = Books.Polyglot()
-        if not ((Util.tamFichero(self.fichero) / (len(self.fichero) - 9)) in ( 54161, 860795) ):
+        if not ((Util.tamFichero(self.fichero) / (len(self.fichero) - 9)) in (75876, 802116)):
             import sys
 
             sys.exit()
@@ -42,22 +46,14 @@ class AperturaPol:
         li = self.book.lista(self.fichero, fen)
         if not li:
             return None
-        total = 0
-        for entry in li:
-            total += entry.weight
-        nli = len(li)
-        total2 = int(total / nli) + nli
-        for entry in li:
-            entry.weight += total2
-        total += nli * total2
+        liNum = []
+        for nentry, entry in enumerate(li):
+            liNum.extend([nentry] * (entry.weight + 1))  # Always entry.weight+1> 0
+        return li[random.choice(liNum)]
 
-        elec = random.randint(1, total)
-        pesos = 0
-        for entry in li:
-            pesos += (entry.weight + 1)
-            if pesos >= elec:
-                return entry
-        return li[-1]
+    def isActive(self, fen):
+        x = self.leeRandom(fen)
+        return x is not None
 
     def juegaMotor(self, fen):
         self.nivelActual += 1
@@ -91,11 +87,6 @@ class AperturaPol:
                 return True
         return False
 
-        # ~ ap = Apertura(100)
-
-        #~ while ap.activa:
-        #~ p_rint ap.juegaMotor()
-
 class JuegaApertura:
     def __init__(self, a1h8):
         p = Partida.Partida()
@@ -127,4 +118,3 @@ class JuegaApertura:
             return jg.desde, jg.hasta
         self.activa = False
         return None, None
-

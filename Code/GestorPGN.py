@@ -1,16 +1,16 @@
 import os
 import sys
 
-from Code.Constantes import *
-import Code.PGN as PGN
+from Code import Gestor
+from Code import PGN
+from Code.QT import Iconos
+from Code.QT import PantallaPGN
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
 import Code.SQL.Base as SQLBase
-import Code.Util as Util
-import Code.Gestor as Gestor
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Iconos as Iconos
-import Code.QT.PantallaPGN as PantallaPGN
+from Code import Util
+from Code.Constantes import *
 
 class GestorPGN(Gestor.Gestor):
     def inicio(self, opcion):
@@ -62,13 +62,13 @@ class GestorPGN(Gestor.Gestor):
 
         elif clave == k_utilidades:
             liMasOpciones = (
-                ( "libros", _("Consult a book"), Iconos.Libros() ),
-                ( None, None, None ),
-                ( "bookguide", _("Personal Opening Guide"), Iconos.BookGuide() ),
-                ( None, None, None ),
-                ( "juega_solo", _X(_('Open in "%1"'), _("Create your own game")), Iconos.JuegaSolo() ),
-                ( None, None, None ),
-                ( "play", _('Play current position'), Iconos.MoverJugar() )
+                ("libros", _("Consult a book"), Iconos.Libros()),
+                (None, None, None),
+                ("bookguide", _("Personal Opening Guide"), Iconos.BookGuide()),
+                (None, None, None),
+                ("juega_solo", _X(_('Open in "%1"'), _("Create your own game")), Iconos.JuegaSolo()),
+                (None, None, None),
+                ("play", _('Play current position'), Iconos.MoverJugar())
             )
             resp = self.utilidades(liMasOpciones)
             if resp == "libros":
@@ -140,8 +140,11 @@ class GestorPGN(Gestor.Gestor):
         texto = QTUtil.traePortapapeles()
         if texto:
             pgn = PGN.UnPGN()
+            encoding = Util.txt_encoding(texto)
+            if encoding != "latin1":
+                texto = texto.decode(encoding)
             try:
-                pgn.leeTexto(str(texto))
+                pgn.leeTexto(texto)
             except:
                 pgn.siError = True
             if pgn.siError:
@@ -168,7 +171,6 @@ class GestorPGN(Gestor.Gestor):
         self.mostrar(pgn, False)
 
     def mostrar(self, pgn, siRepiteFichero, siBlancas=None):
-
         self.pensando(True)
         self.partida.leeOtra(pgn.partida)
         self.listaAperturasStd.asignaApertura(self.partida)
@@ -184,7 +186,7 @@ class GestorPGN(Gestor.Gestor):
         self.pantalla.activaJuego(True, False, siAyudas=False)
         self.quitaAyudas()
         self.ponRotulo1("%s : <b>%s</b><br>%s : <b>%s</b>" % (_("White"), blancas, _("Black"), negras))
-        self.ponRotulo2("%s : <b>%s</b>" % ( _("Result"), resultado ))
+        self.ponRotulo2("%s : <b>%s</b>" % (_("Result"), resultado))
 
         self.tablero.desactivaTodas()
 
@@ -222,15 +224,11 @@ class GestorPGN(Gestor.Gestor):
             path = self.nuestroFichero
         elif siBuscar:
             # Elegimos el fichero
-            path = QTUtil2.leeFichero(self.pantalla, self.configuracion.dirPGN, "pgn")
+            path = QTVarios.select_pgn(self.pantalla)
             if not path:
                 if self.muestraInicial:
                     self.finPartida()
                 return
-            carpeta, fichero = os.path.split(path)
-            if self.configuracion.dirPGN != carpeta:
-                self.configuracion.dirPGN = carpeta
-                self.configuracion.graba()
         # ~ else ya esta el nombre
 
         fpgn = PGN.PGN()
@@ -290,7 +288,7 @@ class GestorPGN(Gestor.Gestor):
 
             dbf.cerrar()
             pgn = PGN.UnPGN()
-            pgn.leeTexto(dicDatos["PGN"])
+            pgn.leeTexto(self.pgnPaste)
             siMostrar = not pgn.siError
             self.pensando(False)
             if not siMostrar:
@@ -358,4 +356,3 @@ class GestorPGN(Gestor.Gestor):
             else:
                 break
         return cab + "\n" + self.partida.pgnBase() + " " + result
-

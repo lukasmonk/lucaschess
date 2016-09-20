@@ -1,20 +1,20 @@
-import os
 import codecs
+import os
 
 from PyQt4 import QtGui, QtCore
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Tacticas as Tacticas
-import Code.AperturasStd as AperturasStd
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.FormLayout as FormLayout
-import Code.QT.WBG_Tree as WBG_Tree
-import Code.QT.WBG_Training as WBG_Training
+from Code import AperturasStd
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import WBG_Training
+from Code.QT import WBG_Tree
+from Code import Tacticas
+from Code import Util
+from Code import VarGen
 
 class WN_LB(Controles.ED):
     def __init__(self, wNavigator, xid):
@@ -71,7 +71,7 @@ class WNavigator(QtGui.QWidget):
 
     def pulsadoBT(self, xid, siInicio, posicion=None, si2=False):
         if siInicio:  # se muestra el item y se guarda el item
-            if self.historia and len(self.historia)>1:
+            if self.historia and len(self.historia) > 1:
                 txt = self.bt.texto()[:posicion]
                 numMove = txt.count(" ") + 1
                 self.siWorking = True
@@ -84,7 +84,7 @@ class WNavigator(QtGui.QWidget):
                 self.siWorking = False
                 self.wmoves.tree.setCurrentItem(self.tmpItem)
             else:  # vuelve a ver el item ultimo
-                if self.historia and len(self.historia)>1:
+                if self.historia and len(self.historia) > 1:
                     item = self.historia[-1].item()
                     self.wmoves.tree.setCurrentItem(item)
                     self.wmoves.tree.scrollToItem(item)
@@ -119,26 +119,26 @@ class WMoves(QtGui.QWidget):
 
         # ToolBar
         liAccionesWork = (
-            ( _("Close"), Iconos.MainMenu(), self.tw_terminar ), None,
-            ( _("Bookmarks"), Iconos.Favoritos(), self.tw_bookmarks ), None,
-            ( _("Start position"), Iconos.Inicio(), self.tw_inicio ),
+            (_("Close"), Iconos.MainMenu(), self.tw_terminar), None,
+            (_("Bookmarks"), Iconos.Favoritos(), self.tw_bookmarks), None,
+            (_("Start position"), Iconos.Inicio(), self.tw_inicio),
         )
         self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
 
         liAccionesGen = (
-            ( _("Change"), Iconos.Modificar(), self.tg_cambiar ),
-            ( _("New"), Iconos.NuevoMas(), self.tg_crear ),
-            ( _("Copy"), Iconos.Copiar(), self.tg_copiar ),
-            ( _("Remove"), Iconos.Borrar(), self.tg_borrar ),
-            ( _("Rename"), Iconos.Rename(), self.tg_rename ),
-            ( _("Training"), Iconos.Entrenamiento(), self.tg_training ),
-            ( _("Import"), Iconos.Mezclar(), self.tg_import ),
+            (_("Change"), Iconos.Modificar(), self.tg_cambiar),
+            (_("New"), Iconos.NuevoMas(), self.tg_crear),
+            (_("Copy"), Iconos.Copiar(), self.tg_copiar),
+            (_("Remove"), Iconos.Borrar(), self.tg_borrar),
+            (_("Rename"), Iconos.Rename(), self.tg_rename),
+            (_("Training"), Iconos.Entrenamiento(), self.tg_training),
+            (_("Import"), Iconos.Mezclar(), self.tg_import),
         )
         self.tbGen = Controles.TBrutina(self, liAccionesGen, tamIcon=24)
 
         # Name
         self.lbName = Controles.LB(self, "").ponWrap().alinCentrado().ponColorFondoN("white", "darkcyan").ponTipoLetra(
-            puntos=16)
+                puntos=16)
 
         # Navigator
         self.navigator = WNavigator(self)
@@ -222,7 +222,7 @@ class WMoves(QtGui.QWidget):
     def setToolBar(self):
         li = self.bookGuide.getOtras()
         wd = len(li) > 0
-        for key in ( "tg_cambiar", "tg_mezclar", "tg_borrar" ):
+        for key in ("tg_cambiar", "tg_mezclar", "tg_borrar"):
             self.tbGen.setAccionVisible(key, wd)
 
     def showChildren(self, unMove):
@@ -280,7 +280,7 @@ class WMoves(QtGui.QWidget):
 
         while True:
             liGen = [(None, None)]
-            liGen.append(( _("Name") + ":", name ))
+            liGen.append((_("Name") + ":", name))
 
             resultado = FormLayout.fedit(liGen, title=title, parent=self, anchoMinimo=460,
                                          icon=Iconos.TutorialesCrear())
@@ -407,15 +407,15 @@ class WMoves(QtGui.QWidget):
 
         liGen = [(None, None)]
 
-        liGen.append(( None, _("Select a maximum number of moves (plies)<br> to consider from each game") ))
+        liGen.append((None, _("Select a maximum number of moves (plies)<br> to consider from each game")))
 
-        liGen.append(( FormLayout.Spinbox(_("Depth"), 3, 99, 50), 30 ))
+        liGen.append((FormLayout.Spinbox(_("Depth"), 3, 99, 50), 30))
         liGen.append((None, None))
 
-        liGen.append(( _("Only white best moves"), False ))
+        liGen.append((_("Only white best moves"), False))
         liGen.append((None, None))
 
-        liGen.append(( _("Only black best moves"), False ))
+        liGen.append((_("Only black best moves"), False))
         liGen.append((None, None))
 
         resultado = FormLayout.fedit(liGen, title=os.path.basename(ficheroBIN), parent=self, anchoMinimo=360,
@@ -441,9 +441,9 @@ class WMoves(QtGui.QWidget):
 
         liGen = [(None, None)]
 
-        liGen.append(( None, _("Select a maximum number of moves (plies)<br> to consider from each game") ))
+        liGen.append((None, _("Select a maximum number of moves (plies)<br> to consider from each game")))
 
-        liGen.append(( FormLayout.Spinbox(_("Depth"), 3, 999, 50), 30 ))
+        liGen.append((FormLayout.Spinbox(_("Depth"), 3, 999, 50), 30))
         liGen.append((None, None))
 
         resultado = FormLayout.fedit(liGen, title=os.path.basename(ficheroPGN), parent=self, anchoMinimo=460,
@@ -547,7 +547,7 @@ class WMoves(QtGui.QWidget):
                     liBrothers = mv.brothers()
                     for mv1 in liBrothers:
                         if mv1.adv() in dicVen[colorAct] or \
-                                mv1.nag() in dicVal[colorAct]:
+                                        mv1.nag() in dicVal[colorAct]:
                             continue
                         mas += "(%s)" % mv1.pgnEN()
 
@@ -579,14 +579,13 @@ class WMoves(QtGui.QWidget):
         d["FILESW"] = "%s.fns:100" % nomTactic
 
         d["PUZZLES"] = str(tactica.PUZZLES)
-        for field in ("JUMPS", "REPEAT", "PENALIZATION", "SHOWTEXT" ):
+        for field in ("JUMPS", "REPEAT", "PENALIZATION", "SHOWTEXT"):
             d[field] = tactica.comas2texto(field)
 
         Util.dic8ini(nomIni, dic)
 
         self.procesador.entrenamientos.rehaz()
         um.final()
-        QTUtil2.mensaje(self, _X(_("Tactic training %1 created."), menuname) + "<br>" + \
+        QTUtil2.mensaje(self, _X(_("Tactic training %1 created."), menuname) + "<br>" +
                         _X(_("You can access this training from menu Trainings-Learn tactics by repetition-%1"),
                            name))
-

@@ -1,28 +1,28 @@
-import sys
-import subprocess
-
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.Partida as Partida
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Delegados as Delegados
-import Code.QT.Tablero as Tablero
-import Code.QT.PantallaParamAnalisis as PantallaParamAnalisis
+from Code import VarGen
+from Code import Partida
+from Code import XRun
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaParamAnalisis
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code.QT import Histogram
 
 class WAnalisisGraph(QTVarios.WDialogo):
     def __init__(self, wowner, gestor, alm, muestraAnalisis):
         titulo = _("Result of analysis")
         icono = Iconos.Estadisticas()
-        extparam = "estadisticas"
+        extparam = "estadisticasv1"
         QTVarios.WDialogo.__init__(self, wowner, titulo, icono, extparam)
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
 
         self.alm = alm
         self.procesador = gestor.procesador
@@ -30,10 +30,6 @@ class WAnalisisGraph(QTVarios.WDialogo):
         self.siPawns = not gestor.procesador.configuracion.centipawns
         self.muestraAnalisis = muestraAnalisis
         self.colorWhite = QTUtil.qtColorRGB(231, 244, 254)
-
-        tabGen = Controles.Tab()
-
-        w = QtGui.QWidget()
 
         def xcol():
             oColumnas = Columnas.ListaColumnas()
@@ -45,70 +41,82 @@ class WAnalisisGraph(QTVarios.WDialogo):
             return oColumnas
 
         self.dicLiJG = {"A": self.alm.lijg, "W": self.alm.lijgW, "B": self.alm.lijgB}
-        gridAll = Grid.Grid(self, xcol(), siSelecFilas=True, id="A")
+        gridAll = Grid.Grid(self, xcol(), siSelecFilas=True, xid="A")
+        anchoGrid = gridAll.fixMinWidth()
         self.registrarGrid(gridAll)
-        gridW = Grid.Grid(self, xcol(), siSelecFilas=True, id="W")
+        gridW = Grid.Grid(self, xcol(), siSelecFilas=True, xid="W")
+        anchoGrid = max(gridW.fixMinWidth(), anchoGrid)
         self.registrarGrid(gridW)
-        gridB = Grid.Grid(self, xcol(), siSelecFilas=True, id="B")
+        gridB = Grid.Grid(self, xcol(), siSelecFilas=True, xid="B")
+        anchoGrid = max(gridB.fixMinWidth(), anchoGrid)
         self.registrarGrid(gridB)
 
         lbIndexes = Controles.LB(self, alm.indexesHTML)
-        pbSave = Controles.PB(self,_("Save to game comments"), self.saveIndexes, plano=False )
+        pbSave = Controles.PB(self, _("Save to game comments"), self.saveIndexes, plano=False)
         pbSave.ponIcono(Iconos.Grabar())
         ly0 = Colocacion.H().control(pbSave).relleno()
         ly = Colocacion.V().control(lbIndexes).otro(ly0).relleno()
         wIdx = QtGui.QWidget()
         wIdx.setLayout(ly)
 
-        tabGrid = Controles.Tab().ponPosicion("W")
+        self.tabGrid = tabGrid = Controles.Tab()
         tabGrid.nuevaTab(gridAll, _("All moves"))
         tabGrid.nuevaTab(gridW, _("White"))
         tabGrid.nuevaTab(gridB, _("Black"))
         tabGrid.nuevaTab(wIdx, _("Indexes"))
+        tabGrid.dispatchChange(self.tabChanged)
+        self.tabActive = 0
 
         confTablero = VarGen.configuracion.confTablero("ANALISISGRAPH", 48)
         self.tablero = Tablero.Tablero(self, confTablero)
         self.tablero.crea()
         self.tablero.ponerPiezasAbajo(True)
+        self.tablero.dispatchSize(self.tableroSizeChanged)
 
-        layout = Colocacion.H().control(tabGrid).control(self.tablero).margen(0)
-        w.setLayout(layout)
-        tabGen.nuevaTab(w, _("Data"))
+        layout = Colocacion.G()
+        layout.controlc(tabGrid, 0, 0)
+        layout.controlc(self.tablero, 0, 1)
 
-        tabGraph = Controles.Tab().ponPosicion("W")
-        tabGen.nuevaTab(tabGraph, _("Graphics"))
+        Controles.Tab().ponPosicion("W")
+        ancho = self.tablero.width() + anchoGrid + 10
+        self.htotal = [ Histogram.Histogram(self, alm.hgame, gridAll, ancho),
+                        Histogram.Histogram(self, alm.hwhite, gridW, ancho),
+                        Histogram.Histogram(self, alm.hblack, gridB, ancho) ]
+        lh = Colocacion.V().control(self.htotal[0]).control(self.htotal[1]).control(self.htotal[2])
+        self.htotal[1].hide()
+        self.htotal[2].hide()
 
-        tab = Controles.Tab()
-        tab.nuevaTab(alm.game, _("Total"))
-        tab.nuevaTab(alm.gameDif, _("Lost points"))
-        tabGraph.nuevaTab(tab, _("All moves"))
-
-        tab = Controles.Tab()
-        tab.nuevaTab(alm.white, _("Total"))
-        tab.nuevaTab(alm.whiteDif, _("Lost points"))
-        tabGraph.nuevaTab(tab, _("White"))
-
-        tab = Controles.Tab()
-        tab.nuevaTab(alm.black, _("Total"))
-        tab.nuevaTab(alm.blackDif, _("Lost points"))
-        tabGraph.nuevaTab(tab, _("Black"))
-
-        layout = Colocacion.V().control(tabGen).margen(8)
+        layout.otroc(lh, 1, 0, 1, 2)
         self.setLayout(layout)
 
-        self.recuperarVideo(siTam=True, anchoDefecto=960, altoDefecto=600)
+        self.recuperarVideo(siTam=False)#, anchoDefecto=960, altoDefecto=600)
 
         gridAll.gotop()
         gridB.gotop()
         gridW.gotop()
         self.gridBotonIzquierdo(gridAll, 0, None)
+        self.tabGrid.setFixedHeight(self.tablero.height())
+        self.adjustSize()
+
+    def tableroSizeChanged(self):
+        self.tabGrid.setFixedHeight(self.tablero.height())
+        self.adjustSize()
+        self.htotal[self.tabActive].grid.setFocus()
+
+    def tabChanged(self, ntab):
+        QtGui.QApplication.processEvents()
+        if ntab <= 2:
+            for n in range(3):
+                self.htotal[n].setVisible(n == ntab)
+            self.adjustSize()
+            self.tabActive = ntab
 
     def gridCambiadoRegistro(self, grid, fila, columna):
         self.gridBotonIzquierdo(grid, fila, columna)
 
     def saveIndexes(self):
         self.gestor.partida.setFirstComment(self.alm.indexesRAW)
-        QTUtil2.mensajeTemporal(self, _("Saved"), 1.8 )
+        QTUtil2.mensajeTemporal(self, _("Saved"), 1.8)
 
     def gridBotonIzquierdo(self, grid, fila, columna):
         self.tablero.quitaFlechas()
@@ -120,12 +128,24 @@ class WAnalisisGraph(QTVarios.WDialogo):
         rm = mrm.liMultiPV[0]
         self.tablero.creaFlechaMulti(rm.movimiento(), False)
         grid.setFocus()
+        self.htotal[self.tabActive].setPointActive(fila)
 
     def gridDobleClick(self, grid, fila, columna):
         jg = self.dicLiJG[grid.id][fila]
         mrm, pos = jg.analisis
         self.muestraAnalisis(self.procesador, self.procesador.xtutor, jg, self.tablero.siBlancasAbajo, 999999, pos,
                              pantalla=self, siGrabar=False)
+
+    def gridTeclaControl(self, grid, k, siShift, siControl, siAlt):
+        nrecno = grid.recno()
+        if k in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return):
+            self.gridDobleClick(grid, nrecno, None)
+        elif k == QtCore.Qt.Key_Right:
+            if nrecno+1 < self.gridNumDatos(grid):
+                grid.goto(nrecno+1, 0)
+        elif k == QtCore.Qt.Key_Left:
+            if nrecno > 0:
+                grid.goto(nrecno-1, 0)
 
     def gridColorFondo(self, grid, fila, oColumna):
         if grid.id == "A":
@@ -146,7 +166,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
         columna = oColumna.clave
         jg = self.dicLiJG[grid.id][fila]
         if columna == "NUM":
-            return " %s "%jg.xnum
+            return " %s " % jg.xnum
         elif columna in ("MOVE", "BEST"):
             mrm, pos = jg.analisis
             rm = mrm.liMultiPV[pos if columna == "MOVE" else 0]
@@ -164,7 +184,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
             rm1 = mrm.liMultiPV[pos]
             pts = rm.puntosABS_5() - rm1.puntosABS_5()
             if self.siPawns:
-                pts = pts / 100.0
+                pts /= 100.0
                 return "%0.2f" % pts
             else:
                 return "%d" % pts
@@ -173,8 +193,8 @@ class WAnalisisGraph(QTVarios.WDialogo):
             rm = mrm.liMultiPV[0]
             rm1 = mrm.liMultiPV[pos]
             pts = rm.puntosABS_5() - rm1.puntosABS_5()
-            prc = 100-pts if pts < 100 else 0
-            return "%3d%%"%prc
+            prc = 100 - pts if pts < 100 else 0
+            return "%3d%%" % prc
 
     def closeEvent(self, event):
         self.guardarVideo()
@@ -325,15 +345,9 @@ class WMuestra(QtGui.QWidget):
 
     def jugarPosicion(self):
         posicion, desde, hasta = self.um.posicionBaseActual()
-        li = []
-        if sys.argv[0].endswith(".py"):
-            li.append("pythonw.exe" if VarGen.isWindows else "python")
-            li.append("Lucas.py")
-        else:
-            li.append("Lucas.exe" if VarGen.isWindows else "Lucas")
         fen = posicion.fen()
-        li.extend(["-play", fen])
-        subprocess.Popen(li)
+
+        XRun.run_lucas("-play", fen)
 
     def lanzaTiempo(self):
         self.siTiempoActivo = not self.siTiempoActivo
@@ -393,8 +407,8 @@ class WAnalisis(QTVarios.WDialogo):
         self.siBlancas = siBlancas
 
         tbWork = Controles.TBrutina(self, tamIcon=24)
-        tbWork.new( _("Close"), Iconos.MainMenu(), self.terminar )
-        tbWork.new( _("New"), Iconos.NuevoMas(), self.crear )
+        tbWork.new(_("Close"), Iconos.MainMenu(), self.terminar)
+        tbWork.new(_("New"), Iconos.NuevoMas(), self.crear)
 
         self.tablero = Tablero.Tablero(self, confTablero)
         self.tablero.crea()
@@ -407,7 +421,7 @@ class WAnalisis(QTVarios.WDialogo):
 
         self.setStyleSheet("QStatusBar::item { border-style: outset; border-width: 1px; border-color: LightSlateGray ;}")
 
-        liMasAcciones = ( ("FEN:%s" % _("Copy to clipboard"), "MoverFEN", Iconos.Clip()),)
+        liMasAcciones = (("FEN:%s" % _("Copy to clipboard"), "MoverFEN", Iconos.Clip()),)
         lytb, self.tb = QTVarios.lyBotonesMovimiento(self, "", siLibre=siLibre,
                                                      siGrabar=siGrabar,
                                                      siGrabarTodos=siGrabar,
@@ -559,9 +573,9 @@ class WAnalisisVariantes(QtGui.QDialog):
         self.tableroT.crea()
         self.tableroT.ponerPiezasAbajo(siBlancas)
 
-        btTerminar = Controles.PB(self, _("Quit"), self.close).ponPlano(False)
+        btTerminar = Controles.PB(self, _("Close"), self.close).ponPlano(False)
         btReset = Controles.PB(self, _("Another change"), oBase.reset).ponIcono(Iconos.MoverLibre()).ponPlano(False)
-        liMasAcciones = ( ("FEN:%s" % _("Copy to clipboard"), "MoverFEN", Iconos.Clip()),)
+        liMasAcciones = (("FEN:%s" % _("Copy to clipboard"), "MoverFEN", Iconos.Clip()),)
         lytbTutor, self.tb = QTVarios.lyBotonesMovimiento(self, "", siLibre=maxRecursion > 0,
                                                           liMasAcciones=liMasAcciones)
         self.maxRecursion = maxRecursion - 1

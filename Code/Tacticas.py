@@ -1,8 +1,8 @@
-import os
 import codecs
+import os
 import random
 
-import Code.Util as Util
+from Code import Util
 
 class BaseTactica:
     def __init__(self):
@@ -13,7 +13,10 @@ class BaseTactica:
         self.REPEAT = [
             0, ]  # Block repetitions, Repetitions of total of puzzles, comma separated, indicating order of repetition as 0=original, 1=random, 2=previous, eg 1,2,0=3 repetitions,
         # first is random, second repeat previous, and third original. Total field in blanck is the same as 0
-        self.PENALIZATION = []  # Penalties, divided in blocks, by example 1,3,5,7 means first 25% (100%/4) of puzzles has one position of penalty when error, second 25% three and so on. Blank means no penalties.
+        # Penalties, divided in blocks, by example 1,3,5,7 means first 25%
+        # (100%/4) of puzzles has one position of penalty when error, second 25%
+        # three and so on. Blank means no penalties.
+        self.PENALIZATION = []
         self.SHOWTEXT = [1, ]  # Text while training, in blocks like penalties, 1,0,0,0, 25% Yes, rest No
         self.POINTVIEW = 0  # El que corresponda, 1 = White 2 = Black
         self.REFERENCE = ""
@@ -388,12 +391,12 @@ class Tactica(BaseTactica):
                      "SHOWTEXT": self.SHOWTEXT, "PENALIZATION": self.PENALIZATION}
         liHisto.insert(0, dicActual)
         self.db["HISTO"] = liHisto
-        #6.3d---------------+
+        # 6.3d---------------+
 
-        #7.0---------------+
+        # 7.0---------------+
         self.db["SECONDS"] = 0.0
         self.db["ERRORS"] = 0
-        #7.0---------------+
+        # 7.0---------------+
 
         self.db.pack()
 
@@ -491,4 +494,3 @@ class Tactica(BaseTactica):
         self.db["HISTO"] = liNueHisto
         if 0 in liNum:
             self.db["POSACTIVE"] = None
-

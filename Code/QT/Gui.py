@@ -2,16 +2,15 @@ import os
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.Usuarios as Usuarios
-import Code.Voice as Voice
-import Code.Configuracion as Configuracion
-import Code.Util as Util
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil as QTUtil
+from Code import Configuracion
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTVarios
+from Code import Usuarios
+from Code import Util
+from Code import VarGen
 
 def lanzaGUI(procesador):
     """
@@ -21,7 +20,8 @@ def lanzaGUI(procesador):
     # Comprobamos el lenguaje
     app = QtGui.QApplication([])
 
-    liUsuarios = Usuarios.listaUsuarios()
+    liUsuarios = Usuarios.Usuarios().lista
+    usuario = None
     if liUsuarios:
         usuario = pideUsuario(liUsuarios)
         if usuario is None:
@@ -34,6 +34,15 @@ def lanzaGUI(procesador):
     siPedirLenguaje = not os.path.isdir(activeFolder) or not os.listdir(activeFolder)
     procesador.iniciaConUsuario(user)
     configuracion = procesador.configuracion
+    if usuario:
+        if not configuracion.jugador:
+            configuracion.jugador = usuario.nombre
+            configuracion.graba()
+        elif configuracion.jugador != usuario.nombre:
+            for usu in liUsuarios:
+                if usu.numero == usuario.numero:
+                    usu.nombre = configuracion.jugador
+                    Usuarios.Usuarios().guardaLista(liUsuarios)
 
     # Comprobamos el lenguaje
     if siPedirLenguaje and not configuracion.traductor:
@@ -53,10 +62,10 @@ def lanzaGUI(procesador):
             menu = QTVarios.LCMenu(None)
 
             nico = QTVarios.rondoPuntos()
-            for k, nombre, porc in li:
+            for k, nombre, porc, author in li:
                 rotulo = nombre
                 if porc != "100":
-                    rotulo += " (%s%%)"%porc
+                    rotulo += " (%s%%)" % porc
                 menu.opcion(k, nombre, nico.otro())
             resp = menu.lanza()
             if resp:
@@ -64,9 +73,7 @@ def lanzaGUI(procesador):
                 configuracion.graba()
 
     # Estilo
-    global stylename
-    styleName = configuracion.estilo
-    app.setStyle(QtGui.QStyleFactory.create(styleName))
+    app.setStyle(QtGui.QStyleFactory.create(configuracion.estilo))
     app.setPalette(QtGui.QApplication.style().standardPalette())
     app.setEffectEnabled(QtCore.Qt.UI_AnimateMenu)
 
@@ -80,7 +87,6 @@ def lanzaGUI(procesador):
     procesador.iniciarGUI()
 
     resp = app.exec_()
-    Voice.runVoice.close()
 
     return resp
 
@@ -154,4 +160,3 @@ def pideUsuario(liUsuarios):
                 return None
 
     return usuario
-

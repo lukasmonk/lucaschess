@@ -1,365 +1,525 @@
 import atexit
 import os
-import struct
+import sqlite3
+import time
+import random
 
-import Code.VarGen as VarGen
-from Code.Movimientos import posA1, a1Pos, pv2xpv, xpv2pv
-import Code.Util as Util
-import Code.Partida as Partida
-import Code.SQL.Base as Base
-import Code.ControlPosicion as ControlPosicion
-import Code.PGNreader as PGNreader
+import LCEngine
 
-class RegSTAT:
-    dicNP = {0: "", 1: "q", 2: "r", 3: "b", 4: "n"}
-    dicPN = {"": 0, "q": 1, "r": 2, "b": 3, "n": 4}
-    sizeSTAT = 26
-    stSTAT = "<HIIIIII"
+from Code import ControlPosicion
+from Code import Partida
+from Code import Util
+from Code import VarGen
 
-    def __init__(self, cfile, offset):
-        self.file = cfile
-        self.offset = offset
-
-    def read(self):
-        self.file.seek(self.offset, 0)
-
-        xmove, self.brother, self.child, self.white, self.draw, self.black, self.other = \
-            struct.unpack(self.stSTAT, self.file.read(self.sizeSTAT))
-
-        self.move = self.num2move(xmove)
-
-    def __str__(self):
-        return "%s b%d c%d w%d d%d b%d o%d" % (
-            self.move, self.brother, self.child, self.white, self.draw, self.black, self.other)
-
-    def write(self, siMas=False):
-        if siMas:
-            self.file.seek(0, 2)
-        else:
-            self.file.seek(self.offset, 0)
-        self.file.write(struct.pack(self.stSTAT, self.move2num(self.move), self.brother,
-                                    self.child, self.white, self.draw, self.black, self.other))
-
-    def num2move(self, num):
-        d = num % 64
-        num /= 64
-        h = num % 64
-        c = num / 64
-        return posA1(d) + posA1(h) + self.dicNP.get(c, "")
-
-    def move2num(self, move):
-        if not move.strip():
-            raise
-
-        d = a1Pos(move[:2])
-        h = a1Pos(move[2:4])
-        c = self.dicPN.get(move[4:], 0)
-
-        return d + 64 * ( h + 64 * c )
-
-    def new(self, move):
-        self.move, self.brother, self.child, self.white, self.draw, self.black, self.other = move, 0, 0, 0, 0, 0, 0
-
-    def sum(self, white, draw, black, other):
-        self.white += white
-        self.draw += draw
-        self.black += black
-        self.other += other
-
-    def clone(self):
-        work = RegSTAT(self.file, self.offset)
-        work.move, work.brother, work.child, work.white, work.draw, work.black, work.other = \
-            self.move, self.brother, self.child, self.white, self.draw, self.black, self.other
-        return work
-
-    def nextByte(self):
-        self.file.seek(0, 2)
-        return self.file.tell()
-
-    def walkchild(self, move, siCrear):
-        if self.child:
-            hijo = self.clone()
-            hijo.offset = self.child
-            while True:
-                hijo.read()
-                if hijo.move == move:
-                    return hijo
-                if hijo.brother:
-                    hijo.offset = hijo.brother
-                else:
-                    if siCrear:
-                        nextByte = self.nextByte()
-                        hijo.brother = nextByte
-                        hijo.write()
-                        # Cambiamos al hermano
-                        hijo.offset = nextByte
-                        hijo.new(move)
-                        hijo.write(True)
-                        return hijo
-                    else:
-                        return None
-        elif siCrear:
-            nextByte = self.nextByte()
-            self.child = nextByte
-            self.write()
-            hijo = self.clone()
-            hijo.offset = nextByte
-            hijo.new(move)
-            hijo.write(True)
-            return hijo
-        else:
-            return None
-
-    def children(self):
-        liChildren = []
-        if self.child:
-            work = self.clone()
-            work.offset = work.child
-            work.read()
-            liChildren.append(work.clone())
-
-            while work.brother:
-                work.offset = work.brother
-                work.read()
-                liChildren.append(work.clone())
-        return liChildren
-
-    def maxBloq(self):
-        resp = ""
-        if self.white >= self.draw and self.white >= self.black:
-            resp += "w"
-        if self.black >= self.draw and self.black >= self.white:
-            resp += "b"
-        if self.draw >= self.white and self.draw >= self.black:
-            resp += "d"
-        return resp
-
-    def games(self):
-        return self.white + self.draw + self.black + self.other
-
-    def gamesParcial(self, siWhite, siDraw):
-        t = self.white if siWhite else self.black
-        if siDraw:
-            t += self.draw
-        return t
+posA1 = LCEngine.posA1
+a1Pos = LCEngine.a1Pos
+pv2xpv = LCEngine.pv2xpv
+xpv2pv = LCEngine.xpv2pv
+PGNreader = LCEngine.PGNreader
+setFen = LCEngine.setFen
+makeMove = LCEngine.makeMove
+getFen = LCEngine.getFen
+getExMoves = LCEngine.getExMoves
+fen2fenM2 = LCEngine.fen2fenM2
+makePV = LCEngine.makePV
+num2move = LCEngine.num2move
+move2num = LCEngine.move2num
 
 class TreeSTAT:
-    regSize = 26
-    defaultDepth = 30
-
     def __init__(self, nomFichero, depth=None):
         self.nomFichero = nomFichero
+        self.defaultDepth = 30
+        self.iniFen = ControlPosicion.FEN_INICIAL
+        self.hiniFen = self._fen2hash(self.iniFen)
+        self._conexion = sqlite3.connect(self.nomFichero)
 
-        tf = Util.tamFichero(nomFichero)
-        if (tf < self.regSize) or ((tf - 1) % self.regSize > 0):
-            self.file = self.creaFichero(depth)
-        else:
-            self.file = self.abreFichero()
-        self.depth = self.readDepth()
-        self.root = RegSTAT(self.file, 1)
-        self.root.read()
+        self.depth, self.riniFen = self.checkTable(depth)
 
+        self.fsum = self._sum  # called method needed to massive append
+
+        self.cursor = self._conexion.cursor()
         atexit.register(self.close)
 
-    def readDepth(self):
-        self.file.seek(0, 0)
-        depth = ord(self.file.read(1))
-        return depth
+    def checkTable(self, depth):
+        cursor = self._conexion.cursor()
+        cursor.execute("pragma table_info(STATS)")
+        if not cursor.fetchall():
+            if depth is None:
+                depth = self.defaultDepth
+            sql = "CREATE TABLE STATS( HASHFEN INT, W INT, B INT, D INT, O INT, RFATHER INT, XMOVE INT );"
+            cursor.execute(sql)
+            sql = "CREATE INDEX HASHFEN ON STATS( HASHFEN );"
+            cursor.execute(sql)
+            sql = "INSERT INTO STATS( HASHFEN, W, B, D, O, RFATHER, XMOVE ) VALUES( ?, ?, ?, ?, ?, ?, ? );"
+            cursor.execute(sql, (self.hiniFen, 0, 0, 0, 0, 0, 0))
+            riniFen = cursor.lastrowid
 
-    def writeDepth(self, depth):
-        self.depth = depth
-        self.file.seek(0, 0)
-        self.file.write(chr(depth))
+            sql = "CREATE TABLE CONFIG( KEY TEXT PRIMARY KEY, VALUE TEXT );"
+            cursor.execute(sql)
+            sql = "INSERT INTO CONFIG( KEY, VALUE ) VALUES( ?, ? );"
+            cursor.execute(sql, ("DEPTH", str(depth)))
+
+            self._conexion.commit()
+            cursor.execute("PRAGMA synchronous = NORMAL")
+            cursor.execute("PRAGMA page_size = 8192")
+        else:
+            sql = "SELECT VALUE FROM CONFIG WHERE KEY= ?"
+            cursor.execute(sql, ("DEPTH",))
+            raw = cursor.fetchone()
+            depth = int(raw[0])
+            sql = "SELECT ROWID FROM STATS WHERE HASHFEN = ?"
+            cursor.execute(sql, (self.hiniFen,))
+            raw = cursor.fetchone()
+            riniFen = raw[0]
+
+        cursor.close()
+        return depth, riniFen
 
     def close(self):
-        if self.file:
-            self.file.close()
-            self.file = None
+        if self._conexion:
+            self.cursor.close()
+            self._conexion.close()
+            self._conexion = None
 
     def reset(self, depth=None):
         self.close()
         Util.borraFichero(self.nomFichero)
-        self.file = self.creaFichero(depth)
-        self.root = RegSTAT(self.file, 1)
-        self.root.read()
+        self._conexion = sqlite3.connect(self.nomFichero)
+        self.depth, self.riniFen = self.checkTable(depth)
+        self.cursor = self._conexion.cursor()
 
-    def creaFichero(self, depth):
-        f = open(self.nomFichero, "w+b")
-        if depth is None:
-            depth = self.defaultDepth
-        self.depth = depth
-        f.seek(0, 0)
-        f.write(chr(depth))
-        wr = RegSTAT(f, 1)
-        wr.new("a1a1")
-        wr.write(True)
-        return f
+    def _readRow(self, hfen, rfather, xmove):
+        sql = "SELECT ROWID, W, B, D, O, RFATHER, XMOVE FROM STATS WHERE HASHFEN = ?"
+        self.cursor.execute(sql, (hfen,))
+        liRows = self.cursor.fetchall()
+        if liRows:
+            for row in liRows:
+                RFATHER = row[5]
+                if rfather == RFATHER:
+                    alm = Util.Almacen()
+                    alm.ROWID = row[0]
+                    alm.W = row[1]
+                    alm.B = row[2]
+                    alm.D = row[3]
+                    alm.O = row[4]
+                    alm.RFATHER = RFATHER
+                    alm.XMOVE = row[6]
+                    return alm
 
-    def abreFichero(self):
-        f = open(self.nomFichero, "r+b")
-        return f
+        alm = Util.Almacen()
+        alm.ROWID = None
+        alm.W = 0
+        alm.B = 0
+        alm.D = 0
+        alm.O = 0
+        alm.RFATHER = rfather
+        alm.XMOVE = xmove
+        return alm
+
+    def _readRowExt(self, rfather, hashFen, fen):
+        sql = "SELECT ROWID, W, B, D, O, RFATHER, XMOVE FROM STATS WHERE HASHFEN = ?"
+        self.cursor.execute(sql, (hashFen,))
+        liRows = self.cursor.fetchall()
+        basefenM2 = fen2fenM2(fen)
+
+        def history(xmove, rfather):
+            li = [xmove,]
+            sql = "SELECT RFATHER, XMOVE FROM STATS WHERE ROWID = ?"
+            while rfather != self.riniFen:
+                self.cursor.execute(sql, (rfather,))
+                rfather, xmove = self.cursor.fetchone()
+                li.insert(0, xmove)
+            li = [num2move(x) for x in li]
+            pv = " ".join(li)
+            setFen(self.iniFen)
+            makePV(pv)
+            fenM2 = fen2fenM2(getFen())
+            return pv, fenM2
+
+        liAlms = []
+        alm_base = None
+        tW = tB = tD = tO = 0
+        if liRows:
+            li = []
+            for row in liRows:
+                alm = Util.Almacen()
+                alm.ROWID, alm.W, alm.B, alm.D, alm.O, alm.RFATHER, alm.XMOVE = row
+                alm.PV, alm.FENM2 = history(alm.XMOVE, alm.RFATHER)
+                if alm.RFATHER == rfather:
+                    alm_base = alm
+                li.append(alm)
+            for alm in li:
+                if alm.FENM2 == basefenM2:
+                    liAlms.append(alm)
+                    tW += alm.W
+                    tB += alm.B
+                    tD += alm.D
+                    tO += alm.O
+        alm = Util.Almacen()
+        alm.W = tW
+        alm.B = tB
+        alm.D = tD
+        alm.O = tO
+        alm.BASE = alm_base
+        alm.LIALMS = liAlms
+        return alm
+
+    def _writeRow(self, hashFen, alm):
+        rowid = alm.ROWID
+        if rowid is None:
+            sql = "INSERT INTO STATS( HASHFEN, W, B, D, O, RFATHER, XMOVE ) VALUES( ?, ?, ?, ?, ?, ?, ? )"
+            self.cursor.execute(sql, (hashFen, alm.W, alm.B, alm.D, alm.O, alm.RFATHER, alm.XMOVE))
+            return self.cursor.lastrowid
+        else:
+            sql = "UPDATE STATS SET W=?, B=?, D=?, O=? WHERE ROWID=?"
+            self.cursor.execute(sql, (alm.W, alm.B, alm.D, alm.O, rowid))
+            return rowid
+
+    def commit(self):
+        self._conexion.commit()
+
+    def _fen2hash(self, fen):
+        return hash(fen2fenM2(fen))
+
+    def _sum(self, hfen, rfather, xmove, w, b, d, o, tdepth ):
+        alm = self._readRow(hfen, rfather, xmove)
+        if w:
+            alm.W += w
+        elif b:
+            alm.B += b
+        elif d:
+            alm.D += d
+        else:
+            alm.O += o
+        return self._writeRow(hfen, alm)
 
     def append(self, pv, result, r=+1):
-        w = d = b = o = 0
+        w = b = d = o = 0
         if result == "1-0":
-            w = r
+            w += r
         elif result == "0-1":
-            b = r
+            b += r
         elif result == "1/2-1/2":
-            d = r
+            d += r
         else:
-            o = r
+            o += r
 
-        self.root.sum(w, d, b, o)
-        self.root.write()
-
-        padre = self.root
-        for n, move in enumerate(pv.split(" ")):
-            if n >= self.depth:
+        self.fsum(self.hiniFen, 0, 0, w, b, d, o, 0)
+        rfather = self.riniFen
+        setFen(self.iniFen)
+        liPV = pv.split(" ")
+        for depth, move in enumerate(liPV):
+            if depth >= self.depth:
                 break
+            if makeMove(move):
+                fen = getFen()
+                hfen = self._fen2hash(fen)
+                rfather = self.fsum(hfen, rfather, move2num(move), w, b, d, o, depth)
 
-            hijo = padre.walkchild(move, True)
-            hijo.sum(w, d, b, o)
-            hijo.write()
-            padre = hijo
+    def append_fen(self, pv, result, liFens):
+        w = b = d = o = 0
+        if result == "1-0":
+            w += 1
+        elif result == "0-1":
+            b += 1
+        elif result == "1/2-1/2":
+            d += 1
+        else:
+            o += 1
+
+        self.fsum(self.hiniFen, 0, 0, w, b, d, o, 0)
+        rfather = self.riniFen
+        liPV = pv.split(" ")
+        for depth, move in enumerate(liPV):
+            if depth >= self.depth:
+                break
+            hfen = hash(liFens[depth])
+            rfather = self.fsum(hfen, rfather, move2num(move), w, b, d, o, depth)
+
+    def massive_append_set(self, start):
+        if start:
+            self.massive = {}
+            self.fsum = self.massive_sum
+        else:
+            self.fsum = self._sum
+            for (hfen, rfather), alm in self.massive.iteritems():
+                self._writeRow(hfen, alm)
+            self.massive = {}
+
+    def massive_sum(self, hfen, rfather, xmove, w, b, d, o, tdepth ):
+        if tdepth > 10:
+            return self._sum(hfen, rfather, xmove, w, b, d, o, tdepth )
+
+        alm = self.massive.get((hfen, rfather))
+        if not alm:
+            alm = self._readRow(hfen, rfather, xmove)
+        if w:
+            alm.W += w
+        elif b:
+            alm.B += b
+        elif d:
+            alm.D += d
+        else:
+            alm.O += o
+        if not alm.ROWID:
+            alm.ROWID = self._writeRow(hfen, alm)
+        self.massive[(hfen, rfather)] = alm
+        return alm.ROWID
 
     def appendColor(self, pv, result, siWhite, r=+1):
-        w = d = b = o = 0
+        w = b = d = o = 0
         if result == "1-0":
-            w = r
+            w += r
         elif result == "0-1":
-            b = r
+            b += r
         elif result == "1/2-1/2":
-            d = r
+            d += r
         else:
-            o = r
+            o += r
 
-        self.root.sum(w, d, b, o)
-        self.root.write()
-
-        padre = self.root
-        for n, move in enumerate(pv.split(" ")):
-            if n >= self.depth:
+        self.fsum(self.hiniFen, 0, 0, w, b, d, o, 0)
+        rfather = self.riniFen
+        setFen(self.iniFen)
+        liPV = pv.split(" ")
+        for depth, move in enumerate(liPV):
+            if depth >= self.depth:
                 break
+            if makeMove(move):
+                fen = getFen()
+                hfen = self._fen2hash(fen)
+                if (depth % 2 == 0 and siWhite) or (depth % 2 == 1 and not siWhite):
+                    rfather = self.fsum(hfen, rfather, move2num(move), w, b, d, o, depth)
+                else:
+                    rfather = self.fsum(hfen, rfather, move2num(move), 0, 0, 0, r, depth)
 
-            hijo = padre.walkchild(move, True)
-            if (n % 2 == 0 and siWhite) or (n % 2 == 1 and not siWhite):
-                hijo.sum(w, d, b, o)
-            else:
-                hijo.sum(0, 0, 0, r)
-            hijo.write()
-            padre = hijo
+    def root(self):
+        return self._readRow(self.hiniFen, 0, 0)
+
+    def rootGames(self):
+        alm = self.root()
+        return alm.W + alm.B + alm.D + alm.O
+
+    def children(self, pvBase):
+        fen_base = makePV(pvBase)
+        li = getExMoves()
+        liResp = []
+        rfather = self.riniFen
+        for n, mv in enumerate(li):
+            setFen(fen_base)
+            move = mv.movimiento()
+            makeMove(move)
+            fen = getFen()
+            hashFen = self._fen2hash(fen)
+            alm = self._readRowExt(rfather, hashFen, fen)
+            alm.move = move
+            liResp.append(alm)
+        return liResp
 
     def flistAllpvs(self, maxDepth, minGames, siWhite, siDraw, pvBase):
-
         fich = VarGen.configuracion.ficheroTemporal("tmp")
         f = open(fich, "wb")
 
         stFenM2 = set()
 
-        def mejor(work, pvPrevio, depth, cp):
+        def mejor(pvPrevio, depth, cp):
             if depth > maxDepth:
                 return
-            if work.games() >= minGames:
-                liChildren = work.children()
-                if not liChildren:
-                    return
-                mv = liChildren[0]
-                mx = mv.gamesParcial(siWhite, siDraw)
-                li = []
-                for uno in liChildren:
-                    unomx = uno.gamesParcial(siWhite, siDraw)
-                    if unomx > mx:
-                        mx = unomx
-                        li = [uno]
-                    elif unomx == mx:
-                        li.append(uno)
-                for uno in li:
-                    wm = uno.move
-                    pv = (pvPrevio + " " + uno.move).strip()
-                    if pv != "a1a1":
-                        cpN = cp.copia()
-                        cpN.moverPV(wm)
-                        f.write("%s|%s|%s\n" % (pv2xpv(pv), wm, cpN.fen() ))
-                        todos(uno, pv, depth + 1, cpN)
+            liChildren = self.children(pvPrevio)
+            liAlmx = []
+            totx = 0
+            for alm in liChildren:
+                t = alm.W if siWhite else alm.B
+                if siDraw:
+                    t += alm.D
+                if t >= minGames:
+                    if t > totx:
+                        liAlmx = [alm]
+                        totx = t
+                    elif t == totx:
+                        liAlmx.append(alm)
+            if totx:
+                for alm in liAlmx:
+                    wm = alm.move
+                    pv = (pvPrevio + " " + wm).strip()
+                    cpN = cp.copia()
+                    cpN.moverPV(wm)
+                    f.write("%s|%s|%s\n" % (alm.XPV, wm, cpN.fen()))
+                    todos(pv, depth + 1, cpN)
 
-        def todos(work, pvPrevio, depth, cp):
+        def todos(pvPrevio, depth, cp):
             if depth > maxDepth:
                 return
-            if work.games() >= minGames:
-                liChildren = work.children()
-                if not liChildren:
-                    return
-                for uno in liChildren:
-                    if uno.games() >= minGames:
-                        wm = uno.move
-                        pv = (pvPrevio + " " + uno.move).strip()
-                        if pv != "a1a1":
-                            cpN = cp.copia()
-                            cpN.moverPV(wm)
-                            f.write("%s|%s|%s\n" % (pv2xpv(pv), wm, cpN.fen() ))
-                            fm2 = cpN.fenM2()
-                            if fm2 not in stFenM2:  # Para que no se repitan los movimientos de los transpositions
-                                stFenM2.add(fm2)
-                                mejor(uno, pv, depth + 1, cpN)
+            if depth > maxDepth:
+                return
+            liChildren = self.children(pvPrevio)
+            if not liChildren:
+                return
+            for alm in liChildren:
+                games = alm.B + alm.W + alm.D
+                if games >= minGames:
+                    wm = alm.move
+                    pv = (pvPrevio + " " + alm.move).strip()
+                    cpN = cp.copia()
+                    cpN.moverPV(wm)
+                    f.write("%s|%s|%s\n" % (alm.XPV, wm, cpN.fen()))
+                    fm2 = cpN.fenM2()
+                    if fm2 not in stFenM2:  # Para que no se repitan los movimientos de los transpositions
+                        stFenM2.add(fm2)
+                        mejor(pv, depth + 1, cpN)
 
         def inicia():
             cp = ControlPosicion.ControlPosicion()
             cp.posInicial()
-            work = self.root
             pvActual = ""
             for pv in pvBase.split(" "):
                 cp.moverPV(pv)
                 pvActual += " " + pv
-                f.write("%s|%s|%s\n" % (pv2xpv(pvActual.strip()), pv, cp.fen() ))
-                liChildren = work.children()
-                work = None
-                for uno in liChildren:
-                    if uno.move == pv:
-                        work = uno
-                        break
-                if work is None:
-                    work = self.root
-                    break
-            return cp, work
+                f.write("%s|%s|%s\n" % (pv2xpv(pvActual.strip()), pv, cp.fen()))
+            return cp
 
-        cp, work = inicia()
+        cp = inicia()
 
         if siWhite and cp.siBlancas:
-            mejor(work, pvBase, 0, cp)
+            mejor(pvBase, 0, cp)
         else:
-            todos(work, pvBase, 0, cp)
+            todos(pvBase, 0, cp)
         f.close()
         return fich
 
 class DBgames:
-    def __init__(self, nomFichero, segundosBuffer=0.8):
+    def __init__(self, nomFichero):
         self.nomFichero = Util.dirRelativo(nomFichero)
-        self.liCamposBase = ["EVENT", "SITE", "DATE", "WHITE", "BLACK", "RESULT", "ECO", "WHITEELO", "BLACKELO",
-                             "PLIES"]
-        self.liCamposWork = ["XPV", "PGN"]
+        self.liCamposBase = ["EVENT", "SITE", "DATE", "WHITE", "BLACK", "RESULT", "ECO", "WHITEELO", "BLACKELO", "PLIES"]
+        self.liCamposWork = ["XPV", ]
+        self.liCamposBLOB = ["PGN", ]
 
-        self.segundosBuffer = segundosBuffer
+        self.liCamposRead = []
+        self.liCamposRead.extend(self.liCamposWork)
+        self.liCamposRead.extend(self.liCamposBase)
 
-        self.db = Base.DBBase(nomFichero)
+        self.liCamposAll = []
+        self.liCamposAll.extend(self.liCamposWork)
+        self.liCamposAll.extend(self.liCamposBase)
+        self.liCamposAll.extend(self.liCamposBLOB)
+
+        self._conexion = sqlite3.connect(self.nomFichero)
+        self._conexion.text_factory = lambda x: unicode(x, "utf-8", "ignore")
+        self._conexion.row_factory = sqlite3.Row
+        self._cursor = self._conexion.cursor()
         self.tabla = "games"
-        if not self.db.existeTabla(self.tabla):
-            self.creaTabla()
+        self.select = ",".join(self.liCamposRead)
+        self.order = None
+        self.filter = None
 
-        liCampos = []
-        liCampos.extend(self.liCamposWork)
-        liCampos.extend(self.liCamposBase)
-        self.dbf = self.db.dbfCache(self.tabla, ",".join(liCampos))
+        self.cache = {}
+        self.mincache = 2000
+        self.maxcache = 4000
+
+        self.controlInicial()
+
         self.liOrden = []
+
+        self.dbSTAT = TreeSTAT(self.nomFichero + "_s1")
+
+        self.liRowids = []
+
         atexit.register(self.close)
 
-        self.dbSTAT = TreeSTAT(self.nomFichero + "-stat")
-        self.dbSTATbase = self.dbSTAT
-        self.dbSTATplayer = None
+        self.rowidReader = Util.RowidReader(self.nomFichero, self.tabla)
+
+    def addcache(self, rowid, reg):
+        if len(self.cache) > self.maxcache:
+            keys = self.cache.keys()
+            rkeys = random.sample(keys, self.mincache)
+            ncache = {}
+            for k in rkeys:
+                ncache[k] = self.cache[k]
+            self.cache = ncache
+        self.cache[rowid] = reg
+
+    def field(self, nfila, name):
+        rowid = self.liRowids[nfila]
+        if rowid not in self.cache:
+            self._cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % (self.select, self.tabla, rowid))
+            reg = self._cursor.fetchone()
+            self.addcache(rowid, reg)
+        return self.cache[rowid][name]
+
+    def siFaltanRegistrosPorLeer(self):
+        if not self.rowidReader:
+            return False
+        return not self.rowidReader.terminado()
+
+    def filterPV(self, pv, condicionAdicional=None):
+        if type(pv) == list:  # transpositions
+            li = []
+            for unpv in pv:
+                xpv = pv2xpv(unpv)
+                li.append('XPV GLOB "%s*"' % xpv)
+            condicion = "(%s)" % (" OR ".join(li),)
+        else:
+            xpv = pv2xpv(pv)
+            condicion = 'XPV GLOB "%s*"' % xpv if xpv else ""
+        if condicionAdicional:
+            if condicion:
+                condicion += " AND (%s)" % condicionAdicional
+            else:
+                condicion = condicionAdicional
+        self.filter = condicion
+
+        self.liRowids = []
+        self.rowidReader.run(self.liRowids, condicion, self.order)
+
+    def reccount(self):
+        if not self.rowidReader:
+            return 0
+        n = self.rowidReader.reccount()
+        # Si es cero y no ha terminado de leer, se le da tiempo para que devuelva algo
+        while n == 0 and not self.rowidReader.terminado():
+            time.sleep(0.05)
+            n = self.rowidReader.reccount()
+        return n
+
+    def all_reccount(self):
+        self.liRowids = []
+        self.rowidReader.run(self.liRowids, None, None)
+        while not self.rowidReader.terminado():
+            time.sleep(0.1)
+        return self.reccount()
+
+    def controlInicial(self):
+        cursor = self._conexion.cursor()
+        cursor.execute("pragma table_info(%s)" % self.tabla)
+        liCampos = cursor.fetchall()
+        cursor.close()
+
+        if not liCampos:
+            sql = "CREATE TABLE %s (" % self.tabla
+            sql += "XPV VARCHAR NOT NULL PRIMARY KEY,"
+            for field in self.liCamposBase:
+                sql += "%s VARCHAR,"% field
+            for field in self.liCamposBLOB:
+                sql += "%s BLOB,"% field
+            sql = sql[:-1] + " );"
+            cursor = self._conexion.cursor()
+            cursor.execute(sql)
+            cursor.close()
+
+    def close(self):
+        if self._conexion:
+            self._cursor.close()
+            self._conexion.close()
+            self._conexion = None
+        if self.dbSTAT:
+            self.dbSTAT.close()
+            self.dbSTAT = None
+        if self.rowidReader:
+            self.rowidReader.stopnow()
+            self.rowidReader = None
 
     def rotulo(self):
         rotulo = os.path.basename(self.nomFichero)[:-4]
-        if rotulo == "Initial Database Games":
+        if rotulo.lower() == "initial database games":
             rotulo = _("Initial Database Games")
         return rotulo
 
@@ -369,163 +529,41 @@ class DBgames:
     def flistAllpvs(self, maxDepth, minGames, siWhite, siDraw, pvBase):
         return self.dbSTAT.flistAllpvs(maxDepth, minGames, siWhite, siDraw, pvBase)
 
-    def close(self):
-        if self.dbf:
-            self.dbf.cerrar()
-            self.dbf = None
-        if self.db:
-            self.db.cerrar()
-            self.db = None
-        if self.dbSTATbase:
-            self.dbSTATbase.close()
-            self.dbSTATbase = None
-        if self.dbSTATplayer:
-            self.dbSTATplayer.close()
-            self.dbSTATplayer = None
-
-    def reccount(self):
-        return self.dbf.reccount()
-
-    def reccountTotal(self):
-        return self.dbSTAT.root.games()
-
-    def creaTabla(self):
-        tb = Base.TablaBase(self.tabla)
-        tb.nuevoCampo("XPV", "VARCHAR", notNull=True, primaryKey=True)
-        for campo in self.liCamposBase:
-            tb.nuevoCampo(campo, "VARCHAR")
-        tb.nuevoCampo("PGN", "BLOB")
-        self.db.generarTabla(tb)
-
-    def goto(self, num):
-        self.dbf.goto(num)
-
-    def field(self, nfila, name):
-        try:
-            self.dbf.goto(nfila)
-            return getattr(self.dbf.reg, name)
-        except:
-            return ""
-
     def damePV(self, fila):
         xpv = self.field(fila, "XPV")
         return xpv2pv(xpv)
 
-    def filterPV(self, pv, condicionAdicional=None):
-        xpv = pv2xpv(pv)
-        condicion = 'XPV LIKE "%s%%"' % xpv if xpv else ""
-        if self.dbSTATplayer and self.dbSTAT == self.dbSTATplayer:
-            playerBusq, siSta, siEnd, playerORI = self.player
-            playerORI = playerORI.upper().strip().replace("*", "%")
-            if siSta or siEnd:
-                condicionAdicional = 'upper(WHITE) like "%s" or upper(BLACK) like "%s"' % (playerORI, playerORI)
-            else:
-                condicionAdicional = 'upper(WHITE) == "%s" or upper(BLACK) == "%s"' % (playerORI, playerORI)
-        if condicionAdicional:
-            if condicion:
-                condicion += " AND (%s)" % condicionAdicional
-            else:
-                condicion = condicionAdicional
-        self.dbf.ponCondicion(condicion)
-        self.dbf.leerBuffer(segundos=self.segundosBuffer)
-        self.dbf.gotop()
-
     def ponOrden(self, liOrden):
         li = ["%s %s" % (campo, tipo) for campo, tipo in liOrden]
-        orden = ",".join(li)
-        self.dbf.ponOrden(orden)
-        self.dbf.leerBuffer(segundos=self.segundosBuffer)
-        self.dbf.gotop()
+        self.order = ",".join(li)
+        self.liRowids = []
+        self.rowidReader.run(self.liRowids, self.filter, self.order)
         self.liOrden = liOrden
 
     def dameOrden(self):
         return self.liOrden
 
-    def appendSTAT(self, pv, res, r, white, black):
-        self.dbSTATbase.append(pv, res, r)
-        if self.dbSTATplayer:
-            if self.esPlayer(white):
-                self.dbSTATplayer.appendColor(pv, res, True, r)
-            elif self.esPlayer(black):
-                self.dbSTATplayer.appendColor(pv, res, False, r)
-
-    def cambiarUno(self, recno, nuevoPGN, pvNue, dicS_PGN):
-        siNuevo = recno is None
-
-        if not siNuevo:
-            self.dbf.goto(recno)
-            reg = self.dbf.reg
-            pvAnt = xpv2pv(reg.XPV)
-            resAnt = reg.RESULT
-        resNue = dicS_PGN.get("Result", "*")
-
-        br = self.dbf.baseRegistro()
-        br.XPV = pv2xpv(pvNue)
-        br.EVENT = dicS_PGN.get("Event", "")
-        br.SITE = dicS_PGN.get("Site", "")
-        br.DATE = dicS_PGN.get("Date", "")
-        br.WHITE = dicS_PGN.get("White", "")
-        br.BLACK = dicS_PGN.get("Black", "")
-        br.RESULT = resNue
-        br.PLIES = "%3d" % (pvNue.strip().count(" ") + 1,)
-        br.ECO = dicS_PGN.get("ECO", "")
-        br.WHITEELO = dicS_PGN.get("WhiteElo", "")
-        br.BLACKELO = dicS_PGN.get("BlackElo", "")
-        br.PGN = Util.var2blob(nuevoPGN)
-
-        siRepetido = False
-        if siNuevo:
-            try:
-                self.dbf.insertar(br, okCommit=True, okCursorClose=True)
-                self.appendSTAT(pvNue, resNue, +1, br.WHITE, br.BLACK)
-            except:
-                siRepetido = True
-        else:
-            try:
-                self.dbf.modificarReg(recno, br)
-                if pvAnt != pvNue or resAnt != resNue:
-                    self.appendSTAT(pvAnt, resAnt, -1, reg.WHITE, reg.BLACK)
-                    self.appendSTAT(pvNue, resNue, +1, br.WHITE, br.BLACK)
-            except:
-                siRepetido = True
-
-        return not siRepetido
-
     def borrarLista(self, lista):
+        cSQL = "DELETE FROM %s WHERE rowid = ?" % self.tabla
+        lista.sort(reverse=True)
         for recno in lista:
-            self.dbf.goto(recno)
-            reg = self.dbf.reg
-            pv = xpv2pv(reg.XPV)
-            result = reg.RESULT
-            self.appendSTAT(pv, result, -1, reg.WHITE, reg.BLACK)
+            pv = self.damePV(recno)
+            result = self.field(recno, "RESULT")
+            self.dbSTAT.append(pv, result, -1)
+            self._cursor.execute(cSQL,(self.liRowids[recno],))
+            del self.liRowids[recno]
+        self._conexion.commit()
 
-        self.dbf.borrarLista(lista)
-        self.dbf.leerBuffer(segundos=self.segundosBuffer)
-
-    def leerMasRegistros(self):
-        return self.dbf.leerMasBuffer(segundos=self.segundosBuffer)
-
-    def siFaltanRegistrosPorLeer(self):
-        return self.dbf.siBufferPendiente
-
-    def pvStats(self, pv):
-        work = self.dbSTAT.root
-        if pv:
-            for move in pv.split(" "):
-                work = work.walkchild(move, False)
-                if not work:
-                    break
-        return work
-
-    def getSummary(self, pvBase, dicAnalisis):
-        root = self.dbSTAT.root
+    def getSummary(self, pvBase, dicAnalisis, siFigurinesPGN):
         liMoves = []
-        siBlancas = True
+        siBlancas = pvBase.count(" ") % 2 == 1 if pvBase else True
 
         if pvBase is None:
-            w, d, b, o = root.white, root.draw, root.black, root.other
+            root = self.dbSTAT.root()
+            w, d, b, o = root.W, root.D, root.B, root.O
             tt = w + d + b + o
             dic = {}
+            dic["numero"] = ""
             dic["pvmove"] = ""
             dic["pv"] = ""
             dic["analisis"] = None
@@ -539,33 +577,27 @@ class DBgames:
             dic["pblack"] = b * 100.0 / tt if tt else 0.0
             dic["pother"] = o * 100.0 / tt if tt else 0.0
             dic["move"] = _("Total")
+            dic["alm"] = None
             liMoves.append(dic)
 
         else:
-            work = root
-            if pvBase:
-                li = pvBase.split(" ")
-                siBlancas = len(li) % 2 == 0
-                for move in li:
-                    work = work.walkchild(move, False)
-                    if not work:
-                        return []
+            liChildren = self.dbSTAT.children(pvBase)
 
-            liBrothers = work.children()
             tt = 0
 
             lipvmove = []
-            for st in liBrothers:
-                w, d, b, o = st.white, st.draw, st.black, st.other
+            for alm in liChildren:
+                w, d, b, o = alm.W, alm.D, alm.B, alm.O
                 t = w + d + b + o
                 # if t == 0:
                 # continue
 
                 dic = {}
-                pvmove = st.move
+                pvmove = alm.move
                 pv = pvBase + " " + pvmove
                 pv = pv.strip()
                 lipvmove.append(pvmove)
+                dic["numero"] = ""
                 dic["pvmove"] = pvmove
                 dic["pv"] = pv
                 dic["analisis"] = dicAnalisis.get(pvmove, None)
@@ -579,6 +611,8 @@ class DBgames:
                 dic["pdraw"] = d * 100.0 / t if t else 0.0
                 dic["pblack"] = b * 100.0 / t if t else 0.0
                 dic["pother"] = o * 100.0 / t if t else 0.0
+
+                dic["alm"] = alm
 
                 liMoves.append(dic)
 
@@ -599,6 +633,7 @@ class DBgames:
                     dic["pdraw"] = 0.00
                     dic["pblack"] = 0.00
                     dic["pother"] = 0.00
+                    dic["alm"] = None
 
                     liMoves.append(dic)
 
@@ -629,8 +664,14 @@ class DBgames:
                 p = Partida.Partida()
                 p.leerPV(pv)
                 if p.numJugadas():
-                    jg = p.liJugadas[-1]
-                    dic["move"] = jg.etiquetaSP().replace(" ", "")
+                    jg = p.last_jg()
+                    jugadas = jg.numMove()
+                    pgn = jg.pgnFigurinesSP() if siFigurinesPGN else jg.pgnSP()
+                    dic["move"] = pgn
+                    dic["numero"] = "%d." % jugadas
+                    if not jg.siBlancas():
+                        # dic["move"] = pgnSP.lower()
+                        dic["numero"] += ".."
                 else:
                     dic["move"] = pvmove
                 dic["partida"] = p
@@ -639,169 +680,357 @@ class DBgames:
 
     def recrearSTAT(self, dispatch, depth):
         self.dbSTAT.reset(depth)
-        recno = 0
-        self.filterPV("")
-        reccount = self.dbf.reccount()
-        dispatch(0, reccount)
+        if self.filter:
+            self.filterPV("")
+        while self.siFaltanRegistrosPorLeer():
+            time.sleep(0.1)
+            dispatch(0, self.reccount())
+        reccount = self.reccount()
         if reccount:
-            while True:
-                self.dbf.goto(recno)
-                pv = xpv2pv(self.dbf.reg.XPV)
-                result = self.dbf.reg.RESULT
-                self.dbSTAT.append(pv, result)
-
-                if recno % 100 == 0:
-                    resp = dispatch(recno, reccount)
-                    if not resp:
-                        return
-
-                recno += 1
-                if recno >= reccount:
-                    if self.dbf.siBufferPendiente:
-                        self.dbf.leerMasBuffer(chunk=3000)
-                        reccount = self.dbf.reccount()
-                        if recno >= reccount:
-                            break
-                    else:
+            self._cursor.execute("SELECT XPV, RESULT FROM %s" % self.tabla)
+            recno = 0
+            t = 0
+            while dispatch(recno, reccount):
+                chunk = random.randint(1500, 3500)
+                li = self._cursor.fetchmany(chunk)
+                if li:
+                    for XPV, RESULT in li:
+                        pv = xpv2pv(XPV)
+                        self.dbSTAT.append(pv, RESULT)
+                    nli = len(li)
+                    if nli < chunk:
                         break
-
-    def esPlayer(self, quien):
-        playerBusq, siSta, siEnd, playerORI = self.player
-        quien = quien.strip().upper()
-        if siEnd and siSta:
-            return playerBusq in quien
-        elif siEnd:
-            return quien.endswith(playerBusq)
-        elif siSta:
-            return quien.startswith(playerBusq)
-        else:
-            return quien == playerBusq
-
-    def recrearSTATplayer(self, dispatch, depth, player):
-        self.dbSTAT = TreeSTAT(self.nomFichero + "-stat-player")
-        self.dbSTATplayer = self.dbSTAT
-        player = player.strip()
-        siEnd = player.startswith("*")
-        siSta = player.endswith("*")
-
-        self.player = (player.strip().strip("*").upper(), siSta, siEnd, player)
-
-        self.dbSTAT.reset(depth)
-        recno = 0
-        self.filterPV("")
-        reccount = self.dbf.reccount()
-        dispatch(0, reccount)
-        while True:
-            self.dbf.goto(recno)
-            reg = self.dbf.reg
-            pv = xpv2pv(reg.XPV)
-            result = reg.RESULT
-            if self.esPlayer(reg.WHITE):
-                self.dbSTAT.appendColor(pv, result, True)
-            elif self.esPlayer(reg.BLACK):
-                self.dbSTAT.appendColor(pv, result, False)
-
-            if recno % 100 == 0:
-                resp = dispatch(recno, reccount)
-                if not resp:
-                    return
-
-            recno += 1
-            if recno >= reccount:
-                if self.dbf.siBufferPendiente:
-                    self.dbf.leerMasBuffer(chunk=3000)
-                    reccount = self.dbf.reccount()
-                    if recno >= reccount:
-                        break
+                    recno += nli
                 else:
                     break
-
-    def append(self, pv, event, site, date, white, black, result, eco, whiteelo, blackelo, pgn, okCommit):
-        br = self.dbf.baseRegistro()
-        br.XPV = pv2xpv(pv)
-        br.EVENT = event
-        br.SITE = site
-        br.DATE = date
-        br.WHITE = white
-        br.BLACK = black
-        br.RESULT = result
-        br.PLIES = "%3d" % (pv.strip().count(" ") + 1,)
-        br.ECO = eco
-        br.WHITEELO = whiteelo
-        br.BLACKELO = blackelo
-        br.PGN = Util.var2blob(pgn)
-        siRepetido = False
-        try:
-            self.dbf.insertar(br, okCommit=okCommit, okCursorClose=okCommit)
-            self.appendSTAT(pv, result, +1, white, black)
-        except:
-            siRepetido = True
-        return not siRepetido
-
-    def __getitem__(self, num):
-        self.dbf.goto(num)
-        reg = self.dbf.reg
-        return reg
-
-    def leePGNrecno(self, recno):
-        self.dbf.goto(recno)
-        v = self.dbf.reg.PGN
-        pgn = Util.blob2var(v) if v else None
-        return pgn
+                t += 1
+                if t % 5 == 0:
+                    self.dbSTAT.commit()
+            self.dbSTAT.commit()
 
     def leerPGN(self, fichero, dlTmp):
-        erroneos = duplicados = importados = 0
+        erroneos = duplicados = importados = n = 0
 
-        # 1.File pgn -> temporal clean
-        for n, g in enumerate(PGNreader.readGames(fichero),1):
-            if n % 100 == 0:
-                if not dlTmp.actualiza(n, erroneos, duplicados, importados):
-                    break
-                if n%10000 == 0:
-                    self.dbf.commit()
-            if g.erroneo:
-                erroneos += 1
-                continue
-            pv = g.pv()
-            if not pv:
-                erroneos += 1
-                continue
-            pgn = g.pgn
+        t1 = time.time()-0.7  # para que empiece enseguida
 
-            get = g.labels.get
-            if get("FEN", None):
-                erroneos += 1
-                continue
+        next_n = random.randint(100, 200)
 
-            def get(label):
-                if label in g.labels:
-                    return g.labels[label]
-                return ""
+        self.dbSTAT.massive_append_set(True)
 
-            event = get("EVENT")
-            site = get("SITE")
-            date = get("DATE")
-            white = get("WHITE")
-            black = get("BLACK")
-            result = get("RESULT")
-            eco = get("ECO")
-            whiteelo = get("WHITEELO")
-            blackelo = get("BLACKELO")
+        # fich_erroneos = "UsrData/fich_erroneos.pgn"
 
-            if self.append(pv, event, site, date, white, black, result, eco, whiteelo, blackelo, pgn, False):
-                importados += 1
-            else:
-                duplicados += 1
+        codec = Util.file_encoding(fichero)
+        sicodec = codec not in ("utf-8", "ascii")
 
-        dlTmp.actualiza(n, erroneos, duplicados, importados)
+        liRegs = []
+        stRegs = set()
+        nRegs = 0
 
+        conexion = self._conexion
+        cursor = self._cursor
+
+        sql = "insert into games (XPV,EVENT,SITE,DATE,WHITE,BLACK,RESULT,ECO,WHITEELO,BLACKELO,PGN,PLIES) values (?,?,?,?,?,?,?,?,?,?,?,?);"
+        liCabs = self.liCamposBase[:-1] # all except PLIES PGN, TAGS
+        liCabs.append("PLYCOUNT")
+
+        with LCEngine.PGNreader(fichero, self.depthStat()) as fpgn:
+            for n, (pgn, pv, dCab, raw, liFens) in enumerate(fpgn, 1):
+                if not pv:
+                    erroneos += 1
+                else:
+                    fen = dCab.get("FEN", None)
+                    if fen and fen != ControlPosicion.FEN_INICIAL:
+                        erroneos += 1
+                    else:
+                        xpv = pv2xpv(pv)
+                        if xpv in stRegs:
+                            dup = True
+                        else:
+                            cursor.execute("SELECT COUNT(*) FROM games WHERE XPV = ?", (xpv,))
+                            num = cursor.fetchone()[0]
+                            dup = num > 0
+                        if dup:
+                            duplicados += 1
+                        else:
+                            stRegs.add(xpv)
+                            if sicodec:
+                                for k, v in dCab.iteritems():
+                                    dCab[k] = unicode(v, encoding=codec, errors="ignore")
+                                if pgn:
+                                    pgn = unicode(pgn, encoding=codec, errors="ignore")
+
+                            if raw: # si no tiene variantes ni comentarios, se graba solo las tags que faltan
+                                liRTags = [(k,v) for k, v in dCab.iteritems() if k not in liCabs] # k is always upper
+                                if liRTags:
+                                    pgn = {}
+                                    pgn["RTAGS"] = liRTags
+                                else:
+                                    pgn = None
+
+                            event = dCab.get("EVENT", "")
+                            site = dCab.get("SITE", "")
+                            date = dCab.get("DATE", "")
+                            white = dCab.get("WHITE", "")
+                            black = dCab.get("BLACK", "")
+                            result = dCab.get("RESULT", "")
+                            eco = dCab.get("ECO", "")
+                            whiteelo = dCab.get("WHITEELO", "")
+                            blackelo = dCab.get("BLACKELO", "")
+                            plies = (pv.count(" ")+1) if pv else 0
+                            if pgn:
+                                pgn = Util.var2blob(pgn)
+
+                            reg = (xpv, event, site, date, white, black, result, eco, whiteelo, blackelo, pgn, plies)
+                            self.dbSTAT.append_fen(pv, result, liFens)
+                            liRegs.append(reg)
+                            nRegs += 1
+                            importados += 1
+                            if nRegs == 10000:
+                                cursor.executemany(sql, liRegs)
+                                liRegs = []
+                                stRegs = set()
+                                conexion.commit()
+                if n == next_n:
+                    if time.time()-t1> 0.8:
+                        if not dlTmp.actualiza(erroneos+duplicados+importados, erroneos, duplicados, importados):
+                            break
+                        t1 = time.time()
+                    next_n = n + random.randint(100, 500)
+
+        if liRegs:
+            cursor.executemany(sql, liRegs)
+            conexion.commit()
+
+        dlTmp.actualiza(erroneos+duplicados+importados, erroneos, duplicados, importados)
         dlTmp.ponSaving()
-        self.dbf.commit()
+
+        self.dbSTAT.massive_append_set(False)
+        self.dbSTAT.commit()
+        conexion.commit()
+
         dlTmp.ponContinuar()
 
-        return
+    def appendDB(self, db, liRecnos, dlTmp):
+        duplicados = importados = 0
 
-    def blankPGN(self):
+        self.dbSTAT.massive_append_set(True)
+
+        t1 = time.time() - 0.7  # para que empiece enseguida
+
+        next_n = random.randint(100, 200)
+
+        liRegs = []
+        nRegs = 0
+
+        conexion = self._conexion
+        cursor = self._cursor
+
+        sql = "insert into games (XPV,EVENT,SITE,DATE,WHITE,BLACK,RESULT,ECO,WHITEELO,BLACKELO,PGN,PLIES) values (?,?,?,?,?,?,?,?,?,?,?,?);"
+
+        for pos, recno in enumerate(liRecnos):
+            raw = db.leeAllRecno(recno)
+
+            xpv = raw["XPV"]
+            cursor.execute("SELECT COUNT(*) FROM games WHERE XPV = ?", (xpv,))
+            num = cursor.fetchone()[0]
+            dup = num > 0
+            if dup:
+                duplicados += 1
+            else:
+                pv = xpv2pv(xpv)
+                reg = (xpv, raw["EVENT"], raw["SITE"], raw["DATE"], raw["WHITE"], raw["BLACK"], raw["RESULT"], raw["ECO"], raw["WHITEELO"],
+                       raw["BLACKELO"], raw["PGN"], raw["PLIES"])
+                self.dbSTAT.append(pv, raw["RESULT"])
+                liRegs.append(reg)
+                nRegs += 1
+                importados += 1
+                if nRegs == 10000:
+                    cursor.executemany(sql, liRegs)
+                    liRegs = []
+                    conexion.commit()
+
+            if pos == next_n:
+                if time.time() - t1 > 0.8:
+                    if not dlTmp.actualiza(duplicados + importados, duplicados, importados):
+                        break
+                    t1 = time.time()
+                next_n = pos + random.randint(100, 500)
+
+        if liRegs:
+            cursor.executemany(sql, liRegs)
+            conexion.commit()
+
+        dlTmp.actualiza(duplicados + importados, duplicados, importados)
+        dlTmp.ponSaving()
+
+        self.dbSTAT.massive_append_set(False)
+        self.dbSTAT.commit()
+        conexion.commit()
+
+        dlTmp.ponContinuar()
+
+    def leeAllRecno(self, recno):
+        rowid = self.liRowids[recno]
+        select = ",".join(self.liCamposAll)
+        self._cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % (select, self.tabla, rowid))
+        return self._cursor.fetchone()
+
+    def leePartidaRecno(self, recno):
+        raw = self.leeAllRecno(recno)
+
+        p = Partida.PartidaCompleta()
+        xpgn = raw["PGN"]
+        rtags = None
+        if xpgn:
+            xpgn = Util.blob2var(xpgn)
+            if type(xpgn) == str:  # Version -9
+                p.readPGN(VarGen.configuracion, xpgn)
+                return p
+            if "RTAGS" in xpgn:
+                rtags = xpgn["RTAGS"]
+            else:
+                p.restore(xpgn["FULLGAME"])
+                return p
+
+        p.leerPV(xpv2pv(raw["XPV"]))
+        rots = ["Event", "Site", "Date", "Round", "White", "Black", "Result",
+                "WhiteTitle", "BlackTitle", "WhiteElo", "BlackElo", "WhiteUSCF", "BlackUSCF", "WhiteNA", "BlackNA",
+                "WhiteType", "BlackType", "EventDate", "EventSponsor", "ECO", "UTCTime", "UTCDate", "TimeControl",
+                "SetUp", "FEN", "PlyCount"]
+        drots = {x.upper():x for x in rots}
+        drots["PLIES"] = "PlyCount"
+
+        litags = []
+        for field in self.liCamposBase:
+             v = raw[field]
+             if v:
+                 litags.append( (drots.get(field, field), str(v) ) )
+        if rtags:
+            litags.extend(rtags)
+
+        p.setTags(litags)
+        p.asignaApertura(VarGen.configuracion)
+        return p
+
+    def leePGNRecno(self, recno):
+        raw = self.leeAllRecno(recno)
+
+        xpgn = raw["PGN"]
+        rtags = None
+        if xpgn:
+            xpgn = Util.blob2var(xpgn)
+            if type(xpgn) == str:  # Version -9
+                return xpgn
+            if "RTAGS" in xpgn:
+                rtags = xpgn["RTAGS"]
+            else:
+                p = Partida.PartidaCompleta()
+                p.restore(xpgn["FULLGAME"])
+                return p.pgn()
+
+        p = Partida.PartidaCompleta()
+        p.leerPV(xpv2pv(raw["XPV"]))
+        rots = ["Event", "Site", "Date", "Round", "White", "Black", "Result",
+                "WhiteTitle", "BlackTitle", "WhiteElo", "BlackElo", "WhiteUSCF", "BlackUSCF", "WhiteNA", "BlackNA",
+                "WhiteType", "BlackType", "EventDate", "EventSponsor", "ECO", "UTCTime", "UTCDate", "TimeControl",
+                "SetUp", "FEN", "PlyCount"]
+        drots = {x.upper(): x for x in rots}
+        drots["PLIES"] = "PlyCount"
+
+        litags = []
+        for field in self.liCamposBase:
+            v = raw[field]
+            if v:
+                litags.append((drots.get(field, field), str(v)))
+        if rtags:
+            litags.extend(rtags)
+
+        p.setTags(litags)
+        p.asignaApertura(VarGen.configuracion)
+        return p.pgn()
+
+    def blankPartida(self):
         hoy = Util.hoy()
-        return '[Date "%d.%02d.%02d"]\n\n*' % (hoy.year, hoy.month, hoy.day)
+        liTags = [["Date", "%d.%02d.%02d" % (hoy.year, hoy.month, hoy.day)],]
+        return Partida.PartidaCompleta(liTags=liTags)
 
+    def modifica(self, recno, partidaCompleta):
+        reg_ant = self.leeAllRecno(recno)
+        resAnt = reg_ant["RESULT"]
+
+        pgn = {}
+        pgn["FULLGAME"] = partidaCompleta.save()
+        xpgn = Util.var2blob(pgn)
+
+        dTags = {}
+        for key, value in partidaCompleta.liTags:
+            dTags[key.upper()] = value
+        dTags["PLIES"] = partidaCompleta.numJugadas()
+        if dTags["PLIES"] == 0:
+            return True
+
+        liFields = []
+        liData = []
+        for field in self.liCamposBase:
+            if reg_ant[field] != dTags.get(field):
+                liFields.append("%s=?"%field)
+                liData.append(dTags.get(field))
+        if xpgn != reg_ant["PGN"]:
+            liFields.append("PGN=?")
+            liData.append(xpgn)
+
+        pvNue = partidaCompleta.pv()
+        xpv = pv2xpv(pvNue)
+        if xpv != reg_ant["XPV"]:
+            self._cursor.execute("SELECT COUNT(*) FROM games WHERE XPV = ?", (xpv,))
+            num = self._cursor.fetchone()[0]
+            if num > 0:
+                return False
+            liFields.append("XPV=?")
+            liData.append(xpv)
+
+        rowid = self.liRowids[recno]
+        if len(liFields) == 0:
+            return True
+        fields = ",".join(liFields)
+        sql = "UPDATE games SET %s WHERE ROWID = %d" % (fields, rowid)
+        self._cursor.execute(sql, liData)
+        self._conexion.commit()
+        pvAnt = xpv2pv(reg_ant["XPV"])
+        resNue = dTags.get("RESULT", "*")
+        self.dbSTAT.append(pvAnt, resAnt, -1)
+        self.dbSTAT.append(pvNue, resNue, +1)
+
+        return True
+
+    def inserta(self, partidaCompleta):
+        pv = partidaCompleta.pv()
+        xpv = pv2xpv(pv)
+        self._cursor.execute("SELECT COUNT(*) FROM games WHERE XPV = ?", (xpv,))
+        num = self._cursor.fetchone()[0]
+        if num > 0:
+            return False
+
+        pgn = {}
+        pgn["FULLGAME"] = partidaCompleta.save()
+        xpgn = Util.var2blob(pgn)
+
+        dTags = {}
+        for key, value in partidaCompleta.liTags:
+            dTags[key.upper()] = value
+        dTags["PLIES"] = partidaCompleta.numJugadas()
+
+        data = [xpv, ]
+        for field in self.liCamposBase:
+            data.append(dTags.get(field, None))
+        data.append(xpgn)
+
+        sql = "insert into games (XPV,EVENT,SITE,DATE,WHITE,BLACK,RESULT,ECO,WHITEELO,BLACKELO,PLIES,PGN) values (?,?,?,?,?,?,?,?,?,?,?,?);"
+        self._cursor.execute(sql, data)
+        self._conexion.commit()
+        self.dbSTAT.append(pv, dTags.get("RESULT", "*"), +1)
+
+        return True
+
+    def guardaPartidaRecno(self, recno, partidaCompleta):
+        return self.inserta(partidaCompleta) if recno is None else self.modifica(recno, partidaCompleta)

@@ -1,18 +1,18 @@
 from PyQt4 import QtCore, QtGui
 
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code.QT import WCapturas
+from Code import VarGen
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.QT.Iconos as Iconos
-import Code.QT.Tablero as Tablero
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Delegados as Delegados
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Colocacion as Colocacion
-import Code.QT.WCapturas as WCapturas
 
 class WBase(QtGui.QWidget):
     def __init__(self, parent, gestor):
@@ -93,14 +93,14 @@ class WBase(QtGui.QWidget):
         # # Pgn
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("NUMERO", _("N."), 35, siCentrado=True)
-        siFigurinesPGN = self.gestor.configuracion.figurinesPGN
+        configuracion = self.gestor.configuracion
+        siFigurinesPGN = configuracion.figurinesPGN
         oColumnas.nueva("BLANCAS", _("White"), nAnchoColor,
                         edicion=Delegados.EtiquetaPGN(True if siFigurinesPGN else None))
         oColumnas.nueva("NEGRAS", _("Black"), nAnchoColor,
                         edicion=Delegados.EtiquetaPGN(False if siFigurinesPGN else None))
         self.pgn = Grid.Grid(self, oColumnas, siCabeceraMovible=False)
         self.pgn.setMinimumWidth(nAnchoPgn)
-        configuracion = self.gestor.configuracion
         self.pgn.tipoLetra(puntos=configuracion.puntosPGN)
         self.pgn.ponAltoFila(configuracion.altoFilaPGN)
 
@@ -108,38 +108,38 @@ class WBase(QtGui.QWidget):
         f = Controles.TipoLetra(puntos=self.gestor.configuracion.tamFontRotulos + 2, peso=75)
         bl, ng = _("White"), _("Black")
         self.lbJugBlancas = Controles.LB(self, bl).anchoFijo(nAnchoLabels).alinCentrado().ponFuente(f).ponColorFondoN("black",
-                                                                                                                "white").ponWrap()
+                                                                                                                      "white").ponWrap()
         self.lbJugNegras = Controles.LB(self, ng).anchoFijo(nAnchoLabels).alinCentrado().ponFuente(f).ponColorFondoN("white",
-                                                                                                               "black").ponWrap()
+                                                                                                                     "black").ponWrap()
         self.lbJugBlancas.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
         self.lbJugNegras.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
 
-        ## Relojes
+        # Relojes
         f = Controles.TipoLetra(puntos=30, peso=75)
         self.lbRelojBlancas = Controles.LB(self, "00:00").ponFuente(f).alinCentrado().ponColorFondoN("#076C9F",
-                                                                                               "#EFEFEF").anchoMinimo(
-            nAnchoLabels)
+                                                                                                     "#EFEFEF").anchoMinimo(
+                nAnchoLabels)
         self.lbRelojNegras = Controles.LB(self, "00:00").ponFuente(f).alinCentrado().ponColorFondoN("#076C9F",
-                                                                                              "#EFEFEF").anchoMinimo(
-            nAnchoLabels)
+                                                                                                    "#EFEFEF").anchoMinimo(
+                nAnchoLabels)
         self.lbRelojBlancas.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
         self.lbRelojNegras.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
 
-        ## Revisando
+        # Revisando
         f = Controles.TipoLetra(puntos=14, peso=75)
         self.lbRevision = Controles.LB(self, _("Reviewing...")).alinCentrado().ponFuente(f).ponFondoN("#b3b3b3")
 
-        ## Ayudas
+        # Ayudas
         self.ayudasUD = QTVarios.LCNumero(3)
 
         f = Controles.TipoLetra(puntos=12)
         self.lbCredito = Controles.LB(self, _("Available hints") + " :   ").alinCentrado().ponFuente(f)
 
-        ## Boton de tutor activo
+        # Boton de tutor activo
         self.btActivarTutor = Controles.PB(self, "", rutina=self.cambiaSiActivarTutor,
-                                           plano=False)  #.anchoFijo( nAnchoPgn )
+                                           plano=False)  # .anchoFijo( nAnchoPgn )
 
-        ## Rotulos de informacion
+        # Rotulos de informacion
         f = Controles.TipoLetra(puntos=self.gestor.configuracion.tamFontRotulos)
         self.lbRotulo1 = Controles.LB(self).ponWrap().ponFuente(f)
         self.lbRotulo2 = Controles.LB(self).ponWrap().ponFuente(f)
@@ -150,7 +150,7 @@ class WBase(QtGui.QWidget):
         self.lbRotulo3.setStyleSheet("*{ border: 1px solid darkgray }")
         self.lbRotulo3.altoFijo(48)
 
-        # Lo escondemos todo
+        # Lo escondemos
         self.lbJugBlancas.hide()
         self.lbJugNegras.hide()
         self.lbRelojBlancas.hide()
@@ -166,15 +166,14 @@ class WBase(QtGui.QWidget):
 
         # Layout
 
-        ## Remoto
+        # Remoto
         lyColor = Colocacion.G()
         lyColor.controlc(self.lbJugBlancas, 0, 0).controlc(self.lbJugNegras, 0, 1)
         lyColor.controlc(self.lbRelojBlancas, 1, 0).controlc(self.lbRelojNegras, 1, 1)
 
-        ## Ayudas
+        # Ayudas
         lyAyudas = Colocacion.H().relleno().control(self.lbCredito).control(self.ayudasUD).relleno().ponSeparacion(1)
 
-        ## Todo
         lyV = Colocacion.V().otro(lyColor).control(self.pgn)
         lyV.control(self.lbRevision).otro(lyAyudas).control(self.btActivarTutor)
         lyV.control(self.lbRotulo1).control(self.lbRotulo2).control(self.lbRotulo3)
@@ -185,56 +184,57 @@ class WBase(QtGui.QWidget):
 
         self.dicTB = {}
 
-        liOpciones = ( ( _("Quit"), Iconos.Terminar(), k_terminar ),
-                       ( _("Play"), Iconos.Libre(), k_play ),
-                       ( _("Competition"), Iconos.NuevaPartida(), k_competicion ),
-                       ( _("Elo-Rating"), Iconos.Elo(), k_elo ),
-                       ( _("Training"), Iconos.Entrenamiento(), k_entrenamiento ),
-                       ( _("Options"), Iconos.Opciones(), k_opciones ),
-                       ( _("Information"), Iconos.Informacion(), k_informacion ),
-                       ( _("Save"), Iconos.Grabar(), k_grabar ),
-                       ( _("Save as"), Iconos.GrabarComo(), k_grabarComo ),
-                       ( _("Open"), Iconos.Recuperar(), k_recuperar ),
-                       ( _("Resign"), Iconos.Abandonar(), k_abandonar ),
-                       ( _("Reinit"), Iconos.Reiniciar(), k_reiniciar ),
-                       ( _("Takeback"), Iconos.Atras(), k_atras ),
-                       ( _("Adjourn"), Iconos.Aplazar(), k_aplazar ),
-                       ( _("End game"), Iconos.FinPartida(), k_finpartida ),
-                       ( _("Close"), Iconos.MainMenu(), k_mainmenu ),
-                       ( _("Reinit"), Iconos.Reiniciar(), k_ent_empezar ),
-                       ( _("Previous"), Iconos.Anterior(), k_anterior ),
-                       ( _("Next"), Iconos.Siguiente(), k_siguiente ),
-                       ( _("Quit"), Iconos.FinPartida(), k_pgnFin ),
-                       ( _("Paste PGN"), Iconos.Pegar(), k_pgnPaste ),
-                       ( _("Read PGN"), Iconos.Fichero(), k_pgnFichero ),
-                       ( _("PGN Labels"), Iconos.InformacionPGN(), k_pgnInformacion ),
-                       ( _("Other game"), Iconos.FicheroRepite(), k_pgnFicheroRepite ),
-                       ( _("My games"), Iconos.NuestroFichero(), k_pgnNuestroFichero ),
-                       ( _("Resign"), Iconos.Rendirse(), k_rendirse ),
-                       ( _("Draw"), Iconos.Tablas(), k_tablas ),
-                       ( _("Boxrooms PGN"), Iconos.Trasteros(), k_trasteros ),
-                       ( _("End"), Iconos.MainMenu(), k_peliculaTerminar ),
-                       ( _("Slow"), Iconos.Pelicula_Lento(), k_peliculaLento ),
-                       ( _("Pause"), Iconos.Pelicula_Pausa(), k_peliculaPausa ),
-                       ( _("Continue"), Iconos.Pelicula_Seguir(), k_peliculaSeguir ),
-                       ( _("Fast"), Iconos.Pelicula_Rapido(), k_peliculaRapido ),
-                       ( _("Repeat"), Iconos.Pelicula_Repetir(), k_peliculaRepetir ),
-                       ( _("Play"), Iconos.Jugar(), k_jugar ),
-                       ( _("Help"), Iconos.AyudaGR(), k_ayuda ),
-                       ( _("Level"), Iconos.Jugar(), k_mateNivel ),
-                       ( _("Accept"), Iconos.Aceptar(), k_aceptar ),
-                       ( _("Cancel"), Iconos.Cancelar(), k_cancelar ),
-                       ( _("Game of the day"), Iconos.LM(), k_jugadadia ),
-                       ( _("Config"), Iconos.Configurar(), k_configurar ),
-                       ( _("Utilities"), Iconos.Utilidades(), k_utilidades ),
-                       ( _("Variants"), Iconos.VariantesG(), k_variantes ),
-                       ( _("Tools"), Iconos.Tools(), k_tools ),
-                       ( _("Change"), Iconos.Cambiar(), k_cambiar),
-                       ( _("Show text"), Iconos.Modificar(), k_showtext),
-                       ( _("Help to move"), Iconos.BotonAyuda(), k_ayudaMover),
-                       ( _("Send"), Iconos.Enviar(), k_enviar),
-                       # ( "Debug", Iconos.Camara(), 999),# Martin debug
-        )
+        liOpciones = ((_("Quit"), Iconos.Terminar(), k_terminar),
+                      (_("Play"), Iconos.Libre(), k_play),
+                      (_("Competition"), Iconos.NuevaPartida(), k_competicion),
+                      (_("Elo-Rating"), Iconos.Elo(), k_elo),
+                      (_("Training"), Iconos.Entrenamiento(), k_entrenamiento),
+                      (_("Options"), Iconos.Opciones(), k_opciones),
+                      (_("Information"), Iconos.Informacion(), k_informacion),
+                      (_("Save"), Iconos.Grabar(), k_grabar),
+                      (_("Save as"), Iconos.GrabarComo(), k_grabarComo),
+                      (_("Open"), Iconos.Recuperar(), k_recuperar),
+                      (_("Resign"), Iconos.Abandonar(), k_abandonar),
+                      (_("Reinit"), Iconos.Reiniciar(), k_reiniciar),
+                      (_("Takeback"), Iconos.Atras(), k_atras),
+                      (_("Adjourn"), Iconos.Aplazar(), k_aplazar),
+                      (_("End game"), Iconos.FinPartida(), k_finpartida),
+                      (_("Close"), Iconos.MainMenu(), k_mainmenu),
+                      (_("Reinit"), Iconos.Reiniciar(), k_ent_empezar),
+                      (_("Previous"), Iconos.Anterior(), k_anterior),
+                      (_("Next"), Iconos.Siguiente(), k_siguiente),
+                      (_("Quit"), Iconos.FinPartida(), k_pgnFin),
+                      (_("Paste PGN"), Iconos.Pegar(), k_pgnPaste),
+                      (_("Read PGN"), Iconos.Fichero(), k_pgnFichero),
+                      (_("PGN Labels"), Iconos.InformacionPGN(), k_pgnInformacion),
+                      (_("Other game"), Iconos.FicheroRepite(), k_pgnFicheroRepite),
+                      (_("My games"), Iconos.NuestroFichero(), k_pgnNuestroFichero),
+                      (_("Resign"), Iconos.Rendirse(), k_rendirse),
+                      (_("Draw"), Iconos.Tablas(), k_tablas),
+                      (_("Boxrooms PGN"), Iconos.Trasteros(), k_trasteros),
+                      (_("End"), Iconos.MainMenu(), k_peliculaTerminar),
+                      (_("Slow"), Iconos.Pelicula_Lento(), k_peliculaLento),
+                      (_("Pause"), Iconos.Pelicula_Pausa(), k_peliculaPausa),
+                      (_("Continue"), Iconos.Pelicula_Seguir(), k_peliculaSeguir),
+                      (_("Fast"), Iconos.Pelicula_Rapido(), k_peliculaRapido),
+                      (_("Repeat"), Iconos.Pelicula_Repetir(), k_peliculaRepetir),
+                      (_("PGN"), Iconos.Pelicula_PGN(), k_peliculaPGN),
+                      (_("Play"), Iconos.Jugar(), k_jugar),
+                      (_("Help"), Iconos.AyudaGR(), k_ayuda),
+                      (_("Level"), Iconos.Jugar(), k_mateNivel),
+                      (_("Accept"), Iconos.Aceptar(), k_aceptar),
+                      (_("Cancel"), Iconos.Cancelar(), k_cancelar),
+                      (_("Game of the day"), Iconos.LM(), k_jugadadia),
+                      (_("Config"), Iconos.Configurar(), k_configurar),
+                      (_("Utilities"), Iconos.Utilidades(), k_utilidades),
+                      (_("Variants"), Iconos.VariantesG(), k_variantes),
+                      (_("Tools"), Iconos.Tools(), k_tools),
+                      (_("Change"), Iconos.Cambiar(), k_cambiar),
+                      (_("Show text"), Iconos.Modificar(), k_showtext),
+                      (_("Help to move"), Iconos.BotonAyuda(), k_ayudaMover),
+                      (_("Send"), Iconos.Enviar(), k_enviar),
+                      # ( "Debug", Iconos.Camara(), 999),# Martin debug
+                      )
 
         cf = self.gestor.configuracion
         peso = 75 if cf.boldTB else 50
@@ -441,49 +441,49 @@ class WBase(QtGui.QWidget):
         pass
         # ~ #--------------------------------------------------------------------------------------------------------------------------------
         # ~ def gridColorTexto( self, fila, oColumna ):
-        #~ analisis = self.gestor.pgn.analisis(fila, oColumna.clave)
-        #~ if analisis:
-        #~ mate = analisis.mate
-        #~ if mate:
-        #~ return self.colorBlanco
-        #~ else:
-        #~ puntos = analisis.puntos
-        #~ if puntos > 0:
-        #~ if puntos < 1000:
-        #~ return self.colorPositivo.darker( 1000-puntos )
-        #~ else:
-        #~ return self.colorBlanco
-        #~ else:
-        #~ if puntos > -1000:
-        #~ return self.colorNegativo.darker( -(-1000-puntos) )
-        #~ else:
-        #~ return self.colorBlanco
+        # ~ analisis = self.gestor.pgn.analisis(fila, oColumna.clave)
+        # ~ if analisis:
+        # ~ mate = analisis.mate
+        # ~ if mate:
+        # ~ return self.colorBlanco
+        # ~ else:
+        # ~ puntos = analisis.puntos
+        # ~ if puntos > 0:
+        # ~ if puntos < 1000:
+        # ~ return self.colorPositivo.darker( 1000-puntos )
+        # ~ else:
+        # ~ return self.colorBlanco
+        # ~ else:
+        # ~ if puntos > -1000:
+        # ~ return self.colorNegativo.darker( -(-1000-puntos) )
+        # ~ else:
+        # ~ return self.colorBlanco
 
-        #~ return None
-        #~ #--------------------------------------------------------------------------------------------------------------------------------
-        #~ def gridColorFondo( self, fila, oColumna ):
-        #~ analisis = self.gestor.pgn.analisis(fila, oColumna.clave)
-        #~ if analisis:
-        #~ mate = analisis.mate
-        #~ if mate:
-        #~ if mate < 0:
-        #~ return self.colorMateNegativo
-        #~ else:
-        #~ return self.colorMatePositivo
-        #~ else:
-        #~ puntos = analisis.puntos
-        #~ if puntos > 0:
-        #~ if puntos < 1000:
-        #~ return self.colorPositivo.lighter( 1000-puntos )
-        #~ else:
-        #~ return self.colorPositivo
-        #~ else:
-        #~ if puntos > -1000:
-        #~ return self.colorNegativo.lighter( -(-1000-puntos) )
-        #~ else:
-        #~ return self.colorNegativo
+        # ~ return None
+        # ~ #--------------------------------------------------------------------------------------------------------------------------------
+        # ~ def gridColorFondo( self, fila, oColumna ):
+        # ~ analisis = self.gestor.pgn.analisis(fila, oColumna.clave)
+        # ~ if analisis:
+        # ~ mate = analisis.mate
+        # ~ if mate:
+        # ~ if mate < 0:
+        # ~ return self.colorMateNegativo
+        # ~ else:
+        # ~ return self.colorMatePositivo
+        # ~ else:
+        # ~ puntos = analisis.puntos
+        # ~ if puntos > 0:
+        # ~ if puntos < 1000:
+        # ~ return self.colorPositivo.lighter( 1000-puntos )
+        # ~ else:
+        # ~ return self.colorPositivo
+        # ~ else:
+        # ~ if puntos > -1000:
+        # ~ return self.colorNegativo.lighter( -(-1000-puntos) )
+        # ~ else:
+        # ~ return self.colorNegativo
 
-        #~ return None
+        # ~ return None
 
     def keyPressEvent(self, event):
         self.teclaPulsada("V", event.key())

@@ -2,25 +2,24 @@ import os
 import sys
 import time
 
+import LCEngine
 from PyQt4 import QtCore, QtGui
 
-import Code.MotorInterno as MotorInterno
-import Code.AnalisisIndexes as AnalisisIndexes
-import Code.VarGen as VarGen
-import Code.SAK as SAK
-import Code.QT.Piezas as Piezas
-import Code.ControlPosicion as ControlPosicion
-import Code.Partida as Partida
-import Code.Util as Util
-import Code.XMotorRespuesta as XMotorRespuesta
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Colocacion as Colocacion
-import Code.QT.QTUtil as QTUtil
-import Code.QT.Tablero as Tablero
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
+from Code import AnalisisIndexes
+from Code import ControlPosicion
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import Piezas
+from Code.QT import QTUtil
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import Util
+from Code import VarGen
+from Code import XMotorRespuesta
 
 CONFIGURACION = "C"
 FEN = "F"
@@ -47,7 +46,7 @@ class VentanaMultiPV(QtGui.QDialog):
         self.setWindowTitle(cpu.titulo)
         self.setWindowIcon(Iconos.Motor())
 
-        # self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
 
         self.setBackgroundRole(QtGui.QPalette.Light)
 
@@ -67,12 +66,12 @@ class VentanaMultiPV(QtGui.QDialog):
         self.lbDepth = Controles.LB(self)
 
         liAcciones = (
-            ( _("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
-            ( _("Continue"), Iconos.Kibitzer_Continuar(), self.play),
-            ( _("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
+            (_("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
+            (_("Continue"), Iconos.Kibitzer_Continuar(), self.play),
+            (_("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
             (_("The best solution found by the engine is saved to the clipboard"), Iconos.MoverGrabar(), self.portapapelesUltJug),
-            ( _("Analyze only color"), Iconos.P_16c(), self.color),
-            ( _("Board"), Iconos.Tablero(), self.confTablero),
+            (_("Analyze only color"), Iconos.P_16c(), self.color),
+            (_("Board"), Iconos.Tablero(), self.confTablero),
             ("%s: %s" % (_("Enable"), _("window on top")), Iconos.Top(), self.windowTop),
             ("%s: %s" % (_("Disable"), _("window on top")), Iconos.Bottom(), self.windowBottom),
         )
@@ -166,7 +165,7 @@ class VentanaMultiPV(QtGui.QDialog):
             return " ".join(li[1:])
 
     def gridBold(self, grid, fila, oColumna):
-        return oColumna.clave in ( "EVALUATION", "BESTMOVE" )
+        return oColumna.clave in ("EVALUATION", "BESTMOVE")
 
     def lanzaMotor(self):
         self.motor = QtCore.QProcess()
@@ -210,8 +209,8 @@ class VentanaMultiPV(QtGui.QDialog):
     def siAnalizar(self):
         siW = " w " in self.fen
         if not self.siPlay or \
-                (siW and (not self.siBlancas) ) or \
-                ((not siW) and (not self.siNegras) ):
+                (siW and (not self.siBlancas)) or \
+                ((not siW) and (not self.siNegras)):
             return False
         return True
 
@@ -279,15 +278,15 @@ class VentanaMultiPV(QtGui.QDialog):
             x, y = dicVideo["_POSICION_"].split(",")
             x = int(x)
             y = int(y)
-            if not ( 0 <= x <= (wE - 50) ):
+            if not (0 <= x <= (wE - 50)):
                 x = 0
-            if not ( 0 <= y <= (hE - 50) ):
+            if not (0 <= y <= (hE - 50)):
                 y = 0
             self.move(x, y)
             if "_SIZE_" not in dicVideo:
-                w, h = self.width(),self.height()
+                w, h = self.width(), self.height()
                 for k in dicVideo:
-                    if k.startswith( "_TAMA" ):
+                    if k.startswith("_TAMA"):
                         w, h = dicVideo[k].split(",")
             else:
                 w, h = dicVideo["_SIZE_"].split(",")
@@ -452,7 +451,7 @@ class VentanaMultiPV(QtGui.QDialog):
         self.lbDepth.ponTexto("-")
         if fen:
             self.fen = fen
-            self.numMovesDepth = min(self.numMultiPV, SAK.sak.numValidMoves(fen))
+            self.numMovesDepth = min(self.numMultiPV, LCEngine.setFen(fen))
             if self.siAnalizar():
                 self.orden_fen(fen)
                 self.runOrdenes()
@@ -559,8 +558,8 @@ class Ventana(QtGui.QDialog):
     def siAnalizar(self):
         siW = " w " in self.fen
         if not self.siPlay or \
-                (siW and (not self.siBlancas) ) or \
-                ((not siW) and (not self.siNegras) ):
+                (siW and (not self.siBlancas)) or \
+                ((not siW) and (not self.siNegras)):
             return False
         return True
 
@@ -589,7 +588,7 @@ class Ventana(QtGui.QDialog):
     def comentario(self, una):
         puntuacion = una["score"].replace("cp", "").strip()
         depth = una["depth"].strip()
-        return " {%s D%s} " % ( puntuacion, depth )
+        return " {%s D%s} " % (puntuacion, depth)
 
     def portapapelesUltJug(self):
         if self.liData and self.siAnalizar():
@@ -628,15 +627,15 @@ class Ventana(QtGui.QDialog):
                 x, y = dic["_POSICION_"].split(",")
                 x = int(x)
                 y = int(y)
-                if not ( 0 <= x <= (wE - 50) ):
+                if not (0 <= x <= (wE - 50)):
                     x = 0
-                if not ( 0 <= y <= (hE - 50) ):
+                if not (0 <= y <= (hE - 50)):
                     y = 0
                 self.move(x, y)
                 if "_SIZE_" not in dic:
-                    w, h = self.width(),self.height()
+                    w, h = self.width(), self.height()
                     for k in dic:
-                        if k.startswith( "_TAMA" ):
+                        if k.startswith("_TAMA"):
                             w, h = dic[k].split(",")
                 else:
                     w, h = dic["_SIZE_"].split(",")
@@ -703,7 +702,7 @@ class Ventana(QtGui.QDialog):
         for linea in li:
             if linea.startswith("info ") and " pv " in linea and " score " in linea:
                 dClaves = self.miraClaves(linea, (
-                    "multipv", "depth", "seldepth", "score", "time", "nodes", "pv", "hashfull", "tbhits", "nps" ))
+                    "multipv", "depth", "seldepth", "score", "time", "nodes", "pv", "hashfull", "tbhits", "nps"))
                 pv = dClaves["pv"]
                 if not pv:
                     continue
@@ -777,7 +776,7 @@ class Ventana(QtGui.QDialog):
                         if nli:
                             txt += '<td align="center"><b>%s</b></td>' % li[0]
                         if nli > 1:
-                            txt += "<td>%s</td>" % (" ".join(li[1:]), )
+                            txt += "<td>%s</td>" % (" ".join(li[1:]),)
                         txt += "</tr>"
 
             txt += "</table>"
@@ -820,8 +819,8 @@ class Ventana(QtGui.QDialog):
                 else:
                     self.miraBuffer()
             self.runOrdenes()
-        else:
-            QtCore.QTimer.singleShot(100, self.readOutput)
+        # else:
+        #     QtCore.QTimer.singleShot(100, self.readOutput)
             # time.sleep(0.1)
 
     def orden_ok(self, orden, ok=None):
@@ -988,7 +987,6 @@ class VentanaJugadas(Ventana):
 
         self.setLayout(layout)
 
-        self.mi = MotorInterno.MotorInterno()
         self.lifens = {}
 
         self.siMotorTrabajando = False
@@ -1135,13 +1133,14 @@ class VentanaJugadas(Ventana):
 
         self.tableroPosicion(posicionInicial)
 
-        self.mi.ponFen(self.fen)
-        liMovs = self.mi.dameMovimientos()
+        LCEngine.setFen(self.fen)
+        liMovs = LCEngine.getMoves()
         jaqs = ""
         caps = ""
         rest = ""
-        for mov in liMovs:
-            pgn1, fen = self.pgn_fen(mov.pv())
+        for xpv in liMovs:
+            pv = xpv[1:]
+            pgn1, fen = self.pgn_fen(pv)
             pgn = pgn1.lstrip("0123456789. ")
             self.dfens[pgn] = fen, pgn1
             pgn += ", "
@@ -1157,9 +1156,9 @@ class VentanaJugadas(Ventana):
 
         txt = '<table border="1" cellpadding="4" cellspacing="0" style="border-color: #ACA899">'
 
-        txt += "<tr><th>%s</th><td>%s</td></tr>" % (_("Checks"), jaqs.rstrip(" ,") )
-        txt += "<tr><th>%s</th><td>%s</td></tr>" % (_("Captured material"), caps.rstrip(" ,") )
-        txt += "<tr><th>%s</th><td>%s</td></tr>" % (_("Rest"), rest.rstrip(" ,") )
+        txt += "<tr><th>%s</th><td>%s</td></tr>" % (_("Checks"), jaqs.rstrip(" ,"))
+        txt += "<tr><th>%s</th><td>%s</td></tr>" % (_("Captured material"), caps.rstrip(" ,"))
+        txt += "<tr><th>%s</th><td>%s</td></tr>" % (_("Rest"), rest.rstrip(" ,"))
 
         txt += "</table>"
         # txt += "<small>%s</small>"%_("Double click on any move to analyze it")
@@ -1173,10 +1172,10 @@ class VentanaIndices(Ventana):
     def creaRestoControles(self):
 
         liAcciones = (
-            ( _("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
-            ( _("Continue"), Iconos.Kibitzer_Continuar(), self.play),
-            ( _("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
-            ( _("Analyze only color"), Iconos.P_16c(), self.color),
+            (_("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
+            (_("Continue"), Iconos.Kibitzer_Continuar(), self.play),
+            (_("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
+            (_("Analyze only color"), Iconos.P_16c(), self.color),
             ("%s: %s" % (_("Enable"), _("window on top")), Iconos.Top(), self.windowTop),
             ("%s: %s" % (_("Disable"), _("window on top")), Iconos.Bottom(), self.windowBottom),
         )
@@ -1248,7 +1247,8 @@ class VentanaIndices(Ventana):
             self.buffer = li[-1]
             li = li[:-1]
         mrm = XMotorRespuesta.MRespuestaMotor("", " w " in self.fen)
-        mrm.dispatch("\n".join(li), None, 9999)
+        mrm.dispatch("\n".join(li))
+        mrm.ordena()
         mrm.maxTiempo = None
         mrm.maxProfundidad = 9999
 
@@ -1257,13 +1257,13 @@ class VentanaIndices(Ventana):
             cp = ControlPosicion.ControlPosicion()
             cp.leeFen(self.fen)
 
-            txt = ['<table border="1" cellpadding="4" cellspacing="0" style="border-color: #ACA899">', ]
+            litxt = ['<table border="1" cellpadding="4" cellspacing="0" style="border-color: #ACA899">', ]
 
             def tr(tp, mas=""):
-                txt[0] += '<tr><th>%s</th><td align="right">%.01f%%</td><td>%s%s</td></tr>' % (tp[0], tp[1], mas, tp[2])
+                litxt.append('<tr><th>%s</th><td align="right">%.01f%%</td><td>%s%s</td></tr>' % (tp[0], tp[1], mas, tp[2]))
 
             tp = AnalisisIndexes.tp_gamestage(cp, mrm)
-            txt[0] += '<tr><th>%s</th><td align="right">%d</td><td>%s</td></tr>' % (tp[0], tp[1], tp[2])
+            litxt.append('<tr><th>%s</th><td align="right">%d</td><td>%s</td></tr>' % (tp[0], tp[1], tp[2]))
 
             pts = mrm.liMultiPV[0].puntosABS()
             if pts:
@@ -1286,13 +1286,19 @@ class VentanaIndices(Ventana):
             tr(AnalisisIndexes.tp_exchangetendency(cp, mrm))
 
             tp = AnalisisIndexes.tp_positionalpressure(cp, mrm)
-            txt[0] += '<tr><th>%s</th><td align="right">%dcp</td><td></td></tr>' % (tp[0], int(tp[1]))
+            litxt.append('<tr><th>%s</th><td align="right">%dcp</td><td></td></tr>' % (tp[0], int(tp[1])))
 
             tr(AnalisisIndexes.tp_materialasymmetry(cp, mrm))
 
-            txt[0] += "</table>"
+            # tr(AnalisisIndexes.tp_test1(cp, mrm))
+            # tr(AnalisisIndexes.tp_test2(cp, mrm))
+            # tr(AnalisisIndexes.tp_test3(cp, mrm))
+            # tr(AnalisisIndexes.tp_test4(cp, mrm))
+            # tr(AnalisisIndexes.tp_test5(cp, mrm))
 
-            self.em.ponHtml(txt[0])
+            litxt.append("</table>")
+
+            self.em.ponHtml("".join(litxt))
 
         self.lock = False
 
@@ -1320,25 +1326,25 @@ class VentanaLinea(Ventana):
 }""")
 
     def creaRestoControles(self):
-
         liAcciones = (
-            ( _("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
-            ( _("Continue"), Iconos.Kibitzer_Continuar(), self.play),
-            ( _("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
-            ( _("Analyze only color"), Iconos.P_16c(), self.color),
-            ( _("Change window position"), Iconos.TamTablero(), self.mover),
+            (_("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
+            (_("Continue"), Iconos.Kibitzer_Continuar(), self.play),
+            (_("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
+            (_("Analyze only color"), Iconos.P_16c(), self.color),
+            (_("Change window position"), Iconos.TamTablero(), self.mover),
         )
         self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
         self.tb.setFixedSize(120, 24)
         self.tb.setPosVisible(1, False)
         self.em = EDP(self)
         self.em.ponTipoLetra(peso=75, puntos=10)
+        self.em.setReadOnly(True)
 
         layout = Colocacion.H().control(self.em).control(self.tb).margen(2)
 
         self.setLayout(layout)
 
-        self.lanzaMotor(True)
+        self.lanzaMotor(False)
 
     def terminar(self):
         self.finalizar()
@@ -1369,7 +1375,6 @@ class VentanaLinea(Ventana):
 
     def ponFen(self, fen):
         if fen:
-
             if fen != self.fen:
                 html = self.em.html()
                 if self.fen and html:
@@ -1403,9 +1408,10 @@ class VentanaLinea(Ventana):
             self.buffer = li[-1]
             li = li[:-1]
         mrm = XMotorRespuesta.MRespuestaMotor("", " w " in self.fen)
-        mrm.dispatch("\n".join(li), None, 9999)
+        mrm.dispatch("\n".join(li))
         mrm.maxTiempo = None
         mrm.maxProfundidad = 9999
+        mrm.ordena()
 
         if mrm.liMultiPV:
             rm = mrm.liMultiPV[0]
@@ -1415,7 +1421,7 @@ class VentanaLinea(Ventana):
             if len(li) > 20:
                 li = li[:20]
 
-            self.em.ponHtml("[%02d] %s | %s" % ( rm.depth, rm.abrTexto(), " ".join(li) ))
+            self.em.ponHtml("[%02d] %s | %s" % (rm.depth, rm.abrTexto(), " ".join(li)))
 
         self.lock = False
 
@@ -1433,7 +1439,7 @@ class VentanaStockfishEval(Ventana):
     def creaRestoControles(self):
 
         liAcciones = (
-            ( _("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
+            (_("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
             ("%s: %s" % (_("Enable"), _("window on top")), Iconos.Top(), self.windowTop),
             ("%s: %s" % (_("Disable"), _("window on top")), Iconos.Bottom(), self.windowBottom),
         )
@@ -1505,7 +1511,6 @@ class VentanaStockfishEval(Ventana):
                 break
 
         if lir:
-
             self.em.ponTexto("\n".join(lir))
 
         self.lock = False
@@ -1516,8 +1521,7 @@ class Orden:
         self.titulo = ""
         self.dv = {}
 
-class CPU():
-    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+class CPU:
     def __init__(self, fdb):
 
         self.ipc = Util.IPC(fdb, False)
@@ -1529,9 +1533,6 @@ class CPU():
         self.ventana = None
         self.motor = None
 
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def run(self):
 
         # Primero espera la orden de lucas
@@ -1543,9 +1544,6 @@ class CPU():
 
         self.procesa(orden)
 
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def recibe(self):
         dv = self.ipc.pop()
         if not dv:
@@ -1556,9 +1554,6 @@ class CPU():
         orden.dv = dv
         return orden
 
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def procesa(self, orden):
         clave = orden.clave
         if clave == CONFIGURACION:
@@ -1583,9 +1578,6 @@ class CPU():
             self.ventana.finalizar()
             self.ventana.reject()
 
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def lanzaVentana(self):
         app = QtGui.QApplication([])
 
@@ -1594,21 +1586,13 @@ class CPU():
 
         self.configuracion.releeTRA()
 
-        # Lanzamos la pantalla
-        # ( "S", _("Best move") ),
-        # ( "C", _("Threats") ),
-        # ( "J", _("Select move") ),
-        # ( "I", _("Indexes") ),
-        # ( "L", _("Best move in one line") ),
-        # ( "M", _("Candidates") ),
-
         if self.tipo == "S":
             self.ventana = VentanaSiguiente(self)
         elif self.tipo == "C":
             self.ventana = VentanaSiguiente(self)
         elif self.tipo == "J":
             self.ventana = VentanaJugadas(self)
-        elif self.tipo == "I":
+        elif self.tipo in "I":
             self.ventana = VentanaIndices(self)
         elif self.tipo == "L":
             self.ventana = VentanaLinea(self)
@@ -1642,4 +1626,3 @@ def run(fdb):
     cpu.run()
 
     ferr.close()
-

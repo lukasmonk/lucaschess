@@ -5,18 +5,18 @@ import zipfile
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.GM as GM
-import Code.Books as Books
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Grid as Grid
-import Code.QT.Columnas as Columnas
-import Code.QT.PantallaAperturas as PantallaAperturas
+from Code import Books
+from Code import GM
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import PantallaAperturas
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Util
+from Code import VarGen
 
 class WGM(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -37,12 +37,12 @@ class WGM(QTVarios.WDialogo):
         flb = Controles.TipoLetra(puntos=10)
 
         # Toolbar
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-                      ( _("One game"), Iconos.Uno(), "unJuego" ), None,
-                      ( _("Import"), Iconos.ImportarGM(), "importar" )
-        ]
-        tb = Controles.TB(self, liAcciones)
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                      (_("One game"), Iconos.Uno(), self.unJuego), None,
+                      (_("Import"), Iconos.ImportarGM(), self.importar)
+                      ]
+        tb = Controles.TBrutina(self, liAcciones)
 
         # Grandes maestros
         self.liGM = GM.listaGM()
@@ -85,12 +85,12 @@ class WGM(QTVarios.WDialogo):
         self.cbJdepth = Controles.CB(self, liDepths, 0).capturaCambiado(self.cambiadoDepth)
         self.lbJdepth = Controles.LB2P(self, _("Depth"))
         self.lbJshow = Controles.LB2P(self, _("Show rating"))
-        liOptions = [( _("All moves"), None ), ( _("Moves are different"), True ), ( _("Never"), False )]
+        liOptions = [(_("All moves"), None), (_("Moves are different"), True), (_("Never"), False)]
         self.cbJshow = Controles.CB(self, liOptions, True)
         self.lbJmultiPV = Controles.LB2P(self, _("Number of moves evaluated by engine(MultiPV)"))
         li = [(_("Default"), "PD"),
-              ( _("Maximum"), "MX")]
-        for x in ( 1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200 ):
+              (_("Maximum"), "MX")]
+        for x in (1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200):
             li.append((str(x), str(x)))
         self.cbJmultiPV = Controles.CB(self, li, "PD")
 
@@ -110,11 +110,11 @@ class WGM(QTVarios.WDialogo):
         # Aperturas
 
         self.btApertura = Controles.PB(self, " " * 5 + _("Undetermined") + " " * 5, self.aperturasEditar).ponPlano(
-            False)
+                False)
         self.btAperturasFavoritas = Controles.PB(self, "", self.aperturasFavoritas).ponIcono(Iconos.Favoritos())
         self.btAperturasQuitar = Controles.PB(self, "", self.aperturasQuitar).ponIcono(Iconos.Motor_No())
         hbox = Colocacion.H().control(self.btAperturasQuitar).control(self.btApertura).control(
-            self.btAperturasFavoritas).relleno()
+                self.btAperturasFavoritas).relleno()
         gbOpening = Controles.GB(self, _("Opening"), hbox)
 
         # gbBasic
@@ -122,25 +122,25 @@ class WGM(QTVarios.WDialogo):
         hbox = Colocacion.H().relleno().control(self.rbBlancas).espacio(10).control(self.rbNegras).relleno()
         gbColor = Controles.GB(self, _("Play with"), hbox).ponFuente(flb)
 
-        ## Tiempo
+        # Tiempo
         ly1 = Colocacion.H().control(self.lbJmotor).control(self.cbJmotor).control(self.lbJshow).control(
-            self.cbJshow).relleno()
+                self.cbJshow).relleno()
         ly2 = Colocacion.H().control(self.lbJtiempo).control(self.edJtiempo)
         ly2.control(self.lbJdepth).control(self.cbJdepth).relleno()
         ly3 = Colocacion.H().control(self.lbJmultiPV).control(self.cbJmultiPV).relleno()
         ly = Colocacion.V().otro(ly1).otro(ly2).otro(ly3)
         self.gbJ = Controles.GB(self, _("Adjudicator"), ly).conectar(self.cambiaJuez)
 
-        ## Opciones
+        # Opciones
         vlayout = Colocacion.V().control(gbColor)
         vlayout.espacio(5).control(self.gbJ)
         vlayout.margen(20)
         gbBasic = Controles.GB(self, "", vlayout)
         gbBasic.setFlat(True)
 
-        ## Opciones avanzadas
+        # Opciones avanzadas
         lyInicial = Colocacion.H().control(lbInicial).control(self.edJugInicial).relleno().control(lbBooks).control(
-            self.cbBooks).relleno()
+                self.cbBooks).relleno()
         vlayout = Colocacion.V().relleno().otro(lyInicial).control(gbOpening)
         vlayout.espacio(5).control(self.chContrario).margen(20).relleno()
         gbAdvanced = Controles.GB(self, "", vlayout)
@@ -260,7 +260,7 @@ class WGM(QTVarios.WDialogo):
         dic = self.liHisto[fila]
         if clave == "FECHA":
             f = dic["FECHA"]
-            return "%d/%02d/%d" % ( f.day, f.month, f.year )
+            return "%d/%02d/%d" % (f.day, f.month, f.year)
         elif clave == "PACIERTOS":
             return "%d%%" % dic["PACIERTOS"]
         elif clave == "PUNTOS":
@@ -283,7 +283,7 @@ class WGM(QTVarios.WDialogo):
 
         self.liPersonal = GM.listaGMpersonal(self.configuracion.dirPersonalTraining)
 
-        li = [(x[0], x[1] ) for x in self.liPersonal]
+        li = [(x[0], x[1]) for x in self.liPersonal]
         li.insert(0, ("-", None))
         self.cbPersonal.rehacer(li, li[0][1])
 
@@ -303,9 +303,6 @@ class WGM(QTVarios.WDialogo):
                     if not sib:
                         self.rbBlancas.activa(True)
                         self.rbNegras.activa(False)
-
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
 
     def aceptar(self):
         if self.grabaDic():
@@ -337,12 +334,12 @@ class WGM(QTVarios.WDialogo):
 
     def cambiaJuez(self):
         si = self.gbJ.isChecked()
-        for control in ( self.cbJmotor, self.lbJmotor,
-                         self.edJtiempo, self.lbJtiempo,
-                         self.lbJdepth, self.cbJdepth,
-                         self.lbJshow, self.cbJshow,
-                         self.lbJmultiPV, self.cbJmultiPV,
-        ):
+        for control in (self.cbJmotor, self.lbJmotor,
+                        self.edJtiempo, self.lbJtiempo,
+                        self.lbJdepth, self.cbJdepth,
+                        self.lbJshow, self.cbJshow,
+                        self.lbJmultiPV, self.cbJmultiPV,
+                        ):
             control.setVisible(si)
 
     def grabaDic(self):
@@ -520,7 +517,7 @@ def eligeJugada(gestor, liJugadas, siGM):
     for desde, hasta, coronacion, rotulo, pgn in liJugadas:
 
         if rotulo and (len(liJugadas) > 1):
-            txt = "%s - %s" % ( pgn, rotulo )
+            txt = "%s - %s" % (pgn, rotulo)
         else:
             txt = pgn
         menu.opcion((desde, hasta, coronacion), txt, icono)
@@ -531,7 +528,7 @@ def eligeJugada(gestor, liJugadas, siGM):
         return resp
     else:
         desde, hasta, coronacion, rotulo, pgn = liJugadas[0]
-        return (desde, hasta, coronacion)
+        return desde, hasta, coronacion
 
 class WImportar(QtGui.QDialog):
     def __init__(self, wParent, liGM):
@@ -543,13 +540,13 @@ class WImportar(QtGui.QDialog):
         self.setWindowTitle(_("Import"))
         self.setWindowIcon(Iconos.ImportarGM())
         self.setWindowFlags(
-            QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
+                QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
 
         # Toolbar
-        liAcciones = [( _("Import"), Iconos.Aceptar(), "aceptar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-                      ( _("Mark"), Iconos.Marcar(), "marcar" ), None,
-        ]
+        liAcciones = [(_("Import"), Iconos.Aceptar(), "aceptar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
+                      (_("Mark"), Iconos.Marcar(), "marcar"), None,
+                      ]
         tb = Controles.TB(self, liAcciones)
 
         # Lista
@@ -634,7 +631,7 @@ def importarGM(ownerGM):
         linea = linea.strip()
         if linea:
             gm, nombre, ctam, cpart = linea.split(VarGen.XSEP)
-            if Util.tamFichero("gm/%s.xgm" % gm) != int(ctam): # si no existe tam = -1
+            if Util.tamFichero("gm/%s.xgm" % gm) != int(ctam):  # si no existe tam = -1
                 dic = {"GM": gm, "NOMBRE": nombre, "PARTIDAS": cpart, "ELEGIDO": False}
                 liGM.append(dic)
     f.close()
@@ -689,10 +686,10 @@ class SelectGame(QTVarios.WDialogo):
         self.grid.coloresAlternados()
         self.registrarGrid(grid)
 
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-        ]
-        tb = Controles.TB(self, liAcciones)
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                      ]
+        tb = Controles.TBrutina(self, liAcciones)
 
         layout = Colocacion.V().control(tb).control(grid).margen(3)
         self.setLayout(layout)
@@ -709,9 +706,6 @@ class SelectGame(QTVarios.WDialogo):
     def gridDobleClick(self, grid, fila, columna):
         self.aceptar()
 
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
-
     def aceptar(self):
         self.partidaElegida = self.liRegs[self.grid.recno()]["NUMERO"]
         self.guardarVideo()
@@ -720,4 +714,3 @@ class SelectGame(QTVarios.WDialogo):
     def cancelar(self):
         self.guardarVideo()
         self.reject()
-

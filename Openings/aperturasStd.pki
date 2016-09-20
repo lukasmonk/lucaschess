@@ -667,7 +667,7 @@ BASIC=False
 ECO=B10
 A1H8=e2e4 c7c6
 PGN=1. e4 c6
-BASIC=False
+BASIC=True
 [Caro-Kann: 3.Nd2]
 ECO=B12
 A1H8=e2e4 c7c6 d2d4 d7d5 b1d2

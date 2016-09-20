@@ -1,9 +1,9 @@
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import QTVarios
 
 class WFavoritos(QTVarios.WDialogo):
     def __init__(self, entrenamientos):
@@ -18,11 +18,11 @@ class WFavoritos(QTVarios.WDialogo):
 
         # Toolbar
         liAcciones = [
-            ( _("Quit"), Iconos.MainMenu(), "terminar" ), None,
-            ( _("New"), Iconos.TutorialesCrear(), "nuevo" ), None,
-            ( _("Remove"), Iconos.Borrar(), "borrar" ), None,
-            ( _("Up"), Iconos.Arriba(), "arriba" ), None,
-            ( _("Down"), Iconos.Abajo(), "abajo" ), None,
+            (_("Close"), Iconos.MainMenu(), "terminar"), None,
+            (_("New"), Iconos.Nuevo(), "nuevo"), None,
+            (_("Remove"), Iconos.Borrar(), "borrar"), None,
+            (_("Up"), Iconos.Arriba(), "arriba"), None,
+            (_("Down"), Iconos.Abajo(), "abajo"), None,
         ]
         tb = Controles.TB(self, liAcciones)
 

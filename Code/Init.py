@@ -1,6 +1,7 @@
 DEBUG = False
-VERSION = "9.08b"
+VERSION = "10.00"
 
+import os
 import sys
 
 from Code.Constantes import *
@@ -8,11 +9,11 @@ from Code.Constantes import *
 if DEBUG:
     prlkn("DEBUG " * 20)
 
-import Code.VarGen as VarGen
-import Code.Procesador as Procesador
-import Code.Sonido as Sonido
+from Code import VarGen
+from Code import Procesador
+from Code import Sonido
 
-import Code.QT.Gui as Gui
+from Code.QT import Gui
 
 def init():
     # Needed for feedback
@@ -39,8 +40,7 @@ def init():
 
     if resp == kFinReinicio:
         if sys.argv[0].endswith(".py"):
-            exe = "./%s"%sys.argv[0]
+            exe = os.path.abspath(sys.argv[0])
         else:
             exe = "Lucas.exe" if VarGen.isWindows else "Lucas"
         VarGen.startfile(exe)
-

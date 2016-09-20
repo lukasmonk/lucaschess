@@ -4,7 +4,7 @@ class Almacen:
     pass
 
 class DBFcache:
-    def __init__(self, conexion, ctabla, select, condicion="", orden="", maxCache=20000):
+    def __init__(self, conexion, ctabla, select, condicion="", orden="", maxCache=2000):
 
         self.conexion = conexion
         self.cursor = conexion.cursor()
@@ -65,7 +65,7 @@ class DBFcache:
         if recno >= 0:
             self.delCache(recno)
 
-    #< CACHE -----------------------------------------------------------------------------------------------------
+    # < CACHE -----------------------------------------------------------------------------------------------------
 
     def reccount(self):
         """
@@ -89,7 +89,7 @@ class DBFcache:
         """
         self.condicion = condicion
 
-    def leerBuffer(self, segundos=1.0, chunk=200):
+    def leerBuffer(self, segundos=1.0, chunk=20000):
         self.resetCache()
         self.cursorBuffer = self.conexion.cursor()
         self.bof = True
@@ -145,7 +145,7 @@ class DBFcache:
         self.ID = self.liIDs[numRecno][0]
         recValores = self.readCache(numRecno)
         if not recValores:
-            self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % ( self.select, self.ctabla, self.ID ))
+            self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % (self.select, self.ctabla, self.ID))
             liValores = self.cursor.fetchone()
             recValores = Almacen()
             for numCampo, campo in enumerate(self.liCampos):
@@ -154,8 +154,8 @@ class DBFcache:
         self.reg = recValores
 
     def leeOtroCampo(self, recno, campo):
-        id = self.rowid(recno)
-        self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % ( campo, self.ctabla, id ))
+        xid = self.rowid(recno)
+        self.cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % (campo, self.ctabla, xid))
         liValores = self.cursor.fetchone()
         return liValores[0]
 
@@ -182,14 +182,14 @@ class DBFcache:
         """
         return self.liIDs[numRecno][0]
 
-    def buscarID(self, id):
+    def buscarID(self, xid):
         """
         Busca el recno de un ID.
 
-        @param id: numero de id.
+        @param xid: numero de id.
         """
         for r in range(self.reccount()):
-            if self.rowid(r) == id:
+            if self.rowid(r) == xid:
                 return r
         return -1
 
@@ -228,7 +228,7 @@ class DBFcache:
         for n, recno in enumerate(listaRecnos):
             if dispatch:
                 dispatch(n)
-            cSQL = "DELETE FROM %s WHERE rowid = %d" % ( self.ctabla, self.rowid(recno) )
+            cSQL = "DELETE FROM %s WHERE rowid = %d" % (self.ctabla, self.rowid(recno))
             self.cursor.execute(cSQL)
         self.conexion.commit()
 
@@ -238,13 +238,13 @@ class DBFcache:
         self.resetCache()
 
     def borrarConFiltro(self, filtro):
-        cSQL = "DELETE FROM %s WHERE %s" % ( self.ctabla, filtro )
+        cSQL = "DELETE FROM %s WHERE %s" % (self.ctabla, filtro)
         self.cursor.execute(cSQL)
         self.conexion.commit()
         self.resetCache()
 
     def borrarROWID(self, rowid):
-        cSQL = "DELETE FROM %s WHERE rowid = %d" % ( self.ctabla, rowid )
+        cSQL = "DELETE FROM %s WHERE rowid = %d" % (self.ctabla, rowid)
         self.cursor.execute(cSQL)
         self.conexion.commit()
         self.delRowidCache(rowid)
@@ -282,7 +282,7 @@ class DBFcache:
         campos = campos[:-1]
         values = values[:-1]
 
-        cSQL = "insert into %s(%s) values(%s)" % ( self.ctabla, campos, values)
+        cSQL = "insert into %s(%s) values(%s)" % (self.ctabla, campos, values)
         self.cursor.execute(cSQL, liValues)
 
         idNuevo = self.cursor.lastrowid
@@ -322,8 +322,7 @@ class DBFcache:
 
         campos = campos[:-1]
 
-        cSQL = "UPDATE %s SET %s WHERE ROWID = %d" % ( self.ctabla, campos, rowid )
+        cSQL = "UPDATE %s SET %s WHERE ROWID = %d" % (self.ctabla, campos, rowid)
         self.cursor.execute(cSQL, liValues)
 
         self.conexion.commit()
-

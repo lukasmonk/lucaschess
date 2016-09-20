@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui
 
-import Code.QT.TabBloques as TabBloques
+from Code.QT import TabBloques
 
 class MarcoSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueMarco, rutinaPulsada=None):
@@ -113,7 +113,7 @@ class MarcoSC(TabBloques.BloqueEspSC):
 
     def mouseMoveEvent(self, event):
         event.ignore()
-        if not (self.siMove or self.tpSize ):
+        if not (self.siMove or self.tpSize):
             return
 
         p = event.scenePos()
@@ -240,4 +240,3 @@ class MarcoSC(TabBloques.BloqueEspSC):
     def boundingRect(self):
         x = self.bloqueDatos.grosor
         return QtCore.QRectF(self.rect).adjusted(-x, -x, x * 2, x * 2)
-

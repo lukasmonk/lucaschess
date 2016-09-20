@@ -1,26 +1,12 @@
-import Code.TrListas as TrListas
-import Code.SAK as SAK
+import LCEngine
+
+from Code import TrListas
 
 FEN_INICIAL = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 class ControlPosicion:
-    """
-    Lleva el control del tablero, piezas en cada casilla, posibilidad de mover de una a otra, asi como el turno....
-    A FEN record contains six fields. The separator between fields is a space. The fields are:
-
-       1. Piece placement (from white's perspective). Each rank is described, starting with rank 8 and ending with rank 1; within each rank, the contents of each square are described from file a through file h. Following the Standard Algebraic Notation (SAN), each piece is identified by a single letter taken from the standard English names (pawn = "P", knight = "N", bishop = "B", rook = "R", queen = "Q" and king = "K").[1] White pieces are designated using upper-case letters ("PNBRQK") while Black take lowercase ("pnbrqk"). Blank squares are noted using digits 1 through 8 (the number of blank squares), and "/" separate ranks.
-       2. Active color. "w" means white moves next, "b" means black.
-       3. Castling availability. If neither side can castle, this is "-". Otherwise,
-       this has one or more letters: "K" (White can castle kingside),
-       "Q" (White can castle queenside), "k" (Black can castle kingside), and/or "q" (Black can castle queenside).
-       4. En passant target square in algebraic notation. If there's no en passant target square, this is "-". If a pawn has just made a 2-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.
-       5. Halfmove clock: This is the number of halfmoves since the last pawn advance or capture. This is used to determine if a draw can be claimed under the fifty-move rule.
-       6. Fullmove number: The number of the full move. It starts at 1, and is incremented after Black's move.
-    """
-
     def __init__(self):
         self.liExtras = []
-        self.sak = SAK.sak
 
     def posInicial(self):
         """
@@ -34,21 +20,21 @@ class ControlPosicion:
         # self.leeFen( "7K/4q3/8/6k1/8/8/8/8 w - - 0 1" ) # Mate en 2/3 para negras
         # self.leeFen( "7K/4q3/Q7/6k1/8/8/8/8 w - - 0 1" ) # Mate en 2/3 para negras
         # self.leeFen( "8/3P3k/8/8/8/8/7K/8 w - - 0 1" ) # Peon a punto de coronar -> promocion
-        # ~ self.leeFen( "7K/8/7k/4Q3/8/8/8/8 w - - 0 1" ) # Tablas
-        #~ self.leeFen( "8/8/8/4k1P1/8/8/6P1/2K5 w - - 0 1" )
+        # self.leeFen( "7K/8/7k/4Q3/8/8/8/8 w - - 0 1" ) # Tablas
+        # self.leeFen( "8/8/8/4k1P1/8/8/6P1/2K5 w - - 0 1" )
         # self.leeFen( "r3k1nr/pp1n1ppp/4p3/1N6/3N4/8/PP2KP1q/R1B1b3 w - - 0 1" ) # Mate a las blancas
-        #~ self.leeFen( "r1b1kbnr/pp3ppp/4p3/4n3/3N4/N7/PP2BPqP/R1BQK2R w - - 0 1" )
-        #~ self.leeFen( "2kr1b1r/2p1pppp/p7/3pPb2/1q3P2/2N1P3/PPP3PP/R1BQK2R w KQ - 0 1" )
-        #~ self.leeFen( "4rk2/1bpq1rpQ/1pn1p2p/p2pP3/3P1N2/P1PB4/2P2PPP/R5K1 w  - 0 1" )
-        #~ self.leeFen( "R3R2K/P6P/2PPq12/1PB1PpQ1/8/p1pp1p1B/bp3p1p/r5rk w - - 6 21" )
-        #~ self.leeFen( "3k4/1p3ppp/2q1p3/1p6/8/N1P3Pb/P2n3P/6K1 w - - 2 40" )
+        # self.leeFen( "r1b1kbnr/pp3ppp/4p3/4n3/3N4/N7/PP2BPqP/R1BQK2R w - - 0 1" )
+        # self.leeFen( "2kr1b1r/2p1pppp/p7/3pPb2/1q3P2/2N1P3/PPP3PP/R1BQK2R w KQ - 0 1" )
+        # self.leeFen( "4rk2/1bpq1rpQ/1pn1p2p/p2pP3/3P1N2/P1PB4/2P2PPP/R5K1 w  - 0 1" )
+        # self.leeFen( "R3R2K/P6P/2PPq12/1PB1PpQ1/8/p1pp1p1B/bp3p1p/r5rk w - - 6 21" )
+        # self.leeFen( "3k4/1p3ppp/2q1p3/1p6/8/N1P3Pb/P2n3P/6K1 w - - 2 40" )
         # self.leeFen( "2bq1b2/p1ppp3/7p/1rPP1Q2/3k3P/P4R2/4PPP1/2R1KB2 w - - 0 22" ) # Mate de mas de una forma
-        #~ self.leeFen( "1rbq1b2/p1pppk2/7p/1PPP4/4Q2P/P6R/4PPP1/R3KB2 w Q - 0 18" )
-        #~ r2qkb1r/1pP1pppp/p2p4/1B6/4P1n1/2N5/PPP2PPP/R1B1K2R b KQkq - 0 10
+        # self.leeFen( "1rbq1b2/p1pppk2/7p/1PPP4/4Q2P/P6R/4PPP1/R3KB2 w Q - 0 18" )
+        # r2qkb1r/1pP1pppp/p2p4/1B6/4P1n1/2N5/PPP2PPP/R1B1K2R b KQkq - 0 10
         return self
 
     def logo(self):
-        # ~ self.leeFen( "8/4q1k1/1R2bpn1/1N2n1b1/1B2r1r1/1Q6/1PKNBR2/8 w - - 0 1" )
+        #  self.leeFen( "8/4q1k1/1R2bpn1/1N2n1b1/1B2r1r1/1Q6/1PKNBR2/8 w - - 0 1" )
         self.leeFen("8/4Q1K1/1r2BPN1/1n2N1B1/1b2R1R1/1q6/1pknbr2/8 w - - 0 1")
         return self
 
@@ -64,30 +50,14 @@ class ControlPosicion:
 
     def legal(self):
         if self.enroques != '-':
-            dic = {"K": ( "K", "R", "e1", "h1" ), "k": ( "k", "r", "e8", "h8" ), "Q": ( "K", "R", "e1", "a1" ),
-                   "q": ( "k", "r", "e8", "a8" )}
+            dic = {"K": ("K", "R", "e1", "h1"), "k": ("k", "r", "e8", "h8"), "Q": ("K", "R", "e1", "a1"),
+                   "q": ("k", "r", "e8", "a8")}
             enr = ""
             for tipo in self.enroques:
                 rey, torre, posRey, posTorre = dic[tipo]
                 if self.siExistePieza(rey, posRey) and self.siExistePieza(torre, posTorre):
                     enr += tipo
-            self.enroques = enr
-            # if len(self.alPaso) == 2:
-            # letra = self.alPaso[0]
-            # numero = self.alPaso[1]
-            # #deben existir
-            # num = "5" if numero == "6" else "4"
-            # peon = "P" if numero == "6" else "p"
-            # let = chr( ord(letra)-1 )
-            # si = False
-            # if let >= 'a':
-            # si = self.siExistePieza( peon, let + num )
-            # if not si:
-            # let = chr( ord(letra)+1 )
-            # if let <= 'h':
-            # si = self.siExistePieza( peon, let + num )
-            # if not si:
-            # self.alPaso = "-"
+            self.enroques = enr if enr else "-"
 
     def leeFen(self, fen):
         fen = fen.strip()
@@ -129,70 +99,11 @@ class ControlPosicion:
 
         return self
 
-    # def fenInverso(self):
-        # cp = ControlPosicion()
+    def setLCE(self):
+        return LCEngine.setFen(self.fen())
 
-        # d = {}
-        # for casilla, v in self.casillas.iteritems():
-            # cCol = casilla[0]
-            # cFil = str(9 - int(casilla[1]))
-            # d[cCol + cFil] = v
-        # cp.casillas = d
-
-        # enroques = self.enroques
-        # if enroques != "-":
-            # r = ""
-            # for c in enroques:
-                # if c.isupper():
-                    # r += c.lower()
-                # else:
-                    # r += c.upper()
-            # enroques = r
-        # cp.enroques = enroques
-        # ap = self.alPaso
-        # if ap != "-":
-            # ap = ap[0] + str(9 - int(ap[1]))
-        # cp.alPaso = ap
-
-        # cp.jugadas = self.jugadas
-        # cp.movPeonCap = self.movPeonCap
-
-        # cp.siBlancas = not self.siBlancas
-
-        # return cp.fen()
-
-    def setSAK(self):
-        nSin = 0
-        posicion = ""
-        for i in range(8, 0, -1):
-            cFil = chr(i + 48)
-            fila = ""
-            for j in range(8):
-                cCol = chr(j + 97)
-                clave = cCol + cFil
-                v = self.casillas[clave]
-                if v is None:
-                    nSin += 1
-                else:
-                    if nSin:
-                        fila += "%d" % nSin
-                        nSin = 0
-                    fila += v
-            if nSin:
-                fila += "%d" % nSin
-                nSin = 0
-
-            posicion += fila
-            if i > 1:
-                posicion += "/"
-        color = "w" if self.siBlancas else "b"
-
-        self.legal()
-
-        self.sak.setXFEN(posicion, color, self.enroques, self.alPaso, self.movPeonCap, self.jugadas)
-
-    def getSAK(self):
-        self.leeFen(self.sak.getFEN())
+    def getExMoves(self):
+        return LCEngine.getExMoves()
 
     def fenBase(self):
         nSin = 0
@@ -251,8 +162,9 @@ class ControlPosicion:
         Se utiliza en analisis
         """
         fen = self.fen()
-        li = fen.split(" ")
-        return " ".join(li[:4])
+        sp1 = fen.rfind(" ")
+        sp2 = fen.rfind(" ", 0, sp1)
+        return fen[:sp2]
 
     def siExistePieza(self, pieza, a1h8=None):
         if a1h8:
@@ -270,7 +182,7 @@ class ControlPosicion:
         """
 
         dic = {}
-        for pieza, num in ( ("P", 8), ("R", 2), ("N", 2), ("B", 2), ("Q", 1), ("K", 1) ):
+        for pieza, num in (("P", 8), ("R", 2), ("N", 2), ("B", 2), ("Q", 1), ("K", 1)):
             dic[pieza] = num
             dic[pieza.lower()] = num
 
@@ -283,71 +195,68 @@ class ControlPosicion:
     def moverPV(self, pv):
         return self.mover(pv[:2], pv[2:4], pv[4:])
 
-    def mover(self, desdeA1H8, hastaA1H8, coronacion=None):
-        self.setSAK()
+    def mover(self, desdeA1H8, hastaA1H8, coronacion=""):
+        self.setLCE()
 
-        mv = self.sak.moveExPV(desdeA1H8, hastaA1H8, coronacion)
+        mv = LCEngine.moveExPV(desdeA1H8, hastaA1H8, coronacion)
         if not mv:
-            return ( False, "Error" )
+            return False, "Error"
 
         self.liExtras = []
 
-        # PZ desde:2 hasta:2 Prom KQ E x
-        hasta = mv[3:5]
-        prom = mv[5].strip()
-        enrK = mv[6] == "K"
-        enrQ = mv[6] == "Q"
-        enPa = mv[7] == "E"
-        # enCp = mv[8] == "x"
+        enrK = mv.isCastleK()
+        enrQ = mv.isCastleQ()
+        enPa = mv.isEnPassant()
 
-        if prom:
+        if coronacion:
             if self.siBlancas:
-                prom = prom.upper()
+                coronacion = coronacion.upper()
             else:
-                prom = prom.lower()
-            self.liExtras.append(("c", hasta, prom))
+                coronacion = coronacion.lower()
+            self.liExtras.append(("c", hastaA1H8, coronacion))
 
         elif enrK:
             if self.siBlancas:
-                self.liExtras.append(( "m", "h1", "f1" ))
+                self.liExtras.append(("m", "h1", "f1"))
             else:
-                self.liExtras.append(( "m", "h8", "f8" ))
+                self.liExtras.append(("m", "h8", "f8"))
 
         elif enrQ:
             if self.siBlancas:
-                self.liExtras.append(( "m", "a1", "d1" ))
+                self.liExtras.append(("m", "a1", "d1"))
             else:
-                self.liExtras.append(( "m", "a8", "d8" ))
+                self.liExtras.append(("m", "a8", "d8"))
 
         elif enPa:
             capt = self.alPaso.replace("6", "5").replace("3", "4")
             self.liExtras.append(("b", capt))
-        self.getSAK()  # despues de liExtras, por si enpassant, para que
 
-        return ( True, self.liExtras )
+        self.leeFen(LCEngine.getFen())  # despues de liExtras, por si enpassant
 
-    # def tablero(self):
-        # resp = "   " + "+---" * 8 + "+" + "\n"
-        # for fila in "87654321":
-            # resp += " " + fila + " |"
-            # for columna in "abcdefgh":
-                # pieza = self.casillas[columna + fila]
-                # if pieza is None:
-                    # resp += "   |"
-                    # # ~ resp += "-"+columna+fila + "|"
-                # else:
-                    # resp += " " + pieza + " |"
-            # resp += " " + fila + "\n"
-            # resp += "   " + "+---" * 8 + "+" + "\n"
-        # resp += "    "
-        # for columna in "abcdefgh":
-            # resp += " " + columna + "  "
+        return True, self.liExtras
 
-        # return resp
+    def tablero(self):
+        resp = "   " + "+---" * 8 + "+" + "\n"
+        for fila in "87654321":
+            resp += " " + fila + " |"
+            for columna in "abcdefgh":
+                pieza = self.casillas[columna + fila]
+                if pieza is None:
+                    resp += "   |"
+                    # resp += "-"+columna+fila + "|"
+                else:
+                    resp += " " + pieza + " |"
+            resp += " " + fila + "\n"
+            resp += "   " + "+---" * 8 + "+" + "\n"
+        resp += "    "
+        for columna in "abcdefgh":
+            resp += " " + columna + "  "
 
-    def pgn(self, desde, hasta, coronacion=None):
-        self.setSAK()
-        return self.sak.getPGN(desde, hasta, coronacion)
+        return resp
+
+    def pgn(self, desde, hasta, coronacion=""):
+        self.setLCE()
+        return LCEngine.getPGN(desde, hasta, coronacion)
 
     def pv2dgt(self, desde, hasta, coronacion=None):
         pOri = self.casillas[desde]
@@ -388,13 +297,11 @@ class ControlPosicion:
         return resp
 
     def siJaque(self):
-        self.setSAK()
-        return self.sak.isCheck()
+        self.setLCE()
+        return LCEngine.isCheck()
 
     def siTerminada(self):
-        self.setSAK()
-        li = self.sak.getExMoves()
-        return len(li) == 0
+        return self.setLCE() == 0
 
     def siFaltaMaterial(self):
         # Rey y Rey
@@ -499,7 +406,7 @@ class ControlPosicion:
             ori = 2
             dest = 1
 
-        if not (int(desdeA1H8[1]) == ori and int(hastaA1H8[1]) == dest ):
+        if not (int(desdeA1H8[1]) == ori and int(hastaA1H8[1]) == dest):
             return False
 
         return True

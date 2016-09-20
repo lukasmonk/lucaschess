@@ -1,18 +1,24 @@
+from Code.QT import FormLayout
+from Code.QT import Iconos
 from Code.Constantes import *
 
-import Code.QT.Iconos as Iconos
+def paramPelicula(configuracion, parent):
 
-import Code.QT.FormLayout as FormLayout
+    nomVar = "PARAMPELICULA"
+    dicVar = configuracion.leeVariables(nomVar)
 
-def paramPelicula(parent):
     # Datos
     liGen = [(None, None)]
 
     # # Segundos
-    liGen.append(( _("Number of seconds between moves") + ":", 2 ))
+    liGen.append((_("Number of seconds between moves") + ":", dicVar.get("SECONDS", 2)))
+    liGen.append(FormLayout.separador)
 
-    # # Si desde el principi
-    liGen.append(( _("Start from first move") + ":", True ))
+    # # Si desde el principio
+    liGen.append((_("Start from first move") + ":", dicVar.get("START", True)))
+    liGen.append(FormLayout.separador)
+
+    liGen.append((_("Show PGN") + ":", dicVar.get("PGN", True)))
 
     # Editamos
     resultado = FormLayout.fedit(liGen, title=_("Replay game"), parent=parent, anchoMinimo=460, icon=Iconos.Pelicula())
@@ -20,14 +26,17 @@ def paramPelicula(parent):
     if resultado:
         accion, liResp = resultado
 
-        segundos = liResp[0]
-        siPrincipio = liResp[1]
-        return segundos, siPrincipio
+        segundos, siPrincipio, siPGN = liResp
+        dicVar["SECONDS"] = segundos
+        dicVar["START"] = siPrincipio
+        dicVar["PGN"] = siPGN
+        configuracion.escVariables(nomVar, dicVar)
+        return segundos, siPrincipio, siPGN
     else:
         return None
 
 class Pelicula:
-    def __init__(self, gestor, segundos, siInicio):
+    def __init__(self, gestor, segundos, siInicio, siPGN):
         self.gestor = gestor
         self.procesador = gestor.procesador
         self.pantalla = gestor.pantalla
@@ -38,9 +47,13 @@ class Pelicula:
         self.siInicio = siInicio
         self.rapidez = 1.0
 
+        self.siPGN = siPGN
+        if not siPGN:
+            self.pantalla.base.pgn.hide()
+
         liAcciones = (
             k_peliculaTerminar, k_peliculaLento, k_peliculaPausa, k_peliculaSeguir, k_peliculaRapido,
-            k_peliculaRepetir )
+            k_peliculaRepetir, k_peliculaPGN)
 
         self.antAcciones = self.pantalla.dameToolBar()
         self.pantalla.ponToolBar(liAcciones)
@@ -64,7 +77,7 @@ class Pelicula:
 
         jg = self.liJugadas[self.posActual]
         self.tablero.ponPosicion(jg.posicionBase)
-        liMovs = [( "b", jg.hasta ), ( "m", jg.desde, jg.hasta )]
+        liMovs = [("b", jg.hasta), ("m", jg.desde, jg.hasta)]
         if jg.posicion.liExtras:
             liMovs.extend(jg.posicion.liExtras)
         self.movimientosPiezas(liMovs)
@@ -92,7 +105,7 @@ class Pelicula:
                     dc = ord(desde[0]) - ord(hasta[0])
                     df = int(desde[1]) - int(hasta[1])
                     # Maxima distancia = 9.9 ( 9,89... sqrt(7**2+7**2)) = 4 segundos
-                    dist = ( dc ** 2 + df ** 2 ) ** 0.5
+                    dist = (dc ** 2 + df ** 2) ** 0.5
                     rp = self.rapidez if self.rapidez > 1.0 else 1.0
                     segundos = 4.0 * dist / (9.9 * rp)
 
@@ -139,12 +152,20 @@ class Pelicula:
             self.rapido()
         elif clave == k_peliculaRepetir:
             self.repetir()
+        elif clave == k_peliculaPGN:
+            self.siPGN = not self.siPGN
+            if self.siPGN:
+                self.pantalla.base.pgn.show()
+            else:
+                self.pantalla.base.pgn.hide()
 
     def terminar(self):
         self.siStop = True
         self.pantalla.ponToolBar(self.antAcciones)
         self.gestor.ponRutinaAccionDef(None)
         self.gestor.xpelicula = None
+        if not self.siPGN:
+            self.pantalla.base.pgn.show()
 
     def lento(self):
         self.rapidez /= 1.2
@@ -163,7 +184,7 @@ class Pelicula:
         self.muestraActual()
 
     def repetir(self):
-        self.posActual = self.jugInicial
+        self.posActual = 0 if self.siInicio else self.jugInicial
         self.siStop = False
         self.muestraPausa(True)
         self.muestraActual()

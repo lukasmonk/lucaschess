@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui, QtSvg
 
-import Code.QT.TabBloques as TabBloques
+from Code.QT import TabBloques
 
 class MarkerSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueMarker, rutinaPulsada=None, siEditando=False):
@@ -116,7 +116,7 @@ class MarkerSC(TabBloques.BloqueEspSC):
 
     def mouseMoveEvent(self, event):
         event.ignore()
-        if not (self.siMove or self.tpSize ):
+        if not (self.siMove or self.tpSize):
             return
 
         p = event.scenePos()
@@ -190,7 +190,7 @@ class MarkerSC(TabBloques.BloqueEspSC):
         poscelda = bm.poscelda
         psize = bm.psize
 
-        def haz( a1h8 ):
+        def haz(a1h8):
 
             alto = ancho = bm.anchoCasilla * 0.3
             df, dc, hf, hc = self.tablero.a1h8_fc(a1h8)
@@ -225,17 +225,17 @@ class MarkerSC(TabBloques.BloqueEspSC):
         dl = bm.a1h8[0]
         hl = bm.a1h8[2]
         if dl > hl:
-            dl,hl = hl,dl
+            dl, hl = hl, dl
         dn = bm.a1h8[1]
         hn = bm.a1h8[3]
         if dn > hn:
-            dn,hn = hn,dn
+            dn, hn = hn, dn
         dn0 = dn
         while dl <= hl:
             while dn <= hn:
-                haz( dl+dn+dl+dn )
-                dn = chr(ord(dn)+1)
-            dl = chr(ord(dl)+1)
+                haz(dl + dn + dl + dn)
+                dn = chr(ord(dn) + 1)
+            dl = chr(ord(dl) + 1)
             dn = dn0
 
         self.rect = QtCore.QRectF(posicion.x, posicion.y, posicion.ancho, posicion.alto)
@@ -250,4 +250,3 @@ class MarkerSC(TabBloques.BloqueEspSC):
     def boundingRect(self):
         x = 1
         return QtCore.QRectF(self.rect).adjusted(-x, -x, x * 2, x * 2)
-

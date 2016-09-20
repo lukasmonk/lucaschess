@@ -1,10 +1,10 @@
 from PyQt4 import QtCore, QtGui
 
-import Code.QT.QTUtil as QTUtil
-import Code.QT.InfoBase as InfoBase
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import InfoBase
+from Code.QT import QTUtil
 
 class WAbout(QtGui.QDialog):
     def __init__(self, procesador):
@@ -18,13 +18,13 @@ class WAbout(QtGui.QDialog):
         f = Controles.TipoLetra(puntos=10)  # 0, peso=75 )
 
         cabecera = '<span style="font-size:30pt; font-weight="700"; font-family:arial; color:#2D2B2B">%s</span><br>' % _(
-            "Lucas Chess")
+                "Lucas Chess")
         cabecera += '<span style="font-size:15pt;">%s</span><br>' % _X(_("version %1"), procesador.version)
         cabecera += '<span style="font-size:8pt;color:2D2B2B">%s</span>' % "Lucas Monge"
         cabecera += ' - <a style="font-size:8pt; color:2D2B2B" href="%s">%s</a>' % (procesador.web, procesador.web)
-        cabecera += ' - <a style="font-size:8pt; color:2D2B2B" href="%s">Blog : Fresh news</a><br>' % (procesador.blog, )
+        cabecera += ' - <a style="font-size:8pt; color:2D2B2B" href="%s">Blog : Fresh news</a><br>' % (procesador.blog,)
         cabecera += '%s <a style="font-size:8pt; color:2D2B2B" href="http://www.gnu.org/copyleft/gpl.html"> GPL</a>' % _(
-            "License")
+                "License")
 
         lbIco = Controles.LB(self).ponImagen(Iconos.pmAplicacion64())
         lbTitulo = Controles.LB(self, cabecera)
@@ -39,7 +39,7 @@ class WAbout(QtGui.QDialog):
         for n, (k, titulo) in enumerate(ib.dic.iteritems()):
             txt = ib.texto(k)
             lb = Controles.LB(self, txt)
-            lb.ponFondoN("Ivory")
+            lb.ponFondoN("#F6F3EE")
             lb.ponFuente(f)
             tab.addTab(lb, titulo)
 

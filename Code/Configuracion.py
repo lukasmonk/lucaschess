@@ -1,27 +1,25 @@
 # -*- coding: utf-8 -*-
 
-NIVELBAK = 1
-
-import os
-import codecs
 import operator
+import os
 
 from PyQt4 import QtGui
 
+from Code import BaseConfig
+from Code import CajonDesastre
+from Code import MotoresExternos
+from Code import TrListas
+from Code import Traducir
+from Code import Util
+from Code import VarGen
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.Traducir as Traducir
-import Code.MotoresExternos as MotoresExternos
-import Code.BaseConfig as BaseConfig
 
 if VarGen.isLinux:
     import Code.EnginesLinux as Engines
 else:
     import Code.EnginesWindows as Engines
 
-import Code.Util as Util
-import Code.CajonDesastre as CajonDesastre
-import Code.TrListas as TrListas
+NIVELBAK = 1
 
 LCFILEFOLDER = "./lc.folder"
 LCBASEFOLDER = "./UsrData"
@@ -35,10 +33,8 @@ def activeFolder():
             return x
     return LCBASEFOLDER
 
-
 def isDefaultFolder():
     return activeFolder() == os.path.abspath(LCBASEFOLDER)
-
 
 def changeFolder(nueva):
     if nueva:
@@ -135,9 +131,9 @@ class Configuracion:
         self.rivalInicial = "rocinante" if VarGen.isLinux else "tarrasch"
         self.rival = self.buscaRival(self.rivalInicial)
 
-        self.tutorInicial = "stockfish"
+        self.tutorInicial = "deepfish"
         self.tutor = self.buscaRival(self.tutorInicial)
-        self.tutorMultiPV = 10 # 0: maximo
+        self.tutorMultiPV = 10  # 0: maximo
         self.tutorDifPts = 0
         self.tutorDifPorc = 0
 
@@ -150,12 +146,12 @@ class Configuracion:
 
         self.siNomPiezasEN = False
 
-        self.voice = ""
-
         self.siAplazada = False
 
-        self.grupos = BaseConfig.Grupos(self)
+        self.notbackground = False
+        self.bmi2 = False
 
+        self.grupos = BaseConfig.Grupos(self)
         self.grupos.nuevo("TarraschToy", 0, 1999, 0)
         self.grupos.nuevo("Bikjump", 2000, 2400, 600)
         self.grupos.nuevo("Greko", 2401, 2599, 1800)
@@ -235,6 +231,7 @@ class Configuracion:
         self.ficheroBookGuide = "%s/Standard opening guide.pgo" % self.carpeta  # fix
         self.ficheroAnalisisBookGuide = "%s/analisisBookGuide.pkd" % self.carpeta  # fix
         self.ficheroLearnPGN = "%s/LearnPGN.db" % self.carpeta
+        self.ficheroPlayPGN = "%s/PlayPGN.db" % self.carpeta
         self.ficheroAlbumes = "%s/albumes.pkd" % self.carpeta
         self.ficheroPuntuaciones = "%s/hpoints.pkd" % self.carpeta
 
@@ -244,24 +241,16 @@ class Configuracion:
 
         Util.creaCarpeta(self.dirPersonalTraining)
 
-        self.ficheroDBgames = "%s/%s.lcg" % ( self.carpeta, _("Initial Database Games") )
+        self.ficheroDBgames = "%s/%s.lcg" % (self.carpeta, _("Initial Database Games"))
 
-        self.ficheroDBgamesFEN = "%s/%s.lcf" % ( self.carpeta, _("Positions database") )
+        self.ficheroDBgamesFEN = "%s/%s.lcf" % (self.carpeta, _("Positions Database"))
 
         self.carpetaSTS = "%s/sts" % self.carpeta
 
-    def setVoice(self):
-        if self.voice:
-            self.folderVoice = os.path.join( self.carpeta, "Voice", self.voice )
-            self.folderVoiceWavs = os.path.join( self.folderVoice, "wavs" )
-            self.folderVoiceHMM = os.path.join( self.folderVoice, "hmm" )
-            self.folderVoiceLM = os.path.join( self.folderVoice, "lm" )
-            if not os.path.isdir(self.folderVoice):
-                os.makedirs(self.folderVoice)
+        self.carpetaScanners = "%s/%s" % (self.carpeta, "scanners")
+        Util.creaCarpeta(self.carpetaScanners)
 
-            if not os.path.isdir(self.folderVoiceWavs):
-                os.makedirs(self.folderVoiceWavs)
-            self.ficheroVoice = "%s/trainingvoices.pkd" % self.folderVoice
+        self.ficheroExpeditions = "%s/Expeditions.db" % self.carpeta
 
     def compruebaBMT(self):
         if not Util.existeFichero(self.ficheroBMT):
@@ -354,7 +343,7 @@ class Configuracion:
         listaMotoresExt.leer()
         for motor in listaMotoresExt.liMotores:
             if motor.multiPV > 10:
-                li.append(( motor.alias, motor.alias + " *" ))
+                li.append((motor.alias, motor.alias + " *"))
         for clave, cm in self.dicRivales.iteritems():
             if cm.puedeSerTutor():
                 li.append((clave, cm.nombre))
@@ -366,19 +355,19 @@ class Configuracion:
         li = []
         for clave, cm in self.dicRivales.iteritems():
             li.append((cm.nombre, clave))
+        li.sort(key=lambda x:x[0])
         return li
 
-    def comboMotoresCompleto(self, siOrdenar=True):
+    def comboMotoresCompleto(self):
         listaMotoresExt = MotoresExternos.ListaMotoresExternos(self.ficheroMExternos)
         listaMotoresExt.leer()
         liMotoresExt = []
         for motor in listaMotoresExt.liMotores:
-            liMotoresExt.append(( motor.alias + "*", "*" + motor.alias ))
+            liMotoresExt.append((motor.alias + "*", "*" + motor.alias))
 
         li = self.comboMotores()
         li.extend(liMotoresExt)
-        if siOrdenar:
-            li = sorted(li, key=operator.itemgetter(0))
+        li = sorted(li, key=operator.itemgetter(0))
         return li
 
     def comboMotoresMultiPV10(self, minimo=10):  # %#
@@ -387,7 +376,7 @@ class Configuracion:
         liMotores = []
         for motor in listaMotoresExt.liMotores:
             if motor.multiPV >= minimo:
-                liMotores.append(( motor.alias + "*", "*" + motor.alias ))
+                liMotores.append((motor.alias + "*", "*" + motor.alias))
 
         for clave, cm in self.dicRivales.iteritems():
             if cm.multiPV >= minimo:
@@ -401,7 +390,7 @@ class Configuracion:
         listaMotoresExt = MotoresExternos.ListaMotoresExternos(self.ficheroMExternos)
         listaMotoresExt.leer()
         for motor in listaMotoresExt.liMotores:
-            li.append(( "*" + motor.alias, motor.alias + " *" ))
+            li.append(("*" + motor.alias, motor.alias + " *"))
         for clave, cm in self.dicRivales.iteritems():
             li.append((clave, cm.nombre))
         li = sorted(li, key=operator.itemgetter(1))
@@ -509,7 +498,8 @@ class Configuracion:
 
         dic["CENTIPAWNS"] = self.centipawns
 
-        dic["VOICE"] = self.voice
+        dic["NOTBACKGROUND"] = self.notbackground
+        dic["BMI2"] = self.bmi2
 
         for clave, rival in self.dicRivales.iteritems():
             dic["RIVAL_%s" % clave] = rival.graba()
@@ -624,7 +614,10 @@ class Configuracion:
 
                 self.centipawns = dg("CENTIPAWNS", self.centipawns)
 
-                self.voice = dg("VOICE", self.voice)
+                self.notbackground = dg("NOTBACKGROUND", self.notbackground)
+                self.bmi2 = dg("BMI2", self.bmi2)
+                if self.bmi2 and not Util.is64Windows():
+                    self.bmi2 = False
 
                 for k in dic.keys():
                     if k.startswith("RIVAL_"):
@@ -659,8 +652,6 @@ class Configuracion:
         self.releeTRA()
 
         TrListas.ponPiecesLNG(self.siNomPiezasEN or self.traductor == "en")
-
-        self.setVoice()
 
     def releeTRA(self):
         Traducir.install(self.traductor)
@@ -707,12 +698,8 @@ class Configuracion:
         for uno in Util.listdir(dlang):
             fini = os.path.join(dlang, uno, "lang.ini")
             if os.path.isfile(fini):
-                try:
-                    dic = Util.iniBase8dic(fini)
-                    if "NAME" in dic:
-                        li.append((uno, dic["NAME"], dic.get( "%", "100")))
-                except:
-                    pass
+                dic = Util.iniBase8dic(fini)
+                li.append((uno, dic["NAME"], dic["%"], dic["AUTHOR"]))
         li = sorted(li, key=lambda lng: lng[0])
         return li
 
@@ -730,13 +717,13 @@ class Configuracion:
     def listaMotores(self):
         li = []
         for k, v in self.dicRivales.iteritems():
-            li.append(( v.nombre, v.autor, v.url ))
+            li.append((v.nombre, v.autor, v.url))
         li = sorted(li, key=operator.itemgetter(0))
         return li
 
     def listaMotoresCompleta(self):
         li = self.listaMotores()
-        li.append(( "Greko 7.1", "Vladimir Medvedev", "http://greko.110mb.com/index.html"))
+        li.append(("Greko 7.1", "Vladimir Medvedev", "http://greko.110mb.com/index.html"))
         li = sorted(li, key=operator.itemgetter(0))
         return li
 
@@ -766,6 +753,11 @@ class Configuracion:
     def leeConfTableros(self):
         db = Util.DicSQL(self.ficheroConfTableros)
         self.dicConfTableros = db.asDictionary()
+        if "BASE" not in self.dicConfTableros:
+            with open("IntFiles/base.board") as f:
+                db["BASE"] = self.dicConfTableros["BASE"] = f.read()
+        # with open("IntFiles/base.board", "wb") as f:
+        #     f.write(db["BASE"])
         db.close()
 
     def cambiaConfTablero(self, confTablero):
@@ -794,29 +786,5 @@ class Configuracion:
 
         return ct
 
-    def listVoices(self):
-        base = "Voice"
-        li = [x for x in os.listdir(base) if os.path.isdir(os.path.join(base,x))]
-        lista = [(_("Disabled"), "")]
-
-        for cp in li:
-            ini = os.path.join(base,cp,"config.ini")
-            if os.path.isfile(ini):
-                with codecs.open(ini, "r", "utf-8") as f:
-                    for linea in f:
-                        if linea.startswith("VOICE"):
-                            lista.append( (linea.split("=")[1].strip(), cp) )
-        return lista
-
     def dicMotoresFixedElo(self):
         return Engines.dicMotoresFixedElo()
-
-        # ~ if __name__ == "__main__":
-        #~ os.chdir( ".." )
-        #~ conf = Configuracion()
-        #~ prilk( conf.listaMotores() )
-
-        #~ for g in conf.grupos.liGrupos:
-        #~ p rint g.nombre
-        #~ for cm in g.liRivales:
-        # p rint "     ", cm.elo, "-", cm.nombre, "-", cm.autor, "-", cm.url

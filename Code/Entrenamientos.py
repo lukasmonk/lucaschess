@@ -1,38 +1,43 @@
 import os
-import shutil
 import random
+import shutil
 
+from Code import Resistance
+from Code import Gestor60
+from Code import GestorAperturas
+from Code import GestorBooks
+from Code import GestorResistance
+from Code import GestorEntTac
+from Code import GestorTurnOnLights
+from Code import GestorGM
+from Code import GestorMate
+from Code import GestorUnJuego
+from Code import Memoria
+from Code import Partida
+from Code.QT import DatosNueva
+from Code.QT import Iconos
+from Code.QT import PantallaAperturas
+from Code.QT import PantallaBMT
+from Code.QT import PantallaBooks
+from Code.QT import PantallaResistance
+from Code.QT import PantallaDailyTest
+from Code.QT import PantallaEverest
+from Code.QT import PantallaGM
+from Code.QT import PantallaHorses
+from Code.QT import PantallaLearnPGN
+from Code.QT import PantallaPlayPGN
+from Code.QT import PantallaPotencia
+from Code.QT import PantallaPuente
+from Code.QT import PantallaTacticas
+from Code.QT import PantallaVisualiza
+from Code.QT import PantallaTurnOnLights
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Tacticas
+from Code import TrListas
+from Code import Util
+from Code import VarGen
 from Code.Constantes import *
-import Code.VarGen as VarGen
-import Code.Memoria as Memoria
-import Code.Util as Util
-import Code.PGNreader as PGNreader
-import Code.TrListas as TrListas
-import Code.Boxing as Boxing
-import Code.GestorEntTac as GestorEntTac
-import Code.GestorGM as GestorGM
-import Code.Gestor60 as Gestor60
-import Code.GestorMate as GestorMate
-import Code.GestorBooks as GestorBooks
-import Code.GestorAperturas as GestorAperturas
-import Code.GestorBoxing as GestorBoxing
-import Code.Tacticas as Tacticas
-import Code.QT.Iconos as Iconos
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.PantallaGM as PantallaGM
-import Code.QT.PantallaBooks as PantallaBooks
-import Code.QT.DatosNueva as DatosNueva
-import Code.QT.QTVarios as QTVarios
-import Code.QT.PantallaAperturas as PantallaAperturas
-import Code.QT.PantallaDailyTest as PantallaDailyTest
-import Code.QT.PantallaBMT as PantallaBMT
-import Code.QT.PantallaPotencia as PantallaPotencia
-import Code.QT.PantallaPuente as PantallaPuente
-import Code.QT.PantallaBoxing as PantallaBoxing
-import Code.QT.PantallaHorses as PantallaHorses
-import Code.QT.PantallaTacticas as PantallaTacticas
-import Code.QT.PantallaLearnPGN as PantallaLearnPGN
-import Code.QT.PantallaVisualiza as PantallaVisualiza
 
 class TrainingFNS:
     def __init__(self, path, name):
@@ -87,10 +92,10 @@ class TrainingDir:
         for folder in self.folders:
             submenu1 = bmenu.submenu(folder.name, icoDr)
             folder.menu(submenu1, xopcion)
-        for file in self.files:
-            xopcion(bmenu, "ep_%s" % file.path, file.name, icoOp)
+        for xfile in self.files:
+            xopcion(bmenu, "ep_%s" % xfile.path, xfile.name, icoOp)
 
-class Entrenamientos():
+class Entrenamientos:
     def __init__(self, procesador):
         self.procesador = procesador
         self.parent = procesador.pantalla
@@ -110,7 +115,7 @@ class Entrenamientos():
 
         def xopcion(menu, clave, texto, icono, siDeshabilitado=False):
             menu.opcion(clave, texto, icono, siDeshabilitado)
-            dicMenu[clave] = (clave, texto, icono, siDeshabilitado )
+            dicMenu[clave] = (clave, texto, icono, siDeshabilitado)
 
         # Posiciones de entrenamiento --------------------------------------------------------------------------
         self.menuFNS(menu, _("Training positions"), xopcion)
@@ -131,27 +136,17 @@ class Entrenamientos():
         xopcion(menu, "bmt", _("Find best move"), Iconos.BMT())
         menu.separador()
 
-        # Openings ------------------------------------------------------------------------------------------------
-        menu1 = menu.submenu(_("Openings"), Iconos.Aperturas())
-        # # Aperturas --------------------------------------------------------------------------------------------
-        xopcion(menu1, "aperturas", _("Learn openings by repetition"), Iconos.Apertura())
-        menu1.separador()
-        ## Books ------------------------------------------------------------------------------------------------
-        xopcion(menu1, "polyglot", _("Training with a book"), Iconos.Libros())
-
+        # Resistencia ------------------------------------------------------------------------------------------
+        menu1 = menu.submenu(_("Resistance Test"), Iconos.Resistencia())
+        nico = Util.Rondo(Iconos.Verde(), Iconos.Azul(), Iconos.Amarillo(), Iconos.Naranja())
+        xopcion(menu1, "resistance", _("Normal"), nico.otro())
+        xopcion(menu1, "resistancec", _("Blindfold chess"), nico.otro())
+        xopcion(menu1, "resistancep1", _("Hide only our pieces"), nico.otro())
+        xopcion(menu1, "resistancep2", _("Hide only opponent pieces"), nico.otro())
         menu.separador()
 
         # DailyTest ------------------------------------------------------------------------------------------------
         xopcion(menu, "dailytest", _("Your daily test"), Iconos.DailyTest())
-        menu.separador()
-
-        # Resistencia ------------------------------------------------------------------------------------------
-        menu1 = menu.submenu(_("Resistance Test"), Iconos.Resistencia())
-        nico = Util.Rondo(Iconos.Verde(), Iconos.Azul(), Iconos.Amarillo(), Iconos.Naranja())
-        xopcion(menu1, "boxing", _("Normal"), nico.otro())
-        xopcion(menu1, "boxingc", _("Blindfold chess"), nico.otro())
-        xopcion(menu1, "boxingp1", _("Hide only our pieces"), nico.otro())
-        xopcion(menu1, "boxingp2", _("Hide only opponent pieces"), nico.otro())
         menu.separador()
 
         # Tacticas ---------------------------------------------------------------------------------------------
@@ -187,11 +182,59 @@ class Entrenamientos():
 
         menu.separador()
 
-        # Maps ----------------------------------------------------------------------------------------
-        menu1 = menu.submenu(_("Training on a map"), Iconos.Maps())
-        xopcion(menu1, "map_Africa", _("Africa map"), Iconos.Africa())
+        # Openings ------------------------------------------------------------------------------------------------
+        menu1 = menu.submenu(_("Openings"), Iconos.Aperturas())
+        # # Aperturas --------------------------------------------------------------------------------------------
+        xopcion(menu1, "aperturas", _("Learn openings by repetition"), Iconos.Apertura())
         menu1.separador()
-        xopcion(menu1, "map_WorldMap", _("World map"), Iconos.WorldMap())
+        # Books ------------------------------------------------------------------------------------------------
+        xopcion(menu1, "polyglot", _("Training with a book"), Iconos.Libros())
+
+        # Ratings
+        menu.separador()
+        menu1 = menu.submenu(_("Training ratings"), Iconos.Elo())
+        xopcion(menu1, "lucaselo", "%s (%d)" % (_("Lucas-Elo"), self.configuracion.eloNC), Iconos.Elo())
+        menu1.separador()
+        xopcion(menu1, "micelo", "%s (%d)" % (_("Tourney-Elo"), self.configuracion.micheloNC), Iconos.EloTimed())
+        menu1.separador()
+        fics = self.configuracion.ficsNC
+        menuf = menu1.submenu("%s (%d)" % (_("Fics-Elo"), fics), Iconos.Fics())
+        rp = QTVarios.rondoPuntos()
+        for elo in range(900, 2800, 100):
+            if (elo == 900) or (0 <= (elo + 99 - fics) <= 400 or 0 <= (fics - elo) <= 400):
+                xopcion(menuf, "fics%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
+        menu1.separador()
+        fide = self.configuracion.fideNC
+        menuf = menu1.submenu("%s (%d)" % (_("Fide-Elo"), fide), Iconos.Fide())
+        rp = QTVarios.rondoPuntos()
+        for elo in range(1500, 2700, 100):
+            if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
+                xopcion(menuf, "fide%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
+
+        menu.separador()
+
+        # Longs ----------------------------------------------------------------------------------------
+        menu1 = menu.submenu(_("Long-term trainings"), Iconos.Longhaul())
+        # Maps
+        menu2 = menu1.submenu(_("Training on a map"), Iconos.Maps())
+        xopcion(menu2, "map_Africa", _("Africa map"), Iconos.Africa())
+        menu2.separador()
+        xopcion(menu2, "map_WorldMap", _("World map"), Iconos.WorldMap())
+        # Rail
+        menu1.separador()
+        xopcion(menu1, "transsiberian", _("Transsiberian Railway"), Iconos.Train())
+        # Everest
+        menu1.separador()
+        xopcion(menu1, "everest", _("Expeditions to the Everest"), Iconos.Trekking())
+        # TOL
+        menu1.separador()
+        menu2 = menu1.submenu(_("Turn on the lights"), Iconos.TOL())
+        xopcion(menu2, "tol_uned", _("UNED chess school"), Iconos.Uned())
+        menu2.separador()
+        xopcion(menu2, "tol_uwe", _("Uwe Auerswald"), Iconos.Uwe())
+        # Washing
+        menu1.separador()
+        xopcion(menu1, "washing_machine", _("The Washing Machine"), Iconos.WashingMachine())
 
         # Cebras ---------------------------------------------------------------------------------------------------
         menu.separador()
@@ -219,11 +262,11 @@ class Entrenamientos():
 
         menu1.separador()
         self.horsesDef = hd = {
-            1: ( "N", "Alpha", _("Basic test") ),
-            2: ( "p", "Fantasy", _("Four pawns test") ),
-            3: ( "Q", "Pirat", _("Jonathan Levitt test") ),
-            4: ( "n", "Spatial", _("Basic test") + ": a1" ),
-            5: ( "N", "Cburnett", _("Basic test") + ": e4" )
+            1: ("N", "Alpha", _("Basic test")),
+            2: ("p", "Fantasy", _("Four pawns test")),
+            3: ("Q", "Pirat", _("Jonathan Levitt test")),
+            4: ("n", "Spatial", _("Basic test") + ": a1"),
+            5: ("N", "Cburnett", _("Basic test") + ": e4")
         }
         menu2 = menu1.submenu(_("Becoming a knight tamer"), self.procesador.tablero.piezas.icono("N"))
         vicon = VarGen.todasPiezas.icono
@@ -253,31 +296,17 @@ class Entrenamientos():
         xopcion(menu1, "potencia", _("Determine your calculating power"), Iconos.Potencia())
 
         menu1.separador()
-        xopcion(menu1, "learnPGN", _("Learn a game"), Iconos.PGN())
+        menu2 = menu1.submenu(_("Learn a game"), Iconos.School())
+        xopcion(menu2, "learnPGN", _("Memorizing their moves"), Iconos.LearnGame())
+        menu2.separador()
+        xopcion(menu2, "playPGN", _("Playing against"), Iconos.Law())
 
         menu1.separador()
         xopcion(menu1, "visualiza", _("The board at a glance"), Iconos.Gafas())
 
-        # Ratings
-        menu.separador()
-        menu1 = menu.submenu(_("Training ratings"), Iconos.Elo())
-        xopcion(menu1, "lucaselo", "%s (%d)" % (_("Lucas-Elo"), self.configuracion.eloNC), Iconos.Elo())
-        menu1.separador()
-        xopcion(menu1, "micelo", "%s (%d)" % (_("Tourney-Elo"), self.configuracion.micheloNC), Iconos.EloTimed())
-        menu1.separador()
-        fics = self.configuracion.ficsNC
-        menuf = menu1.submenu("%s (%d)" % (_("Fics-Elo"), fics), Iconos.Fics())
-        rp = QTVarios.rondoPuntos()
-        for elo in range(900, 2800, 100):
-            if (elo == 900) or (0 <= (elo + 99 - fics) <= 400 or 0 <= (fics - elo) <= 400):
-                xopcion(menuf, "fics%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
-        menu1.separador()
-        fide = self.configuracion.fideNC
-        menuf = menu1.submenu("%s (%d)" % (_("Fide-Elo"), fide), Iconos.Fide())
-        rp = QTVarios.rondoPuntos()
-        for elo in range(1500, 2700, 100):
-            if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
-                xopcion(menuf, "fide%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
+        # menu2 = menu1.submenu(_("Endings with 3/4 pieces"), Iconos.Puente())
+        # xopcion(menu2, "end_t4-1", "%s %d"%(_("Level"), 1), Iconos.PuntoAzul())
+        # xopcion(menu2, "end_t4-2", "%s %d"%(_("Level"), 2), Iconos.PuntoMagenta())
 
         return menu, dicMenu
 
@@ -322,8 +351,7 @@ class Entrenamientos():
         resp = menu.lanza()
 
         if resp:
-            siStr = type(resp) == type("")
-            if siStr:
+            if type(resp) == str:
                 if resp == "menu_global":
                     self.lanza(False)
 
@@ -339,8 +367,8 @@ class Entrenamientos():
                 elif resp == "polyglot":
                     self.entrenaBooks()
 
-                elif resp.startswith("boxing"):
-                    self.boxing(resp[6:])
+                elif resp.startswith("resistance"):
+                    self.resistance(resp[10:])
 
                 elif resp in ["j60_rival", "j60_jugador"]:
                     self.jugar60(resp == "j60_jugador")
@@ -383,9 +411,8 @@ class Entrenamientos():
                         for x in entreno[:-4].split("/")[1:]:
                             titentreno += dicTraining.get(x, x) + "/"
                         titentreno = titentreno[:-1]
-                    f = PGNreader.openCodec(entreno)
-                    todo = f.read().strip()
-                    f.close()
+                    with Util.OpenCodec(entreno) as f:
+                        todo = f.read().strip()
                     liEntrenamientos = todo.split("\n")
                     nPosiciones = len(liEntrenamientos)
                     um.final()
@@ -400,12 +427,12 @@ class Entrenamientos():
                         if posUltimo is None:
                             posUltimo = 1
                         resp = DatosNueva.numPosicion(self.procesador.pantalla,
-                                                     titentreno, nPosiciones, posUltimo)
+                                                      titentreno, nPosiciones, posUltimo)
                         if resp is None:
                             return
                         pos, tipo, jump = resp
                         db.close()
-                        if tipo.startswith( "r" ):
+                        if tipo.startswith("r"):
                             if tipo == "rk":
                                 random.seed(pos)
                             random.shuffle(liEntrenamientos)
@@ -413,6 +440,9 @@ class Entrenamientos():
 
                 elif resp == "learnPGN":
                     self.learnPGN()
+
+                elif resp == "playPGN":
+                    self.playPGN()
 
                 elif resp == "lucaselo":
                     self.procesador.lucaselo(False)
@@ -429,6 +459,18 @@ class Entrenamientos():
                 elif resp.startswith("map_"):
                     nada, mapa = resp.split("_")
                     self.procesador.trainingMap(mapa)
+
+                elif resp == "transsiberian":
+                    self.procesador.showRoute()
+
+                elif resp == "everest":
+                    self.everest()
+
+                elif resp.startswith("tol_"):
+                    self.turn_on_lights(resp[4:])
+
+                elif resp == "washing_machine":
+                    self.washing_machine()
 
             else:
                 if resp <= -100:
@@ -451,7 +493,6 @@ class Entrenamientos():
             menu.separador()
 
             dmenu = {}
-
             for valor, lista in liMenus:
                 actmenu = menu
                 if len(lista) > 1:
@@ -555,15 +596,57 @@ class Entrenamientos():
     def bmt(self):
         PantallaBMT.pantallaBMT(self.procesador)
 
-    def boxing(self, tipo):
-        boxing = Boxing.Boxing(self.procesador, tipo)
-        resp = PantallaBoxing.pantallaBoxing(self.procesador.pantalla, boxing)
+    def resistance(self, tipo):
+        resistance = Resistance.Resistance(self.procesador, tipo)
+        resp = PantallaResistance.pantallaResistance(self.procesador.pantalla, resistance)
         if resp is not None:
             numEngine, clave = resp
-            self.procesador.gestor = GestorBoxing.GestorBoxing(self.procesador)
-            self.procesador.gestor.inicio(boxing, numEngine, clave)
+            self.procesador.gestor = GestorResistance.GestorResistance(self.procesador)
+            self.procesador.gestor.inicio(resistance, numEngine, clave)
 
     def learnPGN(self):
         w = PantallaLearnPGN.WLearnBase(self.procesador)
         w.exec_()
+
+    def playPGN(self):
+        w = PantallaPlayPGN.WPlayBase(self.procesador)
+        if w.exec_():
+            recno = w.recno
+            if recno is not None:
+                siBlancas = w.siBlancas
+                db = PantallaPlayPGN.PlayPGNs(self.configuracion.ficheroPlayPGN)
+                reg = db.leeRegistro(recno)
+                partidaObj = Partida.Partida()
+                partidaObj.recuperaDeTexto(reg["PARTIDA"])
+                nombreObj = reg.get("WHITE" if siBlancas else "BLACK", _("Player"))
+                self.procesador.gestor = GestorUnJuego.GestorUnJuego(self.procesador)
+                self.procesador.gestor.inicio(recno, partidaObj, nombreObj, siBlancas, db.rotulo(recno))
+                db.close()
+
+    def everest(self):
+        PantallaEverest.everest(self.procesador)
+
+    def turn_on_lights(self, name):
+        if name == "uned":
+            title = _("UNED chess school")
+            folder = "Trainings/Tactics by UNED chess school"
+            icono = Iconos.Uned()
+            li_tam_blocks = (6, 12, 20, 30, 60)
+        elif name == "uwe":
+            title = _("Uwe Auerswald")
+            folder = "Trainings/Tactics by Uwe Auerswald"
+            icono = Iconos.Uwe()
+            li_tam_blocks = (6, 10, 15, 30, 45, 90)
+            li_tam_blocks = (5, 10, 20, 40, 80)
+
+        resp = PantallaTurnOnLights.pantallaTurnOnLigths(self.procesador, name, title, icono, folder, li_tam_blocks)
+        if resp:
+            num_theme, num_block, tol = resp
+            self.procesador.tipoJuego = kJugEntLight
+            self.procesador.estado = kJugando
+            self.procesador.gestor = GestorTurnOnLights.GestorTurnOnLights(self.procesador)
+            self.procesador.gestor.inicio(num_theme, num_block, tol)
+
+    def washing_machine(self):
+        self.procesador.showWashing()
 

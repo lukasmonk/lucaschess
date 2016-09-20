@@ -18,7 +18,7 @@ siempre que la rutina se haya definido en la ventana:
 
 from PyQt4 import QtCore, QtGui
 
-import Code.QT.QTUtil as QTUtil
+from Code.QT import QTUtil
 
 class ControlGrid(QtCore.QAbstractTableModel):
     """
@@ -210,7 +210,7 @@ class Grid(QtGui.QTableView):
     """
 
     def __init__(self, wParent, oColumnas, dicVideo=None, altoFila=20, siSelecFilas=False, siSeleccionMultiple=False,
-                 siLineas=True, siEditable=False, siCabeceraMovible=True, id=None, background="",
+                 siLineas=True, siEditable=False, siCabeceraMovible=True, xid=None, background="",
                  siCabeceraVisible=True, altoCabecera=None):
         """
         @param wParent: ventana propietaria
@@ -223,7 +223,7 @@ class Grid(QtGui.QTableView):
         QtGui.QTableView.__init__(self)
 
         self.wParent = wParent
-        self.id = id
+        self.id = xid
 
         self.oColumnas = oColumnas
         if dicVideo:
@@ -419,6 +419,11 @@ class Grid(QtGui.QTableView):
             ancho += columna.ancho
         return ancho
 
+    def fixMinWidth(self):
+        nAncho = self.anchoColumnas() + 24
+        self.setMinimumWidth(nAncho)
+        return nAncho
+
     def recno(self):
         """
         Devuelve la fila actual.
@@ -472,7 +477,7 @@ class Grid(QtGui.QTableView):
         @return: tupla con ( num fila, objeto columna )
         """
         columna = self.oColumnasR.columna(self.currentIndex().column())
-        return (self.recno(), columna)
+        return self.recno(), columna
 
     def posActualN(self):
         """
@@ -480,7 +485,7 @@ class Grid(QtGui.QTableView):
 
         @return: tupla con ( num fila, num  columna )
         """
-        return (self.recno(), self.currentIndex().column())
+        return self.recno(), self.currentIndex().column()
 
     def tipoLetra(self, nombre="", puntos=8, peso=50, siCursiva=False, siSubrayado=False, siTachado=False, txt=None):
         font = QtGui.QFont()
@@ -488,7 +493,7 @@ class Grid(QtGui.QTableView):
             cursiva = 1 if siCursiva else 0
             subrayado = 1 if siSubrayado else 0
             tachado = 1 if siTachado else 0
-            txt = "%s,%d,-1,5,%d,%d,%d,%d,0,0" % ( nombre, puntos, peso, cursiva, subrayado, tachado )
+            txt = "%s,%d,-1,5,%d,%d,%d,%d,0,0" % (nombre, puntos, peso, cursiva, subrayado, tachado)
         font.fromString(txt)
         self.setFont(font)
 
@@ -497,4 +502,3 @@ class Grid(QtGui.QTableView):
         vh.setResizeMode(QtGui.QHeaderView.Fixed)
         vh.setDefaultSectionSize(altoFila)
         vh.setVisible(False)
-

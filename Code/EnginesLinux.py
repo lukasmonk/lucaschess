@@ -2,8 +2,8 @@
 
 import collections
 
-import Code.BaseConfig as BaseConfig
-import Code.VarGen as VarGen
+from Code import BaseConfig
+from Code import VarGen
 
 def leeRivales():
     dicRivales = collections.OrderedDict()
@@ -153,17 +153,17 @@ def dicMotoresFixedElo():
     d = leeRivales()
     dic = {}
     for nm, desde, hasta in (
-                                ("cheng", 800, 2500),
-                                ("greko", 1600, 2400),
-                                ("discocheck", 1500, 2700),
-                            ):
-        for elo in range(desde, hasta+100, 100):
+            ("cheng", 800, 2500),
+            ("greko", 1600, 2400),
+            ("discocheck", 1500, 2700),
+    ):
+        for elo in range(desde, hasta + 100, 100):
             cm = d[nm].clona()
             if elo not in dic:
                 dic[elo] = []
-            cm.ordenUCI("UCI_LimitStrengh", "true")
             cm.ordenUCI("UCI_Elo", str(elo))
-            cm.clave += " (%d)"%elo
-            cm.nombre += " (%d)"%elo
+            cm.ordenUCI("UCI_LimitStrength", "true")
+            cm.clave += " (%d)" % elo
+            cm.nombre += " (%d)" % elo
             dic[elo].append(cm)
     return dic

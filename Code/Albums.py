@@ -1,14 +1,13 @@
+import atexit
 import collections
 import random
-import atexit
 
-import Code.VarGen as VarGen
-import Code.Books as Books
-import Code.Util as Util
-import Code.XGestorMotor as XGestorMotor
-import Code.XMotorRespuesta as XMotorRespuesta
-import Code.MotorInterno as MotorInterno
-import Code.QT.Iconos as Iconos
+from Code import Books
+from Code.QT import Iconos
+from Code import Util
+from Code import VarGen
+from Code import XGestorMotor
+from Code import XMotorRespuesta
 
 ALBUMSHECHOS = "albumshechos"
 
@@ -21,12 +20,14 @@ class GestorMotorAlbum:
 
         self.partida = gestor.partida
 
-        self.mi = MotorInterno.MotorInterno()
-
         self.nombre = cromo.nombre
 
-        self.xgaia = None
+        self.xirina = None
         self.xsimilar = None
+
+        conf_motor = self.gestor.configuracion.buscaRival("irina")
+        self.xirina = XGestorMotor.GestorMotor(self.gestor.procesador, conf_motor)
+        self.xirina.opciones(None, 1, False)
 
         self.apertura = self.cromo.apertura
         if self.apertura:
@@ -41,9 +42,9 @@ class GestorMotorAlbum:
         atexit.register(self.cerrar)
 
     def cerrar(self):
-        if self.xgaia:
-            self.xgaia.terminar()
-            self.xgaia = None
+        if self.xirina:
+            self.xirina.terminar()
+            self.xirina = None
         if self.xsimilar:
             self.xsimilar.terminar()
             self.xsimilar = None
@@ -75,35 +76,28 @@ class GestorMotorAlbum:
             return self.juega_esquivo(fen)
         bola -= self.cromo.esquivo
         if bola <= self.cromo.bien:
-            return self.juega_gaia(fen)
+            return self.juega_irina(fen)
         else:
             return self.juega_similar(fen)
 
     def juega_aleatorio(self, fen):
-        pv = self.mi.mp1(fen)
-        mrm = XMotorRespuesta.MRespuestaMotor("interno", "w" in fen)
-        mrm.dispatch("bestmove " + pv, None, None)
-        return mrm.liMultiPV[0]
+        self.xirina.set_option("Personality", "Random")
+        return self.run_irina(fen)
 
     def juega_esquivo(self, fen):
-        pv = self.mi.mp2_1(fen)
-        mrm = XMotorRespuesta.MRespuestaMotor("interno", "w" in fen)
-        mrm.dispatch("bestmove " + pv, None, None)
-        return mrm.liMultiPV[0]
+        self.xirina.set_option("Personality", "Advance")
+        return self.run_irina(fen)
 
     def juega_captura(self, fen):
-        pv = self.mi.mp2(fen)
-        mrm = XMotorRespuesta.MRespuestaMotor("interno", "w" in fen)
-        mrm.dispatch("bestmove " + pv, None, None)
-        return mrm.liMultiPV[0]
+        self.xirina.set_option("Personality", "Capture")
+        return self.run_irina(fen)
 
-    def juega_gaia(self, fen):
-        if self.xgaia is None:
-            conf_motor = self.gestor.configuracion.buscaRival("gaia")
-            self.xgaia = XGestorMotor.GestorMotor(self.gestor.procesador, conf_motor)
-            self.xgaia.opciones(None, 1, False)
+    def juega_irina(self, fen):
+        self.xirina.set_option("Personality", "Irina")
+        return self.run_irina(fen)
 
-        mrm = self.xgaia.control(fen, 1)
+    def run_irina(self, fen):
+        mrm = self.xirina.control(fen, 1)
         mrm.partida = self.partida
         return mrm.mejorMov()
 
@@ -164,20 +158,20 @@ class Album:
     def __len__(self):
         return len(self.liCromos)
 
-    def getCromo(self, pos):
+    def get_cromo(self, pos):
         return self.liCromos[pos]
 
-    def nuevoCromo(self, cromo):
+    def new_cromo(self, cromo):
         cromo.siBlancas = len(self.liCromos) % 2 == 0
         self.liCromos.append(cromo)
 
-    def getDB(self, key):
+    def get_db(self, key):
         db = Util.DicSQL(self.ficheroDB)
         resp = db[key]
         db.close()
         return resp
 
-    def putDB(self, key, value):
+    def put_db(self, key, value):
         db = Util.DicSQL(self.ficheroDB)
         db[key] = value
         db.close()
@@ -186,36 +180,36 @@ class Album:
         dic = collections.OrderedDict()
         for cromo in self.liCromos:
             dic[cromo.clave] = cromo.hecho
-        self.putDB(self.claveDB, dic)
+        self.put_db(self.claveDB, dic)
 
-    def compruebaTerminado(self):
+    def test_finished(self):
         for cromo in self.liCromos:
             if not cromo.hecho:
                 return False
-        dic = self.getDB(ALBUMSHECHOS)
+        dic = self.get_db(ALBUMSHECHOS)
         if not dic:
             dic = {}
         dic[self.claveDB] = True
-        self.putDB(ALBUMSHECHOS, dic)
+        self.put_db(ALBUMSHECHOS, dic)
         return True
 
     def reset(self):
-        self.putDB(self.claveDB, None)
+        self.put_db(self.claveDB, None)
 
-class Albumes():
-    def __init__(self, preClave):
+class Albumes:
+    def __init__(self, pre_clave):
         self.ficheroDB = VarGen.configuracion.ficheroAlbumes
-        self.preClave = preClave
-        self.liGeneralCromos = self.leeCSV()
+        self.preClave = pre_clave
+        self.liGeneralCromos = self.read_csv()
         self.dicAlbumes = self.configura()
 
-    def leeCSV(self):
-        pass  # Para que no de error el corrector
+    def read_csv(self):
+        return []
 
     def configura(self):
-        pass  # Para que no de error el corrector
+        return {}
 
-    def creaAlbum(self, alias):
+    def create_album(self, alias):
         album = Album(self.preClave + "_" + alias, _F(alias), Iconos.icono(alias))
 
         for nivel, cuantos in enumerate(self.dicAlbumes[alias]):
@@ -228,18 +222,18 @@ class Albumes():
                     cromo.pos = pos
                     cromo.siBlancas = pos % 2 == 0
                     cromo.hecho = False
-                    album.nuevoCromo(cromo)
+                    album.new_cromo(cromo)
         album.guarda()
         return album
 
-    def getAlbum(self, alias):
-        claveDB = self.preClave + "_" + alias
-        dic = self.getDB(claveDB)
+    def get_album(self, alias):
+        key_db = self.preClave + "_" + alias
+        dic = self.get_db(key_db)
         if dic:
             dig = {}
             for cromo in self.liGeneralCromos:
                 dig[cromo.clave] = cromo
-            album = Album(claveDB, _F(alias), Iconos.icono(alias))
+            album = Album(key_db, _F(alias), Iconos.icono(alias))
             li = []
             pos = 0
             for k, v in dic.iteritems():
@@ -251,41 +245,41 @@ class Albumes():
                 li.append(cromo)
             album.liCromos = li
         else:
-            album = self.creaAlbum(alias)
+            album = self.create_album(alias)
 
         li = self.dicAlbumes.keys()
         for n, k in enumerate(li):
             if k == alias:
                 album.siguiente = li[n + 1] if n < len(li) - 1 else None
                 if album.siguiente:
-                    dicDB = self.getDB(ALBUMSHECHOS)
-                    if dicDB and dicDB.get(self.preClave + "_" + alias):
+                    dic_db = self.get_db(ALBUMSHECHOS)
+                    if dic_db and dic_db.get(self.preClave + "_" + alias):
                         album.siguiente = None  # Para que no avise de que esta hecho
                 break
         return album
 
     def reset(self, alias):
-        self.creaAlbum(alias)
+        self.create_album(alias)
 
-    def getDB(self, key):
+    def get_db(self, key):
         db = Util.DicSQL(self.ficheroDB)
         resp = db[key]
         db.close()
         return resp
 
-    def putDB(self, key, value):
+    def put_db(self, key, value):
         db = Util.DicSQL(self.ficheroDB)
         db[key] = value
         db.close()
 
-    def listaMenu(self):
-        dicDB = self.getDB(ALBUMSHECHOS)
-        if not dicDB:
-            dicDB = {}
+    def list_menu(self):
+        dic_db = self.get_db(ALBUMSHECHOS)
+        if not dic_db:
+            dic_db = {}
         dic = collections.OrderedDict()
         for uno in self.dicAlbumes:
             clave = self.preClave + "_" + uno
-            dic[uno] = dicDB.get(clave, False)
+            dic[uno] = dic_db.get(clave, False)
         return dic
 
 class AlbumesAnimales(Albumes):
@@ -319,7 +313,7 @@ class AlbumesAnimales(Albumes):
         dic["Owl"] = (4, 6, 7, 7, 7, 9)  # 40
         return dic
 
-    def leeCSV(self):
+    def read_csv(self):
         # x = """Animal;Nivel ;Bien;Aleatorio;Captura;Esquivo;Similar;Dif puntos;Aterrizaje;Mate;Engine;Apertura
         # Ant;0;0;100;0;0;0;1000;450;0;t;0
         # Bee;0;1;95;0;0;0;1000;450;0;k;0
@@ -434,16 +428,16 @@ class AlbumesVehicles(Albumes):
 
     def configura(self):
         dic = collections.OrderedDict()
-        dic["TouringMotorcycle"] = ( 4, 0, 0, 0, 0, 0 )  # 4
-        dic["Car"] = ( 3, 2, 2, 1, 0, 0 )  # 8
-        dic["QuadBike"] = ( 3, 3, 3, 3, 0, 0 )  # 12
-        dic["Truck"] = ( 4, 4, 3, 3, 2, 0 )  # 16
-        dic["DieselLocomotiveBoxcar"] = ( 4, 4, 4, 4, 4, 0 )  # 20
-        dic['SubwayTrain'] = ( 4, 5, 5, 4, 4, 2 )  # 24
-        dic["Airplane"] = ( 4, 5, 5, 5, 5, 4 )  # 28
+        dic["TouringMotorcycle"] = (4, 0, 0, 0, 0, 0)  # 4
+        dic["Car"] = (3, 2, 2, 1, 0, 0)  # 8
+        dic["QuadBike"] = (3, 3, 3, 3, 0, 0)  # 12
+        dic["Truck"] = (4, 4, 3, 3, 2, 0)  # 16
+        dic["DieselLocomotiveBoxcar"] = (4, 4, 4, 4, 4, 0)  # 20
+        dic['SubwayTrain'] = (4, 5, 5, 4, 4, 2)  # 24
+        dic["Airplane"] = (4, 5, 5, 5, 5, 4)  # 28
         return dic
 
-    def leeCSV(self):
+    def read_csv(self):
         # x = """Vehicle;Nivel ;Bien;Aleatorio;Captura;Esquivo;Similar;Dif puntos;Aterrizaje;Mate;Engine;Apertura
         # Wheel;0;0;100;0;0;0;1000;450;0;t;0
         # Wheelchair;0;1;95;0;0;0;1000;450;0;k;0
@@ -513,4 +507,3 @@ class AlbumesVehicles(Albumes):
             Cromo("Airplane", _("Airplane"), 5, 99, 0, 0, 10, 26, 300, 150, 1, "k", 999),
         ]
         return li
-

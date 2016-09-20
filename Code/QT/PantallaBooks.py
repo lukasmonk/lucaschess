@@ -3,15 +3,15 @@ import subprocess
 
 from PyQt4 import QtCore, QtGui
 
-import Code.VarGen as VarGen
-import Code.Util as Util
-import Code.Books as Books
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.QTVarios as QTVarios
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.FormLayout as FormLayout
+from Code import Books
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code import Util
+from Code import VarGen
 
 class WBooksCrear(QtGui.QDialog):
     def __init__(self, wParent):
@@ -40,7 +40,7 @@ class WBooksCrear(QtGui.QDialog):
         lbMinGame = Controles.LB(self, _("Minimum number of games") + ":").ponFuente(f)
         self.sbMinGame = Controles.SB(self, 3, 1, 999).tamMaximo(50)
         lbMinScore = Controles.LB(self, _("Minimum score") + ":").ponFuente(f)
-        self.sbMinScore = Controles.SB(self, 0, 0, 999).tamMaximo(50)
+        self.sbMinScore = Controles.SB(self, 0, 0, 100).tamMaximo(50)
         self.chbOnlyWhite = Controles.CHB(self, _("White only"), False).ponFuente(f)
         self.chbOnlyBlack = Controles.CHB(self, _("Black only"), False).ponFuente(f)
         self.chbUniform = Controles.CHB(self, _("Uniform distribution"), False).ponFuente(f)
@@ -56,9 +56,9 @@ class WBooksCrear(QtGui.QDialog):
         ly.controlc(self.chbUniform, 6, 0, 1, 2)
 
         # Toolbar
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None
-        ]
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), "aceptar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None
+                      ]
         tb = Controles.TB(self, liAcciones)
 
         # Layout
@@ -93,9 +93,9 @@ class WBooksCrear(QtGui.QDialog):
 
         # Creamos la linea de ordenes
         if VarGen.isWindows:
-            exe = 'EnginesWindows/polyglot/polyglot.exe'
+            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
         else:
-            exe = 'EnginesLinux/polyglot/polyglot'
+            exe = 'Engines/Linux/_tools/polyglot/polyglot'
         li = [os.path.abspath(exe), 'make-book', "-pgn", fichTemporal, "-bin", self.fichero]
         Util.borraFichero(self.fichero)
 
@@ -149,11 +149,11 @@ def polyglotUnir(owner):
     lista = [(None, None)]
 
     dict1 = {"FICHERO": "", "EXTENSION": "bin", "SISAVE": False}
-    lista.append(( _("File") + " 1 :", dict1 ))
+    lista.append((_("File") + " 1 :", dict1))
     dict2 = {"FICHERO": "", "EXTENSION": "bin", "SISAVE": False}
-    lista.append(( _("File") + " 2 :", dict2 ))
+    lista.append((_("File") + " 2 :", dict2))
     dictr = {"FICHERO": "", "EXTENSION": "bin", "SISAVE": True}
-    lista.append(( _("Book to create") + ":", dictr ))
+    lista.append((_("Book to create") + ":", dictr))
 
     while True:
         resultado = FormLayout.fedit(lista, title=_("Merge two books in one"), parent=owner, anchoMinimo=460,
@@ -184,9 +184,9 @@ def polyglotUnir(owner):
             return
 
         if VarGen.isWindows:
-            exe = 'EnginesWindows/polyglot/polyglot.exe'
+            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
         else:
-            exe = 'EnginesLinux/polyglot/polyglot'
+            exe = 'Engines/Linux/_tools/polyglot/polyglot'
         li = [os.path.abspath(exe), 'merge-book', "-in1", f1, "-in2", f2, "-out", fr]
         try:
             os.remove(fr)
@@ -235,9 +235,9 @@ class WBooks(QtGui.QDialog):
         dic_RJ = dic.get("RJ", False)
 
         # Toolbar
-        liAcciones = [( _("Accept"), Iconos.Aceptar(), "aceptar" ), None,
-                      ( _("Cancel"), Iconos.Cancelar(), "cancelar" ), None,
-        ]
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), "aceptar"), None,
+                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
+                      ]
         tb = Controles.TB(self, liAcciones)
 
         # Color
@@ -275,10 +275,10 @@ class WBooks(QtGui.QDialog):
 
         # Respuesta rival
         li = (
-            (_("Selected by the player"), "su" ),
-            (_("Uniform random"), "au" ),
-            (_("Proportional random"), "ap" ),
-            (_("Always the highest percentage"), "mp" ),
+            (_("Selected by the player"), "su"),
+            (_("Uniform random"), "au"),
+            (_("Proportional random"), "ap"),
+            (_("Always the highest percentage"), "mp"),
         )
         self.cbRR = QTUtil2.comboBoxLB(self, li, dic_RR)
         hbox = Colocacion.H().relleno().control(self.cbRR).relleno()
@@ -374,7 +374,7 @@ def eligeJugadaBooks(pantalla, liJugadas, siBlancas):
         return resp
     else:
         desde, hasta, coronacion, pgn, peso = liJugadas[0]
-        return (desde, hasta, coronacion)
+        return desde, hasta, coronacion
 
 def saltaJugadaBooks(gestor, liJugadas, jg):
     siBlancas = jg.posicionBase.siBlancas

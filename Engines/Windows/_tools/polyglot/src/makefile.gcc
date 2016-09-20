@@ -1,0 +1,27 @@
+# Makefile for use with gnu tools
+# > make -f makefile.gcc
+
+CC = g++
+CFLAGS = -Wall -c -D "NDEBUG" -fexpensive-optimizations -O3
+LFLAGS = -lm -s
+
+# Disable affinity use?  (Needed for Win95 support)
+#CFLAGS += -D "NO_AFFINITY"
+
+EXE = polyglot
+
+OBJS = adapter.o attack.o board.o book.o book_make.o \
+       book_merge.o colour.o engine.o epd.o fen.o game.o \
+       hash.o io.o line.o list.o main.o move.o move_do.o \
+       move_gen.o move_legal.o option.o parse.o pgn.o \
+       piece.o posix.o random.o san.o search.o square.o \
+       uci.o uci_options.o util.o
+       
+$(EXE): $(OBJS)
+	$(CC) $(LFLAGS) $(OBJS) -o $(EXE)
+
+clean:
+	rm -f $(OBJS) $(EXE)
+
+%.o : %.cpp
+	$(CC) $(CFLAGS) $<

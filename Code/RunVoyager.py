@@ -1,45 +1,70 @@
+import os
 import sys
 
+from PIL import Image
 from PyQt4 import QtCore, QtGui
 
-import Code.Util as Util
-import Code.VarGen as VarGen
-import Code.Configuracion as Configuracion
-import Code.ControlPosicion as ControlPosicion
-import Code.Partida as Partida
-import Code.Jugada as Jugada
-import Code.QT.Piezas as Piezas
-import Code.Voice as Voice
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.Colocacion as Colocacion
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.Tablero as Tablero
-import Code.QT.Columnas as Columnas
-import Code.QT.Grid as Grid
-import Code.QT.Delegados as Delegados
+from Code import Configuracion
+from Code import ControlPosicion
+from Code import Jugada
+from Code import Partida
+from Code.QT import Colocacion
+from Code.QT import Columnas
+from Code.QT import Controles
+from Code.QT import Delegados
+from Code.QT import FormLayout
+from Code.QT import Grid
+from Code.QT import Iconos
+from Code.QT import Piezas
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Tablero
+from Code import RunScanner
+from Code import Util
+from Code import VarGen
+from Code import XRun
 
-MODO_POSICION, MODO_PARTIDA=range(2)
+MODO_POSICION, MODO_PARTIDA = range(2)
+
+def hamming_distance(string, other_string):
+    # Adaptation from https://github.com/bunchesofdonald/photohash, MIT license
+    """ Computes the hamming distance between two strings. """
+    return sum(map(lambda x: 0 if x[0] == x[1] else 1, zip(string, other_string)))
+
+def average_hash(img, hash_size=8):
+    # Adaptation from https://github.com/bunchesofdonald/photohash, MIT license
+    """ Computes the average hash of the given image. """
+    # Open the image, resize it and convert it to black & white.
+    image = img.resize((hash_size, hash_size), Image.ANTIALIAS).convert('L')
+    pixels = list(image.getdata())
+
+    avg = sum(pixels) / len(pixels)
+
+    # Compute the hash based on each pixels value compared to the average.
+    bits = "".join(map(lambda pixel: '1' if pixel > avg else '0', pixels))
+    hashformat = "0{hashlength}x".format(hashlength=hash_size ** 2 // 4)
+    return int(bits, 2).__format__(hashformat)
 
 class WPosicion(QtGui.QWidget):
     def __init__(self, wparent, cpu):
         self.cpu = cpu
         self.posicion = cpu.partida.iniPosicion
-        configuracion = cpu.configuracion
+        self.configuracion = configuracion = cpu.configuracion
+
+        self.is_game = cpu.is_game
 
         self.wparent = wparent
 
         QtGui.QWidget.__init__(self, wparent)
 
         liAcciones = (
-                ( _("Save"), Iconos.GrabarComo(), self.save ), None,
-                ( _("Cancel"), Iconos.Cancelar(), self.cancelar ), None,
-                ( _("Start position"), Iconos.Inicio(), self.inicial ), None,
-                ( _("Clear board"), Iconos.Borrar(), self.limpiaTablero ),
-                ( _("Paste FEN position"), Iconos.Pegar16(), self.pegar ),
-                ( _("Copy FEN position"), Iconos.Copiar(), self.copiar ),
-                ( _("Active voice"), Iconos.S_Microfono(), self.wparent.voice_active ),
-                ( _("Deactive voice"), Iconos.X_Microfono(), self.wparent.voice_deactive ),
+            (_("Save"), Iconos.GrabarComo(), self.save), None,
+            (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+            (_("Start position"), Iconos.Inicio(), self.inicial), None,
+            (_("Clear board"), Iconos.Borrar(), self.limpiaTablero),
+            (_("Paste FEN position"), Iconos.Pegar16(), self.pegar),
+            (_("Copy FEN position"), Iconos.Copiar(), self.copiar),
+            (_("Scanner"), Iconos.Scanner(), self.scanner),
         )
 
         self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=20)
@@ -54,8 +79,11 @@ class WPosicion(QtGui.QWidget):
         self.tablero.ponDispatchDrop(self.dispatchDrop)
         self.tablero.baseCasillasSC.setAcceptDrops(True)
 
-        self.rbWhite = Controles.RB(self, _("White"))
-        self.rbBlack = Controles.RB(self, _("Black"))
+        dragDropWB = QTVarios.ListaPiezas(self, "P,N,B,R,Q,K", self.tablero, margen=0)
+        dragDropBA = QTVarios.ListaPiezas(self, "k,q,r,b,n,p", self.tablero, margen=0)
+
+        self.rbWhite = Controles.RB(self, _("White"), rutina=self.cambiaColor)
+        self.rbBlack = Controles.RB(self, _("Black"), rutina=self.cambiaColor)
 
         self.cbWoo = Controles.CHB(self, _("White") + " O-O", True)
         self.cbWooo = Controles.CHB(self, _("White") + " O-O-O", True)
@@ -66,13 +94,33 @@ class WPosicion(QtGui.QWidget):
         self.edEnPassant = Controles.ED(self).controlrx("(-|[a-h][36])").anchoFijo(30)
 
         self.edMovesPawn, lbMovesPawn = QTUtil2.spinBoxLB(self, 0, 0, 999,
-                                                    etiqueta=_("Halfmove clock"),
-                                                    maxTam=50)
+                                                          etiqueta=_("Halfmove clock"),
+                                                          maxTam=50)
 
         self.edFullMoves, lbFullMoves = QTUtil2.spinBoxLB(self, 1, 1, 999, etiqueta=_("Fullmove number"), maxTam=50)
 
+        self.vars_scanner = RunScanner.Scanner_vars(self.configuracion.carpetaScanners)
+
+        self.lb_scanner = Controles.LB(self)
+
+        pb_scanner_deduce = Controles.PB(self, _("Deduce"), self.scanner_deduce, plano=False)
+        self.chb_scanner_flip = Controles.CHB(self, _("Flip the board"), False).capturaCambiado(self, self.scanner_flip)
+        self.pb_scanner_learn = Controles.PB(self, _("Learn"), self.scanner_learn, plano=False)
+        self.pb_scanner_learn_quit = Controles.PB(self, "", self.scanner_learn_quit).ponIcono(Iconos.Menos(), tamIcon=24)
+        self.pb_scanner_learn_quit.ponToolTip(_("Remove last learned")).anchoFijo(24)
+
+        self.sb_scanner_tolerance, lb_scanner_tolerance = QTUtil2.spinBoxLB(self, self.vars_scanner.tolerance, 3, 20,
+                                                                            etiqueta=_("Tolerance"), maxTam=50)
+
+        self.cb_scanner_select, lb_scanner_select = QTUtil2.comboBoxLB(self, [], None, _("OPR"))
+        self.cb_scanner_select.capturaCambiado(self.scanner_change)
+        pb_scanner_more = Controles.PB(self, "", self.scanner_more).ponIcono(Iconos.Mas())
+
+        self.li_scan_pch = []
+        self.is_scan_init = False
+
         # COLOCACION -------------------------------------------------------------------------------------------
-        hbox = Colocacion.H().relleno().control(self.rbWhite).espacio(15).control(self.rbBlack).relleno()
+        hbox = Colocacion.H().control(self.rbWhite).espacio(15).control(self.rbBlack)
         gbColor = Controles.GB(self, _("Next move"), hbox)
 
         ly = Colocacion.G().control(self.cbWoo, 0, 0).control(self.cbBoo, 0, 1)
@@ -85,18 +133,40 @@ class WPosicion(QtGui.QWidget):
         ly.controld(lbFullMoves, 1, 2).control(self.edFullMoves, 1, 3)
         gbOtros = Controles.GB(self, "", ly)
 
-        ly = Colocacion.V().control(self.tb).control(self.tablero)
-        ly.control(gbColor).control(gbEnroques).control(gbOtros)
-        ly.margen(1)
-        self.setLayout(ly)
+        lyT = Colocacion.H().relleno().control(lb_scanner_tolerance).espacio(5).control(self.sb_scanner_tolerance).relleno()
+        lyL = Colocacion.H().control(self.pb_scanner_learn).control(self.pb_scanner_learn_quit)
+        lyS = Colocacion.H().control(lb_scanner_select).control(self.cb_scanner_select).control(pb_scanner_more)
+        ly = Colocacion.V().control(pb_scanner_deduce).control(self.chb_scanner_flip).otro(lyT).otro(lyL).otro(lyS)
+        self.gb_scanner = Controles.GB(self, "", ly)
+
+        lyG = Colocacion.G()
+        lyG.controlc(dragDropBA, 0, 0)
+        lyG.control(self.tablero, 1, 0).control(self.lb_scanner, 1, 1)
+        lyG.controlc(dragDropWB, 2, 0)
+        lyG.controlc(gbColor, 3, 0).controlc(self.gb_scanner, 3, 1, numFilas=2)
+        lyG.controlc(gbEnroques, 4, 0)
+        lyG.controlc(gbOtros, 5, 0)
+
+        layout = Colocacion.V()
+        layout.controlc(self.tb)
+        layout.otro(lyG)
+        layout.margen(1)
+        self.setLayout(layout)
 
         self.ultimaPieza = "P"
         self.piezas = self.tablero.piezas
         self.resetPosicion()
         self.ponCursor()
 
-        self.queueVoice = []
-        self.bufferVoice = ""
+        self.lb_scanner.hide()
+        self.pb_scanner_learn_quit.hide()
+        self.gb_scanner.hide()
+
+    def closeEvent(self, QCloseEvent):
+        self.scanner_write()
+
+    def cambiaColor(self):
+        self.tablero.ponIndicador(self.rbWhite.isChecked())
 
     def save(self):
         self.actPosicion()
@@ -109,11 +179,18 @@ class WPosicion(QtGui.QWidget):
                 sik = True
         if siK and sik:
             self.wparent.setPosicion(self.posicion)
-        self.wparent.ponModo(MODO_PARTIDA)
+        self.scanner_write()
+        if self.is_game:
+            self.wparent.ponModo(MODO_PARTIDA)
+        else:
+            self.wparent.save()
 
     def cancelar(self):
-        self.wparent.ponModo(MODO_PARTIDA)
-        self.voice_deactive()
+        self.scanner_write()
+        if self.is_game:
+            self.wparent.ponModo(MODO_PARTIDA)
+        else:
+            self.wparent.cancelar()
 
     def ponCursor(self):
         cursor = self.piezas.cursor(self.ultimaPieza)
@@ -162,13 +239,13 @@ class WPosicion(QtGui.QWidget):
 
         liOpciones = []
         if not siK:
-            liOpciones.append(( _("King"), "K"))
+            liOpciones.append((_("King"), "K"))
         liOpciones.extend(
-            [( _("Queen"), "Q"), (_("Rook"), "R"), (_("Bishop"), "B"), (_("Knight"), "N"), (_("Pawn"), "P")])
+                [(_("Queen"), "Q"), (_("Rook"), "R"), (_("Bishop"), "B"), (_("Knight"), "N"), (_("Pawn"), "P")])
         if not sik:
-            liOpciones.append(( _("King"), "k"))
+            liOpciones.append((_("King"), "k"))
         liOpciones.extend(
-            [( _("Queen"), "q"), (_("Rook"), "r"), (_("Bishop"), "b"), (_("Knight"), "n"), (_("Pawn"), "p")])
+                [(_("Queen"), "q"), (_("Rook"), "r"), (_("Bishop"), "b"), (_("Knight"), "n"), (_("Pawn"), "p")])
 
         for txt, pieza in liOpciones:
             icono = self.tablero.piezas.icono(pieza)
@@ -220,7 +297,7 @@ class WPosicion(QtGui.QWidget):
         movPeonCap = self.edMovesPawn.value()
 
         enroques = ""
-        for cont, pieza in ( (self.cbWoo, "K" ), (self.cbWooo, "Q" ), (self.cbBoo, "k"), (self.cbBooo, "q") ):
+        for cont, pieza in ((self.cbWoo, "K"), (self.cbWooo, "Q"), (self.cbBoo, "k"), (self.cbBooo, "q")):
             if cont.isChecked():
                 enroques += pieza
         if not enroques:
@@ -297,44 +374,235 @@ class WPosicion(QtGui.QWidget):
         self.edFullMoves.setValue(self.posicion.jugadas)
         self.edMovesPawn.setValue(self.posicion.movPeonCap)
 
-    def setVoice(self):
-        v_a = v_d = False
-        if self.wparent.isVoice:
-            if self.wparent.isVoiceActive:
-                v_d = True
-            else:
-                v_a = True
-        self.tb.setAccionVisible(self.wparent.voice_active, v_a)
-        self.tb.setAccionVisible(self.wparent.voice_deactive, v_d)
+    def scanner(self):
+        fdb = self.configuracion.ficheroTemporal("png")
+        self.wparent.showMinimized()
 
-    def voice(self, lista):
-        li = lista.split(" ")
-        white = self.ultimaPieza.isupper()
-        for w in li:
-            if w in "PNBRQK":
-                self.ultimaPieza = w if white else w.lower()
-            elif w in "abcdefgh":
-                self.bufferVoice = w
-            elif w in "12345678":
-                if self.bufferVoice:
-                    pos = self.bufferVoice + w
-                    self.bufferVoice = ""
-                    self.actPosicion()
-                    self.queueVoice.append( self.posicion.fen() )
-                    if self.casillas[pos]:
-                        self.borraCasilla(pos)
-                    else:
-                        self.repitePieza(pos)
-            elif w == "WHITE":
-                self.ultimaPieza = self.ultimaPieza.upper()
-            elif w == "BLACK":
-                self.ultimaPieza = self.ultimaPieza.lower()
-            elif w == "TAKEBACK":
-                if self.queueVoice:
-                    fen = self.queueVoice[-1]
-                    self.queueVoice = self.queueVoice[:-1]
-                    self.posicion.leeFen(fen)
-                    self.resetPosicion()
+        popen = XRun.run_lucas("-scanner", fdb, self.configuracion.carpetaScanners)
+
+        if not self.is_scan_init:
+            self.scanner_init()
+            self.is_scan_init = True
+
+        popen.wait()
+
+        self.vars_scanner.read()
+        self.vars_scanner.tolerance = self.sb_scanner_tolerance.valor()  # releemos la variable
+
+        if os.path.isfile(fdb):
+            if Util.tamFichero(fdb):
+                self.scanner_read_png(fdb)
+                self.pixmap = QtGui.QPixmap(fdb)
+                tc = self.tablero.anchoCasilla * 8
+                pm = self.pixmap.scaled(tc, tc)
+                self.wparent.showNormal()  # needed to maintain position
+                self.lb_scanner.ponImagen(pm)
+                self.lb_scanner.show()
+                self.gb_scanner.show()
+                self.scanner_deduce()
+        self.wparent.activateWindow()
+        self.wparent.showNormal()
+        self.wparent.setFocus()
+        self.setFocus()
+
+    def scanner_read_png(self, fdb):
+        self.im_scanner = Image.open(fdb)
+        self.scanner_process()
+
+    def scanner_process(self):
+        im = self.im_scanner
+        flipped = self.chb_scanner_flip.isChecked()
+        w, h = im.size
+        tam = w / 8
+        dic = {}
+        dic_color = {}
+        for f in range(8):
+            for c in range(8):
+                if flipped:
+                    fil = chr(49 + f)
+                    col = chr(97 + 7 - c)
+                else:
+                    fil = chr(49 + 7 - f)
+                    col = chr(97 + c)
+                x = c * tam + 2
+                y = f * tam + 2
+                x1 = x + tam - 4
+                y1 = y + tam - 4
+                im_t = im.crop((x, y, x1, y1))
+                pos = "%s%s" % (col, fil)
+                dic[pos] = average_hash(im_t, hash_size=8)
+                dic_color[pos] = (f + c) % 2 == 0
+        self.dicscan_pos_hash = dic
+        self.dic_pos_color = dic_color
+        siBlancasAbajo = self.tablero.siBlancasAbajo
+        if (siBlancasAbajo and flipped) or ((not siBlancasAbajo) and (not flipped)):
+            self.tablero.rotaTablero()
+
+    def scanner_flip(self):
+        self.scanner_process()
+        self.scanner_deduce()
+
+    def scanner_deduce_base(self):
+        tolerance = self.sb_scanner_tolerance.valor()
+        dic = {}
+        for pos, hs in self.dicscan_pos_hash.iteritems():
+            pz = None
+            dt = 99999999
+            cl = self.dic_pos_color[pos]
+            for piece, color, hsp in self.li_scan_pch:
+                if cl == color:
+                    dtp = hamming_distance(hs, hsp)
+                    if dtp < dt:
+                        pz = piece
+                        dt = dtp
+                    elif dtp == dt and piece:
+                        pz = piece
+            if pz and dt <= tolerance:
+                dic[pos] = pz
+        return dic
+
+    def scanner_deduce(self):
+        self.actPosicion()
+        fen = "8/8/8/8/8/8/8/8 w KQkq - 0 1"
+        if not self.posicion.siBlancas:
+            fen = fen.replace("w", "b")
+        self.posicion.leeFen(fen)
+        self.actPosicion()
+        self.resetPosicion()
+        dic = self.scanner_deduce_base()
+        for pos, pz in dic.iteritems():
+            self.ponPieza(pos, pz)
+
+    def scanner_learn(self):
+        cp = ControlPosicion.ControlPosicion()
+        cp.leeFen(self.tablero.fenActual())
+
+        self.n_scan_last_added = len(self.li_scan_pch)
+        dic_deduced = self.scanner_deduce_base()
+
+        for pos, pz_real in cp.casillas.iteritems():
+            if pz_real:
+                pz_deduced = dic_deduced.get(pos)
+                if (not pz_deduced) or (pz_real != pz_deduced):
+                    color = self.dic_pos_color[pos]
+                    hs = self.dicscan_pos_hash[pos]
+                    key = (pz_real, color, hs)
+                    self.li_scan_pch.append(key)
+
+        self.scanner_show_learned()
+
+    def scanner_learn_quit(self):
+        self.li_scan_pch = self.li_scan_pch[:self.n_scan_last_added]
+        self.scanner_show_learned()
+
+    def scanner_more(self):
+        name = ""
+        while True:
+            liGen = []
+
+            config = FormLayout.Editbox(_("Name"), ancho=120)
+            liGen.append((config, name))
+
+            resultado = FormLayout.fedit(liGen, title=_("New scanner"), parent=self, anchoMinimo=200,
+                                         icon=Iconos.Scanner())
+            if resultado:
+                accion, liGen = resultado
+                name = liGen[0].strip()
+                if name:
+                    fich = os.path.join(self.configuracion.carpetaScanners, "%s.scn" % name)
+                    if Util.existeFichero(fich):
+                        QTUtil2.mensError(self, _("This scanner already exists."))
+                        continue
+                    try:
+                        with open(fich, "wb") as f:
+                            f.write("")
+                        self.scanner_reread(name)
+                        return
+                    except:
+                        QTUtil2.mensError(self, _("This name is not valid to create a scanner file."))
+                        continue
+            return
+
+    def scanner_init(self):
+
+        scanner = self.vars_scanner.scanner
+        self.scanner_reread(scanner)
+
+    def scanner_change(self):
+        fich_scanner = self.cb_scanner_select.valor()
+        self.vars_scanner.scanner = os.path.basename(fich_scanner)[:-4]
+        self.scanner_read()
+
+    def scanner_reread(self, label_default):
+        dsc = self.configuracion.carpetaScanners
+        lista = [fich for fich in os.listdir(dsc) if fich.endswith(".scn")]
+        li = [(fich[:-4], os.path.join(dsc, fich)) for fich in lista]
+        fich_default = None
+        if not label_default:
+            if li:
+                label_default, fich_default = li[0]
+
+        for label, fich in li:
+            if label == label_default:
+                fich_default = fich
+
+        self.cb_scanner_select.rehacer(li, fich_default)
+        self.cb_scanner_select.show()
+        self.scanner_read()
+
+    def scanner_read(self):
+        self.li_scan_pch = []
+        self.n_scan_last_save = 0
+        self.n_scan_last_added = 0
+        fich = self.cb_scanner_select.valor()
+        if not fich:
+            return
+        if Util.tamFichero(fich):
+            with open(fich) as f:
+                for linea in f:
+                    self.li_scan_pch.append(eval(linea.strip()))
+        self.n_scan_last_save = len(self.li_scan_pch)
+        self.n_scan_last_added = self.n_scan_last_save
+
+        self.scanner_show_learned()
+
+    def scanner_show_learned(self):
+        self.pb_scanner_learn.ponTexto("%s (%d)" % (_("Learn"), len(self.li_scan_pch)))
+        self.pb_scanner_learn_quit.setVisible(self.n_scan_last_added < len(self.li_scan_pch))
+
+    def scanner_write(self):
+        fich_scanner = self.cb_scanner_select.valor()
+        if not fich_scanner:
+            return
+
+        tam = len(self.li_scan_pch)
+        if tam > self.n_scan_last_save:
+            with open(fich_scanner, "ab") as q:
+                for x in range(self.n_scan_last_save, tam):
+                    q.write(str(self.li_scan_pch[x]).replace(" ", ""))
+                    q.write("\n")
+            self.n_scan_last_save = tam
+            self.n_scan_last_added = tam
+
+        self.vars_scanner.scanner = os.path.basename(fich_scanner)[:-4]
+        self.vars_scanner.tolerance = self.sb_scanner_tolerance.valor()
+        self.vars_scanner.write()
+
+    def keyPressEvent(self, event):
+        k = event.key()
+
+        if k == QtCore.Qt.Key_W:
+            self.actPosicion()
+            fen = self.posicion.fen()
+            fich = "scanner.fns"
+            with open(fich, "ab") as q:
+                q.write(fen + "\n")
+                QTUtil2.mensajeTemporal(self.parent(), _("Saved in %s") % fich, 0.3)
+
+        elif k == QtCore.Qt.Key_D:
+            self.scanner_deduce()
+
+        event.ignore()
 
 class WPGN(QtGui.QWidget):
     def __init__(self, wparent, cpu):
@@ -346,12 +614,11 @@ class WPGN(QtGui.QWidget):
         QtGui.QWidget.__init__(self, wparent)
 
         liAcciones = (
-                ( _("Save"), Iconos.Grabar(), self.save ), None,
-                ( _("Start position"), Iconos.Datos(), self.inicial ), None,
-                ( _("Clear"), Iconos.Borrar(), self.limpia ), None,
-                ( _("Take back"), Iconos.Atras(), self.atras ), None,
-                ( _("Active voice"), Iconos.S_Microfono(), self.wparent.voice_active ),
-                ( _("Deactive voice"), Iconos.X_Microfono(), self.wparent.voice_deactive ),
+            (_("Save"), Iconos.Grabar(), self.save), None,
+            (_("Cancel"), Iconos.Cancelar(), self.wparent.cancelar), None,
+            (_("Start position"), Iconos.Datos(), self.inicial), None,
+            (_("Clear"), Iconos.Borrar(), self.limpia), None,
+            (_("Take back"), Iconos.Atras(), self.atras), None,
         )
 
         self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=20)
@@ -368,15 +635,13 @@ class WPGN(QtGui.QWidget):
         nAnchoColor = (self.tablero.ancho - 35 - 20) / 2
         oColumnas.nueva("BLANCAS", _("White"), nAnchoColor, edicion=Delegados.EtiquetaPGN(True if self.siFigurinesPGN else None))
         oColumnas.nueva("NEGRAS", _("Black"), nAnchoColor, edicion=Delegados.EtiquetaPGN(False if self.siFigurinesPGN else None))
-        self.pgn = Grid.Grid(self, oColumnas, siCabeceraMovible=False,siSelecFilas=True)
+        self.pgn = Grid.Grid(self, oColumnas, siCabeceraMovible=False, siSelecFilas=True)
         self.pgn.setMinimumWidth(self.tablero.ancho)
 
         ly = Colocacion.V().control(self.tb).control(self.tablero)
         ly.control(self.pgn)
         ly.margen(1)
         self.setLayout(ly)
-
-        self.liVoice = []
 
         self.tablero.ponPosicion(self.partida.ultPosicion)
         self.siguienteJugada()
@@ -394,7 +659,7 @@ class WPGN(QtGui.QWidget):
         n = self.partida.numJugadas()
         if n:
             self.partida.liJugadas = self.partida.liJugadas[:-1]
-            jg = self.partida.jugada(n-2)
+            jg = self.partida.jugada(n - 2)
             if jg:
                 self.partida.ultPosicion = jg.posicion
                 self.tablero.ponPosicion(jg.posicion)
@@ -408,7 +673,7 @@ class WPGN(QtGui.QWidget):
         self.wparent.ponModo(MODO_POSICION)
 
     def siguienteJugada(self):
-        self.tb.setAccionVisible(self.inicial,self.partida.numJugadas() == 0)
+        self.tb.setAccionVisible(self.inicial, self.partida.numJugadas() == 0)
         if self.partida.siTerminada():
             self.tablero.desactivaTodas()
             return
@@ -425,8 +690,7 @@ class WPGN(QtGui.QWidget):
         siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
 
         if siBien:
-            self.partida.liJugadas.append(jg)
-            self.partida.ultPosicion = jg.posicion
+            self.partida.append_jg(jg)
             if self.partida.siTerminada():
                 jg.siJaqueMate = jg.siJaque
                 jg.siAhogado = not jg.siJaque
@@ -449,16 +713,16 @@ class WPGN(QtGui.QWidget):
         n = self.partida.numJugadas()
         if not n:
             return 0
-        if  self.partida.siEmpiezaConNegras:
+        if self.partida.siEmpiezaConNegras:
             n += 1
-        if n%2:
-            n+= 1
-        return n//2
+        if n % 2:
+            n += 1
+        return n // 2
 
     def gridDato(self, grid, fila, oColumna):
         col = oColumna.clave
         if col == "NUMERO":
-            return str(self.partida.iniPosicion.jugadas+fila)
+            return str(self.partida.iniPosicion.jugadas + fila)
 
         siIniBlack = self.partida.siEmpiezaConNegras
         nJug = self.partida.numJugadas()
@@ -466,9 +730,9 @@ class WPGN(QtGui.QWidget):
             w = None if siIniBlack else 0
             b = 0 if siIniBlack else 1
         else:
-            n = fila*2
-            w = n-1 if siIniBlack else n
-            b = w+1
+            n = fila * 2
+            w = n - 1 if siIniBlack else n
+            b = w + 1
         if b >= nJug:
             b = None
 
@@ -480,48 +744,24 @@ class WPGN(QtGui.QWidget):
                 return jg.pgnFigurinesSP()
             else:
                 return jg.pgnSP()
+
         if col == "BLANCAS":
             return xjug(w)
         else:
             return xjug(b)
 
-    def voice(self, txt):
-        if "TAKEBACK" in txt:
-            self.atras()
-            self.liVoice = []
-            return
-        self.liVoice.extend(txt.split(" "))
-        while True:
-            resp = Voice.readPGN(self.liVoice, self.partida.ultPosicion)
-            if resp is None:
-                self.liVoice = []
-                return
-            else:
-                siMove, move, nGastados = resp
-                if siMove:
-                    self.mueveHumano(move.desde(), move.hasta(), move.coronacion())
-                    n = len(self.liVoice)
-                    if nGastados >= n:
-                        self.liVoice = []
-                        return
-                    else:
-                        self.liVoice = self.liVoice[nGastados:]
-                        continue
-                else:
-                    return
-
 class Voyager(QtGui.QDialog):
     def __init__(self, cpu):
         QtGui.QDialog.__init__(self)
 
-        configuracion = cpu.configuracion
         self.cpu = cpu
+        self.is_game = cpu.is_game
         self.partida = cpu.partida
 
-        self.setWindowFlags(QtCore.Qt.Tool | QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
 
-        self.setWindowTitle(_("Voyager 2").replace("2", "1"))
-        self.setWindowIcon(Iconos.Voyager())
+        self.setWindowTitle(_("Voyager 2") if self.is_game else _("Start position"))
+        self.setWindowIcon(Iconos.Voyager() if self.is_game else Iconos.Datos())
 
         self.wPos = WPosicion(self, cpu)
         self.wPGN = WPGN(self, cpu)
@@ -529,22 +769,7 @@ class Voyager(QtGui.QDialog):
         ly = Colocacion.V().control(self.wPos).control(self.wPGN).margen(0)
         self.setLayout(ly)
 
-        if configuracion.voice:
-            self.isVoice = True
-            self.isVoiceActive = True
-            self.voice_active()
-        else:
-            self.isVoice = False
-            self.isVoiceActive = False
-            self.voice_deactive()
-
-        self.ponModo(MODO_PARTIDA)
-
-    def voice(self, txt):
-        if self.modo == MODO_POSICION:
-            self.wPos.voice(txt)
-        else:
-            self.wPGN.voice(txt)
+        self.ponModo(MODO_PARTIDA if self.is_game else MODO_POSICION)
 
     def ponModo(self, modo):
         self.modo = modo
@@ -561,41 +786,21 @@ class Voyager(QtGui.QDialog):
         self.wPGN.limpia()
 
     def save(self):
-        self.cierra(self.partida.guardaEnTexto())
+        self.cierra(self.partida.guardaEnTexto() if self.is_game else self.partida.iniPosicion.fen())
+        self.accept()
+
+    def cancelar(self):
+        self.cierra(None)
         self.accept()
 
     def cierra(self, valor):
-        Voice.runVoice.close()
         self.cpu.setRaw(valor)
 
     def closeEvent(self, event):
         self.cierra(None)
         event.accept()
 
-    def setVoice(self):
-        v_a = v_d = False
-        if self.isVoice:
-            if self.isVoiceActive:
-                v_d = True
-            else:
-                v_a = True
-        self.wPGN.tb.setAccionVisible(self.voice_active, v_a)
-        self.wPGN.tb.setAccionVisible(self.voice_deactive, v_d)
-        self.wPos.tb.setAccionVisible(self.voice_active, v_a)
-        self.wPos.tb.setAccionVisible(self.voice_deactive, v_d)
-
-    def voice_active(self):
-        self.isVoiceActive = True
-        Voice.runVoice.setConf(self, False)
-        Voice.runVoice.start(self.voice)
-        self.setVoice()
-
-    def voice_deactive(self):
-        self.isVoiceActive = False
-        Voice.runVoice.close()
-        self.setVoice()
-
-class CPU():
+class CPU:
     def __init__(self, fdb):
         self.fdb = fdb
         self.getRaw()
@@ -607,18 +812,19 @@ class CPU():
         self.configuracion = Configuracion.Configuracion(db["USER"])
         self.configuracion.lee()
         self.configuracion.leeConfTableros()
-        self.partida = Partida.Partida()
-        txt = db["PARTIDA"]
-        if txt:
-            self.partida.recuperaDeTexto(txt)
-        # posicion = ControlPosicion.ControlPosicion()
-        # posicion.leeFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 5")
-        # self.partida = Partida.Partida(posicion)
+        self.is_game = db["MODO_PARTIDA"]
+        if self.is_game:
+            self.partida = Partida.Partida()
+            txt = db["PARTIDA"]
+            if txt:
+                self.partida.recuperaDeTexto(txt)
+        else:
+            self.partida = Partida.Partida(fen=db["FEN"])
         db.close()
 
-    def setRaw(self, txtpartida):
+    def setRaw(self, txt):
         db = Util.DicRaw(self.fdb)
-        db["TXTGAME"] = txtpartida
+        db["RESULT"] = txt
         db.close()
 
     def run(self):

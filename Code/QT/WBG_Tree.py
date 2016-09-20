@@ -2,16 +2,16 @@ import collections
 
 from PyQt4 import QtGui, QtCore
 
+from Code.QT import Controles
+from Code.QT import FormLayout
+from Code.QT import Iconos
+from Code.QT import PantallaColores
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import WBG_Comun
+from Code import TrListas
 from Code.Constantes import *
-import Code.TrListas as TrListas
-import Code.QT.Iconos as Iconos
-import Code.QT.Controles as Controles
-import Code.QT.QTVarios as QTVarios
-import Code.QT.QTUtil as QTUtil
-import Code.QT.QTUtil2 as QTUtil2
-import Code.QT.FormLayout as FormLayout
-import Code.QT.WBG_Comun as WBG_Comun
-import Code.QT.PantallaColores as PantallaColores
 
 SIN_VALORACION, MUY_MALO, MALO, BUENO, MUY_BUENO, INTERESANTE, DUDOSA = (0, 4, 2, 1, 3, 5, 6)
 V_SIN, V_IGUAL, V_BLANCAS, V_NEGRAS, V_BLANCAS_MAS, V_NEGRAS_MAS, V_BLANCAS_MAS_MAS, V_NEGRAS_MAS_MAS = (
@@ -53,23 +53,23 @@ class TreeMoves(QtGui.QTreeWidget):
 
         dicNAGs = TrListas.dicNAGs()
         self.dicValoracion = collections.OrderedDict()
-        self.dicValoracion[BUENO] = (dicNAGs[1], PantallaColores.nag2ico(1,16))
-        self.dicValoracion[MALO] = (dicNAGs[2], PantallaColores.nag2ico(2,16))
-        self.dicValoracion[MUY_BUENO] = (dicNAGs[3], PantallaColores.nag2ico(3,16))
-        self.dicValoracion[MUY_MALO] = (dicNAGs[4], PantallaColores.nag2ico(4,16))
-        self.dicValoracion[INTERESANTE] = (dicNAGs[5], PantallaColores.nag2ico(5,16))
-        self.dicValoracion[DUDOSA] = (dicNAGs[6], PantallaColores.nag2ico(6,16))
-        self.dicValoracion[SIN_VALORACION] = (_("No rating"), self.noIcon )
+        self.dicValoracion[BUENO] = (dicNAGs[1], PantallaColores.nag2ico(1, 16))
+        self.dicValoracion[MALO] = (dicNAGs[2], PantallaColores.nag2ico(2, 16))
+        self.dicValoracion[MUY_BUENO] = (dicNAGs[3], PantallaColores.nag2ico(3, 16))
+        self.dicValoracion[MUY_MALO] = (dicNAGs[4], PantallaColores.nag2ico(4, 16))
+        self.dicValoracion[INTERESANTE] = (dicNAGs[5], PantallaColores.nag2ico(5, 16))
+        self.dicValoracion[DUDOSA] = (dicNAGs[6], PantallaColores.nag2ico(6, 16))
+        self.dicValoracion[SIN_VALORACION] = (_("No rating"), self.noIcon)
 
         self.dicVentaja = collections.OrderedDict()
-        self.dicVentaja[V_SIN] = ( _("Undefined"), self.noIcon )
-        self.dicVentaja[V_IGUAL] = ( dicNAGs[11], Iconos.V_Blancas_Igual_Negras() )
-        self.dicVentaja[V_BLANCAS] = ( dicNAGs[14], Iconos.V_Blancas() )
-        self.dicVentaja[V_BLANCAS_MAS] = ( dicNAGs[16], Iconos.V_Blancas_Mas() )
-        self.dicVentaja[V_BLANCAS_MAS_MAS] = ( dicNAGs[18], Iconos.V_Blancas_Mas_Mas() )
-        self.dicVentaja[V_NEGRAS] = ( dicNAGs[15], Iconos.V_Negras() )
-        self.dicVentaja[V_NEGRAS_MAS] = ( dicNAGs[17], Iconos.V_Negras_Mas() )
-        self.dicVentaja[V_NEGRAS_MAS_MAS] = ( dicNAGs[19], Iconos.V_Negras_Mas_Mas() )
+        self.dicVentaja[V_SIN] = (_("Undefined"), self.noIcon)
+        self.dicVentaja[V_IGUAL] = (dicNAGs[11], Iconos.V_Blancas_Igual_Negras())
+        self.dicVentaja[V_BLANCAS] = (dicNAGs[14], Iconos.V_Blancas())
+        self.dicVentaja[V_BLANCAS_MAS] = (dicNAGs[16], Iconos.V_Blancas_Mas())
+        self.dicVentaja[V_BLANCAS_MAS_MAS] = (dicNAGs[18], Iconos.V_Blancas_Mas_Mas())
+        self.dicVentaja[V_NEGRAS] = (dicNAGs[15], Iconos.V_Negras())
+        self.dicVentaja[V_NEGRAS_MAS] = (dicNAGs[17], Iconos.V_Negras_Mas())
+        self.dicVentaja[V_NEGRAS_MAS_MAS] = (dicNAGs[19], Iconos.V_Negras_Mas_Mas())
 
     def dobleClick(self, item, col):
         move = self.dicItems.get(str(item), None)
@@ -340,11 +340,11 @@ class TreeMoves(QtGui.QTreeWidget):
         txt = comment if siComment else allpgn
 
         liGen = [(None, None)]
-        liGen.append(( _("Name") + ":", txt ))
+        liGen.append((_("Name") + ":", txt))
 
-        liGen.append(( _("Copy PGN") + ":", False ))
+        liGen.append((_("Copy PGN") + ":", False))
         if siComment:
-            liGen.append(( _("Copy comment") + ":", False ))
+            liGen.append((_("Copy comment") + ":", False))
 
         reg = KRegistro()
         reg.allpgn = allpgn
