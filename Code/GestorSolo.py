@@ -464,6 +464,9 @@ class GestorSolo(Gestor.Gestor):
     def reiniciar(self, dic=None):
         if dic is None:
             dic = self.creaDic()
+        if self.xrival:
+            self.xrival.terminar()
+            self.xrival = None
         self.inicio(dic, fichero=self.xfichero, pgn=self.xpgn, jugadaInicial=self.xjugadaInicial,
                     siGrabar=self.siGrabar, siExterno=self.siExterno)
 

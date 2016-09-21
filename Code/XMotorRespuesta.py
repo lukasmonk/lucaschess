@@ -570,6 +570,22 @@ class MRespuestaMotor:
             return self.liMultiPV[0]
         return RespuestaMotor(self.nombre, self.siBlancas)
 
+    def bestmoves(self):
+        li = []
+        if not self.liMultiPV:
+            return li
+        n = len(self.liMultiPV)
+        rm0 = self.liMultiPV[0]
+        li.append(rm0)
+        if n > 1:
+            for n in range(1,n):
+                rm = self.liMultiPV[n]
+                if rm0.puntosABS() == rm.puntosABS():
+                    li.append(rm)
+                else:
+                    break
+        return li
+
     def mejorMovDetectaBlunders(self, fdbg, mindifpuntos, maxmate):
         rm0 = self.liMultiPV[0]
         if maxmate:

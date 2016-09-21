@@ -507,24 +507,15 @@ class GestorRoutesEndings(GestorRoutes):
         else:
             fen = self.partida.ultPosicion.fen()
             pv = jgSel.movimiento().lower()
-            li = self.t4.better_moves(fen, pv)
-            if li:
-                b_wdl, b_dtz = self.t4.wdl_dtz(fen)
-                m_wdl, m_dtz = self.t4.wd_move(fen, pv)
-                ok = True
-                if b_wdl > m_wdl:
-                    QTUtil2.mensajeTemporal(self.pantalla, _("Wrong move"), 2)
-                    self.warnings = self.max_warnings + 1
-                    ok = False
-                elif m_dtz > b_dtz:
-                    QTUtil2.mensajeTemporal(self.pantalla, _("There are better moves"), 2)
-                    self.warnings += 1
-                    ok = False
-                if not ok:
-                    self.ponWarnings()
-                    self.ponPosicion(self.partida.ultPosicion)
-                    self.sigueHumano()
-                    return False
+            b_wdl, b_dtz = self.t4.wdl_dtz(fen)
+            m_wdl, m_dtz = self.t4.wd_move(fen, pv)
+            if b_wdl != m_wdl:
+                QTUtil2.mensajeTemporal(self.pantalla, _("Wrong move"), 2)
+                self.warnings += 1
+                self.ponWarnings()
+                self.ponPosicion(self.partida.ultPosicion)
+                self.sigueHumano()
+                return False
 
         self.movimientosPiezas(jgSel.liMovs)
 
@@ -548,12 +539,15 @@ class GestorRoutesEndings(GestorRoutes):
             liMovs = [(pv[:2], pv[2:4], n == 0) for n, pv in enumerate(li)]
         else:
             fen = self.partida.ultPosicion.fen()
-            li = self.t4.better_moves(fen, None)
+            um = self.unMomento()
+            mrm = self.xanalyzer.analiza(fen)
+            um.final()
+            li = mrm.bestmoves()
             if li:
-                liMovs = [(pv[:2], pv[2:4], True) for pv in li]
+                liMovs = [(rm.desde, rm.hasta, True) for rm in li]
         if liMovs:
             self.tablero.ponFlechasTmp(liMovs)
-            self.warnings += 1
+            self.warnings += self.max_warnings
             self.ponWarnings()
 
     def lineaTerminada(self):

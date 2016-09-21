@@ -12,7 +12,6 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code import Util
-from Code import VarGen
 
 class WJuicio(QTVarios.WDialogo):
     def __init__(self, gestor, xmotor, nombreOP, posicion, mrm, rmOP, rmUsu, analisis, siCompetitivo=None):
