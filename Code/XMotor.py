@@ -29,7 +29,7 @@ PRIORITY_LOW, PRIORITY_VERYLOW   = psutil.BELOW_NORMAL_PRIORITY_CLASS, psutil.ID
 PRIORITY_HIGH, PRIORITY_VERYHIGH = psutil.ABOVE_NORMAL_PRIORITY_CLASS, psutil.HIGH_PRIORITY_CLASS
 
 class Engine(QtCore.QThread):
-    def __init__(self, exe, priority):
+    def __init__(self, exe, priority, args):
         QtCore.QThread.__init__(self)
         self.exe = os.path.abspath(exe)
         self.direxe = os.path.dirname(exe)
@@ -39,6 +39,7 @@ class Engine(QtCore.QThread):
         self.libuffer = []
         self.lastline = ""
         self.starting = True
+        self.args = args if args else []
 
     def cerrar(self):
         self.working = False
@@ -76,7 +77,7 @@ class Engine(QtCore.QThread):
     def run(self):
         self.process = QtCore.QProcess()
         self.process.setWorkingDirectory(self.direxe)
-        self.process.start(self.exe, [], mode=QtCore.QIODevice.ReadWrite)
+        self.process.start(self.exe, self.args, mode=QtCore.QIODevice.ReadWrite)
         self.process.waitForStarted()
         self.pid = self.process.pid()
         if VarGen.isWindows:
@@ -109,13 +110,13 @@ class Engine(QtCore.QThread):
         self.process.close()
 
 class XMotor:
-    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=0, priority=PRIORITY_NORMAL):
+    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=0, priority=PRIORITY_NORMAL, args=[]):
         self.nombre = nombre
 
         self.ponder = False
         self.pondering = False
 
-        self.engine = Engine(exe, priority)
+        self.engine = Engine(exe, priority, args)
         self.engine.start()
         if not self.engine.waitForStarting(3.0):
             self.uci_ok = False

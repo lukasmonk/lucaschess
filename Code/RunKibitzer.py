@@ -180,11 +180,12 @@ class VentanaMultiPV(QtGui.QDialog):
 
         configMotor = self.cpu.configMotor
         exe = configMotor.ejecutable()
+        args = configMotor.argumentos()
         absexe = os.path.abspath(exe)
         direxe = os.path.abspath(os.path.dirname(exe))
 
         self.motor.setWorkingDirectory(direxe)
-        self.motor.start(absexe, [], mode=QtCore.QIODevice.ReadWrite)
+        self.motor.start(absexe, args, mode=QtCore.QIODevice.ReadWrite)
         self.motor.waitForStarted()
         self.connect(self.motor, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
 
@@ -671,9 +672,10 @@ class Ventana(QtGui.QDialog):
 
         configMotor = self.cpu.configMotor
         exe = configMotor.ejecutable()
+        args = configMotor.argumentos()
 
         self.motor.setWorkingDirectory(os.path.abspath(os.path.dirname(exe)))
-        self.motor.start(exe, [], mode=QtCore.QIODevice.Unbuffered | QtCore.QIODevice.ReadWrite)
+        self.motor.start(exe, ags, mode=QtCore.QIODevice.Unbuffered | QtCore.QIODevice.ReadWrite)
         self.motor.waitForStarted()
         self.connect(self.motor, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
 

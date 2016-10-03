@@ -15,6 +15,7 @@ from Code.QT import Iconos
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
+from Code.QT import FormLayout
 from Code import Util
 from Code import VarGen
 
@@ -41,6 +42,7 @@ class WMotores(QTVarios.WDialogo):
             (_("Import"), Iconos.MasDoc(), self.importar), None,
             (_("Up"), Iconos.Arriba(), self.arriba), None,
             (_("Down"), Iconos.Abajo(), self.abajo), None,
+            (_("Command"), Iconos.Terminal(), self.command), None,
         ]
         tb = Controles.TBrutina(self, liAcciones)
 
@@ -86,6 +88,44 @@ class WMotores(QTVarios.WDialogo):
             return me.idInfo.replace("\n", "-")
         elif clave == "ELO":
             return str(me.elo) if me.elo else "-"
+
+    def command(self):
+        separador = FormLayout.separador
+        liGen = [separador]
+        liGen.append(separador)
+        config = FormLayout.Fichero(_("File"), "exe", False)
+        liGen.append((config, ""))
+
+        for num in range(1, 11):
+            liGen.append((_("Argument %d") % num + ":", ""))
+        liGen.append(separador)
+        resultado = FormLayout.fedit(liGen, title=_("Command"), parent=self, anchoMinimo=600, icon=Iconos.Terminal())
+        if resultado:
+            nada, resp = resultado
+            command = resp[0]
+            liArgs = []
+            if not command or not os.path.isfile(command):
+                return
+            for x in range(1, len(resp)):
+                arg = resp[x].strip()
+                if arg:
+                    liArgs.append(arg)
+
+            um = QTUtil2.unMomento(self)
+            me = MotoresExternos.MotorExterno()
+            resp = me.leerUCI(command, liArgs)
+            um.final()
+            if not resp:
+                QTUtil2.mensaje(self, _X(_("The file %1 does not correspond to a UCI engine type."), command))
+                return None
+
+            # Editamos
+            w = WMotor(self, self.listaMotores, me)
+            if w.exec_():
+                self.listaMotores.nuevo(me)
+                self.grid.refresh()
+                self.grid.gobottom(0)
+                self.grabar()
 
     def nuevo(self):
         me = selectEngine(self)

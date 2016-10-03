@@ -160,11 +160,12 @@ class MotorExterno:
             if self.multiPV > self.maxMultiPV:
                 self.multiPV = self.maxMultiPV
 
-    def leerUCI(self, exe):
+    def leerUCI(self, exe, args=[]):
         self.exe = Util.dirRelativo(exe)
+        self.args = args
         self.liOpciones = []
 
-        motor = XMotor.XMotor("-", exe)
+        motor = XMotor.XMotor("-", exe, args=args)
         if motor.uci_ok:
             self.idName = "-"
             self.idAuthor = "-"
@@ -186,6 +187,7 @@ class MotorExterno:
     def save(self):
         dic = {}
         dic["EXE"] = Util.dirRelativo(self.exe)
+        dic["ARGS"] = self.args
         dic["ALIAS"] = self.alias
         dic["IDNAME"] = self.idName
         dic["IDAUTHOR"] = self.idAuthor
@@ -199,6 +201,7 @@ class MotorExterno:
 
     def restore(self, dic):
         self.exe = dic["EXE"]
+        self.args = dic.get("ARGS", [])
         self.alias = dic["ALIAS"]
         self.idName = dic["IDNAME"]
         self.clave = self.idName
@@ -299,6 +302,7 @@ class ConfigMotor(BaseConfig.ConfigMotorBase):
         BaseConfig.ConfigMotorBase.__init__(self, clave, autor, version)
 
         self.exe = motor.exe
+        self.args = getattr(motor, "args", [])
         self.siExterno = True
 
         self.nombre = self.clave
@@ -315,6 +319,9 @@ class ConfigMotor(BaseConfig.ConfigMotorBase):
 
     def ejecutable(self):
         return self.exe
+
+    def argumentos(self):
+        return self.args
 
     def claveReal(self):
         return "*" + self.clave

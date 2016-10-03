@@ -106,6 +106,7 @@ class Engine(MotoresExternos.MotorExterno):
         if resp.startswith("*"):
             me = MotoresExternos.buscaMotor(resp)
             self.exe = Util.dirRelativo(me.exe)
+            self.args = me.args
             self.alias = me.alias
             self.idName = me.idName
             self.clave = me.clave
@@ -118,6 +119,7 @@ class Engine(MotoresExternos.MotorExterno):
         else:
             cm = VarGen.configuracion.buscaRival(resp)
             self.alias = cm.clave
+            self.args = []
             self.idName = cm.nombre
             self.idAuthor = cm.autor
             self.idInfo = ""
@@ -127,7 +129,7 @@ class Engine(MotoresExternos.MotorExterno):
             self.exe = cm.ejecutable()
 
             me = MotoresExternos.MotorExterno()
-            me.leerUCI(self.exe)
+            me.leerUCI(self.exe, self.args)
             self.liOpciones = me.liOpciones
             for op in self.liOpciones:
                 for comando, valor in cm.liUCI:

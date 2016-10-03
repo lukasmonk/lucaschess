@@ -66,8 +66,9 @@ class GestorMotor:
             self.nMultiPV = min(self.nMultiPV, self.confMotor.maxMultiPV)
 
         exe = self.confMotor.ejecutable()
+        args = self.confMotor.argumentos()
         liUCI = self.confMotor.liUCI
-        self.motor = XMotor.XMotor(self.nombre, exe, liUCI, self.nMultiPV, priority=self.priority)
+        self.motor = XMotor.XMotor(self.nombre, exe, liUCI, self.nMultiPV, priority=self.priority, args = args)
         if self.confMotor.siDebug:
             self.motor.siDebug = True
             self.motor.nomDebug = self.confMotor.nomDebug

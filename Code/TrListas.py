@@ -983,7 +983,7 @@ def listSTD():
             (_("Owen defence"), "B00", "e2e4 b7b6", "1. e4 b6", False),
             (_("Paleface attack"), "A45", "d2d4 g8f6 f2f3", "1. d4 Nf6 2. f3", False),
             (_("Petrov's defence"), "C42", "e2e4 e7e5 g1f3 g8f6", "1. e4 e5 2. Nf3 Nf6", True),
-            (_("Petrov three knights game"), "C42", "e2e4 e7e5 g1f3 g8f6 b1c3", "1. e4 e5 2. Nf3 Nf6 3. Nc3", False),
+            (_("Petrov: three knights game"), "C42", "e2e4 e7e5 g1f3 g8f6 b1c3", "1. e4 e5 2. Nf3 Nf6 3. Nc3", False),
             (_("Petrov: Cochrane gambit"), "C42", "e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f7", "1. e4 e5 2. Nf3 Nf6 3. Nxe5 d6 4. Nxf7", False),
             (_("Petrov: Cozio (Lasker) attack"), "C42", "e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 d1e2", "1. e4 e5 2. Nf3 Nf6 3. Nxe5 d6 4. Nf3 Nxe4 5. Qe2", False),
             (_("Petrov: Damiano variation"), "C42", "e2e4 e7e5 g1f3 g8f6 f3e5 f6e4", "1. e4 e5 2. Nf3 Nf6 3. Nxe5 Nxe4", False),

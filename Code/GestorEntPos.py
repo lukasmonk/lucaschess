@@ -625,7 +625,6 @@ class GestorEntPos(Gestor.Gestor):
                     break
 
     def createTactics(self):
-
         nameTactic = os.path.basename(self.entreno)[:-4]
 
         nomDir = os.path.join(self.configuracion.dirPersonalTraining, "Tactics", nameTactic)

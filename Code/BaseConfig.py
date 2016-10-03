@@ -191,6 +191,7 @@ class ConfigMotorBase:
     def __init__(self, clave, autor, version):
         self.clave = clave
         self.autor = autor
+        self.args = []
         self.version = version
         self.path = ""
         self.siUCI = True
@@ -200,6 +201,9 @@ class ConfigMotorBase:
         self.siDebug = False
         self.siExterno = False
         self.path_64 = None
+
+    def argumentos(self):
+        return self.args
 
     def debug(self, txt):
         self.siDebug = True

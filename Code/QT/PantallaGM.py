@@ -602,7 +602,7 @@ def importarGM(ownerGM):
         os.remove(ficht)
     except:
         pass
-    web = "https://9e381514ebe3c322ee1218fc59752291d258e933.googledrive.com/host/0B0D6J3YCrUoubmZGVzhfRjNYdkU"
+    web = "http://www-lucaschess.rhcloud.com/static/GM"
     me = QTUtil2.mensEspera.inicio(ownerGM, _("Reading the list of grandmasters from the web"))
     siError = False
     try:
