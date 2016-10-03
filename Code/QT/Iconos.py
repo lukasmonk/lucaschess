@@ -2260,3 +2260,9 @@ def pmWashingMachine():
 def WashingMachine():
     return QtGui.QIcon(pmWashingMachine())
 
+def pmTerminal():
+    return PM(910751,914295)
+
+def Terminal():
+    return QtGui.QIcon(pmTerminal())
+
