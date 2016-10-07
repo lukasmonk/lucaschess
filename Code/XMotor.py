@@ -377,6 +377,7 @@ class XMotor:
     def close(self):
         if self.pid:
             try:
+                self.engine.close()
                 os.kill(self.pid, signal.SIGTERM)
             except:
                 pass

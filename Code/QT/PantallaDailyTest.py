@@ -266,6 +266,7 @@ class WDailyTest(QTVarios.WDialogo):
     def procesarTB(self):
         accion = self.sender().clave
         if accion in ["abandonar", "terminar", "cancelar"]:
+            self.xtutor.terminar()
             self.guardarVideo()
             self.reject()
         elif accion == "empezar":

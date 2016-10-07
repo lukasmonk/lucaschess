@@ -675,7 +675,7 @@ class Ventana(QtGui.QDialog):
         args = configMotor.argumentos()
 
         self.motor.setWorkingDirectory(os.path.abspath(os.path.dirname(exe)))
-        self.motor.start(exe, ags, mode=QtCore.QIODevice.Unbuffered | QtCore.QIODevice.ReadWrite)
+        self.motor.start(exe, args, mode=QtCore.QIODevice.Unbuffered | QtCore.QIODevice.ReadWrite)
         self.motor.waitForStarted()
         self.connect(self.motor, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
 

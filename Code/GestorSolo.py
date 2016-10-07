@@ -95,7 +95,7 @@ class GestorSolo(Gestor.Gestor):
         self.siJuegaPorMi = True
         self.dicRival = {}
 
-        self.siJuegaMotor = dic.get("SIJUEGAMOTOR", False)
+        self.siJuegaMotor = dic.get("SIJUEGAMOTOR", False) if not self.xrival else True
 
         self.ultimoFichero = dic.get("ULTIMOFICHERO", "")
         self.siCambios = dic.get("SICAMBIOS", False)
@@ -464,9 +464,6 @@ class GestorSolo(Gestor.Gestor):
     def reiniciar(self, dic=None):
         if dic is None:
             dic = self.creaDic()
-        if self.xrival:
-            self.xrival.terminar()
-            self.xrival = None
         self.inicio(dic, fichero=self.xfichero, pgn=self.xpgn, jugadaInicial=self.xjugadaInicial,
                     siGrabar=self.siGrabar, siExterno=self.siExterno)
 
