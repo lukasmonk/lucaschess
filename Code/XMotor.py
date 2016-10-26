@@ -31,6 +31,7 @@ PRIORITY_HIGH, PRIORITY_VERYHIGH = psutil.ABOVE_NORMAL_PRIORITY_CLASS, psutil.HI
 class Engine(QtCore.QThread):
     def __init__(self, exe, priority, args):
         QtCore.QThread.__init__(self)
+        self.pid = None
         self.exe = os.path.abspath(exe)
         self.direxe = os.path.dirname(exe)
         self.priority = priority
@@ -67,12 +68,6 @@ class Engine(QtCore.QThread):
     def close(self):
         self.working = False
         self.wait()
-
-    def waitForStarting(self, max_time):
-        iniTiempo = time.time()
-        while self.starting and (time.time()-iniTiempo) < max_time:
-            self.wait(90)
-        return not self.starting
 
     def run(self):
         self.process = QtCore.QProcess()
@@ -116,23 +111,29 @@ class XMotor:
         self.ponder = False
         self.pondering = False
 
-        self.engine = Engine(exe, priority, args)
-        self.engine.start()
-        if not self.engine.waitForStarting(3.0):
-            self.uci_ok = False
-            self.uci_lines = []
-            self.engine.close()
-            return
-
-        self.pid = self.engine.pid
-
-        self.lockAC = True
+        self.is_white = True
 
         self.guiDispatch = None
         self.ultDispatch = 0
         self.minDispatch = 1.0  # segundos
         self.whoDispatch = nombre
-        self.is_white = True
+        self.uci_ok = False
+        self.pid = None
+
+        if not os.path.isfile(exe):
+            return
+
+        self.engine = Engine(exe, priority, args)
+        self.engine.start()
+
+        time.sleep(0.01)
+        n = 100
+        while self.engine.starting and n:
+            time.sleep(0.1 if n > 50 else 0.3)
+            n-= 1
+
+        self.lockAC = True
+        self.pid = self.engine.pid
 
         self.order_uci()
 

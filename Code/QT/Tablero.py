@@ -561,11 +561,11 @@ class Tablero(QtGui.QGraphicsView):
         # menu.separador()
 
         if not self.siTableroDirector():
-            menu.opcion("director", _("Director") + " [D]", Iconos.Director())
+            menu.opcion("director", _("Director") + " [%s-D]" % _("ALT"), Iconos.Director())
             menu.separador()
 
         if self.siPosibleRotarTablero:
-            menu.opcion("girar", _("Flip the board") + " [F]", Iconos.JS_Rotacion())
+            menu.opcion("girar", _("Flip the board") + " [%s-F]" % _("ALT"), Iconos.JS_Rotacion())
             menu.separador()
 
         smenu = menu.submenu(_("Default"), Iconos.Defecto())
