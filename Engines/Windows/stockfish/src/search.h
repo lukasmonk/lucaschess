@@ -22,13 +22,13 @@
 #define SEARCH_H_INCLUDED
 
 #include <atomic>
-#include <memory>  // For std::unique_ptr
-#include <stack>
 #include <vector>
 
 #include "misc.h"
-#include "position.h"
+#include "movepick.h"
 #include "types.h"
+
+class Position;
 
 namespace Search {
 
@@ -43,9 +43,12 @@ struct Stack {
   Move excludedMove;
   Move killers[2];
   Value staticEval;
+  Value history;
   bool skipEarlyPruning;
   int moveCount;
+  CounterMoveStats* counterMoves;
 };
+
 
 /// RootMove struct is used for moves at the root of the tree. For each root move
 /// we store a score and a PV (really a refutation in the case of moves which
@@ -57,7 +60,6 @@ struct RootMove {
 
   bool operator<(const RootMove& m) const { return m.score < score; } // Descending sort
   bool operator==(const Move& m) const { return pv[0] == m; }
-  void insert_pv_in_tt(Position& pos);
   bool extract_ponder_from_tt(Position& pos);
 
   Value score = -VALUE_INFINITE;
@@ -65,7 +67,8 @@ struct RootMove {
   std::vector<Move> pv;
 };
 
-typedef std::vector<RootMove> RootMoveVector;
+typedef std::vector<RootMove> RootMoves;
+
 
 /// LimitsType struct stores information sent by GUI about available time to
 /// search the current move, maximum depth/time, if we are in analysis mode or
@@ -74,8 +77,8 @@ typedef std::vector<RootMove> RootMoveVector;
 struct LimitsType {
 
   LimitsType() { // Init explicitly due to broken value-initialization of non POD in MSVC
-    nodes = time[WHITE] = time[BLACK] = inc[WHITE] = inc[BLACK] = npmsec = movestogo =
-    depth = movetime = mate = infinite = ponder = 0;
+    nodes = time[WHITE] = time[BLACK] = inc[WHITE] = inc[BLACK] =
+    npmsec = movestogo = depth = movetime = mate = infinite = ponder = 0;
   }
 
   bool use_time_management() const {
@@ -88,18 +91,16 @@ struct LimitsType {
   TimePoint startTime;
 };
 
-/// The SignalsType struct stores atomic flags updated during the search
-/// typically in an async fashion e.g. to stop the search by the GUI.
+
+/// SignalsType struct stores atomic flags updated during the search, typically
+/// in an async fashion e.g. to stop the search by the GUI.
 
 struct SignalsType {
   std::atomic_bool stop, stopOnPonderhit;
 };
 
-typedef std::unique_ptr<std::stack<StateInfo>> StateStackPtr;
-
 extern SignalsType Signals;
 extern LimitsType Limits;
-extern StateStackPtr SetupStates;
 
 void init();
 void clear();

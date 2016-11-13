@@ -227,9 +227,9 @@ def leeRivales():
     cm.ponMultiPV(20, 256)
     mas(cm)
 
-    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "7 32bit", "http://stockfishchess.org/")
-    cm.path = "Windows/stockfish 7 32bit.exe"
-    cm.path_64 = "Windows/stockfish 7 x64 bmi2.exe", "7 64bit bmi2"
+    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "8 32bits", "http://stockfishchess.org/")
+    cm.path = "Windows/stockfish_8_x32.exe"
+    cm.path_64 = "Windows/stockfish_8_x64_bmi2.exe", "8 64bits bmi2"
     cm.elo = 3300
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "64")

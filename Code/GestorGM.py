@@ -26,6 +26,7 @@ class GestorGM(Gestor.Gestor):
         self.siBlancas = record.siBlancas
         self.modo = record.modo
         self.siJuez = record.siJuez
+        self.showevals = record.showevals
         self.motor = record.motor
         self.tiempo = record.tiempo
         self.depth = record.depth
@@ -50,7 +51,6 @@ class GestorGM(Gestor.Gestor):
             self.xtutor = self.procesador.creaGestorMotor(tutor, t_t, self.depth)
             self.xtutor.actMultiPV(self.multiPV)
             self.analisis = None
-            self.siCompetitivo = True
 
         self.book = Apertura.AperturaPol(999)
 
@@ -321,7 +321,7 @@ class GestorGM(Gestor.Gestor):
             dpts = rmUsu.puntosABS() - rmGM.puntosABS()
 
             if self.mostrar is None or (self.mostrar == True and not isValid):
-                w = PantallaJuicio.WJuicio(self, self.xtutor, self.nombreGM, posicion, mrm, rmGM, rmUsu, analisis)
+                w = PantallaJuicio.WJuicio(self, self.xtutor, self.nombreGM, posicion, mrm, rmGM, rmUsu, analisis, siCompetitivo=not self.showevals)
                 w.exec_()
 
                 rm, posGM = w.analisis[0].buscaRM(jgGM.movimiento())
@@ -352,6 +352,11 @@ class GestorGM(Gestor.Gestor):
         self.error = ""
         self.siguienteJugada()
         return True
+
+    def analizaPosicion(self, fila, clave):
+        if self.estado != kFinJuego:
+            return
+        Gestor.Gestor.analizaPosicion(self, fila, clave)
 
     def mueveRival(self, move):
         desde = move[:2]

@@ -21,18 +21,19 @@ class GestorBooks(Gestor.Gestor):
         self.jugJugador = jugJugador
         self.aciertos = 0
         self.movimientos = 0
+        self.sumar_aciertos = True
 
         self.liReiniciar = libro, siBlancas, jugContrario, jugJugador
 
         self.siJugamosConBlancas = siBlancas
         self.siRivalConBlancas = not siBlancas
 
-        self.pantalla.ponToolBar((k_mainmenu, k_reiniciar, k_configurar, k_utilidades))
+        self.pantalla.ponToolBar((k_mainmenu, k_reiniciar, k_atras, k_ayuda, k_configurar, k_utilidades))
         self.pantalla.activaJuego(True, False, siAyudas=False)
         self.ponMensajero(self.mueveHumano)
         self.ponPosicion(self.partida.ultPosicion)
         self.mostrarIndicador(True)
-        self.quitaAyudas()
+        self.quitaAyudas(siQuitarAtras=False)
         self.ponPiezasAbajo(siBlancas)
         self.ponRotulo1(libro.nombre)
         self.ponRotulo2("")
@@ -55,11 +56,17 @@ class GestorBooks(Gestor.Gestor):
         elif clave == k_reiniciar:
             self.reiniciar()
 
+        elif clave == k_atras:
+            self.atras()
+
         elif clave == k_configurar:
             self.configurar(siSonidos=True)
 
         elif clave == k_utilidades:
             self.utilidades()
+
+        elif clave == k_ayuda:
+            self.ayuda()
 
         else:
             Gestor.Gestor.rutinaAccionDef(self, clave)
@@ -72,10 +79,9 @@ class GestorBooks(Gestor.Gestor):
         return False
 
     def reiniciar(self):
-        if QTUtil2.pregunta(self.pantalla, _("Restart the game?")):
-            self.partida.reset()
-            libro, siBlancas, jugContrario, jugJugador = self.liReiniciar
-            self.inicio(libro, siBlancas, jugContrario, jugJugador)
+        self.partida.reset()
+        libro, siBlancas, jugContrario, jugJugador = self.liReiniciar
+        self.inicio(libro, siBlancas, jugContrario, jugJugador)
 
     def siguienteJugada(self):
 
@@ -160,8 +166,6 @@ class GestorBooks(Gestor.Gestor):
 
         siEncontrado = False
         actpeso = 0
-        if coronacion is None:
-            coronacion = ""
         for jdesde, jhasta, jcoronacion, jpgn, peso in self.listaJugadas:
             if desde == jdesde and hasta == jhasta and jg.coronacion == jcoronacion:
                 siEncontrado = True
@@ -178,16 +182,33 @@ class GestorBooks(Gestor.Gestor):
 
         if not siEncontrado:
             self.tablero.ponPosicion(self.partida.ultPosicion)
-            self.tablero.activaColor(self.siJugamosConBlancas)
-            resp = PantallaBooks.eligeJugadaBooks(self.pantalla, self.listaJugadas, self.siJugamosConBlancas)
+
+            main = self.listaJugadas[0][4]
+            saux = False
+            paux = 0
+
+            for n, jug in enumerate(self.listaJugadas):
+                opacity = p = jug[4]
+                simain = p == main
+                if not simain:
+                    if not saux:
+                        paux = p
+                        saux = True
+                    opacity = 1.0 if p == paux else max(p, 0.25)
+                self.tablero.creaFlechaMulti(jug[0]+jug[1], siMain=simain, opacidad=opacity)
+
+            resp = PantallaBooks.eligeJugadaBooks(self.pantalla, self.listaJugadas, self.siJugamosConBlancas, siSelectSiempre=False)
+            self.tablero.quitaFlechas()
             if resp is None:
-                resp = self.listaJugadas[0][:3]
+                self.sumar_aciertos = False
+                self.sigueHumano()
+                return False
 
             desde, hasta, coronacion = resp
-
             siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
         else:
-            self.aciertos += actpeso
+            if self.sumar_aciertos:
+                self.aciertos += actpeso
         self.movimientos += 1
 
         self.ponRotulo2(self.txtAciertos())
@@ -197,8 +218,51 @@ class GestorBooks(Gestor.Gestor):
         self.partida.ultPosicion = jg.posicion
         self.masJugada(jg, True)
         self.error = ""
+        self.sumar_aciertos = True
         self.siguienteJugada()
         return True
+
+    def ayuda(self):
+        if self.siJuegaHumano:
+            self.paraHumano()
+        else:
+            return
+        self.tablero.ponPosicion(self.partida.ultPosicion)
+
+        main = self.listaJugadas[0][4]
+        saux = False
+        paux = 0
+
+        for n, jug in enumerate(self.listaJugadas):
+            opacity = p = jug[4]
+            simain = p == main
+            if not simain:
+                if not saux:
+                    paux = p
+                    saux = True
+                opacity = 1.0 if p == paux else max(p, 0.25)
+            self.tablero.creaFlechaMulti(jug[0]+jug[1], siMain=simain, opacidad=opacity)
+
+        resp = PantallaBooks.eligeJugadaBooks(self.pantalla, self.listaJugadas, self.siJugamosConBlancas, siSelectSiempre=False)
+        self.tablero.quitaFlechas()
+        if resp is None:
+            self.sumar_aciertos = False
+            self.sigueHumano()
+            return
+
+        desde, hasta, coronacion = resp
+        siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
+        self.movimientos += 1
+
+        self.ponRotulo2(self.txtAciertos())
+
+        self.movimientosPiezas(jg.liMovs)
+
+        self.partida.ultPosicion = jg.posicion
+        self.masJugada(jg, True)
+        self.error = ""
+        self.sumar_aciertos = True
+        self.siguienteJugada()
 
     def masJugada(self, jg, siNuestra):
 
@@ -224,6 +288,21 @@ class GestorBooks(Gestor.Gestor):
         self.refresh()
 
         self.ponPosicionDGT()
+
+    def atras(self):
+        if self.partida.numJugadas():
+            self.estado = kJugando
+            self.movimientos -= 1
+            if self.movimientos < 0:
+                self.movimientos = 0
+            self.aciertos -= 1
+            if self.aciertos < 0:
+                self.aciertos = 0
+            self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
+            self.ponteAlFinal()
+            self.refresh()
+            self.siguienteJugada()
+
 
     def ponVariantes(self, jg):
         desde = jg.desde

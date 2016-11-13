@@ -351,7 +351,7 @@ class WBooks(QtGui.QDialog):
         dic["RJ"] = self.chRJ.valor()
         Util.guardaVar(self.configuracion.ficheroTrainBooks, dic)
 
-def eligeJugadaBooks(pantalla, liJugadas, siBlancas):
+def eligeJugadaBooks(pantalla, liJugadas, siBlancas, siSelectSiempre=True):
     pantalla.cursorFueraTablero()
     menu = QTVarios.LCMenu(pantalla)
     f = Controles.TipoLetra(nombre="Courier New", puntos=10)
@@ -373,8 +373,11 @@ def eligeJugadaBooks(pantalla, liJugadas, siBlancas):
     if resp:
         return resp
     else:
-        desde, hasta, coronacion, pgn, peso = liJugadas[0]
-        return desde, hasta, coronacion
+        if siSelectSiempre:
+            desde, hasta, coronacion, pgn, peso = liJugadas[0]
+            return desde, hasta, coronacion
+        else:
+            return None
 
 def saltaJugadaBooks(gestor, liJugadas, jg):
     siBlancas = jg.posicionBase.siBlancas

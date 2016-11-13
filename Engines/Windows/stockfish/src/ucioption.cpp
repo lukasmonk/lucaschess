@@ -57,7 +57,7 @@ void init(OptionsMap& o) {
 
   const int MaxHashMB = Is64Bit ? 1024 * 1024 : 2048;
 
-  o["Write Debug Log"]       << Option(false, on_logger);
+  o["Debug Log File"]        << Option("", on_logger);
   o["Contempt"]              << Option(0, -100, 100);
   o["Threads"]               << Option(1, 1, 128, on_threads);
   o["Hash"]                  << Option(16, 1, MaxHashMB, on_hash_size);
@@ -67,7 +67,7 @@ void init(OptionsMap& o) {
   o["Skill Level"]           << Option(20, 0, 20);
   o["Move Overhead"]         << Option(30, 0, 5000);
   o["Minimum Thinking Time"] << Option(20, 0, 5000);
-  o["Slow Mover"]            << Option(84, 10, 1000);
+  o["Slow Mover"]            << Option(89, 10, 1000);
   o["nodestime"]             << Option(0, 0, 10000);
   o["UCI_Chess960"]          << Option(false);
   o["SyzygyPath"]            << Option("<empty>", on_tb_path);

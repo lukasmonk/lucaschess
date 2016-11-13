@@ -9,9 +9,12 @@ from Code import VarGen
 
 class GMpartida:
     def __init__(self, linea):
-        xpv, self.event, self.oponent, self.date, self.opening, self.result, self.color = linea.split("|")
-        self.liPV = xpv2pv(xpv).split(" ")
+        self.xpv, self.event, self.oponent, self.date, self.opening, self.result, self.color = linea.split("|")
+        self.liPV = xpv2pv(self.xpv).split(" ")
         self.lenPV = len(self.liPV)
+
+    def toline(self):
+        return "%s|%s|%s|%s|%s|%s|%s" % (self.xpv, self.event, self.oponent, self.date, self.opening, self.result, self.color)
 
     def isWhite(self, siWhite):
         if siWhite:
@@ -174,6 +177,17 @@ class GM:
             dic = dict(NOMBRE=part.oponent, FECHA=part.date, ECO=part.opening, RESULT=part.result, NUMERO=num)
             liRegs.append(dic)
         return liRegs
+
+    def write(self):
+        ficheroGM = self.gm + ".xgm"
+        with open(os.path.join(self.carpeta, ficheroGM), "wb" ) as q:
+            for part in self.liGMPartidas:
+                q.write(part.toline()+"\n")
+
+    def remove(self, num):
+        del self.liGMPartidas[num]
+        self.write()
+
 
 def dicGM():
     dic = {}

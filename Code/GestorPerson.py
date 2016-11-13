@@ -52,7 +52,7 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
         if not dic["FASTMOVES"]:
             self.xrival.set_option("Max Time", "5")
             self.xrival.set_option("Min Time", "1")
-        self.xrival.nombre = self.rival_name
+        self.xrival.nombre = _F(self.rival_name)
 
         self.xrival.siBlancas = self.siRivalConBlancas
 

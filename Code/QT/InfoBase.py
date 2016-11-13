@@ -58,14 +58,14 @@ class ThanksTo:
             ["Rybka 2.3.2a 32-bit", "Vasik Rajlich", "http://rybkachess.com/"],
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
             ["Texel 1.05", "Peter Österlund", "http://web.comhem.se/petero2home/javachess/index.html#texel"],
-            ["Stockfish 7", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
+            ["Stockfish 8", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
             ["Deepfish 4.1", "Tord Romstad, Marco Costalba, Joona Kiiski, fork by Marco Zerbinati", "https://github.com/Zerbinati/DeepFishMZ"],
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
         ]
         li.sort(key=lambda x: x[0])
         # for n, a, u in li:
         #     k = n.split(" ")[0].lower()
-        #     print '                                    ( "%s", "%s", "%s", "%s" ),'%(k,a,n,u)
+        #     p rint '                                    ( "%s", "%s", "%s", "%s" ),'%(k,a,n,u)
         if bloque == "1":
             return li[:len(li) / 2]
         else:

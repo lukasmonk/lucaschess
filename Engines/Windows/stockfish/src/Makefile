@@ -22,7 +22,10 @@
 ### ==========================================================================
 
 ### Establish the operating system name
-UNAME = $(shell uname)
+KERNEL = $(shell uname -s)
+ifeq ($(KERNEL),Linux)
+	OS = $(shell uname -o)
+endif
 
 ### Executable name
 EXE = stockfish
@@ -32,7 +35,7 @@ PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
 ### Built-in benchmark for pgo-builds
-PGOBENCH = ./$(EXE) bench 16 1 1000 default time
+PGOBENCH = ./$(EXE) bench
 
 ### Object files
 OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
@@ -47,13 +50,12 @@ OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 # ----------------------------------------------------------------------------
 #
 # debug = yes/no      --- -DNDEBUG         --- Enable/Disable debug mode
+# sanitize = yes/no   --- (-fsanitize )    --- enable undefined behavior checks
 # optimize = yes/no   --- (-O3/-fast etc.) --- Enable/Disable optimizations
 # arch = (name)       --- (-arch)          --- Target architecture
 # bits = 64/32        --- -DIS_64BIT       --- 64-/32-bit operating system
-# prefetch = yes/no   --- -DUSE_PREFETCH   --- Use prefetch x86 asm-instruction
-# bsfq = yes/no       --- -DUSE_BSFQ       --- Use bsfq x86_64 asm-instruction (only
-#                                              with GCC and ICC 64-bit)
-# popcnt = yes/no     --- -DUSE_POPCNT     --- Use popcnt x86_64 asm-instruction
+# prefetch = yes/no   --- -DUSE_PREFETCH   --- Use prefetch asm-instruction
+# popcnt = yes/no     --- -DUSE_POPCNT     --- Use popcnt asm-instruction
 # sse = yes/no        --- -msse            --- Use Intel Streaming SIMD Extensions
 # pext = yes/no       --- -DUSE_PEXT       --- Use pext x86_64 asm-instruction
 #
@@ -64,9 +66,9 @@ OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 ### 2.1. General and architecture defaults
 optimize = yes
 debug = no
+sanitize = no
 bits = 32
 prefetch = no
-bsfq = no
 popcnt = no
 sse = no
 pext = no
@@ -96,7 +98,6 @@ ifeq ($(ARCH),x86-64)
 	arch = x86_64
 	bits = 64
 	prefetch = yes
-	bsfq = yes
 	sse = yes
 endif
 
@@ -104,7 +105,6 @@ ifeq ($(ARCH),x86-64-modern)
 	arch = x86_64
 	bits = 64
 	prefetch = yes
-	bsfq = yes
 	popcnt = yes
 	sse = yes
 endif
@@ -113,7 +113,6 @@ ifeq ($(ARCH),x86-64-bmi2)
 	arch = x86_64
 	bits = 64
 	prefetch = yes
-	bsfq = yes
 	popcnt = yes
 	sse = yes
 	pext = yes
@@ -122,7 +121,6 @@ endif
 ifeq ($(ARCH),armv7)
 	arch = armv7
 	prefetch = yes
-	bsfq = yes
 endif
 
 ifeq ($(ARCH),ppc-32)
@@ -153,7 +151,16 @@ ifeq ($(COMP),gcc)
 	comp=gcc
 	CXX=g++
 	CXXFLAGS += -pedantic -Wextra -Wshadow
-	ifneq ($(UNAME),Darwin)
+
+	ifeq ($(ARCH),armv7)
+		ifeq ($(OS),Android)
+			CXXFLAGS += -m$(bits)
+		endif
+	else
+		CXXFLAGS += -m$(bits)
+	endif
+
+	ifneq ($(KERNEL),Darwin)
 	   LDFLAGS += -Wl,--no-as-needed
 	endif
 endif
@@ -161,7 +168,7 @@ endif
 ifeq ($(COMP),mingw)
 	comp=mingw
 
-	ifeq ($(UNAME),Linux)
+	ifeq ($(KERNEL),Linux)
 		ifeq ($(bits),64)
 			ifeq ($(shell which x86_64-w64-mingw32-c++-posix),)
 				CXX=x86_64-w64-mingw32-c++
@@ -193,9 +200,20 @@ ifeq ($(COMP),clang)
 	comp=clang
 	CXX=clang++
 	CXXFLAGS += -pedantic -Wextra -Wshadow
-	ifeq ($(UNAME),Darwin)
-		CXXFLAGS += -std=c++0x -stdlib=libc++
-		DEPENDFLAGS += -std=c++0x -stdlib=libc++
+
+	ifeq ($(ARCH),armv7)
+		ifeq ($(OS),Android)
+			CXXFLAGS += -m$(bits)
+			LDFLAGS += -m$(bits)
+		endif
+	else
+		CXXFLAGS += -m$(bits)
+		LDFLAGS += -m$(bits)
+	endif
+
+	ifeq ($(KERNEL),Darwin)
+		CXXFLAGS += -stdlib=libc++
+		DEPENDFLAGS += -stdlib=libc++
 	endif
 endif
 
@@ -211,41 +229,52 @@ else
 	profile_clean = gcc-profile-clean
 endif
 
-ifeq ($(UNAME),Darwin)
+ifeq ($(KERNEL),Darwin)
 	CXXFLAGS += -arch $(arch) -mmacosx-version-min=10.9
 	LDFLAGS += -arch $(arch) -mmacosx-version-min=10.9
 endif
 
 ### Travis CI script uses COMPILER to overwrite CXX
 ifdef COMPILER
-	CXX=$(COMPILER)
+	COMPCXX=$(COMPILER)
+endif
+
+### Allow overwriting CXX from command line
+ifdef COMPCXX
+	CXX=$(COMPCXX)
 endif
 
 ### On mingw use Windows threads, otherwise POSIX
 ifneq ($(comp),mingw)
 	# On Android Bionic's C library comes with its own pthread implementation bundled in
-	ifneq ($(arch),armv7)
+	ifneq ($(OS),Android)
 		# Haiku has pthreads in its libroot, so only link it in on other platforms
-		ifneq ($(UNAME),Haiku)
+		ifneq ($(KERNEL),Haiku)
 			LDFLAGS += -lpthread
 		endif
 	endif
 endif
 
-### 3.4 Debugging
+### 3.2.1 Debugging
 ifeq ($(debug),no)
 	CXXFLAGS += -DNDEBUG
 else
 	CXXFLAGS += -g
 endif
 
-### 3.5 Optimization
+### 3.2.2 Debugging with undefined behavior sanitizers
+ifeq ($(sanitize),yes)
+	CXXFLAGS += -g3 -fsanitize=undefined
+endif
+
+### 3.3 Optimization
 ifeq ($(optimize),yes)
 
-	ifeq ($(comp),gcc)
-		CXXFLAGS += -O3
+	CXXFLAGS += -O3
 
-		ifeq ($(UNAME),Darwin)
+	ifeq ($(comp),gcc)
+
+		ifeq ($(KERNEL),Darwin)
 			ifeq ($(arch),i386)
 				CXXFLAGS += -mdynamic-no-pic
 			endif
@@ -254,27 +283,19 @@ ifeq ($(optimize),yes)
 			endif
 		endif
 
-		ifeq ($(arch),armv7)
+		ifeq ($(OS), Android)
 			CXXFLAGS += -fno-gcse -mthumb -march=armv7-a -mfloat-abi=softfp
 		endif
 	endif
 
-	ifeq ($(comp),mingw)
-		CXXFLAGS += -O3
-	endif
-
 	ifeq ($(comp),icc)
-		ifeq ($(UNAME),Darwin)
-			CXXFLAGS += -fast -mdynamic-no-pic
-		else
-			CXXFLAGS += -fast
+		ifeq ($(KERNEL),Darwin)
+			CXXFLAGS += -mdynamic-no-pic
 		endif
 	endif
 
 	ifeq ($(comp),clang)
-		CXXFLAGS += -O3
-
-		ifeq ($(UNAME),Darwin)
+		ifeq ($(KERNEL),Darwin)
 			ifeq ($(pext),no)
 				CXXFLAGS += -flto
 				LDFLAGS += $(CXXFLAGS)
@@ -289,12 +310,12 @@ ifeq ($(optimize),yes)
 	endif
 endif
 
-### 3.6. Bits
+### 3.4 Bits
 ifeq ($(bits),64)
 	CXXFLAGS += -DIS_64BIT
 endif
 
-### 3.7 prefetch
+### 3.5 prefetch
 ifeq ($(prefetch),yes)
 	ifeq ($(sse),yes)
 		CXXFLAGS += -msse
@@ -304,12 +325,7 @@ else
 	CXXFLAGS += -DNO_PREFETCH
 endif
 
-### 3.8 bsfq
-ifeq ($(bsfq),yes)
-	CXXFLAGS += -DUSE_BSFQ
-endif
-
-### 3.9 popcnt
+### 3.6 popcnt
 ifeq ($(popcnt),yes)
 	ifeq ($(comp),icc)
 		CXXFLAGS += -msse3 -DUSE_POPCNT
@@ -318,15 +334,15 @@ ifeq ($(popcnt),yes)
 	endif
 endif
 
-### 3.10 pext
+### 3.7 pext
 ifeq ($(pext),yes)
 	CXXFLAGS += -DUSE_PEXT
 	ifeq ($(comp),$(filter $(comp),gcc clang mingw))
-		CXXFLAGS += -mbmi -mbmi2
+		CXXFLAGS += -mbmi2
 	endif
 endif
 
-### 3.11 Link Time Optimization, it works since gcc 4.5 but not on mingw under Windows.
+### 3.8 Link Time Optimization, it works since gcc 4.5 but not on mingw under Windows.
 ### This is a mix of compile and link time options because the lto link phase
 ### needs access to the optimization flags.
 ifeq ($(comp),gcc)
@@ -339,7 +355,7 @@ ifeq ($(comp),gcc)
 endif
 
 ifeq ($(comp),mingw)
-	ifeq ($(UNAME),Linux)
+	ifeq ($(KERNEL),Linux)
 	ifeq ($(optimize),yes)
 	ifeq ($(debug),no)
 		CXXFLAGS += -flto
@@ -349,9 +365,9 @@ ifeq ($(comp),mingw)
 	endif
 endif
 
-### 3.12 Android 5 can only run position independent executables. Note that this
+### 3.9 Android 5 can only run position independent executables. Note that this
 ### breaks Android 4.0 and earlier.
-ifeq ($(arch),armv7)
+ifeq ($(OS), Android)
 	CXXFLAGS += -fPIE
 	LDFLAGS += -fPIE -pie
 endif
@@ -365,7 +381,7 @@ help:
 	@echo ""
 	@echo "To compile stockfish, type: "
 	@echo ""
-	@echo "make target ARCH=arch [COMP=comp]"
+	@echo "make target ARCH=arch [COMP=compiler] [COMPCXX=cxx]"
 	@echo ""
 	@echo "Supported targets:"
 	@echo ""
@@ -395,11 +411,17 @@ help:
 	@echo "clang                   > LLVM Clang compiler"
 	@echo "icc                     > Intel compiler"
 	@echo ""
-	@echo "Examples. If you don't know what to do, you likely want to run: "
+	@echo "Simple examples. If you don't know what to do, you likely want to run: "
 	@echo ""
 	@echo "make build ARCH=x86-64    (This is for 64-bit systems)"
 	@echo "make build ARCH=x86-32    (This is for 32-bit systems)"
 	@echo ""
+	@echo "Advanced examples, for experienced users: "
+	@echo ""
+	@echo "make build ARCH=x86-64 COMP=clang"
+	@echo "make profile-build ARCH=x86-64-modern COMP=gcc COMPCXX=g++-4.8"
+	@echo ""
+
 
 .PHONY: build profile-build
 build:
@@ -453,8 +475,9 @@ config-sanity:
 	@echo "optimize: '$(optimize)'"
 	@echo "arch: '$(arch)'"
 	@echo "bits: '$(bits)'"
+	@echo "kernel: '$(KERNEL)'"
+	@echo "os: '$(OS)'"
 	@echo "prefetch: '$(prefetch)'"
-	@echo "bsfq: '$(bsfq)'"
 	@echo "popcnt: '$(popcnt)'"
 	@echo "sse: '$(sse)'"
 	@echo "pext: '$(pext)'"
@@ -472,7 +495,6 @@ config-sanity:
 	 test "$(arch)" = "ppc64" || test "$(arch)" = "ppc" || test "$(arch)" = "armv7"
 	@test "$(bits)" = "32" || test "$(bits)" = "64"
 	@test "$(prefetch)" = "yes" || test "$(prefetch)" = "no"
-	@test "$(bsfq)" = "yes" || test "$(bsfq)" = "no"
 	@test "$(popcnt)" = "yes" || test "$(popcnt)" = "no"
 	@test "$(sse)" = "yes" || test "$(sse)" = "no"
 	@test "$(pext)" = "yes" || test "$(pext)" = "no"

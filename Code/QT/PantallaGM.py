@@ -85,6 +85,7 @@ class WGM(QTVarios.WDialogo):
         self.cbJdepth = Controles.CB(self, liDepths, 0).capturaCambiado(self.cambiadoDepth)
         self.lbJdepth = Controles.LB2P(self, _("Depth"))
         self.lbJshow = Controles.LB2P(self, _("Show rating"))
+        self.chbEvals = Controles.CHB(self, _("Show all evals"), False)
         liOptions = [(_("All moves"), None), (_("Moves are different"), True), (_("Never"), False)]
         self.cbJshow = Controles.CB(self, liOptions, True)
         self.lbJmultiPV = Controles.LB2P(self, _("Number of moves evaluated by engine(MultiPV)"))
@@ -126,7 +127,7 @@ class WGM(QTVarios.WDialogo):
         ly1 = Colocacion.H().control(self.lbJmotor).control(self.cbJmotor).control(self.lbJshow).control(
                 self.cbJshow).relleno()
         ly2 = Colocacion.H().control(self.lbJtiempo).control(self.edJtiempo)
-        ly2.control(self.lbJdepth).control(self.cbJdepth).relleno()
+        ly2.control(self.lbJdepth).control(self.cbJdepth).espacio(15).control(self.chbEvals).relleno()
         ly3 = Colocacion.H().control(self.lbJmultiPV).control(self.cbJmultiPV).relleno()
         ly = Colocacion.V().otro(ly1).otro(ly2).otro(ly3)
         self.gbJ = Controles.GB(self, _("Adjudicator"), ly).conectar(self.cambiaJuez)
@@ -355,6 +356,7 @@ class WGM(QTVarios.WDialogo):
         rk.partidaElegida = None
         rk.siBlancas = self.rbBlancas.isChecked()
         rk.siJuez = self.gbJ.isChecked()
+        rk.showevals = self.chbEvals.valor()
         rk.motor = self.cbJmotor.valor()
         rk.tiempo = int(self.edJtiempo.textoFloat() * 10)
         rk.mostrar = self.cbJshow.valor()
@@ -374,6 +376,7 @@ class WGM(QTVarios.WDialogo):
             QTUtil2.mensError(self, _("There are no games to play with this color"))
             return False
 
+        self.ogm.isErasable = rk.modo == "personal" # para saber si se puede borrar
         self.record = rk
         dic = {}
 
@@ -393,6 +396,7 @@ class WGM(QTVarios.WDialogo):
             modo = dic.get("MODO", "estandar")
             siBlancas = dic["SIBLANCAS"]
             siJuez = dic["SIJUEZ"]
+            showevals = dic.get("SHOWEVALS", False)
             motor = dic["MOTOR"]
             tiempo = dic["TIEMPO"]
             depth = dic.get("DEPTH", 0)
@@ -425,6 +429,7 @@ class WGM(QTVarios.WDialogo):
             self.cbJmotor.ponValor(motor)
             self.edJtiempo.ponFloat(float(tiempo / 10.0))
             self.cbJshow.ponValor(mostrar)
+            self.chbEvals.ponValor(showevals)
             self.cbJdepth.ponValor(depth)
             self.cambiadoDepth(depth)
             self.cbJmultiPV.ponValor(multiPV)
@@ -668,6 +673,7 @@ def importarGM(ownerGM):
 
 class SelectGame(QTVarios.WDialogo):
     def __init__(self, wgm, ogm):
+        self.ogm = ogm
         self.liRegs = ogm.genToSelect()
 
         dgm = GM.dicGM()
@@ -682,13 +688,17 @@ class SelectGame(QTVarios.WDialogo):
         oColumnas.nueva("FECHA", _("Date"), 90, siCentrado=True)
         oColumnas.nueva("ECO", _("ECO"), 40, siCentrado=True)
         oColumnas.nueva("RESULT", _("Result"), 64, siCentrado=True)
-        self.grid = grid = Grid.Grid(self, oColumnas, siSelecFilas=True)
+        self.grid = grid = Grid.Grid(self, oColumnas, siSelecFilas=True, siSeleccionMultiple=True)
         self.grid.coloresAlternados()
         self.registrarGrid(grid)
 
         liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
                       (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
                       ]
+        if ogm.isErasable:
+            liAcciones.append((_("Remove"), Iconos.Borrar(), self.remove))
+            liAcciones.append(None)
+
         tb = Controles.TBrutina(self, liAcciones)
 
         layout = Colocacion.V().control(tb).control(grid).margen(3)
@@ -714,3 +724,13 @@ class SelectGame(QTVarios.WDialogo):
     def cancelar(self):
         self.guardarVideo()
         self.reject()
+
+    def remove(self):
+        li = self.grid.recnosSeleccionados()
+        if len(li) > 0:
+            if QTUtil2.pregunta(self, _("Do you want to delete all selected records?")):
+                li.sort(reverse=True)
+                for x in li:
+                    self.ogm.remove(x)
+                    del self.liRegs[x]
+                self.grid.refresh()
