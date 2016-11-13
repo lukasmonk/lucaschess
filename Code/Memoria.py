@@ -88,19 +88,19 @@ class Memoria:
 
         li = []
 
-        f = open("./Trainings/Checkmates by Eduardo Sadier/145032 positions of mate in two.fns", "rb")
-        for l in f:
-            if l:
-                pz = 0
-                l = l.split("|")[0]
-                for c in l:
-                    if c == " ":
-                        break
-                    if not (c.isdigit() or c == "/"):
-                        pz += 1
-                if pz == piezas:
-                    li.append(l)
-        f.close()
+        fedu = Util.listfiles(".", "Trainings", "Checkmates by Eduardo Sadier", "*.fns")[0]
+        with open(fedu) as f:
+            for l in f:
+                if l:
+                    pz = 0
+                    l = l.split("|")[0]
+                    for c in l:
+                        if c == " ":
+                            break
+                        if not (c.isdigit() or c == "/"):
+                            pz += 1
+                    if pz == piezas:
+                        li.append(l)
 
         me.final()
 
