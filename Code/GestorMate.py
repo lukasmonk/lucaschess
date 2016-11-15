@@ -14,7 +14,7 @@ class ConfigNivel:
     def __init__(self, mate):
         self.mate = mate
 
-        eduardo = "Trainings/From Eduardo Sadier/145032 positions of mate in two.fns"
+        eduardo = Util.listfiles("Trainings", "Checkmates by Eduardo Sadier", "*.fns")[0]
         pascal3 = "Trainings/From Pascal Georges in Scid/Mate in 3.fns"
         pascal4 = "Trainings/From Pascal Georges in Scid/Mate in 4 and more.fns"
         dicFicheros = {1: eduardo, 2: eduardo, 3: pascal3, 4: pascal4}

@@ -326,9 +326,9 @@ class MRespuestaMotor:
             if (dClaves["nodes"] == "0") and ("mate" not in pvBase):
                 return
 
-        # if "score" in dClaves:
-        #     if dClaves["score"].startswith("mate 0"):
-        #         return
+        if "score" in dClaves:
+            if "mate 0 " in pvBase:
+                return
 
         if "multipv" in dClaves:
             kMulti = dClaves["multipv"]
@@ -377,8 +377,7 @@ class MRespuestaMotor:
             elif score.startswith("mate "):
                 rm.puntos = 0
                 rm.mate = int(score.split(" ")[1])
-                if rm.mate == 0:  # stockfish mate 0 + komodo
-                    rm.mate = -1
+                rm.sinMovimientos = False
 
         if "pv" in dClaves:
             pv = dClaves["pv"].strip()
@@ -392,10 +391,6 @@ class MRespuestaMotor:
     def miraScore(self, pvBase):
         dClaves = self.miraClaves(pvBase, ("multipv", "depth", "seldepth", "score", "time",
                                            "nodes", "pv", "hashfull", "tbhits", "nps", "currmove", "currmovenumber"))
-
-        if "score" in dClaves:  # problema con stockfish
-            if dClaves["score"].startswith("mate 0"):
-                return
 
         if "multipv" in dClaves:
             kMulti = dClaves["multipv"]

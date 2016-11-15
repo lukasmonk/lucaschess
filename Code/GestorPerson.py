@@ -98,7 +98,7 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
         self.ponMensajero(self.mueveHumano)
         self.ponPosicion(self.partida.ultPosicion)
         self.mostrarIndicador(True)
-        self.quitaAyudas(True)
+        self.quitaAyudas(True, siQuitarAtras=False)
         self.ponPiezasAbajo(siBlancas)
 
         imagen = getattr(Iconos, "pm%s" % self.rival_name)
