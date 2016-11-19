@@ -1,6 +1,8 @@
 import codecs
 import os
 
+from PyQt4.QtCore import Qt
+
 from Code import ControlPosicion
 from Code import Gestor
 from Code import Jugada
@@ -239,14 +241,21 @@ class GestorEntPos(Gestor.Gestor):
         self.inicio(pos, self.numEntrenos, self.titEntreno, self.liEntrenos, self.siTutorActivado, self.jump)
 
     def controlTeclado(self, nkey):
-        if nkey in (43, 16777239):  # pulsado + o avpag
+        if nkey in (Qt.Key_Plus, Qt.Key_PageDown):
             self.ent_siguiente(k_siguiente)
-        elif nkey in (45, 16777238):  # pulsado - o repag
+        elif nkey in (Qt.Key_Minus, Qt.Key_PageUp):
             self.ent_siguiente(k_anterior)
-        elif nkey == 80: # P: salva
+        elif nkey == Qt.Key_T:
             li = self.fenInicial.split("|")
             li[2] = self.partida.pgnBaseRAW()
             self.saveSelectedPosition("|".join(li))
+
+    def listHelpTeclado(self):
+        return [
+            ("+/%s"%_("Page Down"), _("Next position")),
+            ("-/%s"%_("Page Up"), _("Previous position")),
+            ("T",  _("Save position in 'Selected positions' file")),
+        ]
 
     def finPartida(self):
         self.procesador.inicio()

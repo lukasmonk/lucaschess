@@ -1,3 +1,5 @@
+from PyQt4.QtCore import Qt
+
 from Code import DGT
 from Code.QT import FormLayout
 from Code.QT import Iconos
@@ -54,6 +56,15 @@ def opciones(parent, configuracion):
     liAsp.append((None, _("Toolbars") + ":"))
     liAsp.append((FormLayout.Spinbox(_("Font size"), 5, 64, 60), configuracion.puntosTB))
     liAsp.append((_("Bold") + ":", configuracion.boldTB))
+    li = (
+            (_("Only display the icon"), Qt.ToolButtonIconOnly),
+            (_("Only display the text"), Qt.ToolButtonTextOnly),
+            (_("The text appears beside the icon"), Qt.ToolButtonTextBesideIcon),
+            (_("The text appears under the icon"), Qt.ToolButtonTextUnderIcon)
+    )
+    config = FormLayout.Combobox(_("Icons"), li)
+    liAsp.append((config, configuracion.iconsTB))
+
 
     # PGN table
     liAsp.append(separador)
@@ -171,7 +182,7 @@ def opciones(parent, configuracion):
 
         liGen, liSon, liTT, liT, liEng, liAsp, liSA, liNC = resp
 
-        configuracion.jugador, configuracion.estilo, configuracion.traductor = liGen
+        (configuracion.jugador, configuracion.estilo, configuracion.traductor) = liGen
 
         porDefecto = liAsp[0]
         if porDefecto:
@@ -179,40 +190,39 @@ def opciones(parent, configuracion):
         else:
             del liAsp[0]
 
-        configuracion.familia, configuracion.puntosMenu, configuracion.boldMenu, \
-        configuracion.puntosTB, configuracion.boldTB, \
-        configuracion.anchoPGN, configuracion.altoFilaPGN, configuracion.puntosPGN, \
-        configuracion.siNomPiezasEN, configuracion.figurinesPGN, \
-        configuracion.tamFontRotulos = liAsp
+        (configuracion.familia, configuracion.puntosMenu, configuracion.boldMenu,
+            configuracion.puntosTB, configuracion.boldTB, configuracion.iconsTB,
+            configuracion.anchoPGN, configuracion.altoFilaPGN, configuracion.puntosPGN,
+            configuracion.siNomPiezasEN, configuracion.figurinesPGN,
+            configuracion.tamFontRotulos) = liAsp
 
         if configuracion.familia == "System":
             configuracion.familia = ""
 
-        configuracion.siSuenaBeep, configuracion.siSuenaResultados, configuracion.siSuenaJugada, \
-        configuracion.siSuenaNuestro = liSon
+        (configuracion.siSuenaBeep, configuracion.siSuenaResultados, configuracion.siSuenaJugada, configuracion.siSuenaNuestro) = liSon
 
-        configuracion.tutor.clave, tiempoTutor, configuracion.tutorMultiPV, \
-        configuracion.tutorActivoPorDefecto, configuracion.tutorDifPts, configuracion.tutorDifPorc = liTT
+        (configuracion.tutor.clave, tiempoTutor, configuracion.tutorMultiPV,
+            configuracion.tutorActivoPorDefecto, configuracion.tutorDifPts, configuracion.tutorDifPorc) = liTT
         configuracion.tiempoTutor = int(tiempoTutor * 1000)
 
-        configuracion.eloNC, configuracion.micheloNC, configuracion.ficsNC, configuracion.fideNC = liNC
+        (configuracion.eloNC, configuracion.micheloNC, configuracion.ficsNC, configuracion.fideNC) = liNC
 
-        configuracion.centipawns, configuracion.bmi2, configuracion.notbackground = liEng
+        (configuracion.centipawns, configuracion.bmi2, configuracion.notbackground) = liEng
 
-        configuracion.vistaTutor, \
-        configuracion.efectosVisuales, rapidezMovPiezas, \
-        configuracion.siAtajosRaton, configuracion.showCandidates, configuracion.showVariantes, \
-        configuracion.siActivarCapturas, configuracion.tipoMaterial, \
-        configuracion.siActivarInformacion, siDGT = liT
+        (configuracion.vistaTutor,
+            configuracion.efectosVisuales, rapidezMovPiezas,
+            configuracion.siAtajosRaton, configuracion.showCandidates, configuracion.showVariantes,
+            configuracion.siActivarCapturas, configuracion.tipoMaterial,
+            configuracion.siActivarInformacion, siDGT) = liT
         configuracion.rapidezMovPiezas = drap[rapidezMovPiezas]
         if configuracion.siDGT != siDGT:
             if siDGT:
                 DGT.ponON()
             configuracion.siDGT = siDGT
 
-        configuracion.salvarFichero, configuracion.salvarGanados, configuracion.salvarPerdidos, \
-        configuracion.salvarAbandonados, configuracion.guardarVariantesTutor, \
-        configuracion.salvarCSV = liSA
+        (configuracion.salvarFichero, configuracion.salvarGanados, configuracion.salvarPerdidos,
+            configuracion.salvarAbandonados, configuracion.guardarVariantesTutor,
+            configuracion.salvarCSV) = liSA
         configuracion.salvarCSV = Util.dirRelativo(configuracion.salvarCSV)
 
         return True

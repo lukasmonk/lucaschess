@@ -226,7 +226,10 @@ def listaGMpersonal(carpeta):
             siW = siB = False
             with open(os.path.join(carpeta, fich)) as f:
                 for linea in f:
-                    gmp = GMpartida(linea.strip())
+                    try:
+                        gmp = GMpartida(linea.strip())
+                    except:
+                        continue
                     if not siW:
                         siW = gmp.isWhite(True)
                     if not siB:
@@ -337,7 +340,10 @@ class FabGM:
             else:
                 if not (siEmpate or (xblancas and siGanaBlancas) or (xnegras and siGanaNegras)):
                     return
-        self.write("%s|%s|%s|%s|%s|%s|%s\n" % (pv2xpv(pk.strip()), event, oponente, date, eco, result, color))
+        def nopipe(txt):
+            return txt.replace("|", " ").strip() if "|" in txt else txt
+
+        self.write("%s|%s|%s|%s|%s|%s|%s\n" % (pv2xpv(pk.strip()), nopipe(event), nopipe(oponente), nopipe(date), eco, result, color))
 
     def xprocesa(self):
         self.close()

@@ -1,5 +1,8 @@
 import time
 
+from PyQt4.QtCore import Qt
+
+
 from Code import ControlPosicion
 from Code import Gestor
 from Code import Jugada
@@ -226,11 +229,17 @@ class GestorEntTac(Gestor.Gestor):
             Gestor.Gestor.rutinaAccionDef(self, clave)
 
     def controlTeclado(self, nkey):
-        if nkey in (43, 16777239):  # pulsado + o avpag
+        if nkey in (Qt.Key_Plus, Qt.Key_PageDown):
             if self.estado == kFinJuego:
                 self.ent_siguiente()
-        elif nkey == 80:
+        elif nkey == Qt.Key_T:
             self.saveSelectedPosition(self.fenInicial)
+
+    def listHelpTeclado(self):
+        return [
+            ("+/%s"%_("Page Down"), _("Next position")),
+            ("T",  _("Save position in 'Selected positions' file")),
+        ]
 
     def reiniciar(self):
         cp = ControlPosicion.ControlPosicion()

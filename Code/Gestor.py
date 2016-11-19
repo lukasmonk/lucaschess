@@ -97,6 +97,8 @@ class Gestor:
         # Informacion
         self.informacionActivable = True
 
+        self.nonDistract = None
+
         # x Control del tutor
         #  asi sabemos si ha habido intento de analisis previo (por ejemplo el usuario mientras piensa decide activar el tutor)
         self.siIniAnalizaTutor = False
@@ -127,6 +129,8 @@ class Gestor:
     def finGestor(self):
         # se llama desde procesador.inicio, antes de borrar el gestor
         self.tablero.atajosRaton = None
+        if self.nonDistract:
+            self.pantalla.base.tb.setVisible(True)
 
     def atajosRatonReset(self):
         self.atajosRatonDestino = None
@@ -711,7 +715,6 @@ class Gestor:
                         "It is saved in the clipboard to paste it wherever you want.")))
 
     def guardarGanados(self, siGanado):
-
         conf = self.configuracion
 
         if siGanado:
@@ -757,6 +760,21 @@ class Gestor:
     def quitaCapturas(self):
         self.pantalla.activaCapturas(False)
         self.ponVista()
+
+    def rightMouse(self, siShift, siControl, siAlt):
+        if siControl:
+            self.capturas()
+        elif siAlt:
+            self.nonDistract = self.pantalla.base.nonDistractMode(self.nonDistract)
+        else:
+            self.pgnInformacion(None, None)
+        self.pantalla.ajustaTam()
+
+    def boardRightMouse(self, siShift, siControl, siAlt):
+        self.rightMouse(siShift, siControl, siAlt)
+
+    def gridRightMouse(self, siShift, siControl, siAlt):
+        self.rightMouse(siShift, siControl, siAlt)
 
     def listado(self, tipo):
         if tipo == "pgn":

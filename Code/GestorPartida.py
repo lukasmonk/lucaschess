@@ -1,5 +1,7 @@
 import time
 
+from PyQt4.QtCore import Qt
+
 from Code import Partida
 from Code import ControlPosicion
 from Code import Gestor
@@ -411,8 +413,13 @@ class GestorPartida(Gestor.Gestor):
                 self.reiniciar(dic)
 
     def controlTeclado(self, nkey):
-        if nkey in (86, 80):  # V,P
+        if nkey in Qt.Key_V:  # V
             self.paste(QTUtil.traePortapapeles())
+
+    def listHelpTeclado(self):
+        return [
+            ("V", _("Paste position")),
+        ]
 
     def paste(self, texto):
         cp = ControlPosicion.ControlPosicion()

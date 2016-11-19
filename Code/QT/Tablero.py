@@ -4,6 +4,8 @@ import copy
 import os
 
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import Qt
+
 
 from Code.QT import Colocacion
 from Code.QT import Controles
@@ -22,17 +24,18 @@ from Code import Util
 from Code import VarGen
 from Code.Constantes import *
 
+
 class RegKB:
     def __init__(self, key, flags):
         self.key = key
         self.flags = flags
 
+
 class Tablero(QtGui.QGraphicsView):
     def __init__(self, parent, confTablero, siMenuVisual=True):
         super(Tablero, self).__init__(None)
 
-        self.setRenderHints(
-                QtGui.QPainter.Antialiasing | QtGui.QPainter.TextAntialiasing | QtGui.QPainter.SmoothPixmapTransform)
+        self.setRenderHints(QtGui.QPainter.Antialiasing | QtGui.QPainter.TextAntialiasing | QtGui.QPainter.SmoothPixmapTransform)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setDragMode(self.NoDrag)
@@ -78,8 +81,8 @@ class Tablero(QtGui.QGraphicsView):
         self.kb_buffer = []
 
     def exec_kb_buffer(self, key, flags):
-        if 16777264 <= key <= 16777273:  # F1..F10
-            f = key - 16777263
+        if Qt.Key_F1 <= key <= Qt.Key_F10:
+            f = key - Qt.Key_F1 + 1
             if self.liMouse:
                 if len(self.liMouse) >= 2:
                     desde = self.liMouse[-2]
@@ -94,11 +97,11 @@ class Tablero(QtGui.QGraphicsView):
             self.init_kb_buffer()
             return
 
-        if key == 16777216:  # ESC
+        if key == Qt.Key_Escape:
             self.init_kb_buffer()
             return
 
-        if key in (16777220, 16777221):  # intros
+        if key in (Qt.Key_Enter, Qt.Key_Return):
             if self.kb_buffer:
                 last = self.kb_buffer[-1]
                 key = last.key
@@ -106,36 +109,61 @@ class Tablero(QtGui.QGraphicsView):
             else:
                 return
 
-        # Operations -> needs Alt
-        if flags & QtCore.Qt.AltModifier:
-            siCtrl = (flags & QtCore.Qt.ControlModifier) > 0
-            ok = True
-            if key == 67:  # C salvar PGN
-                self.salvaPGN(siClipboard=siCtrl)
+        siAlt = (flags & QtCore.Qt.AltModifier) > 0
+        siCtrl = (flags & QtCore.Qt.ControlModifier) > 0
 
-            elif key == 73:  # I copiar tablero
-                self.salvaEnImagen(siCtrl=siCtrl)
-            elif key == 83:  # S copiar tablero en fichero
-                resp = QTUtil2.salvaFichero(self, _("File to save"), self.configuracion.dirSalvados,
-                                            "%s PNG (*.png)" % _("File"), False)
-                if resp:
-                    self.salvaEnImagen(resp, "png", siCtrl=siCtrl)
-            elif key == 70:  # Alt-F girar tablero ALt-Ctrl-F = copy FEN to clipboard
-                if siCtrl:
-                    QTUtil.ponPortapapeles(self.ultPosicion.fen())
-                    QTUtil2.mensajeTemporal(self.pantalla, _("FEN is in clipboard"), 1)
-                else:
-                    self.intentaRotarTablero(None)
+        okseguir = False
 
-            elif key == 68:  # D director director
-                if not self.siTableroDirector():
-                    self.lanzaDirector()
-            else:
-                ok = False
-            if ok:
-                if self.kb_buffer:
-                    self.kb_buffer = self.kb_buffer[:-1]
-                return
+        # CTRL-C : copy fen al clipboard
+        if siCtrl and key == Qt.Key_C:
+            QTUtil.ponPortapapeles(self.ultPosicion.fen())
+            QTUtil2.mensajeTemporal(self.pantalla, _("FEN is in clipboard"), 1)
+
+        # ALT-D -> Director
+        elif siAlt and key == Qt.Key_D:
+            if not self.siTableroDirector():
+                self.lanzaDirector()
+
+        # ALT-F -> Rota tablero
+        elif siAlt and key == Qt.Key_F:
+            self.intentaRotarTablero(None)
+
+        # ALT-I Save image to clipboard (CTRL->no border)
+        elif key == Qt.Key_I:
+            self.salvaEnImagen(siCtrl=siCtrl)
+            QTUtil2.mensaje(self, _("Board image is in clipboard"))
+
+        # ALT-J Save image to file (CTRL->no border)
+        elif key == Qt.Key_J:
+            path = QTUtil2.salvaFichero(self, _("File to save"), self.configuracion.dirSalvados, "%s PNG (*.png)" % _("File"), False)
+            if path:
+                self.salvaEnImagen(path, "png", siCtrl=siCtrl)
+                self.configuracion.dirSalvados = os.path.dirname(path)
+                self.configuracion.graba()
+
+        # ALT-K
+        elif key == Qt.Key_K:
+            self.showKeys()
+
+        elif hasattr(self.pantalla, "gestor") and self.pantalla.gestor and hasattr(self.pantalla.gestor, "rightMouse") \
+            and key in (Qt.Key_P, Qt.Key_N, Qt.Key_C):
+            # P -> show information
+            if key == Qt.Key_P:
+                self.pantalla.gestor.rightMouse(False, False, False)
+            # ALT-N -> non distract mode
+            elif key == Qt.Key_N and siAlt:
+                self.pantalla.gestor.rightMouse(False, False, True)
+            # ALT-C -> show captures
+            elif key == Qt.Key_C and siAlt:
+                self.pantalla.gestor.rightMouse(False, True, False)
+
+        else:
+            okseguir = True
+
+        if not okseguir:
+            if self.kb_buffer:
+                self.kb_buffer = self.kb_buffer[:-1]
+            return
 
         if self.mensajero and self.siActivasPiezas:
             nk = len(self.kb_buffer)
@@ -193,10 +221,7 @@ class Tablero(QtGui.QGraphicsView):
                     return
 
     def sizeHint(self):
-        return QtCore.QSize(self.ancho+6, self.ancho+6)
-
-    # def adjustSize(self):
-    #     return
+        return QtCore.QSize(self.ancho + 6, self.ancho + 6)
 
     def keyPressEvent(self, event):
         k = event.key()
@@ -544,6 +569,41 @@ class Tablero(QtGui.QGraphicsView):
 
         self.init_kb_buffer()
 
+    def showKeys(self):
+        liKeys = [
+            (_("CTRL") + "-C", _("Copy FEN to clipboard")),
+            ("I", _("Copy board as image to clipboard")),
+            (_("CTRL") + "-I", _("Copy board as image to clipboard") + " (%s)" % _("without border")),
+            ("J", _("Copy board as image to a file")),
+            (_("CTRL") + "-J", _("Copy board as image to a file") + " (%s)" % _("without border")),
+        ]
+        if self.siActivasPiezas:
+            liKeys.append((None, None))
+            liKeys.append(("a1 ... h8", _("To indicate origin and destination of a move")))
+
+
+        if hasattr(self.pantalla, "gestor") and self.pantalla.gestor:
+            if hasattr(self.pantalla.gestor, "rightMouse"):
+                liKeys.append((None, None))
+                liKeys.append(("P", _("Show/Hide PGN information")))
+                liKeys.append((_("ALT") + "-C", _("Show/Hide captures")))
+                liKeys.append((_("ALT") + "-N", _("Activate/Deactivate non distract mode")))
+
+            if hasattr(self.pantalla.gestor, "listHelpTeclado"):
+                liKeys.append((None, None))
+                liKeys.extend(self.pantalla.gestor.listHelpTeclado())
+
+        rondo = QTVarios.rondoPuntos()
+        menu = QTVarios.LCMenu(self)
+        menu.opcion(None, _("Active keys"), Iconos.Rename())
+        menu.separador()
+        for key, mess in liKeys:
+            if key is None:
+                menu.separador()
+            else:
+                menu.opcion(None, "%s [%s]" % (mess, key), rondo.otro())
+        menu.lanza()
+
     def lanzaMenuVisual(self, siIzquierdo):
         if not self.siMenuVisual:
             return
@@ -576,6 +636,9 @@ class Tablero(QtGui.QGraphicsView):
         smenu.opcion("def_size", _("Size"), Iconos.TamTablero())
         smenu.separador()
         smenu.opcion("def_resto", _("The other"), Iconos.PuntoVerde())
+
+        menu.separador()
+        menu.opcion("keys", _("Active keys")+ " [%s-K]" % _("ALT"), Iconos.Rename())
 
         resp = menu.lanza()
         if resp is None:
@@ -636,6 +699,9 @@ class Tablero(QtGui.QGraphicsView):
         #     w = PantallaTabVisual.WTabVisual(self)
         #     w.exec_()
         #     QTUtil.refreshGUI()
+
+        elif resp == "keys":
+            self.showKeys()
 
         elif resp.startswith("def_"):
             self.confTablero.porDefecto(resp[4:])
@@ -727,6 +793,12 @@ class Tablero(QtGui.QGraphicsView):
         if event.button() == QtCore.Qt.RightButton:
             if not siDentro:
                 self.lanzaMenuVisual(False)
+            elif hasattr(self.pantalla, "boardRightMouse"):
+                m = int(event.modifiers())
+                siShift = (m & QtCore.Qt.ShiftModifier) > 0
+                siControl = (m & QtCore.Qt.ControlModifier) > 0
+                siAlt = (m & QtCore.Qt.AltModifier) > 0
+                self.pantalla.boardRightMouse(siShift, siControl, siAlt)
             # QtGui.QGraphicsView.mousePressEvent(self,event)
             return
         if not siDentro:
@@ -1175,8 +1247,8 @@ class Tablero(QtGui.QGraphicsView):
         return chr(96 + columna) + str(fila)
 
     def alg2num(self, a1):
-        x = self.columna2punto(ord(a1[0])-96)
-        y = self.fila2punto(ord(a1[1])-48)
+        x = self.columna2punto(ord(a1[0]) - 96)
+        y = self.fila2punto(ord(a1[1]) - 48)
         return x, y
 
     def intentaMover(self, piezaSC, posCursor, eventButton):
@@ -1443,14 +1515,9 @@ class Tablero(QtGui.QGraphicsView):
             pm = QtGui.QPixmap.grabWidget(self)
         if fichero is None:
             QTUtil.ponPortapapeles(pm, tipo="p")
+
         else:
             pm.save(fichero, tipo)
-
-    def salvaPGN(self, siClipboard=None):
-        if hasattr(self.pantalla, "gestor") and hasattr(self.pantalla.gestor, "salvaFEN_PGN"):
-            self.pantalla.gestor.salvaFEN_PGN("pgn", not siClipboard)
-            if siClipboard:
-                QTUtil2.mensajeTemporal(self, _("PGN is in clipboard"), 1)
 
     def thumbnail(self, ancho):
         # escondemos piezas+flechas
@@ -1646,6 +1713,7 @@ class Tablero(QtGui.QGraphicsView):
 
         return "/".join(lineas) + " " + resto
 
+
 class WTamTablero(QtGui.QDialog):
     def __init__(self, tablero):
 
@@ -1780,6 +1848,7 @@ class WTamTablero(QtGui.QDialog):
         if self.confTablero.siBase:
             self.tablero.permitidoResizeExterno(self.confTablero.siBase)
 
+
 class PosTablero(Tablero):
     def activaTodas(self):
         for pieza, piezaSC, siActiva in self.liPiezas:
@@ -1856,6 +1925,7 @@ class PosTablero(Tablero):
             event.setDropAction(QtCore.Qt.IgnoreAction)
         event.ignore()
 
+
 class TableroEstatico(Tablero):
     def mousePressEvent(self, event):
         pos = event.pos()
@@ -1882,6 +1952,7 @@ class TableroEstatico(Tablero):
         self.pantalla.pulsadaCelda(c + f)
 
         Tablero.mousePressEvent(self, event)
+
 
 class TableroVisual(Tablero):
     EVENTO_DERECHO, EVENTO_DERECHO_PIEZA, EVENTO_DROP, EVENTO_BORRAR, EVENTO_FUNCION = range(5)
@@ -2058,6 +2129,7 @@ class TableroVisual(Tablero):
         Tablero.ponPosicion(self, posicion)
         self.baseCasillasSC.setAcceptDrops(True)
         self.activaTodas()
+
 
 class TableroDirector(TableroVisual):
     def keyPressEvent(self, event):

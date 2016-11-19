@@ -72,7 +72,7 @@ class Procesador:
         self.web = "http://www-lucaschess.rhcloud.com"
         self.blog = "http://lucaschess.blogspot.com"
 
-        self.liOpcionesInicio = [k_terminar, k_play, k_competicion, k_elo,
+        self.liOpcionesInicio = [k_terminar, k_play,
                                  k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
 
         self.configuracion = Configuracion.Configuracion(user)
@@ -320,6 +320,12 @@ class Procesador:
         menu.opcion(("free", None), _("Play against an engine of your choice"), Iconos.Libre())
         menu.separador()
 
+        menu.opcion(("competition", None), _("Competition"), Iconos.NuevaPartida())
+        menu.separador()
+
+        menu.opcion(("elo", None), _("Elo-Rating"), Iconos.Elo())
+        menu.separador()
+
         # Principiantes ----------------------------------------------------------------------------------------
         menu1 = menu.submenu(_("Opponents for young players"), Iconos.RivalesMP())
 
@@ -356,6 +362,12 @@ class Procesador:
             tipo, rival = resp
             if tipo == "free":
                 self.procesarAccion(k_libre)
+
+            elif tipo == "competition":
+                self.competicion()
+
+            elif tipo == "elo":
+                self.elo()
 
             elif tipo == "person":
                 self.playPerson(rival)
@@ -440,9 +452,6 @@ class Procesador:
         elif clave == k_libre:
             self.libre()
 
-        elif clave == k_competicion:
-            self.competicion()
-
         elif clave == k_entrenamiento:
             self.entrenamientos.lanza()
 
@@ -451,9 +460,6 @@ class Procesador:
 
         elif clave == k_tools:
             self.tools()
-
-        elif clave == k_elo:
-            self.elo()
 
         elif clave == k_informacion:
             self.informacion()

@@ -4,6 +4,7 @@ import operator
 import os
 
 from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 from Code import BaseConfig
 from Code import CajonDesastre
@@ -110,6 +111,7 @@ class Configuracion:
 
         self.puntosTB = 11
         self.boldTB = False
+        self.iconsTB = Qt.ToolButtonTextUnderIcon
 
         self.centipawns = False
 
@@ -467,6 +469,7 @@ class Configuracion:
 
         dic["PUNTOSTB"] = self.puntosTB
         dic["BOLDTB"] = self.boldTB
+        dic["ICONSTB"] = self.iconsTB
 
         dic["COLOR_NAG1"] = self.color_nag1
         dic["COLOR_NAG2"] = self.color_nag2
@@ -591,6 +594,7 @@ class Configuracion:
 
                 self.puntosTB = dg("PUNTOSTB", self.puntosTB)
                 self.boldTB = dg("BOLDTB", self.boldTB)
+                self.iconsTB = dg("ICONSTB", self.iconsTB)
 
                 self.color_nag1 = dg("COLOR_NAG1", self.color_nag1)
                 self.color_nag2 = dg("COLOR_NAG2", self.color_nag2)

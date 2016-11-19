@@ -20,7 +20,9 @@ class WBase(QtGui.QWidget):
 
         self.gestor = gestor
 
-        self.centipawns = VarGen.configuracion.centipawns
+        self.configuracion = VarGen.configuracion
+
+        self.centipawns = self.configuracion.centipawns
 
         self.procesandoEventos = None
 
@@ -57,11 +59,11 @@ class WBase(QtGui.QWidget):
 
     def creaToolBar(self):
         self.tb = QtGui.QToolBar("BASICO", self)
-        self.tb.setIconSize(QtCore.QSize(32, 32))
-        self.tb.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        # self.tb.setStyleSheet("QWidget { background: #AFC3D7 }")
-        # self.tb.setStyleSheet("QToolBar {background: #AFC3D7;border-bottom: 1px solid black; border-top: 1px solid black;}");
-
+        iconsTB = self.configuracion.iconsTB
+        self.tb.setToolButtonStyle(iconsTB)
+        sz = 32 if iconsTB == QtCore.Qt.ToolButtonTextUnderIcon else 16
+        self.tb.setIconSize(QtCore.QSize(sz, sz))
+        self.tb.setStyleSheet("QToolBar {border-bottom: 1px solid gray; border-top: 1px solid gray;}");
         self.preparaTB()
 
     def creaTablero(self):
@@ -174,9 +176,14 @@ class WBase(QtGui.QWidget):
         # Ayudas
         lyAyudas = Colocacion.H().relleno().control(self.lbCredito).control(self.ayudasUD).relleno().ponSeparacion(1)
 
+        # Abajo
+        lyAbajo = Colocacion.V()
+        lyAbajo.setSizeConstraint(lyAbajo.SetFixedSize)
+        lyAbajo.control(self.lbRevision).otro(lyAyudas).control(self.btActivarTutor)
+        lyAbajo.control(self.lbRotulo1).control(self.lbRotulo2).control(self.lbRotulo3)
+
         lyV = Colocacion.V().otro(lyColor).control(self.pgn)
-        lyV.control(self.lbRevision).otro(lyAyudas).control(self.btActivarTutor)
-        lyV.control(self.lbRotulo1).control(self.lbRotulo2).control(self.lbRotulo3)
+        lyV.otro(lyAbajo)
 
         return lyV
 
@@ -186,8 +193,8 @@ class WBase(QtGui.QWidget):
 
         liOpciones = ((_("Quit"), Iconos.Terminar(), k_terminar),
                       (_("Play"), Iconos.Libre(), k_play),
-                      (_("Competition"), Iconos.NuevaPartida(), k_competicion),
-                      (_("Elo-Rating"), Iconos.Elo(), k_elo),
+                      # (_("Competition"), Iconos.NuevaPartida(), k_competicion),
+                      # (_("Elo-Rating"), Iconos.Elo(), k_elo),
                       (_("Training"), Iconos.Entrenamiento(), k_entrenamiento),
                       (_("Options"), Iconos.Opciones(), k_opciones),
                       (_("Information"), Iconos.Informacion(), k_informacion),
@@ -306,11 +313,11 @@ class WBase(QtGui.QWidget):
 
     def gridBotonDerecho(self, grid, fila, columna, modificadores):
         self.gestor.pgnMueveBase(fila, columna.clave)
+        self.gestor.rightMouse(modificadores.siShift, modificadores.siControl, modificadores.siAlt)
 
-        if modificadores.siControl:
-            self.gestor.capturas()
-        else:
-            self.gestor.pgnInformacion(fila, columna.clave)
+    def boardRightMouse(self, siShift, siControl, siAlt):
+        if hasattr(self.gestor, "boardRightMouse"):
+            self.gestor.boardRightMouse(siShift, siControl, siAlt)
 
     def gridDobleClick(self, grid, fila, columna):
         if columna.clave == "NUMERO":
@@ -533,6 +540,31 @@ class WBase(QtGui.QWidget):
         self.lbJugNegras.setVisible(siReloj)
         self.lbRelojBlancas.setVisible(siReloj)
         self.lbRelojNegras.setVisible(siReloj)
+
+    def nonDistractMode(self, nonDistract):
+        if nonDistract:
+            for widget in nonDistract:
+                widget.setVisible(True)
+            nonDistract = None
+        else:
+            nonDistract = []
+            for widget in  (self.tb,
+                            self.pgn,
+                            self.lbRevision,
+                            self.ayudasUD,
+                            self.lbCredito,
+                            self.btActivarTutor,
+                            self.lbRotulo1,
+                            self.lbRotulo2,
+                            self.lbRotulo3,
+                            self.lbJugBlancas,
+                            self.lbJugNegras,
+                            self.lbRelojBlancas,
+                            self.lbRelojNegras ):
+                if widget.isVisible():
+                    nonDistract.append(widget)
+                    widget.setVisible(False)
+        return nonDistract
 
     def ponDatosReloj(self, bl, rb, ng, rn):
         self.lbJugBlancas.altoMinimo(0)

@@ -2,6 +2,8 @@ import os
 import sys
 import time
 
+from PyQt4.QtCore import Qt
+
 from Code import ControlPosicion
 from Code import Gestor
 from Code import PGN
@@ -676,34 +678,7 @@ class GestorSolo(Gestor.Gestor):
                 self.reiniciar()
 
         elif resp == "posicion":
-            resp = XVoyager.xVoyagerFEN(self.pantalla, self.configuracion, self.fen)
-            if resp is not None:
-                self.fen = resp
-                self.bloqueApertura = None
-                self.posicApertura = None
-
-                if self.xpgn:
-                    siInicio = self.fen == ControlPosicion.FEN_INICIAL
-                    li = self.xpgn.split("\n")
-                    lin = []
-                    siFen = False
-                    for linea in li:
-                        if linea.startswith("["):
-                            if "FEN " in linea:
-                                siFen = True
-                                if siInicio:
-                                    continue
-                                linea = '[FEN "%s"]' % self.fen
-                            lin.append(linea)
-                        else:
-                            break
-                    if not siFen:
-                        linea = '[FEN "%s"]' % self.fen
-                        lin.append(linea)
-                    self.liPGN = lin
-                    self.xpgn = "\n".join(lin) + "\n\n*"
-
-                self.reiniciar()
+            self.startPosition()
 
         elif resp == "pasteposicion":
             texto = QTUtil.traePortapapeles()
@@ -771,11 +746,50 @@ class GestorSolo(Gestor.Gestor):
                 self.reiniciar(dic)
 
     def controlTeclado(self, nkey):
-        if nkey == 86:  # V
+        if nkey == Qt.Key_V:
             self.paste(QTUtil.traePortapapeles())
-        elif nkey == 80: # P
+        elif nkey == Qt.Key_T:
             li = [self.fen if self.fen else ControlPosicion.FEN_INICIAL,"",self.partida.pgnBaseRAW()]
             self.saveSelectedPosition("|".join(li))
+        elif nkey == Qt.Key_S:
+            self.startPosition()
+
+    def listHelpTeclado(self):
+        return [
+            ("V", _("Paste position")),
+            ("T", _("Save position in 'Selected positions' file")),
+            ("S", _("Set start position"))
+        ]
+
+    def startPosition(self):
+        resp = XVoyager.xVoyagerFEN(self.pantalla, self.configuracion, self.fen)
+        if resp is not None:
+            self.fen = resp
+            self.bloqueApertura = None
+            self.posicApertura = None
+
+            if self.xpgn:
+                siInicio = self.fen == ControlPosicion.FEN_INICIAL
+                li = self.xpgn.split("\n")
+                lin = []
+                siFen = False
+                for linea in li:
+                    if linea.startswith("["):
+                        if "FEN " in linea:
+                            siFen = True
+                            if siInicio:
+                                continue
+                            linea = '[FEN "%s"]' % self.fen
+                        lin.append(linea)
+                    else:
+                        break
+                if not siFen:
+                    linea = '[FEN "%s"]' % self.fen
+                    lin.append(linea)
+                self.liPGN = lin
+                self.xpgn = "\n".join(lin) + "\n\n*"
+
+            self.reiniciar()
 
     def paste(self, texto):
         cp = ControlPosicion.ControlPosicion()
