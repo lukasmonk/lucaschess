@@ -8,7 +8,6 @@ from Code import Gestor
 from Code import PGN
 from Code.QT import Controles
 from Code.QT import Iconos
-from Code.QT import PantallaAperturas
 from Code.QT import PantallaEntMaq
 from Code.QT import PantallaPGN
 from Code.QT import PantallaSolo
@@ -36,8 +35,6 @@ class GestorPartida(Gestor.Gestor):
 
         self.estado = kJugando
 
-        self.bloqueApertura = None
-
         li = [k_grabar, k_cancelar, k_pgnInformacion, k_atras, k_reiniciar, k_configurar, k_utilidades]
         self.pantalla.ponToolBar(li)
 
@@ -59,16 +56,19 @@ class GestorPartida(Gestor.Gestor):
 
         self.siguienteJugada()
 
-    def reiniciar(self):
-        if self.siCambios:
-            if QTUtil2.pregunta(self.pantalla, _("You will lost all changes, are you sure?")):
-                p = Partida.PartidaCompleta()
-                p.restore(self.reinicio)
-                self.inicio(p, self.siCompleta)
+    def reiniciar(self,):
+        if self.siCambios and not QTUtil2.pregunta(self.pantalla, _("You will lost all changes, are you sure?")):
+            return
+        p = Partida.PartidaCompleta()
+        p.restore(self.reinicio)
+        self.inicio(p, self.siCompleta)
 
     def procesarAccion(self, clave):
         if clave == k_reiniciar:
             self.reiniciar()
+
+        elif clave == k_atras:
+            self.atras()
 
         elif clave == k_grabar:
             self.pantalla.accept()
@@ -303,13 +303,14 @@ class GestorPartida(Gestor.Gestor):
 
         liMasOpciones = [
             ("rotacion", _("Auto-rotate board"), Iconos.JS_Rotacion()), sep,
-            ("apertura", _("Opening"), Iconos.Apertura()), sep,
-            ("posicion", _("Start position"), Iconos.Datos()), sep,
-            ("pasteposicion", _("Paste FEN position"), Iconos.Pegar16()), sep,
             ("leerpgn", _("Read PGN"), Iconos.PGN_Importar()), sep,
             ("pastepgn", _("Paste PGN"), Iconos.Pegar16()), sep,
-            ("voyager", _("Voyager 2"), Iconos.Voyager1()),
         ]
+        if not self.siCompleta:
+            liMasOpciones.extend( [ ("posicion", _("Start position"), Iconos.Datos()), sep,
+                                    ("pasteposicion", _("Paste FEN position"), Iconos.Pegar16()), sep,
+                                    ("voyager", _("Voyager 2"), Iconos.Voyager1()) ] )
+
         resp = self.configurar(liMasOpciones, siCambioTutor=True, siSonidos=True)
 
         if resp == "rotacion":
@@ -318,20 +319,11 @@ class GestorPartida(Gestor.Gestor):
             if self.siVolteoAutomatico:
                 if siBlancas != self.tablero.siBlancasAbajo:
                     self.tablero.rotaTablero()
-        elif resp == "apertura":
-            bl, ps = PantallaAperturas.dameApertura(self.pantalla, self.configuracion, self.bloqueApertura,
-                                                    self.posicApertura)
-            if bl:
-                self.bloqueApertura = bl
-                self.posicApertura = ps
-                self.fen = None
-                self.reiniciar()
 
         elif resp == "posicion":
             resp = XVoyager.xVoyagerFEN(self.pantalla, self.configuracion, self.fen)
             if resp is not None:
                 self.fen = resp
-                self.bloqueApertura = None
                 self.posicApertura = None
 
                 if self.xpgn:
@@ -364,7 +356,6 @@ class GestorPartida(Gestor.Gestor):
                 try:
                     cp.leeFen(str(texto))
                     self.fen = cp.fen()
-                    self.bloqueApertura = None
                     self.posicApertura = None
                     self.reiniciar()
                 except:
@@ -373,15 +364,16 @@ class GestorPartida(Gestor.Gestor):
         elif resp == "leerpgn":
             unpgn = PantallaPGN.eligePartida(self.pantalla)
             if unpgn:
-                self.bloqueApertura = None
-                self.posicApertura = None
-                self.fen = unpgn.dic.get("FEN", None)
-                dic = self.creaDic()
-                dic["PARTIDA"] = unpgn.partida.guardaEnTexto()
-                dic["liPGN"] = unpgn.listaCabeceras()
-                dic["FEN"] = self.fen
-                dic["SIBLANCASABAJO"] = unpgn.partida.ultPosicion.siBlancas
-                self.reiniciar(dic)
+                partida = unpgn.partida
+                if self.siCompleta and not partida.siFenInicial():
+                    return
+                p = Partida.PartidaCompleta()
+                p.leeOtra(partida)
+                if self.siCompleta:
+                    p.asignaApertura(self.configuracion)
+                p.setTags(unpgn.listaCabeceras())
+                self.reinicio = p.save()
+                self.reiniciar()
 
         elif resp == "pastepgn":
             texto = QTUtil.traePortapapeles()
@@ -391,15 +383,16 @@ class GestorPartida(Gestor.Gestor):
                 if unpgn.siError:
                     QTUtil2.mensError(self.pantalla, _("The text from the clipboard does not contain a chess game in PGN format"))
                     return
-                self.bloqueApertura = None
-                self.posicApertura = None
-                self.fen = unpgn.dic.get("FEN", None)
-                dic = self.creaDic()
-                dic["PARTIDA"] = unpgn.partida.guardaEnTexto()
-                dic["liPGN"] = unpgn.listaCabeceras()
-                dic["FEN"] = self.fen
-                dic["SIBLANCASABAJO"] = unpgn.partida.ultPosicion.siBlancas
-                self.reiniciar(dic)
+                partida = unpgn.partida
+                if self.siCompleta and not partida.siFenInicial():
+                    return
+                p = Partida.PartidaCompleta()
+                p.leeOtra(partida)
+                if self.siCompleta:
+                    p.asignaApertura(self.configuracion)
+                p.setTags(unpgn.listaCabeceras())
+                self.reinicio = p.save()
+                self.reiniciar()
 
         elif resp == "voyager":
             ptxt = XVoyager.xVoyager(self.pantalla, self.configuracion, partida=self.partida)
@@ -420,32 +413,6 @@ class GestorPartida(Gestor.Gestor):
         return [
             ("V", _("Paste position")),
         ]
-
-    def paste(self, texto):
-        cp = ControlPosicion.ControlPosicion()
-        try:
-            if "." in texto or '"' in texto:
-                unpgn = PGN.UnPGN()
-                unpgn.leeTexto(texto)
-                if unpgn.siError:
-                    return
-                self.bloqueApertura = None
-                self.posicApertura = None
-                self.fen = unpgn.dic.get("FEN", None)
-                dic = self.creaDic()
-                dic["PARTIDA"] = unpgn.partida.guardaEnTexto()
-                dic["liPGN"] = unpgn.listaCabeceras()
-                dic["FEN"] = self.fen
-                dic["SIBLANCASABAJO"] = unpgn.partida.ultPosicion.siBlancas
-                self.reiniciar(dic)
-            else:
-                cp.leeFen(str(texto))
-                self.fen = cp.fen()
-                self.bloqueApertura = None
-                self.posicApertura = None
-                self.reiniciar()
-        except:
-            pass
 
     def juegaRival(self):
         if not self.siTerminada():

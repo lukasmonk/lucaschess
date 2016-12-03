@@ -105,7 +105,12 @@ class WGames(QtGui.QWidget):
             txt = ""
         else:
             partida = self.summaryActivo.get("partida")
-            txt = "%s | "%partida.pgnBaseRAW() if partida else ""
+            nj = partida.numJugadas()
+            if nj > 1:
+                p = partida.copia(nj-2)
+                txt = "%s | " % p.pgnBaseRAW()
+            else:
+                txt = ""
             siPte = self.dbGames.siFaltanRegistrosPorLeer()
             if not siPte:
                 recs = self.dbGames.reccount()
@@ -179,6 +184,9 @@ class WGames(QtGui.QWidget):
                         pv = [ralm.PV for ralm in alm.LIALMS]
                     else:
                         pv = self.summaryActivo["pv"]
+                        if pv:
+                            lipv = pv.split(" ")
+                            pv = " ".join(lipv[:-1])
             self.dbGames.filterPV(pv)
             self.updateStatus()
             self.numJugada = pv.count(" ")
@@ -189,13 +197,14 @@ class WGames(QtGui.QWidget):
             self.gridCambiadoRegistro(None, recno, None)
 
     def gridCambiadoRegistro(self, grid, fila, oCol):
-        pv = self.dbGames.damePV(fila)
-        p = Partida.Partida()
-        p.leerPV(pv)
-        p.siTerminada()
-        self.infoMove.modoPartida(p, self.numJugada)
-        self.setFocus()
-        self.grid.setFocus()
+        if fila >= 0:
+            pv = self.dbGames.damePV(fila)
+            p = Partida.Partida()
+            p.leerPV(pv)
+            p.siTerminada()
+            self.infoMove.modoPartida(p, self.numJugada)
+            self.setFocus()
+            self.grid.setFocus()
 
     def tw_gobottom(self):
         self.grid.gobottom()
@@ -209,8 +218,7 @@ class WGames(QtGui.QWidget):
             if not self.dbGames.guardaPartidaRecno(recno, partidaCompleta):
                 QTUtil2.mensError(self, _("This game already exists."))
             else:
-                self.grid.refresh()
-                self.updateStatus()
+                self.actualiza(True)
 
     def tw_nuevo(self):
         recno = None

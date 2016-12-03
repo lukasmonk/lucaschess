@@ -17,7 +17,6 @@ def generaPM(piezas):
     dicPM["R"] = Iconos.pmApertura()
     dicPM["M"] = Iconos.pmComentarioMas()
     dicPM["S"] = Iconos.pmAperturaComentario()
-    dicPM["X"] = Iconos.pmLastXFCC()
     for k in "KQRNBkqrnb":
         dicPZ[k] = piezas.render(k)
 

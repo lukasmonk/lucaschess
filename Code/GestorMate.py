@@ -1,5 +1,6 @@
 import time
 
+from Code import TrListas
 from Code import ControlPosicion
 from Code import Gestor
 from Code import Jugada
@@ -135,10 +136,13 @@ class ControlMate:
 
     def basadoEn(self):
         fich = self.configNivel.fichero[:-4]
-        li = fich.split("/")
-        txt = _F(li[1])
+        li = fich.split("/" if "/" in fich else "\\")
+        d = TrListas.dicTraining()
+        base = li[1]
+        txt = d.get(base, _F(base))
         if len(li) == 3:
-            txt += ", " + _F(li[2])
+            fich = li[2]
+            txt += ", " + d.get(fich, _F(fich))
         return txt
 
     def numDatos(self):

@@ -475,7 +475,7 @@ int pgn_gen_pv(void)
 
             /*movegen();*/
             /*movegen_piece(PZNAME[piece]);*/
-            movegen_piece_to((int)PZNAME[piece], (unsigned)to);
+            movegen_piece_to((int)PZNAME[(int)piece], (unsigned)to);
             for (k = board.ply_moves[board.ply - 1]; k < board.ply_moves[board.ply]; k++)
             {
                 move = board.moves[k];

@@ -3,8 +3,8 @@ kInicio, kJugando, kFinJuego, kEntrenando, kVisorPGNini, kVisorPGNfic, kVisorPGN
 kSigueApertura, kSigueUsuario, kMalApertura = range(3)
 
 kJugNueva, kJugEntPos, kJugPGN, kJugEntMaq, kJugGM, kJugRemoto, kJugSolo, kJug60, kJugElo, kJugMicElo, \
-kJugBooks, kJugAperturas, kJugBoxing, kJugEntTac, kJugMvM, kJugAlbum, kJugFics, kJugFide, kJugXFCC, \
-kJugWorldMap, kJugRoute, kJugEntLight, kJugWashingCreate, kJugWashingTactics, kJugWashingReplay = range(25)
+kJugBooks, kJugAperturas, kJugBoxing, kJugEntTac, kJugMvM, kJugAlbum, kJugFics, kJugFide, \
+kJugWorldMap, kJugRoute, kJugEntLight, kJugWashingCreate, kJugWashingTactics, kJugWashingReplay = range(24)
 
 kFinNormal, kFinReinicio = range(2)
 

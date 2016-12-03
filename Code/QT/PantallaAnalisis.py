@@ -189,12 +189,12 @@ class WAnalisisGraph(QTVarios.WDialogo):
             else:
                 return "%d" % pts
         elif columna == "PORC":
-            mrm, pos = jg.analisis
-            rm = mrm.liMultiPV[0]
-            rm1 = mrm.liMultiPV[pos]
-            pts = rm.puntosABS_5() - rm1.puntosABS_5()
-            prc = 100 - pts if pts < 100 else 0
-            return "%3d%%" % prc
+            # mrm, pos = jg.analisis
+            # rm = mrm.liMultiPV[0]
+            # rm1 = mrm.liMultiPV[pos]
+            # pts = rm.puntosABS_5() - rm1.puntosABS_5()
+            # prc = 100 - pts if pts < 100 else 0
+            return "%3d%%" % jg.porcentaje
 
     def closeEvent(self, event):
         self.guardarVideo()
@@ -382,13 +382,12 @@ class WMuestra(QtGui.QWidget):
         menu.separador()
         menu.opcion(False, _("Only the first move of each variant"), Iconos.PuntoRojo())
         resp = menu.lanza()
-        if resp is None:
-            return
-        for pos, tp in enumerate(self.um.listaRM):
-            rm = tp[0]
-            partida = Partida.Partida(self.um.jg.posicionBase).leerPV(rm.pv)
-            self.um.grabarBase(partida, rm, resp)
-        self.um.ponVistaGestor()
+        if resp:
+            for pos, tp in enumerate(self.um.listaRM):
+                rm = tp[0]
+                partida = Partida.Partida(self.um.jg.posicionBase).leerPV(rm.pv)
+                self.um.grabarBase(partida, rm, resp)
+            self.um.ponVistaGestor()
 
 class WAnalisis(QTVarios.WDialogo):
     def __init__(self, mAnalisis, ventana, siBlancas, siLibre, siGrabar, muestraInicial):

@@ -299,7 +299,7 @@ class TreeSTAT:
         alm = self.root()
         return alm.W + alm.B + alm.D + alm.O
 
-    def children(self, pvBase):
+    def children(self, pvBase, allmoves=True):
         fen_base = makePV(pvBase)
         li = getExMoves()
         liResp = []
@@ -311,6 +311,8 @@ class TreeSTAT:
             fen = getFen()
             hashFen = self._fen2hash(fen)
             alm = self._readRowExt(rfather, hashFen, fen)
+            if not allmoves and (alm.W +alm.B+alm.D+alm.O) == 0:
+                continue
             alm.move = move
             liResp.append(alm)
         return liResp
@@ -452,11 +454,14 @@ class DBgames:
 
     def filterPV(self, pv, condicionAdicional=None):
         if type(pv) == list:  # transpositions
-            li = []
-            for unpv in pv:
-                xpv = pv2xpv(unpv)
-                li.append('XPV GLOB "%s*"' % xpv)
-            condicion = "(%s)" % (" OR ".join(li),)
+            if pv:
+                li = []
+                for unpv in pv:
+                    xpv = pv2xpv(unpv)
+                    li.append('XPV GLOB "%s*"' % xpv)
+                condicion = "(%s)" % (" OR ".join(li),)
+            else:
+                condicion = ""
         else:
             xpv = pv2xpv(pv)
             condicion = 'XPV GLOB "%s*"' % xpv if xpv else ""
@@ -554,68 +559,46 @@ class DBgames:
             del self.liRowids[recno]
         self._conexion.commit()
 
-    def getSummary(self, pvBase, dicAnalisis, siFigurinesPGN):
+    def getSummary(self, pvBase, dicAnalisis, siFigurinesPGN, allmoves=True):
         liMoves = []
         siBlancas = pvBase.count(" ") % 2 == 1 if pvBase else True
 
-        if pvBase is None:
-            root = self.dbSTAT.root()
-            w, d, b, o = root.W, root.D, root.B, root.O
-            tt = w + d + b + o
+        liChildren = self.dbSTAT.children(pvBase, allmoves)
+
+        tt = 0
+
+        lipvmove = []
+        for alm in liChildren:
+            w, d, b, o = alm.W, alm.D, alm.B, alm.O
+            t = w + d + b + o
+            # if t == 0:
+            # continue
+
             dic = {}
+            pvmove = alm.move
+            pv = pvBase + " " + pvmove
+            pv = pv.strip()
+            lipvmove.append(pvmove)
             dic["numero"] = ""
-            dic["pvmove"] = ""
-            dic["pv"] = ""
-            dic["analisis"] = None
-            dic["games"] = tt
+            dic["pvmove"] = pvmove
+            dic["pv"] = pv
+            dic["analisis"] = dicAnalisis.get(pvmove, None)
+            dic["games"] = t
+            tt += t
             dic["white"] = w
             dic["draw"] = d
             dic["black"] = b
             dic["other"] = o
-            dic["pwhite"] = w * 100.0 / tt if tt else 0.0
-            dic["pdraw"] = d * 100.0 / tt if tt else 0.0
-            dic["pblack"] = b * 100.0 / tt if tt else 0.0
-            dic["pother"] = o * 100.0 / tt if tt else 0.0
-            dic["move"] = _("Total")
-            dic["alm"] = None
+            dic["pwhite"] = w * 100.0 / t if t else 0.0
+            dic["pdraw"] = d * 100.0 / t if t else 0.0
+            dic["pblack"] = b * 100.0 / t if t else 0.0
+            dic["pother"] = o * 100.0 / t if t else 0.0
+
+            dic["alm"] = alm
+
             liMoves.append(dic)
 
-        else:
-            liChildren = self.dbSTAT.children(pvBase)
-
-            tt = 0
-
-            lipvmove = []
-            for alm in liChildren:
-                w, d, b, o = alm.W, alm.D, alm.B, alm.O
-                t = w + d + b + o
-                # if t == 0:
-                # continue
-
-                dic = {}
-                pvmove = alm.move
-                pv = pvBase + " " + pvmove
-                pv = pv.strip()
-                lipvmove.append(pvmove)
-                dic["numero"] = ""
-                dic["pvmove"] = pvmove
-                dic["pv"] = pv
-                dic["analisis"] = dicAnalisis.get(pvmove, None)
-                dic["games"] = t
-                tt += t
-                dic["white"] = w
-                dic["draw"] = d
-                dic["black"] = b
-                dic["other"] = o
-                dic["pwhite"] = w * 100.0 / t if t else 0.0
-                dic["pdraw"] = d * 100.0 / t if t else 0.0
-                dic["pblack"] = b * 100.0 / t if t else 0.0
-                dic["pother"] = o * 100.0 / t if t else 0.0
-
-                dic["alm"] = alm
-
-                liMoves.append(dic)
-
+        if allmoves:
             for pvmove in dicAnalisis:
                 if pvmove not in lipvmove:
                     dic = {}
@@ -637,8 +620,9 @@ class DBgames:
 
                     liMoves.append(dic)
 
-            liMoves = sorted(liMoves, key=lambda dic: -dic["games"])
+        liMoves = sorted(liMoves, key=lambda dic: -dic["games"])
 
+        tg = w = d = l = 0
         for dic in liMoves:
             dic["pgames"] = dic["games"] * 100.0 / tt if tt else 0.0
             dic["pdrawwhite"] = dic["pwhite"] + dic["pdraw"]
@@ -658,6 +642,13 @@ class DBgames:
                 dic["plost"] = dic["pwhite"]
                 dic["pwin"] = dic["pblack"]
 
+            g = dic["games"]
+            tg += g
+            w += dic["win"]
+            l += dic["lost"]
+            d += dic["draw"]
+
+
             pvmove = dic["pvmove"]
             if pvmove:
                 pv = dic["pv"]
@@ -675,6 +666,18 @@ class DBgames:
                 else:
                     dic["move"] = pvmove
                 dic["partida"] = p
+
+        dic = {}
+        dic["games"] = tg
+        dic["win"] = w
+        dic["draw"] = d
+        dic["lost"] = l
+        dic["pwin"] = w*100.0/tg if tg else 0.0
+        dic["pdraw"] = d*100.0/tg if tg else 0.0
+        dic["plost"] = l*100.0/tg if tg else 0.0
+        dic["pdrawwin"] = (w+d)*100.0/tg if tg else 0.0
+        dic["pdrawlost"] = (l+d)*100.0/tg if tg else 0.0
+        liMoves.append(dic)
 
         return liMoves
 

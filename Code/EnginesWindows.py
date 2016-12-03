@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: latin-1 -*-
 
 import collections
 
@@ -149,7 +149,7 @@ def leeRivales():
     cm.ponMultiPV(1, 4)
     mas(cm)
 
-    cm = ConfigMotor("cheng", "Martin Sedl√°k", "4 0.39", "http://www.vlasak.biz/cheng")
+    cm = ConfigMotor("cheng", "Martin Sedl·k", "4 0.39", "http://www.vlasak.biz/cheng")
     cm.path = "cheng4.exe"
     cm.elo = 2750
     cm.ponMultiPV(20, 256)
@@ -219,7 +219,7 @@ def leeRivales():
     cm.ponMultiPV(20, 100)
     mas(cm)
 
-    cm = ConfigMotor("texel", "Peter √ñsterlund", "1.05 32bit", "http://web.comhem.se/petero2home/javachess/index.html#texel")
+    cm = ConfigMotor("texel", "Peter ÷sterlund", "1.05 32bit", "http://web.comhem.se/petero2home/javachess/index.html#texel")
     cm.path = "texel32old.exe"
     cm.elo = 3100
     cm.ordenUCI("Hash", "32")
@@ -260,10 +260,10 @@ def leeRivales():
     cm.elo = 1200
     mas(cm)
 
-    cm = ConfigMotor("rodentII", "Pawel Koziol", "0.9.3", "http://www.pkoziol.cal24.pl/rodent/rodent.htm")
-    cm.path = "rodentII_x32.exe"
-    cm.path_64 = "rodentII_x64.exe", "0.9.3 64bit"
-    cm.elo = 2866
+    cm = ConfigMotor("rodentII", "Pawel Koziol", "0.9.64", "http://www.pkoziol.cal24.pl/rodent/rodent.htm")
+    cm.path = "RodentII_x32.exe"
+    cm.path_64 = "RodentII_x64.exe", "0.9.64 64bit"
+    cm.elo = 2912
     cm.ordenUCI("Hash", "64")
     mas(cm)
 

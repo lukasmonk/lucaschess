@@ -16,6 +16,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import WBG_Comun
 
+
 class WSummary(QtGui.QWidget):
     def __init__(self, procesador, winBookGuide, dbGames, siMoves=True):
         QtGui.QWidget.__init__(self)
@@ -31,11 +32,13 @@ class WSummary(QtGui.QWidget):
         self.analisisMRM = None
         self.siMoves = siMoves
         self.procesador = procesador
-        configuracion = procesador.configuracion
+        self.configuracion = procesador.configuracion
 
-        self.aperturasStd = AperturasStd.ListaAperturasStd(configuracion, False, False)
+        self.leeConfig()
 
-        self.siFigurinesPGN = procesador.configuracion.figurinesPGN
+        self.aperturasStd = AperturasStd.ListaAperturasStd(self.configuracion, False, False)
+
+        self.siFigurinesPGN = self.configuracion.figurinesPGN
 
         self.pvBase = ""
 
@@ -66,16 +69,17 @@ class WSummary(QtGui.QWidget):
         oColumnas.nueva("pdrawlost", "%% %s" % _("L+D"), 60, siDerecha=True)
 
         self.grid = Grid.Grid(self, oColumnas, xid="summary", siSelecFilas=True)
-        self.grid.tipoLetra(puntos=configuracion.puntosPGN)
-        self.grid.ponAltoFila(configuracion.altoFilaPGN)
+        self.grid.tipoLetra(puntos=self.configuracion.puntosPGN)
+        self.grid.ponAltoFila(self.configuracion.altoFilaPGN)
 
         # ToolBar
         liAcciones = [(_("Close"), Iconos.MainMenu(), winBookGuide.terminar), None,
-                      (_("Total"), Iconos.Inicio(), self.inicio), None,
+                      (_("Start position"), Iconos.Inicio(), self.inicio), None,
                       (_("Previous"), Iconos.AnteriorF(), self.anterior),
                       (_("Next"), Iconos.SiguienteF(), self.siguiente), None,
                       (_("Analyze"), Iconos.Analizar(), self.analizar), None,
                       (_("Rebuild"), Iconos.Reindexar(), self.reindexar), None,
+                      (_("Config"), Iconos.Configurar(), self.config), None,
                       ]
         if siMoves:
             liAcciones.append((_("Create a new guide based in these games") if siMoves else _("Create"), Iconos.BookGuide(), self.createGuide))
@@ -96,8 +100,8 @@ class WSummary(QtGui.QWidget):
 
         self.setLayout(layout)
 
-        self.qtColor = (
-            QTUtil.qtColorRGB(221, 255, 221), QTUtil.qtColorRGB(247, 247, 247), QTUtil.qtColorRGB(255, 217, 217))
+        self.qtColor = (QTUtil.qtColorRGB(221, 255, 221), QTUtil.qtColorRGB(247, 247, 247), QTUtil.qtColorRGB(255, 217, 217))
+        self.qtColorTotales = QTUtil.qtColorRGB(170, 170, 170)
 
     def gridDobleClickCabecera(self, grid, oColumna):
         clave = oColumna.clave
@@ -108,7 +112,8 @@ class WSummary(QtGui.QWidget):
             func = lambda dic: dic["move"].upper()
         else:
             func = lambda dic: dic[clave]
-        li = sorted(self.liMoves, key=func)
+        tot = self.liMoves[-1]
+        li = sorted(self.liMoves[:-1], key=func)
 
         orden, mas = self.orden
         if orden == clave:
@@ -118,6 +123,7 @@ class WSummary(QtGui.QWidget):
         if not mas:
             li.reverse()
         self.orden = clave, mas
+        li.append(tot)
         self.liMoves = li
         self.grid.refresh()
 
@@ -141,6 +147,8 @@ class WSummary(QtGui.QWidget):
             self.siguiente()
 
     def gridBotonDerecho(self, grid, fila, columna, modificadores):
+        if self.siFilaTotales(fila):
+            return
         alm = self.liMoves[fila]["alm"]
         if not alm or len(alm.LIALMS) < 2:
             return
@@ -157,9 +165,19 @@ class WSummary(QtGui.QWidget):
 
     def gridDato(self, grid, nfila, ocol):
         clave = ocol.clave
+
+        # Last=Totals
+        if self.siFilaTotales(nfila):
+            if clave in ("trans", "numero", "analisis", "pgames"):
+                return ""
+            elif clave == "move":
+                return _("Total")
+
         if clave == "trans":
             alm = self.liMoves[nfila]["alm"]
             return "t" if (alm and len(alm.LIALMS) > 1) else "-"
+        if self.liMoves[nfila]["games"] == 0 and clave not in ("numero", "analisis", "move"):
+            return ""
         v = self.liMoves[nfila][clave]
         if clave.startswith("p"):
             return "%.01f %%" % v
@@ -179,21 +197,26 @@ class WSummary(QtGui.QWidget):
         d = {}
         prev = 0
         ant = li[0][1]
+        total = 0
         for cl, v in li:
             if v < ant:
                 prev += 1
             d[cl] = prev
             ant = v
+            total += v
+        if total == 0:
+            d["win"] = d["draw"] = d["lost"] = -1
         return d
 
     def gridColorFondo(self, grid, nfila, ocol):
         clave = ocol.clave
+        if self.siFilaTotales(nfila) and clave not in ("numero", "analisis"):
+            return self.qtColorTotales
         if clave in ("pwin", "pdraw", "plost"):
             dic = self.posicionFila(nfila)
             n = dic[clave[1:]]
-            return self.qtColor[n]
-
-        return None
+            if n > -1:
+                return self.qtColor[n]
 
     def popPV(self, pv):
         if pv:
@@ -226,16 +249,15 @@ class WSummary(QtGui.QWidget):
             analisis.exeAnalizar(self.fenM2, resp, None, fen, pv, rmAnalisis)
 
     def inicio(self):
-        self.actualizaPV(None)
+        self.actualizaPV("")
         self.cambiaInfoMove()
 
     def anterior(self):
         if self.pvBase:
             pv = self.popPV(self.pvBase)
-        else:
-            pv = None
-        self.actualizaPV(pv)
-        self.cambiaInfoMove()
+
+            self.actualizaPV(pv)
+            self.cambiaInfoMove()
 
     def siguiente(self):
         recno = self.grid.recno()
@@ -399,8 +421,20 @@ class WSummary(QtGui.QWidget):
         else:
             return None
 
+    def siFilaTotales(self, nfila):
+        return nfila == len(self.liMoves)-1
+
+    def noFilaTotales(self, nfila):
+        return nfila < len(self.liMoves)-1
+
     def gridDobleClick(self, grid, fil, col):
-        self.siguiente()
+        if self.noFilaTotales(fil):
+            self.siguiente()
+
+    def gridActualiza(self):
+        nfila = self.grid.recno()
+        if nfila > -1:
+            self.gridCambiadoRegistro(None, nfila, None)
 
     def actualiza(self):
         movActual = self.infoMove.movActual
@@ -411,8 +445,8 @@ class WSummary(QtGui.QWidget):
         self.actualizaPV(pvBase)
         if movActual:
             pv = movActual.allPV()
-            for n, uno in enumerate(self.liMoves):
-                if uno["pv"] == pv:
+            for n in range(len(self.liMoves)-1):
+                if self.liMoves[n]["pv"] == pv:
                     self.grid.goto(n, 0)
                     return
 
@@ -435,7 +469,7 @@ class WSummary(QtGui.QWidget):
             if self.analisisMRM:
                 for rm in self.analisisMRM.liMultiPV:
                     dicAnalisis[rm.movimiento()] = rm
-        self.liMoves = self.dbGames.getSummary(pvMirar, dicAnalisis, self.siFigurinesPGN)
+        self.liMoves = self.dbGames.getSummary(pvMirar, dicAnalisis, self.siFigurinesPGN, self.allmoves)
 
         self.grid.refresh()
         self.grid.gotop()
@@ -451,7 +485,7 @@ class WSummary(QtGui.QWidget):
 
     def cambiaInfoMove(self):
         fila = self.grid.recno()
-        if fila >= 0:
+        if fila >= 0 and self.noFilaTotales(fila):
             pv = self.liMoves[fila]["pv"]
             p = Partida.Partida()
             p.leerPV(pv)
@@ -464,3 +498,25 @@ class WSummary(QtGui.QWidget):
     def showActiveName(self, nombre):
         # Llamado de WBG_Games -> setNameToolbar
         self.lbName.ponTexto(_("Summary of %s") % nombre)
+
+    def leeConfig(self):
+        dicConfig = self.configuracion.leeVariables("DBSUMMARY")
+        if not dicConfig:
+            dicConfig = { "allmoves":False }
+        self.allmoves = dicConfig["allmoves"]
+        return dicConfig
+
+    def grabaConfig(self):
+        dicConfig = {"allmoves": self.allmoves}
+        self.configuracion.escVariables("DBSUMMARY", dicConfig)
+        self.configuracion.graba()
+
+    def config(self):
+        menu = QTVarios.LCMenu(self)
+        menu.opcion("allmoves", _("Show all moves"), siCheckable=True, siChecked=self.allmoves)
+        resp = menu.lanza()
+        if resp is None:
+            return
+        self.allmoves = not self.allmoves
+
+        self.actualizaPV(self.pvBase)

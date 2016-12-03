@@ -1,7 +1,8 @@
 import os
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
+from Code.Constantes import *
 from Code.QT import Colocacion
 from Code.QT import Controles
 from Code.QT import Iconos
@@ -62,48 +63,50 @@ class InformacionPGN(QtGui.QWidget):
         self.gbValoracion = Controles.GB(self, _("Rating"), ly).ponFuente(f)
 
         # Comentarios
-        self.comentario = Controles.EM(self, siHTML=False).capturaCambios(self.comentarioCambiado).ponFuente(
-                ftxt).anchoMinimo(200)
+        self.comentario = Controles.EM(self, siHTML=False).capturaCambios(self.comentarioCambiado).ponFuente(ftxt).anchoMinimo(200)
 
         ly = Colocacion.H().control(self.comentario)
         self.gbComentario = Controles.GB(self, _("Comments"), ly).ponFuente(f)
 
         # Variantes
         liAcciones = (
-            (_("Append"), Iconos.Mas(), "tbMasVariante"), None,
-            ("%s+%s" % (_("Append"), _("Engine")), Iconos.MasR(), "tbMasVarianteR"), None,
-            (_("Edit"), Iconos.ComentarioEditar(), "tbEditarVariante"), None,
-            (_("Remove"), Iconos.Borrar(), "tbBorrarVariante"), None,
+            (_("Append"), Iconos.Mas(), self.tbMasVariante), None,
+            ("%s+%s" % (_("Append"), _("Engine")), Iconos.MasR(), self.tbMasVarianteR), None,
+            (_("Edit"), Iconos.ComentarioEditar(), self.tbEditarVariante), None,
+            (_("Remove"), Iconos.Borrar(), self.tbBorrarVariante), None,
         )
-        tbVariantes = Controles.TB(self, liAcciones, siTexto=False, tamIcon=16)
+        tbVariantes = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
 
         self.variantes = Controles.EM(self, siHTML=False).capturaCambios(self.variantesCambiado).ponFuente(ftxt)
         self.variantes.capturaDobleClick(self.variantesDobleClick)
-
+        self.variantes.setReadOnly(True)
         ly = Colocacion.V().control(tbVariantes).control(self.variantes)
         self.gbVariantes = Controles.GB(self, _("Variants"), ly).ponFuente(f)
+
+        self.splitter = splitter = QtGui.QSplitter(self)
+        self.splitter.setOrientation(QtCore.Qt.Vertical)
+        splitter.addWidget(self.gbComentario)
+        splitter.addWidget(self.gbVariantes)
 
         layout = Colocacion.V()
         layout.control(self.lbApertura)
         layout.control(self.gbValoracion)
-        layout.control(self.gbComentario)
-        layout.control(self.gbVariantes)
+        layout.control(self.splitter)
+        # layout.control(self.gbComentario)
+        # layout.control(self.gbVariantes)
         layout.margen(5)
 
         self.setLayout(layout)
 
-    def procesarTB(self):
-        getattr(self, self.sender().clave)()
-
     def tbMasVariante(self, siEngineActivo=False):
         resp = self.editaVariante("", siEngineActivo)
         if resp is not None:
-            txt = self.variantes.texto().strip()
+            txt = self.getVariantes()
             if txt:
                 txt += "\n\n"
             nuevaLinea, a1h8 = resp
             txt += nuevaLinea
-            self.variantes.ponTexto(txt)
+            self.setVariantes(txt)
             self.variantesCambiado()
 
     def tbMasVarianteR(self):
@@ -113,7 +116,7 @@ class InformacionPGN(QtGui.QWidget):
         self.variantesDobleClick(None)
 
     def tbBorrarVariante(self):
-        txt = self.variantes.texto()
+        txt = self.getVariantes()
         pos = self.variantes.posicion()
         li = txt.replace("\n\n", "\n").split("\n")
         n = 0
@@ -127,7 +130,7 @@ class InformacionPGN(QtGui.QWidget):
             del li[nLinea]
             txt = "\n\n".join(li)
             txt = txt.strip()
-            self.variantes.ponTexto(txt)
+            self.setVariantes(txt)
             self.variantesCambiado()
 
     def ponJG(self, partida, jg, apertura):
@@ -139,7 +142,7 @@ class InformacionPGN(QtGui.QWidget):
         self.gbVariantes.setVisible(siJG)
 
         if siJG:
-            self.gbComentario.ponTexto("%s - %s" % (_("Move"), _("Comments")))
+            self.gbComentario.ponTexto(_("Comments"))
             if apertura:
                 self.lbApertura.ponTexto(apertura)
                 if jg.siApertura:
@@ -151,7 +154,7 @@ class InformacionPGN(QtGui.QWidget):
                 self.lbApertura.hide()
 
             self.comentario.ponTexto(jg.comentario)
-            self.variantes.ponTexto(jg.variantes)
+            self.setVariantes(jg.variantes)
 
             li = jg.critica.split(" ")
 
@@ -193,7 +196,7 @@ class InformacionPGN(QtGui.QWidget):
 
     def variantesCambiado(self):
         if self.jg:
-            self.jg.variantes = self.variantes.texto()
+            self.jg.variantes = self.getVariantes()
 
     def valoracionCambiada(self, npos):
         if self.jg:
@@ -211,7 +214,7 @@ class InformacionPGN(QtGui.QWidget):
             self.jg.criticaDirecta = criticaDirecta if criticaDirecta != "-" else ""
 
     def variantesDobleClick(self, event):
-        txt = self.variantes.texto()
+        txt = self.getVariantes()
         pos = self.variantes.posicion()
         li = txt.replace("\n\n", "\n").split("\n")
         n = 0
@@ -228,11 +231,19 @@ class InformacionPGN(QtGui.QWidget):
             if resp is not None:
                 nuevaLinea, a1h8 = resp
                 txt = txt.replace(lineaPGN, nuevaLinea)
-                self.variantes.ponTexto(txt)
+                self.setVariantes(txt)
                 self.variantesCambiado()
 
     def editaVariante(self, linea, siEngineActivo=False):
         import Code.Variantes as Variantes
+
+        siCompetitivo = False
+        if hasattr(self.wParent, "gestor") and hasattr(self.wParent.gestor, "siCompetitivo"):
+            if self.wParent.gestor.siCompetitivo:
+                siCompetitivo = self.wParent.gestor.estado != kFinJuego
+
+        if siCompetitivo:
+            siEngineActivo = False
 
         gestor = self.wParent.gestor
         pos, jg = gestor.jugadaActiva()
@@ -240,4 +251,11 @@ class InformacionPGN(QtGui.QWidget):
             return None
         fen = jg.posicionBase.fen()
 
-        return Variantes.editaVariante(gestor.procesador, gestor, fen, linea, siEngineActivo=siEngineActivo)
+        return Variantes.editaVariante(gestor.procesador, gestor, fen, linea, siEngineActivo=siEngineActivo, siCompetitivo=siCompetitivo)
+
+    def setVariantes(self, txt):
+        self.variantes.ponTexto(txt)
+
+    def getVariantes(self):
+        return self.variantes.texto().strip()
+

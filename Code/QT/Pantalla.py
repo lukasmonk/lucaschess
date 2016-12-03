@@ -37,6 +37,7 @@ class Pantalla(QTVarios.WDialogo):
         self.informacionPGN = WInformacion.InformacionPGN(self)
         self.siInformacionPGN = False
         self.informacionPGN.hide()
+        self.registrarSplitter(self.informacionPGN.splitter, "InformacionPGN")
 
         self.timer = None
         self.siTrabajando = False
@@ -189,7 +190,7 @@ class Pantalla(QTVarios.WDialogo):
 
         self.setWindowFlags(flags)
 
-        self.setWindowTitle(titulo)
+        self.setWindowTitle(titulo if titulo else "-")
 
         return self.exec_()
 
@@ -299,6 +300,12 @@ class Pantalla(QTVarios.WDialogo):
             self.siInformacionPGN = siActivar
         self.informacionPGN.setVisible(self.siInformacionPGN)
         self.ajustaTamH()
+        sizes = self.informacionPGN.splitter.sizes()
+        for n, size in enumerate(sizes):
+            if size == 0:
+                sizes[n] = 100
+                self.informacionPGN.splitter.setSizes(sizes)
+                break
 
     def quitaChat(self):
         self.chat.hide()

@@ -12,13 +12,13 @@ all : $(LINK_TARGET)
 	echo All done
 
 $(LINK_TARGET) : $(OBJS)
-	#~ gcc -O3 -o $@ $^  -DNDEBUG
-	clang -O2 -o $@ $^
+	gcc -O3 -o $@ $^  -DNDEBUG
+	#~ clang -O2 -o $@ $^
 	#~ profile mas -pg
 	strip $(LINK_TARGET)
 
 %.o : %.c
-	#~ gcc -Wall -O3 -o $@ -c $< -DNDEBUG
+	gcc -Wall -O3 -o $@ -c $< -DNDEBUG -DWIN32
 	#~ mas rapida y menor tam = -O1
 	#~ profile mas -pg
-	clang -Wall -O2 -o $@ -c $<
+	#~ clang -Wall -O2 -o $@ -c $<

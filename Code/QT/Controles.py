@@ -36,9 +36,6 @@ class ED(QtGui.QLineEdit):
         return self
 
     def capturaIntro(self, rutina):
-        """
-        Si se pulsa un intro en el campo, se lanza la rutina
-        """
         self.connect(self, QtCore.SIGNAL("returnPressed()"), rutina)
         return self
 
@@ -47,76 +44,44 @@ class ED(QtGui.QLineEdit):
         return self
 
     def ponTexto(self, texto):
-        """
-        Pone el texto en el campo.
-        """
         self.setText(texto)
 
     def texto(self):
-        """
-        Devuelve el texto del campo.
-        """
         txt = self.text()
         return txt
 
     def alinCentrado(self):
-        """
-        Alinea al centro.
-        """
         self.setAlignment(QtCore.Qt.AlignHCenter)
         return self
 
     def alinDerecha(self):
-        """
-        Alinea a la derecha.
-        """
         self.setAlignment(QtCore.Qt.AlignRight)
         return self
 
-    def anchoMinimo(self, tam):
-        """
-        Ancho minimo en pixeles
-        """
-        self.setMinimumWidth(tam)
+    def anchoMinimo(self, px):
+        self.setMinimumWidth(px)
         return self
 
-    def anchoMaximo(self, tam):
-        """
-        Ancho maximo en pixeles
-        """
-        self.setMaximumWidth(tam)
+    def anchoMaximo(self, px):
+        self.setMaximumWidth(px)
         return self
 
     def caracteres(self, num):
-        """
-        Numero maximo de caracteres.
-        @param num: numero de caracteres maximo que puede contener.
-        """
         self.setMaxLength(num)
         self.numCaracteres = num
         return self
 
-    def anchoFijo(self, tam):
-        """
-        Ancho fijo del campo.
-        @param tam: tama_o en pixeles.
-        """
-        self.setFixedWidth(tam)
+    def anchoFijo(self, px):
+        self.setFixedWidth(px)
         return self
 
     def controlrx(self, regexpr):
-        """
-        Valida los caracteres introducidos en base a una expresion regular
-        """
         rx = QtCore.QRegExp(regexpr)
         validator = QtGui.QRegExpValidator(rx, self)
         self.setValidator(validator)
         return self
 
     def ponFuente(self, f):
-        """
-        Pone el tipo de letra f
-        """
         self.setFont(f)
         return self
 
@@ -144,17 +109,11 @@ class ED(QtGui.QLineEdit):
         return self
 
     def ponFloat(self, valor):
-        """
-        Pone el numero decimal en el campo
-        """
         fm = "%0." + str(self.decimales) + "f"
         self.ponTexto(fm % valor)
         return self
 
     def textoFloat(self):
-        """
-        Recupera el numero decimal del campo.
-        """
         txt = self.text()
         return round(float(txt), self.decimales) if txt else 0.0
 
@@ -169,18 +128,13 @@ class ED(QtGui.QLineEdit):
         return self
 
     def ponInt(self, valor):
-        """
-        Pone el numero entero en el campo
-        """
         self.ponTexto(str(valor))
         return self
 
     def textoInt(self):
-        """
-        Recupera el entero del campo.
-        """
         txt = self.text()
         return int(txt) if txt else 0
+
 
 class SB(QtGui.QSpinBox):
     """
@@ -198,11 +152,8 @@ class SB(QtGui.QSpinBox):
         self.setSingleStep(1)
         self.setValue(int(valor))
 
-    def tamMaximo(self, maxTam):
-        """
-        Tama_o maximo del campo en pixeles
-        """
-        self.setFixedWidth(maxTam)
+    def tamMaximo(self, px):
+        self.setFixedWidth(px)
         return self
 
     def valor(self):
@@ -214,6 +165,7 @@ class SB(QtGui.QSpinBox):
     def capturaCambiado(self, rutina):
         self.connect(self, QtCore.SIGNAL("valueChanged(int)"), rutina)
         return self
+
 
 class CB(QtGui.QComboBox):
     """
@@ -229,15 +181,9 @@ class CB(QtGui.QComboBox):
         self.rehacer(liOpciones, valorInicial)
 
     def valor(self):
-        """
-        Devuelve la clave de la opcion elegida
-        """
         return self.itemData(self.currentIndex())
 
     def ponFuente(self, f):
-        """
-        Pone el tipo de letra f
-        """
         self.setFont(f)
         return self
 
@@ -261,14 +207,14 @@ class CB(QtGui.QComboBox):
                 self.setCurrentIndex(n)
                 break
 
-    def ponAncho(self, tam):
+    def ponAncho(self, px):
         r = self.geometry()
-        r.setWidth(tam)
+        r.setWidth(px)
         self.setGeometry(r)
         return self
 
-    def ponAnchoFijo(self, tam):
-        self.setFixedWidth(tam)
+    def ponAnchoFijo(self, px):
+        self.setFixedWidth(px)
         return self
 
     def ponAnchoMinimo(self):
@@ -300,9 +246,6 @@ class CHB(QtGui.QCheckBox):
         return self.isChecked()
 
     def ponFuente(self, f):
-        """
-        Pone el tipo de letra f
-        """
         self.setFont(f)
         return self
 
@@ -310,12 +253,10 @@ class CHB(QtGui.QCheckBox):
         owner.connect(self, QtCore.SIGNAL("clicked()"), rutina)
         return self
 
-    def anchoFijo(self, tam):
-        """
-        Ancho fijo del campo.
-        """
-        self.setFixedWidth(tam)
+    def anchoFijo(self, px):
+        self.setFixedWidth(px)
         return self
+
 
 class LB(QtGui.QLabel):
     """
@@ -335,9 +276,6 @@ class LB(QtGui.QLabel):
         self.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByMouse)
 
     def ponTexto(self, texto):
-        """
-        Asigna un texto a la etiqueta.
-        """
         self.setText(texto)
 
     def texto(self):
@@ -353,57 +291,36 @@ class LB(QtGui.QLabel):
         return self
 
     def alinCentrado(self):
-        """
-        Alinea al centro.
-        """
         self.setAlignment(QtCore.Qt.AlignCenter)
         return self
 
     def alinDerecha(self):
-        """
-        Alinea a la derecha.
-        """
         self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         return self
 
-    def anchoMaximo(self, tam):
-        self.setMaximumWidth(tam)
+    def anchoMaximo(self, px):
+        self.setMaximumWidth(px)
         return self
 
-    def anchoFijo(self, tam):
-        """
-        Ancho fijo del campo.
-        """
-        self.setFixedWidth(tam)
+    def anchoFijo(self, px):
+        self.setFixedWidth(px)
         return self
 
-    def anchoMinimo(self, tam):
-        """
-        Ancho minimo del campo.
-        """
-        self.setMinimumWidth(tam)
+    def anchoMinimo(self, px):
+        self.setMinimumWidth(px)
         return self
 
-    def altoMinimo(self, tam):
-        """
-        Alto minimo del campo.
-        """
-        self.setMinimumHeight(tam)
+    def altoMinimo(self, px):
+        self.setMinimumHeight(px)
         return self
 
-    def altoFijo(self, tam):
-        """
-        Alto fijo del campo.
-        """
-        self.setFixedHeight(tam)
+    def altoFijo(self, px):
+        self.setFixedHeight(px)
         return self
 
-    def ponAlto(self, tam):
-        """
-        Alto del campo.
-        """
+    def ponAlto(self, px):
         rec = self.geometry()
-        rec.setHeight(tam)
+        rec.setHeight(px)
         self.setGeometry(rec)
         return self
 
@@ -439,14 +356,16 @@ class LB(QtGui.QLabel):
         self.setWordWrap(True)
         return self
 
-    def ponAncho(self, tam):
+    def ponAncho(self, px):
         r = self.geometry()
-        r.setWidth(tam)
+        r.setWidth(px)
         self.setGeometry(r)
         return self
 
+
 def LB2P(parent, texto):
     return LB(parent, texto + ": ")
+
 
 class PB(QtGui.QPushButton):
     """
@@ -479,35 +398,23 @@ class PB(QtGui.QPushButton):
         self.setFont(f)
         return self
 
-    def anchoFijo(self, tam):
-        """
-        Ancho fijo del campo.
-        """
-        self.setFixedWidth(tam)
+    def anchoFijo(self, px):
+        self.setFixedWidth(px)
         return self
 
-    def altoFijo(self, tam):
-        """
-        Alto fijo del campo.
-        """
-        self.setFixedHeight(tam)
+    def altoFijo(self, px):
+        self.setFixedHeight(px)
         return self
 
-    def cuadrado(self, tam):
-        self.setFixedSize(tam, tam)
+    def cuadrado(self, px):
+        self.setFixedSize(px, px)
         return self
 
-    def anchoMinimo(self, tam):
-        """
-        Ancho minimo del campo.
-        """
-        self.setMinimumWidth(tam)
+    def anchoMinimo(self, px):
+        self.setMinimumWidth(px)
         return self
 
     def conectar(self, rutina):
-        """
-        Se indica la rutina asociada cuando se presiona.
-        """
         self.wParent.connect(self, QtCore.SIGNAL("clicked()"), rutina)
         return self
 
@@ -530,6 +437,7 @@ class PB(QtGui.QPushButton):
     def ponTexto(self, txt):
         self.setText(txt)
 
+
 class RB(QtGui.QRadioButton):
     """
     RadioButton: lista de alternativas
@@ -543,6 +451,7 @@ class RB(QtGui.QRadioButton):
     def activa(self, siActivar=True):
         self.setChecked(siActivar)
         return self
+
 
 class GB(QtGui.QGroupBox):
     """
@@ -568,9 +477,6 @@ class GB(QtGui.QGroupBox):
         return self
 
     def conectar(self, rutina):
-        """
-        Se indica la rutina asociada cuando se presiona.
-        """
         self.setCheckable(True)
         self.setChecked(False)
         self.wParent.connect(self, QtCore.SIGNAL("clicked()"), rutina)
@@ -579,6 +485,7 @@ class GB(QtGui.QGroupBox):
     def ponTexto(self, texto):
         self.setTitle(texto)
         return self
+
 
 class EM(QtGui.QTextEdit):
     """
@@ -604,23 +511,14 @@ class EM(QtGui.QTextEdit):
                 self.insertPlainText(texto)
 
     def ponHtml(self, texto):
-        """
-        Pone el texto en el campo.
-        """
         self.setHtml(texto)
         return self
 
     def insertarHtml(self, texto):
-        """
-        Inserta un texto en la posicion del cursor.
-        """
         self.insertHtml(texto)
         return self
 
     def insertarTexto(self, texto):
-        """
-        Inserta un texto en la posicion del cursor.
-        """
         self.insertPlainText(texto)
         return self
 
@@ -629,56 +527,35 @@ class EM(QtGui.QTextEdit):
         return self
 
     def texto(self):
-        """
-        Recupera el texto del campo.
-        """
         return self.toPlainText()
 
     def ponTexto(self, txt):
-        """
-        texto del campo.
-        """
         self.setText("")
         self.insertarTexto(txt)
 
     def html(self):
-        """
-        Recupera el texto del campo.
-        """
         return self.toHtml()
 
-    def ponAncho(self, tam):
+    def ponAncho(self, px):
         r = self.geometry()
-        r.setWidth(tam)
+        r.setWidth(px)
         self.setGeometry(r)
         return self
 
-    def anchoMinimo(self, tam):
-        """
-        Ancho minimo del campo.
-        """
-        self.setMinimumWidth(tam)
+    def anchoMinimo(self, px):
+        self.setMinimumWidth(px)
         return self
 
-    def altoMinimo(self, tam):
-        """
-        Alto minimo del campo.
-        """
-        self.setMinimumHeight(tam)
+    def altoMinimo(self, px):
+        self.setMinimumHeight(px)
         return self
 
-    def altoFijo(self, tam):
-        """
-        Alto minimo del campo.
-        """
-        self.setFixedHeight(tam)
+    def altoFijo(self, px):
+        self.setFixedHeight(px)
         return self
 
-    def anchoFijo(self, tam):
-        """
-        Ancho fijo del campo.
-        """
-        self.setFixedWidth(tam)
+    def anchoFijo(self, px):
+        self.setFixedWidth(px)
         return self
 
     def ponFuente(self, f):
@@ -708,6 +585,7 @@ class EM(QtGui.QTextEdit):
 
     def posicion(self):
         return self.textCursor().position()
+
 
 class Menu(QtGui.QMenu):
     """
@@ -762,7 +640,7 @@ class Menu(QtGui.QMenu):
         self.setFont(f)
         return self
 
-    def opcion(self, clave, rotulo, icono=None, siDeshabilitado=False, tipoLetra=None):
+    def opcion(self, clave, rotulo, icono=None, siDeshabilitado=False, tipoLetra=None, siCheckable=False, siChecked=False):
         if icono:
             accion = QtGui.QAction(icono, rotulo, self)
         else:
@@ -772,6 +650,10 @@ class Menu(QtGui.QMenu):
             accion.setDisabled(True)
         if tipoLetra:
             accion.setFont(tipoLetra)
+        if siCheckable:
+            accion.setCheckable(True)
+            accion.setChecked(siChecked)
+
         self.addAction(accion)
         return accion
 
@@ -798,6 +680,7 @@ class Menu(QtGui.QMenu):
             return resp.clave
         else:
             return None
+
 
 class TB(QtGui.QToolBar):
     """
@@ -869,6 +752,7 @@ class TB(QtGui.QToolBar):
         for accion in self.liAcciones:
             if accion.clave == key:
                 accion.setVisible(value)
+
 
 class TBrutina(QtGui.QToolBar):
     """
@@ -952,6 +836,7 @@ class TBrutina(QtGui.QToolBar):
         if accion:
             accion.setVisible(value)
 
+
 class TipoLetra(QtGui.QFont):
     def __init__(self, nombre="", puntos=8, peso=50, siCursiva=False, siSubrayado=False, siTachado=False, txt=None):
         QtGui.QFont.__init__(self)
@@ -990,9 +875,6 @@ class Tab(QtGui.QTabWidget):
         self.setTabIcon(pos, icono)
 
     def ponFuente(self, f):
-        """
-        Pone el tipo de letra f
-        """
         self.setFont(f)
         return self
 
@@ -1006,6 +888,7 @@ class Tab(QtGui.QTabWidget):
 
         # def formaTriangular( self ):
         # self.setTabShape(self.Triangular)
+
 
 class SL(QtGui.QSlider):
     def __init__(self, parent, minimo, maximo, nvalor, dispatch, tick=10, step=1):
@@ -1035,8 +918,8 @@ class SL(QtGui.QSlider):
     def valor(self):
         return self.value()
 
-    def ponAncho(self, tam):
-        self.setFixedWidth(tam)
+    def ponAncho(self, px):
+        self.setFixedWidth(px)
         return self
 
     # class PRB(QtGui.QProgressBar):

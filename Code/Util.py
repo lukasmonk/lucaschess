@@ -832,7 +832,7 @@ class DicSQL(object):
     def __setitem__(self, key, obj):
         cursor = self._conexion.cursor()
         dato = base64.encodestring(cPickle.dumps(obj))
-        key = str(key)
+        # key = str(key)
         siYaEsta = key in self.stKeys
         if siYaEsta:
             sql = "UPDATE %s SET VALUE=? WHERE KEY = ?" % self.table

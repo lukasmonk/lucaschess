@@ -1,4 +1,5 @@
 #include <string.h>
+#include <ctype.h>
 
 #include "defs.h"
 #include "protos.h"
@@ -278,7 +279,7 @@ char * toSan(int num, char *sanMove)
             sprintf(sanMove, "%cx%s", POS_AH[move.from][0], POS_AH[move.to]);
         }
         else  {
-            sprintf(sanMove, POS_AH[move.to]);
+            sprintf(sanMove, "%s", POS_AH[move.to]);
         }
 //        if( move.is_ep ){
 //            sprintf(sanMove, "%s e.p.", sanMove);

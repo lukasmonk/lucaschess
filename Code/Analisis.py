@@ -660,7 +660,7 @@ class UnaMuestra:
         nombre = self.etiquetaMotor()
         tiempo = self.etiquetaTiempo()
         comentario = " {%s %s %s} " % (rm.abrTexto(), nombre, tiempo)
-        jugada = partida.pgnBaseRAW(self.mAnalisis.posJugada / 2 + 1)
+        jugada = partida.pgnBaseRAW(self.jg.posicionBase.jugadas)
         li = jugada.split(" ")
         n = 1 if siW else 2
         if siTodos:

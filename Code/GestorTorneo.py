@@ -117,7 +117,7 @@ class GestorTorneo(Gestor.Gestor):
             rm.siBlancas = self.partida.ultPosicion.siBlancas
             txt = "<b>[%s]</b> (%s) %s" % (rm.nombre, rm.abrTexto(), p.pgnSP())
             self.ponRotulo3(txt)
-            self.showPV(rm.pv, 5)
+            self.showPV(rm.pv, 3)
             # self.ponFlechaSC( rm.pv[:2], rm.pv[2:4] )
             # QTUtil.refreshGUI()
         self.refresh()

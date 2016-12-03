@@ -924,6 +924,7 @@ class ListaPiezas(QtGui.QWidget):
         itemData = QtCore.QByteArray(str(pieza))
 
         self.owner.ultimaPieza = pieza
+        self.owner.ponCursor()
 
         mimeData = QtCore.QMimeData()
         mimeData.setData('image/x-lc-dato', itemData)

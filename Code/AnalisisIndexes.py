@@ -249,7 +249,7 @@ def get_gamestage(cp, mrm):
 def tp_gamestage(cp, mrm):
     return _("Game stage"), calc_gamestage(cp, mrm), get_gamestage(cp, mrm)
 
-def genIndexes(partida):
+def genIndexes(partida, alm):
     average = {True: 0, False: 0}
     domination = {True: 0, False: 0}
     complexity = {True: 0.0, False: 0.0}
@@ -312,6 +312,7 @@ def genIndexes(partida):
     ct = _("Total")
     cpt = " " + _("pts")
     xac = txt_levels
+    prc = "%"
 
     inicio = '<tr><td align="center">%s</td>'
     resto = '<td align="center">%s</td><td align="center">%s</td><td align="center">%s</td></tr>'
@@ -328,6 +329,7 @@ def genIndexes(partida):
     txt += plantillaC % (_("Narrowness"), xac(narrowness[True]), xac(narrowness[False]), xac(narrownessT))
     txt += plantillaC % (_("Pieces activity"), xac(piecesactivity[True]), xac(piecesactivity[False]), xac(piecesactivityT))
     txt += plantillaC % (_("Exchange tendency"), xac(exchangetendency[True]), xac(exchangetendency[False]), xac(exchangetendencyT))
+    txt += plantillaL % ( "%", alm.porcW, prc, alm.porcB, prc, alm.porcT, prc)
 
     txtHTML = '<table border="1" cellpadding="5" cellspacing="1" >%s%s</table>' % (cab, txt)
     # Analisis.csv_formula(partida)

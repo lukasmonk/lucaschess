@@ -79,7 +79,6 @@ def dicDisk(configuracion):
     dicDisk_SQL(backup, configuracion.fichEstadFicsElo, tabla="color")
     dicDisk_SQL(backup, configuracion.fichEstadFideElo, tabla="color")
     dicDisk_SQL(backup, configuracion.fichEstadMicElo, tabla="color")
-    dicDisk_SQL(backup, configuracion.carpeta + "/*.xfcc", tabla="config")
     dicDisk_SQL(backup, configuracion.ficheroMate, siAllTables=True)
 
     # Cache

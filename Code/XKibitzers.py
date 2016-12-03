@@ -34,7 +34,7 @@ def nuevaKibitzer(ventana, configuracion):
                ("L", _("Best move in one line")),
                ("J", _("Select move")),
                ("C", _("Threats")),
-               ("E", _("Stockfish eval")),
+               ("E", _("Stockfish evaluation")),
                ]
     liGen.append((_("Type"), liTipos))
 

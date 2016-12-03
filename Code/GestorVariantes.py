@@ -2,13 +2,14 @@ import time
 
 from Code import ControlPosicion
 from Code import Gestor
+from Code import Jugada
 from Code import PGN
 from Code.QT import Iconos
 from Code import Util
 from Code.Constantes import *
 
 class GestorVariantes(Gestor.Gestor):
-    def inicio(self, fen, lineaPGN, okMasOpciones, siBlancasAbajo, siEngineActivo=False):
+    def inicio(self, fen, lineaPGN, okMasOpciones, siBlancasAbajo, siEngineActivo=False, siCompetitivo=False):
 
         self.pensando(True)
 
@@ -20,6 +21,8 @@ class GestorVariantes(Gestor.Gestor):
         self.lineaPGN = lineaPGN
 
         self.siAceptado = False
+
+        self.siCompetitivo = siCompetitivo
 
         uno = PGN.UnPGN()
         uno.leeTexto('[FEN "%s"]\n%s' % (fen, lineaPGN))
@@ -69,14 +72,13 @@ class GestorVariantes(Gestor.Gestor):
         self.siJugamosConBlancas = siBlancas
         self.siJuegaHumano = True
 
-        if siEngineActivo:
+        if siEngineActivo and not siCompetitivo:
             self.activeEngine()
 
         if not self.partida.numJugadas():
             self.siguienteJugada()
 
     def procesarAccion(self, clave):
-
         if clave == k_aceptar:
             self.siAceptado = True
             # self.resultado =
@@ -139,7 +141,6 @@ class GestorVariantes(Gestor.Gestor):
             self.siguienteJugada()
 
     def siguienteJugada(self):
-
         if self.estado == kFinJuego:
             return
 
@@ -303,10 +304,14 @@ class GestorVariantes(Gestor.Gestor):
         mt = _("Engine").lower()
         mt = _X(_("Disable %1"), mt) if self.siJuegaMotor else _X(_("Enable %1"), mt)
 
-        liMasOpciones = (
-            ("motor", mt, Iconos.Motores()),
-        )
-        resp = Gestor.Gestor.configurar(self, liMasOpciones, siCambioTutor=True)
+        if not self.siCompetitivo:
+            liMasOpciones = (
+                ("motor", mt, Iconos.Motores()),
+            )
+        else:
+            liMasOpciones = []
+
+        resp = Gestor.Gestor.configurar(self, liMasOpciones, siCambioTutor=not self.siCompetitivo)
 
         if resp == "motor":
             self.ponRotulo1("")
@@ -321,9 +326,12 @@ class GestorVariantes(Gestor.Gestor):
         if not self.siTerminada():
             self.pensando(True)
             rm = self.xrival.juega(nAjustado=self.xrival.nAjustarFuerza)
-            self.pensando(False)
             if rm.desde:
-                self.mueveHumano(rm.desde, rm.hasta, rm.coronacion)
+                siBien, self.error, jg = Jugada.dameJugada(self.partida.ultPosicion, rm.desde, rm.hasta, rm.coronacion)
+                self.masJugada(jg)
+                self.movimientosPiezas(jg.liMovs)
+                self.partida.ultPosicion = jg.posicion
+            self.pensando(False)
 
     def activeEngine(self):
         dicBase = self.configuracion.leeVariables("ENG_VARIANTES")

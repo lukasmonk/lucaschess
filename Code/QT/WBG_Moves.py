@@ -137,7 +137,7 @@ class WMoves(QtGui.QWidget):
         self.tbGen = Controles.TBrutina(self, liAccionesGen, tamIcon=24)
 
         # Name
-        self.lbName = Controles.LB(self, "").ponWrap().alinCentrado().ponColorFondoN("white", "darkcyan").ponTipoLetra(
+        self.lbName = Controles.LB(self, "").ponWrap().alinCentrado().ponColorFondoN("white", "#5178AA").ponTipoLetra(
                 puntos=16)
 
         # Navigator

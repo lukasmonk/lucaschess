@@ -52,6 +52,8 @@ class Gestor:
         self.ayudas = None
         self.ayudasPGN = 0
 
+        self.siCompetitivo = False
+
         self.resultado = kDesconocido
 
         self.categoria = None
@@ -145,16 +147,14 @@ class Gestor:
                 liPlayer.append((mov.hasta(), "P+"))
             elif mov.captura():
                 liPlayer.append((mov.hasta(), "Px"))
-        fen = posicion.fen()
-        if "w" in fen:
-            fen = fen.replace(" w ", " b ")
-        else:
-            fen = fen.replace(" b ", " w ")
+        oposic = posicion.copia()
+        oposic.siBlancas = not posicion.siBlancas
+        oposic.alPaso = ""
         siJaque = LCEngine.isCheck()
-        LCEngine.setFen(fen)
+        LCEngine.setFen(oposic.fen())
         liO = LCEngine.getExMoves()
         liRival = []
-        for mov in liO:
+        for n, mov in enumerate(liO):
             if not siJaque:
                 if mov.mate():
                     liRival.append((mov.hasta(), "R#"))
@@ -443,9 +443,7 @@ class Gestor:
 
     def siMiraKibitzers(self):
         return (self.estado == kFinJuego) or \
-               self.tipoJuego in (
-                   kJugEntPos, kJugPGN, kJugEntMaq, kJugEntTac, kJugGM, kJugSolo, kJugBooks, kJugAperturas,
-                   kJugXFCC) or \
+               self.tipoJuego in (kJugEntPos, kJugPGN, kJugEntMaq, kJugEntTac, kJugGM, kJugSolo, kJugBooks, kJugAperturas) or \
                (self.tipoJuego in (kJugElo, kJugMicElo) and not self.siCompetitivo)
 
     def miraKibitzers(self, jg, columnaClave):
@@ -890,8 +888,7 @@ class Gestor:
         if self.estado == kFinJuego:
             maxRecursion = 9999
         else:
-            if not (self.tipoJuego in [kJugEntPos, kJugPGN, kJugEntMaq, kJugGM, kJugSolo, kJugBooks, kJugAperturas,
-                                       kJugEntTac, kJugXFCC] or
+            if not (self.tipoJuego in [kJugEntPos, kJugPGN, kJugEntMaq, kJugGM, kJugSolo, kJugBooks, kJugAperturas, kJugEntTac] or
                         (self.tipoJuego in [kJugElo, kJugMicElo] and not self.siCompetitivo)):
                 if siUltimo or self.ayudas == 0:
                     return
@@ -1388,7 +1385,7 @@ class Gestor:
     def showAnalisis(self):
         um = self.procesador.unMomento()
         alm = Histogram.genHistograms(self.partida, self.configuracion.centipawns)
-        alm.indexesHTML, alm.indexesRAW = AnalisisIndexes.genIndexes(self.partida)
+        alm.indexesHTML, alm.indexesRAW = AnalisisIndexes.genIndexes(self.partida, alm)
         um.final()
         PantallaAnalisis.showGraph(self.pantalla, self, alm, Analisis.muestraAnalisis)
 

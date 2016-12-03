@@ -117,15 +117,13 @@ class WBase(QtGui.QWidget):
         self.lbJugNegras.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
 
         # Relojes
-        f = Controles.TipoLetra(puntos=30, peso=75)
-        self.lbRelojBlancas = Controles.LB(self, "00:00").ponFuente(f).alinCentrado().ponColorFondoN("#076C9F",
-                                                                                                     "#EFEFEF").anchoMinimo(
-                nAnchoLabels)
-        self.lbRelojNegras = Controles.LB(self, "00:00").ponFuente(f).alinCentrado().ponColorFondoN("#076C9F",
-                                                                                                    "#EFEFEF").anchoMinimo(
-                nAnchoLabels)
-        self.lbRelojBlancas.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
-        self.lbRelojNegras.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
+        f = Controles.TipoLetra("Arial Black", puntos=26, peso=75)
+        def lbReloj():
+            lb = Controles.LB(self, "00:00").ponFuente(f).alinCentrado().ponColorFondoN("#076C9F", "#EFEFEF").anchoMinimo(nAnchoLabels)
+            lb.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
+            return lb
+        self.lbRelojBlancas = lbReloj()
+        self.lbRelojNegras = lbReloj()
 
         # Revisando
         f = Controles.TipoLetra(puntos=14, peso=75)
@@ -427,9 +425,6 @@ class WBase(QtGui.QWidget):
                 indicadorInicial = "V"
             elif nR > 1:
                 indicadorInicial = "M"
-
-        if jg.siXFCC:
-            indicadorInicial = "X"
 
         pgn = jg.pgnFigurinesSP() if self.gestor.configuracion.figurinesPGN else jg.pgnSP()
         if nag:

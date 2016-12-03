@@ -10,7 +10,6 @@ class Jugada:
     def __init__(self):
         self.analisis = None
         self.criticaDirecta = ""
-        self.siXFCC = False  # usada en XFCC para marcar la jugada ultima, no se guarda
 
     def ponDatos(self, posicionBase, posicion, desde, hasta, coronacion):
         self.posicionBase = posicionBase
@@ -84,8 +83,7 @@ class Jugada:
         return resp + self.resultadoSP()
 
     def pgnFigurinesSP(self):
-        resp = self.pgnBase
-        return resp + self.resultadoSP()
+        return self.pgnBase + self.resultadoSP()
 
     def etiAbandono(self):
         xab = self.siAbandono

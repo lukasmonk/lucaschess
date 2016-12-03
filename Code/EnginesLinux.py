@@ -36,17 +36,19 @@ def leeRivales():
 
     cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman", "5r1 32-bit", "http://komodochess.com/")
     cm.path = "Linux/komodo-5r1-32bit"
+    cm.path_64 = "Linux/komodo-8-linux-generic", "8 64bits"
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "32")
     cm.elo = 3053
     cm.ponMultiPV(20, 99)
     mas(cm)
 
-    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "3", "http://stockfishchess.org/")
-    cm.path = "Linux/stockfish-3-32-ja"
-    cm.elo = 3079
+    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "8 32bits", "http://stockfishchess.org/")
+    cm.path = "Linux/stockfish_8_x32_old"
+    cm.path_64 = "Linux/stockfish_8_x64", "8 64bits"
+    cm.elo = 3300
     cm.ordenUCI("Ponder", "false")
-    cm.ordenUCI("Hash", "32")
+    cm.ordenUCI("Hash", "64")
     cm.ordenUCI("Threads", "1")
     cm.ponMultiPV(20, 500)
     mas(cm)
@@ -145,6 +147,17 @@ def leeRivales():
     cm = ConfigMotor("texel", "Peter Österlund", "0.98", "http://web.comhem.se/petero2home/javachess/index.html#texel")
     cm.path = "texel32"
     cm.elo = 2900
+    mas(cm)
+
+    cm = ConfigMotor("irina", "Lucas Monge", "0.12", "")
+    cm.path = "irina"
+    cm.elo = 1200
+    mas(cm)
+
+    cm = ConfigMotor("rodentII", "Pawel Koziol", "0.9.64", "http://www.pkoziol.cal24.pl/rodent/rodent.htm")
+    cm.path = "RodentII_x32"
+    cm.elo = 2912
+    cm.ordenUCI("Hash", "64")
     mas(cm)
 
     return dicRivales

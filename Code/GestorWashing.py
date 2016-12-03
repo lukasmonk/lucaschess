@@ -139,7 +139,7 @@ class GestorWashingReplay(Gestor.Gestor):
             mens = _("Congratulations, this washing is done")
             QTUtil2.mensaje(self.pantalla, mens)
         else:
-            mens = "%s<br>%s: %d" %( _("Done with errors"), _("Errors"), self.errores)
+            mens = "%s<br>%s: %d" %( _("Done with errors."), _("Errors"), self.errores)
             QTUtil2.mensError(self.pantalla, mens)
 
     def mueveHumano(self, desde, hasta, coronacion=None):

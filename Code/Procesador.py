@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import webbrowser
 
 from Code import Albums
 from Code import CPU
@@ -15,7 +16,7 @@ from Code import GestorEverest
 from Code import GestorFideFics
 from Code import GestorMateMap
 from Code import GestorMicElo
-from Code import GestorNueva
+from Code import GestorCompeticion
 from Code import GestorPGN
 from Code import GestorPerson
 from Code import GestorRoutes
@@ -222,7 +223,7 @@ class Procesador:
             categoria = self.configuracion.rival.categorias.segunClave(aplazamiento["CATEGORIA"])
             nivel = aplazamiento["NIVEL"]
             puntos = aplazamiento["PUNTOS"]
-            self.gestor = GestorNueva.GestorNueva(self)
+            self.gestor = GestorCompeticion.GestorCompeticion(self)
             self.gestor.inicio(categoria, nivel, siBlancas, puntos, aplazamiento)
         elif tipoJuego == kJugEntMaq:
             if aplazamiento["MODO"] == "Basic":
@@ -880,15 +881,15 @@ class Procesador:
         elif resp == "acercade":
             self.acercade()
         elif resp == "docs":
-            VarGen.startfile("%s/docs" % self.web)
+            webbrowser.open("%s/docs" % self.web)
         elif resp == "blog":
-            VarGen.startfile(self.blog)
+            webbrowser.open(self.blog)
         elif resp.startswith("http"):
-            VarGen.startfile(resp)
+            webbrowser.open(resp)
         elif resp == "web":
-            VarGen.startfile("%s/index?lang=%s" % (self.web, self.configuracion.traductor))
+            webbrowser.open("%s/index?lang=%s" % (self.web, self.configuracion.traductor))
         elif resp == "mail":
-            VarGen.startfile("mailto:lukasmonk@gmail.com")
+            webbrowser.open("mailto:lukasmonk@gmail.com")
 
 
     def adTitulo(self):
@@ -919,7 +920,7 @@ class Procesador:
             self.tipoJuego = kJugNueva
             categoria, nivel, siBlancas, puntos = opciones
 
-            self.gestor = GestorNueva.GestorNueva(self)
+            self.gestor = GestorCompeticion.GestorCompeticion(self)
             self.gestor.inicio(categoria, nivel, siBlancas, puntos)
 
     def finalX(self):

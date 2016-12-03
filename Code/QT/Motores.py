@@ -51,12 +51,13 @@ class Motores:
         d = Engines.leeRivales()
         li = []
         for elo, clave, depth in GestorElo.listaMotoresElo():
-            cm = d[clave].clona()
-            cm.nombre = "%d - %s (%s %d)" % (elo, cm.nombre, _("depth"), depth)
-            cm.clave = cm.nombre
-            cm.fixed_depth = depth
-            cm.elo = elo
-            li.append(cm)
+            if clave in d:
+                cm = d[clave].clona()
+                cm.nombre = "%d - %s (%s %d)" % (elo, cm.nombre, _("depth"), depth)
+                cm.clave = cm.nombre
+                cm.fixed_depth = depth
+                cm.elo = elo
+                li.append(cm)
         li.sort(key=lambda x:x.elo)
         return li
 

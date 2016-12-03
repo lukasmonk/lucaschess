@@ -76,6 +76,7 @@ def lanzaGUI(procesador):
     app.setStyle(QtGui.QStyleFactory.create(configuracion.estilo))
     app.setPalette(QtGui.QApplication.style().standardPalette())
     app.setEffectEnabled(QtCore.Qt.UI_AnimateMenu)
+    # QtGui.QFontDatabase.addApplicationFont('IntFiles/ChessAlpha2.ttf') # TODO
 
     if configuracion.familia:
         font = Controles.TipoLetra(configuracion.familia)

@@ -70,7 +70,7 @@ class WBDatabase(QTVarios.WDialogo):
         self.dbGames.close()
         self.dbGames = DBgames.DBgames(self.configuracion.ficheroDBgames)
         self.setdbGames()
-        self.wsummary.actualizaPV(None)
+        self.wsummary.actualizaPV("")
 
     def setdbGames(self):
         self.tab.ponValor(0, self.dbGames.rotulo())
@@ -83,12 +83,14 @@ class WBDatabase(QTVarios.WDialogo):
         tablero.desactivaTodas()
         if ntab == 0:
             self.wgames.actualiza()
+        else:
+            self.wsummary.gridActualiza()
 
     def inicializa(self):
         self.wsummary.setInfoMove(self.infoMove)
         self.wgames.setInfoMove(self.infoMove)
         self.setdbGames()
-        self.wsummary.actualizaPV(None)
+        self.wsummary.actualizaPV("")
         self.wgames.actualiza(True)
 
     def terminar(self):

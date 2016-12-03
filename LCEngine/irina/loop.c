@@ -1,7 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef WIN32
 #include <windows.h>
+#elif _POSIX_C_SOURCE >= 199309L
+#include <time.h>   // for nanosleep
+#else
+#include <unistd.h> // for usleep
+#endif
+
+void sleep_ms(int milliseconds) // cross-platform sleep function
+{
+#ifdef WIN32
+    Sleep(milliseconds);
+#elif _POSIX_C_SOURCE >= 199309L
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+#else
+    usleep(milliseconds * 1000);
+#endif
+}
+
+//#include <windows.h>
 #include "defs.h"
 #include "protos.h"
 #include "globals.h"
@@ -45,7 +68,7 @@ void loop(void) {
 
     for (;;) {
         if (!fgets(s, 2048, stdin)) {
-            Sleep( 100 );
+            sleep_ms( 100 );
             continue;
         }
         if (SCAN("uci")) {
@@ -189,7 +212,7 @@ void go(char *line) {
         movetime /= movestogo * 11 / 10;
     }
     if (!depth) {
-        depth = INFINITE;
+        depth = INFINITE9;
     }
 
     play(depth, movetime);
