@@ -454,7 +454,7 @@ def mensErrorSobreControl(owner, mens, control):
     msgBox.move(owner.x() + control.x(), owner.y() + control.y())
     msgBox.exec_()
 
-def pregunta(parent, mens, etiSi=None, etiNo=None):
+def pregunta(parent, mens, etiSi=None, etiNo=None, si_top=False):
     msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, _("Question"), resalta(mens), parent=parent)
     if etiSi is None:
         etiSi = _("Yes")
@@ -462,6 +462,8 @@ def pregunta(parent, mens, etiSi=None, etiNo=None):
         etiNo = _("No")
     siButton = msgBox.addButton(etiSi, QtGui.QMessageBox.YesRole)
     msgBox.addButton(etiNo, QtGui.QMessageBox.NoRole)
+    if si_top:
+        msgBox.setWindowFlags(msgBox.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
     msgBox.exec_()
     return msgBox.clickedButton() == siButton
 
@@ -478,6 +480,23 @@ def preguntaCancelar(parent, mens, si, no):
         resp = False
     else:
         resp = None
+    return resp
+
+def preguntaCancelar123(parent, title, mens, si, no, cancel):
+    msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, title, resalta(mens), parent=parent)
+    siButton = msgBox.addButton(si, QtGui.QMessageBox.YesRole)
+    noButton = msgBox.addButton(no, QtGui.QMessageBox.NoRole)
+    cancelButton = msgBox.addButton(cancel, QtGui.QMessageBox.RejectRole)
+    msgBox.exec_()
+    cb = msgBox.clickedButton()
+    if cb == siButton:
+        resp = 1
+    elif cb == noButton:
+        resp = 2
+    elif cb == cancelButton:
+        resp = 3
+    else:
+        resp = 0
     return resp
 
 def tbAcceptCancel(parent, siDefecto=False, siReject=True):

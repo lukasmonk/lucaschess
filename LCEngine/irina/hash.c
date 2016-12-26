@@ -6,7 +6,6 @@
 #include "hash.h"
 #include "globals.h"
 
-
 Bitmap HASH_keys[64][16];
 Bitmap HASH_ep[64];
 Bitmap HASH_wk = 0;

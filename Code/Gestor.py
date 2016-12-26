@@ -442,9 +442,9 @@ class Gestor:
                     self.paraKibitzers()
 
     def siMiraKibitzers(self):
-        return (self.estado == kFinJuego) or \
-               self.tipoJuego in (kJugEntPos, kJugPGN, kJugEntMaq, kJugEntTac, kJugGM, kJugSolo, kJugBooks, kJugAperturas) or \
-               (self.tipoJuego in (kJugElo, kJugMicElo) and not self.siCompetitivo)
+        return ((self.estado == kFinJuego) or
+               self.tipoJuego in (kJugEntPos, kJugPGN, kJugEntMaq, kJugEntTac, kJugGM, kJugSolo, kJugBooks, kJugAperturas) or
+               (self.tipoJuego in (kJugElo, kJugMicElo) and not self.siCompetitivo))
 
     def miraKibitzers(self, jg, columnaClave):
         if jg:

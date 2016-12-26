@@ -233,7 +233,6 @@ class WDialogo(QtGui.QDialog):
             return None
 
     def recuperarVideo(self, siTam=True, anchoDefecto=None, altoDefecto=None, dicDef=None):
-
         dic = self.recuperarDicVideo()
         if not dic:
             dic = dicDef

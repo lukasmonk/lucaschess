@@ -17,13 +17,15 @@ class Scanner_vars:
         self.last_width = int(dic.get("LAST_WIDTH", 0))
         self.tolerance = int(dic.get("TOLERANCE", 6))
         self.scanner = dic.get("SCANNER", "")
+        self.ask = dic.get("ASK", "True") == "True"
 
     def write(self):
         dic = {
             "OPACITY": self.opacity,
             "LAST_WIDTH": self.last_width,
             "TOLERANCE": self.tolerance,
-            "SCANNER": self.scanner
+            "SCANNER": self.scanner,
+            "ASK": self.ask
         }
         Util.dic8iniBase(self.fich_vars, dic)
 
@@ -180,8 +182,8 @@ class CPU:
         self.folder_scanners = folder_scanners
 
     def end(self, rect):
+        self.scanner.close()
         if rect:
-            self.scanner.close()
             desktop = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId(), 0, 0,
                                                QTUtil.anchoEscritorio(), QTUtil.altoEscritorio())
             selected_pixmap = desktop.copy(rect)

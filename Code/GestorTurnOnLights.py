@@ -286,3 +286,11 @@ class GestorTurnOnLights(Gestor.Gestor):
         self.procesador.inicio()
         return False
 
+    def actualPGN(self):
+        resp = '[Event "%s"]\n' % _("Turn on the lights")
+        resp += '[Site "%s"]\n' % self.line.label.replace("<br>", " ").strip()
+        resp += '[FEN "%s"\n' % self.partida.iniPosicion.fen()
+
+        resp += "\n" + self.partida.pgnBase()
+
+        return resp

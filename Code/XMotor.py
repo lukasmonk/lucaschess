@@ -21,6 +21,15 @@ def xpr(line):
         tdbg[0] = t
     return True
 
+def xprli(li):
+    if DEBUG:
+        t = time.time()
+        dif = t - tdbg[0]
+        for line in li:
+            prlk("%0.04f %s\n" % (dif, line))
+        tdbg[0] = t
+    return True
+
 if DEBUG:
     xpr("DEBUG XMOTOR")
 
@@ -52,6 +61,7 @@ class Engine(QtCore.QThread):
         self.wait()
 
     def put_line(self, line):
+        assert xpr("put>>> %s\n" % line)
         self.process.write(line +"\n")
 
     def get_lines(self):
@@ -59,6 +69,7 @@ class Engine(QtCore.QThread):
         li = self.libuffer
         self.libuffer = []
         self.mutex.unlock()
+        assert xprli(li)
         return li
 
     def hay_datos(self):
@@ -91,7 +102,6 @@ class Engine(QtCore.QThread):
             if self.process.waitForReadyRead(90):
                 x = str(self.process.readAllStandardOutput())
                 if x:
-                    assert xpr(x)
                     self.mutex.lock()
                     if self.lastline:
                         x = self.lastline + x
@@ -392,8 +402,8 @@ class XMotor:
     def order_uci(self):
         self.reset()
         self.put_line("uci")
-        self.put_line("isready")
-        li, self.uci_ok = self.wait_list("readyok", 1000)
+        # self.put_line("isready")
+        li, self.uci_ok = self.wait_list("uciok", 10000)
         self.uci_lines = [x for x in li if x.startswith("id ") or x.startswith("option name")] if self.uci_ok else []
 
     def set_option(self, name, value):

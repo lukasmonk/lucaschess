@@ -16,7 +16,6 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import WBG_Comun
 
-
 class WSummary(QtGui.QWidget):
     def __init__(self, procesador, winBookGuide, dbGames, siMoves=True):
         QtGui.QWidget.__init__(self)

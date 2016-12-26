@@ -24,5 +24,5 @@ def xVoyager(wowner, configuracion, partida=None, fen=None, siFen=False):
 def xVoyagerFEN(wowner, configuracion, fen):
     wowner.showMinimized()
     resp = xVoyager(wowner, configuracion, fen=fen, siFen=True)
-    wowner.setWindowState(wowner.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+    wowner.setWindowState(QtCore.Qt.WindowActive)
     return resp

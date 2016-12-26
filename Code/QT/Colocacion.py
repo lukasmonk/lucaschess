@@ -37,8 +37,8 @@ class V(QtGui.QVBoxLayout):
         return self
 
 class H(QtGui.QHBoxLayout):
-    def control(self, control):
-        self.addWidget(control)
+    def control(self, control, stretch=0):
+        self.addWidget(control, stretch)
         return self
 
     def controld(self, control):

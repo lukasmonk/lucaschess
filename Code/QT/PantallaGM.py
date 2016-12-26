@@ -548,11 +548,11 @@ class WImportar(QtGui.QDialog):
                 QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
 
         # Toolbar
-        liAcciones = [(_("Import"), Iconos.Aceptar(), "aceptar"), None,
-                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
-                      (_("Mark"), Iconos.Marcar(), "marcar"), None,
+        liAcciones = [(_("Import"), Iconos.Aceptar(), self.accept), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.reject), None,
+                      (_("Mark"), Iconos.Marcar(), self.marcar), None,
                       ]
-        tb = Controles.TB(self, liAcciones)
+        tb = Controles.TBrutina(self, liAcciones)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()
@@ -567,15 +567,6 @@ class WImportar(QtGui.QDialog):
         # Layout
         layout = Colocacion.V().control(tb).control(self.grid).margen(3)
         self.setLayout(layout)
-
-    def procesarTB(self):
-        accion = self.sender().clave
-        if accion == "aceptar":
-            self.accept()
-        elif accion == "cancelar":
-            self.reject()
-        elif accion == "marcar":
-            self.marcar()
 
     def marcar(self):
         menu = QTVarios.LCMenu(self)
@@ -608,6 +599,7 @@ def importarGM(ownerGM):
     except:
         pass
     web = "http://www-lucaschess.rhcloud.com/static/GM"
+    # web = "http://lucaschess.pythonanywhere.com/static/gm"
     me = QTUtil2.mensEspera.inicio(ownerGM, _("Reading the list of grandmasters from the web"))
     siError = False
     try:
@@ -675,6 +667,8 @@ class SelectGame(QTVarios.WDialogo):
     def __init__(self, wgm, ogm):
         self.ogm = ogm
         self.liRegs = ogm.genToSelect()
+        self.siReverse = False
+        self.claveSort = None
 
         dgm = GM.dicGM()
         nombre = dgm.get(ogm.gm, ogm.gm)
@@ -686,10 +680,14 @@ class SelectGame(QTVarios.WDialogo):
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("NOMBRE", _("Opponent"), 180)
         oColumnas.nueva("FECHA", _("Date"), 90, siCentrado=True)
+        oColumnas.nueva("EVENT", _("Event"), 140, siCentrado=True)
         oColumnas.nueva("ECO", _("ECO"), 40, siCentrado=True)
         oColumnas.nueva("RESULT", _("Result"), 64, siCentrado=True)
         self.grid = grid = Grid.Grid(self, oColumnas, siSelecFilas=True, siSeleccionMultiple=True)
+        nAnchoPgn = self.grid.anchoColumnas() + 20
+        self.grid.setMinimumWidth(nAnchoPgn)
         self.grid.coloresAlternados()
+
         self.registrarGrid(grid)
 
         liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
@@ -715,6 +713,22 @@ class SelectGame(QTVarios.WDialogo):
 
     def gridDobleClick(self, grid, fila, columna):
         self.aceptar()
+
+    def gridDobleClickCabecera(self, grid, oColumna):
+        clave = oColumna.clave
+
+        self.liRegs = sorted(self.liRegs, key=lambda x: x[clave].upper())
+
+        if self.claveSort == clave:
+            if self.siReverse:
+                self.liRegs.reverse()
+
+            self.siReverse = not self.siReverse
+        else:
+            self.siReverse = True
+
+        self.grid.refresh()
+        self.grid.gotop()
 
     def aceptar(self):
         self.partidaElegida = self.liRegs[self.grid.recno()]["NUMERO"]

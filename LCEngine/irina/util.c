@@ -1,3 +1,4 @@
+#include <sys/types.h>
 #include <sys/timeb.h>
 #include <string.h>
 #include <ctype.h>

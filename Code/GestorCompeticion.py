@@ -7,7 +7,6 @@ from Code import VarGen
 from Code import XMotorRespuesta
 from Code.Constantes import *
 
-
 class GestorCompeticion(Gestor.Gestor):
     def inicio(self, categoria, nivel, siBlancas, puntos, aplazamiento=None):
         self.tipoJuego = kJugNueva

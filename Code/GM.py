@@ -174,7 +174,7 @@ class GM:
     def genToSelect(self):
         liRegs = []
         for num, part in enumerate(self.liGMPartidas):
-            dic = dict(NOMBRE=part.oponent, FECHA=part.date, ECO=part.opening, RESULT=part.result, NUMERO=num)
+            dic = dict(NOMBRE=part.oponent, FECHA=part.date, ECO=part.opening, RESULT=part.result, NUMERO=num, EVENT=part.event)
             liRegs.append(dic)
         return liRegs
 
@@ -187,7 +187,6 @@ class GM:
     def remove(self, num):
         del self.liGMPartidas[num]
         self.write()
-
 
 def dicGM():
     dic = {}

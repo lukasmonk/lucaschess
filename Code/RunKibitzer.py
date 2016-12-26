@@ -24,6 +24,7 @@ from Code import XMotorRespuesta
 CONFIGURACION = "C"
 FEN = "F"
 TERMINAR = "T"
+COPYCLIPBOARD = "P"
 
 class VentanaMultiPV(QtGui.QDialog):
     def __init__(self, cpu):
@@ -238,18 +239,20 @@ class VentanaMultiPV(QtGui.QDialog):
             self.motor = None
 
     def portapapelesUltJug(self):
-        if self.liData and self.siAnalizar():
+        if self.liData: # and self.siAnalizar():
             rm = self.liData[0]
             p = Partida.Partida(fen=self.fen)
             p.leerPV(rm.pv)
-            pgn = p.pgnSP()
-            li = pgn.split(" ")
-            n = 2 if "..." in pgn else 1
-            resp = " ".join(li[0:n])
-            resp += " {%s D%s} " % (rm.abrTexto(), rm.depth)
-            if len(li) > n:
-                resp += " ".join(li[n:])
+            pgn = p.pgnBaseRAW()
+            resp = '["FEN", "%s"]\n\n%s' % (self.fen, pgn)
             QTUtil.ponPortapapeles(resp)
+
+            # li = pgn.split(" ")
+            # n = 2 if "..." in pgn else 1
+            # resp = " ".join(li[0:n])
+            # # resp += " {%s D%s} " % (rm.abrTexto(), rm.depth)
+            # if len(li) > n:
+            #     resp += " ".join(li[n:])
 
     def guardarVideo(self):
         dic = {}
@@ -595,13 +598,14 @@ class Ventana(QtGui.QDialog):
         if self.liData and self.siAnalizar():
             una = self.liData[-1]
             pgn = una["pgn"]
-            li = pgn.split(" ")
-            n = 2 if "..." in pgn else 1
-            resp = " ".join(li[0:n])
-            resp += self.comentario(una)
-            if len(li) > n:
-                resp += " ".join(li[n:])
+            resp = '["FEN", "%s"]\n\n%s\n' % (self.fen, pgn)
             QTUtil.ponPortapapeles(resp)
+            # li = pgn.split(" ")
+            # n = 2 if "..." in pgn else 1
+            # resp = " ".join(li[0:n])
+            # # resp += self.comentario(una)
+            # if len(li) > n:
+            #     resp += " ".join(li[n:])
 
     def guardarVideo(self):
         dic = {}
@@ -926,12 +930,15 @@ class Ventana(QtGui.QDialog):
 
 class VentanaSiguiente(Ventana):
     def creaRestoControles(self):
-
         layout = Colocacion.V().control(self.tb).otro(self.layoutDT).margen(1)
 
         self.setLayout(layout)
 
         self.lanzaMotor()
+        self.tb.setPosVisible(1, False)
+        self.tb.setPosVisible(2, True)
+        self.siPlay = True
+        self.liData = []
 
     def pause(self):
         self.siPlay = False
@@ -1002,21 +1009,21 @@ class VentanaJugadas(Ventana):
         Ventana.finalizar(self)
 
     def portapapelesUltJug(self):
-        if self.liData and self.siAnalizar():
+        # if self.liData and self.siAnalizar():
+        if self.liData:
             una = self.liData[-1]
             pgn = una["pgn"]
-            if "..." in pgn:
-                pgn = pgn.lstrip("0123456789. ")
-            li = pgn.split(" ")
-            resp = self.pgn1 + " " + li[0]
-            resp += self.comentario(una)
-            if len(li) > 1:
-                resp += " ".join(li[1:])
-
+            resp = '["FEN", "%s"]\n\n%s' % (self.fen, pgn)
             QTUtil.ponPortapapeles(resp)
+            # if "..." in pgn:
+            #     pgn = pgn.lstrip("0123456789. ")
+            # li = pgn.split(" ")
+            # resp = self.pgn1 + " " + li[0]
+            # # resp += self.comentario(una)
+            # if len(li) > 1:
+            #     resp += " ".join(li[1:])
 
     def paraMotorJugada(self):
-
         self.lbJug.hide()
         self.em.hide()
         self.tablero.hide()

@@ -648,7 +648,6 @@ class DBgames:
             l += dic["lost"]
             d += dic["draw"]
 
-
             pvmove = dic["pvmove"]
             if pvmove:
                 pv = dic["pv"]

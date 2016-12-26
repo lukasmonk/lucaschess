@@ -116,6 +116,8 @@ class WPosicion(QtGui.QWidget):
         self.cb_scanner_select.capturaCambiado(self.scanner_change)
         pb_scanner_more = Controles.PB(self, "", self.scanner_more).ponIcono(Iconos.Mas())
 
+        self.chb_scanner_ask = Controles.CHB(self, _("Ask before new capture"), self.vars_scanner.ask)
+
         self.li_scan_pch = []
         self.is_scan_init = False
 
@@ -136,7 +138,7 @@ class WPosicion(QtGui.QWidget):
         lyT = Colocacion.H().relleno().control(lb_scanner_tolerance).espacio(5).control(self.sb_scanner_tolerance).relleno()
         lyL = Colocacion.H().control(self.pb_scanner_learn).control(self.pb_scanner_learn_quit)
         lyS = Colocacion.H().control(lb_scanner_select).control(self.cb_scanner_select).control(pb_scanner_more)
-        ly = Colocacion.V().control(pb_scanner_deduce).control(self.chb_scanner_flip).otro(lyT).otro(lyL).otro(lyS)
+        ly = Colocacion.V().control(pb_scanner_deduce).control(self.chb_scanner_flip).otro(lyT).otro(lyL).otro(lyS).control(self.chb_scanner_ask)
         self.gb_scanner = Controles.GB(self, "", ly)
 
         lyG = Colocacion.G()
@@ -375,31 +377,36 @@ class WPosicion(QtGui.QWidget):
         self.edMovesPawn.setValue(self.posicion.movPeonCap)
 
     def scanner(self):
-        fdb = self.configuracion.ficheroTemporal("png")
         self.wparent.showMinimized()
+        seguir = True
+        if self.chb_scanner_ask.valor() and not QTUtil2.pregunta(None, _("Bring the window to scan to front"), etiSi=_("Capture"), etiNo=_("Cancel"), si_top=True):
+            seguir = False
+        if seguir:
+            fdb = self.configuracion.ficheroTemporal("png")
 
-        popen = XRun.run_lucas("-scanner", fdb, self.configuracion.carpetaScanners)
+            popen = XRun.run_lucas("-scanner", fdb, self.configuracion.carpetaScanners)
 
-        if not self.is_scan_init:
-            self.scanner_init()
-            self.is_scan_init = True
+            if not self.is_scan_init:
+                self.scanner_init()
+                self.is_scan_init = True
 
-        popen.wait()
+            popen.wait()
 
-        self.vars_scanner.read()
-        self.vars_scanner.tolerance = self.sb_scanner_tolerance.valor()  # releemos la variable
+            self.vars_scanner.read()
+            self.vars_scanner.tolerance = self.sb_scanner_tolerance.valor()  # releemos la variable
 
-        if os.path.isfile(fdb):
-            if Util.tamFichero(fdb):
-                self.scanner_read_png(fdb)
-                self.pixmap = QtGui.QPixmap(fdb)
-                tc = self.tablero.anchoCasilla * 8
-                pm = self.pixmap.scaled(tc, tc)
-                self.wparent.showNormal()  # needed to maintain position
-                self.lb_scanner.ponImagen(pm)
-                self.lb_scanner.show()
-                self.gb_scanner.show()
-                self.scanner_deduce()
+            if os.path.isfile(fdb):
+                if Util.tamFichero(fdb):
+                    self.scanner_read_png(fdb)
+                    self.pixmap = QtGui.QPixmap(fdb)
+                    tc = self.tablero.anchoCasilla * 8
+                    pm = self.pixmap.scaled(tc, tc)
+                    self.wparent.showNormal()  # needed to maintain position
+                    self.lb_scanner.ponImagen(pm)
+                    self.lb_scanner.show()
+                    self.gb_scanner.show()
+                    self.scanner_deduce()
+
         self.wparent.activateWindow()
         self.wparent.showNormal()
         self.wparent.setFocus()
@@ -586,6 +593,7 @@ class WPosicion(QtGui.QWidget):
 
         self.vars_scanner.scanner = os.path.basename(fich_scanner)[:-4]
         self.vars_scanner.tolerance = self.sb_scanner_tolerance.valor()
+        self.vars_scanner.ask = self.chb_scanner_ask.valor()
         self.vars_scanner.write()
 
     def keyPressEvent(self, event):

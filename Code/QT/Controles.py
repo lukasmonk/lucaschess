@@ -135,7 +135,6 @@ class ED(QtGui.QLineEdit):
         txt = self.text()
         return int(txt) if txt else 0
 
-
 class SB(QtGui.QSpinBox):
     """
     SpinBox: Entrada de numeros enteros, con control de incremento o reduccion
@@ -165,7 +164,6 @@ class SB(QtGui.QSpinBox):
     def capturaCambiado(self, rutina):
         self.connect(self, QtCore.SIGNAL("valueChanged(int)"), rutina)
         return self
-
 
 class CB(QtGui.QComboBox):
     """
@@ -256,7 +254,6 @@ class CHB(QtGui.QCheckBox):
     def anchoFijo(self, px):
         self.setFixedWidth(px)
         return self
-
 
 class LB(QtGui.QLabel):
     """
@@ -362,10 +359,8 @@ class LB(QtGui.QLabel):
         self.setGeometry(r)
         return self
 
-
 def LB2P(parent, texto):
     return LB(parent, texto + ": ")
-
 
 class PB(QtGui.QPushButton):
     """
@@ -437,7 +432,6 @@ class PB(QtGui.QPushButton):
     def ponTexto(self, txt):
         self.setText(txt)
 
-
 class RB(QtGui.QRadioButton):
     """
     RadioButton: lista de alternativas
@@ -451,7 +445,6 @@ class RB(QtGui.QRadioButton):
     def activa(self, siActivar=True):
         self.setChecked(siActivar)
         return self
-
 
 class GB(QtGui.QGroupBox):
     """
@@ -485,7 +478,6 @@ class GB(QtGui.QGroupBox):
     def ponTexto(self, texto):
         self.setTitle(texto)
         return self
-
 
 class EM(QtGui.QTextEdit):
     """
@@ -586,7 +578,6 @@ class EM(QtGui.QTextEdit):
     def posicion(self):
         return self.textCursor().position()
 
-
 class Menu(QtGui.QMenu):
     """
     Menu popup.
@@ -681,7 +672,6 @@ class Menu(QtGui.QMenu):
         else:
             return None
 
-
 class TB(QtGui.QToolBar):
     """
     Crea una barra de tareas simple.
@@ -752,7 +742,6 @@ class TB(QtGui.QToolBar):
         for accion in self.liAcciones:
             if accion.clave == key:
                 accion.setVisible(value)
-
 
 class TBrutina(QtGui.QToolBar):
     """
@@ -836,7 +825,6 @@ class TBrutina(QtGui.QToolBar):
         if accion:
             accion.setVisible(value)
 
-
 class TipoLetra(QtGui.QFont):
     def __init__(self, nombre="", puntos=8, peso=50, siCursiva=False, siSubrayado=False, siTachado=False, txt=None):
         QtGui.QFont.__init__(self)
@@ -888,7 +876,6 @@ class Tab(QtGui.QTabWidget):
 
         # def formaTriangular( self ):
         # self.setTabShape(self.Triangular)
-
 
 class SL(QtGui.QSlider):
     def __init__(self, parent, minimo, maximo, nvalor, dispatch, tick=10, step=1):

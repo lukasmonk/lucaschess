@@ -680,7 +680,7 @@ class GestorElo(Gestor.Gestor):
         dd.close()
 
     def determinaColor(self, datosMotor):
-        clave = "%s-%d" % (datosMotor.nombre, datosMotor.depth if datosMotor.depth else 0)
+        clave = "%s-%d" % (datosMotor.clave, datosMotor.depth if datosMotor.depth else 0)
         if not self.siCompetitivo:
             clave += "NC"
 

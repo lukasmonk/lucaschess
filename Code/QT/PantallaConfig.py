@@ -27,6 +27,8 @@ def opciones(parent, configuracion):
            rotulo += " (%s%%)"%porc
         li.append((k, rotulo))
     liGen.append((_("Language") + ":", li))
+    liGen.append(separador)
+    liGen.append((_("Check for updates at startup") + ":", configuracion.checkforupdate))
 
     # Engines
     liEng = [separador]
@@ -64,7 +66,6 @@ def opciones(parent, configuracion):
     )
     config = FormLayout.Combobox(_("Icons"), li)
     liAsp.append((config, configuracion.iconsTB))
-
 
     # PGN table
     liAsp.append(separador)
@@ -128,7 +129,7 @@ def opciones(parent, configuracion):
     config = FormLayout.Fichero(_("Autosave to a CSV file moves played"), "csv", True)
     liSA.append((config, configuracion.salvarCSV))
 
-    # Tableros
+    # Boards
     liT = [separador]
 
     # Mostrando el tutor
@@ -156,6 +157,8 @@ def opciones(parent, configuracion):
     liT.append((_("Show candidates") + ":", configuracion.showCandidates))
     liT.append((_("Show arrows of variants") + ":", configuracion.showVariantes))
     liT.append(separador)
+    liT.append((_("Show cursor when engine is thinking") + ":", configuracion.cursorThinking))
+    liT.append(separador)
     liT.append((_("Enable captured material window by default") + ":", configuracion.siActivarCapturas))
     liMat = [configuracion.tipoMaterial, ("D", _("Difference material")), ("C", _("Captured material at beginning"))]
     liT.append((_("Show material") + ":", liMat))
@@ -182,7 +185,7 @@ def opciones(parent, configuracion):
 
         liGen, liSon, liTT, liT, liEng, liAsp, liSA, liNC = resp
 
-        (configuracion.jugador, configuracion.estilo, configuracion.traductor) = liGen
+        (configuracion.jugador, configuracion.estilo, configuracion.traductor, configuracion.checkforupdate) = liGen
 
         porDefecto = liAsp[0]
         if porDefecto:
@@ -212,7 +215,7 @@ def opciones(parent, configuracion):
         (configuracion.vistaTutor,
             configuracion.efectosVisuales, rapidezMovPiezas,
             configuracion.siAtajosRaton, configuracion.showCandidates, configuracion.showVariantes,
-            configuracion.siActivarCapturas, configuracion.tipoMaterial,
+            configuracion.cursorThinking, configuracion.siActivarCapturas, configuracion.tipoMaterial,
             configuracion.siActivarInformacion, siDGT) = liT
         configuracion.rapidezMovPiezas = drap[rapidezMovPiezas]
         if configuracion.siDGT != siDGT:

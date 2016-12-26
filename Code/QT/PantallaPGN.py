@@ -106,18 +106,12 @@ class WElegir(QTVarios.WDialogo):
 
         dicVideoGrid = self.estado.dicVideoGrid if siRepite else None
         self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, dicVideo=dicVideoGrid, siSeleccionMultiple=True)
+        self.registrarGrid(self.grid)
 
         if siRepite:
             self.grid.goto(self.estado.recno, 0)
         else:
             self.grid.gotop()
-
-        if siRepite:
-            self.estado.recuperaWindow(self)
-        else:
-            n = self.grid.anchoColumnas() + 20
-            w, h = QTUtil.tamEscritorio()
-            self.resize(min(w * 9 / 10, n), h * 8 / 10)
 
         # Toolbar
         if siElegir:
@@ -146,6 +140,14 @@ class WElegir(QTVarios.WDialogo):
         self.setLayout(layout)
 
         self.recuperarVideo(siTam=False)
+
+        if siRepite:
+            self.estado.recuperaWindow(self)
+        else:
+            n = self.grid.anchoColumnas() + 20
+            w, h = QTUtil.tamEscritorio()
+            self.resize(min(w * 9 / 10, n), h * 8 / 10)
+
         self.ponStatus()
 
     def ponStatus(self):

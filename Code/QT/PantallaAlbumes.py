@@ -11,7 +11,7 @@ class WAlbum(QTVarios.WDialogo):
 
         self.album = album
         titulo = album.nombre
-        QTVarios.WDialogo.__init__(self, wowner, titulo, album.icono, "albumes")
+        QTVarios.WDialogo.__init__(self, wowner, titulo, album.icono(), "albumes")
 
         self.configuracion = procesador.configuracion
 

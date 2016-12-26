@@ -11,20 +11,28 @@ def leeRivales():
     def mas(cm):
         dicRivales[cm.clave] = cm
 
+
     ConfigMotor = BaseConfig.ConfigMotor
+
+    cm = ConfigMotor("cheng", "Martin Sedlák", "4 ver 0.39", "http://www.vlasak.biz/cheng")
+    cm.path = "cheng4_linux_x64"
+    cm.elo = 2750
+    cm.ponMultiPV(20, 256)
+    mas(cm)
+
+    cm = ConfigMotor("cinnamon", "Giuseppe Cannella", "1.2b", "http://cinnamonchess.altervista.org/")
+    cm.path = "cinnamon_1.2b-generic"
+    cm.ordenUCI("Hash", "32")
+    cm.elo = 1930
+    mas(cm)
+
+
     cm = ConfigMotor("critter", "Richard Vida", "1.6a 32bits", "http://www.vlasak.biz/critter/")
     cm.path = "critter-16a-32bit"
     cm.elo = 3091
     cm.ordenUCI("Hash", "32")
     cm.ordenUCI("Threads", "1")
     cm.ponMultiPV(20, 100)
-    mas(cm)
-
-    ConfigMotor = BaseConfig.ConfigMotor
-    cm = ConfigMotor("cheng", "Martin Sedlák", "4 ver 0.36c", "http://www.vlasak.biz/cheng")
-    cm.path = "cheng4_linux"
-    cm.elo = 2750
-    cm.ponMultiPV(20, 256)
     mas(cm)
 
     cm = ConfigMotor("clarabit", "Salvador Pallares Bejarano", "1.00", "http://sapabe.googlepages.com")
@@ -65,12 +73,6 @@ def leeRivales():
     cm = ConfigMotor("greko", "Vladimir Medvedev", "10.2", "http://sourceforge.net/projects/greko")
     cm.path = "10.2/bin/GreKo-102-32-ja"
     cm.elo = 2480
-    mas(cm)
-
-    cm = ConfigMotor("cinnamon", "Giuseppe Cannella", "1.2b", "http://cinnamonchess.altervista.org/")
-    cm.path = "cinnamon_1.2b-generic"
-    cm.ordenUCI("Hash", "32")
-    cm.elo = 1930
     mas(cm)
 
     cm = ConfigMotor("cyrano", "Harald Johnsen", "06B17", "http://sites.estvideo.net/tipunch/cyrano/")

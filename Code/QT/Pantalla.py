@@ -42,8 +42,7 @@ class Pantalla(QTVarios.WDialogo):
         self.timer = None
         self.siTrabajando = False
 
-        self.cursorthinking = QtGui.QCursor(Iconos.pmThinking())
-
+        self.cursorthinking = QtGui.QCursor(Iconos.pmThinking() if self.gestor.configuracion.cursorThinking else QtCore.Qt.BlankCursor)
         self.onTop = False
 
         self.tablero = self.base.tablero

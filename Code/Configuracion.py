@@ -115,6 +115,8 @@ class Configuracion:
 
         self.centipawns = False
 
+        self.cursorThinking = True
+
         self.salvarGanados = False
         self.salvarPerdidos = False
         self.salvarAbandonados = False
@@ -152,6 +154,8 @@ class Configuracion:
 
         self.notbackground = False
         self.bmi2 = False
+
+        self.checkforupdate = False
 
         self.grupos = BaseConfig.Grupos(self)
         self.grupos.nuevo("TarraschToy", 0, 1999, 0)
@@ -501,8 +505,12 @@ class Configuracion:
 
         dic["CENTIPAWNS"] = self.centipawns
 
+        dic["CURSORTHINKING"] = self.cursorThinking
+
         dic["NOTBACKGROUND"] = self.notbackground
         dic["BMI2"] = self.bmi2
+
+        dic["CHECKFORUPDATE"] = self.checkforupdate
 
         for clave, rival in self.dicRivales.iteritems():
             dic["RIVAL_%s" % clave] = rival.graba()
@@ -618,10 +626,14 @@ class Configuracion:
 
                 self.centipawns = dg("CENTIPAWNS", self.centipawns)
 
+                self.cursorThinking = dg("CURSORTHINKING", self.cursorThinking)
+
                 self.notbackground = dg("NOTBACKGROUND", self.notbackground)
                 self.bmi2 = dg("BMI2", self.bmi2)
-                if self.bmi2 and not Util.is64Windows():
+                if self.bmi2 and VarGen.isWindows and not Util.is64Windows():
                     self.bmi2 = False
+
+                self.checkforupdate = dg("CHECKFORUPDATE", self.checkforupdate)
 
                 for k in dic.keys():
                     if k.startswith("RIVAL_"):
@@ -748,6 +760,26 @@ class Configuracion:
         resp = db[nomVar]
         db.close()
         return resp if resp else {}
+
+        # "DicMicElos": _("Tourney-Elo")
+        # "ENG_GESTORSOLO": _("Create your own game")
+        # "FICH_GESTORSOLO": _("Create your own game")
+        # "ENG_VARIANTES": _("Variants") _("Edition")
+        # "TRANSSIBERIAN": _("Transsiberian Railway")
+        # "STSFORMULA": _("Formula to calculate elo") -  _("STS: Strategic Test Suite")
+        # "PantallaColores": _("Colors")
+        # "PCOLORES": _("Colors")
+        # "manual_save": _("Save positions to FNS/PGN")
+        # "FOLDER_ENGINES": _("External engines")
+        # "MICELO":
+        # "MICPER":
+        # "SAVEPGN":
+        # "STSRUN":
+        # "crear_torneo":
+        # "PARAMPELICULA":
+        # "BLINDFOLD":
+        # "WBG_MOVES":
+        # "DBSUMMARY":
 
     def escVariables(self, nomVar, dicValores):
         db = Util.DicSQL(self.ficheroVariables)

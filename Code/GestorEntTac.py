@@ -2,7 +2,6 @@ import time
 
 from PyQt4.QtCore import Qt
 
-
 from Code import ControlPosicion
 from Code import Gestor
 from Code import Jugada

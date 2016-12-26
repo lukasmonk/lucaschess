@@ -167,7 +167,8 @@ class GestorEntPos(Gestor.Gestor):
         self.pgnRefresh(True)
         QTUtil.xrefreshGUI()
 
-        self.xrival = self.procesador.creaGestorMotor(self.configuracion.tutor, self.configuracion.tiempoTutor, None)
+        if self.xrival is None:
+            self.xrival = self.procesador.creaGestorMotor(self.configuracion.tutor, self.configuracion.tiempoTutor, None)
 
         self.siAnalizadoTutor = False
 

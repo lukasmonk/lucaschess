@@ -16,7 +16,15 @@ Linux installation from sources
     - sudo pip install PhotoHash
     - sudo pip install Cython
 
+    
 3) chmod -R 777 *  at top-level project directory, (to ensure all engines have exec-permissions)
+
+) 64 bits
+    - cd LCEngine/irina
+    - ./xmk_linux.sh
+    - 
+
+
 
 
 Tested in Mate 14.04

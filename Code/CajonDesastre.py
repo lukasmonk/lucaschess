@@ -47,7 +47,7 @@ def compruebaCambioCarpetas(configuracion):
 def ficheroPotencia(configuracion):
     if os.path.isfile(configuracion.ficheroPotencia):
         conexion = sqlite3.connect(configuracion.ficheroPotencia)
-        conexion.text_factory = lambda x: unicode(x, "latin-1", "ignore")
+        conexion.text_factory = lambda x: unicode(x, "utf-8", "ignore")
 
         # Lista de tablas
         cursor = conexion.cursor()
@@ -109,7 +109,7 @@ def dicDisk_SQL(backup, path, tabla=None, siAllTables=False, pickle=True):
         shutil.copy(path, fdest)
 
     conexion = sqlite3.connect(path)
-    conexion.text_factory = lambda x: unicode(x, "latin-1", "ignore")
+    conexion.text_factory = lambda x: unicode(x, "utf-8", "ignore")
 
     # Lista de tablas
     cursor = conexion.cursor()

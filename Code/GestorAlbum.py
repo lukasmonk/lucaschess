@@ -12,7 +12,7 @@ class GestorAlbum(Gestor.Gestor):
             cromo = aplazamiento["CROMO"]
             self.reinicio = aplazamiento
         else:
-            self.reinicio = {"ALBUM": album, "CROMO": cromo}
+            self.reinicio = {"ALBUM": album, "CROMO": cromo, "SIBLANCAS":cromo.siBlancas}
 
         siBlancas = cromo.siBlancas
 

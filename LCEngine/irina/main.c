@@ -18,6 +18,7 @@ char * xx[] = { "c4", "e5", "e3", "Nf6", "b3", "d5", "cxd5", "Nxd5", "Bb2", "Bd6
                 "Bd4", "Rh2", "Na3+", "Kc1", "Nc4", "Kb1", "Ka3", "Rh3", "Be3", "Rh1", "Nd2+", "Kc1", "Ka2", "Kd1", "Nc4", "Ke2", "b2", "Kd3",
                 "Bc1", "Rh2", "Nd2"};
 
+
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 
 int pgn2pv(char *pgn, char * pv);

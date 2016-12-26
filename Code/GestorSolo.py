@@ -758,7 +758,7 @@ class GestorSolo(Gestor.Gestor):
         return [
             ("V", _("Paste position")),
             ("T", _("Save position in 'Selected positions' file")),
-            ("S", _("Set start position"))
+            ("S", _("Set start position")),
         ]
 
     def startPosition(self):

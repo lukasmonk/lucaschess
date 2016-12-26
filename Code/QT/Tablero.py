@@ -6,7 +6,6 @@ import os
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
-
 from Code.QT import Colocacion
 from Code.QT import Controles
 from Code.QT import Iconos
@@ -24,12 +23,10 @@ from Code import Util
 from Code import VarGen
 from Code.Constantes import *
 
-
 class RegKB:
     def __init__(self, key, flags):
         self.key = key
         self.flags = flags
-
 
 class Tablero(QtGui.QGraphicsView):
     def __init__(self, parent, confTablero, siMenuVisual=True):
@@ -580,7 +577,6 @@ class Tablero(QtGui.QGraphicsView):
         if self.siActivasPiezas:
             liKeys.append((None, None))
             liKeys.append(("a1 ... h8", _("To indicate origin and destination of a move")))
-
 
         if hasattr(self.pantalla, "gestor") and self.pantalla.gestor:
             if hasattr(self.pantalla.gestor, "rightMouse"):
@@ -1713,7 +1709,6 @@ class Tablero(QtGui.QGraphicsView):
 
         return "/".join(lineas) + " " + resto
 
-
 class WTamTablero(QtGui.QDialog):
     def __init__(self, tablero):
 
@@ -1848,7 +1843,6 @@ class WTamTablero(QtGui.QDialog):
         if self.confTablero.siBase:
             self.tablero.permitidoResizeExterno(self.confTablero.siBase)
 
-
 class PosTablero(Tablero):
     def activaTodas(self):
         for pieza, piezaSC, siActiva in self.liPiezas:
@@ -1925,7 +1919,6 @@ class PosTablero(Tablero):
             event.setDropAction(QtCore.Qt.IgnoreAction)
         event.ignore()
 
-
 class TableroEstatico(Tablero):
     def mousePressEvent(self, event):
         pos = event.pos()
@@ -1952,7 +1945,6 @@ class TableroEstatico(Tablero):
         self.pantalla.pulsadaCelda(c + f)
 
         Tablero.mousePressEvent(self, event)
-
 
 class TableroVisual(Tablero):
     EVENTO_DERECHO, EVENTO_DERECHO_PIEZA, EVENTO_DROP, EVENTO_BORRAR, EVENTO_FUNCION = range(5)
@@ -2129,7 +2121,6 @@ class TableroVisual(Tablero):
         Tablero.ponPosicion(self, posicion)
         self.baseCasillasSC.setAcceptDrops(True)
         self.activaTodas()
-
 
 class TableroDirector(TableroVisual):
     def keyPressEvent(self, event):

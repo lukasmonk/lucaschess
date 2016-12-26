@@ -104,8 +104,8 @@ class OpcionUCI:
             return False
 
     def leeString(self, li):
-        if len(li) == 4 and li[2] == "default":
-            self.default = "" if li[3] == "<empty>" else li[3]
+        if (len(li) == 3 or len(li) == 4) and li[2] == "default": # proposed by tico-tico in https://github.com/lukasmonk/lucaschess/issues/18
+            self.default = "" if len(li) == 3 or li[3] == "<empty>" else li[3] # proposed by tico-tico
             return True
         else:
             return False
@@ -113,6 +113,7 @@ class OpcionUCI:
     def leeCombo(self, li):
         self.liVars = []
         self.default = ""
+        siDefault = False
         nvar = -1
         for x in li[2:]:
             if x == "var":

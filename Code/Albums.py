@@ -147,13 +147,16 @@ class Cromo:
         return Iconos.pixmap(li[self.nivel])
 
 class Album:
-    def __init__(self, clavedb, nombre, icono):
+    def __init__(self, clavedb, alias):
         self.claveDB = clavedb
-        self.nombre = nombre
-        self.icono = icono
+        self.alias = alias
+        self.nombre = _F(alias)
         self.liCromos = []
         self.hecho = False
         self.ficheroDB = VarGen.configuracion.ficheroAlbumes
+
+    def icono(self):
+        return Iconos.icono(self.alias)
 
     def __len__(self):
         return len(self.liCromos)
@@ -210,7 +213,7 @@ class Albumes:
         return {}
 
     def create_album(self, alias):
-        album = Album(self.preClave + "_" + alias, _F(alias), Iconos.icono(alias))
+        album = Album(self.preClave + "_" + alias, alias )
 
         for nivel, cuantos in enumerate(self.dicAlbumes[alias]):
             if cuantos:
@@ -233,7 +236,7 @@ class Albumes:
             dig = {}
             for cromo in self.liGeneralCromos:
                 dig[cromo.clave] = cromo
-            album = Album(key_db, _F(alias), Iconos.icono(alias))
+            album = Album(key_db, alias)
             li = []
             pos = 0
             for k, v in dic.iteritems():

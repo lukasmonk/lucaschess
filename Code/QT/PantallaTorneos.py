@@ -158,10 +158,10 @@ class WUnTorneo(QTVarios.WDialogo):
         self.edNombre = Controles.ED(w, torneo.nombre())
         # # Resign
         lbResign = Controles.LB(self, _("Minimum points to assign winner") + ": ")
-        self.sbResign = Controles.SB(self, torneo.resign(), 60, 10000)
+        self.sbResign = Controles.SB(self, torneo.resign(), 60, 100000)
         # Draw-plys
         lbDrawMinPly = Controles.LB(self, _("Minimum moves to assign draw") + ": ")
-        self.sbDrawMinPly = Controles.SB(self, torneo.drawMinPly(), 20, 9999)
+        self.sbDrawMinPly = Controles.SB(self, torneo.drawMinPly(), 20, 1000)
         # Draw-puntos
         lbDrawRange = Controles.LB(self, _("Maximum points to assign draw") + ": ")
         self.sbDrawRange = Controles.SB(self, torneo.drawRange(), 0, 50)

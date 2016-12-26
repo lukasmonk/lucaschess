@@ -2254,3 +2254,9 @@ def pmTerminal():
 def Terminal():
     return QtGui.QIcon(pmTerminal())
 
+def pmManualSave():
+    return PM(912313,912896)
+
+def ManualSave():
+    return QtGui.QIcon(pmManualSave())
+

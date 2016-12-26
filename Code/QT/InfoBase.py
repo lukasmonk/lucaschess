@@ -406,7 +406,7 @@ class ThanksTo:
             ("The Week in Chess", "http://theweekinchess.com/"),
             ("Wikipedia", "http://en.wikipedia.org/wiki/List_of_chess_games"),
             ("fics", "http://ficsgames.org/cgi-bin/download.cgi"),
-            ("Norman Pollock", "http://www.hoflink.com/~npollock/40H.html"),
+            ("Norman Pollock", "http://40h.000webhostapp.com/"),
         )
         txt = '<center><table border="1" cellpadding="5" cellspacing="0" >'
         for nom, web in li:

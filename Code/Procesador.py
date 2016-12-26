@@ -49,8 +49,8 @@ from Code.QT import Piezas
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
-from Code.QT import WBDatabase
-# from Code.QT import WBDatabaseFEN # TODO
+from Code.QT import PantallaDatabase
+from Code.QT import PantallaManualSave
 from Code.QT import WBGuide
 from Code import Routes
 from Code import Util
@@ -119,6 +119,7 @@ class Procesador:
 
         self.entrenamientos = Entrenamientos.Entrenamientos(self)
 
+
         if self.configuracion.siAplazada:
             aplazamiento = self.configuracion.aplazamiento
             self.juegaAplazada(aplazamiento)
@@ -141,9 +142,9 @@ class Procesador:
                 elif comandoL.endswith(".lcg"):
                     self.externDatabase(comando)
                     return
-                # elif comandoL.endswith(".lcf"): # TODO
-                #     self.externDatabaseFEN(comando)
-                #     return
+                elif comandoL.endswith(".lcf"):
+                    self.externDatabaseFEN(comando)
+                    return
                 elif comandoL.endswith(".bmt"):
                     self.inicio()
                     self.externBMT(comando)
@@ -238,7 +239,7 @@ class Procesador:
             self.gestor.inicio(None, 0, 0, aplazamiento["SICOMPETITIVO"], aplazamiento)
         elif tipoJuego == kJugAlbum:
             self.gestor = GestorAlbum.GestorAlbum(self)
-            self.gestor.inicio(None, None, None, aplazamiento)
+            self.gestor.inicio(None, None, aplazamiento)
         elif tipoJuego == kJugPGN:
             self.visorPGN("pgn_comandoExterno")
         elif tipoJuego == kJugSolo:
@@ -667,8 +668,9 @@ class Procesador:
 
         menu1 = menu.submenu(_("Database"), Iconos.Database())
         menu1.opcion("database", _("Complete games"), Iconos.DatabaseC())
-        # menu1.separador()
-        # menu1.opcion("databaseFEN", _("Positions"), Iconos.DatabaseF()) # TODO
+        menu.separador()
+
+        menu.opcion("manual_save", _("Save positions to FNS/PGN"), Iconos.ManualSave())
         menu.separador()
 
         menu1 = menu.submenu(_("Openings"), Iconos.Aperturas())
@@ -701,10 +703,11 @@ class Procesador:
             elif resp == "sts":
                 self.sts()
 
+            elif resp == "manual_save":
+                self.manual_save()
+
             elif resp == "database":
                 self.database()
-            # elif resp == "databaseFEN": # TODO
-            #     self.databaseFEN()
 
             elif resp == "aperturaspers":
                 self.aperturaspers()
@@ -722,17 +725,11 @@ class Procesador:
         self.procesarAccion(k_terminar)
 
     def database(self):
-        w = WBDatabase.WBDatabase(self.pantalla, self)
+        w = PantallaDatabase.WBDatabase(self.pantalla, self)
         w.exec_()
 
-    # def externDatabaseFEN(self, fichero): # TODO
-    #     self.configuracion.ficheroDBgamesFEN = fichero
-    #     self.databaseFEN()
-    #     self.procesarAccion(k_terminar)
-
-    # def databaseFEN(self): # TODO
-    #     w = WBDatabaseFEN.WBDatabaseFEN(self.pantalla, self)
-    #     w.exec_()
+    def manual_save(self):
+        PantallaManualSave.manual_save(self)
 
     def torneos(self):
         xjugar = PantallaTorneos.torneos(self.pantalla)

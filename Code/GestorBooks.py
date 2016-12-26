@@ -303,7 +303,6 @@ class GestorBooks(Gestor.Gestor):
             self.refresh()
             self.siguienteJugada()
 
-
     def ponVariantes(self, jg):
         desde = jg.desde
         hasta = jg.hasta

@@ -289,7 +289,7 @@ class Tactica(BaseTactica):
         for f, w, d, h in self.filesw:
             lif0 = []
             for fich in self.listaFicheros(f):
-                q = codecs.open(fich, "r", "latin-1", 'ignore')
+                q = codecs.open(fich, "r", "utf-8", 'ignore')
                 for linea in q:
                     linea = linea.strip()
                     if linea and "|" in linea:
