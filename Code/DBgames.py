@@ -453,6 +453,7 @@ class DBgames:
         return not self.rowidReader.terminado()
 
     def filterPV(self, pv, condicionAdicional=None):
+        condicion = ""
         if type(pv) == list:  # transpositions
             if pv:
                 li = []
@@ -460,9 +461,7 @@ class DBgames:
                     xpv = pv2xpv(unpv)
                     li.append('XPV GLOB "%s*"' % xpv)
                 condicion = "(%s)" % (" OR ".join(li),)
-            else:
-                condicion = ""
-        else:
+        elif pv:
             xpv = pv2xpv(pv)
             condicion = 'XPV GLOB "%s*"' % xpv if xpv else ""
         if condicionAdicional:

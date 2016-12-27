@@ -104,7 +104,7 @@ class WGames(QtGui.QWidget):
         if not self.summaryActivo:
             txt = ""
         else:
-            partida = self.summaryActivo.get("partida")
+            partida = self.summaryActivo.get("partida", Partida.PartidaCompleta())
             nj = partida.numJugadas()
             if nj > 1:
                 p = partida.copia(nj-2)
@@ -178,12 +178,12 @@ class WGames(QtGui.QWidget):
             self.summaryActivo = summaryActivo
             pv = ""
             if self.summaryActivo:
-                alm = self.summaryActivo["alm"]
+                alm = self.summaryActivo.get("alm")
                 if alm:
                     if len(alm.LIALMS) > 1:
                         pv = [ralm.PV for ralm in alm.LIALMS]
                     else:
-                        pv = self.summaryActivo["pv"]
+                        pv = self.summaryActivo.get("pv")
                         if pv:
                             lipv = pv.split(" ")
                             pv = " ".join(lipv[:-1])

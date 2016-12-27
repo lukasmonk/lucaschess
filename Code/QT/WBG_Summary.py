@@ -451,15 +451,15 @@ class WSummary(QtGui.QWidget):
 
     def actualizaPV(self, pvBase):
         self.pvBase = pvBase
-        if pvBase is None:
-            pvMirar = None
+        if not pvBase:
+            pvMirar = ""
         else:
             pvMirar = self.pvBase
 
         self.analisisMRM = None
         dicAnalisis = {}
         self.fenM2 = None
-        if pvMirar is not None:
+        if pvMirar:
             p = Partida.Partida()
             if pvMirar:
                 p.leerPV(pvMirar)
