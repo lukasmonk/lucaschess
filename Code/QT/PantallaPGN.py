@@ -751,7 +751,7 @@ class WFiltrar(QtGui.QDialog):
                 if campo == "PLIES":
                     valor = valor.strip()
                     if valor.isdigit():
-                        valor = "%3d" % int(valor)
+                        valor = "%d" % int(valor)  # fonkap patch %3d -> %d
                 if par0:
                     npar += 1
                 if par1:
@@ -791,9 +791,11 @@ class WFiltrar(QtGui.QDialog):
             else:
                 valor = valor.upper()
                 if valor.isupper():
-                    where += "UPPER(%s) %s '%s'" % (campo, condicion, valor.upper())
+                    where += "UPPER(%s) %s '%s'" % (campo, condicion, valor)  # fonkap patch
+                elif valor.isdigit():  # fonkap patch
+                    where += "CAST(%s as decimal) %s %s" % (campo, condicion, valor)  # fonkap patch
                 else:
-                    where += "%s %s '%s'" % (campo, condicion, valor.upper())
+                    where += "%s %s '%s'" % (campo, condicion, valor)  # fonkap patch
             if par1:
                 where += ")"
         return where

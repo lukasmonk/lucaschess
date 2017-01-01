@@ -23,7 +23,7 @@ class ThanksTo:
 
     def listaMotores(self, bloque):
         li = [
-            ["Acqua 20180918", "Giovanni Di Maria", "http://www.elektrosoft.it/scacchi/acqua/acqua.asp"],
+            ["Acqua 20160918", "Giovanni Di Maria", "http://www.elektrosoft.it/scacchi/acqua/acqua.asp"],
             ["Tarrasch ToyEngine Beta V0.905", "Bill Forster", "http://www.triplehappy.com/"],
             ["Rocinante 2.0", "Antonio Torrecillas", "http://sites.google.com/site/barajandotrebejos/"],
             ["Roce 0.0390", "Roman Hartmann", "http://www.rocechess.ch/rocee.html"],
@@ -32,7 +32,7 @@ class ThanksTo:
             ["Clarabit 1.00", "Salvador Pallares Bejarano", "http://sapabe.googlepages.com"],
             ["Lime v 66", "Richard Allbert", "http://www.geocities.com/taciturn_lemon"],
             ["Chispa 4.0.3", "Federico Corigliano", "http://chispachess.blogspot.com/"],
-            ["Gaia 3.5", "Jean-Francois Romang, David Rabel", "http://gaiachess.free.fr"],
+            ["Gaïa 3.5", "Jean-Francois Romang, David Rabel", "http://gaiachess.free.fr"],
             ["Simplex 0.9.8", "Antonio Torrecillas", "http://sites.google.com/site/barajandotrebejos/"],
             ["Greko 12.9", "Vladimir Medvedev", "http://sourceforge.net/projects/greko"],
             ["Pawny 0.3.1", "Mincho Georgiev", "http://pawny.netii.net/"],
@@ -44,7 +44,7 @@ class ThanksTo:
             ["Alaric 707", "Peter Fendrich", "http://alaric.fendrich.se/index.html"],
             ["Cyrano 06B17", "Harald Johnsen", "http://sites.estvideo.net/tipunch/cyrano/"],
             ["Daydreamer 1.75 JA", "Aaron Becker", "http://github.com/AaronBecker/daydreamer/downloads"],
-            ["Godel 3.4.9", "Juan Manuel Vazquez", "https://sites.google.com/site/godelchessengine"],
+            ["Gödel 3.4.9", "Juan Manuel Vazquez", "https://sites.google.com/site/godelchessengine"],
             ["Rhetoric 1.4.3", "Alberto Sanjuan", "http://www.chessrhetoric.com/"],
             ["Cheng 4 0.39", "Martin Sedlák", "http://www.vlasak.biz/cheng"],
             ["Glaurung 2.2 JA", "Tord RomsTad", "http://www.glaurungchess.com/"],
@@ -63,6 +63,7 @@ class ThanksTo:
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
         ]
         li.sort(key=lambda x: x[0])
+        # Gaia y godel con dos puntos
         # for n, a, u in li:
         #     k = n.split(" ")[0].lower()
         #     p rint '                                    ( "%s", "%s", "%s", "%s" ),'%(k,a,n,u)

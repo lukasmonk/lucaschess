@@ -14,6 +14,7 @@ import sys
 
 
 
+
 reload(sys)
 sys.setdefaultencoding("latin-1")
 sys.path.insert(0, os.curdir)
@@ -48,10 +49,6 @@ elif nArgs >= 2:
             arg == "-play" or arg.endswith(".bmt")):
         import Code.Init
         Code.Init.init()
-
-    elif arg == "-sound":
-        import Code.RunSound
-        Code.RunSound.run(sys.argv[2])
 
     elif arg == "-kibitzer":
         import Code.RunKibitzer

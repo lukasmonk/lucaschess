@@ -7,7 +7,7 @@ import pyaudio
 from Code.QT import QTUtil
 from Code import Util
 from Code import VarGen
-from Code import XRun
+from Code import XRunSound
 
 class RunSound:
     def __init__(self):
@@ -194,85 +194,52 @@ class TallerSonido:
 
         self.centesimas = centHasta - centDesde
 
-class Orden:
-    def __init__(self):
-        self.clave = ""
-        self.dv = {}
-
-    def ponVar(self, nombre, valor):
-        self.dv[nombre] = valor
-
-    def bloqueEnvio(self):
-        self.dv["__CLAVE__"] = self.clave
-        return self.dv
 
 class Replay:
-    DATABASE = "D"
-    PLAY_ESPERA = "P"
-    PLAY_SINESPERA = "N"
-    STOP = "S"
-    TERMINAR = "T"
-
     def __init__(self):
+        self.io = XRunSound.IO()
+        self.io.start()
 
-        fdb = VarGen.configuracion.ficheroTemporal("db")
-
-        self.ipc = Util.IPC(fdb, True)
-
-        orden = Orden()
-        orden.clave = self.DATABASE
+        orden = XRunSound.Orden()
+        orden.clave = XRunSound.DATABASE
         orden.ponVar("FICHERO", VarGen.configuracion.ficheroSounds)
         orden.ponVar("TABLA", "general")
 
-        self.escribe(orden)
+        self.push(orden)
         self.siSonando = False
 
-        self.popen = XRun.run_lucas("-sound", fdb)
-
-    def escribe(self, orden):
-        self.ipc.push(orden.bloqueEnvio())
+    def push(self, orden):
+        self.io.push(orden.bloqueEnvio())
 
     def terminar(self):
         try:
-            orden = Orden()
-            orden.clave = self.TERMINAR
-            self.escribe(orden)
-            self.ipc.close()
-            self.close()
+            orden = XRunSound.Orden()
+            orden.clave = XRunSound.TERMINAR
+            self.push(orden)
+            self.io.close()
         except:
             pass
 
-    def close(self):
-        if self.popen:
-            try:
-                self.popen.terminate()
-                self.popen = None
-            except:
-                pass
-
-    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def playClave(self, clave, siEspera):
-        orden = Orden()
-        orden.clave = self.PLAY_ESPERA if siEspera else self.PLAY_SINESPERA
+        orden = XRunSound.Orden()
+        orden.clave = XRunSound.PLAY_ESPERA if siEspera else XRunSound.PLAY_SINESPERA
         orden.ponVar("CLAVE", clave)
         self.siSonando = True
 
-        self.escribe(orden)
+        self.push(orden)
 
-    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def playLista(self, lista, siEspera):
-        orden = Orden()
-        orden.clave = self.PLAY_ESPERA if siEspera else self.PLAY_SINESPERA
+        orden = XRunSound.Orden()
+        orden.clave = XRunSound.PLAY_ESPERA if siEspera else XRunSound.PLAY_SINESPERA
         orden.ponVar("LISTACLAVES", lista)
         self.siSonando = True
 
-        self.escribe(orden)
+        self.push(orden)
 
-    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     def stop(self):
         if self.siSonando:
-            orden = Orden()
-            orden.clave = self.STOP
+            orden = XRunSound.Orden()
+            orden.clave = XRunSound.STOP
             self.siSonando = False
 
-            self.escribe(orden)
+            self.push(orden)

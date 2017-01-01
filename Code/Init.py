@@ -1,5 +1,5 @@
 DEBUG = False
-VERSION = "10.10.1"
+VERSION = "10.10.2"
 
 import os
 import sys
@@ -16,7 +16,6 @@ from Code import Sonido
 from Code.QT import Gui
 
 def init():
-    # Needed for feedback
     if not DEBUG:
         try:
             ferr = open("bug.log", "at")

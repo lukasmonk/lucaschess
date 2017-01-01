@@ -138,7 +138,7 @@ int bioskey()
     }
     else
     {
-        return kbhit();
+        return _kbhit();
     }
 }
 #endif
