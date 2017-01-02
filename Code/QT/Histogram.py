@@ -431,8 +431,14 @@ def genHistograms(partida, sicentipawns):
     alm.lijgB = lijgB
 
     alm.porcT = porcT*1.0/len(lijg)
-    alm.porcW = porcW*1.0/len(lijgW)
-    alm.porcB = porcB*1.0/len(lijgB)
+    if len(lijgW) != 0:
+        alm.porcW = porcW*1.0/len(lijgW)
+    else:
+        alm.porcW = 0;
+    if len(lijgB) != 0:
+        alm.porcB = porcB*1.0/len(lijgB)
+    else:
+        alm.porcB = 0;
 
     return alm
 
