@@ -15,6 +15,7 @@ from Code.QT import Grid
 from Code.QT import Iconos
 from Code.QT import Piezas
 from Code.QT import QTUtil
+from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code import Util
@@ -62,7 +63,7 @@ class VentanaMultiPV(QtGui.QDialog):
         oColumnas.nueva("BESTMOVE", _("Alternatives"), 80, siCentrado=True)
         oColumnas.nueva("EVALUATION", _("Evaluation"), 85, siCentrado=True)
         oColumnas.nueva("MAINLINE", _("Main line"), 300)
-        self.grid = Grid.Grid(self, oColumnas, dicVideo=dicVideo)
+        self.grid = Grid.Grid(self, oColumnas, dicVideo=dicVideo, siSelecFilas=True)
 
         self.lbDepth = Controles.LB(self)
 
@@ -70,7 +71,7 @@ class VentanaMultiPV(QtGui.QDialog):
             (_("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
             (_("Continue"), Iconos.Kibitzer_Continuar(), self.play),
             (_("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
-            (_("The best solution found by the engine is saved to the clipboard"), Iconos.MoverGrabar(), self.portapapelesUltJug),
+            (_("The line selected is saved to the clipboard"), Iconos.MoverGrabar(), self.portapapelesJugSelected),
             (_("Analyze only color"), Iconos.P_16c(), self.color),
             (_("Board"), Iconos.Tablero(), self.confTablero),
             ("%s: %s" % (_("Enable"), _("window on top")), Iconos.Top(), self.windowTop),
@@ -180,6 +181,7 @@ class VentanaMultiPV(QtGui.QDialog):
         self.lock = False
 
         configMotor = self.cpu.configMotor
+        self.nom_engine = configMotor.nombre
         exe = configMotor.ejecutable()
         args = configMotor.argumentos()
         absexe = os.path.abspath(exe)
@@ -238,21 +240,21 @@ class VentanaMultiPV(QtGui.QDialog):
             self.motor.close()
             self.motor = None
 
-    def portapapelesUltJug(self):
-        if self.liData: # and self.siAnalizar():
-            rm = self.liData[0]
+    def portapapelesJugSelected(self):
+        if self.liData:
+            n = self.grid.recno()
+            if n < 0 or n >= len(self.liData):
+                n = 0
+            rm = self.liData[n]
             p = Partida.Partida(fen=self.fen)
             p.leerPV(rm.pv)
+            jg0 = p.jugada(0)
+            jg0.comentario = rm.abrTextoPDT() + " " + self.nom_engine
             pgn = p.pgnBaseRAW()
             resp = '["FEN", "%s"]\n\n%s' % (self.fen, pgn)
             QTUtil.ponPortapapeles(resp)
+            QTUtil2.mensajeTemporal(self, _("The line selected is saved to the clipboard"), 0.7)
 
-            # li = pgn.split(" ")
-            # n = 2 if "..." in pgn else 1
-            # resp = " ".join(li[0:n])
-            # # resp += " {%s D%s} " % (rm.abrTexto(), rm.depth)
-            # if len(li) > n:
-            #     resp += " ".join(li[n:])
 
     def guardarVideo(self):
         dic = {}

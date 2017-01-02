@@ -540,7 +540,7 @@ class Gestor:
         if self.configuracion.siSuenaJugada:
             if self.partida.numJugadas():
                 jg = self.partida.jugada(-1)
-                self.runSound.playLista(jg.listaSonidos())
+                self.runSound.playLista(jg.listaSonidos(), siEsperar=True)
         elif self.configuracion.siSuenaBeep:
             self.runSound.playBeep()
 

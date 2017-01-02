@@ -63,9 +63,8 @@ def lanzaGUI(procesador):
 
             nico = QTVarios.rondoPuntos()
             for k, nombre, porc, author in li:
-                rotulo = nombre
-                if porc != "100":
-                    rotulo += " (%s%%)" % porc
+                if int(porc) < 80:
+                    nombre += " (%s%%)" % porc
                 menu.opcion(k, nombre, nico.otro())
             resp = menu.lanza()
             if resp:

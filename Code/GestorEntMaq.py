@@ -845,7 +845,6 @@ class GestorEntMaq(Gestor.Gestor):
         if not self.siPrimeraJugadaHecha:
             self.siPrimeraJugadaHecha = True
 
-        # Preguntamos al mono si hay movimiento
         if self.siTerminada():
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque

@@ -5,6 +5,8 @@ import wave
 
 import pyaudio
 
+from PyQt4 import QtCore
+
 from Code import Util
 
 DATABASE = "D"
@@ -13,12 +15,21 @@ PLAY_SINESPERA = "N"
 STOP = "S"
 TERMINAR = "T"
 
+
 class Orden:
     def __init__(self):
         self.clave = ""
         self.dv = {}
 
-class Replay:
+    def ponVar(self, nombre, valor):
+        self.dv[nombre] = valor
+
+    def bloqueEnvio(self):
+        self.dv["__CLAVE__"] = self.clave
+        return self.dv
+
+
+class RunReplay:
     def __init__(self):
         self.CHUNK = 1024
 
@@ -98,14 +109,16 @@ class Replay:
         nPos = 0
         orden = None
 
+        t0 = time.time()
         for n in range(nTam):
             hasta = nPos + self.CHUNK
             stream.write(frames[nPos:hasta])
             nPos = hasta
-            orden = io.recibe()
-            if orden:
-                if orden.clave in (STOP, PLAY_SINESPERA, TERMINAR):
+            t1 = time.time()
+            if (t1-t0) > 0.2:
+                if io.orden_acabar():
                     break
+                t0 = t1
 
         if orden is None:
             stream.stop_stream()
@@ -114,13 +127,29 @@ class Replay:
 
         return orden
 
-class IO:
-    def __init__(self, xcpu, fdb):
-        self.ipc = Util.IPC(fdb, False)
-        self.xcpu = xcpu
 
-    def recibe(self):
-        dv = self.ipc.pop()
+class IO(QtCore.QThread):
+    def __init__(self):
+        QtCore.QThread.__init__(self)
+        self.ipc = []
+        self.mutex = QtCore.QMutex()
+        self.continuar = True
+
+    def push(self, orden):
+        self.mutex.lock()
+        self.ipc.append(orden)
+        self.mutex.unlock()
+
+    def orden_acabar(self):
+        for orden in self.ipc:
+            if orden["__CLAVE__"] in (STOP, PLAY_SINESPERA, TERMINAR):
+                return True
+        return False
+
+    def pop(self):
+        self.mutex.lock()
+        dv = self.ipc.pop(0) if self.ipc else None
+        self.mutex.unlock()
         if not dv:
             return None
 
@@ -129,26 +158,22 @@ class IO:
         orden.dv = dv
         return orden
 
+    def close(self):
+        if self.continuar:
+            self.continuar = False
+        self.wait()
+
     def run(self):
+        xreplay = RunReplay()
         orden = None
-        while True:
+        while self.continuar:
             if orden:
                 if orden.clave == TERMINAR:
-                    self.ipc.close()
                     break
-                orden = self.xcpu.procesa(self, orden)
+                orden = xreplay.procesa(self, orden)
                 if orden:
                     continue
-            orden = self.recibe()
+            orden = self.pop()
             if orden is None:
-                time.sleep(0.1)
-
-def run(fdb):
-    ferr = open("./bug.sound", "at")
-    sys.stderr = ferr
-
-    r = Replay()
-    io = IO(r, fdb)
-    io.run()
-
-    ferr.close()
+                self.msleep(500)
+        self.continuar = False

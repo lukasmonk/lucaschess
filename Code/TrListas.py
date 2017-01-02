@@ -2033,7 +2033,7 @@ def dicNAGs():
     return dicNAG
 
 def dicTraining():
-    return {
+    d = {
         "Checkmates by Eduardo Sadier": _("Checkmates by Eduardo Sadier"),
         "145307 positions of mate in two": _("50000 positions of mate in two").replace("50000", "145307"),
 
@@ -2045,13 +2045,6 @@ def dicTraining():
         "The kick of the knight": _("The kick of the knight"),
 
         "Checkmates in GM games": _("Checkmates in GM games"),
-        "Mate in 1": _("Mate in 1"),
-        "Mate in 2": _("Mate in 2"),
-        "Mate in 3": _("Mate in 3"),
-        "Mate in 4": _("Mate in 4"),
-        "Mate in 5": _("Mate in 5"),
-        "Mate in 6": _("Mate in 6"),
-        "Mate in 7": _("Mate in 7"),
 
         "Endgames by Rui Grafino": _("Endgames by Rui Grafino"),
         "Famous Studies": _("Famous Studies"),
@@ -2135,8 +2128,11 @@ def dicTraining():
         "Attacking Defender": _("Attacking Defender"),
 
         "All tactics": _("All tactics"),
-
     }
+
+    for n in range(1,10):
+        d["Mate in %d" % n] = _X(_("Mate in %1"), str(n))
+    return d
 
 def STS():
     return [_("Undermining"),
