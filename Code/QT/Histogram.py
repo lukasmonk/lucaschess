@@ -337,8 +337,9 @@ class Histogram(QtGui.QGraphicsView):
         pen.setWidth(2)
         pen.setColor(QtGui.QColor("#DE5044"))
         painter.setPen(pen)
-        p = self.hserie.liPoints[self.pointActive]
-        painter.drawLine(p.rx, bottom, p.rx, top)
+        if 0 <= self.pointActive < len(self.hserie.liPoints):
+            p = self.hserie.liPoints[self.pointActive]
+            painter.drawLine(p.rx, bottom, p.rx, top)
 
     def mousePressEvent(self, event):
         super(Histogram, self).mousePressEvent(event)
@@ -430,15 +431,9 @@ def genHistograms(partida, sicentipawns):
     alm.lijgW = lijgW
     alm.lijgB = lijgB
 
-    alm.porcT = porcT*1.0/len(lijg)
-    if len(lijgW) != 0:
-        alm.porcW = porcW*1.0/len(lijgW)
-    else:
-        alm.porcW = 0;
-    if len(lijgB) != 0:
-        alm.porcB = porcB*1.0/len(lijgB)
-    else:
-        alm.porcB = 0;
+    alm.porcT = porcT*1.0/len(lijg) if len(lijg) else 0
+    alm.porcW = porcW*1.0/len(lijgW) if len(lijgW) else 0
+    alm.porcB = porcB*1.0/len(lijgB) if len(lijgB) else 0
 
     return alm
 

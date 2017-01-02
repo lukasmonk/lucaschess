@@ -26,7 +26,7 @@ int max_time = 0;
 
 bool set_personality(char* value, char* name, int random, int advance,
                      int capture, int material, int sanity,
-                     int queen, int rook, int bishop, int knight)
+                     int queen, int rook, int bishop, int knight, bool ownbook)
 {
     if(strcmp(value, name) == 0)
     {
@@ -40,6 +40,7 @@ bool set_personality(char* value, char* name, int random, int advance,
         person_rook = rook;
         person_bishop = bishop;
         person_knight = knight;
+        set_ownbook(ownbook);
         return true;
     }
     return false;
@@ -49,17 +50,17 @@ void set_personality_name(char * value)
 {
     srand(time(NULL));
     is_personality = false;
-    //                                  Rnd Adv Cap Mat San   Q   R   B   N
-    if(set_personality(value, "Monkey", 100,  0,  0,  0,  0,  0,  0,  0,  0)) return;
-    if(set_personality(value, "Donkey",  50, 30, 10, 10,  0,  1,  1,  1,  1)) return;
-    if(set_personality(value, "Bull",    40, 40,  5, 15,  0,  2,  1,  1,  1)) return;
-    if(set_personality(value, "Wolf",    30, 25, 30, 15,  0,  3,  2,  1,  1)) return;
-    if(set_personality(value, "Lion",    20, 15, 30, 30,  5,  5,  3,  2,  2)) return;
-    if(set_personality(value, "Rat",     15, 10, 25, 35, 15,  8,  4,  3,  3)) return;
-    if(set_personality(value, "Snake",    5, 15, 20, 40, 20, 10,  5,  3,  3)) return;
-    if(set_personality(value, "Random", 100,  0,  0,  0,  0,  0,  0,  0,  0)) return;
-    if(set_personality(value, "Advance",  0,100,  0,  0,  0,  0,  0,  0,  0)) return;
-    if(set_personality(value, "Capture",  0,  0,100,  0,  0,  0,  0,  0,  0)) return;
+    //                                        Rnd Adv  Cap Mat  San   Q    R   B    N    book
+    if(set_personality(value, "Monkey", 100,  0,  0,  0,  0,  0,  0,  0,  0, false)) return;
+    if(set_personality(value, "Donkey",  50, 30, 10, 10,  0,  1,  1,  1,  1, false)) return;
+    if(set_personality(value, "Bull",    40, 40,  5, 15,  0,  2,  1,  1,  1, false)) return;
+    if(set_personality(value, "Wolf",    30, 25, 30, 15,  0,  3,  2,  1,  1, false)) return;
+    if(set_personality(value, "Lion",    20, 15, 30, 30,  5,  5,  3,  2,  2, false)) return;
+    if(set_personality(value, "Rat",     15, 10, 25, 35, 15,  8,  4,  3,  3,  true)) return;
+    if(set_personality(value, "Snake",    5, 15, 20, 40, 20, 10,  5,  3,  3,  true)) return;
+    if(set_personality(value, "Random", 100,  0,  0,  0,  0,  0,  0,  0,  0, false)) return;
+    if(set_personality(value, "Advance",  0,100,  0,  0,  0,  0,  0,  0,  0, false)) return;
+    if(set_personality(value, "Capture",  0,  0,100,  0,  0,  0,  0,  0,  0, false)) return;
 
     if(!strcmp(value, "Material"))
     {

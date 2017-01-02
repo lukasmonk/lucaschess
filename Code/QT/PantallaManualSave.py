@@ -6,6 +6,7 @@ from PyQt4 import QtGui, QtCore
 from Code import ControlPosicion
 from Code import XVoyager
 from Code import Partida
+
 from Code.QT import Colocacion
 from Code.QT import Controles
 from Code.QT import Iconos

@@ -12,7 +12,7 @@
 #include "protos.h"
 #include "globals.h"
 
-#define VERSION    "0.12"
+#define VERSION    "0.13"
 
 
 void begin(void)
@@ -53,6 +53,9 @@ void loop(void)
     char file[256];
     int num;
 
+    set_ownbookfile("irina.bin");
+    set_ownbook(true);
+
     for (;;)
     {
         if (!fgets(s, 2048, stdin))
@@ -72,6 +75,8 @@ void loop(void)
             printf("option name Personality type combo default Irina var Irina var Steven var Monkey var Donkey var Bull var Wolf var Lion var Rat var Snake var Material var Random var Capture var Advance\n");
             printf("option name Min Time type spin default 0 min 0 max 99\n");
             printf("option name Max Time type spin default 0 min 0 max 99\n");
+            printf("option name OwnBook type check default true\n");
+            printf("option name OwnBookFile type string default irina.bin\n");
             printf("uciok\n");
         }
         else if (SCAN("isready"))
@@ -108,6 +113,7 @@ void loop(void)
         }
         else if (SCAN("ucinewgame"))
         {
+            open_book();
             continue;
         }
         else if (SCAN("position"))
@@ -121,9 +127,9 @@ void loop(void)
         else if (SCAN("setoption name"))
         {
             set_option(s);
-
         }
     }
+    close_book();
 }
 
 
@@ -345,6 +351,14 @@ void set_option(char *line)
     else if(strcmp(name, "Hash") == 0)
     {
         set_hash( value );
+    }
+    else if(strcmp(name, "OwnBook") == 0)
+    {
+        set_ownbook( strcmp(value, "true") == 0 );
+    }
+    else if(strcmp(name, "OwnBookFile") == 0)
+    {
+        set_ownbookfile( value );
     }
     /* setoption name <id> [value <x>]
     	this is sent to the engine when the user wants to change the internal parameters

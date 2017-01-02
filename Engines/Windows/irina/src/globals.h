@@ -98,6 +98,8 @@ extern int max_time;
 
 extern bool is_personality;
 
+extern bool use_book;
+
 
 extern int ST_PAWNPOS_W[64];
 extern int ST_KNIGHTPOS_W[64];

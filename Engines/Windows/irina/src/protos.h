@@ -84,4 +84,12 @@ void time_test( Bitmap mstime );
 void init_data_steven(void);
 int eval_steven(void);
 
+// book.c
+bool using_book(void);
+void set_ownbook( bool ok );
+void set_ownbookfile( char * name );
+void close_book( void );
+void open_book();
+bool check_book( char * fen, char * move );
+
 #endif

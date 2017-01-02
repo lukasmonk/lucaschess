@@ -193,7 +193,16 @@ class WElegir(QTVarios.WDialogo):
     def gridDobleClickCabecera(self, grid, oColumna):
         clave = oColumna.clave
         orden = self.dbf.orden
-        if orden.startswith(clave):
+        if clave == "PLIES":
+            siDesc = orden.endswith("DESC")
+            siPrevio = orden.startswith("CAST")
+            orden = "CAST(PLIES AS INTEGER)"
+            if siPrevio:
+                if siDesc:
+                    orden = ""
+                else:
+                    orden += " DESC"
+        elif orden.startswith(clave):
             siDesc = orden.endswith("DESC")
             if siDesc:
                 orden = ""

@@ -68,6 +68,21 @@ void play_irina(int depth, int time)
     char str_move[20];
     char bestmove[6], ponder[6];
     Bitmap ms;
+    char fen[100];
+
+    if( using_book() )
+    {
+        board_fen(fen);
+        if( check_book(fen, bestmove) )
+        {
+            printf("bestmove %s\n", bestmove);
+            return;
+        }
+        else
+        {
+            close_book();
+        }
+    }
 
     ok_time_kb = true;
     time_ini = get_ms();
@@ -165,10 +180,39 @@ int noMovesScore(int ply)
     return DRAWSCORE;
 }
 
+inline void test_time()
+{
+    Bitmap ms;
+    if (--xxx == 0)
+    {
+        ms = get_ms();
+        if ((time_end && (time_end < ms)) || bioskey())
+        {
+            ok_time_kb = false;
+        }
+        xxx = TEST_KEY_TIME;
+
+        if (ms - time_last > MSG_INTERVAL)
+        {
+            time_last = ms;
+            ms -= time_ini;
+            if (ms)
+            {
+                printf("info depth %d time %lu nodes %lu nps %lu\n",
+                       working_depth,
+                       (long unsigned int) ms, (long unsigned int) inodes,
+                       (long unsigned int) (inodes * 1000 / ms));
+            }
+        }
+    }
+}
+
 int quiescence(int alpha, int beta, int ply, int max_ply)
 {
     int k, j;
     int score;
+
+    test_time();
 
     if (inCheck()) {
           return alphaBeta(alpha, beta, 1, ply, max_ply);
@@ -219,32 +263,9 @@ int alphaBeta(int alpha, int beta, int depth, int ply, int max_ply)
     int score, best_score;
     int desde, hasta;
     unsigned k, j;
-    Bitmap ms;
     Move move;
 
-    if (--xxx == 0)
-    {
-        ms = get_ms();
-        if ((time_end && (time_end < ms)) || bioskey())
-        {
-            ok_time_kb = false;
-        }
-        xxx = TEST_KEY_TIME;
-
-        if (ms - time_last > MSG_INTERVAL)
-        {
-            time_last = ms;
-            ms -= time_ini;
-            if (ms)
-            {
-                printf("info depth %d time %lu nodes %lu nps %lu\n",
-                       working_depth,
-                       (long unsigned int) ms, (long unsigned int) inodes,
-                       (long unsigned int) (inodes * 1000 / ms));
-            }
-        }
-    }
-
+    test_time();
 
     if (depth == 0)
     {

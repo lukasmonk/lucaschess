@@ -1,6 +1,6 @@
 LINK_TARGET = irina.exe
 
-OBJS = main.o loop.o board.o data.o util.o movegen.o makemove.o perft.o eval.o evalst.o search.o person.o hash.o
+OBJS = main.o loop.o board.o data.o util.o movegen.o makemove.o perft.o eval.o evalst.o search.o person.o hash.o book.o
 
 REBUILDABLES = $(OBJS) $(LINK_TARGET)
 
