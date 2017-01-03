@@ -808,7 +808,7 @@ class WTabDirector(QTVarios.WDialogo):
         self.guion = None
 
     def closeEvent(self, event):
-        if self.guion:
+        if self.guion is not None:
             self.cierraRecursos()
 
     def terminar(self):

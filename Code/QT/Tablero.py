@@ -2092,7 +2092,8 @@ class TableroVisual(Tablero):
                 posA1H8 = chr(c + 96) + str(f)
                 self.creaPieza(cpieza, posA1H8)
 
-        self.ponerPiezasAbajo(otroTablero.siBlancasAbajo)
+        if not otroTablero.siBlancasAbajo:
+            self.rotaTablero();
 
         if otroTablero.indicadorSC.isVisible():
             bdOT = otroTablero.indicadorSC.bloqueDatos
