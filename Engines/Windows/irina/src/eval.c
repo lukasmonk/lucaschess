@@ -10,9 +10,11 @@ int eval() {
     int whitetotalmat, blacktotalmat, totalmat;
     int whitekingsquare, blackkingsquare;
     int valpawn, valknight, valbishop, valrook, valqueen;
+    // int whitepassedpawns, blackpassedpawns;
     //bool opening, middlegame; endgame;
     bool endgame;
     Bitmap temp;
+    int q;
 
     if( hash_probe(&score) ) return score;
 
@@ -171,6 +173,7 @@ int eval() {
     // Evaluate white pawns
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    // whitepassedpawns = 0;
     temp = board.white_pawns;
     while (temp) {
         square = first_one(temp);
@@ -185,9 +188,21 @@ int eval() {
         if (endgame) score += PAWN_OWN_DISTANCE[DISTANCE[square][whitekingsquare]];
 
         // - passed, doubled, isolated or backward pawns
-        if (!(PASSED_WHITE[square] & board.black_pawns)) score += BONUS_PASSED_PAWN;
+        if (!(PASSED_WHITE[square] & board.black_pawns)) {
+            score += BONUS_PASSED_PAWN;
+            // whitepassedpawns ^= BITSET[square];
+        }
 
         if (board.white_pawns & PASSED_WHITE[square]) score -= PENALTY_DOUBLED_PAWN;
+
+        if (!(ISOLATED_WHITE[square] & board.white_pawns)) score -= PENALTY_ISOLATED_PAWN;
+        else {
+             // If it is not isolated, then it might be backward. Two conditions must be true:
+             //  1) if the next square is controlled by an enemy pawn - we use the PAWN_ATTACKS bitmaps to check this
+             //  2) if there are no pawns left that could defend this pawn
+             if ((WHITE_PAWN_ATTACKS[square + 8] & board.black_pawns) && !(BACKWARD_WHITE[square] & board.white_pawns) )
+                score -= PENALTY_BACKWARD_PAWN;
+        }
 
         temp ^= BITSET[square];
     }
@@ -230,12 +245,23 @@ int eval() {
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     temp = board.white_rooks;
+    q = 0;
     while (temp) {
         square = first_one(temp);
+        q++;
         score += ROOKPOS_W[square];
         score += ROOK_DISTANCE[DISTANCE[square][blackkingsquare]];
+        if(bit_count(COLUMNA_MASK[square]&board.all_pieces) == 1) score += BONUS_ROOK_ON_OPEN_FILE;
+        // if (COLUMNA_MASK[square] & whitepassedpawns) {
+             // if ((unsigned int) square < last_one(COLUMNA_MASK[square] & whitepassedpawns))
+             // {
+                   // score += BONUS_ROOK_BEHIND_PASSED_PAWN;
+             // }
+        // }
         temp ^= BITSET[square];
     }
+    // if(q==2 && bit_count(COLUMNA_MASK[square]&board.white_rooks)==2 && bit_count(COLUMNA_MASK[square]&board.all_pieces)==2)
+        // score += BONUS_TWO_ROOKS_ON_OPEN_FILE;
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Evaluate white queens
@@ -278,6 +304,7 @@ int eval() {
     // - passed, doubled, isolated or backward pawns
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    // blackpassedpawns = 0;
     temp = board.black_pawns;
     while (temp) {
         square = first_one(temp);
@@ -291,9 +318,21 @@ int eval() {
         if (endgame) score += PAWN_OWN_DISTANCE[DISTANCE[square][blackkingsquare]];
 
         // - passed, doubled, isolated or backward pawns
-        if (!(PASSED_WHITE[square] & board.white_pawns)) score += BONUS_PASSED_PAWN;
+        if (!(PASSED_BLACK[square] & board.white_pawns)) {
+            score -= BONUS_PASSED_PAWN;
+            // blackpassedpawns ^= BITSET[square];
+        }
 
-        if (board.black_pawns & PASSED_WHITE[square]) score -= PENALTY_DOUBLED_PAWN;
+        if (board.black_pawns & PASSED_BLACK[square]) score += PENALTY_DOUBLED_PAWN;
+
+        if (!(ISOLATED_BLACK[square] & board.black_pawns)) score += PENALTY_ISOLATED_PAWN;
+        else {
+                 // If it is not isolated, then it might be backward. Two conditions must be true:
+                 //  1) if the next square is controlled by an enemy pawn - we use the PAWN_ATTACKS bitmaps to check this
+                 //  2) if there are no pawns left that could defend this pawn
+                 if ((BLACK_PAWN_ATTACKS[square + 8] & board.white_pawns) && !(BACKWARD_BLACK[square] & board.black_pawns) )
+                    score += PENALTY_BACKWARD_PAWN;
+        }
 
         square = first_one(temp);
     }
@@ -336,12 +375,23 @@ int eval() {
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     temp = board.black_rooks;
+    q = 0;
     while (temp) {
         square = first_one(temp);
+        q++;
         score -= ROOKPOS_B[square];
         score -= ROOK_DISTANCE[DISTANCE[square][whitekingsquare]];
+        if(bit_count(COLUMNA_MASK[square]&board.all_pieces) == 1) score -= BONUS_ROOK_ON_OPEN_FILE;
+        // if (COLUMNA_MASK[square] & blackpassedpawns) {
+             // if ((unsigned int) square < last_one(COLUMNA_MASK[square] & blackpassedpawns))
+             // {
+                   // score -= BONUS_ROOK_BEHIND_PASSED_PAWN;
+             // }
+        // }
         temp ^= BITSET[square];
     }
+    // if(q==2 && bit_count(COLUMNA_MASK[square]&board.black_rooks)==2 && bit_count(COLUMNA_MASK[square]&board.all_pieces)==2)
+        // score -= BONUS_TWO_ROOKS_ON_OPEN_FILE;
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Evaluate black queens

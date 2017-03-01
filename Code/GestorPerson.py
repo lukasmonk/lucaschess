@@ -10,6 +10,7 @@ from Code import VarGen
 from Code import XMotorRespuesta
 from Code.Constantes import *
 
+
 class GestorPerson(GestorEntMaq.GestorEntMaq):
     def inicio(self, dic, aplazamiento=None, siPrimeraJugadaHecha=False):
         if aplazamiento:

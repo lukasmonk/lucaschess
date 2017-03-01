@@ -4,6 +4,7 @@ from Code import PGNreader
 from Code import Util
 from Code.Constantes import *
 
+
 class ControlPGN:
     def __init__(self, gestor):
         self.gestor = gestor

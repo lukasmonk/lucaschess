@@ -1,5 +1,6 @@
 from PyQt4 import QtCore, QtGui
 
+
 class V(QtGui.QVBoxLayout):
     def control(self, control):
         self.addWidget(control)
@@ -35,6 +36,7 @@ class V(QtGui.QVBoxLayout):
     def relleno(self, factor=1):
         self.addStretch(factor)
         return self
+
 
 class H(QtGui.QHBoxLayout):
     def control(self, control, stretch=0):
@@ -80,6 +82,7 @@ class H(QtGui.QHBoxLayout):
     def relleno(self, factor=1):
         self.addStretch(factor)
         return self
+
 
 class G(QtGui.QGridLayout):
     dicAlineacion = {None: QtCore.Qt.AlignLeft, "d": QtCore.Qt.AlignRight, "c": QtCore.Qt.AlignCenter}

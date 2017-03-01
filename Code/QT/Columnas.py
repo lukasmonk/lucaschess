@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 from Code import VarGen
 
+
 class Columna:
     """
     Definicion de cada columna del grid.
@@ -213,6 +214,7 @@ class Columna:
             resultado = "Error" if siError else ""
 
         return resultado
+
 
 class ListaColumnas:
     """

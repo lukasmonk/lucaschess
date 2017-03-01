@@ -12,6 +12,7 @@ from Code import VarGen
 from Code import XMotorRespuesta
 from Code.Constantes import *
 
+
 class DicMicElos:
     def __init__(self):
         self.variable = "DicMicElos"
@@ -26,6 +27,7 @@ class DicMicElos:
         self._dic[claveMotor] = nuevoElo
         self.configuracion.escVariables(self.variable, self._dic)
 
+
 def lista():
     li = EnginesMicElo.listaCompleta()
     dicElos = DicMicElos().dic()
@@ -35,6 +37,7 @@ def lista():
             mt.elo = dicElos[k]
 
     return li
+
 
 class GestorMicElo(Gestor.Gestor):
     def calcDifElo(self, eloJugador, eloRival, resultado):

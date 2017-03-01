@@ -1,8 +1,16 @@
+# coding=utf-8
+
+import os
+
 from PyQt4 import QtCore, QtGui
 
-import math
-
 from Code import Util
+from Code import VarGen
+from Code.QT import QTUtil
+from Code.QT import QTUtil2
+from Code.QT import QTVarios
+from Code.QT import Iconos
+
 
 class HSerie:
     def __init__(self, siPawns):
@@ -15,6 +23,10 @@ class HSerie:
             self.minimum = -500
             self.maximum = +500
         self.qcolor = { True:QtGui.QColor("#DACA99"), False:QtGui.QColor("#83C5F8") }
+
+        # Elo para que 3400 - 1000 esten en los limites interiores
+        self.maximum_elo = 4200
+        self.minimum_elo = 200
 
     def addPoint(self, hpoint):
         hpoint.setGridPos(len(self.liPoints))
@@ -38,20 +50,24 @@ class HSerie:
     def scenePoints(self, sz_width, sz_height, sz_left):
         ntotal_y = self.maximum - self.minimum
         self.factor = sz_height * 1.0 / ntotal_y
-        nmedia_y = (self.maximum-self.minimum) / 2
-        self.step = step = sz_width*1.0/self.steps()
+        ntotal_y_elo = self.maximum_elo - self.minimum_elo
+        self.factor_elo = sz_height * 1.0 / ntotal_y_elo
+        nmedia_y = ntotal_y / 2
         firstmove = self.firstmove()
+        self.step = sz_width * 1.0 / self.steps()
         nmedia_x = len(self.liPoints)/2
         for npoint, point in enumerate(self.liPoints):
             point.minmax_rvalue(self.minimum, self.maximum)
             dr = ("s" if point.value > 0 else "n") + ("e" if npoint < nmedia_x else "w" )
             point.set_dir_tooltip(dr)
-            rx = (point.nummove-firstmove)*step-sz_left
+            rx = (point.nummove-firstmove)*self.step-sz_left
             ry = -(point.rvalue + nmedia_y)*self.factor
-            point.set_rxy(rx, ry)
+            ry_elo = -(point.elo-self.minimum_elo)*self.factor_elo
+            point.set_rxy(rx, ry, ry_elo)
+
 
 class HPoint:
-    def __init__(self, nummove, value, lostp, lostp_abs, tooltip):
+    def __init__(self, nummove, value, lostp, lostp_abs, tooltip, elo):
         self.nummove = nummove
         self.rvalue = self.value = value
         self.tooltip = tooltip
@@ -61,10 +77,11 @@ class HPoint:
         self.lostp_abs = lostp_abs
         self.gridPos = None
         self.brush_color = self.setColor()
+        self.elo = elo
 
     def setColor(self):
-        if self.lostp_abs > 80:
-            return QtGui.QColor("#DC143C"), QtGui.QColor("#DC143C")
+        # if self.lostp_abs > 80:
+        #     return QtGui.QColor("#DC143C"), QtGui.QColor("#DC143C")
         if self.is_white:
             return QtCore.Qt.white, QtCore.Qt.black
         return QtCore.Qt.black, QtCore.Qt.black
@@ -83,15 +100,17 @@ class HPoint:
     def set_dir_tooltip(self, dr):
         self.dir_tooltip = dr
 
-    def set_rxy(self, rx, ry):
+    def set_rxy(self, rx, ry, ry_elo):
         self.rx = rx
         self.ry = ry
+        self.ry_elo = ry_elo
 
     def clone(self):
-        return HPoint(self.nummove, self.value, self.lostp, self.lostp_abs, self.tooltip)
+        return HPoint(self.nummove, self.value, self.lostp, self.lostp_abs, self.tooltip, self.elo)
+
 
 class GraphPoint(QtGui.QGraphicsItem):
-    def __init__(self, histogram, point):
+    def __init__(self, histogram, point, si_values):
         super(GraphPoint, self).__init__()
 
         self.histogram = histogram
@@ -104,6 +123,7 @@ class GraphPoint(QtGui.QGraphicsItem):
         self.setZValue(2)
 
         self.tooltipping = False
+        self.si_values = si_values
 
     def hoverLeaveEvent(self, event):
         self.histogram.hide_tooltip()
@@ -112,11 +132,13 @@ class GraphPoint(QtGui.QGraphicsItem):
     def hoverMoveEvent(self, event):
         if not self.tooltipping:
             self.tooltipping = True
-            self.histogram.show_tooltip(self.point.tooltip, self.point.rx, self.point.ry, self.point.dir_tooltip)
-            self.tooltipping = True
+            ry = self.point.ry if self.si_values else self.point.ry_elo
+            self.histogram.show_tooltip(self.point.tooltip, self.point.rx, ry, self.point.dir_tooltip)
+            self.tooltipping = False
 
     def ponPos(self):
-        self.setPos(self.point.rx+4, self.point.ry+4)
+        ry = self.point.ry if self.si_values else self.point.ry_elo
+        self.setPos(self.point.rx+4, ry+4)
 
     def boundingRect(self):
         return QtCore.QRectF(-6, -6, 6, 6)
@@ -132,6 +154,7 @@ class GraphPoint(QtGui.QGraphicsItem):
 
     def mouseDoubleClickEvent(self, event):
         self.histogram.dispatch_enter(self.point.gridPos)
+
 
 class GraphToolTip(QtGui.QGraphicsItem):
     def __init__(self, graph):
@@ -182,8 +205,9 @@ class GraphToolTip(QtGui.QGraphicsItem):
         painter.drawRect(self.xrect)
         painter.drawText( self.xrect, QtCore.Qt.AlignCenter, self.texto)
 
+
 class Histogram(QtGui.QGraphicsView):
-    def __init__(self, owner, hserie, grid, ancho):
+    def __init__(self, owner, hserie, grid, ancho, si_values):
         super(Histogram, self).__init__()
 
         self.hserie = hserie
@@ -210,8 +234,10 @@ class Histogram(QtGui.QGraphicsView):
 
         hserie.scenePoints(sz_width, sz_height, sz_left)
 
+        self.si_values = si_values
+
         for point in hserie.liPoints:
-            node = GraphPoint(self, point)
+            node = GraphPoint(self, point, si_values)
             scene.addItem(node)
             node.ponPos()
 
@@ -264,60 +290,74 @@ class Histogram(QtGui.QGraphicsView):
         njg = self.steps + 1
         step = self.step
 
+        # Numeros de jugada, en dos lineas
         for x in range(njg-1):
             num = firstmove + x
             decimal = num/10
             if decimal:
                 painter.drawText(textRect.translated(x*step, 0), str(decimal))
-
         for x in range(njg-1):
             num = firstmove + x
             ent = num%10
             painter.drawText(textRect.translated(x*step, 12), str(ent))
 
+        # Lineas verticales de referencia
         painter.setPen(QtGui.QColor("#D9D9D9"))
         for x in range(1, njg-1):
             t = left+step*x
             painter.drawLine(t, top, t, bottom)
 
+        # Eje de las y a la izquierda
         painter.setPen(QtGui.QColor("#545454"))
         align = QtCore.Qt.AlignRight
-        x = left-26
         h = 12
         w = 24
         coord = [-3.0, -1.5, 0.0, +1.5, +3.0]
         plant = "%+0.1f"
-        if not serie.siPawns:
-            coord = [int(rx*100) for rx in coord]
-            plant = "%+d"
 
-        for d in coord:
-            y = bottom - height/2 - d*serie.factor - h/2
-            painter.drawText( x, y, w, h, align, plant % d)
+        if self.si_values:
+            x = left - 26
+            if not serie.siPawns:
+                coord = [int(rx*100) for rx in coord]
+                plant = "%+d"
+            for d in coord:
+                y = bottom - height/2 - d*serie.factor - h/2
+                painter.drawText(x, y, w, h, align, plant % d)
+        else:
+            x = left - 26
+            for d in coord:
+                y = bottom - height / 2 - d * serie.factor - h / 2
+                d = 1000+ 600*(d*2+6)/3
+                painter.drawText(x, y, w, h, align, "%d" % d)
 
+        # Linea de referencia en la mitad-horizontal
         painter.setPen(QtCore.Qt.black)
         t = top+height*0.50
         painter.drawLine(left, t, right, t)
 
+        # Lineas referencia horizontal
         painter.setPen(QtGui.QColor("#D9D9D9"))
         for d in coord:
             if d:
                 t = bottom-height/2-d*serie.factor
                 painter.drawLine(left, t, right, t)
 
-        n = max(serie.step / 2.0 - 2, 4)/2.0
-        color = QtGui.QColor("#FFCECE")
-        painter.setBrush(QtGui.QBrush(color))
-        painter.setPen(color)
-        for p in serie.liPoints:
-            if p.rlostp:
-                y = bottom - p.rlostp * serie.factor
-                rect = QtCore.QRectF(p.rx-n, bottom-1, n*2, y+2)
-                painter.drawRect(rect)
-                p.rect_lost = rect
+        # Barras de los puntos perdidos
+        if self.owner.valorShowLostPoints():
+            n = max(serie.step / 2.0 - 2, 4)/2.0
+            color = QtGui.QColor("#FFCECE")
+            painter.setBrush(QtGui.QBrush(color))
+            painter.setPen(color)
+            for p in serie.liPoints:
+                if p.rlostp:
+                    y = bottom - p.rlostp * serie.factor
+                    rect = QtCore.QRectF(p.rx-n, bottom-1, n*2, y+2)
+                    painter.drawRect(rect)
+                    p.rect_lost = rect
 
-        painter.setBrush(QtGui.QBrush())
+            painter.setBrush(QtGui.QBrush())
 
+        # Lineas que unen los puntos
         pen = painter.pen()
         pen.setWidth(4)
         for is_white in (True, False):
@@ -325,20 +365,30 @@ class Histogram(QtGui.QGraphicsView):
             painter.setPen(pen)
             for p, p1 in serie.lines():
                 if p.is_white == is_white:
-                    painter.drawLine(p.rx, p.ry, p1.rx, p1.ry)
+                    if self.si_values:
+                        ry = p.ry
+                        ry1 = p1.ry
+                    else:
+                        ry = p.ry_elo
+                        ry1 = p1.ry_elo
+                    painter.drawLine(p.rx+1, ry, p1.rx, ry1)
 
+        painter.setBrush(QtGui.QBrush())
+
+        # Caja exterior
         pen = painter.pen()
         pen.setWidth(1)
         pen.setColor(QtGui.QColor("#545454"))
         painter.setPen(pen)
         painter.drawRect(sceneRect)
 
+        # Linea roja de la posicion actual
         pen = painter.pen()
         pen.setWidth(2)
         pen.setColor(QtGui.QColor("#DE5044"))
         painter.setPen(pen)
         if 0 <= self.pointActive < len(self.hserie.liPoints):
-            p = self.hserie.liPoints[self.pointActive]
+            p = serie.liPoints[self.pointActive]
             painter.drawLine(p.rx, bottom, p.rx, top)
 
     def mousePressEvent(self, event):
@@ -348,6 +398,24 @@ class Histogram(QtGui.QGraphicsView):
             if p.rlostp:
                 if p.rect_lost.contains(ep):
                     self.dispatch(p.gridPos)
+        if event.button() == QtCore.Qt.RightButton:
+            menu = QTVarios.LCMenu(self)
+            menu.opcion("clip", _("Copy to clipboard"), Iconos.Clip())
+            menu.separador()
+            menu.opcion("file", _("Save") + " png", Iconos.GrabarFichero())
+            resp = menu.lanza()
+            if resp:
+                pm = QtGui.QPixmap.grabWidget(self)
+                if resp == "clip":
+                    QTUtil.ponPortapapeles(pm, tipo="p")
+                else:
+                    configuracion = VarGen.configuracion
+                    path = QTUtil2.salvaFichero(self, _("File to save"), configuracion.dirSalvados,
+                                                "%s PNG (*.png)" % _("File"), False)
+                    if path:
+                        pm.save(path, "png")
+                        configuracion.dirSalvados = os.path.dirname(path)
+                        configuracion.graba()
 
     def mouseDoubleClickEvent(self, event):
         super(Histogram, self).mouseDoubleClickEvent(event)
@@ -360,6 +428,7 @@ class Histogram(QtGui.QGraphicsView):
     def wheelEvent(self, event):
         k = QtCore.Qt.Key_Left if event.delta() > 0 else QtCore.Qt.Key_Right
         self.owner.gridTeclaControl(self.grid, k, False, False, False)
+
 
 def genHistograms(partida, sicentipawns):
     siPawns = not sicentipawns
@@ -374,6 +443,8 @@ def genHistograms(partida, sicentipawns):
     porcT = 0
     porcW = 0
     porcB = 0
+    with open( "IntFiles/Formulas/eloperfomance.formula") as f:
+        eloformula = f.read().strip()
 
     for num, jg in enumerate(partida.liJugadas):
         if jg.analisis:
@@ -382,6 +453,15 @@ def genHistograms(partida, sicentipawns):
             pts = mrm.liMultiPV[pos].puntosABS_5()
             pts0 = mrm.liMultiPV[0].puntosABS_5()
             lostp_abs = pts0 - pts
+
+            elo_base = int(eval(eloformula.replace("xlost", str(lostp_abs))))
+            jg.elo_real = max(elo_base, 0)
+            elo = max(elo_base, 1000)
+            jg.elo = elo
+
+            li = list({rm.puntosABS_5() for rm in mrm.liMultiPV})
+            li.sort(reverse=True)
+            jg.elo_factor = len(li)
 
             porc = jg.porcentaje = 100 - lostp_abs if lostp_abs < 100 else 0
             porcT += porc
@@ -415,7 +495,8 @@ def genHistograms(partida, sicentipawns):
                 tooltip += " ?" +("%0.02f" if siPawns else "%d") % lostp
             else:
                 tooltip += "!"
-            hp = HPoint(nj, pts, lostp, lostp_abs, tooltip)
+            tooltip += " (%d)" % elo
+            hp = HPoint(nj, pts, lostp, lostp_abs, tooltip, elo)
             hgame.addPoint(hp)
             if siBlancas:
                 hwhite.addPoint(hp.clone())

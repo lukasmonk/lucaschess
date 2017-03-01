@@ -12,7 +12,7 @@
 #include "protos.h"
 #include "globals.h"
 
-#define VERSION    "0.13"
+#define VERSION "0.15"
 
 
 void begin(void)
@@ -56,6 +56,10 @@ void loop(void)
     set_ownbookfile("irina.bin");
     set_ownbook(true);
 
+    #ifdef LOG
+        open_log();
+    #endif
+
     for (;;)
     {
         if (!fgets(s, 2048, stdin))
@@ -67,6 +71,9 @@ void loop(void)
             #endif
             continue;
         }
+        #ifdef LOG
+            fprintf(flog, "REC:%s\n", s);
+        #endif
         if (SCAN("uci"))
         {
             printf("id name Irina %s\n", VERSION);
@@ -78,10 +85,25 @@ void loop(void)
             printf("option name OwnBook type check default true\n");
             printf("option name OwnBookFile type string default irina.bin\n");
             printf("uciok\n");
+            #ifdef LOG
+                fprintf(flog, "id name Irina %s\n", VERSION);
+                fprintf(flog, "id author Lucas Monge\n");
+                fprintf(flog, "option name Hash type spin min 2 max 1024 default 32\n");
+                fprintf(flog, "option name Personality type combo default Irina var Irina var Steven var Monkey var Donkey var Bull var Wolf var Lion var Rat var Snake var Material var Random var Capture var Advance\n");
+                fprintf(flog, "option name Min Time type spin default 0 min 0 max 99\n");
+                fprintf(flog, "option name Max Time type spin default 0 min 0 max 99\n");
+                fprintf(flog, "option name OwnBook type check default true\n");
+                fprintf(flog, "option name OwnBookFile type string default irina.bin\n");
+                fprintf(flog, "uciok\n");
+            #endif
+
         }
         else if (SCAN("isready"))
         {
             printf("readyok\n");
+            #ifdef LOG
+                fprintf(flog, "readyok\n");
+            #endif
         }
         else if (SCAN("stop"))
         {
@@ -95,6 +117,9 @@ void loop(void)
         {
             board_fen(s);
             printf("%s\n", s);
+            #ifdef LOG
+                fprintf(flog, "%s\n", s);
+            #endif
         }
         else if (SCAN("test"))
         {
@@ -130,6 +155,9 @@ void loop(void)
         }
     }
     close_book();
+    #ifdef LOG
+        close_log();
+    #endif
 }
 
 
@@ -261,7 +289,10 @@ void go(char *line)
         {
             movetime = wtime + movestogo * winc;
         }
-        movetime /= movestogo * 11 / 10;
+        movetime = movetime*9/(movestogo*10);
+        #ifdef LOG
+            fprintf(flog, "movetime=%d\n", movetime);
+        #endif
     }
     if (!depth)
     {

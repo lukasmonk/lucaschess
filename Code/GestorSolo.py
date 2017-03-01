@@ -18,8 +18,9 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code import TrListas
 from Code import Util
-from Code import XVoyager
+from Code.QT import Voyager
 from Code.Constantes import *
+
 
 def pgn_pks(estado, pgn, jugada_inicial=None):
     unpgn = PGN.UnPGN()
@@ -59,6 +60,7 @@ def pgn_pks(estado, pgn, jugada_inicial=None):
 #     dic["MOVES"] = li
 
 #     return dic
+
 
 class GestorSolo(Gestor.Gestor):
     def inicio(self, dic=None, fichero=None, pgn=None, jugadaInicial=None, siGrabar=True, siExterno=False):
@@ -735,7 +737,7 @@ class GestorSolo(Gestor.Gestor):
                 self.cambioRival()
 
         elif resp == "voyager":
-            ptxt = XVoyager.xVoyager(self.pantalla, self.configuracion, partida=self.partida)
+            ptxt = Voyager.voyagerPartida(self.pantalla, self.partida)
             if ptxt:
                 dic = self.creaDic()
                 dic["PARTIDA"] = ptxt
@@ -762,7 +764,7 @@ class GestorSolo(Gestor.Gestor):
         ]
 
     def startPosition(self):
-        resp = XVoyager.xVoyagerFEN(self.pantalla, self.configuracion, self.fen)
+        resp = Voyager.voyagerFEN(self.pantalla, self.fen)
         if resp is not None:
             self.fen = resp
             self.bloqueApertura = None

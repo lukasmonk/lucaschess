@@ -11,6 +11,7 @@ from Code.QT import QTUtil2
 from Code import Util
 from Code.Constantes import *
 
+
 class GestorGM(Gestor.Gestor):
     def inicio(self, record):
 

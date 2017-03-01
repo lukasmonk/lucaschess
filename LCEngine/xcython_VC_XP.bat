@@ -11,9 +11,6 @@ set INCLUDE=%VCINSTALLDIR%\Include;%WindowsSdkDir%\Include;%INCLUDE%
 set LIB=%VCINSTALLDIR%\Lib;%WindowsSdkDir%\Lib;%LIB%
 set LIBPATH=%VCINSTALLDIR%\Lib;%WindowsSdkDir%\Lib;%LIBPATH%
 
-
-
 python setup.py build_ext --inplace
-del ..\LCEngine.pyd
-copy LCEngine.pyd ..
+copy LCEngine.pyd ..\Engines\Windows\_tools
 

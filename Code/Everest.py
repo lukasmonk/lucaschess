@@ -4,9 +4,11 @@ from Code import Partida
 from Code.SQL import Base
 from Code import Util
 
+
 def str_file(fichero):
     with open(fichero) as f:
         return eval(f.read())
+
 
 def gen_list(txt):  # tolerance and tries in 12
     xmin, xmax = txt.split(",")
@@ -19,6 +21,7 @@ def gen_list(txt):  # tolerance and tries in 12
         li[x] = int(round(xmax, 0))
     return li
 
+
 def pos_lidistribution(lidistribution, pos):
     desde = 0
     for n, x in enumerate(lidistribution):
@@ -26,6 +29,7 @@ def pos_lidistribution(lidistribution, pos):
         if desde <= pos <= hasta:
             return n, pos - desde
         desde = hasta + 1
+
 
 class Expedition:
     def __init__(self, configuration, recno):
@@ -174,6 +178,7 @@ class Expedition:
 
         return change_game
 
+
 class Expeditions:
     def __init__(self, configuracion):
         self.configuracion = configuracion
@@ -282,6 +287,7 @@ class Expeditions:
         self.dbf.borrarLista(lirecnos)
         self.dbf.pack()
         self.dbf.leer()
+
 
 class Everest:
     def __init__(self):

@@ -25,6 +25,7 @@ makePV = LCEngine.makePV
 num2move = LCEngine.num2move
 move2num = LCEngine.move2num
 
+
 class TreeSTAT:
     def __init__(self, nomFichero, depth=None):
         self.nomFichero = nomFichero
@@ -345,7 +346,7 @@ class TreeSTAT:
                     pv = (pvPrevio + " " + wm).strip()
                     cpN = cp.copia()
                     cpN.moverPV(wm)
-                    f.write("%s|%s|%s\n" % (alm.XPV, wm, cpN.fen()))
+                    f.write("%s|%s|%s\n" % (pv2xpv(pv), wm, cpN.fen()))
                     todos(pv, depth + 1, cpN)
 
         def todos(pvPrevio, depth, cp):
@@ -363,7 +364,7 @@ class TreeSTAT:
                     pv = (pvPrevio + " " + alm.move).strip()
                     cpN = cp.copia()
                     cpN.moverPV(wm)
-                    f.write("%s|%s|%s\n" % (alm.XPV, wm, cpN.fen()))
+                    f.write("%s|%s|%s\n" % (pv2xpv(pv), wm, cpN.fen()))
                     fm2 = cpN.fenM2()
                     if fm2 not in stFenM2:  # Para que no se repitan los movimientos de los transpositions
                         stFenM2.add(fm2)
@@ -387,6 +388,7 @@ class TreeSTAT:
             todos(pvBase, 0, cp)
         f.close()
         return fich
+
 
 class DBgames:
     def __init__(self, nomFichero):

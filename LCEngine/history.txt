@@ -1,0 +1,36 @@
+    1  ls
+    2  runasroot.sh
+    3  ./runasroot.sh
+    4  ./runasroot.sh autorun.sh
+    5  ./runasroot.sh ./autorun.sh
+    6  sudo autorun.sh
+    7  sudo ./autorun.sh
+    8  sudo apt-get install git
+    9  xmk_linux.sh
+   10  ./xmk_linux.sh
+   11  cd ..
+   12  chmod -R 777 *
+   13  cd LCEngine
+   14  cd irina
+   15  ./xmk_linux.sh
+   16  cd ..
+   17  ls -l *sh
+   18  ./xcython_linux.sh
+   19  pip install cython
+   20  sudo apt-get install python-pip
+   21  pip install cython
+   22  sudo pip install cython
+   23  ls
+   24  exit
+   25  sudo pip install Cython
+   26  sudo apt-get install build-essentials
+   27  sudo apt-get install build-essential
+   28  sudo pip install Cython
+   29  sudo apt-get python-dev
+   30  sudo apt-get install python-dev
+   31  sudo pip install Cython
+   32  history
+   33  history > history.txt
+   34  ./scython_linux.sh
+   35  ./xcython_linux.sh
+   36  history > history.txt

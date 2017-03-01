@@ -3,124 +3,16 @@ import signal
 import struct
 import time
 
-import psutil
-
 from PyQt4 import QtCore
 
 from Code import VarGen
 from Code.Constantes import *
 from Code import XMotorRespuesta
+from Code import EngineThread
 
-DEBUG = False
-tdbg = [time.time()]
-
-def xpr(line):
-    if DEBUG:
-        t = time.time()
-        prlk("%0.04f %s" % (t - tdbg[0], line))
-        tdbg[0] = t
-    return True
-
-def xprli(li):
-    if DEBUG:
-        t = time.time()
-        dif = t - tdbg[0]
-        for line in li:
-            prlk("%0.04f %s\n" % (dif, line))
-        tdbg[0] = t
-    return True
-
-if DEBUG:
-    xpr("DEBUG XMOTOR")
-
-if VarGen.isLinux:
-    PRIORITY_NORMAL = 0
-    PRIORITY_LOW, PRIORITY_VERYLOW = 10, 20
-    PRIORITY_HIGH, PRIORITY_VERYHIGH = -10, -20
-else:
-    PRIORITY_NORMAL                  = psutil.NORMAL_PRIORITY_CLASS
-    PRIORITY_LOW, PRIORITY_VERYLOW   = psutil.BELOW_NORMAL_PRIORITY_CLASS, psutil.IDLE_PRIORITY_CLASS
-    PRIORITY_HIGH, PRIORITY_VERYHIGH = psutil.ABOVE_NORMAL_PRIORITY_CLASS, psutil.HIGH_PRIORITY_CLASS
-
-class Engine(QtCore.QThread):
-    def __init__(self, exe, priority, args):
-        QtCore.QThread.__init__(self)
-        self.pid = None
-        self.exe = os.path.abspath(exe)
-        self.direxe = os.path.dirname(exe)
-        self.priority = priority
-        self.working = True
-        self.mutex = QtCore.QMutex()
-        self.libuffer = []
-        self.lastline = ""
-        self.starting = True
-        self.args = args if args else []
-
-    def cerrar(self):
-        self.working = False
-        self.wait()
-
-    def put_line(self, line):
-        assert xpr("put>>> %s\n" % line)
-        self.process.write(line +"\n")
-
-    def get_lines(self):
-        self.mutex.lock()
-        li = self.libuffer
-        self.libuffer = []
-        self.mutex.unlock()
-        assert xprli(li)
-        return li
-
-    def hay_datos(self):
-        return len(self.libuffer) > 0
-
-    def reset(self):
-        self.mutex.lock()
-        self.libuffer = []
-        self.lastline = ""
-        self.mutex.unlock()
-
-    def close(self):
-        self.working = False
-        self.wait()
-
-    def run(self):
-        self.process = QtCore.QProcess()
-        self.process.setWorkingDirectory(self.direxe)
-        self.process.start(self.exe, self.args, mode=QtCore.QIODevice.ReadWrite)
-        self.process.waitForStarted()
-        self.pid = self.process.pid()
-        if VarGen.isWindows:
-            hp, ht, self.pid, dt = struct.unpack("PPII", self.pid.asstring(16))
-        if self.priority != PRIORITY_NORMAL:
-            p = psutil.Process(self.pid)
-            p.nice(self.priority)
-
-        self.starting = False
-        while self.working:
-            if self.process.waitForReadyRead(90):
-                x = str(self.process.readAllStandardOutput())
-                if x:
-                    self.mutex.lock()
-                    if self.lastline:
-                        x = self.lastline + x
-                    self.lastline = ""
-                    sifdl = x.endswith("\n")
-                    li = x.split("\n")
-                    if not sifdl:
-                        self.lastline = li[-1]
-                        li = li[:-1]
-                    self.libuffer.extend(li)
-                    if len(self.libuffer) > 2000:
-                        self.libuffer = self.libuffer[1000:]
-                    self.mutex.unlock()
-        self.put_line("quit")
-        self.process.kill()
-        self.process.close()
 
 class XMotor:
-    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=0, priority=PRIORITY_NORMAL, args=[]):
+    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=0, priority=EngineThread.PRIORITY_NORMAL, args=None):
         self.nombre = nombre
 
         self.ponder = False
@@ -135,34 +27,45 @@ class XMotor:
         self.uci_ok = False
         self.pid = None
 
+        self.uci_lines = []
+
         if not os.path.isfile(exe):
             return
 
-        self.engine = Engine(exe, priority, args)
+        self.engine = EngineThread.EnginePOP(exe, priority, args)
         self.engine.start()
 
-        time.sleep(0.01)
-        n = 100
-        while self.engine.starting and n:
-            time.sleep(0.1 if n > 50 else 0.3)
-            n-= 1
+        # time.sleep(0.01)
+        # n = 100
+        # while self.engine.starting and n:
+        #     time.sleep(0.1 if n > 50 else 0.2)
+        #     n-= 1
 
         self.lockAC = True
         self.pid = self.engine.pid
 
         self.order_uci()
 
+        txt_uci_analysemode = "UCI_AnalyseMode"
+        uci_analysemode = False
+
         if liOpcionesUCI:
             for opcion, valor in liOpcionesUCI:
                 if type(valor) == bool:
                     valor = str(valor).lower()
                 self.set_option(opcion, valor)
+                if opcion == txt_uci_analysemode:
+                    uci_analysemode = True
                 if opcion.lower() == "ponder":
                     self.ponder = valor == "true"
 
         self.nMultiPV = nMultiPV
         if nMultiPV:
             self.ponMultiPV(nMultiPV)
+            if not uci_analysemode:
+                for line in self.uci_lines:
+                    if "UCI_AnalyseMode" in line:
+                        self.set_option("UCI_AnalyseMode", "true")
 
     def get_lines(self):
         return self.engine.get_lines()
@@ -323,12 +226,12 @@ class XMotor:
         self.mrm.ordena()
         return self.mrm
 
-    def set_game_position(self, partida):
+    def set_game_position(self, partida, njg=99999):
         posInicial = "startpos" if partida.siFenInicial() else "fen %s" % partida.iniPosicion.fen()
-        li = [jg.movimiento().lower() for jg in partida.liJugadas]
+        li = [jg.movimiento().lower() for n, jg in enumerate(partida.liJugadas) if n < njg]
         moves = " moves %s" % (" ".join(li)) if li else ""
         self.work_ok("position %s%s" % (posInicial, moves))
-        self.is_white = partida.siBlancas()
+        self.is_white = partida.siBlancas() if njg > 9000 else partida.jugada(njg).siBlancas()
 
     def set_fen_position(self, fen):
         self.work_ok("position fen %s" % fen)
@@ -382,6 +285,38 @@ class XMotor:
         time.sleep(0.1)
         return self.ac_estado()
 
+    def analysis_stable(self, partida, njg, ktime, kdepth, is_savelines, st_centipawns, st_depths, st_timelimit):
+        self.set_game_position(partida, njg)
+        self.reset()
+        if is_savelines:
+            self.mrm.save_lines()
+        self.put_line("go infinite")
+        def lee():
+            for line in self.get_lines():
+                self.mrm.dispatch(line)
+            self.mrm.ordena()
+            return self.mrm.mejorMov()
+        ok_time = False if ktime else True
+        ok_depth = False if kdepth else True
+        while self.guiDispatch(None):
+            rm = lee()
+            if not ok_time:
+                ok_time = rm.time >= ktime
+            if not ok_depth:
+                ok_depth = rm.depth >= kdepth
+            if ok_time and ok_depth:
+                break
+            time.sleep(0.1)
+
+        if st_timelimit == 0:
+            st_timelimit = 999999
+        while not self.mrm.is_stable(st_centipawns, st_depths) and self.guiDispatch(None) and st_timelimit > 0.0:
+            time.sleep(0.1)
+            st_timelimit -= 0.1
+            lee()
+        self.put_line("stop")
+        return self.mrm
+
     def ponGuiDispatch(self, guiDispatch, whoDispatch=None):
         self.guiDispatch = guiDispatch
         if whoDispatch is not None:
@@ -402,7 +337,6 @@ class XMotor:
     def order_uci(self):
         self.reset()
         self.put_line("uci")
-        # self.put_line("isready")
         li, self.uci_ok = self.wait_list("uciok", 10000)
         self.uci_lines = [x for x in li if x.startswith("id ") or x.startswith("option name")] if self.uci_ok else []
 
@@ -415,6 +349,10 @@ class XMotor:
     def bestmove_game(self, partida, max_time, max_depth):
         self.set_game_position(partida)
         return self.seek_bestmove(max_time, max_depth, False)
+
+    def bestmove_game_jg(self, partida, njg, max_time, max_depth, is_savelines=False):
+        self.set_game_position(partida, njg)
+        return self.seek_bestmove(max_time, max_depth, is_savelines)
 
     def bestmove_fen(self, fen, max_time, max_depth, is_savelines=False):
         self.set_fen_position(fen)
@@ -452,3 +390,184 @@ class XMotor:
         self.work_ok("stop")
         self.pondering = False
 
+
+class DirectMotor(QtCore.QProcess):
+    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=None, args = []):
+        QtCore.QProcess.__init__(self)
+
+        absexe = os.path.abspath(exe)
+        direxe = os.path.abspath(os.path.dirname(exe))
+        self.setWorkingDirectory(direxe)
+        self.start(absexe, args, mode=QtCore.QIODevice.ReadWrite)
+        self.waitForStarted()
+        self.nMultiPV = nMultiPV
+        self.lockAC = True
+        self.pid = self.pid()
+        hp, ht, self.pid, dt = struct.unpack("PPII", self.pid.asstring(16))
+
+        # Control de lectura
+        self._buffer = ""
+
+        self.siDebug = False
+        self.nomDebug = nombre
+
+        self.connect(self, QtCore.SIGNAL("readyReadStandardOutput()"), self._lee)
+
+        self.guiDispatch = None
+        self.ultDispatch = 0
+        self.minDispatch = 1.0 #segundos
+        self.whoDispatch = nombre
+        self.siBlancas = True
+
+        # Configuramos
+        self.nombre = nombre
+        self.uci = self.orden_uci()
+
+        if liOpcionesUCI:
+            for opcion, valor in liOpcionesUCI:
+                if valor is None:  # button en motores externos
+                    self.orden_ok("setoption name %s" % opcion)
+                else:
+                    if type(valor) == bool:
+                        valor = str(valor).lower()
+                    self.orden_ok("setoption name %s value %s" % (opcion, valor))
+        if nMultiPV:
+            self.ponMultiPV(nMultiPV)
+
+    def ponGuiDispatch(self, guiDispatch, whoDispatch=None):
+        self.guiDispatch = guiDispatch
+        if whoDispatch is not None:
+            self.whoDispatch = whoDispatch
+
+    def ponMultiPV(self, nMultiPV):
+        self.orden_ok("setoption name MultiPV value %s" % nMultiPV)
+
+    def flush(self):
+        self.readAllStandardOutput()
+        self._buffer = ""
+
+    def buffer(self):
+        self._lee()
+        resp = self._buffer
+        self._buffer = ""
+        return resp
+
+    def apagar(self):
+        self.write("stop\n")
+        self.waitForReadyRead(90)
+        self.cerrar()
+
+    def cerrar(self):
+        if self.pid:
+            try:
+                os.kill(self.pid, signal.SIGTERM)
+            except:
+                self.close()
+            self.pid = None
+
+    def _lee(self):
+        x = str(self.readAllStandardOutput())
+        if x:
+            self._buffer += x
+            if self.siDebug:
+                prlk(x)
+            return True
+        return False
+
+    def escribe(self, linea):
+        self.write(str(linea) + "\n")
+        if self.siDebug:
+            prlkn(self.nomDebug, "W", linea)
+
+    def dispatch(self):
+        QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+        if self.guiDispatch:
+            tm = time.time()
+            if tm-self.ultDispatch < self.minDispatch:
+                return True
+            self.ultDispatch = tm
+            mrm = XMotorRespuesta.MRespuestaMotor(self.nombre, self.siBlancas)
+            if self._buffer.endswith("\n"):
+                b = self._buffer
+            else:
+                n = self._buffer.rfind("\n")
+                b = self._buffer[:-n + 1] if n > 1 else ""
+            mrm.dispatch(b)
+            mrm.ordena()
+            rm = mrm.mejorMov()
+            rm.whoDispatch = self.whoDispatch
+            if not self.guiDispatch(rm):
+                return False
+        return True
+
+    def espera(self, txt, msStop, siStop=True):
+        iniTiempo = time.time()
+        stop = False
+        tamBuffer = len(self._buffer)
+        while True:
+            if tamBuffer != len(self._buffer):
+                tamBuffer = len(self._buffer)
+                if txt in self._buffer:
+                    if self._buffer.endswith("\n"):
+                        self.dispatch()
+                        return True
+
+            if not self.dispatch():
+                return False
+
+            queda = msStop - int((time.time() - iniTiempo) * 1000)
+            if queda <= 0:
+                if stop:
+                    return True
+                if siStop:
+                    self.escribe("stop")
+                msStop += 2000
+                stop = True
+            self.waitForReadyRead(90)
+
+    def orden_ok(self, orden):
+        self.escribe(orden)
+        self.escribe("isready")
+        self.espera("readyok", 1000)
+        return self.buffer()
+
+    def orden_uci(self):
+        self.escribe("uci")
+        self.espera("uciok", 5000)
+        return self.buffer()
+
+    def orden_bestmove(self, orden, msMaxTiempo):
+        self.flush()
+        self.escribe(orden)
+        self.espera("bestmove", msMaxTiempo, siStop=True)
+        return self.buffer()
+
+    def bestmove_fen(self, fen, maxTiempo, maxProfundidad):
+        self.orden_ok("position fen %s" % fen)
+        self.siBlancas = siBlancas = "w" in fen
+        return self._mejorMov(maxTiempo, maxProfundidad, siBlancas)
+
+    def _mejorMov(self, maxTiempo, maxProfundidad, siBlancas):
+        env = "go"
+        if maxProfundidad:
+            env += " depth %d" % maxProfundidad
+        elif maxTiempo:
+            env += " movetime %d" % maxTiempo
+
+        msTiempo = 10000
+        if maxTiempo:
+            msTiempo = maxTiempo
+        elif maxProfundidad:
+            msTiempo = int(maxProfundidad * msTiempo / 3.0)
+
+        resp = self.orden_bestmove(env, msTiempo)
+        if not resp:
+            return None
+
+        mrm = XMotorRespuesta.MRespuestaMotor(self.nombre, siBlancas)
+        for linea in resp.split("\n"):
+            mrm.dispatch(linea.strip())
+        mrm.maxTiempo = maxTiempo
+        mrm.maxProfundidad = maxProfundidad
+        mrm.ordena()
+        return mrm

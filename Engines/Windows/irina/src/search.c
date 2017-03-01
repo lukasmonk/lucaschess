@@ -20,6 +20,9 @@ int working_depth;
 int triangularLength[MAX_PLY];
 Move triangularArray[MAX_PLY][MAX_PLY];
 
+Bitmap historia[MAX_PLY];
+int len_historia;
+
 typedef struct MoveOrder
 {
     Move move;
@@ -32,7 +35,6 @@ FunctionEval functionEval = &eval;
 
 void orderMoves( int ply );
 void quick_sort(int low, int high);
-int repetitions(void);
 
 // void show_move(Move move) {
     // printf("[%c %s%s ", NAMEPZ[move.piece], POS_AH[move.from], POS_AH[move.to]);
@@ -76,6 +78,9 @@ void play_irina(int depth, int time)
         if( check_book(fen, bestmove) )
         {
             printf("bestmove %s\n", bestmove);
+            #ifdef LOG
+                fprintf(flog, "bestmove %s\n", bestmove);
+            #endif
             return;
         }
         else
@@ -95,6 +100,9 @@ void play_irina(int depth, int time)
     ponder[0] = '\0';
     if (depth<=0) depth = 120;
 
+    len_historia = board.ply;
+    for(i=0; i < board.ply; i++)
+        historia[i] = board.history[i].hashkey;
     board_reset();
 
     for (working_depth = 1; working_depth <= depth && ok_time_kb; working_depth++)
@@ -122,11 +130,22 @@ void play_irina(int depth, int time)
             printf("info depth %d score %s time %lu nodes %lu nps %lu pv",
                    working_depth, str_score, (long unsigned int) ms, (long unsigned int) inodes,
                    (long unsigned int) (inodes * 1000 / ms));
+            #ifdef LOG
+                fprintf(flog, "info depth %d score %s time %lu nodes %lu nps %lu pv",
+                       working_depth, str_score, (long unsigned int) ms, (long unsigned int) inodes,
+                       (long unsigned int) (inodes * 1000 / ms));
+            #endif
             for (i = 0; i < triangularLength[0]; i++)
             {
                 printf(" %s", move2str(triangularArray[0][i], str_move));
+                #ifdef LOG
+                    fprintf(flog, " %s", move2str(triangularArray[0][i], str_move));
+                #endif
             }
             printf("\n");
+            #ifdef LOG
+                fprintf(flog, "\n");
+            #endif
             if (triangularLength[0])
             {
                 move2str(triangularArray[0][0], bestmove);
@@ -159,11 +178,20 @@ void play_irina(int depth, int time)
             person_sleep(0);
         }
         printf("bestmove %s", bestmove);
+        #ifdef LOG
+            fprintf(flog, "bestmove %s", bestmove);
+        #endif
         if (ponder[0])
         {
             printf(" ponder %s", ponder);
+            #ifdef LOG
+                fprintf(flog, " ponder %s", ponder);
+            #endif
         }
         printf("\n");
+        #ifdef LOG
+            fprintf(flog, "\n");
+        #endif
     }
     if( max_time )
     {
@@ -202,6 +230,12 @@ inline void test_time()
                        working_depth,
                        (long unsigned int) ms, (long unsigned int) inodes,
                        (long unsigned int) (inodes * 1000 / ms));
+                #ifdef LOG
+                    fprintf(flog, "info depth %d time %lu nodes %lu nps %lu\n",
+                        working_depth,
+                        (long unsigned int) ms, (long unsigned int) inodes,
+                        (long unsigned int) (inodes * 1000 / ms));
+                #endif
             }
         }
     }
@@ -276,9 +310,11 @@ int alphaBeta(int alpha, int beta, int depth, int ply, int max_ply)
     {
         return noMovesScore(ply);
     }
+
     if( repetitions() >= 3) {
         return DRAWSCORE;
     }
+
     desde = board.ply_moves[ply];
     hasta = board.ply_moves[ply + 1];
     best_score = -BIGNUMBER;
@@ -335,15 +371,22 @@ void orderMoves( int ply )
 
 int repetitions()
 {
-	int i, ilast, rep;
-	Bitmap hashkey = board.hashkey;
-	rep = 1;
-	ilast = board.ply - board.fifty;
-	for (i = board.ply - 2; i >= ilast; i -= 2)
-	{
-		if (board.history[i].hashkey == hashkey) rep++;
-	}
-	return rep;
+    int i, ilast, rep;
+    Bitmap hashkey = board.hashkey;
+    rep = 1;
+    ilast = board.ply - board.fifty;
+    if(ilast < 0)
+    {
+        for (i = len_historia - 1; i >= (len_historia+ilast)-1 && i; i--)
+        {
+            if( historia[i] == hashkey ) rep++;
+        }
+    }
+    for (i = board.ply - 2; i >= ilast && i; i -= 2)
+    {
+        if (board.history[i].hashkey == hashkey) rep++;
+    }
+    return rep;
 }
 
 

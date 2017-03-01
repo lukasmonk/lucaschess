@@ -17,8 +17,9 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code import Util
-from Code import XVoyager
+from Code.QT import Voyager
 from Code.Constantes import *
+
 
 class WEntMaquina(QTVarios.WDialogo):
     def __init__(self, procesador, titulo):
@@ -356,16 +357,10 @@ class WEntMaquina(QTVarios.WDialogo):
         self.edRtiempo.setEnabled(num == 0)
 
     def posicionEditar(self):
-        resp = XVoyager.xVoyagerFEN(self, self.configuracion, self.fen)
+        resp = Voyager.voyagerFEN(self, self.fen)
         if resp is not None:
             self.fen = resp
             self.muestraPosicion()
-        self.procesador.pantalla.raise_()
-        self.procesador.pantalla.show()
-        self.procesador.pantalla.activateWindow()
-        # self.raise_()
-        # self.show()
-        # self.activateWindow()
 
     def posicionPegar(self):
         texto = QTUtil.traePortapapeles()
@@ -608,12 +603,14 @@ class WEntMaquina(QTVarios.WDialogo):
         if PantallaTutor.cambioTutor(self, self.configuracion):
             self.procesador.cambiaXTutor()
 
+
 def entrenamientoMaquina(procesador, titulo):
     w = WEntMaquina(procesador, titulo)
     if w.exec_():
         return w.dic
     else:
         return None
+
 
 class WCambioRival(QtGui.QDialog):
     def __init__(self, wParent, configuracion, dic, siGestorSolo):
@@ -788,6 +785,7 @@ class WCambioRival(QtGui.QDialog):
             actual = self.cbAjustarRival.valor()
             self.cbAjustarRival.rehacer(self.personalidades.listaAjustes(True), actual)
 
+
 def cambioRival(parent, configuracion, dic, siGestorSolo=False):
     w = WCambioRival(parent, configuracion, dic, siGestorSolo)
 
@@ -795,6 +793,7 @@ def cambioRival(parent, configuracion, dic, siGestorSolo=False):
         return w.dic
     else:
         return None
+
 
 def dameMinutosExtra(pantalla):
     liGen = [(None, None)]

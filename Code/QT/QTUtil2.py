@@ -7,6 +7,7 @@ from Code.QT import QTUtil
 from Code import VarGen
 from Code.Constantes import *
 
+
 def dicTeclas():
     dic = {
         16777234: kMoverAtras,
@@ -18,11 +19,13 @@ def dicTeclas():
     }
     return dic
 
+
 def leeCarpeta(owner, carpeta, titulo=None):
     if titulo is None:
         titulo = _("Open Directory")
     return QtGui.QFileDialog.getExistingDirectory(owner, titulo, carpeta,
                                                   QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks)
+
 
 def _lfTituloFiltro(extension, titulo):
     if titulo is None:
@@ -31,10 +34,9 @@ def _lfTituloFiltro(extension, titulo):
         filtro = extension
     else:
         pathext = "*.%s" % extension
-        if extension == "*" and VarGen.isLinux:
-            pathext = "*"
         filtro = _("File") + " %s (%s)" % (extension, pathext)
     return titulo, filtro
+
 
 def leeFichero(owner, carpeta, extension, titulo=None):
     titulo, filtro = _lfTituloFiltro(extension, titulo)
@@ -43,12 +45,14 @@ def leeFichero(owner, carpeta, extension, titulo=None):
     # resp = resp[0] #+pyside
     return resp
 
+
 def creaFichero(owner, carpeta, extension, titulo=None):
     titulo, filtro = _lfTituloFiltro(extension, titulo)
     resp = QtGui.QFileDialog.getSaveFileName(owner, titulo, carpeta, filtro)
     # if resp : #+pyside
     # resp = resp[0] #+pyside
     return resp
+
 
 def leeCreaFichero(owner, carpeta, extension, titulo=None):
     titulo, filtro = _lfTituloFiltro(extension, titulo)
@@ -68,6 +72,7 @@ def leeCreaFichero(owner, carpeta, extension, titulo=None):
     # else:
     #     return None
 
+
 def salvaFichero(pantalla, titulo, carpeta, filtro, siConfirmarSobreescritura=True):
     if siConfirmarSobreescritura:
         resp = QtGui.QFileDialog.getSaveFileName(pantalla, titulo, carpeta, filtro)
@@ -77,6 +82,7 @@ def salvaFichero(pantalla, titulo, carpeta, filtro, siConfirmarSobreescritura=Tr
         # if resp : #+pyside
         # resp = resp[0] #+pyside
     return resp
+
 
 class MensEspera(QtGui.QWidget):
     def __init__(self, parent, mensaje, siCancelar, siMuestraYa, opacity, posicion, fixedSize, titCancelar, background, pmImagen=None):
@@ -159,6 +165,7 @@ class MensEspera(QtGui.QWidget):
         self.destroy()
         QTUtil.refreshGUI()
 
+
 class ControlMensEspera:
     def __init__(self):
         self.me = None
@@ -214,9 +221,11 @@ class ControlMensEspera:
 
 mensEspera = ControlMensEspera()
 
+
 def mensajeTemporal(pantalla, mensaje, segundos, background=None, pmImagen=None):
     me = mensEspera.inicio(pantalla, mensaje, background=background, pmImagen=pmImagen, siCancelar=segundos > 3.0, titCancelar=_("Continue"))
     me.time(segundos)
+
 
 class BarraProgreso2(QtGui.QDialog):
     def __init__(self, owner, titulo, formato1="%v/%m", formato2="%v/%m"):
@@ -288,6 +297,7 @@ class BarraProgreso2(QtGui.QDialog):
         QTUtil.refreshGUI()
         return self._siCancelado
 
+
 class BarraProgreso1(QtGui.QDialog):
     def __init__(self, owner, titulo, formato1="%v/%m"):
         QtGui.QDialog.__init__(self, owner)
@@ -349,6 +359,7 @@ class BarraProgreso1(QtGui.QDialog):
         QTUtil.refreshGUI()
         return self._siCancelado
 
+
 class BarraProgreso(QtGui.QProgressDialog):
     # ~ bp = QTUtil2.BarraProgreso( self, "me", 5 ).mostrar()
     # ~ n = 0
@@ -404,8 +415,10 @@ class BarraProgreso(QtGui.QProgressDialog):
     def inc(self):
         self.pon(self.actual + 1)
 
+
 def resalta(mens, tipo=4):
     return ("<h%d>%s</h%d>" % (tipo, mens, tipo)).replace("\n", "<br>")
+
 
 def mensaje(parent, mens, titulo=None, siResalta=True, siArribaDerecha=False):
     w = Mensaje(parent, mens, titulo, siResalta)
@@ -413,6 +426,7 @@ def mensaje(parent, mens, titulo=None, siResalta=True, siArribaDerecha=False):
         w.move(parent.x() + parent.width() - w.width(), parent.y())
         # w.show()
     w.muestra()
+
 
 class Mensaje(QtGui.QDialog):
     def __init__(self, parent, mens, titulo=None, siResalta=True):
@@ -443,16 +457,19 @@ class Mensaje(QtGui.QDialog):
         self.exec_()
         QTUtil.refreshGUI()
 
+
 def mensError(parent, mens):
     msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Warning, _("Error"), resalta(mens), parent=parent)
     msgBox.addButton(_("Continue"), QtGui.QMessageBox.ActionRole)
     msgBox.exec_()
+
 
 def mensErrorSobreControl(owner, mens, control):
     msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Warning, _("Error"), resalta(mens), parent=owner)
     msgBox.addButton(_("Continue"), QtGui.QMessageBox.ActionRole)
     msgBox.move(owner.x() + control.x(), owner.y() + control.y())
     msgBox.exec_()
+
 
 def pregunta(parent, mens, etiSi=None, etiNo=None, si_top=False):
     msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, _("Question"), resalta(mens), parent=parent)
@@ -466,6 +483,7 @@ def pregunta(parent, mens, etiSi=None, etiNo=None, si_top=False):
         msgBox.setWindowFlags(msgBox.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
     msgBox.exec_()
     return msgBox.clickedButton() == siButton
+
 
 def preguntaCancelar(parent, mens, si, no):
     msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, _("Question"), resalta(mens), parent=parent)
@@ -481,6 +499,7 @@ def preguntaCancelar(parent, mens, si, no):
     else:
         resp = None
     return resp
+
 
 def preguntaCancelar123(parent, title, mens, si, no, cancel):
     msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, title, resalta(mens), parent=parent)
@@ -498,6 +517,7 @@ def preguntaCancelar123(parent, title, mens, si, no, cancel):
     else:
         resp = 0
     return resp
+
 
 def tbAcceptCancel(parent, siDefecto=False, siReject=True):
     liAcciones = [(_("Accept"), Iconos.Aceptar(), parent.aceptar),
@@ -546,6 +566,7 @@ def tbAcceptCancel(parent, siDefecto=False, siReject=True):
 # except:
 # pass
 
+
 def tiposDeLineas():
     li = (
         (_("No pen"), 0),
@@ -556,6 +577,7 @@ def tiposDeLineas():
         (_("Dash dot dot line"), 5),
     )
     return li
+
 
 def listaOrdenes():
     li = []
@@ -569,6 +591,7 @@ def listaOrdenes():
         li.append((txt, k))
     return li
 
+
 def spinBoxLB(owner, valor, desde, hasta, etiqueta=None, maxTam=None):
     ed = Controles.SB(owner, valor, desde, hasta)
     if maxTam:
@@ -579,6 +602,7 @@ def spinBoxLB(owner, valor, desde, hasta, etiqueta=None, maxTam=None):
     else:
         return ed
 
+
 def comboBoxLB(parent, liOpciones, valor, etiqueta=None):
     cb = Controles.CB(parent, liOpciones, valor)
     if etiqueta:
@@ -586,11 +610,14 @@ def comboBoxLB(parent, liOpciones, valor, etiqueta=None):
     else:
         return cb
 
+
 def unMomento(owner):
     return mensEspera.inicio(owner, _("One moment please..."))
 
+
 def analizando(owner):
     return mensEspera.inicio(owner, _("Analyzing the move...."), posicion="ad")
+
 
 def ponIconosMotores(lista):
     liResp = []

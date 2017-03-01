@@ -1,10 +1,11 @@
-from PyQt4.QtCore import Qt
+from PyQt4 import QtCore
 
 from Code import DGT
 from Code.QT import FormLayout
 from Code.QT import Iconos
 from Code import Util
 from Code.Constantes import *
+
 
 def opciones(parent, configuracion):
     separador = (None, None)
@@ -42,32 +43,35 @@ def opciones(parent, configuracion):
     liEng.append((_("Do not work in background when possible") + ":", configuracion.notbackground))
 
     # Aspect
-    liAsp = [separador]
+    liAsp = []
 
     liAsp.append((_("By default") + ":", False))
+    liAsp.append(separador)
 
+    ## font general
     liAsp.append((FormLayout.FontCombobox(_("Font")), configuracion.familia))
+    liAsp.append(separador)
 
-    # Menus
+    ## Menus
     liAsp.append((None, _("Menus") + ":"))
     liAsp.append((FormLayout.Spinbox(_("Font size"), 5, 64, 60), configuracion.puntosMenu))
     liAsp.append((_("Bold") + ":", configuracion.boldMenu))
 
-    # Toolbars
+    ## Toolbars
     liAsp.append(separador)
     liAsp.append((None, _("Toolbars") + ":"))
     liAsp.append((FormLayout.Spinbox(_("Font size"), 5, 64, 60), configuracion.puntosTB))
     liAsp.append((_("Bold") + ":", configuracion.boldTB))
     li = (
-            (_("Only display the icon"), Qt.ToolButtonIconOnly),
-            (_("Only display the text"), Qt.ToolButtonTextOnly),
-            (_("The text appears beside the icon"), Qt.ToolButtonTextBesideIcon),
-            (_("The text appears under the icon"), Qt.ToolButtonTextUnderIcon)
+            (_("Only display the icon"), QtCore.Qt.ToolButtonIconOnly),
+            (_("Only display the text"), QtCore.Qt.ToolButtonTextOnly),
+            (_("The text appears beside the icon"), QtCore.Qt.ToolButtonTextBesideIcon),
+            (_("The text appears under the icon"), QtCore.Qt.ToolButtonTextUnderIcon)
     )
     config = FormLayout.Combobox(_("Icons"), li)
     liAsp.append((config, configuracion.iconsTB))
 
-    # PGN table
+    ## PGN table
     liAsp.append(separador)
     liAsp.append((None, _("PGN table") + ":"))
     liAsp.append((FormLayout.Spinbox(_("Width"), 283, 1000, 70), configuracion.anchoPGN))
@@ -160,7 +164,7 @@ def opciones(parent, configuracion):
     liT.append((_("Show cursor when engine is thinking") + ":", configuracion.cursorThinking))
     liT.append(separador)
     liT.append((_("Enable captured material window by default") + ":", configuracion.siActivarCapturas))
-    liMat = [configuracion.tipoMaterial, ("D", _("Difference material")), ("C", _("Captured material at beginning"))]
+    liMat = [configuracion.tipoMaterial, ("D", _("Difference material")), ("C", _("Captured material at beginning")), ("M", _("Material advantage"))]
     liT.append((_("Show material") + ":", liMat))
     liT.append(separador)
     liT.append((_("Enable information panel by default") + ":", configuracion.siActivarInformacion))
@@ -189,16 +193,14 @@ def opciones(parent, configuracion):
 
         porDefecto = liAsp[0]
         if porDefecto:
-            liAsp = "", 11, False, 11, False, 283, 22, 10, False, True, 10
+            liAsp = "", 11, False, 11, False,  QtCore.Qt.ToolButtonTextUnderIcon, 283, 22, 10, False, True, 10
         else:
             del liAsp[0]
-
         (configuracion.familia, configuracion.puntosMenu, configuracion.boldMenu,
             configuracion.puntosTB, configuracion.boldTB, configuracion.iconsTB,
             configuracion.anchoPGN, configuracion.altoFilaPGN, configuracion.puntosPGN,
             configuracion.siNomPiezasEN, configuracion.figurinesPGN,
             configuracion.tamFontRotulos) = liAsp
-
         if configuracion.familia == "System":
             configuracion.familia = ""
 
@@ -231,6 +233,7 @@ def opciones(parent, configuracion):
         return True
     else:
         return False
+
 
 def opcionesPrimeraVez(parent, configuracion):
     separador = (None, None)

@@ -29,9 +29,14 @@ int CHECK_MATE = 9999;
 
 int DISTANCE[64][64];
 
+// used in Eugene Nalimov's bitScanReverse
+int MS1BTABLE[256];
+
 Bitmap BLACK_SQUARES;
 Bitmap WHITE_SQUARES;
 
+Bitmap FILA_MASK[64];
+Bitmap COLUMNA_MASK[64];
 
 Bitmap inodes;
 
@@ -166,7 +171,7 @@ int BONUS_PASSED_PAWN             = 20;
 int BONUS_BISHOP_PAIR             = 10;
 int BONUS_ROOK_BEHIND_PASSED_PAWN = 20;
 int BONUS_ROOK_ON_OPEN_FILE       = 20;
-int BONUS_TWO_ROOKS_ON_OPEN_FILE  = 20;
+int BONUS_TWO_ROOKS_ON_OPEN_FILE  = 5;
 
 int BONUS_PAWN_SHIELD_STRONG = 9;
 int BONUS_PAWN_SHIELD_WEAK = 4;
@@ -193,7 +198,7 @@ void init_data(void)
 {
     int i, square;
     int from, to, col_from, col_to, fil_from, fil_to, dif_fil, dif_col;
-    Bitmap tmp;
+    Bitmap tmp, fb, cb;
 
     BITSET[0] = 1;
     for (i = 1; i < 64; i++)
@@ -205,6 +210,17 @@ void init_data(void)
     {
         fil_from = FILA(from);
         col_from = COLUMNA(from);
+
+        fb = 0;
+        cb = 0;
+        for(i=0; i < 8; i++)
+        {
+            fb |= BITSET[fil_from*8+i];
+            cb |= BITSET[col_from+i*8];
+        }
+        FILA_MASK[from] = fb;
+        COLUMNA_MASK[from] = cb;
+
         for (to = 0; to < 64; to++)
         {
             fil_to = FILA(to);
@@ -622,6 +638,22 @@ void init_data(void)
             if (abs(FILA(from) - FILA(to)) > abs(COLUMNA(from) - COLUMNA(to))) DISTANCE[from][to] = abs(FILA(from) - FILA(to));
             else DISTANCE[from][to] = abs(COLUMNA(from) - COLUMNA(to));
         }
+    }
+
+
+    //     ===========================================================================
+    //     Initialize MS1BTABLE, used in last_one
+    //     ===========================================================================
+    for (i = 0; i < 256; i++)
+    {
+        MS1BTABLE[i] = (
+            (i > 127) ? 7 :
+            (i >  63) ? 6 :
+            (i >  31) ? 5 :
+            (i >  15) ? 4 :
+            (i >   7) ? 3 :
+            (i >   3) ? 2 :
+            (i >   1) ? 1 : 0 );
     }
 
 

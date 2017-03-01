@@ -4,6 +4,7 @@ import LCEngine
 import chess
 import chess.syzygy
 
+
 class T4:
     def __init__(self):
         self.tb = chess.syzygy.Tablebases("./IntFiles/syzygy")
@@ -70,8 +71,18 @@ class T4:
         return dic
 
     def wd_move(self, fen, move):
-        dic = self.checkFen(fen)
-        return dic.get(move, (-2, 0))
+        LCEngine.setFen(fen)
+        liMoves = LCEngine.getMoves()
+        liMoves = map(lambda x: x[1:], liMoves)
+
+        if move in liMoves:
+            LCEngine.movePV(move[:2], move[2:4], move[4:])
+            xfen = LCEngine.getFen()
+            wdl, dtz = self.wdl_dtz(xfen)
+        else:
+            wdl, dtz = 2, 0
+
+        return -wdl, -dtz
 
     def close(self):
         if self.tb:

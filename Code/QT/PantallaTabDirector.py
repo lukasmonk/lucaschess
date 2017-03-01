@@ -24,7 +24,8 @@ from Code.QT import Tablero
 from Code import TabVisual
 from Code import Util
 from Code import VarGen
-from Code import XVoyager
+from Code.QT import Voyager
+
 
 class WTabDirector(QTVarios.WDialogo):
     def __init__(self, tableroOwner):
@@ -362,7 +363,7 @@ class WTabDirector(QTVarios.WDialogo):
 
         if tipo == "PI":
             fen = self.tablero.fenActual()
-            fen = XVoyager.xVoyagerFEN(self, VarGen.configuracion, fen)
+            fen = Voyager.voyagerFEN(self, fen)
             if fen is None:
                 return None
 
@@ -556,7 +557,7 @@ class WTabDirector(QTVarios.WDialogo):
                     tarea.coordina()
 
             elif isinstance(tarea, TabVisual.GT_Posicion):
-                fen = XVoyager.xVoyagerFEN(self, VarGen.configuracion, tarea.fen())
+                fen = Voyager.voyagerFEN(self, tarea.fen())
                 if fen is not None:
                     tarea.fen(fen)
 

@@ -17,6 +17,7 @@ SIN_VALORACION, MUY_MALO, MALO, BUENO, MUY_BUENO, INTERESANTE, DUDOSA = (0, 4, 2
 V_SIN, V_IGUAL, V_BLANCAS, V_NEGRAS, V_BLANCAS_MAS, V_NEGRAS_MAS, V_BLANCAS_MAS_MAS, V_NEGRAS_MAS_MAS = (
     0, 11, 14, 15, 16, 17, 18, 19)
 
+
 class TreeMoves(QtGui.QTreeWidget):
     def __init__(self, wmoves):
         QtGui.QTreeWidget.__init__(self)

@@ -39,10 +39,12 @@ from Code import Util
 from Code import VarGen
 from Code.Constantes import *
 
+
 class TrainingFNS:
     def __init__(self, path, name):
         self.name = name
         self.path = path
+
 
 class TrainingDir:
     def __init__(self, carpeta):
@@ -94,6 +96,7 @@ class TrainingDir:
             folder.menu(submenu1, xopcion)
         for xfile in self.files:
             xopcion(bmenu, "ep_%s" % xfile.path, xfile.name, icoOp)
+
 
 class Entrenamientos:
     def __init__(self, procesador):

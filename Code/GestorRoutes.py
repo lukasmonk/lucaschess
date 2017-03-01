@@ -16,6 +16,7 @@ from Code import Routes
 from Code import VarGen
 from Code.Constantes import *
 
+
 class GR_Engine:
     def __init__(self, procesador, nlevel):
         self._label = "%s - %s %d" % (_("Engine"), _("Level"), nlevel)
@@ -102,6 +103,7 @@ toga 1236 1495 1928 2132"""
             mas(engine, 4, d4)
         return d
 
+
 class GestorRoutes(Gestor.Gestor):
     def inicio(self, route):
         self.route = route
@@ -141,6 +143,7 @@ class GestorRoutes(Gestor.Gestor):
         self.refresh()
 
         self.ponPosicionDGT()
+
 
 class GestorRoutesPlay(GestorRoutes):
     def inicio(self, route):
@@ -307,7 +310,8 @@ class GestorRoutesPlay(GestorRoutes):
         self.pantalla.ponToolBar(liOpciones)
         jgUlt = self.partida.last_jg()
 
-        siwin = jgUlt.siBlancas() == self.siJugamosConBlancas
+        siwin = (jgUlt.siBlancas() == self.siJugamosConBlancas) and not jgUlt.siTablas()
+
         if siwin:
             if self.route.end_playing():
                 QTUtil2.mensaje(self.pantalla, _("Congratulations, you have completed the game."))
@@ -351,6 +355,7 @@ class GestorRoutesPlay(GestorRoutes):
         resp += "\n" + self.partida.pgnBase() + " " + result
 
         return resp
+
 
 class GestorRoutesEndings(GestorRoutes):
     def inicio(self, route):
@@ -555,9 +560,13 @@ class GestorRoutesEndings(GestorRoutes):
         self.siJuegaHumano = False
         self.estado = kFinJuego
         self.refresh()
-        if self.warnings <= self.max_warnings:
-            liOpciones = [k_mainmenu, k_utilidades]
-            self.pantalla.ponToolBar(liOpciones)
+
+        jgUlt = self.partida.last_jg()
+        if jgUlt.siTablas():
+            QTUtil2.mensaje(self.pantalla, _("Draw") + "<br>" + _("You must repeat the puzzle."))
+            self.inicio(self.route)
+        elif self.warnings <= self.max_warnings:
+            self.pantalla.ponToolBar([k_mainmenu, k_utilidades])
             QTUtil2.mensaje(self.pantalla, _("Done"))
             self.route.end_ending()
         else:
@@ -571,6 +580,7 @@ class GestorRoutesEndings(GestorRoutes):
         resp += "\n" + self.partida.pgnBase()
 
         return resp
+
 
 class GestorRoutesTactics(GestorRoutes):
     def inicio(self, route):

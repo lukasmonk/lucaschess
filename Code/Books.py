@@ -8,6 +8,7 @@ from Code import ControlPosicion
 from Code import Util
 from Code import VarGen
 
+
 class ListaLibros:
     def __init__(self):
         self.lista = []
@@ -159,6 +160,7 @@ class ListaLibros:
 
         return liResp
 
+
 class Libro:
     def __init__(self, tipo, nombre, path, pordefecto, extras=None):
         self.tipo = tipo
@@ -266,6 +268,7 @@ class Libro:
 
         return liResp
 
+
 class Entry:
     key = 0L
     move = 0L
@@ -287,6 +290,7 @@ class Entry:
             pv += " nbrq"[p]
 
         return {"e1h1": "e1g1", "e1a1": "e1c1", "e8h8": "e8g8", "e8a8": "e8c8"}.get(pv, pv)
+
 
 class Polyglot:
     """

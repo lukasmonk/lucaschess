@@ -6,6 +6,7 @@ from Code import VarGen
 
 NOABANDONO, ABANDONO, ABANDONORIVAL = "N", "S", "R"
 
+
 class Jugada:
     def __init__(self):
         self.analisis = None
@@ -60,7 +61,8 @@ class Jugada:
         return self.posicion.fenBase()
 
     def siTablas(self):
-        return self.siTablasRepeticion or self.siTablas50 or self.siTablasFaltaMaterial or self.siTablasAcuerdo
+        return self.siTablasRepeticion or self.siTablas50 or self.siTablasFaltaMaterial or self.siTablasAcuerdo \
+               or self.siAhogado
 
     def pv2dgt(self):
         return self.posicionBase.pv2dgt(self.desde, self.hasta, self.coronacion)
@@ -367,6 +369,7 @@ class Jugada:
         self.comentario = ""
         self.critica = ""
         self.criticaDirecta = ""
+
 
 def dameJugada(posicionBase, desde, hasta, coronacion):
     posicion = posicionBase.copia()

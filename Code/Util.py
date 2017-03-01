@@ -18,6 +18,7 @@ from itertools import izip, cycle
 
 import chardet.universaldetector
 
+
 def xor_crypt(data, key):
     """
     http://bytes.com/topic/python/answers/881561-xor-encryption
@@ -28,15 +29,18 @@ def xor_crypt(data, key):
     else:
         return data
 
+
 def nuevoID():
     d = datetime.datetime.now()
     r = random.randint
     t = (((((r(1, d.year) * 12 + r(1, d.month)) * 31 + d.day) * 24 + d.hour) * 60 + d.minute) * 60 + d.second) * 1000 + r(1, d.microsecond + 737) / 1000
     return t
 
+
 def guardaDIC(dic, fich):
     with open(fich, "w") as q:
         q.write(base64.encodestring(cPickle.dumps(dic)))
+
 
 def recuperaDIC(fich):
     try:
@@ -47,9 +51,11 @@ def recuperaDIC(fich):
         dic = None
     return dic
 
+
 def guardaVar(fich, v):
     with open(fich, "w") as q:
         q.write(cPickle.dumps(v))
+
 
 def recuperaVar(fich):
     try:
@@ -60,10 +66,12 @@ def recuperaVar(fich):
         v = None
     return v
 
+
 def var2blob(var):
     varp = cPickle.dumps(var)
     varz = zlib.compress(varp, 7)
     return sqlite3.Binary(varz)
+
 
 def blob2var(blob):
     if blob is None:
@@ -71,10 +79,12 @@ def blob2var(blob):
     varp = zlib.decompress(blob)
     return cPickle.loads(varp)
 
+
 def dic2blob(dic):
     varp = str(dic).replace(', ', ',').replace(': ', ':')
     varz = zlib.compress(varp, 7)
     return sqlite3.Binary(varz)
+
 
 def blob2dic(blob):
     if blob is None:
@@ -82,28 +92,35 @@ def blob2dic(blob):
     varp = zlib.decompress(blob)
     return eval(varp)
 
+
 def str2blob(varp):
     varz = zlib.compress(varp, 7)
     return sqlite3.Binary(varz)
+
 
 def blob2str(blob):
     if blob is None:
         return ""
     return str(zlib.decompress(blob))
 
+
 def dic2txt(dic):
     return base64.encodestring(cPickle.dumps(dic)).replace("\n", "|")
+
 
 def txt2dic(txt):
     txt = txt.replace("|", "\n")
     dic = cPickle.loads(base64.decodestring(txt))
     return dic
 
+
 def var2txt(var):
     return cPickle.dumps(var)
 
+
 def txt2var(txt):
     return cPickle.loads(txt)
+
 
 def renombraNum(origen):
     num = 1
@@ -111,25 +128,32 @@ def renombraNum(origen):
         num += 1
     os.rename(origen, "%s.%d" % (origen, num))
 
+
 class Almacen:
     pass
+
 
 class Record:
     pass
 
+
 def hoy():
     return datetime.datetime.now()
 
+
 def dtos(f):
     return "%04d%02d%02d" % (f.year, f.month, f.day)
+
 
 def stod(txt):
     if txt and len(txt) == 8 and txt.isdigit():
         return datetime.date(int(txt[:4]), int(txt[4:6]), int(txt[6:]))
     return None
 
+
 def dtosext(f):
     return "%04d%02d%02d%02d%02d%02d" % (f.year, f.month, f.day, f.hour, f.minute, f.second)
+
 
 def stodext(txt):
     if txt and len(txt) == 14 and txt.isdigit():
@@ -137,18 +161,22 @@ def stodext(txt):
                                  int(txt[8:10]), int(txt[10:12]), int(txt[12:]))
     return None
 
+
 def primeraMayuscula(txt):
     return txt[0].upper() + txt[1:]
+
 
 def huella():
     m = hashlib.md5()
     m.update(str(random.random()) + str(hoy()))
     return m.hexdigest()
 
+
 def microsegundosRnd():
     d = datetime.datetime.now()
     return random.randint(0, 1000) + 1000 * (
         d.microsecond + 1000000 * (d.second + 60 * (d.minute + 60 * (d.hour + 24 * d.toordinal()))))
+
 
 def fileNext(folder, base, ext):
     n = 1
@@ -157,6 +185,7 @@ def fileNext(folder, base, ext):
         n += 1
     return path_ % n
 
+
 def ficheroTemporal(pathTemp, extension):
     creaCarpeta(pathTemp)
     while True:
@@ -164,11 +193,14 @@ def ficheroTemporal(pathTemp, extension):
         if not existeFichero(fich):
             return fich
 
+
 def tamFichero(fichero):
     return os.path.getsize(fichero) if os.path.isfile(fichero) else -1
 
+
 def existeFichero(fichero):
     return tamFichero(fichero) >= 0
+
 
 def copiaFichero(origen, destino):
     if existeFichero(origen):
@@ -176,6 +208,7 @@ def copiaFichero(origen, destino):
             shutil.copy2(origen, destino)
             return True
     return False
+
 
 def renombraFichero(origen, destino):
     if not existeFichero(origen):
@@ -192,12 +225,14 @@ def renombraFichero(origen, destino):
         return True
     return False
 
+
 def borraFichero(fichero):
     try:
         os.remove(fichero)
     except:
         pass
     return not os.path.isfile(fichero)
+
 
 def ini2lista(fichero, etiClave="CLAVE"):
     li = []
@@ -224,6 +259,7 @@ def ini2lista(fichero, etiClave="CLAVE"):
 
     return li
 
+
 def lista2ini(fichero, lista, etiClave="CLAVE"):
     f = open(fichero, "wb")
     for dic in lista:
@@ -232,6 +268,7 @@ def lista2ini(fichero, lista, etiClave="CLAVE"):
             if k != etiClave:
                 f.write("%s=%s\n" % (k, dic[k]))
     f.close()
+
 
 def ini2dic(fichero):
     dicBase = collections.OrderedDict()
@@ -257,6 +294,7 @@ def ini2dic(fichero):
 
     return dicBase
 
+
 def ini8dic(fichero):
     dicBase = collections.OrderedDict()
 
@@ -281,6 +319,7 @@ def ini8dic(fichero):
 
     return dicBase
 
+
 def dic8ini(fichero, dic):
     f = codecs.open(fichero, "w", "utf-8", 'ignore')
     for k in dic:
@@ -288,6 +327,7 @@ def dic8ini(fichero, dic):
         for clave in dic[k]:
             f.write("%s=%s\n" % (clave, dic[k][clave]))
     f.close()
+
 
 def iniBase8dic(fichero):
     dic = {}
@@ -310,11 +350,13 @@ def iniBase8dic(fichero):
 
     return dic
 
+
 def dic8iniBase(fichero, dic):
     f = codecs.open(fichero, "w", "utf-8", 'ignore')
     for k in dic:
         f.write("%s=%s\n" % (k, dic[k]))
     f.close()
+
 
 def creaCarpeta(carpeta):
     try:
@@ -322,12 +364,14 @@ def creaCarpeta(carpeta):
     except:
         pass
 
+
 def secs2str(s):
     m = s/60
     s = s%60
     h = m/60
     m = m%60
     return "%02d:%02d:%02d" % (h, m, s)
+
 
 class ListaNumerosImpresion:
     def __init__(self, txt):
@@ -391,6 +435,7 @@ class ListaNumerosImpresion:
     def selected(self, lista):
         return [x for x in lista if self.siEsta(x)]
 
+
 def speed():
     t = time.time()
     for x in xrange(100000):
@@ -398,6 +443,7 @@ def speed():
             oct(i)
         gc.enable()
     return time.time() - t
+
 
 class SymbolDict:
     def __init__(self, dic=None):
@@ -444,6 +490,7 @@ class SymbolDict:
         # x+= "[%s]=[%s]\n"%(t, str(self.__getitem__(t)) )
         # return x.strip()
 
+
 class IPC(object):
     def __init__(self, nomFichero, siPush):
         if siPush and os.path.isfile(nomFichero):
@@ -488,6 +535,7 @@ class IPC(object):
             self._conexion.close()
             self._conexion = None
 
+
 class Rondo:
     def __init__(self, *lista):
         self.pos = -1
@@ -508,12 +556,14 @@ class Rondo:
     def reset(self):
         self.pos = -1
 
+
 def validNomFichero(nombre):
     nombre = nombre.strip()
     for x in "\\:/|?*^%><()":
         if x in nombre:
             nombre = nombre.replace(x, "_")
     return nombre
+
 
 class Timer:
     def __init__(self, tiempoPendiente):
@@ -621,6 +671,7 @@ class Timer:
         self.paraMarcador(0.00)
         return self.tiempoPendiente
 
+
 def fideELO(eloJugador, eloRival, resultado):
     if resultado == +1:
         resultado = 1.0
@@ -641,11 +692,14 @@ def fideELO(eloJugador, eloRival, resultado):
 
 date_format = ["%Y.%m.%d", ]
 
+
 def localDate(date):
     return date.strftime(date_format[0])
 
+
 def localDateT(date):
     return "%s %02d:%02d" % (date.strftime(date_format[0]), date.hour, date.minute)
+
 
 def listfiles(*lista):
     f = lista[0]
@@ -654,8 +708,10 @@ def listfiles(*lista):
             f = os.path.join(f, x)
     return glob.glob(f)
 
+
 def listdir(txt, siUnicode=False):
     return os.listdir(unicode(txt)) if siUnicode else os.listdir(txt)
+
 
 def dirRelativo(dr):
     if dr:
@@ -668,6 +724,7 @@ def dirRelativo(dr):
     else:
         dr = ""
     return dr
+
 
 def cX():
     b3 = "Sibuscasresultadosdistintosnohagassiemprelomismo"
@@ -686,6 +743,7 @@ def cX():
     c9.reverse()
     c9 = "".join(c9)
     return c9
+
 
 def enc(cad):
     pos = 0
@@ -716,6 +774,7 @@ def enc(cad):
     # if pos >= lcl:
     # pos = 0
     # return resp
+
 
 def creaID():
     r = random.randint(1, 9999)
@@ -791,6 +850,7 @@ def creaID():
 # if ncpus > 0:
 # return ncpus
 # return 1 # Default
+
 
 class DicSQL(object):
     def __init__(self, nomDB, tabla="Data", maxCache=2048):
@@ -913,6 +973,7 @@ class DicSQL(object):
         cursor.close()
         self._conexion.commit()
 
+
 class LIdisk:
     def __init__(self, nomFichero):
 
@@ -956,6 +1017,7 @@ class LIdisk:
         if self._conexion:
             self._conexion.close()
             self._conexion = None
+
 
 class DicRaw:
     def __init__(self, nomDB, tabla="Data"):
@@ -1042,6 +1104,7 @@ class DicRaw:
     def __exit__(self, xtype, value, traceback):
         self.close()
 
+
 class DicBLOB(object):
     def __init__(self, nomDB, tabla="Datos"):
         self._conexion = sqlite3.connect(nomDB)
@@ -1126,6 +1189,7 @@ class DicBLOB(object):
         else:
             return default
 
+
 class Timekeeper:
     def __init__(self):
         self._begin = None
@@ -1139,6 +1203,7 @@ class Timekeeper:
             self._begin = None
             return time.time() - b
 
+
 class OpenCodec:
     def __init__(self, path):
         with open(path) as f:
@@ -1148,8 +1213,7 @@ class OpenCodec:
                 if n == 500:
                     break
             u.close()
-
-        encoding = u.result.get("encoding", "latin-1")
+            encoding = u.result.get("encoding", "latin-1")
         self.f = codecs.open(path, "r", encoding, 'ignore')
 
     def __enter__(self):
@@ -1158,12 +1222,14 @@ class OpenCodec:
     def __exit__(self, xtype, value, traceback):
         self.f.close()
 
+
 def txt_encoding(txt):
     u = chardet.universaldetector.UniversalDetector()
     u.feed(txt)
     u.close()
 
     return u.result.get("encoding", "latin-1")
+
 
 def file_encoding(fich, chunk=3000):
     with open(fich) as f:
@@ -1172,6 +1238,7 @@ def file_encoding(fich, chunk=3000):
         u.close()
 
     return u.result.get("encoding", "ascii")
+
 
 class RowidReader():
     def __init__(self, nomFichero, tabla):
@@ -1234,6 +1301,7 @@ class RowidReader():
 
     def reccount(self):
         return len(self.liRowids)
+
 
 def is64Windows():
     return 'PROGRAMFILES(X86)' in os.environ

@@ -22,6 +22,7 @@ from Code import Util
 from Code import VarGen
 from Code import Variantes
 
+
 class WAperturas(QTVarios.WDialogo):
     def __init__(self, owner, configuracion, bloqueApertura):
         icono = Iconos.Apertura()
@@ -272,6 +273,7 @@ class WAperturas(QTVarios.WDialogo):
         ap.pgn = self.partida.pgnSP()
         return ap
 
+
 class EntrenamientoApertura(QTVarios.WDialogo):
     def __init__(self, owner, listaAperturasStd, dicDatos):
         icono = Iconos.Apertura()
@@ -401,6 +403,7 @@ class EntrenamientoApertura(QTVarios.WDialogo):
             li.append(bloque.a1h8)
         return li
 
+
 class EntrenamientoAperturas(QTVarios.WDialogo):
     def __init__(self, procesador):
 
@@ -494,10 +497,7 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
         f.close()
 
         # Ejecutamos
-        if VarGen.isWindows:
-            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
-        else:
-            exe = 'Engines/Linux/_tools/polyglot/polyglot'
+        exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
         li = [os.path.abspath(exe),
               'make-book',
               "-pgn", fichTMP,
@@ -673,6 +673,7 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
             self.grid.refresh()
             self.grid.setFocus()
             self.grabar()
+
 
 class AperturasPersonales(QTVarios.WDialogo):
     def __init__(self, procesador, owner=None):

@@ -7,6 +7,7 @@ from Code.QT import PantallaJuicio
 from Code.QT import QTUtil2
 from Code.Constantes import *
 
+
 class GestorUnJuego(Gestor.Gestor):
     def inicio(self, recno, partidaObj, nombreObj, siBlancas, rotulo):
         self.recno = recno

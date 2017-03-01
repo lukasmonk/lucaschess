@@ -1,5 +1,6 @@
 from PyQt4 import QtCore, QtGui
 
+
 class BloqueEspSC(QtGui.QGraphicsItem):
     def __init__(self, escena, bloqueDatos):
 

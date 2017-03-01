@@ -19,6 +19,7 @@ from Code import Util
 
 # liFens = []
 
+
 class WDailyTestBase(QTVarios.WDialogo):
     def __init__(self, procesador):
 
@@ -205,6 +206,7 @@ class WDailyTestBase(QTVarios.WDialogo):
         w.exec_()
         self.calcListaHistorico()
         self.ghistorico.refresh()
+
 
 class WDailyTest(QTVarios.WDialogo):
     def __init__(self, owner, liFens, motor, segundos, fns):
@@ -460,6 +462,7 @@ class WDailyTest(QTVarios.WDialogo):
     def analizar(self):
         Analisis.muestraAnalisis(self.procesador, self.xtutor, self.jg, self.posicion.siBlancas, 9999999, 1,
                                  pantalla=self, siGrabar=False)
+
 
 def dailyTest(procesador):
     w = WDailyTestBase(procesador)

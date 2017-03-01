@@ -10,6 +10,7 @@ from Code import Util
 from Code import XMotorRespuesta
 from Code.Constantes import *
 
+
 class GestorAperturas(Gestor.Gestor):
     def inicio(self, listaAperturasStd, ficheroDatos, lista, fila, jugamos, repeticiones, rep_actual):
 

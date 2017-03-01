@@ -6,8 +6,10 @@ import collections
 import sqlite3
 import time
 
+
 class Almacen:
     pass
+
 
 class DBF:
     """
@@ -571,6 +573,7 @@ class DBF:
             return 0
         else:
             return liData[0][0]
+
 
 class DBFT(DBF):
     """

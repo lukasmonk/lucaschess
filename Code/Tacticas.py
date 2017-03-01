@@ -4,6 +4,7 @@ import random
 
 from Code import Util
 
+
 class BaseTactica:
     def __init__(self):
 
@@ -29,13 +30,16 @@ class BaseTactica:
         else:
             return ""
 
+
 def leePOINTVIEW(dic, default="0"):
     c = dic.get("POINTVIEW", default)
     return int(c)
 
+
 def leeREFERENCE(dic, default=""):
     c = dic.get("REFERENCE", default)
     return c
+
 
 def leeJUMPS(dic, default=None):
     JUMPS = [] if default is None else default
@@ -44,12 +48,14 @@ def leeJUMPS(dic, default=None):
         JUMPS = [int(x) for x in c.replace(" ", "").split(",")]
     return JUMPS
 
+
 def leeFILLEND(dic, default=None):
     FILLEND = False if default is None else default
     c = dic.get("FILLEND", None)
     if c and c.isdigit():
         FILLEND = c == "1"
     return FILLEND
+
 
 def leeREPEAT(dic, default=None):
     REPEAT = [0, ] if default is None else default
@@ -58,12 +64,14 @@ def leeREPEAT(dic, default=None):
         REPEAT = [int(x) for x in c.replace(" ", "").split(",")]
     return REPEAT
 
+
 def leePENALIZATION(dic, default=None):
     PENALIZATION = [] if default is None else default
     c = dic.get("PENALIZATION", None)
     if c:
         PENALIZATION = [int(x) for x in c.replace(" ", "").split(",")]
     return PENALIZATION
+
 
 def leeSHOWTEXT(dic, default=None):
     SHOWTEXT = [1, ] if default is None else default
@@ -74,6 +82,7 @@ def leeSHOWTEXT(dic, default=None):
         SHOWTEXT = [1, ]
     return SHOWTEXT
 
+
 def leePUZZLES(dic, default=None):
     PUZZLES = 999 if default is None else default
     c = dic.get("PUZZLES", None)
@@ -82,6 +91,7 @@ def leePUZZLES(dic, default=None):
     if not PUZZLES:
         PUZZLES = 999
     return PUZZLES
+
 
 class Tacticas:
     """
@@ -156,6 +166,7 @@ CATEGORIAS|AFICIONADO=D1:70,D2:30
         self.REFERENCE = leeREFERENCE(dic)
 
         self.FOLDER = dic.get("FOLDER", self.carpeta)
+
 
 class Tactica(BaseTactica):
     def __init__(self, tts, nombre):

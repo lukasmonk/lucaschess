@@ -7,6 +7,7 @@ from Code import Partida
 from Code import Util
 from Code import VarGen
 
+
 class Engine(MotoresExternos.MotorExterno):
     def __init__(self):
         MotoresExternos.MotorExterno.__init__(self)
@@ -142,6 +143,7 @@ class Engine(MotoresExternos.MotorExterno):
                             op.valor = valor
                         break
 
+
 class Game:
     def __init__(self):
         self._hwhite = None  # la huella de un engine
@@ -258,6 +260,7 @@ class Game:
         base = self._partida.pgnBase()
 
         return cabecera + "\n" + base + " %s\n" % rs
+
 
 class Torneo:
     def __init__(self, nombre=""):

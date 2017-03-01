@@ -10,6 +10,7 @@ from Code import BaseConfig
 from Code import Util
 from Code import VarGen
 
+
 def compruebaCambioCarpetas(configuracion):
     usrdata = configuracion.carpeta
 
@@ -44,6 +45,7 @@ def compruebaCambioCarpetas(configuracion):
     # Fichero potencia
     ficheroPotencia(configuracion)
 
+
 def ficheroPotencia(configuracion):
     if os.path.isfile(configuracion.ficheroPotencia):
         conexion = sqlite3.connect(configuracion.ficheroPotencia)
@@ -62,6 +64,7 @@ def ficheroPotencia(configuracion):
             conexion.commit()
         cursor.close()
         conexion.close()
+
 
 def dicDisk(configuracion):
     backup = configuracion.carpeta + "/__BACKUP__"
@@ -95,6 +98,7 @@ def dicDisk(configuracion):
     dicDisk_SQL(backup, configuracion.ficheroConfTableros)
     dicDisk_SQL(backup, configuracion.ficheroGMhisto)
     dicDisk_SQL(backup, configuracion.ficheroRecursos, siAllTables=True)
+
 
 def dicDisk_SQL(backup, path, tabla=None, siAllTables=False, pickle=True):
     if "*" in path:
@@ -170,6 +174,7 @@ def dicDisk_SQL(backup, path, tabla=None, siAllTables=False, pickle=True):
     conexion.commit()
     cursor.close()
     conexion.close()
+
 
 def compruebaCambioVersion(configuracion):
     v1 = "lk.pik"
@@ -367,6 +372,7 @@ def compruebaCambioVersion(configuracion):
         configuracion.lee()
         configuracion.graba()
 
+
 class ElemGM:
     def __init__(self):
         self.juega = ""
@@ -414,6 +420,7 @@ class ElemGM:
             n -= 128
         coronacion = chr(n).strip().lower()
         self.movimiento = (desde + hasta + coronacion).strip()
+
 
 class GMconvert:
     def __init__(self, carpeta):
@@ -511,6 +518,7 @@ class GMconvert:
         lee(0, "")
 
         f.close()
+
 
 def gmConvert(configuracion):
     # GM solo se borran

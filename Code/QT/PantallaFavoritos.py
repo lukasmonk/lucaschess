@@ -5,6 +5,7 @@ from Code.QT import Grid
 from Code.QT import Iconos
 from Code.QT import QTVarios
 
+
 class WFavoritos(QTVarios.WDialogo):
     def __init__(self, entrenamientos):
 
@@ -111,6 +112,7 @@ class WFavoritos(QTVarios.WDialogo):
         if fila < len(self.liFavoritos) - 1:
             self.liFavoritos[fila], self.liFavoritos[fila + 1] = self.liFavoritos[fila + 1], self.liFavoritos[fila]
             self.graba(fila + 1)
+
 
 def miraFavoritos(entrenamientos):
     w = WFavoritos(entrenamientos)

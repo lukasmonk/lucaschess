@@ -7,6 +7,7 @@ from Code.QT import Iconos
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 
+
 class WResistance(QTVarios.WDialogo):
     def __init__(self, owner, resistance):
 
@@ -121,6 +122,7 @@ class WResistance(QTVarios.WDialogo):
             self.ponTextoAyuda()
             self.grid.refresh()
             return liResp[0]
+
 
 def pantallaResistance(window, resistance):
     w = WResistance(window, resistance)

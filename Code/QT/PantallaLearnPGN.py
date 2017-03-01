@@ -17,6 +17,7 @@ from Code.QT import Tablero
 from Code import TrListas
 from Code import Util
 
+
 class LearnPGNs(Util.DicSQL):
     def __init__(self, fichero):
         Util.DicSQL.__init__(self, fichero)
@@ -44,6 +45,7 @@ class LearnPGNs(Util.DicSQL):
             self.__delitem__(self.regKeys[x])
         self.pack()
         self.regKeys = self.keys(True, True)
+
 
 class WLearnBase(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -129,6 +131,7 @@ class WLearnBase(QTVarios.WDialogo):
         if len(li) > 0:
             w = WLearn1(self, li[0])
             w.exec_()
+
 
 class WLearn1(QTVarios.WDialogo):
     def __init__(self, owner, numRegistro):
@@ -269,6 +272,7 @@ class WLearn1(QTVarios.WDialogo):
 
         w = WLearnPuente(self, self.partida, level, white, black, siClock)
         w.exec_()
+
 
 class WLearnPuente(QTVarios.WDialogo):
     INICIO, FINAL_JUEGO, REPLAY, REPLAY_CONTINUE = range(4)

@@ -3,10 +3,12 @@ import cPickle
 
 from Code import Configuracion
 
+
 class Usuario:
     nombre = ""
     numero = 0
     password = ""
+
 
 class Usuarios:
     def __init__(self):

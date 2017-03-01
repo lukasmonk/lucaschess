@@ -11,6 +11,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import Tablero
 
+
 class WDatos(QtGui.QDialog):
     def __init__(self, wParent, txtcategoria, maxNivel):
         super(WDatos, self).__init__(wParent)
@@ -36,6 +37,7 @@ class WDatos(QtGui.QDialog):
         self.nivel = self.ed.value()
         self.accept()
 
+
 def paramMemoria(parent, txtCategoria, maxNivel):
     if maxNivel == 1:
         return 1
@@ -46,6 +48,7 @@ def paramMemoria(parent, txtCategoria, maxNivel):
         return w.nivel
     else:
         return None
+
 
 class WMemoria(QTVarios.WDialogo):
     def __init__(self, procesador, txtcategoria, nivel, segundos, listaFen, record):
@@ -367,6 +370,7 @@ class WMemoria(QTVarios.WDialogo):
             self.timer.stop()
             del self.timer
             self.timer = None
+
 
 def lanzaMemoria(procesador, txtcategoria, nivel, segundos, listaFen, record):
     w = WMemoria(procesador, txtcategoria, nivel, segundos, listaFen, record)

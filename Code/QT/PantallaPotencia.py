@@ -23,6 +23,7 @@ from Code.SQL import Base
 from Code import Util
 from Code import VarGen
 
+
 def lee_1_linea_mfn(linea):
     cabs, pv, jugada = linea.strip().split("||")
     dic = Util.SymbolDict()
@@ -42,12 +43,14 @@ def lee_1_linea_mfn(linea):
     info = "<b>%s - %s (%s)</b>    %s (%s) " % (white, black, result, event, date,)
     return p, dic, info, int(jugada), linea
 
+
 def lee_linea_mfn():
     npos = random.randint(0, 9999)
     with open("./IntFiles/games.mfn") as f:
         for num, linea in enumerate(f):
             if num == npos:
                 return lee_1_linea_mfn(linea)
+
 
 def lee_varias_lineas_mfn(nlineas):  # PantallaDailyTest
     lipos = random.sample(range(0, 9999), nlineas)
@@ -61,6 +64,7 @@ def lee_varias_lineas_mfn(nlineas):  # PantallaDailyTest
                 fen = p.jugada(int(jugada)).posicion.fen()
                 lifen.append(fen)
     return lifen
+
 
 class PotenciaHistorico:
     def __init__(self, fichero):
@@ -164,10 +168,12 @@ class PotenciaHistorico:
         self.dbf.pack()
         self.dbf.leer()
 
+
 class EDCelda(Controles.ED):
     def focusOutEvent(self, event):
         self.parent.focusOut(self)
         Controles.ED.focusOutEvent(self, event)
+
 
 class WEdMove(QtGui.QWidget):
     def __init__(self, owner, conj_piezas, si_blancas):
@@ -277,6 +283,7 @@ class WEdMove(QtGui.QWidget):
 
         return menu
 
+
 class WBlqMove(QtGui.QWidget):
     def __init__(self, owner, conj_piezas, siBlancas, posicion):
         QtGui.QWidget.__init__(self)
@@ -332,6 +339,7 @@ class WBlqMove(QtGui.QWidget):
             self.aceptar.show()
         else:
             self.cancelar.show()
+
 
 class WPotenciaBase(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -504,6 +512,7 @@ class WPotenciaBase(QTVarios.WDialogo):
         w.exec_()
         self.ghistorico.gotop()
         self.ghistorico.refresh()
+
 
 class WPotencia(QTVarios.WDialogo):
     def __init__(self, owner, motor, segundos, min_min, min_max, linea=None, ref=None):
@@ -798,6 +807,7 @@ class WPotencia(QTVarios.WDialogo):
         jg = self.liAnalisis[posicion]
         siBlancas = jg.posicionBase.siBlancas
         Analisis.muestraAnalisis(self.procesador, self.xtutor, jg, siBlancas, 9999999, 1, pantalla=self, siGrabar=False)
+
 
 def pantallaPotencia(procesador):
     w = WPotenciaBase(procesador)

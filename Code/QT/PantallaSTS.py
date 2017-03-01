@@ -20,9 +20,10 @@ from Code import STS
 from Code import Util
 from Code import VarGen
 
+
 class WRun(QTVarios.WDialogo):
     def __init__(self, wParent, sts, work, procesador):
-        titulo = "%s - %s" % (sts.name, work.ref)
+        titulo = "%s - %s - %s" % (sts.name, work.ref, work.pathToExe())
         icono = Iconos.STS()
         extparam = "runsts"
         QTVarios.WDialogo.__init__(self, wParent, titulo, icono, extparam)
@@ -31,6 +32,7 @@ class WRun(QTVarios.WDialogo):
         self.sts = sts
         self.ngroup = -1
         self.xengine = procesador.creaGestorMotor(work.configEngine(), work.seconds * 1000, work.depth)
+        self.xengine.set_direct( )
         self.playing = False
         self.configuracion = procesador.configuracion
         dic = self.configuracion.leeVariables("STSRUN")
@@ -57,7 +59,7 @@ class WRun(QTVarios.WDialogo):
 
         self.dworks = self.read_works()
         self.calc_max()
-        for x in range(len(self.sts.works)):
+        for x in range(len(self.sts.works)-1, -1, -1):
             work = self.sts.works.getWork(x)
             if work != self.work:
                 key = "OTHER%d" % x
@@ -255,13 +257,14 @@ class WRun(QTVarios.WDialogo):
             for key, r in self.dworks.iteritems():
                 r.labels[ng].is_max = key in st
 
+
 class WWork(QtGui.QDialog):
     def __init__(self, wParent, sts, work):
         super(WWork, self).__init__(wParent)
 
         self.work = work
 
-        self.setWindowTitle(sts.name)
+        self.setWindowTitle(work.pathToExe())
         self.setWindowIcon(Iconos.Motor())
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
 
@@ -281,7 +284,7 @@ class WWork(QtGui.QDialog):
         self.sbDepth = Controles.SB(self, work.depth, 0, 50)
 
         lbSeconds = Controles.LB(self, _("Maximum seconds to think") + ": ")
-        self.sbSeconds = Controles.SB(self, work.seconds, 0, 9999)
+        self.sbSeconds = Controles.ED(self).tipoFloat(float(work.seconds), decimales=3).anchoFijo(60)
 
         lbSample = Controles.LB(self, _("Sample") + ": ")
         self.sbIni = Controles.SB(self, work.ini + 1, 1, 100).capturaCambiado(self.changeSample)
@@ -362,7 +365,7 @@ class WWork(QtGui.QDialog):
         self.work.ref = self.edRef.texto()
         self.work.info = self.emInfo.texto()
         self.work.depth = self.sbDepth.valor()
-        self.work.seconds = self.sbSeconds.valor()
+        self.work.seconds = self.sbSeconds.textoFloat()
         self.work.ini = self.sbIni.valor() - 1
         self.work.end = self.sbEnd.valor() - 1
         me = self.work.me
@@ -370,6 +373,7 @@ class WWork(QtGui.QDialog):
         for n, group in enumerate(self.liGroups):
             self.work.liGroupActive[n] = group.valor()
         self.accept()
+
 
 class WUnSTS(QTVarios.WDialogo):
     def __init__(self, wParent, sts, procesador):
@@ -516,11 +520,12 @@ class WUnSTS(QTVarios.WDialogo):
             self.wkNew(work.clone())
 
     def wkRemove(self):
-        fila = self.grid.recno()
-        if fila >= 0:
-            work = self.sts.getWork(fila)
-            if QTUtil2.pregunta(self, _X(_("Delete %1?"), work.ref)):
-                self.sts.removeWork(fila)
+        li = self.grid.recnosSeleccionados()
+        if li:
+            if QTUtil2.pregunta(self, _("Do you want to delete all selected records?")):
+                li.reverse()
+                for fila in li:
+                    self.sts.removeWork(fila)
                 self.sts.save()
                 self.grid.refresh()
 
@@ -562,6 +567,7 @@ class WUnSTS(QTVarios.WDialogo):
             self.grid.refresh()
             self.grid.gotop()
 
+
 class WSTS(QTVarios.WDialogo):
     def __init__(self, wParent, procesador):
 
@@ -597,8 +603,8 @@ class WSTS(QTVarios.WDialogo):
         self.registrarGrid(self.grid)
 
         lb = Controles.LB(self,
-                          '<a href="https://sites.google.com/site/strategictestsuite/about-1">%s</a>  %s: <b>Dan Corbit & Swaminathan</b>' % (
-                              _("More info"), _("Authors")))
+                          'STS %s: <b>Dan Corbit & Swaminathan</b> <a href="https://sites.google.com/site/strategictestsuite/about-1">%s</a>' % (
+                              _("Authors"), _("More info")))
 
         # Layout
         layout = Colocacion.V().control(tb).control(self.grid).control(lb).margen(8)
@@ -717,6 +723,7 @@ class WSTS(QTVarios.WDialogo):
                 sts = STS.STS(nombre)
                 self.reread()
                 self.trabajar(sts)
+
 
 def sts(procesador, parent):
     w = WSTS(parent, procesador)

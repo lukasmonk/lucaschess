@@ -2,6 +2,7 @@ import LCEngine
 
 from Code import Util
 
+
 class Move:
     def __init__(self):
         self.pgn = ""
@@ -16,6 +17,7 @@ class Move:
         self.siDesconocido = False  # Si ha sido una terminacion de partida, por causas desconocidas
         self.fenPrev = ""
         self.fen = ""
+
 
 class Moves:
     def __init__(self):
@@ -225,6 +227,7 @@ class Moves:
 
         return True
 
+
 class Game:
     def __init__(self):
         self.labels = Util.SymbolDict()
@@ -263,6 +266,7 @@ class Game:
     def move(self, num):
         return self.moves.liMoves[num]
 
+
 def read1Game(pgn):
     pgnCab = []
     pgnMov = []
@@ -285,6 +289,7 @@ def read1Game(pgn):
     g.readLabels(pgnCab)
     g.readBody("\n".join(pgnMov))
     return g
+
 
 def readGames(pgnfile):
     with Util.OpenCodec(pgnfile) as f:
@@ -322,13 +327,13 @@ def readGames(pgnfile):
                         siCab = True
                     else:
                         pgnMov.append(linea)
-                else:
-                    g = Game()
-                    g.nbytes = nbytes
-                    g.readLabels(pgnCab)
-                    g.readBody("\n".join(pgnMov))
-                    yield g
-                    siBCab = True
+                # else:
+                    # g = Game()
+                    # g.nbytes = nbytes
+                    # g.readLabels(pgnCab)
+                    # g.readBody("\n".join(pgnMov))
+                    # yield g
+                    # siBCab = True
 
         if not siBCab:
             g = Game()

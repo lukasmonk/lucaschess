@@ -9,12 +9,13 @@ from Code.QT import Controles
 from Code.QT import Delegados
 from Code.QT import Grid
 from Code.QT import Iconos
-from Code.QT import PantallaParamAnalisis
+from Code.QT import PantallaAnalisisParam
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code.QT import Histogram
+
 
 class WAnalisisGraph(QTVarios.WDialogo):
     def __init__(self, wowner, gestor, alm, muestraAnalisis):
@@ -27,6 +28,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
         self.alm = alm
         self.procesador = gestor.procesador
         self.gestor = gestor
+        self.configuracion = gestor.configuracion
         self.siPawns = not gestor.procesador.configuracion.centipawns
         self.muestraAnalisis = muestraAnalisis
         self.colorWhite = QTUtil.qtColorRGB(231, 244, 254)
@@ -38,6 +40,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
             oColumnas.nueva("BEST", _("Best move"), 120, siCentrado=True, edicion=Delegados.EtiquetaPGN(True, True, True))
             oColumnas.nueva("DIF", _("Difference"), 80, siCentrado=True)
             oColumnas.nueva("PORC", "%", 80, siCentrado=True)
+            oColumnas.nueva("ELO", _("Elo"), 80, siCentrado=True)
             return oColumnas
 
         self.dicLiJG = {"A": self.alm.lijg, "W": self.alm.lijgW, "B": self.alm.lijgB}
@@ -73,23 +76,34 @@ class WAnalisisGraph(QTVarios.WDialogo):
         self.tablero.ponerPiezasAbajo(True)
         self.tablero.dispatchSize(self.tableroSizeChanged)
 
+        self.rbShowValues = Controles.RB(self, _("Values"), rutina=self.cambiadoShow).activa(True)
+        self.rbShowElo = Controles.RB(self, _("Elo perfomance"), rutina=self.cambiadoShow)
+        self.chbShowLostPoints = Controles.CHB(self, _("Show lost points"), self.getShowLostPoints()).capturaCambiado(self, self.showLostPointsChanged)
+        ly_rb = Colocacion.H().espacio(40).control(self.rbShowValues).espacio(20).control(self.rbShowElo).espacio(30).control(self.chbShowLostPoints).relleno(1)
+
         layout = Colocacion.G()
         layout.controlc(tabGrid, 0, 0)
-        layout.controlc(self.tablero, 0, 1)
+        layout.otroc(ly_rb, 1, 0)
+        layout.controlc(self.tablero, 0, 1, numFilas=2)
 
         Controles.Tab().ponPosicion("W")
         ancho = self.tablero.width() + anchoGrid + 10
-        self.htotal = [ Histogram.Histogram(self, alm.hgame, gridAll, ancho),
-                        Histogram.Histogram(self, alm.hwhite, gridW, ancho),
-                        Histogram.Histogram(self, alm.hblack, gridB, ancho) ]
-        lh = Colocacion.V().control(self.htotal[0]).control(self.htotal[1]).control(self.htotal[2])
-        self.htotal[1].hide()
-        self.htotal[2].hide()
+        self.htotal = [ Histogram.Histogram(self, alm.hgame, gridAll, ancho, True),
+                        Histogram.Histogram(self, alm.hwhite, gridW, ancho, True),
+                        Histogram.Histogram(self, alm.hblack, gridB, ancho, True),
+                        Histogram.Histogram(self, alm.hgame, gridAll, ancho, False),
+                        Histogram.Histogram(self, alm.hwhite, gridW, ancho, False),
+                        Histogram.Histogram(self, alm.hblack, gridB, ancho, False)]
+        lh = Colocacion.V()
+        for x in range(6):
+            lh.control(self.htotal[x])
+            if x:
+                self.htotal[x].hide()
 
-        layout.otroc(lh, 1, 0, 1, 2)
+        layout.otroc(lh, 2, 0, 1, 2)
         self.setLayout(layout)
 
-        self.recuperarVideo(siTam=False)#, anchoDefecto=960, altoDefecto=600)
+        self.recuperarVideo(siTam=False)
 
         gridAll.gotop()
         gridB.gotop()
@@ -98,18 +112,37 @@ class WAnalisisGraph(QTVarios.WDialogo):
         self.tabGrid.setFixedHeight(self.tablero.height())
         self.adjustSize()
 
+    def valorShowLostPoints(self):
+        # Llamada desde histogram
+        return self.chbShowLostPoints.valor()
+
+    def showLostPointsChanged(self):
+        dic = {"SHOWLOSTPOINTS":self.valorShowLostPoints()}
+        self.configuracion.escVariables("ANALISIS_GRAPH", dic)
+        self.cambiadoShow()
+
+    def getShowLostPoints(self):
+        dic = self.configuracion.leeVariables("ANALISIS_GRAPH")
+        return dic.get("SHOWLOSTPOINTS", True) if dic else True
+
+    def cambiadoShow(self):
+        self.tabChanged(self.tabGrid.currentIndex())
+
     def tableroSizeChanged(self):
         self.tabGrid.setFixedHeight(self.tablero.height())
         self.adjustSize()
-        self.htotal[self.tabActive].grid.setFocus()
+        self.cambiadoShow()
 
     def tabChanged(self, ntab):
         QtGui.QApplication.processEvents()
-        if ntab <= 2:
-            for n in range(3):
-                self.htotal[n].setVisible(n == ntab)
-            self.adjustSize()
-            self.tabActive = ntab
+        tab_vis = 0 if ntab == 3 else ntab
+        if self.rbShowElo.isChecked():
+            tab_vis += 3
+        for n in range(6):
+            self.htotal[n].setVisible(False)
+        self.htotal[tab_vis].setVisible(True)
+        self.adjustSize()
+        self.tabActive = ntab
 
     def gridCambiadoRegistro(self, grid, fila, columna):
         self.gridBotonIzquierdo(grid, fila, columna)
@@ -129,6 +162,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
         self.tablero.creaFlechaMulti(rm.movimiento(), False)
         grid.setFocus()
         self.htotal[self.tabActive].setPointActive(fila)
+        self.htotal[self.tabActive+3].setPointActive(fila)
 
     def gridDobleClick(self, grid, fila, columna):
         jg = self.dicLiJG[grid.id][fila]
@@ -189,19 +223,18 @@ class WAnalisisGraph(QTVarios.WDialogo):
             else:
                 return "%d" % pts
         elif columna == "PORC":
-            # mrm, pos = jg.analisis
-            # rm = mrm.liMultiPV[0]
-            # rm1 = mrm.liMultiPV[pos]
-            # pts = rm.puntosABS_5() - rm1.puntosABS_5()
-            # prc = 100 - pts if pts < 100 else 0
             return "%3d%%" % jg.porcentaje
+        elif columna == "ELO":
+            return "%3d" % jg.elo
 
     def closeEvent(self, event):
         self.guardarVideo()
 
+
 def showGraph(wowner, gestor, alm, muestraAnalisis):
     w = WAnalisisGraph(wowner, gestor, alm, muestraAnalisis)
     w.exec_()
+
 
 class WMuestra(QtGui.QWidget):
     def __init__(self, owner, um):
@@ -234,7 +267,7 @@ class WMuestra(QtGui.QWidget):
         oColumnas = Columnas.ListaColumnas()
         siFigurinesPGN = VarGen.configuracion.figurinesPGN
         oColumnas.nueva("JUGADAS", "%d %s" % (len(self.listaRM), _("Moves")), 120, siCentrado=True,
-                        edicion=Delegados.EtiquetaPGN(True if siFigurinesPGN else None))
+                        edicion=Delegados.EtiquetaPGN(um.jg.siBlancas() if siFigurinesPGN else None))
         self.wrm = Grid.Grid(self, oColumnas, siLineas=False)
 
         self.wrm.tipoLetra(puntos=9)
@@ -389,6 +422,7 @@ class WMuestra(QtGui.QWidget):
                 self.um.grabarBase(partida, rm, resp)
             self.um.ponVistaGestor()
 
+
 class WAnalisis(QTVarios.WDialogo):
     def __init__(self, mAnalisis, ventana, siBlancas, siLibre, siGrabar, muestraInicial):
         titulo = _("Analysis")
@@ -540,10 +574,11 @@ class WAnalisis(QTVarios.WDialogo):
             delattr(self, "timer")
 
     def crear(self):
-        alm = PantallaParamAnalisis.paramAnalisis(self, VarGen.configuracion, False, siTodosMotores=True)
+        alm = PantallaAnalisisParam.paramAnalisis(self, VarGen.configuracion, False, siTodosMotores=True)
         if alm:
             um = self.mAnalisis.creaMuestra(self, alm)
             self.crearMuestra(um)
+
 
 class WAnalisisVariantes(QtGui.QDialog):
     def __init__(self, oBase, ventana, segundosPensando, siBlancas, cPuntos, maxRecursion):

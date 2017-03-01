@@ -5,6 +5,7 @@ from Code import Partida
 from Code import Util
 from Code import VarGen
 
+
 class EtiApertura:
     def __init__(self, nombre, eco, a1h8, pgn):
         self.nombre = nombre
@@ -15,6 +16,7 @@ class EtiApertura:
 
     def hijo(self, ea):
         self.liHijos.append(ea)
+
 
 class AperturaPol:
     def __init__(self, maxNivel, elo=None):
@@ -86,6 +88,7 @@ class AperturaPol:
             if pv[:2] == desde and pv[2:4] == hasta:
                 return True
         return False
+
 
 class JuegaApertura:
     def __init__(self, a1h8):

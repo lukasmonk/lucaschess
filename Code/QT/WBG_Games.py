@@ -17,6 +17,7 @@ from Code.QT import QTVarios
 from Code import TrListas
 from Code import Util
 
+
 class WGames(QtGui.QWidget):
     def __init__(self, procesador, winBookGuide, dbGames, wsummary, siMoves=True):
         QtGui.QWidget.__init__(self)
@@ -233,13 +234,19 @@ class WGames(QtGui.QWidget):
             self.editar(recno, partidaCompleta)
 
     def tw_filtrar(self):
+        xpv = None
+        if self.summaryActivo and "pv" in self.summaryActivo:
+            li = self.summaryActivo["pv"].split(" ")
+            if len(li) > 1:
+                xpv = " ".join(li[:-1])
+
         def standard():
             w = PantallaPGN.WFiltrar(self, self.grid.oColumnas, self.liFiltro)
             if w.exec_():
                 self.liFiltro = w.liFiltro
 
                 self.where = w.where()
-                self.dbGames.filterPV(self.summaryActivo["pv"] if self.summaryActivo else None, self.where)
+                self.dbGames.filterPV(xpv, self.where)
                 self.grid.refresh()
                 self.grid.gotop()
                 self.updateStatus()
@@ -248,7 +255,7 @@ class WGames(QtGui.QWidget):
             w = PantallaPGN.WFiltrarRaw(self, self.grid.oColumnas, self.where)
             if w.exec_():
                 self.where = w.where
-                self.dbGames.filterPV(self.summaryActivo["pv"] if self.summaryActivo else None, self.where)
+                self.dbGames.filterPV(xpv, self.where)
                 self.grid.refresh()
                 self.grid.gotop()
                 self.updateStatus()

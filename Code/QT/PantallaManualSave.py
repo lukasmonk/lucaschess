@@ -4,7 +4,7 @@ import codecs
 from PyQt4 import QtGui, QtCore
 
 from Code import ControlPosicion
-from Code import XVoyager
+from Code.QT import Voyager
 from Code import Partida
 
 from Code.QT import Colocacion
@@ -16,6 +16,7 @@ from Code.QT import Columnas
 from Code.QT import Grid
 from Code.QT import Delegados
 from Code.QT import QTUtil2
+
 
 class WManualSave(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -365,7 +366,7 @@ class WManualSave(QTVarios.WDialogo):
     def change_position(self):
         prev = self.analyzing
         self.stop()
-        fen = XVoyager.xVoyagerFEN(self, self.configuracion, self.posicion.fen())
+        fen = Voyager.voyagerFEN(self, self.posicion.fen())
         if fen is not None:
             self.em_solucion.ponTexto("")
             self.posicion.leeFen(fen)
@@ -487,6 +488,7 @@ class WManualSave(QTVarios.WDialogo):
             jg = self.partida.jugada(self.partida.mover_jugada)
             self.tablero.ponPosicion(jg.posicion)
             self.tablero.ponFlechaSC(jg.desde, jg.hasta)
+
 
 def manual_save(procesador):
     w = WManualSave(procesador)

@@ -116,4 +116,5 @@ typedef struct
 
 #define BIGNUMBER    9999999
 #define HASH_DEFAULT 32
+
 #endif

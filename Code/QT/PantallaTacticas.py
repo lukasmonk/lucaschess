@@ -10,9 +10,11 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code import Util
 
+
 def consultaHistorico(pantalla, tactica, icono):
     w = WHistoricoTacticas(pantalla, tactica, icono)
     return w.resultado if w.exec_() else None
+
 
 class WHistoricoTacticas(QTVarios.WDialogo):
     def __init__(self, pantalla, tactica, icono):
@@ -181,6 +183,7 @@ class WHistoricoTacticas(QTVarios.WDialogo):
 
         self.tb.liAcciones = liAcciones
         self.tb.update()
+
 
 class WConfTactics(QtGui.QWidget):
     def __init__(self, owner, tactica, ncopia=None):
@@ -538,6 +541,7 @@ class WConfTactics(QtGui.QWidget):
         self.grid_show.gotop()
         self.grid_show.refresh()
 
+
 class WEditaTactica(QTVarios.WDialogo):
     def __init__(self, owner, tactica, ncopia):
 
@@ -595,6 +599,7 @@ class WEditaTactica(QTVarios.WDialogo):
 
     def borraPENALIZATION(self):
         self.wtactic.penal_delete_all()
+
 
 def edita1tactica(owner, tactica, ncopia):
     w = WEditaTactica(owner, tactica, ncopia)

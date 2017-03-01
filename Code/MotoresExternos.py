@@ -5,6 +5,7 @@ from Code import Util
 from Code import VarGen
 from Code import XMotor
 
+
 class OpcionUCI:
     def leeTXT(self, txt):
         li = txt.split(VarGen.XSEP)
@@ -137,6 +138,7 @@ class OpcionUCI:
 
         return self.default and (self.default in self.liVars)
 
+
 class MotorExterno:
     def __init__(self):
         self.exe = ""
@@ -250,6 +252,7 @@ class MotorExterno:
         me.leerTXT(self.grabarTXT())
         return me
 
+
 class ListaMotoresExternos:
     def __init__(self, fichero):
         self.fichero = fichero
@@ -295,6 +298,7 @@ class ListaMotoresExternos:
     def nuevo(self, motor):
         self.liMotores.append(motor)
 
+
 class ConfigMotor(BaseConfig.ConfigMotorBase):
     def __init__(self, motor):
         clave = motor.alias
@@ -327,6 +331,7 @@ class ConfigMotor(BaseConfig.ConfigMotorBase):
     def claveReal(self):
         return "*" + self.clave
 
+
 def buscaRival(gestor, txtMotor):
     txtMotor = txtMotor[1:]
     le = ListaMotoresExternos(gestor.configuracion.ficheroMExternos)
@@ -337,6 +342,7 @@ def buscaRival(gestor, txtMotor):
             return cm
     return None
 
+
 def buscaMotor(nomMotor):
     txtMotor = nomMotor[1:]
     le = ListaMotoresExternos(VarGen.configuracion.ficheroMExternos)
@@ -345,6 +351,7 @@ def buscaMotor(nomMotor):
         if me.alias == txtMotor:
             return me
     return None
+
 
 def buscaRivalExt(nomMotor):
     me = buscaMotor(nomMotor)

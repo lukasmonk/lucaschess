@@ -9,6 +9,7 @@ from Code.QT import QTUtil2
 import Code.SQL.Base as SQLBase
 from Code import Util
 
+
 class UnPGN:
     def __init__(self, dic=None):
         self.reset(dic)
@@ -84,6 +85,7 @@ class UnPGN:
                 valor = li[1].strip()
                 if clave and valor:
                     self.dic[clave] = valor
+
 
 class PGN:
     def __init__(self):
@@ -251,6 +253,7 @@ class PGN:
 
         return True
 
+
 def leeEntDirigidoBase(fen, solucion):
     dicDirigidoFen = collections.OrderedDict()
 
@@ -294,11 +297,13 @@ def leeEntDirigidoBase(fen, solucion):
 
     return dicDirigidoFen, len(st)
 
+
 def leeEntDirigido(fen, solucion):
     """
     Utilizado en GestorEntPos y GestorEntTac, para crear un diccionario y usarlo en un entrenamiento dirigido
     """
     return leeEntDirigidoBase(fen, solucion)[0]
+
 
 def leeEntDirigidoM2(fen, solucion):
     dic = leeEntDirigidoBase(fen, solucion)[0]
@@ -311,6 +316,7 @@ def leeEntDirigidoM2(fen, solucion):
             d[fenM2] = dic[fen]
     return d
 
+
 def leeEntDirigidoBaseM2(fen, solucion):
     dic, nMoves = leeEntDirigidoBase(fen, solucion)
     d = collections.OrderedDict()
@@ -321,6 +327,7 @@ def leeEntDirigidoBaseM2(fen, solucion):
             fenM2 = fen[:sp2]
             d[fenM2] = dic[fen]
     return d, nMoves
+
 
 def rawPGN(pgn):
     g = PGNreader.read1Game(pgn)

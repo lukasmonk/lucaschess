@@ -17,6 +17,7 @@ from Code import TabVisual
 from Code import Util
 from Code import VarGen
 
+
 class WTV_Marco(QtGui.QDialog):
     def __init__(self, owner, regMarco):
 
@@ -128,6 +129,7 @@ class WTV_Marco(QtGui.QDialog):
         self.regMarco.png = str(bf.buffer())
 
         self.accept()
+
 
 class WTV_Marcos(QTVarios.WDialogo):
     def __init__(self, owner, listaMarcos, dbMarcos):

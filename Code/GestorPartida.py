@@ -15,8 +15,9 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code import TrListas
-from Code import XVoyager
+from Code.QT import Voyager
 from Code.Constantes import *
+
 
 class GestorPartida(Gestor.Gestor):
     def inicio(self, partidaCompleta, siCompleta):
@@ -321,7 +322,7 @@ class GestorPartida(Gestor.Gestor):
                     self.tablero.rotaTablero()
 
         elif resp == "posicion":
-            resp = XVoyager.xVoyagerFEN(self.pantalla, self.configuracion, self.fen)
+            resp = Voyager.voyagerFEN(self.pantalla, self.fen)
             if resp is not None:
                 self.fen = resp
                 self.posicApertura = None
@@ -395,7 +396,7 @@ class GestorPartida(Gestor.Gestor):
                 self.reiniciar()
 
         elif resp == "voyager":
-            ptxt = XVoyager.xVoyager(self.pantalla, self.configuracion, partida=self.partida)
+            ptxt = Voyager.voyagerPartida(self.pantalla, self.partida)
             if ptxt:
                 dic = self.creaDic()
                 dic["PARTIDA"] = ptxt
@@ -406,7 +407,7 @@ class GestorPartida(Gestor.Gestor):
                 self.reiniciar(dic)
 
     def controlTeclado(self, nkey):
-        if nkey in Qt.Key_V:  # V
+        if nkey == Qt.Key_V:  # V
             self.paste(QTUtil.traePortapapeles())
 
     def listHelpTeclado(self):

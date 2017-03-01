@@ -1,5 +1,6 @@
 from PyQt4 import QtCore
 
+
 class Posicion:
     def __init__(self, x=0, y=0, ancho=0, alto=0, angulo=0, orden=15):
         self.x = x
@@ -18,6 +19,7 @@ class Posicion:
         for var in ("x", "y", "ancho", "alto", "angulo", "orden"):
             txt += "%s : %s\n" % (var, str(getattr(self, var)))
         return txt
+
 
 class TipoLetra:
     def __init__(self, nombre="", puntos=8, peso=50, siCursiva=False, siSubrayado=False, siTachado=False):
@@ -38,6 +40,7 @@ class TipoLetra:
         t = TipoLetra(self.nombre, self.puntos, self.peso, self.siCursiva, self.siSubrayado, self.siTachado)
         return t
 
+
 class Bloque:
     def __init__(self):
         self.siMovible = False
@@ -56,6 +59,7 @@ class Bloque:
         for var, tipo in self.liVars:
             txt += "%s : %s\n" % (var, str(getattr(self, var)))
         return txt
+
 
 class Texto(Bloque):
     def __init__(self):
@@ -79,6 +83,7 @@ class Texto(Bloque):
         t.valor = self.valor
         return t
 
+
 class Imagen(Bloque):
     def __init__(self):
         self.liVars = [
@@ -92,6 +97,7 @@ class Imagen(Bloque):
         t.posicion = self.posicion.copia()
         t.pixmap = self.pixmap
         return t
+
 
 class Caja(Bloque):
     def __init__(self):
@@ -115,6 +121,7 @@ class Caja(Bloque):
         c.tipo = self.tipo
         return c
 
+
 class Circulo(Bloque):
     def __init__(self):
         self.liVars = [
@@ -127,6 +134,7 @@ class Circulo(Bloque):
         ]
         Bloque.__init__(self)
 
+
 class Pieza(Bloque):
     def __init__(self):
         self.liVars = [
@@ -136,6 +144,7 @@ class Pieza(Bloque):
             ("columna", "n", 1),
         ]
         Bloque.__init__(self)
+
 
 class Flecha(Bloque):
     def __init__(self):
@@ -182,6 +191,7 @@ class Flecha(Bloque):
         c.png = getattr(self, "png", "")
         return c
 
+
 class Marco(Bloque):
     def __init__(self):
         self.liVars = [
@@ -199,6 +209,7 @@ class Marco(Bloque):
         ]
         Bloque.__init__(self)
 
+
 class SVG(Bloque):
     def __init__(self):
         # orden por debajo de las piezas
@@ -213,6 +224,7 @@ class SVG(Bloque):
             ("png", "c", "")  # png para usar como boton
         ]
         Bloque.__init__(self)
+
 
 class Marker(Bloque):
     def __init__(self):

@@ -6,8 +6,9 @@ from Code import Partida
 from Code import VarGen
 from Code.Constantes import *
 
+
 class RespuestaMotor:
-    def __init__(self, nombre, siBlancas):
+    def __init__(self, nombre, si_blancas):
         self.nombre = nombre
         self.sinInicializar = True
         self.mate = 0
@@ -22,17 +23,11 @@ class RespuestaMotor:
         self.nodes = 0
         self.nps = 0
         self.seldepth = 0
-        self.siBlancas = siBlancas
+        self.siBlancas = si_blancas
 
         self.tiempo = 0
 
         self.maxTiempo = 0
-
-        # def __str__( self ):
-        # resp = ""
-        # for x in [ "sinInicializar", "mate", "puntos", "sinMovimientos", "pv", "desde", "hasta", "coronacion", "depth"]:
-        # resp += x + " : " + str( eval("self.%s"%x) ) + "  "
-        # return resp
 
     def movimiento(self):
         return self.desde + self.hasta + self.coronacion
@@ -230,32 +225,30 @@ class RespuestaMotor:
                     self.nps = int(eti)
                 elif clave == "SELDEPTH":
                     self.seldepth = int(eti)
+    def copia(self):
+        rm = RespuestaMotor(self.nombre, self.siBlancas)
+        rm.texto2base(self.base2texto())
+        return rm
+
+st_uci_claves = {"multipv", "depth", "seldepth", "score", "time", "nodes", "pv", "hashfull", "tbhits", "nps",
+                     "currmove", "currmovenumber", "cpuload", "string", "refutation", "currline"}
+
 
 class MRespuestaMotor:
     def __init__(self, nombre, siBlancas):
         self.nombre = nombre
-        self.tiempo = 0
         self.siBlancas = siBlancas
 
-        self.depth = 0
-
-        self.maxTiempo = 0
-        self.maxProfundidad = 0
-
-        self.dicMultiPV = {}
-        self.liMultiPV = []
-
-        self.saveLines = False
-        self.lines = []
+        self.reset()
 
     def reset(self):
         self.tiempo = 0
-
         self.depth = 0
 
         self.maxTiempo = 0
         self.maxProfundidad = 0
 
+        self.dicDepth = {}
         self.dicMultiPV = {}
         self.liMultiPV = []
 
@@ -271,6 +264,9 @@ class MRespuestaMotor:
         self.maxProfundidad = maxProfundidad
 
     def dispatch(self, linea):
+        if "bound" in linea and ("lowerbound" in linea or "upperbound" in linea):
+            return
+
         if linea.startswith("info ") and " pv " in linea:
             self.miraPV(linea[5:])
 
@@ -292,7 +288,6 @@ class MRespuestaMotor:
         li = []
         setYa = set()
         for k, rm in self.dicMultiPV.iteritems():
-
             mov = rm.movimiento()
             if mov in setYa:
                 continue
@@ -300,20 +295,11 @@ class MRespuestaMotor:
             li.append(rm)
         self.liMultiPV = sorted(li, key=lambda rm: -rm.puntosABS())  # de mayor a menor
 
-        # elpeor = True
-        # for n, rm1 in enumerate(self.liMultiPV):
-        # if rm.siMejorQue( rm1, 0, 0 ):
-        # self.liMultiPV.insert( n, rm )
-        # elpeor = False
-        # break
-        # if elpeor:
-
     def __len__(self):
         return len(self.liMultiPV)
 
     def miraPV(self, pvBase):
-        dClaves = self.miraClaves(pvBase, ("multipv", "depth", "seldepth", "score", "time",
-                                           "nodes", "pv", "hashfull", "tbhits", "nps", "currmove", "currmovenumber"))
+        dClaves = self.miraClaves(pvBase, st_uci_claves)
 
         if "pv" in dClaves:
             pv = dClaves["pv"].strip()
@@ -351,6 +337,8 @@ class MRespuestaMotor:
                     if (depth > self.maxProfundidad) and (depth > rm.depth):
                         return
             rm.depth = depth
+        else:
+            depth = 0
 
         if "time" in dClaves:
             rm.time = int(dClaves["time"].strip())
@@ -379,18 +367,21 @@ class MRespuestaMotor:
                 rm.mate = int(score.split(" ")[1])
                 rm.sinMovimientos = False
 
-        if "pv" in dClaves:
-            pv = dClaves["pv"].strip()
-            x = pv.find(" ")
-            pv1 = pv[:x] if x >= 0 else pv
-            rm.pv = pv
-            rm.desde = pv1[:2]
-            rm.hasta = pv1[2:4]
-            rm.coronacion = pv1[4].lower() if len(pv1) == 5 else ""
+        pv = dClaves["pv"].strip()
+        x = pv.find(" ")
+        pv1 = pv[:x] if x >= 0 else pv
+        rm.pv = pv
+        rm.desde = pv1[:2]
+        rm.hasta = pv1[2:4]
+        rm.coronacion = pv1[4].lower() if len(pv1) == 5 else ""
+
+        if depth:
+            if depth not in self.dicDepth:
+                self.dicDepth[depth] = {}
+            self.dicDepth[depth][rm.movimiento()] = rm.puntosABS_5()
 
     def miraScore(self, pvBase):
-        dClaves = self.miraClaves(pvBase, ("multipv", "depth", "seldepth", "score", "time",
-                                           "nodes", "pv", "hashfull", "tbhits", "nps", "currmove", "currmovenumber"))
+        dClaves = self.miraClaves(pvBase, st_uci_claves)
 
         if "multipv" in dClaves:
             kMulti = dClaves["multipv"]
@@ -454,7 +445,7 @@ class MRespuestaMotor:
         self.dicMultiPV = {"1": rm}
 
         rm.sinInicializar = False
-        dClaves = self.miraClaves(bestmove, ("bestmove", "ponder"))
+        dClaves = self.miraClaves(bestmove, {"bestmove", "ponder"} )
         rm.desde = ""
         rm.hasta = ""
         rm.coronacion = ""
@@ -482,12 +473,12 @@ class MRespuestaMotor:
         else:
             rm.sinMovimientos = True
 
-    def miraClaves(self, mensaje, liClaves):
+    def miraClaves(self, mensaje, stClaves):
         dClaves = {}
         clave = ""
         dato = ""
         for palabra in mensaje.split(" "):
-            if palabra in liClaves:
+            if palabra in stClaves:
                 if clave:
                     dClaves[clave] = dato.strip()
                 clave = palabra
@@ -498,12 +489,45 @@ class MRespuestaMotor:
             dClaves[clave] = dato.strip()
         return dClaves
 
-        # def rmMultiPV( self, movim ):
-        # movim = movim.lower()
-        # for k, rm in enumerate(self.liMultiPV):
-        # if rm.movimiento() == movim:
-        # return rm, k
-        # return None, None
+    def is_stable(self, centipawns, num_depths):
+        li_depths = self.dicDepth.keys()
+        if len(li_depths) > 40:
+            return True
+        if len(li_depths) <= num_depths:
+            return False
+        li_depths.sort(reverse=True)
+
+        def best(npos):
+            dic = self.dicDepth[li_depths[npos]]
+            li_best = []
+            pmax = -999999
+            for mov, pts in dic.iteritems():
+                if pts > pmax:
+                    li_best = [mov,]
+                    pmax = pts
+                elif pts == pmax:
+                    li_best.append(mov)
+            return (li_best, pmax)
+
+        def equal(li_best0, li_best1):
+            li_mov0, pts0 = li_best0
+            li_mov1, pts1 = li_best1
+            if len(li_mov0) != len(li_mov1):
+                return False
+            if abs(pts0 - pts1) > centipawns:
+                return False
+
+            for mov0 in li_mov0:
+                if mov0 not in li_mov1:
+                    return False
+            return True
+
+        l_d = [best(pos) for pos in range(num_depths)]
+        l_0 = l_d[0]
+        for pos in range(1, num_depths):
+            if not equal(l_d[pos], l_0):
+                return False
+        return True
 
     def mejorRMQue(self, rm, difpts, difporc):
         if self.liMultiPV:
@@ -965,10 +989,9 @@ class MRespuestaMotor:
 
         # 3. Leemos el texto enviado por el engine
         busca = "pv " + rmbr.movimiento() + " "
-        listaClaves = ("multipv", "depth", "seldepth", "score", "time", "nodes", "pv", "hashfull", "tbhits", "nps")
         for linea in self.lines:
             if busca in linea:
-                dClaves = self.miraClaves(linea, listaClaves)
+                dClaves = self.miraClaves(linea, st_uci_claves)
 
                 if not ("depth" in dClaves):
                     continue

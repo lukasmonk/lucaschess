@@ -4,6 +4,7 @@ from Code.QT import Controles
 from Code.QT import QTUtil
 from Code.Constantes import *
 
+
 class BloqueSC(QtGui.QGraphicsItem):
     def __init__(self, escena, posicion):
 
@@ -37,6 +38,7 @@ class BloqueSC(QtGui.QGraphicsItem):
             self.setFlag(QtGui.QGraphicsItem.ItemIsMovable, False)
             self.setFlag(QtGui.QGraphicsItem.ItemIsFocusable, False)
 
+
 class CajaSC(BloqueSC):
     def __init__(self, escena, bloqueCaja):
 
@@ -59,6 +61,7 @@ class CajaSC(BloqueSC):
             painter.drawRoundedRect(self.rect, bl.redEsquina, bl.redEsquina)
         else:
             painter.drawRect(self.rect)
+
 
 class CirculoSC(BloqueSC):
     def __init__(self, escena, bloqueCirculo, rutina=None):
@@ -95,6 +98,7 @@ class CirculoSC(BloqueSC):
         if self.rutina and self.contains(event.pos()):
             self.rutina(event.button() == QtCore.Qt.LeftButton)
 
+
 class PuntoSC(CirculoSC):
     def __init__(self, escena, bloqueCirculo, rutina, cursor=None):
         CirculoSC.__init__(self, escena, bloqueCirculo, rutina)
@@ -108,6 +112,7 @@ class PuntoSC(CirculoSC):
 
     def hoverMoveEvent(self, event):
         self.setCursor(self.cursor)
+
 
 class TextoSC(BloqueSC):
     def __init__(self, escena, bloqueTexto, rutina=None):
@@ -153,6 +158,7 @@ class TextoSC(BloqueSC):
         event.ignore()
         if self.rutina:
             self.rutina(event.button() == QtCore.Qt.LeftButton, False, self.bloqueTexto.valor)
+
 
 class PiezaSC(BloqueSC):
     def __init__(self, escena, bloquePieza, tablero):
@@ -221,6 +227,7 @@ class PiezaSC(BloqueSC):
             self.setFocus()
         else:
             self.setCursor(QtCore.Qt.ArrowCursor)
+
 
 class TiempoSC(BloqueSC):
     def __init__(self, escena, bloqueTexto, rutina=None):
@@ -355,6 +362,7 @@ class TiempoSC(BloqueSC):
             self.setFocus()
         else:
             self.setFlag(QtGui.QGraphicsItem.ItemIsMovable, False)
+
 
 class PixmapSC(BloqueSC):
     def __init__(self, escena, bloqueImagen, pixmap=None):

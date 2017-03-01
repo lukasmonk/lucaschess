@@ -14,6 +14,7 @@ from Code.QT import WCapturas
 from Code import VarGen
 from Code.Constantes import *
 
+
 class WBase(QtGui.QWidget):
     def __init__(self, parent, gestor):
         super(WBase, self).__init__(parent)
@@ -26,7 +27,6 @@ class WBase(QtGui.QWidget):
 
         self.procesandoEventos = None
 
-        # self.setBackgroundRole(QtGui.QPalette.Light)
         self.setWindowIcon(Iconos.Aplicacion())
         self.setStyleSheet("QToolButton { padding: 0px; }")
 
@@ -39,7 +39,7 @@ class WBase(QtGui.QWidget):
 
         lyT = Colocacion.V().control(self.tablero).relleno()
 
-        lyAI = Colocacion.H().relleno().controli(self.capturas).otroi(lyT).otroi(lyBI).relleno().margen(0)
+        lyAI = Colocacion.H().control(self.capturas).otroi(lyT).otroi(lyBI).relleno(1).margen(0)
         ly = Colocacion.V().control(self.tb).relleno().otro(lyAI).relleno().margen(2)
 
         self.setLayout(ly)

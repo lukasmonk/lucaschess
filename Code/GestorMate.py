@@ -11,6 +11,7 @@ from Code.QT import QTUtil2
 from Code import Util
 from Code.Constantes import *
 
+
 class ConfigNivel:
     def __init__(self, mate):
         self.mate = mate
@@ -44,6 +45,7 @@ class ConfigNivel:
     def dameFenPV(self, nivel, bloque):
         return self.dicMate[nivel * 10 + bloque]
 
+
 class MateBloque:
     def __init__(self):
         self.errores = None
@@ -55,6 +57,7 @@ class MateBloque:
 
     def siTerminado(self):
         return not ((self.errores is None) or (self.errores > 0))
+
 
 class MateNivel:
     def __init__(self, nivel):
@@ -97,6 +100,7 @@ class MateNivel:
                 return n
         return 0
 
+
 class MateDB(Util.DicSQL):
     def __init__(self, gestor, mate):
         nomFichero = gestor.configuracion.ficheroMate
@@ -120,6 +124,7 @@ class MateDB(Util.DicSQL):
         else:
             mateNivel = MateNivel(nivel)
         return mateNivel
+
 
 class ControlMate:
     def __init__(self, gestor, mate):
@@ -211,6 +216,7 @@ class ControlMate:
 
     def depth(self):
         return self.configNivel.depth
+
 
 class GestorMate(Gestor.Gestor):
     def inicio(self, mate):

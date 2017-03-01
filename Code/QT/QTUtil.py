@@ -2,6 +2,7 @@ import gc
 
 from PyQt4 import QtCore, QtGui
 
+
 class GarbageCollector(QtCore.QObject):
     '''
     http://pydev.blogspot.com.br/2014/03/should-python-garbage-collector-be.html
@@ -36,11 +37,13 @@ class GarbageCollector(QtCore.QObject):
                     num = gc.collect(2)
         return num
 
+
 def beep():
     """
     Pitido del sistema
     """
     QtGui.QApplication.beep()
+
 
 def backgroundGUI():
     """
@@ -48,11 +51,13 @@ def backgroundGUI():
     """
     return QtGui.QApplication.palette().brush(QtGui.QPalette.Active, QtGui.QPalette.Window).color().name()
 
+
 def backgroundGUIlight(factor):
     """
     Background por defecto del GUI
     """
     return QtGui.QApplication.palette().brush(QtGui.QPalette.Active, QtGui.QPalette.Window).color().light(factor).name()
+
 
 def refreshGUI():
     """
@@ -60,6 +65,7 @@ def refreshGUI():
     """
     QtCore.QCoreApplication.processEvents()
     QtGui.QApplication.processEvents()
+
 
 def xrefreshGUI():
     """
@@ -69,11 +75,13 @@ def xrefreshGUI():
 
 dAlineacion = {"i": QtCore.Qt.AlignLeft, "d": QtCore.Qt.AlignRight, "c": QtCore.Qt.AlignCenter}
 
+
 def qtAlineacion(cAlin):
     """
     Convierte alineacion en letras (i-c-d) en constantes qt
     """
     return dAlineacion.get(cAlin, QtCore.Qt.AlignLeft)
+
 
 def qtColor(nColor):
     """
@@ -81,17 +89,20 @@ def qtColor(nColor):
     """
     return QtGui.QColor(nColor)
 
+
 def qtColorRGB(r, g, b):
     """
     Genera un color a partir del rgb
     """
     return QtGui.QColor(r, g, b)
 
+
 def qtBrush(nColor):
     """
     Genera un brush a partir de un dato numerico
     """
     return QtGui.QBrush(qtColor(nColor))
+
 
 def centraWindow(window):
     """
@@ -101,11 +112,20 @@ def centraWindow(window):
     size = window.geometry()
     window.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
 
+
+def escondeWindow(window):
+    pos = window.pos()
+    screen = QtGui.QDesktopWidget().screenGeometry()
+    window.move(screen.width()*2, 0)
+    return pos
+
+
 def colorIcon(xcolor, ancho, alto):
     color = QtGui.QColor(xcolor)
     pm = QtGui.QPixmap(ancho, alto)
     pm.fill(color)
     return QtGui.QIcon(pm)
+
 
 def tamEscritorio():
     """
@@ -114,14 +134,18 @@ def tamEscritorio():
     screen = QtGui.QDesktopWidget().availableGeometry()
     return screen.width(), screen.height()
 
+
 def anchoEscritorio():
     return QtGui.QDesktopWidget().availableGeometry().width()
+
 
 def altoEscritorio():
     return QtGui.QDesktopWidget().availableGeometry().height()
 
+
 def salirAplicacion(xid):
     QtGui.QApplication.exit(xid)
+
 
 def ponPortapapeles(dato, tipo="t"):
     cb = QtGui.QApplication.clipboard()
@@ -132,17 +156,20 @@ def ponPortapapeles(dato, tipo="t"):
     elif tipo == "p":
         cb.setPixmap(dato)
 
+
 def traePortapapeles():
     cb = QtGui.QApplication.clipboard()
     texto = cb.text()
     texto = texto.encode("utf-8", "ignore")
     return texto
 
+
 def shrink(widget):
     r = widget.geometry()
     r.setWidth(0)
     r.setHeight(0)
     widget.setGeometry(r)
+
 
 def kbdPulsado():
     m = int(QtGui.QApplication.keyboardModifiers())

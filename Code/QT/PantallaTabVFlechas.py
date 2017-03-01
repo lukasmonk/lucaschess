@@ -17,12 +17,14 @@ from Code import TabVisual
 from Code import Util
 from Code import VarGen
 
+
 def tiposDestino():
     li = (
         (_("To center"), "c"),
         (_("To closest point"), "m"),
     )
     return li
+
 
 class WTV_Flecha(QtGui.QDialog):
     def __init__(self, owner, regFlecha, siNombre):
@@ -189,6 +191,7 @@ class WTV_Flecha(QtGui.QDialog):
         self.regFlecha.png = str(bf.buffer())
 
         self.accept()
+
 
 class WTV_Flechas(QTVarios.WDialogo):
     def __init__(self, owner, listaFlechas, dbFlechas):

@@ -3,6 +3,7 @@ from operator import attrgetter
 from Code import TrListas
 from Code import Util
 
+
 class AperturaStd:
     def __init__(self, clave):
         self.nombre = clave
@@ -27,6 +28,7 @@ class AperturaStd:
 
     def __str__(self):
         return self.nombre + " " + self.pgn
+
 
 class ListaAperturasStd:
     def __init__(self, configuracion, siBasic, siEntrenar):

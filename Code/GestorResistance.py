@@ -6,6 +6,7 @@ from Code import Util
 from Code import XMotorRespuesta
 from Code.Constantes import *
 
+
 class GestorResistance(Gestor.Gestor):
     def inicio(self, resistance, numEngine, clave):
 

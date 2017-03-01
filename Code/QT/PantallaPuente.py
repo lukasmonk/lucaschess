@@ -19,6 +19,7 @@ from Code.QT import Tablero
 from Code.SQL import Base
 from Code import Util
 
+
 class PuenteHistorico:
     def __init__(self, fichero, nivel):
         self.fichero = fichero
@@ -115,10 +116,12 @@ class PuenteHistorico:
         self.dbf.leer()
         self.calculaMedia()
 
+
 class EDCelda(Controles.ED):
     def focusOutEvent(self, event):
         self.parent.focusOut(self)
         Controles.ED.focusOutEvent(self, event)
+
 
 class WEdMove(QtGui.QWidget):
     def __init__(self, owner, conj_piezas, siBlancas):
@@ -239,6 +242,7 @@ class WEdMove(QtGui.QWidget):
             menu.addAction(accion)
 
         return menu
+
 
 class WPuenteBase(QTVarios.WDialogo):
     def __init__(self, procesador, nivel):
@@ -367,6 +371,7 @@ class WPuenteBase(QTVarios.WDialogo):
         w.exec_()
         self.ghistorico.gotop()
         self.ghistorico.refresh()
+
 
 class WPuente(QTVarios.WDialogo):
     def __init__(self, owner, fenIni, fenFin, liMV, info):
@@ -605,6 +610,7 @@ class WPuente(QTVarios.WDialogo):
         mens = "<center>%s</center>" % mens
 
         return mens
+
 
 def pantallaPuente(procesador, nivel):
     w = WPuenteBase(procesador, nivel)

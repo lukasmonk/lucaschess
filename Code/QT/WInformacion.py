@@ -10,6 +10,7 @@ from Code.QT import QTVarios
 from Code import TrListas
 from Code import VarGen
 
+
 class InformacionPGN(QtGui.QWidget):
     def __init__(self, wParent):
         QtGui.QWidget.__init__(self, wParent)
@@ -137,6 +138,9 @@ class InformacionPGN(QtGui.QWidget):
         self.partida = partida
         self.jg = jg
 
+        if not apertura:
+            self.lbApertura.hide()
+
         siJG = self.jg is not None
         self.gbValoracion.setVisible(siJG)
         self.gbVariantes.setVisible(siJG)
@@ -150,8 +154,6 @@ class InformacionPGN(QtGui.QWidget):
                 else:
                     self.lbApertura.ponColorFondoN("#ffffff", "#aaaaaa")
                 self.lbApertura.show()
-            else:
-                self.lbApertura.hide()
 
             self.comentario.ponTexto(jg.comentario)
             self.setVariantes(jg.variantes)
@@ -166,6 +168,10 @@ class InformacionPGN(QtGui.QWidget):
             self.gbComentario.ponTexto("%s - %s" % (_("Game"), _("Comments")))
             if partida:
                 self.comentario.ponTexto(partida.firstComment)
+                if apertura:
+                    self.lbApertura.ponTexto(apertura)
+                    self.lbApertura.ponColorFondoN("#eeeeee", "#474d59")
+                    self.lbApertura.show()
 
     def ponNAGs(self, li):
         n = 0

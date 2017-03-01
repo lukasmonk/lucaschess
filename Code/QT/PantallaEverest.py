@@ -18,6 +18,7 @@ from Code.QT import QTVarios
 import Code.SQL.Base as SQLBase
 from Code import Util
 
+
 class WNewExpedition(QTVarios.WDialogo):
     def __init__(self, owner, fichero):
         self.litourneys = Everest.str_file(fichero)
@@ -195,6 +196,7 @@ class WNewExpedition(QTVarios.WDialogo):
         dbf.cerrar()
         bd.cerrar()
 
+
 class WExpedition(QTVarios.WDialogo):
     def __init__(self, wowner, configuracion, recno):
         expedition = Everest.Expedition(configuracion, recno)
@@ -297,6 +299,7 @@ class WExpedition(QTVarios.WDialogo):
     def cancel(self):
         self.guardarVideo()
         self.reject()
+
 
 class WEverest(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -410,10 +413,12 @@ class WEverest(QTVarios.WDialogo):
             self.db.new(reg)
             self.grid.refresh()
 
+
 def everest(procesador):
     w = WEverest(procesador)
     if w.exec_():
         procesador.showEverest(w.selected)
+
 
 def show_expedition(wowner, configuracion, recno):
     wexp = WExpedition(wowner, configuracion, recno)

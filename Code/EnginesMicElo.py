@@ -1,5 +1,6 @@
 from Code import MotoresExternos
 
+
 def leeMicEngines():
     lme = MotoresExternos.ListaMotoresExternos("./IntFiles/michele.pkt")
     lme.leer()
@@ -18,10 +19,12 @@ def leeMicEngines():
         li.append(mt1)
     return li
 
+
 def listaGM():
     li = [mtl for mtl in leeMicEngines() if mtl.nombre[0].isupper()]
     li.sort(key=lambda uno: uno.nombre)
     return li
+
 
 def listaCompleta():
     li = leeMicEngines()

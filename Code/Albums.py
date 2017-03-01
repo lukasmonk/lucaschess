@@ -11,6 +11,7 @@ from Code import XMotorRespuesta
 
 ALBUMSHECHOS = "albumshechos"
 
+
 class GestorMotorAlbum:
     def __init__(self, gestor, cromo):
 
@@ -110,6 +111,7 @@ class GestorMotorAlbum:
         mrm.partida = self.partida
         return mrm.mejorMovAjustadoSimilar(self.cromo.dif_puntos, self.cromo.mate, self.cromo.aterrizaje)
 
+
 class Cromo:
     def __init__(self, clave, nombre, nivel, bien, aleatorio, captura, esquivo, similar, dif_puntos, aterrizaje, mate,
                  engine, apertura):
@@ -145,6 +147,7 @@ class Cromo:
     def pixmap_level(self):
         li = ("Amarillo", "Naranja", "Verde", "Azul", "Magenta", "Rojo")
         return Iconos.pixmap(li[self.nivel])
+
 
 class Album:
     def __init__(self, clavedb, alias):
@@ -198,6 +201,7 @@ class Album:
 
     def reset(self):
         self.put_db(self.claveDB, None)
+
 
 class Albumes:
     def __init__(self, pre_clave):
@@ -284,6 +288,7 @@ class Albumes:
             clave = self.preClave + "_" + uno
             dic[uno] = dic_db.get(clave, False)
         return dic
+
 
 class AlbumesAnimales(Albumes):
     def __init__(self):
@@ -418,6 +423,7 @@ class AlbumesAnimales(Albumes):
             Cromo("Owl", _("Owl"), 5, 100, 0, 0, 0, 0, 0, 150, 2, "c", 999),
         ]
         return li
+
 
 class AlbumesVehicles(Albumes):
     def __init__(self):

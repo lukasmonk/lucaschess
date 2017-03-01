@@ -9,6 +9,7 @@ from Code.QT import QTVarios
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 
+
 class WTurnOnLights(QTVarios.WDialogo):
     def __init__(self, owner, name, title, icono, folder, li_tam_blocks):
 
@@ -122,19 +123,25 @@ class WTurnOnLights(QTVarios.WDialogo):
 
     def colors(self):
         menu = QTVarios.LCMenu(self)
-        d = {"0": Iconos.Gris32(),
-             "1": Iconos.Amarillo32(),
-             "2": Iconos.Naranja32(),
-             "3": Iconos.Verde32(),
-             "4": Iconos.Azul32(),
-             "5": Iconos.Magenta32(),
-             "6": Iconos.Rojo32(),
-             "7": Iconos.Light32()
-             }
+        d =  {  "0": Iconos.Gris32(),
+                "1": Iconos.Amarillo32(),
+                "2": Iconos.Naranja32(),
+                "3": Iconos.Verde32(),
+                "4": Iconos.Azul32(),
+                "5": Iconos.Magenta32(),
+                "6": Iconos.Rojo32(),
+                "7": Iconos.Light32()
+            }
+        num, ultimo = TurnOnLights.numColorMinimum(self.tol)
+        snum = str(num)
         for txt, key, secs in TurnOnLights.QUALIFICATIONS:
-            menu.opcion(None, "%s < %0.2f\"" % (_F(txt), secs), d[key])
+            rotulo = "%s < %0.2f\"" % (_F(txt), secs)
+            if key == snum and not ultimo:
+                rotulo += " = %s" % _("Minimum to access next level")
+            menu.opcion(None, rotulo, d[key])
             menu.separador()
         menu.lanza()
+
 
 def pantallaTurnOnLigths(procesador, name, title, icono, folder, li_tam_blocks):
     while True:

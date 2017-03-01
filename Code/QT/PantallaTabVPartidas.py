@@ -9,6 +9,7 @@ from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code import VarGen
 
+
 def texto2partida(owner, texto):
     pgn = PGN.UnPGN()
     pgn.leeTexto(texto)
@@ -16,6 +17,7 @@ def texto2partida(owner, texto):
         QTUtil2.mensError(owner, _("This is not a valid PGN file"))
         return None
     return pgn.partida
+
 
 class W_EligeMovimientos(QTVarios.WDialogo):
     def __init__(self, owner, partida):

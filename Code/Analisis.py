@@ -8,10 +8,11 @@ from Code import Jugada
 from Code import Partida
 from Code.QT import PantallaAnalisis
 from Code.QT import PantallaPGN
-from Code.QT import PantallaParamAnalisis
+from Code.QT import PantallaAnalisisParam
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code import Util
+
 
 class AnalizaPartida:
     def __init__(self, procesador, alm, is_massiv, li_moves=None):
@@ -27,6 +28,11 @@ class AnalizaPartida:
         self.tiempo = alm.tiempo
         self.depth = alm.depth
         self.siVariantes = (not is_massiv) and alm.masvariantes
+
+        self.stability = alm.stability
+        self.st_centipawns = alm.st_centipawns
+        self.st_depths = alm.st_depths
+        self.st_timelimit = alm.st_timelimit
 
         # Asignacion de variables para blunders:
         # kblunders: puntos de perdida para considerar un blunder
@@ -310,15 +316,14 @@ FILESW=%s:100
         self.siBMTblunders = False
         self.siBMTbrilliancies = False
 
-        siBP2 = hasattr(tmpBP, "bp2")  # Para diferenciar el analisis de una partida que usa una progressbar unica del
-
-        # analisis de muchas, que usa doble
+        siBP2 = hasattr(tmpBP, "bp2")   # Para diferenciar el analisis de una partida que usa una progressbar unica del
+                                        # analisis de muchas, que usa doble
 
         def guiDispatch(rm):
             return not tmpBP.siCancelado()
 
-        self.xgestor.ponGuiDispatch(guiDispatch)  # Dispatch del motor, si esta puesto a 4 minutos por ejemplo que
-        # compruebe si se ha indicado que se cancele.
+        self.xgestor.ponGuiDispatch(guiDispatch)    # Dispatch del motor, si esta puesto a 4 minutos por ejemplo que
+                                                    # compruebe si se ha indicado que se cancele.
 
         siBlunders = self.kblunders > 0
         siBrilliancies = self.fnsbrilliancies or self.pgnbrilliancies or self.bmtbrilliancies
@@ -346,7 +351,7 @@ FILESW=%s:100
                         if siA:
                             if jugador.endswith(uno):
                                 si = True
-                            if siZ:  # form apara poner siA y siZ
+                            if siZ:  # form para poner siA y siZ
                                 si = uno in jugador
                         elif siZ:
                             if jugador.startswith(uno):
@@ -442,8 +447,12 @@ FILESW=%s:100
                     continue
 
             # -# Procesamos
-            resp = self.xgestor.analizaJugada(jg, self.tiempo, depth=self.depth, brDepth=self.dpbrilliancies,
-                                              brPuntos=self.ptbrilliancies)
+            resp = self.xgestor.analizaJugadaPartida(partida, njg, self.tiempo, depth=self.depth,
+                                                     brDepth=self.dpbrilliancies, brPuntos=self.ptbrilliancies,
+                                                     stability=self.stability,
+                                                     st_centipawns=self.st_centipawns,
+                                                     st_depths=self.st_depths,
+                                                     st_timelimit=self.st_timelimit)
             if not resp:
                 self.xgestor.quitaGuiDispatch()
                 return
@@ -513,6 +522,7 @@ FILESW=%s:100
             f.close()
 
         self.xgestor.quitaGuiDispatch()
+
 
 class UnaMuestra:
     def __init__(self, mAnalisis, mrm, posElegida, numero, xmotor):
@@ -679,6 +689,7 @@ class UnaMuestra:
     def ponVistaGestor(self):
         self.mAnalisis.procesador.gestor.ponVista()
 
+
 class MuestraAnalisis:
     def __init__(self, procesador, jg, maxRecursion, posJugada):
 
@@ -722,6 +733,7 @@ class MuestraAnalisis:
         self.liMuestras.append(um)
         return um
 
+
 def muestraAnalisis(procesador, xtutor, jg, siBlancas, maxRecursion, posJugada, pantalla=None, siGrabar=True):
     pantalla = procesador.pantalla if pantalla is None else pantalla
 
@@ -743,6 +755,7 @@ def muestraAnalisis(procesador, xtutor, jg, siBlancas, maxRecursion, posJugada, 
         xmotor = uno.xmotor
         if not xtutor or xmotor.clave != xtutor.clave:
             xmotor.terminar()
+
 
 class AnalisisVariantes:
     def __init__(self, owner, xtutor, jg, siBlancas, cPuntosBase, maxRecursion=100000):
@@ -909,13 +922,14 @@ class AnalisisVariantes:
         pts = self.rm.texto()
         AnalisisVariantes(self.w, self.xtutor, jg, self.siBlancas, pts, maxRecursion)
 
+
 def analizaPartida(gestor):
     partida = gestor.partida
     procesador = gestor.procesador
     pantalla = gestor.pantalla
     pgn = gestor.pgn
 
-    alm = PantallaParamAnalisis.paramAnalisis(pantalla, procesador.configuracion, True)
+    alm = PantallaAnalisisParam.paramAnalisis(pantalla, procesador.configuracion, True)
 
     if alm is None:
         return

@@ -8,6 +8,7 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.Constantes import *
 
+
 class GestorTurnOnLights(Gestor.Gestor):
     def inicio(self, num_theme, num_block, tol):
 

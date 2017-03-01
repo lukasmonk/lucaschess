@@ -14,7 +14,7 @@ from Code.QT import FormLayout
 from Code.QT import Grid
 from Code.QT import Iconos
 from Code.QT import PantallaBooks
-from Code.QT import PantallaParamAnalisis
+from Code.QT import PantallaAnalisisParam
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
@@ -22,6 +22,7 @@ from Code import SQL
 from Code import TrListas
 from Code import Util
 from Code import VarGen
+
 
 class EstadoWpgn:
     def guarda(self, window, dbf):
@@ -52,6 +53,7 @@ class EstadoWpgn:
     def recuperaWindow(self, window):
         window.resize(self.tam)
         window.move(self.pos)
+
 
 class WElegir(QTVarios.WDialogo):
     def __init__(self, owner, dbf, dClaves, gestor, estado, siElegir):
@@ -462,7 +464,7 @@ class WElegir(QTVarios.WDialogo):
         liSeleccionadas = self.grid.recnosSeleccionados()
         nSeleccionadas = len(liSeleccionadas)
 
-        alm = PantallaParamAnalisis.paramAnalisisMasivo(self, self.gestor.configuracion, nSeleccionadas > 1)
+        alm = PantallaAnalisisParam.paramAnalisisMasivo(self, self.gestor.configuracion, nSeleccionadas > 1)
         if alm:
 
             if alm.siVariosSeleccionados:
@@ -648,6 +650,7 @@ class WElegir(QTVarios.WDialogo):
 
         crearTactic(self.gestor.procesador, self, liRegistros, rutinaDatos)
 
+
 class WFiltrar(QtGui.QDialog):
     def __init__(self, wParent, oColumnas, liFiltro):
 
@@ -809,6 +812,7 @@ class WFiltrar(QtGui.QDialog):
                 where += ")"
         return where
 
+
 class EM_SQL(Controles.EM):
     def __init__(self, owner, where, liCampos):
         self.liCampos = liCampos
@@ -824,6 +828,7 @@ class EM_SQL(Controles.EM):
             resp = menu.lanza()
             if resp:
                 self.insertarTexto(resp)
+
 
 class WFiltrarRaw(QTVarios.WDialogo):
     def __init__(self, wParent, oColumnas, where):
@@ -863,11 +868,13 @@ class WFiltrarRaw(QTVarios.WDialogo):
         self.guardarVideo()
         self.accept()
 
+
 def elegirPGN(owner, dbf, dClaves, gestor, estado, siElegir=False):
     w = WElegir(owner, dbf, dClaves, gestor, estado, siElegir)
     if w.exec_():
         return True, w.estado, w.seHaBorradoAlgo
     return False, None, w.seHaBorradoAlgo
+
 
 def eligePartida(ventana):
     configuracion = VarGen.configuracion
@@ -910,6 +917,7 @@ def eligePartida(ventana):
 
     return unpgn
 
+
 def mensajeEntrenamientos(owner, liCreados, liNoCreados):
     txt = ""
     if liCreados:
@@ -925,6 +933,7 @@ def mensajeEntrenamientos(owner, liCreados, liNoCreados):
             txt += "<li>%s</li>" % os.path.basename(x)
         txt += "</ul>"
     QTUtil2.mensaje(owner, txt)
+
 
 def crearTactic(procesador, wowner, liRegistros, rutinaDatos):
     # Se pide el nombre de la carpeta

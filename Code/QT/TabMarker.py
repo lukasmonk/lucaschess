@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui, QtSvg
 
 from Code.QT import TabBloques
 
+
 class MarkerSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueMarker, rutinaPulsada=None, siEditando=False):
         super(MarkerSC, self).__init__(escena, bloqueMarker)

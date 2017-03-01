@@ -6,6 +6,7 @@ VTEXTO = 0
 VENTERO = 1
 VDECIMAL = 2
 
+
 class Variable:
     def __init__(self, nombre, tipo, inicial):
         self.id = None
@@ -15,12 +16,14 @@ class Variable:
         self.valor = inicial
         self.id = None
 
+
 class Tarea:
     def enlaza(self, cpu):
         self.cpu = cpu
         self.id = cpu.nuevaID()
         self.junks = cpu.junks
         self.padre = 0
+
 
 class TareaDuerme(Tarea):
     def __init__(self, segundos):
@@ -39,6 +42,7 @@ class TareaDuerme(Tarea):
     def __str__(self):
         return "DUERME %0.2f" % self.segundos
 
+
 class TareaToolTip(Tarea):
     def __init__(self, texto):
         self.texto = texto
@@ -50,6 +54,7 @@ class TareaToolTip(Tarea):
     def __str__(self):
         return "TOOLTIP %s" % self.texto
 
+
 class TareaPonPosicion(Tarea):
     def __init__(self, posicion):
         self.posicion = posicion
@@ -60,6 +65,7 @@ class TareaPonPosicion(Tarea):
 
     def __str__(self):
         return self.posicion.fen()
+
 
 class TareaCambiaPieza(Tarea):
     def __init__(self, a1h8, pieza):
@@ -75,6 +81,7 @@ class TareaCambiaPieza(Tarea):
 
     def directo(self, tablero):
         return tablero.cambiaPieza(self.a1h8, self.pieza)
+
 
 class TareaBorraPieza(Tarea):
     def __init__(self, a1h8, tipo=None):
@@ -93,6 +100,7 @@ class TareaBorraPieza(Tarea):
 
     def directo(self, tablero):
         tablero.borraPieza(self.a1h8)
+
 
 class TareaMuevePieza(Tarea):
     def __init__(self, desdeA1H8, hastaA1H8, segundos=0.0):
@@ -149,6 +157,7 @@ class TareaMuevePieza(Tarea):
     def directo(self, tablero):
         tablero.muevePieza(self.desdeA1H8, self.hastaA1H8)
 
+
 class TareaMuevePiezaV(TareaMuevePieza):
     def __init__(self, desdeA1H8, hastaA1H8, vsegundos):
         TareaMuevePieza.__init__(self, desdeA1H8, hastaA1H8, 0.0)
@@ -164,6 +173,7 @@ class TareaMuevePiezaV(TareaMuevePieza):
 
     def directo(self, tablero):
         tablero.muevePieza(self.desdeA1H8, self.hastaA1H8)
+
 
 class TareaMuevePiezaLI(Tarea):
     def __init__(self, lista, segundos):
@@ -212,6 +222,7 @@ class TareaMuevePiezaLI(Tarea):
             self.tablero.colocaPieza(bp, self.hastaA1H8)
         return siUltimo
 
+
 class TareaCreaFlecha(Tarea):
     def __init__(self, tutorial, desde, hasta, idFlecha):
         self.tutorial = tutorial
@@ -238,6 +249,7 @@ class TareaCreaFlecha(Tarea):
         self.scFlecha = tablero.creaFlecha(regFlecha)
         return True
 
+
 class TareaCreaMarco(Tarea):
     def __init__(self, tutorial, desde, hasta, idMarco):
         self.tutorial = tutorial
@@ -262,6 +274,7 @@ class TareaCreaMarco(Tarea):
         regMarco.a1h8 = self.desde + self.hasta
         self.scMarco = tablero.creaMarco(regMarco)
         return True
+
 
 class TareaCreaSVG(Tarea):
     def __init__(self, tutorial, desde, hasta, idSVG):

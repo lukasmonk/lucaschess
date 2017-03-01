@@ -13,6 +13,7 @@ from Code import XMotorRespuesta
 from Code import Washing
 from Code.Constantes import *
 
+
 def gestorWashing(procesador):
     dbwashing = Washing.DBWashing(procesador.configuracion)
     washing = dbwashing.washing
@@ -28,6 +29,7 @@ def gestorWashing(procesador):
     elif engine.state == Washing.REPLAY:
         procesador.gestor = GestorWashingReplay(procesador)
         procesador.gestor.inicio(dbwashing, washing, engine)
+
 
 class GestorWashingReplay(Gestor.Gestor):
     def inicio(self, dbwashing, washing, engine):
@@ -238,6 +240,7 @@ class GestorWashingReplay(Gestor.Gestor):
     def finalX(self):
         self.procesador.inicio()
         return False
+
 
 class GestorWashingTactics(Gestor.Gestor):
     def inicio(self, dbwashing, washing, engine):
@@ -450,6 +453,7 @@ class GestorWashingTactics(Gestor.Gestor):
     def finalX(self):
         self.procesador.inicio()
         return False
+
 
 class GestorWashingCreate(Gestor.Gestor):
     def inicio(self, dbwashing, washing, engine):

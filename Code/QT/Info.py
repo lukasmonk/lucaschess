@@ -6,6 +6,7 @@ from Code.QT import Iconos
 from Code.QT import InfoBase
 from Code.QT import QTUtil
 
+
 class WAbout(QtGui.QDialog):
     def __init__(self, procesador):
         super(WAbout, self).__init__(procesador.pantalla)
@@ -48,6 +49,7 @@ class WAbout(QtGui.QDialog):
 
         self.setLayout(layout)
 
+
 class WInfo(QtGui.QDialog):
     def __init__(self, wParent, titulo, cabecera, txt, minTam, pmIcono):
         super(WInfo, self).__init__(wParent)
@@ -74,6 +76,7 @@ class WInfo(QtGui.QDialog):
 
     def seguir(self):
         self.close()
+
 
 def info(parent, titulo, cabecera, txt, minTam, pmIcono):
     w = WInfo(parent, titulo, cabecera, txt, minTam, pmIcono)

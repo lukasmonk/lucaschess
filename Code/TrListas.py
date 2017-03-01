@@ -1,5 +1,6 @@
 import collections
 
+
 def categoria(key):
     return {"PRINCIPIANTE": _("Beginner"),
             "AFICIONADO": _("Amateur"),
@@ -9,6 +10,7 @@ def categoria(key):
             "GRANMAESTRO": _("Grandmaster"),
             "ALUCINANTE": _("Mind-bending")
             }[key]
+
 
 def pgnLabel(key):
     return {"EVENT": _("Event"),
@@ -24,20 +26,25 @@ def pgnLabel(key):
             "WHITEELO": _("White elo"),
             "BLACKELO": _("Black elo")}.get(key, key)
 
+
 def dicNomPiezas():
     return {"K": _("King"), "N": _("Knight"), "B": _("Bishop"), "Q": _("Queen"), "R": _("Rook"), "P": _("Pawn")}
 
 dConvTR = [{}]
 
+
 def dConv():
     return dConvTR[0]
+
 
 def ponPiecesLNG(siEN):
     dConvTR[0] = {} if siEN else {"K": _("K"), "N": _("N"), "B": _("B"), "Q": _("Q"), "R": _("R")}
 
+
 def letterPiece(piece):
     p = piece.upper()
     return dConvTR[0].get(p, p)
+
 
 def listSTD():
     return (
@@ -1873,6 +1880,7 @@ def listSTD():
             (_("Woozle defence"), "A43", "d2d4 c7c5 d4d5 g8f6 b1c3 d8a5", "1. d4 c5 2. d5 Nf6 3. Nc3 Qa5", False),
     )
 
+
 def dicNAGs():
     lista = ("",
              _("Good move"),
@@ -2032,6 +2040,7 @@ def dicNAGs():
 
     return dicNAG
 
+
 def dicTraining():
     d = {
         "Checkmates by Eduardo Sadier": _("Checkmates by Eduardo Sadier"),
@@ -2134,6 +2143,7 @@ def dicTraining():
         d["Mate in %d" % n] = _X(_("Mate in %1"), str(n))
     return d
 
+
 def STS():
     return [_("Undermining"),
             _("Open Files and Diagonals"),
@@ -2151,6 +2161,7 @@ def STS():
             _("Queens and Rooks to the 7th Rank"),
             _("Avoid Pointless Exchange"),
             ]
+
 
 def MicElo():
     return [

@@ -1,7 +1,9 @@
 import time
 
+
 class Almacen:
     pass
+
 
 class DBFcache:
     def __init__(self, conexion, ctabla, select, condicion="", orden="", maxCache=2000):

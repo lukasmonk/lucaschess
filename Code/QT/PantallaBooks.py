@@ -13,6 +13,7 @@ from Code.QT import QTVarios
 from Code import Util
 from Code import VarGen
 
+
 class WBooksCrear(QtGui.QDialog):
     def __init__(self, wParent):
 
@@ -92,10 +93,7 @@ class WBooksCrear(QtGui.QDialog):
         fichTemporal = self.wParent.damePGNtemporal()
 
         # Creamos la linea de ordenes
-        if VarGen.isWindows:
-            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
-        else:
-            exe = 'Engines/Linux/_tools/polyglot/polyglot'
+        exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
         li = [os.path.abspath(exe), 'make-book', "-pgn", fichTemporal, "-bin", self.fichero]
         Util.borraFichero(self.fichero)
 
@@ -141,9 +139,11 @@ class WBooksCrear(QtGui.QDialog):
 
         self.accept()
 
+
 def polyglotCrear(owner):
     w = WBooksCrear(owner)
     w.exec_()
+
 
 def polyglotUnir(owner):
     lista = [(None, None)]
@@ -183,10 +183,7 @@ def polyglotUnir(owner):
         else:
             return
 
-        if VarGen.isWindows:
-            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
-        else:
-            exe = 'Engines/Linux/_tools/polyglot/polyglot'
+        exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
         li = [os.path.abspath(exe), 'merge-book', "-in1", f1, "-in2", f2, "-out", fr]
         try:
             os.remove(fr)
@@ -206,6 +203,7 @@ def polyglotUnir(owner):
         QTUtil2.mensaje(owner, txt)
 
         return
+
 
 class WBooks(QtGui.QDialog):
     def __init__(self, procesador):
@@ -351,6 +349,7 @@ class WBooks(QtGui.QDialog):
         dic["RJ"] = self.chRJ.valor()
         Util.guardaVar(self.configuracion.ficheroTrainBooks, dic)
 
+
 def eligeJugadaBooks(pantalla, liJugadas, siBlancas, siSelectSiempre=True):
     pantalla.cursorFueraTablero()
     menu = QTVarios.LCMenu(pantalla)
@@ -378,6 +377,7 @@ def eligeJugadaBooks(pantalla, liJugadas, siBlancas, siSelectSiempre=True):
             return desde, hasta, coronacion
         else:
             return None
+
 
 def saltaJugadaBooks(gestor, liJugadas, jg):
     siBlancas = jg.posicionBase.siBlancas

@@ -20,6 +20,7 @@ from Code import Util
 from Code import VarGen
 from Code.Constantes import *
 
+
 class GestorEntPos(Gestor.Gestor):
     def ponEntreno(self, entreno):
         # Guarda el ultimo entrenamiento en el db de entrenos

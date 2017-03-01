@@ -51,6 +51,7 @@ bool hash_probe(int * val)
     x = &registers[board.hashkey%register_max];
     if(x->hashkey == board.hashkey) {
         *val = x->val;
+        if (repetitions() >= 3) *val = DRAWSCORE;
         return true;
     }
     return false;

@@ -4,12 +4,13 @@ from Code.QT import Colocacion
 from Code.QT import QTUtil
 from Code import VarGen
 
+
 class CapturaLista(QtGui.QWidget):
     def __init__(self, wParent, tablero):
         super(CapturaLista, self).__init__(wParent)
 
-        self.setFixedWidth(tablero.ancho / 10)
-        anchoPZ = int(tablero.ancho / 12)
+        self.setFixedWidth(10)
+        anchoPZ = int(tablero.ancho/12)
         self.pantalla = wParent.parent()
 
         self.tipoMaterial = VarGen.configuracion.tipoMaterial
@@ -20,13 +21,13 @@ class CapturaLista(QtGui.QWidget):
             dW = self.dic[pieza] = []
             dB = self.dic[pieza.lower()] = []
             for i in range(numero):
-                lbW = tablero.piezas.widget(pieza)
-                lbW.setFixedSize(anchoPZ, anchoPZ)
+                lbW = tablero.piezas.label(self, pieza, anchoPZ)
                 lbW.hide()
+                lbW.alinCentrado()
                 dW.append(lbW)
-                lbB = tablero.piezas.widget(pieza.lower())
-                lbB.setFixedSize(anchoPZ, anchoPZ)
+                lbB = tablero.piezas.label(self, pieza.lower(), anchoPZ)
                 lbB.hide()
+                lbB.alinCentrado()
                 dB.append(lbB)
 
         self.ponLayout(True)
@@ -36,11 +37,10 @@ class CapturaLista(QtGui.QWidget):
             self.pantalla.activaCapturas(False)
 
     def resetPZ(self, tablero):
-        anchoPZ = tablero.anchoPieza
+        anchoPZ = int(tablero.ancho/12)
         for k, li in self.dic.iteritems():
             for lb in li:
-                lb.setFixedSize(anchoPZ, anchoPZ)
-
+                tablero.piezas.change_label(lb, anchoPZ)
         self.setMinimumWidth(anchoPZ + 4)
         self.adjustSize()
 
@@ -59,12 +59,16 @@ class CapturaLista(QtGui.QWidget):
 
         dlayout = {}
         for color in (True, False):
-            ly = dlayout[color] = Colocacion.V().margen(0)
+            ly = dlayout[color] = Colocacion.V().margen(4)
             for pieza, numero in self.li:
-                if not color:
-                    pieza = pieza.lower()
+                if self.tipoMaterial == "M":
+                    if color:
+                        pieza = pieza.lower()
+                else:
+                    if not color:
+                        pieza = pieza.lower()
                 for i in range(numero):
-                    ly.control(self.dic[pieza][i])
+                    ly.controlc(self.dic[pieza][i])
         ly0, ly1 = dlayout[siBlancasAbajo], dlayout[not siBlancasAbajo]
 
         layout.otro(ly0).relleno().otro(ly1)
@@ -110,6 +114,17 @@ class CapturaLista(QtGui.QWidget):
                         if vD < 0:
                             pieza = pieza.lower()
                             vD = -vD
+                        liDif.append((pieza, vD))
+            elif tipo == "M":
+                for pieza in cPiezas:
+                    vW = dicCapturas[pieza]
+                    vB = dicCapturas[pieza.lower()]
+                    vD = vW - vB
+                    if vD != 0:
+                        if vD < 0:
+                            vD = -vD
+                        else:
+                            pieza = pieza.lower()
                         liDif.append((pieza, vD))
             else:
                 for pieza in cPiezas:

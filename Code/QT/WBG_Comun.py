@@ -1,10 +1,11 @@
 from Code import ControlPosicion
 from Code import Partida
 from Code.QT import Iconos
-from Code.QT import PantallaParamAnalisis
+from Code.QT import PantallaAnalisisParam
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code import VarGen
+
 
 class Analisis:
     def __init__(self, wowner, bookGuide, dispatchAnalisis, procesador):
@@ -81,7 +82,7 @@ class Analisis:
             return
 
     def nuevoAnalisis(self, fenM2, infoDispatch):
-        alm = PantallaParamAnalisis.paramAnalisis(self.pantalla, VarGen.configuracion, False, siTodosMotores=True)
+        alm = PantallaAnalisisParam.paramAnalisis(self.pantalla, VarGen.configuracion, False, siTodosMotores=True)
         if alm is None:
             return
         configuracion = VarGen.configuracion

@@ -7,6 +7,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code import Routes
 
+
 class WTranssiberian(QTVarios.WDialogo):
     def __init__(self, procesador):
 
@@ -202,6 +203,7 @@ class WTranssiberian(QTVarios.WDialogo):
                     self.route.set_level(n)
             self.reject()
             train_train(self.procesador)
+
 
 def train_train(procesador):
     w = WTranssiberian(procesador)

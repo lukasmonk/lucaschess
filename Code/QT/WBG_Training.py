@@ -6,6 +6,7 @@ from Code.QT import Iconos
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 
+
 class TConf(QtGui.QWidget):
     def __init__(self, dicValoracion, dicVentaja):
         QtGui.QWidget.__init__(self)
@@ -65,6 +66,7 @@ class TConf(QtGui.QWidget):
                 reVen.append(chb.id)
 
         return reVal, reVen
+
 
 class WTraining(QTVarios.WDialogo):
     def __init__(self, wParent, dicValoracion, dicVentaja):

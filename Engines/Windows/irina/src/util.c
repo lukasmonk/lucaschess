@@ -27,11 +27,11 @@ unsigned int bit_count(Bitmap bitmap)
 
 /**
  * @author Kim Walisch (2012)
- * @param bb bitboard to scan
- * @precondition bb != 0
+ * @param bitmap bitboard to scan
+ * @precondition bitmap != 0
  * @return index (0..63) of least significant one bit
  */
-unsigned int first_one(Bitmap bb)
+unsigned int first_one(Bitmap bitmap)
 {
     static const int index64[64] =
     {
@@ -46,7 +46,32 @@ unsigned int first_one(Bitmap bb)
     };
     static const Bitmap debruijn64 = 0x03f79d71b4cb0a89;
 
-    return index64[((bb ^ (bb - 1)) * debruijn64) >> 58];
+    return index64[((bitmap ^ (bitmap - 1)) * debruijn64) >> 58];
+}
+
+unsigned int last_one(Bitmap bitmap)
+{
+	// this is Eugene Nalimov's bitScanReverse
+	// use firstOne if you can, it is faster than lastOne.
+	// don't use this if bitmap = 0
+
+	int result = 0;
+	if (bitmap > 0xFFFFFFFF)
+	{
+		bitmap >>= 32;
+		result = 32;
+	}
+	if (bitmap > 0xFFFF)
+	{
+		bitmap >>= 16;
+		result += 16;
+	}
+	if (bitmap > 0xFF)
+	{
+		bitmap >>= 8;
+		result += 8;
+	}
+	return result + MS1BTABLE[bitmap];
 }
 
 Bitmap get_ms()
@@ -87,6 +112,33 @@ char *move2str(Move move, char *str_dest)
     return str_dest;
 }
 
+
+void show_bitmap(Bitmap bm)
+{
+    int i, j, x;
+
+    for (i = 0; i < 8; i++) {
+        x = 8 * (8 - i - 1);
+        for (j = 0; j < 8; j++) {
+            if (bm & BITSET[x + j]) {
+                printf("1");
+            } else {
+                printf(".");
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+//    for (i = 0; i < 8; i++) {
+//        x = 8 * (8 - i - 1);
+//        for (j = 0; j < 8; j++) {
+//            if (bm & BITSET[x + j]) {
+//                printf("%2d:%s|", x + j, POS_AH[x + j]);
+//            }
+//        }
+//        printf("\n");
+//    }
+}
 
 /*
  * From Beowulf, from Olithink () (via glaurung)

@@ -8,6 +8,7 @@ from Code import VarGen
 from Code import XGestorMotor
 from Code.Constantes import *
 
+
 class GestorTorneo(Gestor.Gestor):
     def inicio(self, torneo, liGames):
 

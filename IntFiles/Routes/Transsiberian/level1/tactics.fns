@@ -390,8 +390,8 @@ rnq1nrk1/ppp3pp/4p3/3Nb3/6B1/8/PPP3PP/R1BQ1RK1 w - - 0 14|FICS freechess.org (20
 r1b2rk1/ppq3p1/2p4p/4bB2/2PP4/P7/1PQ3PP/3R1RK1 w - - 0 20|FICS freechess.org (2008.03.18)<br><b>laotzi-Motyl</b>|20.Bh7+ Kh8 21.Rxf8#
 5rk1/R1R3p1/5q2/3pp3/1P3r1p/6QP/5P2/6K1 w - - 0 35|FICS freechess.org (2011.06.05)<br><b>aiwala-philverb</b>|35.Rxg7+ Kh8 36.Rh7#
 2b2rk1/3rR1p1/1p1P2Bp/2p5/q1P3Q1/2P5/6PP/4R1K1 w - - 3 30|FICS freechess.org (2009.12.16)<br><b>gaelleg-Lokeyx</b>|30.Bh7+ Kxh7 31.Qxg7#
-r1b2rk1/pp2nNp1/3b3p/q1p1p2Q/1nBpP3/3P2N1/PPPB1PPP/R3K2R w KQ - 3 12|FICS freechess.org (2008.03.09)<br><b>hangbuik-geroellheimer</b>|12.Nxh6+ Kh7 13.Ng4#
-5rk1/2P3p1/6B1/3R3P/P2P4/5PK1/8/8 w - - 3 48|FICS freechess.org (2012.06.26)<br><b>ChineseName-TheWeakInChess</b>|48.Rd8 Rxd8 49.cxd8=Q#
+r1b2rk1/pp2nNp1/3b3p/q1p1p2Q/1nBpP3/3P2N1/PPPB1PPP/R3K2R w KQ - 3 12|FICS freechess.org (2008.03.09)<br><b>hangbuik-geroellheimer</b>|12.Nxh6+ Kh7 13.Ng4# (13.Nhf5#)(13.Ng8#) 
+5rk1/2P3p1/6B1/3R3P/P2P4/5PK1/8/8 w - - 3 48|FICS freechess.org (2012.06.26)<br><b>ChineseName-TheWeakInChess</b>|48.Rd8 Rxd8 49.cxd8=Q# (49.cxd8=R#)
 2r2rk1/pp4pR/2b5/3pPpP1/2p5/2N1P3/PPP1B3/2K4R w - - 1 23|FICS freechess.org (2008.07.19)<br><b>hangbuik-sotanaht</b>|23.g6 d4 24.Rh8#
 1rb2rk1/5pp1/p1pNp1P1/4q3/8/5Q2/2PK2P1/3R3R w - - 0 22|FICS freechess.org (2009.09.25)<br><b>ShakaZahn-AnesJamak</b>|22.gxf7+ Rxf7 23.Qxf7#
 5rk1/5ppp/3Q4/4RP2/3R4/7P/2q1pnPK/8 w - - 0 35|FICS freechess.org (2008.07.23)<br><b>moonmaniac-chendo</b>|35.Qxf8+ Kxf8 36.Rd8#
@@ -403,37 +403,37 @@ r1b2rk1/pppp1ppp/1q6/7Q/2B5/2b5/PPP2PPP/3RR1K1 w - - 0 15|FICS freechess.org (20
 r4rk1/pp3ppp/1b2p3/8/2n1N1P1/3Q1P1R/qP2K3/7R w - - 0 26|FICS freechess.org (2011.10.07)<br><b>TheIllumined-bortkiew</b>|26.Nf6+ gxf6 27.Qxh7#
 5rk1/1ppb2p1/3p3p/pP1P2q1/P1P1B2R/2N3b1/2Q4P/5R1K w - - 0 31|FICS freechess.org (2008.07.05)<br><b>nepossiver-gigu</b>|31.Bh7+ Kh8 32.Rxf8#
 rn3rk1/p4pp1/1pp2PQp/8/2BP2q1/7P/P4P2/1RB2RK1 w - - 1 22|FICS freechess.org (2010.12.18)<br><b>spanksyou-siralofwo</b>|22.hxg4 b5 23.Qxg7#
-r4rk1/1b1q2p1/pp2p3/n2pPp1Q/P2P4/2P2N1R/1P4PP/R5K1 w - - 2 21|FICS freechess.org (2010.07.31)<br><b>Makan-moonloop</b>|21.Ng5 Qxa4 22.Qh7#
+r4rk1/1b1q2p1/pp2p3/n2pPp1Q/P2P4/2P2N1R/1P4PP/R5K1 w - - 2 21|FICS freechess.org (2010.07.31)<br><b>Makan-moonloop</b>|21.Ng5 Qxa4 22.Qh7# (22.Qh8#)
 1r2Rrk1/3Q1ppp/p7/3p4/2pP4/2P3bP/qP4P1/2B2R1K w - - 5 31|FICS freechess.org (2009.10.23)<br><b>robertoze-cloudinripple</b>|31.Qxf7+ Kh8 32.Qxf8#
-rnbq1rk1/p5p1/np2pp2/2p1P1PQ/3P4/P1N5/1P3PP1/R1B1K2R w KQ - 0 15|FICS freechess.org (2010.09.13)<br><b>BlindSmirdo-DukeAlbertNYC</b>|15.g6 fxe5 16.Qh7#
+rnbq1rk1/p5p1/np2pp2/2p1P1PQ/3P4/P1N5/1P3PP1/R1B1K2R w KQ - 0 15|FICS freechess.org (2010.09.13)<br><b>BlindSmirdo-DukeAlbertNYC</b>|15.g6 fxe5 16.Qh7# (16.Qh8#)
 5rk1/1q3ppp/8/1BQn4/P2P2b1/8/3B1PPP/4R1K1 w - - 3 30|FICS freechess.org (2011.09.13)<br><b>PawnDrone-raprap</b>|30.Qxf8+ Kxf8 31.Re8#
 2b2rk1/p1N3pp/p1N5/8/n7/8/P1P3PP/2K2R2 w - - 1 23|FICS freechess.org (2008.07.19)<br><b>SleauweJerke-hajo</b>|23.Ne7+ Kh8 24.Rxf8#
 r4rk1/pp4p1/4n1P1/3pP3/3P2Q1/8/q1PK4/3R3R w - - 1 30|FICS freechess.org (2009.06.12)<br><b>CoolTrain-JaiMan</b>|30.Qxe6+ Rf7 31.Qxf7#
 5rk1/pb4pp/2p1Rn2/qpB5/3P4/1Bn2Q2/P4PPP/4R1K1 w - - 0 23|FICS freechess.org (2008.03.13)<br><b>Rocato-FelixLassiter</b>|23.Rxf6+ Kh8 24.Rxf8#
 5rk1/5Npp/8/8/p2rP3/1Bp5/P1P3PP/5RK1 w - - 0 27|FICS freechess.org (2012.07.23)<br><b>Queribus-Sbetso</b>|27.Nh6+ Kh8 28.Rxf8#
 1r3rk1/q5pp/p3p3/3p4/2Pb4/3bNQN1/P2B1R1P/5RK1 w - - 2 30|FICS freechess.org (2009.08.22)<br><b>Kasparovzilla-picommander</b>|30.Qxf8+ Rxf8 31.Rxf8#
-2bR1rk1/2b2ppp/2N5/4N3/1p2n3/1P2B3/1P3PPP/6K1 w - - 0 24|FICS freechess.org (2008.11.19)<br><b>picommander-Lasambra</b>|24.Ne7+ Kh8 25.Rxf8#
-1r1q1rk1/2ppb1pR/bp2p1Q1/p4nP1/2PP4/8/PP3PP1/1K1R4 w - - 2 20|FICS freechess.org (2011.12.21)<br><b>zsoti-Hisaw</b>|20.Rdh1 Nxd4 21.Rxg7#
+2bR1rk1/2b2ppp/2N5/4N3/1p2n3/1P2B3/1P3PPP/6K1 w - - 0 24|FICS freechess.org (2008.11.19)<br><b>picommander-Lasambra</b>|24.Ne7+ Kh8 25.Rxf8# (25.Nxf7#)
+1r1q1rk1/2ppb1pR/bp2p1Q1/p4nP1/2PP4/8/PP3PP1/1K1R4 w - - 2 20|FICS freechess.org (2011.12.21)<br><b>zsoti-Hisaw</b>|20.Rdh1 Nxd4 21.Rxg7# (21.Rh8#)(21.Qxg7#)
 r4rk1/pb1nq1p1/3b2QR/1p1pn3/2pP4/P1P1P3/1PBN2PP/R1B3K1 w - - 0 21|FICS freechess.org (2009.08.26)<br><b>picko-zmzmzm</b>|21.Rh8+ Kxh8 22.Qh7#
 r4rk1/1bq1bppp/pn6/1pp1P3/4Nn2/1P1Q1N1P/PBB2PP1/3RR1K1 w - - 15 25|FICS freechess.org (2011.10.30)<br><b>Kamikazepawn-ilRenzo</b>|25.Nf6+ gxf6 26.Qxh7#
 Q4rk1/2pbRppp/p6q/1p6/3P3P/NBb3P1/P4P2/R5K1 w - - 2 21|FICS freechess.org (2008.11.30)<br><b>DarkBreed-vuhb</b>|21.Bxf7+ Kh8 22.Qxf8#
 1rb2rk1/p4ppp/2p5/4R3/3b4/1B3QPq/PP1N1P1P/R5K1 w - - 1 20|FICS freechess.org (2012.09.23)<br><b>XmYthZ-imdabeast</b>|20.Qxf7+ Rxf7 21.Re8#
 r1b2rk1/pp4p1/2n3Q1/3pPB2/5B2/2q5/P2NK3/R6R w - - 2 20|FICS freechess.org (2010.11.29)<br><b>picko-steghost</b>|20.Rh8+ Kxh8 21.Qh7#
 5rk1/4Qppp/1p6/pP1b4/3P4/5qP1/4R2P/4R1K1 w - - 6 33|FICS freechess.org (2009.12.24)<br><b>cssavwilliam-FisKaRov</b>|33.Qxf8+ Kxf8 34.Re8#
-rn1q1rk1/pb4p1/1p1ppp2/2p1P1PQ/3P4/2P5/PP1N1PP1/R3K2R w KQ - 0 15|FICS freechess.org (2008.07.15)<br><b>notkino-asianmonkeyhi</b>|15.g6 fxe5 16.Qh7#
+rn1q1rk1/pb4p1/1p1ppp2/2p1P1PQ/3P4/2P5/PP1N1PP1/R3K2R w KQ - 0 15|FICS freechess.org (2008.07.15)<br><b>notkino-asianmonkeyhi</b>|15.g6 fxe5 16.Qh7# (16.Qh8#)
 r1b2rkN/ppq1b1p1/1n2pp2/n6Q/2pP1P2/2P2R2/PP1N2PP/R1B3K1 w - - 4 19|FICS freechess.org (2009.06.19)<br><b>mariuss-AshleyJL</b>|19.Rh3 Qd8 20.Qh7#
 1qb1Qrk1/p5pp/2pP1P2/2p5/2p5/2B1P1K1/PP5P/3R4 w - - 3 35|FICS freechess.org (2012.03.15)<br><b>Tondini-Kamikazepawn</b>|35.f7+ Kh8 36.Qxf8#
 r1q2rk1/p4pp1/1pp5/4PNp1/8/5Q2/PPP5/3R1RK1 w - - 0 28|FICS freechess.org (2009.01.20)<br><b>smays-JaiMan</b>|28.Ne7+ Kh7 29.Qh5#
 r2b1rk1/5Rpp/8/2p1Q3/2B5/2BP4/P1P3PP/3q2K1 w - - 1 31|FICS freechess.org (2009.12.10)<br><b>MWell-manilovechess</b>|31.Rf1+ Kh8 32.Qxg7#
-5rk1/2q2Np1/p6p/1p1B3Q/2p1P3/2P1P2P/6P1/5nK1 w - - 0 31|FICS freechess.org (2012.07.06)<br><b>Justacountryboy-sakkjani</b>|31.Nxh6+ Kh7 32.Nf5#
+5rk1/2q2Np1/p6p/1p1B3Q/2p1P3/2P1P2P/6P1/5nK1 w - - 0 31|FICS freechess.org (2012.07.06)<br><b>Justacountryboy-sakkjani</b>|31.Nxh6+ Kh7 32.Nf5# (32.Ng4#)(32.Ng8#)
 r1b2rk1/1pp3pp/3qp3/5p2/p6Q/bP1B1P2/PBPP1P1P/2KR2R1 w - - 0 16|FICS freechess.org (2008.07.23)<br><b>Pawns-ReadyToRumble</b>|16.Rxg7+ Kh8 17.Qxh7#
 2r2rk1/pp1q1pp1/1bp4p/4B3/3P2b1/1B1Q4/PP3PPP/R4RK1 w - - 1 19|FICS freechess.org (2011.03.10)<br><b>ApocalypseSoon-Betin</b>|19.Qg6 Bxd4 20.Qxg7#
 5rk1/6pp/7q/2pN4/2P5/1P1b4/5QpP/4R1K1 w - - 0 31|FICS freechess.org (2012.08.03)<br><b>cjldx-teofilonestor</b>|31.Ne7+ Kh8 32.Qxf8#
 r4rk1/1bqpbppp/p3p3/1p2n1N1/1P2N3/P2Q4/1BP2PPP/R3R1K1 w - - 0 16|FICS freechess.org (2008.12.14)<br><b>purplepawns-Docman</b>|16.Nf6+ gxf6 17.Qxh7#
-5k2/8/2p1PPpP/p1p5/PpP1K3/8/8/8 w - - 1 57|FICS freechess.org (2010.10.04)<br><b>Valiantangel-vprimorac</b>|57.h7 b3 58.h8=Q#
+5k2/8/2p1PPpP/p1p5/PpP1K3/8/8/8 w - - 1 57|FICS freechess.org (2010.10.04)<br><b>Valiantangel-vprimorac</b>|57.h7 b3 58.h8=Q# (58.h8=R#)
 8/kPK5/3p4/3P4/8/4p3/8/8 w - - 0 60|FICS freechess.org (2009.11.17)<br><b>Geitebukk-delirioit</b>|60.b8=Q+ Ka6 61.Qb6#
-1k6/1p6/pKpPp1pp/P3P3/1P6/6PP/8/8 w - - 1 45|FICS freechess.org (2012.06.30)<br><b>penedepayaso-kqrxyibu</b>|45.d7 c5 46.d8=Q#
-6k1/2p1K2p/1p1p1P1P/p2Pp3/8/8/PPP5/8 w - - 0 39|FICS freechess.org (2011.12.07)<br><b>northridgehawk-kunde</b>|39.f7+ Kh8 40.f8=Q#
+1k6/1p6/pKpPp1pp/P3P3/1P6/6PP/8/8 w - - 1 45|FICS freechess.org (2012.06.30)<br><b>penedepayaso-kqrxyibu</b>|45.d7 c5 46.d8=Q# (46.d8=R#)
+6k1/2p1K2p/1p1p1P1P/p2Pp3/8/8/PPP5/8 w - - 0 39|FICS freechess.org (2011.12.07)<br><b>northridgehawk-kunde</b>|39.f7+ Kh8 40.f8=Q# (40.f8=R#)
 8/5p1P/4p3/k1P1P3/2K5/6p1/8/8 w - - 0 48|FICS freechess.org (2010.08.11)<br><b>batchelg-ivanst</b>|48.h8=Q g2 49.Qa8#
 5k2/3p1P2/1p4P1/4K3/2p5/8/8/8 w - - 0 55|FICS freechess.org (2009.12.20)<br><b>ramparashar-Rumbaut</b>|55.Kf6 c3 56.g7#
 8/8/5R2/6pk/8/2r4P/5KP1/8 w - - 10 45|FICS freechess.org (2012.07.30)<br><b>PawnsWizard-Vitsaus</b>|45.g4+ Kh4 46.Rh6#
@@ -443,10 +443,10 @@ r4rk1/1bqpbppp/p3p3/1p2n1N1/1P2N3/P2Q4/1BP2PPP/R3R1K1 w - - 0 16|FICS freechess.
 8/p6p/3R4/5K1k/8/8/P3p1PP/2r5 w - - 4 50|FICS freechess.org (2012.02.29)<br><b>chapss-klacer</b>|50.g4+ Kh4 51.Rh6#
 8/5pp1/pr2p1p1/R2p4/1P1P1P1k/2P2K2/6P1/8 w - - 0 31|FICS freechess.org (2012.09.14)<br><b>daxhot-Caerbannog</b>|31.Ra1 Rxb4 32.Rh1#
 7k/8/3N2KP/8/3b4/5P2/8/8 w - - 3 69|FICS freechess.org (2011.05.02)<br><b>biologist-innlay</b>|69.h7 Bb2 70.Nf7#
-5r1k/6pp/4Q2N/3pN3/8/4P3/q4PPP/5nK1 w - - 2 24|FICS freechess.org (2011.12.13)<br><b>CarlosBT-AshleyJL</b>|24.Qg8+ Rxg8 25.Nhf7#
+5r1k/6pp/4Q2N/3pN3/8/4P3/q4PPP/5nK1 w - - 2 24|FICS freechess.org (2011.12.13)<br><b>CarlosBT-AshleyJL</b>|24.Qg8+ Rxg8 25.Nhf7# (25.Nef7#)
 7k/7P/6K1/4P3/1pN5/1Bb5/8/8 w - - 1 71|FICS freechess.org (2008.05.21)<br><b>hydrapulse-NoPawnPlease</b>|71.Nd6 Bxe5 72.Nf7#
 r6k/ppb2Qnp/2p2Npq/2P2pN1/5Pb1/8/PP4PP/R4R1K w - - 8 29|FICS freechess.org (2010.11.21)<br><b>Mejvik-Linchong</b>|29.Qg8+ Rxg8 30.Nf7#
-7k/6R1/1n3B2/3p2N1/2p5/6P1/5rK1/8 w - - 0 40|FICS freechess.org (2012.02.21)<br><b>klacer-wmahan</b>|40.Kxf2 c3 41.Nf7#
+7k/6R1/1n3B2/3p2N1/2p5/6P1/5rK1/8 w - - 0 40|FICS freechess.org (2012.02.21)<br><b>klacer-wmahan</b>|40.Kxf2 c3 41.Nf7# (41.Rg6#)
 r1b2r1k/pp4pp/4q3/2PpN3/3PP3/1Q6/P5pP/1R3RK1 w - - 0 24|FICS freechess.org (2010.11.18)<br><b>evilcoyote-Freakothello</b>|24.Rxf8+ Qg8 25.Nf7#
 2r1r1k1/pp3R2/4N1p1/3PP1Np/2p5/6n1/PP4P1/2R1K3 w - - 0 28|FICS freechess.org (2012.05.06)<br><b>gbaltz-DragoGreen</b>|28.Rg7+ Kh8 29.Nf7#
 7k/8/6KP/2n3N1/8/8/8/8 w - - 0 81|FICS freechess.org (2008.05.25)<br><b>RedHyppo-spizzichino</b>|81.h7 Nb3 82.Nf7#

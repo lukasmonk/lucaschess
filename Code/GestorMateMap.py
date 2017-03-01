@@ -5,6 +5,7 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.Constantes import *
 
+
 class GestorMateMap(Gestor.Gestor):
     def inicio(self, workmap):
         self.workmap = workmap

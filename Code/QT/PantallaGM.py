@@ -18,6 +18,7 @@ from Code.QT import QTVarios
 from Code import Util
 from Code import VarGen
 
+
 class WGM(QTVarios.WDialogo):
     def __init__(self, procesador):
 
@@ -505,6 +506,7 @@ class WGM(QTVarios.WDialogo):
         self.bloqueApertura = None
         self.aperturaMuestra()
 
+
 def eligeJugada(gestor, liJugadas, siGM):
     menu = QTVarios.LCMenu(gestor.pantalla)
 
@@ -534,6 +536,7 @@ def eligeJugada(gestor, liJugadas, siGM):
     else:
         desde, hasta, coronacion, rotulo, pgn = liJugadas[0]
         return desde, hasta, coronacion
+
 
 class WImportar(QtGui.QDialog):
     def __init__(self, wParent, liGM):
@@ -588,6 +591,7 @@ class WImportar(QtGui.QDialog):
 
     def gridDato(self, grid, fila, oColumna):
         return self.liGM[fila][oColumna.clave]
+
 
 def importarGM(ownerGM):
     # Primero nos tenemos que traer la lista de la web
@@ -662,6 +666,7 @@ def importarGM(ownerGM):
         return True
 
     return False
+
 
 class SelectGame(QTVarios.WDialogo):
     def __init__(self, wgm, ogm):

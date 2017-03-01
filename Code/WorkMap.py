@@ -8,6 +8,7 @@ from Code import STS
 from Code import Util
 from Code import VarGen
 
+
 class RegWorkMap:
     def __str__(self):
         s = ""
@@ -28,6 +29,7 @@ class RegWorkMap:
     def _restore(self, dic):
         for k, v in dic.iteritems():
             setattr(self, k, v)
+
 
 def ld_countries(mapa):
     dicFiltros = {"Africa": ['gw', 'zm', 'ci', 'eh', 'cm', 'eg', 'cg', 'za', 'ao', 'cd', 'ga', 'gn', 'et', 'gm', 'zw', 'cv',
@@ -250,6 +252,7 @@ def ld_countries(mapa):
     dic = {alm.iso: alm for alm in lista}
     return dic
 
+
 class DBWorkMap(SQLBase.DBBase):
     trDic = {"mate": _("Mate"),
              "sts": _("STS"),
@@ -363,6 +366,7 @@ class DBWorkMap(SQLBase.DBBase):
             if d["ACTIVE"] == "X":
                 return d["TIPO"]
         return ""
+
 
 class WorkMap:
     def __init__(self, mapa):

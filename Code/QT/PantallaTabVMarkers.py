@@ -19,6 +19,7 @@ from Code import TabVisual
 from Code import Util
 from Code import VarGen
 
+
 class WTV_Marker(QtGui.QDialog):
     def __init__(self, owner, regMarker, xml=None, nombre=None):
 
@@ -121,6 +122,7 @@ class WTV_Marker(QtGui.QDialog):
 
         self.regMarker = regMarker
         self.accept()
+
 
 class WTV_Markers(QTVarios.WDialogo):
     def __init__(self, owner, listaMarkers, dbMarkers):

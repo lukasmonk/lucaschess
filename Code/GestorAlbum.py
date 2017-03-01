@@ -4,6 +4,7 @@ from Code import Jugada
 from Code.QT import QTUtil2
 from Code.Constantes import *
 
+
 class GestorAlbum(Gestor.Gestor):
     def inicio(self, album, cromo, aplazamiento=None):
 

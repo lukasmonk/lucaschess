@@ -14,6 +14,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.Constantes import *
 
+
 class GestorEntTac(Gestor.Gestor):
     def inicio(self, tactica, posSiguiente=None):
 

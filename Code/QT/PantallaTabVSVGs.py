@@ -56,6 +56,7 @@ estrellaSVG = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
   </g>
 </svg>"""
 
+
 class WTV_SVG(QtGui.QDialog):
     def __init__(self, owner, regSVG, xml=None, nombre=None):
 
@@ -152,6 +153,7 @@ class WTV_SVG(QtGui.QDialog):
         self.regSVG.png = str(bf.buffer())
 
         self.accept()
+
 
 class WTV_SVGs(QTVarios.WDialogo):
     def __init__(self, owner, listaSVGs, dbSVGs):

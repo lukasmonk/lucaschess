@@ -14,6 +14,7 @@ from Code import TrListas
 from Code import VarGen
 from Code.Constantes import *
 
+
 class ConjuntoPiezas:
     def __init__(self, nombre):
         self.nombre = nombre
@@ -48,8 +49,20 @@ class ConjuntoPiezas:
         painter.begin(pm)
         render.render(painter)
         painter.end()
-
         return pm
+
+    def label(self, owner, pieza, tam):
+        pm = self.pixmap(pieza, tam)
+        lb = Controles.LB(owner)
+        lb.ponImagen(pm)
+        lb.pieza = pieza
+        lb.tam_pieza = tam
+        return lb
+
+    def change_label(self, lb, tam):
+        if lb.tam_pieza <> tam:
+            pm = self.pixmap(lb.pieza, tam)
+            lb.ponImagen(pm)
 
     def icono(self, pieza):
         icon = QtGui.QIcon(self.pixmap(pieza, 32))
@@ -57,6 +70,7 @@ class ConjuntoPiezas:
 
     def cursor(self, pieza):
         return QtGui.QCursor(self.pixmap(pieza))
+
 
 class TodasPiezas:
     def __init__(self):
@@ -92,6 +106,7 @@ class TodasPiezas:
 
 HIDE, GREY, CHECKER, SHOW = range(4)
 
+
 class BlindfoldConfig:
     def __init__(self, nomPiezasOri, dicPiezas=None):
         self.nomPiezasOri = nomPiezasOri
@@ -126,6 +141,7 @@ class BlindfoldConfig:
 
     def save(self):
         VarGen.configuracion.escVariables("BLINDFOLD", self.dicPiezas)
+
 
 class Blindfold(ConjuntoPiezas):
     def __init__(self, nomPiezasOri, tipo=kBlindfoldConfig):
@@ -170,6 +186,7 @@ class Blindfold(ConjuntoPiezas):
                 shutil.copy(ori, dest)
 
         self.dicPiezas = self.leePiezas()
+
 
 class WBlindfold(QTVarios.WDialogo):
     def __init__(self, owner, nomPiezasOri):

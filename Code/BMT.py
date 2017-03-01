@@ -2,6 +2,7 @@ import copy
 
 import Code.SQL.Base as SQLBase
 
+
 class BMT(SQLBase.DBBase):
     def __init__(self, nomFichero):
         SQLBase.DBBase.__init__(self, nomFichero)
@@ -35,6 +36,7 @@ class BMT(SQLBase.DBBase):
         if self.conexion:
             self.conexion.close()
             self.conexion = None
+
 
 class BMT_Uno:
     def __init__(self, fen, mrm, maxPuntos, clpartida):
@@ -80,6 +82,7 @@ class BMT_Uno:
             if rm.siPrimero:
                 return rm
         return None
+
 
 class BMT_Lista:
     def __init__(self):

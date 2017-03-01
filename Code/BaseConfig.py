@@ -11,6 +11,7 @@ from Code import Util
 from Code import VarGen
 from Code.Constantes import *
 
+
 class Grupo:
     def __init__(self, nombre, desde, hasta, minPuntos, liRivales):
         self.nombre = nombre
@@ -28,6 +29,7 @@ class Grupo:
     def limpia(self):
         for cm in self.liRivales:
             cm.limpia()
+
 
 class Grupos:
     def __init__(self, conf):
@@ -62,6 +64,7 @@ class Grupos:
     def limpia(self):
         for g in self.liGrupos:
             g.limpia()
+
 
 class Categoria:
     def __init__(self, clave, c_icono, ayudas, sinAyudasFinal, valorPuntos):
@@ -107,6 +110,7 @@ class Categoria:
     def limpia(self):
         self.nivelHecho = 0
         self.hecho = ""
+
 
 class Categorias:
     def __init__(self):
@@ -187,6 +191,7 @@ class Categorias:
                 return maxNivel, hecho, puntos
             maxNivel = cat.nivelHecho
 
+
 class ConfigMotorBase:
     def __init__(self, clave, autor, version):
         self.clave = clave
@@ -212,6 +217,12 @@ class ConfigMotorBase:
     def ordenUCI(self, comando, valor):
         self.liUCI.append((comando, valor))
 
+    def removeUCI(self, del_comando):
+        for n, (comando, valor) in enumerate(self.liUCI):
+            if comando == del_comando:
+                del self.liUCI[n]
+                return
+
     def winboard(self):
         self.siUCI = False
 
@@ -231,6 +242,7 @@ class ConfigMotorBase:
 
     def puedeSerTutor(self):
         return self.maxMultiPV >= 10
+
 
 class ConfigMotor(ConfigMotorBase):
     def __init__(self, clave, autor, version, url, carpeta=None):
@@ -272,8 +284,7 @@ class ConfigMotor(ConfigMotorBase):
 
     def ejecutable(self):
         self.test_bmi2()
-        tipo = "Linux" if VarGen.isLinux else "Windows"
-        return "./Engines/%s/%s/%s" % (tipo, self.carpeta, self.path)
+        return "%s/%s/%s" % (VarGen.folder_engines, self.carpeta, self.path)
 
     def puntuacion(self):
         return self.categorias.puntuacion()
@@ -296,6 +307,7 @@ class ConfigMotor(ConfigMotorBase):
 
     def clona(self):
         return copy.deepcopy(self)
+
 
 class ConfigTabTema:
     def __init__(self):
@@ -483,6 +495,7 @@ class ConfigTabTema:
         ct.lee(self.graba())
         return ct
 
+
 class ConfigTabBase:
     def __init__(self):
         self.inicio()
@@ -536,6 +549,7 @@ class ConfigTabBase:
         ct = ConfigTabBase()
         ct.lee(self.graba())
         return ct
+
 
 class ConfigTablero:
     def __init__(self, ident, anchoPieza, padre="BASE"):

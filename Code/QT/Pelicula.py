@@ -2,6 +2,7 @@ from Code.QT import FormLayout
 from Code.QT import Iconos
 from Code.Constantes import *
 
+
 def paramPelicula(configuracion, parent):
 
     nomVar = "PARAMPELICULA"
@@ -34,6 +35,7 @@ def paramPelicula(configuracion, parent):
         return segundos, siPrincipio, siPGN
     else:
         return None
+
 
 class Pelicula:
     def __init__(self, gestor, segundos, siInicio, siPGN):
@@ -130,6 +132,8 @@ class Pelicula:
         self.tablero.ponPosicion(jg.posicion)
 
         # self.gestor.pgnMueve( fila, jg.posicion.siBlancas )
+
+        self.gestor.ponVista()
 
         cpu.reset()
         cpu.duerme(self.segundos / self.rapidez)

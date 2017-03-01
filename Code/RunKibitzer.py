@@ -27,6 +27,7 @@ FEN = "F"
 TERMINAR = "T"
 COPYCLIPBOARD = "P"
 
+
 class VentanaMultiPV(QtGui.QDialog):
     def __init__(self, cpu):
         QtGui.QDialog.__init__(self)
@@ -255,7 +256,6 @@ class VentanaMultiPV(QtGui.QDialog):
             QTUtil.ponPortapapeles(resp)
             QTUtil2.mensajeTemporal(self, _("The line selected is saved to the clipboard"), 0.7)
 
-
     def guardarVideo(self):
         dic = {}
 
@@ -469,6 +469,7 @@ class VentanaMultiPV(QtGui.QDialog):
             self.ready_ok("stop")
             self.runOrdenes()
         self.grid.refresh()
+
 
 class Ventana(QtGui.QDialog):
     def __init__(self, cpu, siWidgets=True, flags=None):
@@ -930,6 +931,7 @@ class Ventana(QtGui.QDialog):
             self.guardarVideo()
         self.play()
 
+
 class VentanaSiguiente(Ventana):
     def creaRestoControles(self):
         layout = Colocacion.V().control(self.tb).otro(self.layoutDT).margen(1)
@@ -986,6 +988,7 @@ class VentanaSiguiente(Ventana):
             self.em.ponHtml("")
             self.ready_ok("stop")
             self.runOrdenes()
+
 
 class VentanaJugadas(Ventana):
     def creaRestoControles(self):
@@ -1176,6 +1179,7 @@ class VentanaJugadas(Ventana):
         self.emJug.ponHtml(txt)
         self.em.ponHtml("")
 
+
 class VentanaIndices(Ventana):
     def __init__(self, cpu):
         Ventana.__init__(self, cpu, False)
@@ -1313,6 +1317,7 @@ class VentanaIndices(Ventana):
 
         self.lock = False
 
+
 class EDP(Controles.ED):
     def ponHtml(self, txt):
         self.setText(txt)
@@ -1321,6 +1326,7 @@ class EDP(Controles.ED):
 
     def html(self):
         return self.text()
+
 
 class VentanaLinea(Ventana):
     def __init__(self, cpu):
@@ -1443,6 +1449,7 @@ class VentanaLinea(Ventana):
             self.motor.close()
             self.motor = None
 
+
 class VentanaStockfishEval(Ventana):
     def __init__(self, cpu):
         Ventana.__init__(self, cpu, False)
@@ -1526,11 +1533,13 @@ class VentanaStockfishEval(Ventana):
 
         self.lock = False
 
+
 class Orden:
     def __init__(self):
         self.clave = ""
         self.titulo = ""
         self.dv = {}
+
 
 class CPU:
     def __init__(self, fdb):
@@ -1628,6 +1637,7 @@ class CPU:
         QTUtil.refreshGUI()
 
         return True
+
 
 def run(fdb):
     ferr = open("./bug.kibitzer", "at")

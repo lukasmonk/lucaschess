@@ -9,7 +9,6 @@ from Code import VarGen
 
 DGT_ON = "DGT.ON"
 
-# Interface
 
 def activarSegunON_OFF(dispatch):
     if siON():
@@ -25,22 +24,27 @@ def activarSegunON_OFF(dispatch):
             desactivar()
     return True
 
+
 def siON():
     return Util.existeFichero(DGT_ON)
+
 
 def ponON():
     f = open(DGT_ON, "wb")
     f.write("act")
     f.close()
 
+
 def ponOFF():
     Util.borraFichero(DGT_ON)
+
 
 def cambiarON_OFF():
     if siON():
         Util.borraFichero(DGT_ON)
     else:
         ponON()
+
 
 def envia(quien, dato):
     # log( "[%s] : [%s]"%( quien, dato ) )
@@ -49,12 +53,15 @@ def envia(quien, dato):
         return VarGen.dgtDispatch(quien, dato)
     return 1
 
+
 def ponPosicion(partida):
     if VarGen.dgt:
         writePosition(partida.ultPosicion.fenDGT())
 
+
 def quitarDispatch():
     VarGen.dgtDispatch = None
+
 
 def log(cad):
     log = open("dgt.log", "ab")
@@ -63,27 +70,35 @@ def log(cad):
 
 # CALLBACKS
 
+
 def registerStatusFunc(dato):
     envia("status", dato)
     return 1
+
 
 def registerScanFunc(dato):
     envia("scan", _dgt2fen(dato))
     return 1
 
+
 def registerWhiteMoveInputFunc(dato):
     return envia("whiteMove", _dgt2pv(dato))
+
 
 def registerBlackMoveInputFunc(dato):
     return envia("blackMove", _dgt2pv(dato))
 
 # Activar/desactivar/reactivar
 
+
 def activar():
     dgt = None
     for path in ("",
                  "C:/Program Files (x86)/DGT Projects/",
-                 "C:/Program Files (x86)/Common Files/DGT Projects/"):
+                 "C:/Program Files (x86)/Common Files/DGT Projects/",
+                 "C:/Program Files/DGT Projects/"
+                 "C:/Program Files/Common Files/DGT Projects/",
+                 ):
         try:
             dgt = ctypes.WinDLL(path + "DGTEBDLL.dll")
             break
@@ -134,6 +149,7 @@ def activar():
     dgt._DGTDLL_SetNRun.restype = ctypes.c_int
     return True
 
+
 def desactivar():
     if VarGen.dgt:
         # log( "desactivar" )
@@ -144,20 +160,24 @@ def desactivar():
 
 # Funciones directas en la DGT
 
+
 def showDialog():
     if VarGen.dgt:
         dgt = VarGen.dgt
         dgt._DGTDLL_ShowDialog(ctypes.c_int(1))
+
 
 def hideDialog():
     if VarGen.dgt:
         dgt = VarGen.dgt
         dgt._DGTDLL_HideDialog(ctypes.c_int(1))
 
+
 def writeDebug(activar):
     if VarGen.dgt:
         dgt = VarGen.dgt
         dgt._DGTDLL_WriteDebug(activar)
+
 
 def writePosition(cposicion):
     if VarGen.dgt:
@@ -165,12 +185,14 @@ def writePosition(cposicion):
         dgt = VarGen.dgt
         dgt._DGTDLL_WritePosition(cposicion)
 
+
 def writeClocks(wclock, bclock):
     if VarGen.dgt:
         dgt = VarGen.dgt
         dgt._DGTDLL_SetNRun(wclock, bclock, 0)
 
 # Utilidades para la trasferencia de datos
+
 
 def _dgt2fen(dato):
     n = 0
@@ -209,6 +231,7 @@ def _dgt2fen(dato):
         caja[7] += str(8 - ntam)
     return "/".join(caja)
 
+
 def _dgt2pv(dato):
     # Coronacion
     if dato[0] in "Pp" and dato[3].lower() != "p":
@@ -217,6 +240,7 @@ def _dgt2pv(dato):
     return dato[1:3] + dato[4:6]
 
 # Lo mismo, de otra forma
+
 
 def xdgt2fen(xdgt):
     liD = xdgt.split(" ")
@@ -260,6 +284,7 @@ def xdgt2fen(xdgt):
         lir.append(act)
     liD[0] = "/".join(lir)
     return " ".join(liD)
+
 
 def fen2xdgt(fen):
     li = fen.split(" ")

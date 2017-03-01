@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 gcc -Wall -fPIC -O3 -c lc.c board.c data.c eval.c hash.c loop.c makemove.c movegen.c movegen_piece_to.c search.c test.c util.c pgn.c -DNDEBUG
 gcc -shared -o ../libirina.so lc.o board.o data.o eval.o hash.o loop.o makemove.o movegen.o movegen_piece_to.o search.o test.o util.o pgn.o
 rm *.o

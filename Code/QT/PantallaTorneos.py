@@ -22,7 +22,8 @@ from Code import Torneo
 from Code import Util
 from Code import VarGen
 from Code import XRun
-from Code import XVoyager
+from Code.QT import Voyager
+
 
 class WResult(QTVarios.WDialogo):
     def __init__(self, wParent, torneo, torneoTMP, gestor):
@@ -125,6 +126,7 @@ class WResult(QTVarios.WDialogo):
         self.guardarVideo()
         self.close()
 
+
 class WUnTorneo(QTVarios.WDialogo):
     def __init__(self, wParent, torneo):
 
@@ -189,7 +191,7 @@ class WUnTorneo(QTVarios.WDialogo):
                 self.btPosicionPegar).relleno()
 
         # Norman Pollock
-        lbNorman = Controles.LB(self, '%s(<a href="http://www.hoflink.com/~npollock/40H.html">?</a>): ' %
+        lbNorman = Controles.LB(self, '%s(<a href="https://komodochess.com/pub/40H-pgn-utilities">?</a>): ' %
                                 _("Initial position from Norman Pollock openings database"))
         self.chbNorman = Controles.CHB(self, " ", self.torneo.norman())
 
@@ -322,7 +324,7 @@ class WUnTorneo(QTVarios.WDialogo):
         self.btPosicion.ponTexto(rotulo)
 
     def posicionEditar(self):
-        resp = XVoyager.xVoyagerFEN(self, self.configuracion, self.fen)
+        resp = Voyager.voyagerFEN(self, self.fen)
         if resp is not None:
             self.fen = resp
             self.muestraPosicion()
@@ -746,6 +748,7 @@ class WUnTorneo(QTVarios.WDialogo):
             w = PantallaSavePGN.WSave(self, pgn, self.configuracion)
             w.exec_()
 
+
 class WTorneos(QTVarios.WDialogo):
     def __init__(self, wParent):
 
@@ -878,12 +881,14 @@ class WTorneos(QTVarios.WDialogo):
                     self.grid.refresh()
                     return
 
+
 def torneos(parent):
     w = WTorneos(parent)
     if w.exec_():
         return w.verSiJugar()
     else:
         return None
+
 
 def unTorneo(parent, torneo):
     w = WUnTorneo(parent, torneo)

@@ -258,7 +258,7 @@ def leeRivales():
     cm.ponMultiPV(20, 64)
     mas(cm)
 
-    cm = ConfigMotor("irina", "Lucas Monge", "0.13", "")
+    cm = ConfigMotor("irina", "Lucas Monge", "0.15", "")
     cm.path = "irina.exe"
     cm.elo = 1200
     mas(cm)

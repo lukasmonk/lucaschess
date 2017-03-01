@@ -18,7 +18,6 @@ from Code.QT import Iconos
 from Code.QT import PantallaAnalisis
 from Code.QT import PantallaArbol
 from Code.QT import PantallaArbolBook
-from Code.QT import PantallaColores
 from Code.QT import PantallaSavePGN
 from Code.QT import PantallaTutor
 from Code.QT import Pelicula
@@ -31,6 +30,7 @@ from Code import VarGen
 from Code import XKibitzers
 from Code import XRun
 from Code.Constantes import *
+
 
 class Gestor:
     def __init__(self, procesador):
@@ -688,7 +688,7 @@ class Gestor:
             nj -= 1
         return numJugadas, nj, fila, siBlancas
 
-    def pgnInformacion(self, fila, clave):
+    def pgnInformacion(self):
         if self.informacionActivable:
             self.pantalla.activaInformacionPGN()
             self.ponVista()
@@ -765,7 +765,7 @@ class Gestor:
         elif siAlt:
             self.nonDistract = self.pantalla.base.nonDistractMode(self.nonDistract)
         else:
-            self.pgnInformacion(None, None)
+            self.pgnInformacion()
         self.pantalla.ajustaTam()
 
     def boardRightMouse(self, siShift, siControl, siAlt):
@@ -881,7 +881,7 @@ class Gestor:
             return
 
         # siShift, siControl, siAlt = QTUtil.kbdPulsado() # Antes de que analice
-        jg, siBlancas, siUltimo, tam_lj, pos = self.dameJugadaEn(fila, clave)
+        jg, siBlancas, siUltimo, tam_lj, pos_jg = self.dameJugadaEn(fila, clave)
         if not jg:
             return
 
@@ -892,22 +892,48 @@ class Gestor:
                         (self.tipoJuego in [kJugElo, kJugMicElo] and not self.siCompetitivo)):
                 if siUltimo or self.ayudas == 0:
                     return
-                maxRecursion = tam_lj - pos - 3  # %#
+                maxRecursion = tam_lj - pos_jg - 3  # %#
             else:
                 maxRecursion = 9999
 
         if not (hasattr(jg, "analisis") and jg.analisis):
             me = QTUtil2.mensEspera.inicio(self.pantalla, _("Analyzing the move...."), posicion="ad")
-            mrm, pos = self.xtutor.analizaJugada(jg, self.xtutor.motorTiempoJugada, self.xtutor.motorProfundidad)
+            mrm, pos = self.xtutor.analizaJugadaPartida(self.partida, pos_jg, self.xtutor.motorTiempoJugada, self.xtutor.motorProfundidad)
             jg.analisis = mrm, pos
             me.final()
 
-        Analisis.muestraAnalisis(self.procesador, self.xtutor, jg, self.tablero.siBlancasAbajo, maxRecursion, pos)
+        Analisis.muestraAnalisis(self.procesador, self.xtutor, jg, self.tablero.siBlancasAbajo, maxRecursion, pos_jg)
         self.ponVista()
 
     def analizar(self):
         Analisis.analizaPartida(self)
         self.refresh()
+
+    def borrar(self):
+        separador = FormLayout.separador
+        li_del = [separador]
+        li_del.append(separador)
+        li_del.append((_("Variants") + ":", False))
+        li_del.append(separador)
+        li_del.append((_("Ratings") + ":", False))
+        li_del.append(separador)
+        li_del.append((_("Comments") + ":", False))
+        li_del.append(separador)
+        li_del.append((_("Analysis") + ":", False))
+        resultado = FormLayout.fedit(li_del, title=_("Remove"), parent=self.pantalla, icon=Iconos.Delete())
+        if resultado:
+            variants, ratings, comments, analysis = resultado[1]
+            for jg in self.partida.liJugadas:
+                if variants:
+                    jg.variantes = ""
+                if ratings:
+                    jg.critica = ""
+                    jg.criticaDirecta = ""
+                if comments:
+                    jg.comentario = ""
+                if analysis:
+                    jg.analisis = None
+            self.refresh()
 
     def cambiaRival(self, nuevo):
         self.procesador.cambiaRival(nuevo)
@@ -1091,8 +1117,6 @@ class Gestor:
         menuVista.opcion("vista_pgn", _("PGN information"), Iconos.InformacionPGNUno())
         menuVista.separador()
         menuVista.opcion("vista_capturas", _("Captured material"), Iconos.Capturas())
-        menuVista.separador()
-        menuVista.opcion("vista_colorpgn", _("Colors") + " - " + _("PGN"), Iconos.Temas())
         menu.separador()
 
         # DGT
@@ -1163,9 +1187,6 @@ class Gestor:
                 elif resp == "capturas":
                     self.pantalla.activaCapturas()
                     self.ponVista()
-                elif resp == "colorpgn":
-                    PantallaColores.cambiaColoresPGN(self.pantalla, self.configuracion)
-                    self.pantalla.base.pgnRefresh()
 
             elif resp == "dgt":
                 DGT.cambiarON_OFF()
@@ -1208,7 +1229,7 @@ class Gestor:
         liSon.append(separador)
         liSon.append((_("Activate sounds with our moves") + ":", self.configuracion.siSuenaNuestro))
         liSon.append(separador)
-        resultado = FormLayout.fedit(liSon, title=_("Sounds"), parent=self.pantalla, anchoMinimo=200,
+        resultado = FormLayout.fedit(liSon, title=_("Sounds"), parent=self.pantalla, anchoMinimo=250,
                                      icon=Iconos.S_Play())
         if resultado:
             self.configuracion.siSuenaBeep, self.configuracion.siSuenaResultados, \
@@ -1283,6 +1304,9 @@ class Gestor:
                     submenu.opcion("analizar_grafico", _("Show graphics"), Iconos.Estadisticas())
                 menu.separador()
 
+                menu.opcion("borrar", _("Remove"), Iconos.Delete())
+                menu.separador()
+
         # Pelicula
         if siJugadas:
             menu.opcion("pelicula", _("Replay game"), Iconos.Pelicula())
@@ -1346,6 +1370,9 @@ class Gestor:
         elif resp == "analizar_grafico":
             self.showAnalisis()
 
+        elif resp == "borrar":
+            self.borrar()
+
         elif resp == "pelicula":
             self.pelicula()
 
@@ -1375,7 +1402,7 @@ class Gestor:
         elif resp == "pgnfichero":
             self.salvaPGN()
 
-        elif resp.startswith("fen") or resp.starswith("fns"):
+        elif resp.startswith("fen") or resp.startswith("fns"):
             extension = resp[:3]
             si_fichero = resp.endswith("fichero")
             self.salvaFEN_FNS(extension, si_fichero)

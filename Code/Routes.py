@@ -5,6 +5,7 @@ import random
 from Code import Partida
 from Code import Util
 
+
 class Reg:
     pass
 
@@ -12,8 +13,10 @@ PLAYING, BETWEEN, ENDING, ENDED = range(4)
 KM_TACTIC = 5
 C_MILES = 1.609344
 
+
 def km_mi(km, is_miles):
     return "%0.0f %s" % (float(km) / C_MILES, _("mi")) if is_miles else "%d %s" % (km, _("km"))
+
 
 class Station:
     def __init__(self, km, name, xpos):
@@ -35,6 +38,7 @@ class Station:
     @property
     def name(self):
         return self._name
+
 
 class Line:
     def __init__(self, st_from, stage):
@@ -86,6 +90,7 @@ class Line:
 
     def km_done(self, km_tot):
         return km_tot - self._st_from.km
+
 
 class Transsiberian:
     def __init__(self, configuracion):

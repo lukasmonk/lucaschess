@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui
 
 from Code.QT import TabBloques
 
+
 class MarcoSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueMarco, rutinaPulsada=None):
 

@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 from Code.QT import TabBloques
 
+
 class FlechaSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueFlecha, rutinaPulsada=None):
 
@@ -188,6 +189,7 @@ class FlechaSC(TabBloques.BloqueEspSC):
         if resp:
             self.poligonoSizeBottom, self.poligonoMove, self.poligonoSizeTop = resp
 
+
 def paintArrow(painter, bf):
     posicion = bf.posicion
     dx = posicion.x
@@ -321,6 +323,7 @@ def paintArrow(painter, bf):
                 painter.drawPolygon(
                         QtGui.QPolygonF([p_base1, p_basecab, p_ala1, p_fin, p_ala2, p_basecab, p_base2, p_base1]))
     return poligonoSizeBottom, poligonoMove, poligonoSizeTop
+
 
 def pixmapArrow(bf, width, height):
     bf = copy.deepcopy(bf)

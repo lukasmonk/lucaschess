@@ -19,6 +19,7 @@ from Code import TrListas
 from Code import Util
 from Code import VarGen
 
+
 class MesaSonido(QtGui.QGraphicsView):
     def __init__(self, parent):
         QtGui.QGraphicsView.__init__(self)
@@ -139,6 +140,7 @@ class MesaSonido(QtGui.QGraphicsView):
     def activaEdicion(self, siActivar):
         for x in (self.txtActual, self.txtFinal, self.txtInicio):
             x.activa(siActivar)
+
 
 class WEdicionSonido(QTVarios.WDialogo):
     ks_aceptar, ks_cancelar, ks_microfono, ks_wav, ks_play, ks_stopplay, \
@@ -369,12 +371,14 @@ class WEdicionSonido(QTVarios.WDialogo):
 
         self.ponBaseTB()
 
+
 def editaSonido(owner, titulo, wav):
     w = WEdicionSonido(owner, titulo, wav)
     if w.exec_():
         return w.wav, w.centesimas
     else:
         return None
+
 
 class WSonidos(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -540,6 +544,7 @@ class WSonidos(QTVarios.WDialogo):
         # for c in "abcdefgh":
         # for f in "12345678":
         # self.liSonidos.append( [ c+f, c+f, None ] )
+
 
 class WSonidosGuion(QTVarios.WDialogo):
     def __init__(self, owner, db):

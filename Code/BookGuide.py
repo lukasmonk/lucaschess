@@ -14,6 +14,7 @@ import Code.SQL.DBF as SQLDBF
 from Code import Util
 from Code import VarGen
 
+
 class UnMove:
     def __init__(self, bookGuide, father):
         self.bookGuide = bookGuide
@@ -249,6 +250,7 @@ class UnMove:
             return
         self.readedEXT = True
         self.bookGuide.readEXT(self)
+
 
 class BookGuide:
     def __init__(self, wowner, nomFichero=None):
@@ -492,9 +494,11 @@ class BookGuide:
         dbf = SQLDBF.DBF(self.conexion, self.tablaDatos, select)
         dnag = {"!!": 3, "!": 1, "?": 2, "??": 4, "!?": 5, "?!": 6}
 
-        for n, g in enumerate(PGNreader.readGames(ficheroPGN)):
+        n = 0
+        liReg = []
 
-            if not dlTmp.actualiza(n + 1, erroneos, duplicados, importados):
+        for n, g in enumerate(PGNreader.readGames(ficheroPGN), 1):
+            if not dlTmp.actualiza(n, erroneos, duplicados, importados):
                 break
             if g.erroneo:
                 erroneos += 1
@@ -858,6 +862,7 @@ class BookGuide:
         uno(rt)
 
         return liT
+
 
 class DBanalisis:
     def __init__(self):

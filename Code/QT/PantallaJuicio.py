@@ -13,6 +13,7 @@ from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code import Util
 
+
 class WJuicio(QTVarios.WDialogo):
     def __init__(self, gestor, xmotor, nombreOP, posicion, mrm, rmOP, rmUsu, analisis, siCompetitivo=None):
         self.siCompetitivo = gestor.siCompetitivo if siCompetitivo is None else siCompetitivo
@@ -254,6 +255,7 @@ class WJuicio(QTVarios.WDialogo):
         jg = self.partida.jugada(self.posMueve)
         pts = self.listaRM[self.grid.recno()].rm.texto()
         Analisis.AnalisisVariantes(self, self.xmotor, jg, self.posicion.siBlancas, pts)
+
 
 class MensajeF(QtGui.QDialog):
     def __init__(self, parent, mens):

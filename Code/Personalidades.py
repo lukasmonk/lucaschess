@@ -5,6 +5,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.Constantes import *
 
+
 class Personalidades:
     def __init__(self, owner, configuracion):
         self.owner = owner

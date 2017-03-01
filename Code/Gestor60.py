@@ -11,6 +11,7 @@ from Code.QT import QTUtil2
 from Code import Util
 from Code.Constantes import *
 
+
 class Control60:
     def __init__(self, gestor, siJugador):
 
@@ -84,6 +85,7 @@ class Control60:
             self.guardar()
 
         return mensaje, siRecord
+
 
 class Gestor60(Gestor.Gestor):
     def inicio(self, siJugador):
@@ -281,5 +283,5 @@ class Gestor60(Gestor.Gestor):
 
         self.pantalla.base.pgn.goto(fila, 0)
 
-    def pgnInformacion(self, fila, clave):
+    def pgnInformacion(self):
         pass  # Para anular el efecto del boton derecho

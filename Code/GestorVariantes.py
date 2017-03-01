@@ -8,6 +8,7 @@ from Code.QT import Iconos
 from Code import Util
 from Code.Constantes import *
 
+
 class GestorVariantes(Gestor.Gestor):
     def inicio(self, fen, lineaPGN, okMasOpciones, siBlancasAbajo, siEngineActivo=False, siCompetitivo=False):
 

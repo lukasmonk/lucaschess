@@ -12,6 +12,7 @@ import Code.SQL.Base as SQLBase
 from Code import Util
 from Code.Constantes import *
 
+
 class GestorPGN(Gestor.Gestor):
     def inicio(self, opcion):
         self.tipoJuego = kJugPGN

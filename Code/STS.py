@@ -5,6 +5,7 @@ from Code import MotoresExternos
 from Code import Util
 from Code import VarGen
 
+
 class Elem:
     def __init__(self, linea):
         self._fen, results = linea.strip().split("|")
@@ -45,6 +46,7 @@ class Elem:
                 xpt = pt
         return xpt, xa1h8
 
+
 class Group:
     def __init__(self, name, lines):
         self._name = name
@@ -63,6 +65,7 @@ class Group:
     def points(self, nelem, a1h8):
         elem = self._liElem[nelem]
         return elem.points(a1h8)
+
 
 class Groups:
     def __init__(self, txt=None):
@@ -99,6 +102,7 @@ class Groups:
     def fen(self, ngroup, nfen):
         return self.lista[ngroup].element(nfen)
 
+
 class ResultGroup:
     def __init__(self):
         self._dicElem = {}
@@ -127,6 +131,7 @@ class ResultGroup:
             tt += t
             tp += p
         return tt, tp
+
 
 class Results:
     def __init__(self, ngroups):
@@ -158,12 +163,13 @@ class Results:
     def resoultGroup(self, ngroup):
         return self._liResultGroups[ngroup]
 
+
 class Work:
     def __init__(self, ngroups):
         self.me = None
         self.ref = ""
         self.info = ""
-        self.seconds = 0
+        self.seconds = 0.0
         self.depth = 3
         self.ini = 0
         self.end = 99
@@ -233,10 +239,14 @@ class Work:
     def configEngine(self):
         return MotoresExternos.ConfigMotor(self.me)
 
+    def pathToExe(self):
+        return self.me.exe
+
     def setResult(self, ngroup, nfen, a1h8, ts):
         resoultGroup = self.results.resoultGroup(ngroup)
         resoultGroup.elem(nfen, a1h8)
         self.workTime += ts
+
 
 class Works:
     def __init__(self):
@@ -284,6 +294,7 @@ class Works:
             return True
         else:
             return False
+
 
 class STS:
     def __init__(self, name):

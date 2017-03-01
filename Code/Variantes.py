@@ -1,5 +1,6 @@
 from Code import GestorVariantes
 
+
 def editaVariante(procesador, gestorBase, fen, lineaPGN, titulo=None, siEngineActivo=False, siCompetitivo=False):
     wpantalla = procesador.pantalla
     liKibitzersActivas = procesador.liKibitzersActivas
@@ -21,6 +22,7 @@ def editaVariante(procesador, gestorBase, fen, lineaPGN, titulo=None, siEngineAc
     procesadorVariantes.pantalla.muestraVariantes(titulo)
 
     return gestorVariantes.valor()  # pgn y a1h8, el a1h8 nos servira para editar las aperturas
+
 
 def editaVarianteMoves(procesador, wpantalla, siBlancasAbajo, fen, lineaPGN, titulo=None):
     procesadorVariantes = procesador.clonVariantes(wpantalla)

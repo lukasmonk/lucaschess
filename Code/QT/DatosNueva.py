@@ -9,6 +9,7 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 
+
 def datos(wParent, configuracion, procesador):
     # Primero determinamos la categoria
     resp = dameCategoria(wParent, configuracion, procesador)
@@ -22,6 +23,7 @@ def datos(wParent, configuracion, procesador):
         return categoria, w.nivel, w.siBlancas, w.puntos
     else:
         return None
+
 
 def dameCategoria(wParent, configuracion, procesador):
     rival = configuracion.rival
@@ -119,6 +121,7 @@ def dameCategoria(wParent, configuracion, procesador):
         categoria = rival.categorias.numero(int(resp))
         return categoria
 
+
 class wDatos(QtGui.QDialog):
     def __init__(self, wParent, categoria, configuracion):
         super(wDatos, self).__init__(wParent)
@@ -212,12 +215,14 @@ class wDatos(QtGui.QDialog):
         self.lbPuntos.setText("%d %s" % (p, _("points")))
         self.puntos = p
 
+
 def numEntrenamiento(wParent, titulo, hasta, etiqueta=None, pos=None, mensAdicional=None):
     w = WNumEntrenamiento(wParent, titulo, hasta, etiqueta, pos, mensAdicional)
     if w.exec_():
         return w.numero
     else:
         return None
+
 
 class WNumEntrenamiento(QtGui.QDialog):
     def __init__(self, wParent, titulo, hasta, etiqueta=None, pos=None, mensAdicional=None):
@@ -255,6 +260,7 @@ class WNumEntrenamiento(QtGui.QDialog):
     def aceptar(self):
         self.numero = self.ed.value()
         self.accept()
+
 
 def numPosicion(wParent, titulo, nFEN, pos):
     liGen = [FormLayout.separador]

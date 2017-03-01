@@ -7,6 +7,7 @@ from Code import PGNreader
 
 INACTIVE, CREATING, REPLAY, TACTICS, ENDED = range(5)
 
+
 class WLine:
     def __init__(self):
         self.fen = None
@@ -36,6 +37,7 @@ class WLine:
 
     def total_moves(self):
         return len(self.limoves)
+
 
 class WEngine:
     def __init__(self, clave=None, nombre=None, elo=0, color=True):
@@ -126,6 +128,7 @@ class WEngine:
 
     def assign_date(self):
         self.date = datetime.datetime.now()
+
 
 class Washing:
     def __init__(self):
@@ -276,6 +279,7 @@ class Washing:
     def index_average(self):
         li = [eng.index() for eng in self.liEngines if eng.state == ENDED]
         return sum(li)/len(li) if li else 0.0
+
 
 class DBWashing:
     def __init__(self, configuracion):

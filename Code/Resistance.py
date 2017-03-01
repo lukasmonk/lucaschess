@@ -2,6 +2,7 @@ import collections
 
 from Code import Util
 
+
 class Resistance:
     def __init__(self, procesador, tipo):
         # Variables

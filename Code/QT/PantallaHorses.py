@@ -17,6 +17,7 @@ from Code.QT import Tablero
 from Code.SQL import Base
 from Code import Util
 
+
 class HorsesHistorico:
     def __init__(self, fichero, test):
         self.fichero = fichero
@@ -101,6 +102,7 @@ class HorsesHistorico:
         self.dbf.borrarLista(liNum)
         self.dbf.pack()
         self.dbf.leer()
+
 
 class WHorsesBase(QTVarios.WDialogo):
     def __init__(self, procesador, test, titulo, tabla, icono):
@@ -204,6 +206,7 @@ class WHorsesBase(QTVarios.WDialogo):
         w.exec_()
         self.ghistorico.gotop()
         self.ghistorico.refresh()
+
 
 class WHorses(QTVarios.WDialogo):
     def __init__(self, owner, test, procesador, titulo, icono):
@@ -426,6 +429,7 @@ class WHorses(QTVarios.WDialogo):
 
         self.tb.liAcciones = liAcciones
         self.tb.update()
+
 
 def pantallaHorses(procesador, test, titulo, icono):
     tabla = "TEST%d" % test

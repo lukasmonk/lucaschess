@@ -13,6 +13,7 @@ from Code.QT import QTVarios
 from Code import Usuarios
 from Code.QT import FormLayout
 
+
 class WUsuarios(QTVarios.WDialogo):
     def __init__(self, procesador):
 
@@ -141,10 +142,12 @@ class WUsuarios(QTVarios.WDialogo):
         # if clave == "PASSWORD":
         #     return "x" * len(usuario.password)
 
+
 def editaUsuarios(procesador):
     w = WUsuarios(procesador)
     if w.exec_():
         pass
+
 
 def setPassword(procesador):
     configuracion = procesador.configuracion

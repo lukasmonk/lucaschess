@@ -16,6 +16,7 @@ from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code import Util
 
+
 class WControl(QTVarios.WDialogo):
     def __init__(self, procesador, path_bloque):
 
@@ -231,6 +232,7 @@ class WControl(QTVarios.WDialogo):
                 self.liHistorico = self.calcListaHistorico()
                 um.final()
                 self.ghistorico.refresh()
+
 
 class WPlay(QTVarios.WDialogo):
     def __init__(self, owner, dicdatos):
@@ -583,6 +585,7 @@ class WPlay(QTVarios.WDialogo):
                 reg.comprobada = False
                 liSolucion.append(reg)
         return liSolucion
+
 
 def pantallaVisualiza(procesador):
     w = WControl(procesador, "./IntFiles/Visual/R50-01.vis")

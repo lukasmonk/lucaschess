@@ -1,18 +1,13 @@
 import os
 import sys
 
-isLinux = sys.platform == "linux2"
-if isLinux:
-    isWine = os.path.isfile("/usr/bin/wine")
-    startfile = os.system
-else:
-    startfile = os.startfile
-isWindows = not isLinux
+startfile = os.startfile
 
 dgt = None
 dgtDispatch = None
 
 configuracion = None  # Actualizado en Configuracion tras lee()
+folder_engines = "Engines/Windows"
 
 todasPiezas = None
 

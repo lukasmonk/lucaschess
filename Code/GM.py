@@ -7,6 +7,7 @@ from Code import Jugada
 from Code import Util
 from Code import VarGen
 
+
 class GMpartida:
     def __init__(self, linea):
         self.xpv, self.event, self.oponent, self.date, self.opening, self.result, self.color = linea.split("|")
@@ -45,6 +46,7 @@ class GMpartida:
             return _("Opponent") + ": %s (%s)" % (self.oponent, self.date)
         else:
             return "%s (%s)" % (self.oponent, self.date)
+
 
 class GM:
     def __init__(self, carpeta, gm):
@@ -188,6 +190,7 @@ class GM:
         del self.liGMPartidas[num]
         self.write()
 
+
 def dicGM():
     dic = {}
     f = open("gm/listaGM.txt", "rb")
@@ -200,6 +203,7 @@ def dicGM():
     f.close()
 
     return dic
+
 
 def listaGM():
     dic = dicGM()
@@ -214,6 +218,7 @@ def listaGM():
                 pass
     li = sorted(li, key=operator.itemgetter(0))
     return li
+
 
 def listaGMpersonal(carpeta):
     li = []
@@ -240,8 +245,10 @@ def listaGMpersonal(carpeta):
     li = sorted(li)
     return li
 
+
 def hayGMpersonal(carpeta):
     return len(listaGMpersonal(carpeta)) > 0
+
 
 class FabGM:
     def __init__(self, configuracion, nomEntrenamiento, liJugadores):

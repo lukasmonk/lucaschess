@@ -8,6 +8,7 @@ from Code.QT import Iconos
 from Code.QT import QTUtil2
 from Code import Util
 
+
 class GestorM1:
     def __init__(self, procesador):
         self.pantalla = procesador.pantalla
@@ -82,6 +83,7 @@ class GestorM1:
 
         return False
 
+
 def basico(procesador, hx, factor=1.0):
     def m(cl, t=4.0):
         n = len(cl) / 2
@@ -105,6 +107,7 @@ def basico(procesador, hx, factor=1.0):
     for uno in li:
         m(uno)
     return procesador.cpu.ponPosicion(procesador.posicionInicial)
+
 
 def partidaDia(procesador, hx):
     dia = Util.hoy().day

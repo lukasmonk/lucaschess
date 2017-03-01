@@ -8,6 +8,7 @@ from Code.QT import QTVarios
 from Code import TrListas
 from Code import Util
 
+
 class WEtiquetasPGN(QTVarios.WDialogo):
     def __init__(self, procesador, liPGN):
         titulo = _("Edit PGN labels")
@@ -106,6 +107,7 @@ class WEtiquetasPGN(QTVarios.WDialogo):
             self.liPGN[n0], self.liPGN[n1] = self.liPGN[n1], self.liPGN[n0]
             self.grid.goto(n1, 0)
             self.grid.refresh()
+
 
 def editarEtiquetasPGN(procesador, liPGN):
     w = WEtiquetasPGN(procesador, liPGN)

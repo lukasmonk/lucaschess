@@ -13,6 +13,7 @@ from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code import VarGen
 
+
 class UnMove:
     def __init__(self, listaMovesPadre, book, fenBase, movBook):
 
@@ -99,6 +100,7 @@ class UnMove:
     def ponComentario(self, comentario):
         self.comentario = comentario
 
+
 class ListaMoves:
     def __init__(self, moveOwner, book, fen):
 
@@ -132,6 +134,7 @@ class ListaMoves:
         book.polyglot()
         liMovesBook = book.miraListaJugadas(self.fen)
         return len(liMovesBook) > 0
+
 
 class TreeMoves(QtGui.QTreeWidget):
     def __init__(self, owner):
@@ -232,6 +235,7 @@ class TreeMoves(QtGui.QTreeWidget):
             mov = None
         return mov
 
+
 class WMoves(QtGui.QWidget):
     def __init__(self, owner, siEnviar):
         QtGui.QWidget.__init__(self)
@@ -258,6 +262,7 @@ class WMoves(QtGui.QWidget):
     def rama(self):
         if self.tree.currentMov():
             self.tree.mas()
+
 
 class InfoMove(QtGui.QWidget):
     def __init__(self, fenActivo):
@@ -336,6 +341,7 @@ class InfoMove(QtGui.QWidget):
     def muestra(self, mov):
         self.movActual = mov
         self.ponValores()
+
 
 class PantallaArbolBook(QTVarios.WDialogo):
     def __init__(self, gestor, siEnVivo):

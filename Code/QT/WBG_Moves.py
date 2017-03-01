@@ -16,6 +16,7 @@ from Code import Tacticas
 from Code import Util
 from Code import VarGen
 
+
 class WN_LB(Controles.ED):
     def __init__(self, wNavigator, xid):
         Controles.ED.__init__(self, wNavigator)
@@ -51,6 +52,7 @@ class WN_LB(Controles.ED):
         if w > maxim:
             w = maxim
         self.setFixedWidth(w)
+
 
 class WNavigator(QtGui.QWidget):
     def __init__(self, wmoves):
@@ -102,6 +104,7 @@ class WNavigator(QtGui.QWidget):
             h = texto.find(">")
             texto = texto[:d] + texto[h + 1:]
         self.bt.ponTexto(texto, self.wmoves.width() - 36)
+
 
 class WMoves(QtGui.QWidget):
     def __init__(self, procesador, winBookGuide):

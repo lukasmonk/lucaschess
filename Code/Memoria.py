@@ -1,6 +1,7 @@
 from Code.QT import PantallaMemoria
 from Code import Util
 
+
 class Memoria:
     def __init__(self, procesador):
 

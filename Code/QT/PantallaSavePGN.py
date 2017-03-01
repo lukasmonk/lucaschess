@@ -19,6 +19,7 @@ from Code import TrListas
 from Code import Util
 from Code import VarGen
 
+
 class WSave(QTVarios.WDialogo):
     def __init__(self, owner, pgn, configuracion):
         titulo = _("Save to PGN")
@@ -234,8 +235,7 @@ class WSave(QTVarios.WDialogo):
         pgn += "\n%s\n" % self.em_body.texto().strip()
         if "\r\n" in pgn:
             pgn = pgn.replace("\r\n", "\n")
-        if VarGen.isWindows:
-            pgn = pgn.replace("\n", "\r\n")
+        pgn = pgn.replace("\n", "\r\n")
 
         if self.chb_remove_c_v.isChecked():
             pgn = PGN.rawPGN(pgn)
@@ -269,7 +269,7 @@ class WSave(QTVarios.WDialogo):
         try:
             f = codecs.open(self.file, modo, codec, 'ignore')
             if modo == "a":
-                f.write("\r\n\r\n" if VarGen.isWindows else "\n\n")
+                f.write("\r\n\r\n")
             f.write(pgn)
             f.close()
             if self.file in self.history_list:

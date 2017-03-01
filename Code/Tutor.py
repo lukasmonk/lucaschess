@@ -9,6 +9,7 @@ from Code.QT import PantallaTutor
 from Code.QT import QTUtil2
 from Code import Util
 
+
 class Tutor:
     def __init__(self, procesador, gestor, jg, desde, hasta, siEntrenando):
         self.procesador = procesador

@@ -43,6 +43,7 @@ from Code import Util
 separador = (None, None)
 SPINBOX, COMBOBOX, COLORBOX, DIAL, EDITBOX, FICHERO, FONTCOMBOBOX, CHSPINBOX = range(8)
 
+
 class Spinbox:
     def __init__(self, label, minimo, maximo, ancho):
         self.tipo = SPINBOX
@@ -50,6 +51,7 @@ class Spinbox:
         self.minimo = minimo
         self.maximo = maximo
         self.ancho = ancho
+
 
 class CHSpinbox:
     def __init__(self, label, minimo, maximo, ancho, chlabel):
@@ -60,16 +62,19 @@ class CHSpinbox:
         self.maximo = maximo
         self.ancho = ancho
 
+
 class Combobox:
     def __init__(self, label, lista):
         self.tipo = COMBOBOX
         self.lista = lista  # (clave,titulo),....
         self.label = label + ":"
 
+
 class FontCombobox:
     def __init__(self, label):
         self.tipo = FONTCOMBOBOX
         self.label = label + ":"
+
 
 class Colorbox:
     def __init__(self, label, ancho, alto, siChecked=False, siSTR=False):
@@ -79,6 +84,7 @@ class Colorbox:
         self.siChecked = siChecked
         self.siSTR = siSTR
         self.label = label + ":"
+
 
 class Editbox:
     def __init__(self, label, ancho=None, rx=None, tipo=str, siPassword=False, alto=1, decimales=1):
@@ -91,9 +97,11 @@ class Editbox:
         self.alto = alto
         self.decimales = decimales
 
+
 class Casillabox(Editbox):
     def __init__(self, label):
         Editbox.__init__(self, label, ancho=24, rx="[a-h][1-8]")
+
 
 class Dial:
     def __init__(self, label, minimo, maximo, siporc=True):
@@ -102,6 +110,7 @@ class Dial:
         self.maximo = maximo
         self.siporc = siporc
         self.label = "\n" + label + ":"
+
 
 class Fichero:
     def __init__(self, label, extension, siSave, siRelativo=True, anchoMinimo=None, ficheroDefecto="", liHistorico=None):
@@ -113,6 +122,7 @@ class Fichero:
         self.anchoMinimo = anchoMinimo
         self.ficheroDefecto = ficheroDefecto
         self.liHistorico = liHistorico
+
 
 class BotonFichero(QtGui.QPushButton):
     def __init__(self, fichero, extension, siSave, siRelativo, anchoMinimo, ficheroDefecto):
@@ -160,6 +170,7 @@ class BotonFichero(QtGui.QPushButton):
 
         self.setText(txt)
 
+
 class LBotonFichero(QtGui.QHBoxLayout):
     def __init__(self, parent, config, fichero):
         QtGui.QHBoxLayout.__init__(self)
@@ -200,6 +211,7 @@ class LBotonFichero(QtGui.QHBoxLayout):
     def cancelar(self):
         self.boton.ponFichero("")
 
+
 class BotonColor(QtGui.QPushButton):
     def __init__(self, parent, ancho, alto, siSTR, dispatch):
         QtGui.QPushButton.__init__(self, parent)
@@ -231,7 +243,7 @@ class BotonColor(QtGui.QPushButton):
         else:
             color = QtGui.QColor()
             color.setRgba(self.xcolor)
-        color = QtGui.QColorDialog.getColor(color, self.parentWidget())
+        color = QtGui.QColorDialog.getColor(color, self.parentWidget(), _("Color"), QtGui.QColorDialog.ShowAlphaChannel|QtGui.QColorDialog.DontUseNativeDialog)
         if color.isValid():
             if self.siSTR:
                 self.ponColor(color.name())
@@ -242,6 +254,7 @@ class BotonColor(QtGui.QPushButton):
 
     def value(self):
         return self.xcolor
+
 
 class BotonCheckColor(QtGui.QHBoxLayout):
     def __init__(self, parent, ancho, alto, dispatch):
@@ -286,6 +299,7 @@ class BotonCheckColor(QtGui.QHBoxLayout):
         if self.dispatch:
             self.dispatch()
 
+
 class Edit(Controles.ED):
     def __init__(self, parent, config, dispatch):
         Controles.ED.__init__(self, parent)
@@ -310,6 +324,7 @@ class Edit(Controles.ED):
             v = self.texto()
         return v
 
+
 class TextEdit(Controles.EM):
     def __init__(self, parent, config, dispatch):
         Controles.EM.__init__(self, parent)
@@ -320,6 +335,7 @@ class TextEdit(Controles.EM):
 
     def valor(self):
         return self.texto()
+
 
 class DialNum(QtGui.QHBoxLayout):
     def __init__(self, parent, config, dispatch):
@@ -358,6 +374,7 @@ class DialNum(QtGui.QHBoxLayout):
 
     def value(self):
         return self.dial.value()
+
 
 class FormWidget(QtGui.QWidget):
     def __init__(self, data, comment="", parent=None, dispatch=None):
@@ -572,6 +589,7 @@ class FormWidget(QtGui.QWidget):
                     return field
         return None
 
+
 class FormComboWidget(QtGui.QWidget):
     def __init__(self, datalist, comment="", parent=None):
         super(FormComboWidget, self).__init__(parent)
@@ -595,6 +613,7 @@ class FormComboWidget(QtGui.QWidget):
     def get(self):
         return [widget.get() for widget in self.widgetlist]
 
+
 class FormTabWidget(QtGui.QWidget):
     def __init__(self, datalist, comment="", parent=None, dispatch=None):
         super(FormTabWidget, self).__init__(parent)
@@ -617,6 +636,7 @@ class FormTabWidget(QtGui.QWidget):
 
     def getWidget(self, numTab, numero):
         return self.widgetlist[numTab].getWidget(numero)
+
 
 class FormDialog(QtGui.QDialog):
     """Form Dialog"""
@@ -670,6 +690,7 @@ class FormDialog(QtGui.QDialog):
     def get(self):
         """Return form result"""
         return self.accion, self.data
+
 
 def fedit(data, title="", comment="", icon=None, parent=None, siDefecto=False, anchoMinimo=None, dispatch=None):
     """

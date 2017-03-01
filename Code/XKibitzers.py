@@ -6,14 +6,17 @@ from Code import Util
 from Code import VarGen
 from Code import XRun
 
+
 def listaKibitzersRecuperar(configuracion):
     lista = Util.recuperaVar(configuracion.ficheroKibitzers)
     if lista is None:
         lista = []
     return lista
 
+
 def listaKibitzersGrabar(configuracion, lista):
     Util.guardaVar(configuracion.ficheroKibitzers, lista)
+
 
 def nuevaKibitzer(ventana, configuracion):
     # Datos generales
@@ -74,6 +77,7 @@ def nuevaKibitzer(ventana, configuracion):
     else:
         return None
 
+
 class Orden:
     def __init__(self):
         self.clave = ""
@@ -85,6 +89,7 @@ class Orden:
     def bloqueEnvio(self):
         self.dv["__CLAVE__"] = self.clave
         return self.dv
+
 
 class XKibitzer:
     CONFIGURACION = "C"

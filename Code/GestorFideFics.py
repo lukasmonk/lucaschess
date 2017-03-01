@@ -14,6 +14,7 @@ from Code.SQL import Base
 from Code import Util
 from Code.Constantes import *
 
+
 class GestorFideFics(Gestor.Gestor):
     def selecciona(self, tipo):
         if tipo == "Fics":

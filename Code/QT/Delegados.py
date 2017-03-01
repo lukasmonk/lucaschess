@@ -12,6 +12,7 @@ dicPM = {}
 dicPZ = {}
 dicNG = {}
 
+
 def generaPM(piezas):
     dicPM["V"] = Iconos.pmComentario()
     dicPM["R"] = Iconos.pmApertura()
@@ -27,6 +28,7 @@ def generaPM(piezas):
             if nag.isdigit():
                 fsvg = carpNAGs + "/" + f
                 dicNG[nag] = QtSvg.QSvgRenderer(fsvg)
+
 
 class ComboBox(QtGui.QItemDelegate):
     def __init__(self, liTextos):
@@ -50,6 +52,7 @@ class ComboBox(QtGui.QItemDelegate):
 
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
+
 
 class LineaTexto(QtGui.QItemDelegate):
     def __init__(self, parent=None, siPassword=False, siEntero=False):
@@ -78,6 +81,7 @@ class LineaTexto(QtGui.QItemDelegate):
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
 
+
 class LineaTextoUTF8(QtGui.QItemDelegate):
     def __init__(self, parent=None, siPassword=False):
         QtGui.QItemDelegate.__init__(self, parent)
@@ -101,11 +105,8 @@ class LineaTextoUTF8(QtGui.QItemDelegate):
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
 
-class EtiquetaPGN(QtGui.QStyledItemDelegate):
-    """
-    Delegado para la muestra con html
-    """
 
+class EtiquetaPGN(QtGui.QStyledItemDelegate):
     def __init__(self, siBlancas, siAlineacion=False, siFondo=False):
         self.siBlancas = siBlancas  # None = no hacer
         self.siFigurinesPGN = siBlancas is not None
@@ -245,6 +246,7 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
                 painter.restore()
                 x += wpz
 
+
 class PmIconosBMT(QtGui.QStyledItemDelegate):
     """
     Delegado para la muestra con html
@@ -270,6 +272,7 @@ class PmIconosBMT(QtGui.QStyledItemDelegate):
         painter.translate(option.rect.x(), option.rect.y())
         painter.drawPixmap(4, 1, self.dicIconos[pos])
         painter.restore()
+
 
 class PmIconosColor(QtGui.QStyledItemDelegate):
     """ Usado en TurnOnLigths"""

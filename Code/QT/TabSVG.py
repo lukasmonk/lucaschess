@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui, QtSvg
 
 from Code.QT import TabBloques
 
+
 class SVGSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueImgSVG, rutinaPulsada=None, siEditando=False):
 
@@ -225,6 +226,7 @@ class SVGSC(TabBloques.BloqueEspSC):
             # def boundingRect(self):
             # x = self.bloqueDatos.grosor
             # return QtCore.QRectF(self.rect).adjusted( -x, -x, x*2, x*2 )
+
 
 class SVGCandidate(SVGSC):
     def posicion2xy(self):

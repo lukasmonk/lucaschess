@@ -4,6 +4,7 @@ import sqlite3
 import DBF
 import DBFcache
 
+
 class DBBase:
     """
     Hace referencia a una base de datos.
@@ -72,6 +73,7 @@ class DBBase:
         cursor.execute("PRAGMA page_size = 8192")
         cursor.close()
 
+
 class TablaBase:
     """
     Definicion generica de una tabla.
@@ -101,6 +103,7 @@ class TablaBase:
         indice = Indice(nombre, campos, siUnico)
         self.liIndices.append(indice)
 
+
 class Campo:
     """
     Definicion generica de un campo de una tabla.
@@ -122,6 +125,7 @@ class Campo:
         if self.autoInc:
             c += " AUTOINCREMENT"
         return "%s %s %s" % (self.nombre, self.tipo, c)
+
 
 class Indice:
     """

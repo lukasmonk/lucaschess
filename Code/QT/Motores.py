@@ -1,8 +1,5 @@
 from Code import VarGen
-if VarGen.isLinux:
-    import Code.EnginesLinux as Engines
-else:
-    import Code.EnginesWindows as Engines
+import Code.EnginesWindows as Engines
 
 from Code import BaseConfig
 from Code import EnginesMicElo
@@ -13,6 +10,7 @@ from Code.QT import Iconos
 from Code.QT import QTVarios
 
 INTERNO, EXTERNO, MICGM, MICPER, FIXED, IRINA, ELO = range(7)
+
 
 class Motores:
     def __init__(self, configuracion):

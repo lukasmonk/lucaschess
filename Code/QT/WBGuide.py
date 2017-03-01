@@ -11,6 +11,7 @@ from Code.QT import WBG_InfoMove
 from Code.QT import WBG_Moves
 from Code.QT import WBG_Summary
 
+
 class WBGuide(QTVarios.WDialogo):
     def __init__(self, wParent, procesador, fenM2inicial=None, pvInicial=None):
 

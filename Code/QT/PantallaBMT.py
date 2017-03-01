@@ -23,6 +23,7 @@ from Code import TrListas
 from Code import Util
 from Code.Constantes import *
 
+
 class WHistorialBMT(QTVarios.WDialogo):
     def __init__(self, owner, dbf):
 
@@ -106,6 +107,7 @@ class WHistorialBMT(QTVarios.WDialogo):
             m = s / 60
             s %= 60
             return "%d' %d\"" % (m, s) if m else "%d\"" % s
+
 
 class WEntrenarBMT(QTVarios.WDialogo):
     def __init__(self, owner, dbf):
@@ -773,6 +775,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
         maxRecursion = 9999
         Analisis.muestraAnalisis(self.procesador, self.procesador.XTutor(), jg, siBlancas, maxRecursion, pos,
                                  pantalla=self)
+
 
 class WBMT(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -1621,6 +1624,7 @@ class WBMT(QTVarios.WDialogo):
 
         self.releer()
         tmpBP.cerrar()
+
 
 def pantallaBMT(procesador):
     w = WBMT(procesador)

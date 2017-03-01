@@ -6,6 +6,7 @@ from Code.QT import Iconos
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 
+
 class WAlbum(QTVarios.WDialogo):
     def __init__(self, wowner, procesador, album):
 
@@ -89,6 +90,7 @@ class WAlbum(QTVarios.WDialogo):
         cromo = self.sender().clave
         self.resultado = cromo, False
         self.accept()
+
 
 def eligeCromo(wowner, procesador, album):
     w = WAlbum(wowner, procesador, album)

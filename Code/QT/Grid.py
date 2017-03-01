@@ -20,6 +20,7 @@ from PyQt4 import QtCore, QtGui
 
 from Code.QT import QTUtil
 
+
 class ControlGrid(QtCore.QAbstractTableModel):
     """
     Modelo de datos asociado al grid, y que realiza todo el trabajo asignado por QT.
@@ -173,6 +174,7 @@ class ControlGrid(QtCore.QAbstractTableModel):
             return columna.cabecera
         return None
 
+
 class Cabecera(QtGui.QHeaderView):
     """
     Se crea esta clase para poder implementar el doble click en la cabecera.
@@ -194,6 +196,7 @@ class Cabecera(QtGui.QHeaderView):
         numColumna = self.logicalIndexAt(event.x(), event.y())
         self.tvParent.mouseCabecera(numColumna)
 
+
 class CabeceraHeight(Cabecera):
     def __init__(self, tvParent, siCabeceraMovible, height):
         Cabecera.__init__(self, tvParent, siCabeceraMovible)
@@ -203,6 +206,7 @@ class CabeceraHeight(Cabecera):
         baseSize = Cabecera.sizeHint(self)
         baseSize.setHeight(self.height)
         return baseSize
+
 
 class Grid(QtGui.QTableView):
     """

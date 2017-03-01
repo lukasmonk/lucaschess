@@ -12,6 +12,7 @@ from Code import Usuarios
 from Code import Util
 from Code import VarGen
 
+
 def lanzaGUI(procesador):
     """
     Lanzador del interfaz grafico de la aplicacion.
@@ -63,8 +64,9 @@ def lanzaGUI(procesador):
 
             nico = QTVarios.rondoPuntos()
             for k, nombre, porc, author in li:
-                if int(porc) < 80:
-                    nombre += " (%s%%)" % porc
+                rotulo = nombre
+                if porc != "100":
+                    rotulo += " (%s%%)" % porc
                 menu.opcion(k, nombre, nico.otro())
             resp = menu.lanza()
             if resp:
@@ -73,8 +75,35 @@ def lanzaGUI(procesador):
 
     # Estilo
     app.setStyle(QtGui.QStyleFactory.create(configuracion.estilo))
-    app.setPalette(QtGui.QApplication.style().standardPalette())
+
+    if configuracion.palette:
+        qpalette = QtGui.QPalette()
+        palette = configuracion.palette
+        def cl(tipo):
+            return QtGui.QColor(palette[tipo])
+        qpalette.setColor(QtGui.QPalette.Window, cl("Window"))
+        qpalette.setColor(QtGui.QPalette.WindowText, cl("WindowText"))
+
+        qpalette.setColor(QtGui.QPalette.Base, cl("Base"))
+        qpalette.setColor(QtGui.QPalette.Text, cl("Text"))
+        qpalette.setColor(QtGui.QPalette.AlternateBase, cl("AlternateBase"))
+
+        qpalette.setColor(QtGui.QPalette.ToolTipBase, cl("ToolTipBase"))
+        qpalette.setColor(QtGui.QPalette.ToolTipText, cl("ToolTipText"))
+
+        qpalette.setColor(QtGui.QPalette.Button, cl("Button"))
+        qpalette.setColor(QtGui.QPalette.ButtonText, cl("ButtonText"))
+        qpalette.setColor(QtGui.QPalette.BrightText, cl("BrightText"))
+
+        qpalette.setColor(QtGui.QPalette.Link, cl("Link"))
+
+    else:
+        qpalette = QtGui.QApplication.style().standardPalette()
+
+    app.setPalette(qpalette)
+
     app.setEffectEnabled(QtCore.Qt.UI_AnimateMenu)
+
     # QtGui.QFontDatabase.addApplicationFont('IntFiles/ChessAlpha2.ttf') # TODO
 
     if configuracion.familia:
@@ -89,6 +118,7 @@ def lanzaGUI(procesador):
     resp = app.exec_()
 
     return resp
+
 
 class WPassword(QtGui.QDialog):
     def __init__(self, liUsuarios):
@@ -124,6 +154,7 @@ class WPassword(QtGui.QDialog):
     def resultado(self):
         usuario = self.cbU.valor()
         return usuario if self.edP.texto().strip() == usuario.password else None
+
 
 def pideUsuario(liUsuarios):
     # Miramos si alguno tiene clave, si es asi, lanzamos ventana

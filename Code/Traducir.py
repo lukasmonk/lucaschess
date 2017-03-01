@@ -2,8 +2,10 @@ import __builtin__
 import gettext
 import os
 
+
 def _F(txt):
     return _(txt)
+
 
 def _SP(clave):
     clave = clave.strip()
@@ -17,6 +19,7 @@ def _SP(clave):
     else:
         return t
 
+
 def _X(clave, op1, op2=None, op3=None):
     resp = clave.replace("%1", op1)
     if op2:
@@ -27,6 +30,7 @@ def _X(clave, op1, op2=None, op3=None):
 
 DOMAIN = "lucaschess"
 DIR_LOCALE = "Locale"
+
 
 def install(lang=None):
     if lang and os.path.isfile("%s/%s/LC_MESSAGES/%s.mo" % (DIR_LOCALE, lang, DOMAIN)):

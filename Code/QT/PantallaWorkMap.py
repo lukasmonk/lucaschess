@@ -16,6 +16,7 @@ from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code import WorkMap
 
+
 class WMap(QTVarios.WDialogo):
     def __init__(self, procesador, mapa):
 
@@ -209,6 +210,7 @@ class WMap(QTVarios.WDialogo):
         clave = oColumna.clave
         return self.workmap.dato(fila, clave) if grid.id == "W" else self.workmap.db.dato(fila, clave)
 
+
 class WUnSTSMap(QTVarios.WDialogo):
     def __init__(self, owner):
 
@@ -365,6 +367,7 @@ class WUnSTSMap(QTVarios.WDialogo):
         xtutor = self.procesador.XTutor()
         Analisis.muestraAnalisis(self.procesador, xtutor, self.jg, self.posicion.siBlancas,
                                  9999999, 1, pantalla=self, siGrabar=False)
+
 
 def train_map(procesador, mapa):
     w = WMap(procesador, mapa)

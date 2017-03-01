@@ -16,6 +16,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import WBG_Comun
 
+
 class WSummary(QtGui.QWidget):
     def __init__(self, procesador, winBookGuide, dbGames, siMoves=True):
         QtGui.QWidget.__init__(self)
@@ -297,7 +298,7 @@ class WSummary(QtGui.QWidget):
         name = os.path.basename(self.dbGames.nomFichero)[:-4]
         maxdepth = self.dbGames.depthStat()
         depth = maxdepth
-        minGames = min(self.dbGames.reccountTotal() * 10 / 100, 5)
+        minGames = min(self.dbGames.all_reccount() * 10 / 100, 5)
         pointview = 2
         inicio = 0
         mov = self.movActivo()

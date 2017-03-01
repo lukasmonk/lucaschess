@@ -1,3 +1,5 @@
+
+
 class JuegaAperturaStd:
     def __init__(self, bloque):
         self.bloque = bloque

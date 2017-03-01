@@ -36,8 +36,10 @@ kControlTableroNo, kControlTableroGeneral, kControlTableroParticular = range(3)
 
 kNoBlindfold, kBlindfoldConfig, kBlindfoldWhite, kBlindfoldBlack, kBlindfoldAll = range(5)
 
+
 class KRegistro:
     pass
+
 
 def prlk(*x):
     import sys
@@ -45,12 +47,14 @@ def prlk(*x):
         sys.stdout.write(l)
         sys.stdout.write(" ")
 
+
 def prlkn(*x):
     import sys
     for l in x:
         sys.stdout.write(l)
         sys.stdout.write(" ")
     sys.stdout.write("\n")
+
 
 def prlk_stack(siPrevio=False):
     import traceback

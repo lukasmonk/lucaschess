@@ -18,6 +18,7 @@ from Code import TrListas
 from Code import Util
 from Code import VarGen
 
+
 class BotonTema(QtGui.QPushButton):
     def __init__(self, parent, rutina):
         QtGui.QPushButton.__init__(self, parent)
@@ -41,6 +42,7 @@ class BotonTema(QtGui.QPushButton):
 
     def pulsado(self):
         self.rutina(self.tema)
+
 
 class BotonColor(QtGui.QPushButton):
     def __init__(self, parent, rut_actual, rut_actualiza):
@@ -68,6 +70,7 @@ class BotonColor(QtGui.QPushButton):
             self.rut_actual(color.rgba())
             self.rut_actualiza()
             self.ponColor()
+
 
 class BotonImagen(Colocacion.H):
     def __init__(self, parent, rut_actual, rut_actualiza, bt_asociado):
@@ -143,6 +146,7 @@ class BotonImagen(Colocacion.H):
             self.ponImagen()
             self.rut_actualiza()
 
+
 class BotonFlecha(Colocacion.H):
     def __init__(self, parent, rut_actual, rut_defecto, rut_actualiza):
         Colocacion.H.__init__(self)
@@ -192,6 +196,7 @@ class BotonFlecha(Colocacion.H):
         if w.exec_():
             self.cambiaFlecha(w.regFlecha)
 
+
 class DialNum(Colocacion.H):
     def __init__(self, parent, rut_actual, rut_actualiza):
         Colocacion.H.__init__(self)
@@ -223,6 +228,7 @@ class DialNum(Colocacion.H):
         self.rut_actual(valor)
         self.ponValor()
         self.rut_actualiza()
+
 
 class WColores(QTVarios.WDialogo):
     def __init__(self, tableroOriginal):
@@ -837,43 +843,6 @@ class WColores(QTVarios.WDialogo):
                 self.ponSecciones()
                 return tema
 
-def cambiaColoresPGN(ventana, configuracion):
-    liGen = [(None, None)]
-
-    dicNAGs = TrListas.dicNAGs()
-    config = FormLayout.Colorbox(dicNAGs[1], 80, 20, siSTR=True)
-    liGen.append((config, configuracion.color_nag1))
-
-    config = FormLayout.Colorbox(dicNAGs[2], 80, 20, siSTR=True)
-    liGen.append((config, configuracion.color_nag2))
-
-    config = FormLayout.Colorbox(dicNAGs[3], 80, 20, siSTR=True)
-    liGen.append((config, configuracion.color_nag3))
-
-    config = FormLayout.Colorbox(dicNAGs[4], 80, 20, siSTR=True)
-    liGen.append((config, configuracion.color_nag4))
-
-    config = FormLayout.Colorbox(dicNAGs[5], 80, 20, siSTR=True)
-    liGen.append((config, configuracion.color_nag5))
-
-    config = FormLayout.Colorbox(dicNAGs[6], 80, 20, siSTR=True)
-    liGen.append((config, configuracion.color_nag6))
-
-    resultado = FormLayout.fedit(liGen, title=_("PGN"), parent=ventana, icon=Iconos.Vista(), siDefecto=True)
-    if resultado:
-        accion, liResp = resultado
-        if accion == "defecto":
-            configuracion.coloresPGNdefecto()
-            configuracion.graba()
-            cambiaColoresPGN(ventana, configuracion)
-        else:
-            configuracion.color_nag1 = liResp[0]
-            configuracion.color_nag2 = liResp[1]
-            configuracion.color_nag3 = liResp[2]
-            configuracion.color_nag4 = liResp[3]
-            configuracion.color_nag5 = liResp[4]
-            configuracion.color_nag6 = liResp[5]
-            configuracion.graba()
 
 def ponMenuTemas(menuBase, liTemas, baseResp):
     baseResp += "%d"
@@ -899,6 +868,7 @@ def ponMenuTemas(menuBase, liTemas, baseResp):
         menuBase.opcion(baseResp % n, uno["NOMBRE"], QTVarios.iconoTema(uno, 16))
     menuBase.separador()
 
+
 def eligeTema(parent, fichTema):
     liTemas = Util.recuperaVar(fichTema)
     if not liTemas:
@@ -912,9 +882,111 @@ def eligeTema(parent, fichTema):
 
     return None if resp is None else liTemas[int(resp)]
 
+
 def nag2ico(nag, tam):
     with open("./IntFiles/NAGs/Color/nag_%d.svg" % nag) as f:
         dato = f.read()
         color = getattr(VarGen.configuracion, "color_nag%d" % nag)
         dato = dato.replace("#3139ae", color)
     return QTVarios.svg2ico(dato, tam)
+
+
+def cambiaColores(parent, configuracion):
+    separador = (None, None)
+
+    liColor = []
+    liColor.append(separador)
+    liColor.append((_("By default") + ":", False))
+    liColor.append(separador)
+
+    palette = configuracion.palette
+    palette_std = QtGui.QApplication.style().standardPalette()
+
+    liPalette = []
+    def xcolor(txt, tipo):
+        config = FormLayout.Colorbox( txt, 40, 20, siSTR=True)
+        color = QtGui.QColor(palette[tipo]) if palette else palette_std.color(getattr(QtGui.QPalette, tipo))
+        liColor.append((config, color))
+        liPalette.append(tipo)
+
+    xcolor(_("General background"), "Window")
+    xcolor(_("General foreground"), "WindowText")
+    liColor.append(separador)
+    xcolor(_("Text entry background"), "Base")
+    xcolor(_("Text entry foreground"), "Text")
+    xcolor(_("Alternate background"), "AlternateBase")
+    liColor.append(separador)
+    xcolor(_("Tool tip background"), "ToolTipBase")
+    xcolor(_("Tool tip foreground"), "ToolTipText")
+    liColor.append(separador)
+    xcolor(_("Button background"), "Button")
+    xcolor(_("Button foreground"), "ButtonText")
+    xcolor(_("Bright text"), "BrightText")
+    liColor.append(separador)
+    xcolor(_("Links"), "Link")
+
+    # QtGui.QPalette.Window	10	A general background color.
+    # QtGui.QPalette.WindowText	0	A general foreground color.
+    # QtGui.QPalette.Base	9	Used mostly as the background color for text entry widgets, but can also be used for other painting - such as the background of combobox drop down lists and toolbar handles. It is usually white or another light color.
+    # QtGui.QPalette.AlternateBase	16	Used as the alternate background color in views with alternating row colors (see QAbstractItemView::setAlternatingRowColors()).
+    # QtGui.QPalette.ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+    # QtGui.QPalette.ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+    # QtGui.QPalette.Text	6	The foreground color used with Base. This is usually the same as the WindowText, in which case it must provide good contrast with Window and Base.
+    # QtGui.QPalette.Button	1	The general button background color. This background can be different from Window as some styles require a different background color for buttons.
+    # QtGui.QPalette.ButtonText	8	A foreground color used with the Button color.
+    # QtGui.QPalette.BrightText	7	A text color that is very different from WindowText, and contrasts well with e.g. Dark. Typically used for text that needs to be drawn where Text or WindowText would give poor contrast, such as on pressed push buttons. Note that text colors can be used for things other than just words; text colors are usually used for text, but it's quite common to use the text color roles for lines, icons, etc.
+
+    liPGN = []
+    liPGN.append(separador)
+    liPGN.append((_("By default") + ":", False))
+    liPGN.append(separador)
+
+    dicNAGs = TrListas.dicNAGs()
+    config = FormLayout.Colorbox(dicNAGs[1], 40, 20, siSTR=True)
+    liPGN.append((config, configuracion.color_nag1))
+
+    config = FormLayout.Colorbox(dicNAGs[2], 40, 20, siSTR=True)
+    liPGN.append((config, configuracion.color_nag2))
+
+    config = FormLayout.Colorbox(dicNAGs[3], 40, 20, siSTR=True)
+    liPGN.append((config, configuracion.color_nag3))
+
+    config = FormLayout.Colorbox(dicNAGs[4], 40, 20, siSTR=True)
+    liPGN.append((config, configuracion.color_nag4))
+
+    config = FormLayout.Colorbox(dicNAGs[5], 40, 20, siSTR=True)
+    liPGN.append((config, configuracion.color_nag5))
+
+    config = FormLayout.Colorbox(dicNAGs[6], 40, 20, siSTR=True)
+    liPGN.append((config, configuracion.color_nag6))
+
+    lista = []
+    lista.append((liColor, _("Windows"), ""))
+    lista.append((liPGN, _("PGN"), ""))
+
+    # Editamos
+    resultado = FormLayout.fedit(lista, title=_("Colors"), parent=parent, anchoMinimo=240, icon=Iconos.Opciones())
+
+    if resultado:
+        accion, resp = resultado
+
+        liColor, liPGN = resp
+
+        if liColor[0]:
+            palette = None
+        else:
+            palette = {}
+            for n, tipo in enumerate(liPalette):
+                palette[tipo] = liColor[n+1]
+        configuracion.palette = palette
+
+        if liPGN[0]:
+            configuracion.coloresPGNdefecto()
+        else:
+            (configuracion.color_nag1, configuracion.color_nag2, configuracion.color_nag3,
+             configuracion.color_nag4, configuracion.color_nag5, configuracion.color_nag6) = liPGN[1:]
+        configuracion.graba()
+
+        return True
+    else:
+        return False

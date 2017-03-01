@@ -10,6 +10,7 @@ from Code.QT import QTVarios
 from Code import TrListas
 from Code import Util
 
+
 class PlayPGNs(Util.DicSQL):
     def __init__(self, fichero):
         Util.DicSQL.__init__(self, fichero)
@@ -47,6 +48,7 @@ class PlayPGNs(Util.DicSQL):
         date = x("DATE").replace(".?", "").replace("?", "")
 
         return "%s-%s : %s %s %s" % (x("WHITE"), x("BLACK"), date, x("EVENT"), x("SITE"))
+
 
 class WPlayBase(QTVarios.WDialogo):
     def __init__(self, procesador):
@@ -137,6 +139,7 @@ class WPlayBase(QTVarios.WDialogo):
                 self.recno = recno
                 self.siBlancas = w.siBlancas
                 self.accept()
+
 
 class WPlay1(QTVarios.WDialogo):
     def __init__(self, owner, numRegistro):

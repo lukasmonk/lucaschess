@@ -15,15 +15,13 @@ from Code import Util
 from Code import VarGen
 from Code.Constantes import *
 
-if VarGen.isLinux:
-    import Code.EnginesLinux as Engines
-else:
-    import Code.EnginesWindows as Engines
+import Code.EnginesWindows as Engines
 
 NIVELBAK = 1
 
 LCFILEFOLDER = "./lc.folder"
 LCBASEFOLDER = "./UsrData"
+
 
 def activeFolder():
     if os.path.isfile(LCFILEFOLDER):
@@ -34,8 +32,10 @@ def activeFolder():
             return x
     return LCBASEFOLDER
 
+
 def isDefaultFolder():
     return activeFolder() == os.path.abspath(LCBASEFOLDER)
+
 
 def changeFolder(nueva):
     if nueva:
@@ -46,6 +46,7 @@ def changeFolder(nueva):
         f.close()
     else:
         Util.borraFichero(LCFILEFOLDER)
+
 
 class Configuracion:
     def __init__(self, user):
@@ -132,7 +133,7 @@ class Configuracion:
 
         self.dicRivales = Engines.leeRivales()
 
-        self.rivalInicial = "rocinante" if VarGen.isLinux else "tarrasch"
+        self.rivalInicial = "tarrasch"
         self.rival = self.buscaRival(self.rivalInicial)
 
         self.tutorInicial = "deepfish"
@@ -156,6 +157,8 @@ class Configuracion:
         self.bmi2 = False
 
         self.checkforupdate = False
+
+        self.palette = {}
 
         self.grupos = BaseConfig.Grupos(self)
         self.grupos.nuevo("TarraschToy", 0, 1999, 0)
@@ -511,6 +514,7 @@ class Configuracion:
         dic["BMI2"] = self.bmi2
 
         dic["CHECKFORUPDATE"] = self.checkforupdate
+        dic["PALETTE"] = self.palette
 
         for clave, rival in self.dicRivales.iteritems():
             dic["RIVAL_%s" % clave] = rival.graba()
@@ -630,10 +634,11 @@ class Configuracion:
 
                 self.notbackground = dg("NOTBACKGROUND", self.notbackground)
                 self.bmi2 = dg("BMI2", self.bmi2)
-                if self.bmi2 and VarGen.isWindows and not Util.is64Windows():
+                if self.bmi2 and not Util.is64Windows():
                     self.bmi2 = False
 
                 self.checkforupdate = dg("CHECKFORUPDATE", self.checkforupdate)
+                self.palette = dg("PALETTE", self.palette)
 
                 for k in dic.keys():
                     if k.startswith("RIVAL_"):
