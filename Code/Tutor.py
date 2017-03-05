@@ -166,7 +166,6 @@ class Tutor:
         self.posRM = pos
         rm = self.listaRM[pos][0]
         self.partidaTutor = Partida.Partida(self.ultPosicion).leerPV(rm.getPV())
-        # posicion = self.partidaTutor.liJugadas[0].posicion if self.partidaTutor.numJugadas() else self.partidaTutor.iniPosicion
 
         self.w.ponPuntuacionTutor(rm.texto())
 

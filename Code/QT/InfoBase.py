@@ -110,7 +110,7 @@ class ThanksTo:
             return txt
 
         # Version 10
-        liBase = ["Remes", "Max Aloyau", "Alfonso Solbes"]
+        liBase = ["Remes", "Max Aloyau", "Alfonso Solbes", "tico-tico"]
         liResto = ["Immortalchess forum", ]
         txt += version(10, liBase, liResto)
 
