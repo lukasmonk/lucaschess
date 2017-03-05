@@ -743,7 +743,7 @@ class Gestor:
     def ponInfoPorDefecto(self):
         self.informacionActivable = True
         if self.configuracion.siActivarInformacion:
-            self.pantalla.activaInformacionPGN()
+            self.pantalla.activaInformacionPGN(True)
             self.ponVista()
 
     def ponCapInfoPorDefecto(self):

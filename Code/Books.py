@@ -205,7 +205,6 @@ class Libro:
         return listaJugadas
 
     def eligeJugadaTipo(self, fen, tipo):
-
         maxim = 0
         liMax = []
         li = self.book.lista(self.path, fen)
@@ -214,7 +213,7 @@ class Libro:
             return None
 
         elif nli == 1:
-            return li[0].pv()
+            pv = li[0].pv()
 
         elif tipo == "mp":  # Mejor posicion
             for entry in li:
@@ -245,9 +244,9 @@ class Libro:
             pv = li[pos].pv()
 
         else:
-            pv = None
+            return None
 
-        return pv
+        return pv.lower()
 
     def miraListaPV(self, fen, siMax):
         li = self.book.lista(self.path, fen)

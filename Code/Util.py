@@ -1306,3 +1306,12 @@ class RowidReader():
 def is64Windows():
     return 'PROGRAMFILES(X86)' in os.environ
 
+
+class Log:
+    def __init__(self, logname):
+        self.logname = logname
+
+    def write(self, buf):
+        ferr = open(self.logname, "at")
+        ferr.write(buf)
+        ferr.close()

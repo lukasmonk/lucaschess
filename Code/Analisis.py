@@ -567,7 +567,7 @@ class UnaMuestra:
             pv1 = rm.pv.split(" ")[0]
             desde = pv1[:2]
             hasta = pv1[2:4]
-            coronacion = pv1[4] if len(pv1) == 5 else None
+            coronacion = pv1[4].lower() if len(pv1) == 5 else None
 
             txt = rm.abrTextoBase()
             if txt:

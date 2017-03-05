@@ -30,12 +30,12 @@ class RespuestaMotor:
         self.maxTiempo = 0
 
     def movimiento(self):
-        return self.desde + self.hasta + self.coronacion
+        return self.desde + self.hasta + self.coronacion.lower()
 
     def getPV(self):
         if self.pv == "a1a1" or not self.pv:
             return self.movimiento()
-        return self.pv.strip()
+        return self.pv.strip().lower()
 
     def cambiaColor(self, posicionAnterior=None):
         # Se usa en tutor para analizar las jugadas siguientes a la del usuario

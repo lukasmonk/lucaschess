@@ -775,17 +775,19 @@ class GestorEntMaq(Gestor.Gestor):
             pointsBest, pointsUser = self.mrmTutor.difPointsBest(movimiento)
             self.setSummary("POINTSBEST", pointsBest)
             self.setSummary("POINTSUSER", pointsUser)
-            if (pointsBest - pointsUser) > 0:
+            difpts = self.configuracion.tutorDifPts
+            difporc = self.configuracion.tutorDifPorc
+            if self.mrmTutor.mejorRMQue(rmUser, difpts, difporc):
                 if not jg.siJaqueMate:
                     siTutor = True
                     if self.chance:
                         num = self.mrmTutor.numMejorMovQue(movimiento)
                         if num:
                             rmTutor = self.mrmTutor.rmBest()
-                            rmUser, n = self.mrmTutor.buscaRM(movimiento)
                             menu = QTVarios.LCMenu(self.pantalla)
                             submenu = menu.submenu(_("There are %d best moves") % num, Iconos.Motor())
-                            submenu.opcion("tutor", "%s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()), Iconos.Tutor())
+                            submenu.opcion("tutor", "%s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()),
+                                           Iconos.Tutor())
                             submenu.separador()
                             submenu.opcion("try", _("Try again"), Iconos.Atras())
                             submenu.separador()

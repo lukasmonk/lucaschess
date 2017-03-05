@@ -1,5 +1,5 @@
 DEBUG = False
-VERSION = "10.11"
+VERSION = "10.11.1"
 
 import os
 import sys
@@ -10,6 +10,7 @@ if DEBUG:
     prlkn("DEBUG " * 20)
 
 from Code import VarGen
+from Code import Util
 from Code import Procesador
 from Code import Sonido
 
@@ -18,12 +19,7 @@ from Code.QT import Gui
 
 def init():
     if not DEBUG:
-        try:
-            ferr = open("bug.log", "at")
-            sys.stderr = ferr
-            okFerr = True
-        except:
-            okFerr = False
+        sys.stderr = Util.Log("bug.log")
 
     mainProcesador = Procesador.Procesador()
     mainProcesador.setVersion(VERSION)
@@ -32,11 +28,6 @@ def init():
     runSound.close()
     mainProcesador.pararMotores()
     mainProcesador.quitaKibitzers()
-
-    # Needed for feedback
-    if not DEBUG:
-        if okFerr:
-            ferr.close()
 
     if resp == kFinReinicio:
         if sys.argv[0].endswith(".py"):
