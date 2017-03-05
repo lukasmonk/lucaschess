@@ -452,6 +452,8 @@ class GestorEntMaq(Gestor.Gestor):
 
     def atras(self):
         if self.partida.numJugadas():
+            if self.siAnalizando:
+                self.analizaTutorFinal()
             if self.ayudas:
                 self.ayudas -= 1
             self.ponAyudasEM()
@@ -459,7 +461,6 @@ class GestorEntMaq(Gestor.Gestor):
             if not self.fen:
                 self.listaAperturasStd.asignaApertura(self.partida)
             self.ponteAlFinal()
-            self.siAnalizadoTutor = False
             self.reOpenBook()
             self.refresh()
             self.siguienteJugada()

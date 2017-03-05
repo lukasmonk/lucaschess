@@ -184,11 +184,8 @@ class Pantalla():
 
     def muestraVariantes(self, titulo):
         flags = QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint
-
         self.setWindowFlags(flags)
-
         self.setWindowTitle(titulo if titulo else "-")
-
         return self.exec_()
 
     def ajustaTam(self):
@@ -304,10 +301,6 @@ class Pantalla():
                 self.informacionPGN.splitter.setSizes(sizes)
                 break
 
-    def quitaChat(self):
-        self.chat.hide()
-        self.ajustaTamH()
-
     def ponCapturas(self, dic, jg, apertura):
         self.capturas.pon(dic, jg, apertura)
 
@@ -391,6 +384,12 @@ class PantallaWidget(QTVarios.WWidget, Pantalla):
         QTVarios.WWidget.__init__(self, owner, titulo, icono, extparam)
         Pantalla.__init__(self, gestor, owner)
 
+    def accept(self):
+        self.close()
+
+    def reject(self):
+        self.close()
+
 
 class PantallaDialog(QTVarios.WDialogo, Pantalla):
     def __init__(self, gestor, owner=None):
@@ -401,4 +400,3 @@ class PantallaDialog(QTVarios.WDialogo, Pantalla):
         extparam = "maind"
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
         Pantalla.__init__(self, gestor, owner)
-

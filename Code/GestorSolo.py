@@ -841,6 +841,7 @@ class GestorSolo(Gestor.Gestor):
 
             dr = dic["RIVAL"]
             rival = dr["CM"]
+            delattr(rival, "icono") # problem with configuracion.escVariables and saving qt variables
             r_t = dr["TIEMPO"] * 100  # Se guarda en decimas -> milesimas
             r_p = dr["PROFUNDIDAD"]
             if r_t <= 0:

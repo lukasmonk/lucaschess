@@ -40,7 +40,6 @@ Traducir.install()
 nArgs = len(sys.argv)
 if nArgs == 1:
     import Code.Init
-
     Code.Init.init()
 
 elif nArgs >= 2:
@@ -54,11 +53,3 @@ elif nArgs >= 2:
     elif arg == "-kibitzer":
         import Code.RunKibitzer
         Code.RunKibitzer.run(sys.argv[2])
-
-    elif arg == "-voyager":
-        import Code.RunVoyager
-        Code.RunVoyager.run(sys.argv[2])
-
-    elif arg == "-scanner":
-        import Code.RunScanner
-        Code.RunScanner.run(sys.argv[2], sys.argv[3])  # fich, carpeta Scanners
