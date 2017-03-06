@@ -46,6 +46,10 @@ class GestorEntMaq(Gestor.Gestor):
         self.siRivalConBlancas = not siBlancas
 
         self.cm = dic["RIVAL"].get("CM", None)
+        if self.cm:
+            if hasattr(self.cm, "icono"):
+                delattr(self.cm, "icono") # problem with configuracion.escVariables and saving qt variables
+
 
         self.siAtras = dic["ATRAS"]
 
@@ -1027,6 +1031,11 @@ class GestorEntMaq(Gestor.Gestor):
         dic = PantallaEntMaq.cambioRival(self.pantalla, self.configuracion, self.reinicio)
 
         if dic:
+            dr = dic["RIVAL"]
+            rival = dr["CM"]
+            if hasattr(rival, "icono"):
+                delattr(rival, "icono")
+
             Util.guardaDIC(dic, self.configuracion.ficheroEntMaquina)
             for k, v in dic.iteritems():
                 self.reinicio[k] = v
@@ -1042,8 +1051,6 @@ class GestorEntMaq(Gestor.Gestor):
 
             self.nAjustarFuerza = dic["AJUSTAR"]
 
-            dr = dic["RIVAL"]
-            rival = dr["CM"]
             r_t = dr["TIEMPO"] * 100  # Se guarda en decimas -> milesimas
             r_p = dr["PROFUNDIDAD"]
             if r_t <= 0:
