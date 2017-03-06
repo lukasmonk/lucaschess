@@ -1061,6 +1061,7 @@ class GestorEntMaq(Gestor.Gestor):
                 r_t = 1000
 
             dr["RESIGN"] = self.resignPTS
+            self.xrival.terminar()
             self.xrival = self.procesador.creaGestorMotor(rival, r_t, r_p, self.nAjustarFuerza != kAjustarMejor)
 
             self.xrival.siBlancas = not siBlancas
