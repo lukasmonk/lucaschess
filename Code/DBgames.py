@@ -45,6 +45,8 @@ class TreeSTAT:
         cursor = self._conexion.cursor()
         cursor.execute("pragma table_info(STATS)")
         if not cursor.fetchall():
+            cursor.execute("PRAGMA page_size = 4096")
+            cursor.execute("PRAGMA synchronous = NORMAL")
             if depth is None:
                 depth = self.defaultDepth
             sql = "CREATE TABLE STATS( HASHFEN INT, W INT, B INT, D INT, O INT, RFATHER INT, XMOVE INT );"
@@ -61,8 +63,6 @@ class TreeSTAT:
             cursor.execute(sql, ("DEPTH", str(depth)))
 
             self._conexion.commit()
-            cursor.execute("PRAGMA synchronous = NORMAL")
-            cursor.execute("PRAGMA page_size = 8192")
         else:
             sql = "SELECT VALUE FROM CONFIG WHERE KEY= ?"
             cursor.execute(sql, ("DEPTH",))
@@ -500,6 +500,8 @@ class DBgames:
         cursor.close()
 
         if not liCampos:
+            cursor = self._conexion.cursor()
+            cursor.execute("PRAGMA page_size = 4096")
             sql = "CREATE TABLE %s (" % self.tabla
             sql += "XPV VARCHAR NOT NULL PRIMARY KEY,"
             for field in self.liCamposBase:
@@ -507,7 +509,6 @@ class DBgames:
             for field in self.liCamposBLOB:
                 sql += "%s BLOB,"% field
             sql = sql[:-1] + " );"
-            cursor = self._conexion.cursor()
             cursor.execute(sql)
             cursor.close()
 

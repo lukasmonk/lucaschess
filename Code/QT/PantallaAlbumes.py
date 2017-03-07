@@ -72,7 +72,7 @@ class WAlbum(QTVarios.WDialogo):
     def terminar(self):
         self.guardarVideo()
 
-    def closeEvent(self):
+    def closeEvent(self, event):
         self.terminar()
 
     def quit(self):
