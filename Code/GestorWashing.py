@@ -642,6 +642,11 @@ class GestorWashingCreate(Gestor.Gestor):
         else:
             self.mrmTutor = self.analizaTutor()
 
+
+    def sigueHumanoAnalisis(self):
+        self.analizaTutorInicio()
+        Gestor.Gestor.sigueHumano(self)
+
     def mueveHumano(self, desde, hasta, coronacion=None):
         jg = self.checkMueveHumano(desde, hasta, coronacion)
         if not jg:
@@ -797,6 +802,8 @@ class GestorWashingCreate(Gestor.Gestor):
 
     def atras(self):
         if self.partida.numJugadas():
+            if self.siAnalizando:
+                self.analizaTutorFinal()
             self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
             self.listaAperturasStd.asignaApertura(self.partida)
             self.ponteAlFinal()

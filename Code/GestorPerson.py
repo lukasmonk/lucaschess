@@ -22,7 +22,6 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
         self.resultado = None
         self.siJuegaHumano = False
         self.estado = kJugando
-        self.siAnalizando = False
         self.timekeeper = Util.Timekeeper()
 
         self.summary = {}
@@ -125,8 +124,6 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
                 bl, ng = ng, bl
             self.pantalla.ponDatosReloj(bl, tpBL, ng, tpNG)
             self.refresh()
-
-        self.siAnalizadoTutor = False
 
         self.ponPosicionDGT()
 
@@ -269,9 +266,6 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
             self.guardarNoTerminados()
             self.ponFinJuego()
         else:
-            if self.siAnalizando:
-                self.siAnalizando = False
-                self.xtutor.ac_final(-1)
             self.pantalla.activaJuego(False, False)
             self.quitaCapturas()
             self.procesador.inicio()
@@ -293,9 +287,6 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
             self.saveSummary()
             self.ponFinJuego()
         else:
-            if self.siAnalizando:
-                self.siAnalizando = False
-                self.xtutor.ac_final(-1)
             self.pantalla.activaJuego(False, False)
             self.quitaCapturas()
             self.procesador.inicio()

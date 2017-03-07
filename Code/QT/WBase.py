@@ -39,7 +39,7 @@ class WBase(QtGui.QWidget):
 
         lyT = Colocacion.V().control(self.tablero).relleno()
 
-        lyAI = Colocacion.H().control(self.capturas).otroi(lyT).otroi(lyBI).relleno(1).margen(0)
+        lyAI = Colocacion.H().relleno(1).control(self.capturas).otroi(lyT).otroi(lyBI).relleno(1).margen(0)
         ly = Colocacion.V().control(self.tb).relleno().otro(lyAI).relleno().margen(2)
 
         self.setLayout(ly)
