@@ -312,7 +312,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.seguir()
 
         elif clave == k_ayudaMover:
-            self.analizaTutorFinal()
+            self.analizaFinal()
             self.ayudaMover(999)
 
         elif clave == k_reiniciar:
@@ -445,19 +445,21 @@ class GestorEntMaq(Gestor.Gestor):
             self.saveSummary()
             self.ponFinJuego()
         else:
-            if self.siAnalizando:
-                self.siAnalizando = False
-                self.xtutor.ac_final(-1)
+            self.analizaTerminar()
             self.pantalla.activaJuego(False, False)
             self.quitaCapturas()
             self.procesador.inicio()
 
         return False
 
+    def analizaTerminar(self):
+        if self.siAnalizando:
+            self.siAnalizando = False
+            self.xtutor.ac_final(-1)
+
     def atras(self):
         if self.partida.numJugadas():
-            if self.siAnalizando:
-                self.analizaTutorFinal()
+            self.analizaTerminar()
             if self.ayudas:
                 self.ayudas -= 1
             self.ponAyudasEM()
@@ -517,7 +519,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.summary[njug] = {}
         self.summary[njug][key] = value
 
-    def analizaTutorInicio(self):
+    def analizaInicio(self):
         self.siAnalizando = False
         self.siAnalizadoTutor = False
         if self.aperturaObl or not self.siTutorActivado or self.ayudasPGN <= 0:
@@ -544,7 +546,7 @@ class GestorEntMaq(Gestor.Gestor):
                         self.guiDispatch(rm)
                         QtCore.QTimer.singleShot(1000, self.analizaSiguiente)
 
-    def analizaTutorFinal(self):
+    def analizaFinal(self):
         estado = self.siAnalizando
         self.siAnalizando = False
         if self.siAnalizadoTutor or not self.siTutorActivado or self.ayudasPGN <= 0:
@@ -633,7 +635,7 @@ class GestorEntMaq(Gestor.Gestor):
 
     def juegaHumano(self, siBlancas):
         self.siJuegaHumano = True
-        self.analizaTutorInicio()
+        self.analizaInicio()
 
         self.relojStart(True)
         self.timekeeper.start()
@@ -712,7 +714,7 @@ class GestorEntMaq(Gestor.Gestor):
             return False
 
     def sigueHumanoAnalisis(self):
-        self.analizaTutorInicio()
+        self.analizaInicio()
         Gestor.Gestor.sigueHumano(self)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
@@ -767,7 +769,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.sigueHumano()
             return False
 
-        self.analizaTutorFinal()  # tiene que acabar siempre
+        self.analizaFinal()  # tiene que acabar siempre
         if not siElegido and self.siTutorActivado:
             rmUser, n = self.mrmTutor.buscaRM(movimiento)
             if not rmUser:

@@ -5,7 +5,6 @@ import time
 
 from PyQt4 import QtCore
 
-from Code import VarGen
 from Code.Constantes import *
 from Code import XMotorRespuesta
 from Code import EngineThread

@@ -17,7 +17,6 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code import TrListas
 from Code import Util
-from Code import VarGen
 
 
 class WSave(QTVarios.WDialogo):

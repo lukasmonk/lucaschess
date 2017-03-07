@@ -1,9 +1,6 @@
 import subprocess
 import sys
 
-from Code import VarGen
-
-
 def run_lucas(*args):
     li = []
     if sys.argv[0].endswith(".py"):

@@ -4,7 +4,6 @@ from Code.QT import Colocacion
 from Code.QT import Controles
 from Code.QT import Iconos
 from Code.QT import QTUtil
-from Code import VarGen
 from Code.Constantes import *
 
 

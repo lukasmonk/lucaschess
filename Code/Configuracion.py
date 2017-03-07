@@ -12,7 +12,6 @@ from Code import MotoresExternos
 from Code import TrListas
 from Code import Traducir
 from Code import Util
-from Code import VarGen
 from Code.Constantes import *
 
 import Code.EnginesWindows as Engines

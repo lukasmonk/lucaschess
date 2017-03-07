@@ -1,4 +1,3 @@
-from Code import VarGen
 import Code.EnginesWindows as Engines
 
 from Code import BaseConfig

@@ -4,7 +4,6 @@ import time
 
 import psutil
 
-from Code import VarGen
 from Code.Constantes import *
 
 DEBUG = False
