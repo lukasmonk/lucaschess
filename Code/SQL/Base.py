@@ -1,6 +1,8 @@
 import atexit
 import sqlite3
 
+from Code import Util
+
 import DBF
 import DBFcache
 
@@ -13,8 +15,14 @@ class DBBase:
 
     def __init__(self, nomFichero):
         self.nomFichero = unicode(nomFichero)
+        existe = Util.existeFichero(nomFichero)
         self.conexion = sqlite3.connect(self.nomFichero)
         self.conexion.text_factory = lambda x: unicode(x, "utf-8", "ignore")
+        if not existe:
+            cursor = self.conexion.cursor()
+            cursor.execute("PRAGMA page_size = 4096")
+            cursor.execute("PRAGMA synchronous = NORMAL")
+            cursor.close()
         atexit.register(self.cerrar)
 
     def cerrar(self):
@@ -66,11 +74,9 @@ class DBBase:
 
     def generarTabla(self, tb):
         cursor = self.conexion.cursor()
-        tb.crearBase(cursor)
-        cursor.close()
-        cursor = self.conexion.cursor()
+        cursor.execute("PRAGMA page_size = 4096")
         cursor.execute("PRAGMA synchronous = NORMAL")
-        cursor.execute("PRAGMA page_size = 8192")
+        tb.crearBase(cursor)
         cursor.close()
 
 

@@ -707,6 +707,7 @@ class WUnTorneo(QTVarios.WDialogo):
                 for y in range(x + 1, nSel):
                     self.torneo.nuevoGame(liSel[x], liSel[y], minutos, segundos)
                     self.torneo.nuevoGame(liSel[y], liSel[x], minutos, segundos)
+        self.torneo.randomize()
 
         self.gridGames.refresh()
         self.gridGames.gobottom()

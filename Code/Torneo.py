@@ -456,6 +456,17 @@ class Torneo:
     def liGames(self):
         return self._liGames
 
+    def randomize(self, n=0):
+        if n == 50:
+            return
+        random.shuffle(self._liGames)
+        prev = self._liGames[0]
+        for gm in self._liGames[1:]:
+            if gm.hwhite() == prev.hwhite() and gm.hblack() == prev.hblack():
+                return self.randomize(n+1)
+            prev = gm
+        return
+
     def delGames(self, lista):
         li = []
         for x in range(len(self._liGames)):

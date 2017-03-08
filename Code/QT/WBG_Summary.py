@@ -263,11 +263,12 @@ class WSummary(QtGui.QWidget):
         recno = self.grid.recno()
         if recno >= 0:
             dic = self.liMoves[recno]
-            pv = dic["pv"]
-            if pv.count(" ") > 0:
-                pv = "%s %s" % (self.pvBase, dic["pvmove"])  # transposition case
-            self.actualizaPV(pv)
-            self.cambiaInfoMove()
+            if "pv" in dic:
+                pv = dic["pv"]
+                if pv.count(" ") > 0:
+                    pv = "%s %s" % (self.pvBase, dic["pvmove"])  # transposition case
+                self.actualizaPV(pv)
+                self.cambiaInfoMove()
 
     def ponPV(self, pvMirar):
         if not pvMirar:

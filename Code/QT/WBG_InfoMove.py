@@ -289,11 +289,11 @@ class WInfomove(QtGui.QWidget):
         self.tablero.desactivaTodas()
 
     def MoverInicio(self):
-        self.colocatePartida(-1)
         if self.usoNormal:
             self.posHistoria = -1
             posicion = ControlPosicion.ControlPosicion().posInicial()
         else:
+            # self.colocatePartida(-1)
             self.posJugada = -1
             posicion = self.partida.iniPosicion
         self.tablero.ponPosicion(posicion)
