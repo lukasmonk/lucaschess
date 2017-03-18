@@ -203,6 +203,8 @@ class VentanaMultiPV(QtGui.QDialog):
             if valor is None:
                 orden = "setoption name %s" % opcion
             else:
+                if type(valor) == bool:
+                    valor = str(valor).lower()
                 orden = "setoption name %s value %s" % (opcion, valor)
             self.ready_ok(orden)
 
@@ -697,6 +699,8 @@ class Ventana(QtGui.QDialog):
             else:
                 if opcion.upper() == "MULTIPV" and not siMultiPV:
                     continue
+                if type(valor) == bool:
+                    valor = str(valor).lower()
                 orden = "setoption name %s value %s" % (opcion, valor)
             self.ready_ok(orden)
 
