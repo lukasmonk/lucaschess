@@ -313,8 +313,8 @@ def dicMotoresFixedElo():
             ( "glass", "Personality", (
                                           ("#1000elo", "p: ~1000 elo", 1000),
                                           ("Careful", "p: Careful / 1900", 1900),
-                                          ("Careful", "p: Defender / 2000", 2000),
-                                          ("Careful", "p: Maverick / 2000", 2000),
+                                          ("Defender", "p: Defender / 2000", 2000),
+                                          ("Maverick", "p: Maverick / 2000", 2000),
                                           ("Solid", "p: Solid / 2200", 2200),
                                           ("Aggressive", "p: Aggressive / 2300", 2300),
                                           ("Glass", "p: Glass / 2400", 2400),
