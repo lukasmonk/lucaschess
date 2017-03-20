@@ -270,6 +270,18 @@ def leeRivales():
     cm.ordenUCI("Hash", "64")
     mas(cm)
 
+    cm = ConfigMotor("glass", "Edmund Moshammer and Pawel Koziol", "2.0", "http://www.pkoziol.cal24.pl/glass/")
+    cm.path = "Glass_Weak_x86.exe"
+    cm.elo = 2400
+    #cm.ordenUCI("Hash", "64")
+    #cm.ordenUCI("Learning", "false")
+    mas(cm)
+
+    cm = ConfigMotor("rodentIII", "Pawel Koziol", "0.172", "http://www.pkoziol.cal24.pl/rodent/rodent.htm")
+    cm.path = "Rodent_III_x32.exe"
+    cm.elo = 2930
+    mas(cm)
+
     return dicRivales
 
 def dicMotoresFixedElo():
@@ -294,4 +306,36 @@ def dicMotoresFixedElo():
             cm.nombre += " (%d)" % elo
             cm.clave += " (%d)" % elo
             dic[elo].append(cm)
+
+    # Personalities
+    # engine     option to set person     name of person in engine       pretty name     ELO
+    for nm, option_name, persons in (
+            ( "glass", "Personality", (
+                                          ("#1000elo", "p: ~1000 elo", 1000),
+                                          ("Careful", "p: Careful / 1900", 1900),
+                                          ("Careful", "p: Defender / 2000", 2000),
+                                          ("Careful", "p: Maverick / 2000", 2000),
+                                          ("Solid", "p: Solid / 2200", 2200),
+                                          ("Aggressive", "p: Aggressive / 2300", 2300),
+                                          ("Glass", "p: Glass / 2400", 2400),
+                                      )
+            ),
+            ( "rodentIII", "PersonalityFile", (
+                                                    ("personalities/school/amy.txt", "p: Amy / 1000", 1000),
+                                                    ("personalities/club/mark.txt", "p: Mark / 1500", 1500),
+                                                    ("personalities/club/sam.txt", "p: Sam / 1500", 1500),
+                                                    ("personalities/masters/victor.txt", "p: Victor / 2250", 2250),
+                                                    ("personalities/famous/Anand.txt", "p: Anand / 2700", 2700),
+                                              )
+            ),
+    ):
+        for person in persons:
+            cm = d[nm].clona()
+            cm.ordenUCI(option_name, person[0])
+            cm.nombre += " (%s)" % person[1]
+            cm.clave += " (%s)" % person[1]
+            if person[2] not in dic:
+                dic[person[2]] = []
+            dic[person[2]].append(cm)
+
     return dic
