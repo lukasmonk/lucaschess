@@ -63,7 +63,7 @@ void pgn_start(char * fich, int depth)
     if( depth > 256 ) depth = 256;
     max_depth = depth;
 
-    fpgn = fopen(fich, "r");
+    fpgn = fopen(fich, "rb");
     max_pgn = 64*1024;
     pgn = (char *)malloc(max_pgn);
     pv = (char *)malloc(5*1024);
@@ -163,7 +163,6 @@ void mas_label(void)
 
 int pgn_read( void )
 {
-    bool check_blank_lines;
     w_pgn = pgn;
     fen[0] = 0;
     pos_label = 0;
@@ -173,6 +172,7 @@ int pgn_read( void )
     do
     {
         if(!fgets(w_pgn, 1024, fpgn)) return false;
+//        printf("PL:[%s]", w_pgn);
         if(w_pgn[0] == '[' )
         {
             mas_label();
@@ -186,31 +186,28 @@ int pgn_read( void )
     do
     {
         if(!fgets(w_pgn, 1024, fpgn)) return false; /*EOF*/
-        if(w_pgn[0] != '[')
-        {
-            check_blank_lines = empty_line();
-            mas_pgn();
-            break;
-        }
+        if(w_pgn[0] != '[') break;
+//        printf("+L:[%s]", w_pgn);
         mas_label();
         mas_pgn();
     }
     while(1);
+//    printf("PR:[%s]", w_pgn);
 
     pos_body = w_pgn;
+    mas_pgn();
 
     /* leemos hasta linea en blanco */
     do
     {
         if(!fgets(w_pgn, 1024, fpgn)) break; /*EOF*/
-        if( check_blank_lines )
-        {
-            if(!empty_line()) check_blank_lines = false;
+        if(w_pgn[0] == '[') {
+            fseek( fpgn, -strlen(w_pgn)-1, SEEK_CUR );
+//            printf("FR:[%s,%d]", w_pgn, -strlen(w_pgn)-1);
+            w_pgn[0] = '\0';
+            break;
         }
-        else
-        {
-            if(empty_line()) break;
-        }
+//        printf("+R:[%s]", w_pgn);
         mas_pgn();
     }
     while(1);
