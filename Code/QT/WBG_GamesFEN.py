@@ -10,11 +10,11 @@ from Code.QT import Columnas
 from Code.QT import Controles
 from Code.QT import Grid
 from Code.QT import Iconos
-from Code.QT import PantallaBooks
 from Code.QT import PantallaPGN
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import Voyager
+from Code.QT import PantallaSolo
 from Code import TrListas
 from Code import Util
 
@@ -41,8 +41,6 @@ class WGamesFEN(QtGui.QWidget):
         oColumnas.nueva("numero", _("N."), 70, siCentrado=True)
         liBasic = dbGamesFEN.liCamposBase
         for clave in liBasic:
-            if clave == "FEN":
-                continue
             rotulo = TrListas.pgnLabel(clave)
             siCentrado = clave != "EVENT"
 
@@ -65,6 +63,7 @@ class WGamesFEN(QtGui.QWidget):
             (_("Last"), Iconos.Final(), self.tw_gobottom), None,
             (_("Filter"), Iconos.Filtrar(), self.tw_filtrar), None,
             (_("Remove"), Iconos.Borrar(), self.tw_borrar),None,
+            (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
         ]
 
         self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
@@ -79,6 +78,10 @@ class WGamesFEN(QtGui.QWidget):
         self.setLayout(layout)
 
         self.setNameToolBar()
+
+    def reread(self):
+        self.dbGamesFEN.lee_rowids()
+        self.grid.refresh()
 
     def limpiaColumnas(self):
         for col in self.grid.oColumnas.liColumnas:
@@ -174,7 +177,7 @@ class WGamesFEN(QtGui.QWidget):
             self.liFiltro = w.liFiltro
 
             self.where = w.where()
-            self.dbGames.filter(self.where)
+            self.dbGamesFEN.setFilter(self.where)
             self.grid.refresh()
             self.grid.gotop()
             self.updateStatus()
@@ -187,16 +190,23 @@ class WGamesFEN(QtGui.QWidget):
 
     def tw_nuevo(self):
         # Se genera un PGN
-        fen = Voyager.voyagerFEN(self, "")
+        fen = Voyager.voyagerFEN(self, "", False)
         if fen is not None:
-            pgn = '[FEN "%s"]' % fen
+            if self.dbGamesFEN.si_existe_fen(fen):
+                QTUtil2.mensError(self, _("This position already exists."))
+                return
+            hoy = Util.hoy()
+            pgn = '[Date "%d.%02d.%02d"]\n[FEN "%s"]' % (hoy.year, hoy.month, hoy.day, fen)
 
             nuevoPGN, pv, dicPGN = self.procesador.gestorUnPGN(self, pgn)
-            if nuevoPGN:
-                if not self.dbGamesFEN.cambiarUno(None, nuevoPGN, pv, dicPGN):
-                    QTUtil2.mensError(self, _("This position already exists."))
-                else:
+            if dicPGN:
+                liTags = [(clave, valor) for clave, valor in dicPGN.iteritems()]
+                partida_completa = Partida.PartidaCompleta(fen=fen, liTags=liTags)
+                if pv:
+                    partida_completa.leerPV(pv)
+                if self.dbGamesFEN.inserta(partida_completa):
                     self.actualiza()
+                    self.grid.refresh()
                     self.grid.gobottom()
 
     def tw_editar(self):
@@ -205,13 +215,19 @@ class WGamesFEN(QtGui.QWidget):
             recno = li[0]
             partidaCompleta = self.dbGamesFEN.leePartidaRecno(recno)
 
-            partidaCompleta = self.procesador.gestorPartida(self, partidaCompleta, True)
-            if partidaCompleta:
-                if not self.dbGamesFEN.guardaPartidaRecno(recno, partidaCompleta):
-                     QTUtil2.mensError(self, _("This position already exists."))
-                else:
-                     self.grid.refresh()
-                     self.updateStatus()
+            fen0 = partidaCompleta.iniPosicion.fen()
+            partidaCompleta = self.procesador.gestorPartida(self, partidaCompleta, False)
+            if partidaCompleta is not None:
+                fen1 = partidaCompleta.iniPosicion.fen()
+                if fen0 != fen1:
+                    if self.dbGamesFEN.si_existe_fen(fen1):
+                        QTUtil2.mensError(self, _("This position already exists."))
+                        return
+
+                self.dbGamesFEN.guardaPartidaRecno(recno, partidaCompleta)
+                self.actualiza()
+                self.grid.refresh()
+                self.updateStatus()
 
     def tw_borrar(self):
         li = self.grid.recnosSeleccionados()
@@ -227,6 +243,13 @@ class WGamesFEN(QtGui.QWidget):
 
             um.final()
 
+    def tw_utilities(self):
+        menu = QTVarios.LCMenu(self)
+        menu.opcion(self.tg_massive_change_tags, _("Massive change of tags"), Iconos.PGN())
+        resp = menu.lanza()
+        if resp:
+            resp()
+
     def tg_file(self):
         menu = QTVarios.LCMenu(self)
 
@@ -239,6 +262,8 @@ class WGamesFEN(QtGui.QWidget):
         submenu.opcion(self.tg_importar_PGN, _("A PGN file"), Iconos.FichPGN())
         submenu.separador()
         submenu.opcion(self.tg_importar_DB, _("Other database"), Iconos.DatabaseC())
+        submenu.separador()
+        submenu.opcion(self.tg_importar_pks, _("A PKS file"), Iconos.JuegaSolo())
         menu.separador()
 
         submenu = menu.submenu(_("Export to"), Iconos.DatabaseMas())
@@ -251,28 +276,36 @@ class WGamesFEN(QtGui.QWidget):
         if resp:
             resp()
 
-    def tw_uti_pcreate(self):
-        PantallaBooks.polyglotCrear(self)
+    def tg_importar_pks(self):
+        path_pks = QTUtil2.leeFichero(self, self.configuracion.dirJS, "pks")
+        if path_pks:
+            direc = os.path.dirname(path_pks)
+            if direc != self.configuracion.dirJS:
+                self.configuracion.dirJS = direc
+                self.configuracion.graba()
 
-    def tw_uti_pmerge(self):
-        PantallaBooks.polyglotUnir(self)
+            mens_error = self.dbGamesFEN.insert_pks(path_pks)
+            if mens_error:
+                QTUtil2.mensError(self, mens_error)
+                return
+            self.actualiza(True)
+            self.grid.gobottom(0)
 
-    def tw_uti_tactic(self):
-        dbf = self.dbGamesFEN.dbf
-
-        def rutinaDatos(recno):
-            dic = {}
-            dbf.goto(recno)
-            for clave in dbf.liCampos:
-                dic[clave] = getattr(dbf.reg, clave)
-            dic["PGN"] = Util.blob2var(dic["PGN"])
-            return dic
-
-        liRegistros = self.grid.recnosSeleccionados()
-        if len(liRegistros) < 2:
-            liRegistros = range(dbf.reccount())
-
-        PantallaPGN.crearTactic(self.procesador, self, liRegistros, rutinaDatos)
+    def tg_massive_change_tags(self):
+        resp = PantallaSolo.massive_change_tags(self, self.configuracion, len(self.grid.recnosSeleccionados()))
+        if resp:
+            recno = self.grid.recno()
+            liTags, remove, overwrite, si_all = resp
+            liRegistros = range(self.dbGamesFEN.reccount()) if si_all else self.grid.recnosSeleccionados()
+            nRegistros = len(liRegistros)
+            if (nRegistros == 1 or
+                ((nRegistros > 1) and
+                 QTUtil2.pregunta(self, _("Are you sure do you want to change the %d registers?" % nRegistros)))):
+                um = QTUtil2.unMomento(self)
+                self.dbGamesFEN.massive_change_tags(liTags, liRegistros, remove, overwrite)
+                self.reread()
+                self.grid.goto(recno, 0)
+                um.final()
 
     def tg_change(self):
         pathFich = QTUtil2.leeFichero(self, os.path.dirname(self.configuracion.ficheroDBgames), "lcf",
@@ -343,76 +376,44 @@ class WGamesFEN(QtGui.QWidget):
 
         if modo == "w" and Util.existeFichero(path):
             Util.borraFichero(path)
-            Util.borraFichero(path+"_s1")
 
         dlTmp = QTVarios.ImportarFicheroDB(self)
+        dlTmp.ponExportados()
         dlTmp.show()
 
         dbn = DBgamesFEN.DBgamesFEN(path)
         dbn.appendDB(self.dbGamesFEN, li, dlTmp)
 
     def tg_exportar_PGN(self):
-        li = self.grid.recnosSeleccionados()
-        if li:
-            if len(li) > 1:
-                menu = QTVarios.LCMenu(self)
-                menu.opcion(True, _("All read"), Iconos.PuntoVerde())
-                menu.separador()
-                menu.opcion(False, _("Only selected"), Iconos.PuntoAzul())
-                resp = menu.lanza()
-                if resp is None:
-                    return
-                siTodos = resp
-            else:
-                siTodos = True
+        resp = self.tg_exportar("pgn")
+        if not resp:
+            return
+        li, modo, path = resp
 
-            if siTodos:
-                li = range(self.dbGamesFEN.reccount())
+        try:
+            fpgn = codecs.open(path, modo, 'utf-8', 'ignore')
+        except:
+            QTUtil2.mensError(self, "%s : %s\n" % (_("Unable to save"), path))
+            return
 
-            # Fichero donde aadir
-            pathPGN = QTUtil2.salvaFichero(self, _("Export"), self.configuracion.dirPGN,
-                                           _("File") + " pgn (*.pgn)",
-                                           False)
-            if pathPGN:
-                carpeta, nomf = os.path.split(pathPGN)
-                if carpeta != self.configuracion.dirPGN:
-                    self.configuracion.dirPGN = carpeta
-                    self.configuracion.graba()
+        pb = QTUtil2.BarraProgreso1(self, _("Exporting..."))
+        pb.mostrar()
+        total = len(li)
+        pb.ponTotal(total)
 
-                # Grabamos
-                modo = "w"
-                if Util.existeFichero(pathPGN):
-                    yn = QTUtil2.preguntaCancelar(self,
-                                                  _X(_("The file %1 already exists, what do you want to do?"), pathPGN),
-                                                  si=_("Append"), no=_("Overwrite"))
-                    if yn is None:
-                        return
-                    if yn:
-                        modo = "a"
-                try:
-                    fpgn = codecs.open(pathPGN, modo, 'utf-8', 'ignore')
-                except:
-                    QTUtil2.mensError(self, "%s : %s\n" % (_("Unable to save"), pathPGN.replace("/", "\\")))
-                    return
+        if modo == "a":
+            fpgn.write("\n\n")
+        for n, recno in enumerate(li):
+            p = self.dbGamesFEN.leePartidaRecno(recno)
+            pb.pon(n + 1)
+            if pb.siCancelado():
+                break
+            fpgn.write(p.pgn())
+            fpgn.write("\n\n")
 
-                pb = QTUtil2.BarraProgreso1(self, _("Exporting..."))
-                pb.mostrar()
-                total = len(li)
-                pb.ponTotal(total)
-
-                if modo == "a":
-                    fpgn.write("\n\n")
-                for n, recno in enumerate(li):
-                    pgn = self.dbGamesFEN.leePGNRecno(recno)
-                    pb.pon(n + 1)
-                    if pb.siCancelado():
-                        break
-                    fpgn.write(pgn)
-                    fpgn.write("\n\n")
-
-                fpgn.close()
-                pb.cerrar()
-                QTUtil2.mensaje(self, _X(_("Saved to %1"), pathPGN.replace("/", "\\")))
+        fpgn.close()
+        pb.cerrar()
+        QTUtil2.mensaje(self, _X(_("Saved to %1"), path))
 
     def tg_importar_PGN(self):
         path = QTVarios.select_pgn(self)
@@ -427,28 +428,16 @@ class WGamesFEN(QtGui.QWidget):
 
     def tg_importar_DB(self):
         path = QTVarios.select_ext(self, "lcf")
-        if not path:
-            return None
+        if path:
+            dlTmp = QTVarios.ImportarFicheroDB(self)
+            dlTmp.show()
 
-        dlTmp = QTVarios.ImportarFicheroDB(self)
-        dlTmp.show()
+            dbn = DBgamesFEN.DBgamesFEN(path)
+            dbn.lee_rowids()
+            liRecnos = range(dbn.reccount())
+            self.dbGamesFEN.appendDB(dbn, liRecnos, dlTmp)
 
-        dbn = DBgamesFEN.DBgamesFEN(path)
-        self.dbGamesFEN.appendDB(dbn, range(dbn.all_reccount()), dlTmp)
-
-        self.actualiza(True)
-
-    def tg_importarFEN(self):
-        # Elegimos el fichero PGN
-        path = QTVarios.select_pgn(self)
-        if not path:
-            return None
-
-        dlTmp = QTVarios.ImportarFicheroPGN(self)
-        dlTmp.show()
-        self.dbGamesFEN.leerPGN(path, dlTmp)
-
-        self.actualiza(True)
+            self.actualiza(True)
 
     def changeDBgames(self, pathFich):
         self.configuracion.ficheroDBgamesFEN = pathFich

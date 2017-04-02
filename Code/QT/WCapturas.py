@@ -1,3 +1,5 @@
+DIVISOR = 12
+
 from PyQt4 import QtCore, QtGui
 
 from Code.QT import Colocacion
@@ -10,7 +12,7 @@ class CapturaLista(QtGui.QWidget):
         super(CapturaLista, self).__init__(wParent)
 
         self.setFixedWidth(10)
-        anchoPZ = int(tablero.ancho/12)
+        anchoPZ = int(tablero.ancho/DIVISOR)
         self.pantalla = wParent.parent()
 
         self.tipoMaterial = VarGen.configuracion.tipoMaterial
@@ -37,7 +39,7 @@ class CapturaLista(QtGui.QWidget):
             self.pantalla.activaCapturas(False)
 
     def resetPZ(self, tablero):
-        anchoPZ = int(tablero.ancho/12)
+        anchoPZ = int(tablero.ancho/DIVISOR)
         for k, li in self.dic.iteritems():
             for lb in li:
                 tablero.piezas.change_label(lb, anchoPZ)

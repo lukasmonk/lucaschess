@@ -68,9 +68,8 @@ def log(cad):
     log.write(".6.[%s]\n%s\n" % (Util.hoy(), cad))
     log.close()
 
+
 # CALLBACKS
-
-
 def registerStatusFunc(dato):
     envia("status", dato)
     return 1
@@ -88,9 +87,8 @@ def registerWhiteMoveInputFunc(dato):
 def registerBlackMoveInputFunc(dato):
     return envia("blackMove", _dgt2pv(dato))
 
+
 # Activar/desactivar/reactivar
-
-
 def activar():
     dgt = None
     for path in ("",
@@ -191,9 +189,8 @@ def writeClocks(wclock, bclock):
         dgt = VarGen.dgt
         dgt._DGTDLL_SetNRun(wclock, bclock, 0)
 
+
 # Utilidades para la trasferencia de datos
-
-
 def _dgt2fen(dato):
     n = 0
     ndato = len(dato)
@@ -239,9 +236,8 @@ def _dgt2pv(dato):
 
     return dato[1:3] + dato[4:6]
 
+
 # Lo mismo, de otra forma
-
-
 def xdgt2fen(xdgt):
     liD = xdgt.split(" ")
     dgt = liD[0]

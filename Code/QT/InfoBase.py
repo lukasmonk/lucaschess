@@ -59,7 +59,7 @@ class ThanksTo:
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
             ["Texel 1.05", "Peter Österlund", "http://web.comhem.se/petero2home/javachess/index.html#texel"],
             ["Stockfish 8", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["Deepfish 4.1", "Tord Romstad, Marco Costalba, Joona Kiiski, fork by Marco Zerbinati", "https://github.com/Zerbinati/DeepFishMZ"],
+            ["McBrain 2.1a", "Michael Byrne (based on stockfish)", "https://github.com/MichaelB7/Stockfish/releases"],
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
         ]
         li.sort(key=lambda x: x[0])
@@ -110,7 +110,7 @@ class ThanksTo:
             return txt
 
         # Version 10
-        liBase = ["Remes", "Max Aloyau", "Alfonso Solbes", "tico-tico"]
+        liBase = ["Remes", "Max Aloyau", "Alfonso Solbes", "tico-tico", "Nils Andersson", "Bernhard"]
         liResto = ["Immortalchess forum", ]
         txt += version(10, liBase, liResto)
 

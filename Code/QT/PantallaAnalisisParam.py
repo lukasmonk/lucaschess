@@ -181,7 +181,7 @@ def paramAnalisis(parent, configuracion, siModoAmpliado, siTodosMotores=False):
         liGen.append((config, defecto))
         liGen.append(SEPARADOR)
 
-        liGen.append((_("To redo any existing prior analyses (if they exist)") + ":", alm.siBorrarPrevio))
+        liGen.append((_("Redo any existing prior analyses (if they exist)") + ":", alm.siBorrarPrevio))
 
         liGen.append((_("Start from the end of the game") + ":", alm.desdeelfinal))
 

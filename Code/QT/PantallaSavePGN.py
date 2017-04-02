@@ -49,7 +49,7 @@ class WSave(QTVarios.WDialogo):
         self.bt_file = Controles.PB(self, "", self.file_select, plano=False).anchoMinimo(300)
 
         # Codec
-        lb_codec = Controles.LB(self, _("Write with the codec") + ": ")
+        lb_codec = Controles.LB(self, _("Encoding") + ": ")
         liCodecs = [k for k in set(v for k, v in encodings.aliases.aliases.iteritems())]
         liCodecs.sort()
         liCodecs = [(k, k) for k in liCodecs]

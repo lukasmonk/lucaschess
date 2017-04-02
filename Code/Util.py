@@ -454,8 +454,7 @@ class SymbolDict:
                 self.__setitem__(k, v)
 
     def __contains__(self, clave):
-        clu = clave.upper()
-        return clu in self._dic
+        return clave.upper() in self._dic
 
     def __len__(self):
         return len(self._keys)

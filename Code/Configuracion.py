@@ -135,7 +135,7 @@ class Configuracion:
         self.rivalInicial = "tarrasch"
         self.rival = self.buscaRival(self.rivalInicial)
 
-        self.tutorInicial = "deepfish"
+        self.tutorInicial = "mcbrain"
         self.tutor = self.buscaRival(self.tutorInicial)
         self.tutorMultiPV = 10  # 0: maximo
         self.tutorDifPts = 0

@@ -201,7 +201,6 @@ class GestorSolo(Gestor.Gestor):
         return "%s-%s (%s, %s,%s)" % (white, black, event, date, result)
 
     def procesarAccion(self, clave):
-
         if clave == k_mainmenu:
             self.finPartida()
 

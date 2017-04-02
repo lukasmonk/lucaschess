@@ -5,6 +5,8 @@ from PyQt4 import QtGui, QtCore
 
 from Code import Partida
 from Code import DBgames
+from Code import TrListas
+from Code import Util
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -14,8 +16,7 @@ from Code.QT import PantallaBooks
 from Code.QT import PantallaPGN
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
-from Code import TrListas
-from Code import Util
+from Code.QT import PantallaSolo
 
 
 class WGames(QtGui.QWidget):
@@ -39,6 +40,8 @@ class WGames(QtGui.QWidget):
         self.liFiltro = []
         self.where = None
 
+        self.last_opening = None
+
         # Grid
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("numero", _("N."), 70, siCentrado=True)
@@ -46,8 +49,7 @@ class WGames(QtGui.QWidget):
         ancho = 70
         for clave in liBasic:
             rotulo = TrListas.pgnLabel(clave)
-            siCentrado = clave != "EVENT"
-            oColumnas.nueva(clave, rotulo, ancho, siCentrado=siCentrado)
+            oColumnas.nueva(clave, rotulo, ancho, siCentrado=True)
 
         self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, siSeleccionMultiple=True, xid="wgames")
 
@@ -65,6 +67,7 @@ class WGames(QtGui.QWidget):
             (_("Last"), Iconos.Final(), self.tw_gobottom), None,
             (_("Filter"), Iconos.Filtrar(), self.tw_filtrar), None,
             (_("Remove"), Iconos.Borrar(), self.tw_borrar),None,
+            (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
         ]
 
         self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
@@ -198,7 +201,7 @@ class WGames(QtGui.QWidget):
             self.gridCambiadoRegistro(None, recno, None)
 
     def gridCambiadoRegistro(self, grid, fila, oCol):
-        if fila >= 0:
+        if self.gridNumDatos(grid) > fila >= 0:
             pv = self.dbGames.damePV(fila)
             p = Partida.Partida()
             p.leerPV(pv)
@@ -220,6 +223,7 @@ class WGames(QtGui.QWidget):
                 QTUtil2.mensError(self, _("This game already exists."))
             else:
                 self.actualiza(True)
+                self.grid.goto(recno, 0)
 
     def tw_nuevo(self):
         recno = None
@@ -263,10 +267,10 @@ class WGames(QtGui.QWidget):
         def opening():
             me = QTUtil2.unMomento(self)
             import Code.QT.PantallaAperturas as PantallaAperturas
-            w = PantallaAperturas.WAperturas(self, self.configuracion, "")
+            w = PantallaAperturas.WAperturas(self, self.configuracion, self.last_opening)
             me.final()
             if w.exec_():
-                ap = w.resultado()
+                self.last_opening = ap = w.resultado()
                 pv = getattr(ap, "a1h8", "")
                 self.dbGames.filterPV(pv)
                 self.numJugada = pv.count(" ")
@@ -321,6 +325,8 @@ class WGames(QtGui.QWidget):
         submenu.opcion(self.tg_importar_PGN, _("A PGN file"), Iconos.FichPGN())
         submenu.separador()
         submenu.opcion(self.tg_importar_DB, _("Other database"), Iconos.DatabaseC())
+        submenu.separador()
+        submenu.opcion(self.tg_importar_pks, _("A PKS file"), Iconos.JuegaSolo())
         menu.separador()
 
         submenu = menu.submenu(_("Export to"), Iconos.DatabaseMas())
@@ -329,19 +335,56 @@ class WGames(QtGui.QWidget):
         submenu.opcion(self.tg_exportar_DB, _("Other database"), Iconos.DatabaseC())
         menu.separador()
 
-        submenu = menu.submenu(_("Utilities"), Iconos.Utilidades())
-        ico = Iconos.PuntoAzul()
-        icoT = Iconos.Tacticas()
-        menu1 = submenu.submenu(_("Polyglot book"), ico)
-        menu1.opcion(self.tw_uti_pcreate, _("Create a new book"), ico)
-        menu1.separador()
-        menu1.opcion(self.tw_uti_pmerge, _("Merge two books in one"), ico)
-        submenu.separador()
-        submenu.opcion(self.tw_uti_tactic, _("Create tactics training"), icoT)
-
         resp = menu.lanza()
         if resp:
             resp()
+
+    def tw_utilities(self):
+        menu = QTVarios.LCMenu(self)
+        ico = Iconos.PuntoAzul()
+        icoT = Iconos.Tacticas()
+        menu1 = menu.submenu(_("Polyglot book"), ico)
+        menu1.opcion(self.tw_uti_pcreate, _("Create a new book"), ico)
+        menu1.separador()
+        menu1.opcion(self.tw_uti_pmerge, _("Merge two books in one"), ico)
+        menu.separador()
+        menu.opcion(self.tw_uti_tactic, _("Create tactics training"), icoT)
+        menu.separador()
+        menu.opcion(self.tw_massive_change_tags, _("Massive change of tags"), Iconos.PGN())
+        resp = menu.lanza()
+        if resp:
+            resp()
+
+    def tg_importar_pks(self):
+        path_pks = QTUtil2.leeFichero(self, self.configuracion.dirJS, "pks")
+        if path_pks:
+            direc = os.path.dirname(path_pks)
+            if direc != self.configuracion.dirJS:
+                self.configuracion.dirJS = direc
+                self.configuracion.graba()
+
+            mens_error = self.dbGames.insert_pks(path_pks)
+            if mens_error:
+                QTUtil2.mensError(self, mens_error)
+                return
+            self.actualiza(True)
+            self.grid.gobottom(0)
+
+    def tw_massive_change_tags(self):
+        resp = PantallaSolo.massive_change_tags(self, self.configuracion, len(self.grid.recnosSeleccionados()))
+        if resp:
+            recno = self.grid.recno()
+            liTags, remove, overwrite, si_all = resp
+            liRegistros = range(self.dbGames.reccount()) if si_all else self.grid.recnosSeleccionados()
+            nRegistros = len(liRegistros)
+            if (nRegistros == 1 or
+                ((nRegistros > 1) and
+                 QTUtil2.pregunta(self, _("Are you sure do you want to change the %d registers?" % nRegistros)))):
+                um = QTUtil2.unMomento(self)
+                self.dbGames.massive_change_tags(liTags, liRegistros, remove, overwrite)
+                self.grid.refresh()
+                self.grid.goto(recno, 0)
+                um.final()
 
     def tw_uti_pcreate(self):
         PantallaBooks.polyglotCrear(self)
@@ -482,7 +525,7 @@ class WGames(QtGui.QWidget):
                 try:
                     fpgn = codecs.open(pathPGN, modo, 'utf-8', 'ignore')
                 except:
-                    QTUtil2.mensError(self, "%s : %s\n" % (_("Unable to save"), pathPGN.replace("/", "\\")))
+                    QTUtil2.mensError(self, "%s : %s\n" % (_("Unable to save"), pathPGN))
                     return
 
                 pb = QTUtil2.BarraProgreso1(self, _("Exporting..."))
@@ -502,7 +545,7 @@ class WGames(QtGui.QWidget):
 
                 fpgn.close()
                 pb.cerrar()
-                QTUtil2.mensaje(self, _X(_("Saved to %1"), pathPGN.replace("/", "\\")))
+                QTUtil2.mensaje(self, _X(_("Saved to %1"), pathPGN))
 
     def tg_importar_PGN(self):
         path = QTVarios.select_pgn(self)
@@ -529,18 +572,6 @@ class WGames(QtGui.QWidget):
 
         self.actualiza(True)
         self.wsummary.reset()
-
-    def tg_importarFEN(self):
-        # Elegimos el fichero PGN
-        path = QTVarios.select_pgn(self)
-        if not path:
-            return None
-
-        dlTmp = QTVarios.ImportarFicheroPGN(self)
-        dlTmp.show()
-        self.dbGames.leerPGN(path, dlTmp)
-
-        self.actualiza(True)
 
     def changeDBgames(self, pathFich):
         self.configuracion.ficheroDBgames = pathFich

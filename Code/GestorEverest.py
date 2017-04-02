@@ -126,7 +126,7 @@ class GestorEverest(Gestor.Gestor):
             licoment.append(_("You have exceeded the limit of lost points."))
 
         if change_game:
-            licoment.append(_("You have also exceeded the limit of tries, then you falls to the previous game."))
+            licoment.append(_("You have exceeded the limit of tries, you will fall back to the previous."))
         elif lost_points:
             licoment.append(_("You must repeat the game from beginning."))
         if licoment:

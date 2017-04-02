@@ -4,6 +4,7 @@ from Code import Analisis
 from Code import ControlPosicion
 from Code import Jugada
 from Code import Partida
+from Code import TrListas
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -19,9 +20,9 @@ from Code import WorkMap
 
 class WMap(QTVarios.WDialogo):
     def __init__(self, procesador, mapa):
-
         self.workmap = WorkMap.WorkMap(mapa)
-        titulo = _F(mapa)
+        dic = TrListas.maps()
+        titulo = dic[mapa]
         icono = getattr(Iconos, mapa)()
 
         QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, icono, mapa)

@@ -657,6 +657,9 @@ class WUnTorneo(QTVarios.WDialogo):
         liGen.append((None, None))
         liGen.append((_("Select all"), False))
 
+        liGen.append((None, None))
+        liGen.append((_("Random order"), True))
+
         reg = Util.Almacen()
         reg.form = None
 
@@ -695,6 +698,8 @@ class WUnTorneo(QTVarios.WDialogo):
             if si:
                 liSel.append(en.huella())
 
+        rnd = liResp[-1]
+
         self.configuracion.escVariables("crear_torneo", dicValores)
 
         nSel = len(liSel)
@@ -707,7 +712,8 @@ class WUnTorneo(QTVarios.WDialogo):
                 for y in range(x + 1, nSel):
                     self.torneo.nuevoGame(liSel[x], liSel[y], minutos, segundos)
                     self.torneo.nuevoGame(liSel[y], liSel[x], minutos, segundos)
-        self.torneo.randomize()
+        if rnd:
+            self.torneo.randomize()
 
         self.gridGames.refresh()
         self.gridGames.gobottom()

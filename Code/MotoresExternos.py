@@ -23,7 +23,7 @@ class OpcionUCI:
             self.max = int(li[5])
 
         elif self.tipo == "check":
-            self.default = self.default == "true"
+            self.default = self.default.lower() == "true"
             self.valor = self.valor.lower() == "true"
 
         elif self.tipo == "button":

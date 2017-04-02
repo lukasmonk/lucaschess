@@ -1022,7 +1022,7 @@ class ImportarFichero(QtGui.QDialog):
         self.lbRotDuplicados = Controles.LB(self, _("Duplicated") + ":").ponFuente(f)
         self.lbDuplicados = Controles.LB(self, "0").ponFuente(f)
 
-        lbRotImportados = Controles.LB(self, _("Imported") + ":").ponFuente(f)
+        self.lbRotImportados = lbRotImportados = Controles.LB(self, _("Imported") + ":").ponFuente(f)
         self.lbImportados = Controles.LB(self, "0").ponFuente(f)
 
         self.btCancelarSeguir = Controles.PB(self, _("Cancel"), self.cancelar, plano=False).ponIcono(Iconos.Delete())
@@ -1051,6 +1051,9 @@ class ImportarFichero(QtGui.QDialog):
     def cancelar(self):
         self.siCancelado = True
         self.ponContinuar()
+
+    def ponExportados(self):
+        self.lbRotImportados.ponTexto(_("Exported") + ":")
 
     def ponSaving(self):
         self.btCancelarSeguir.setDisabled(True)

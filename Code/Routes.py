@@ -4,6 +4,7 @@ import random
 
 from Code import Partida
 from Code import Util
+from Code import TrListas
 
 
 class Reg:
@@ -37,7 +38,7 @@ class Station:
 
     @property
     def name(self):
-        return self._name
+        return _F(self._name)
 
 
 class Line:
@@ -173,7 +174,11 @@ class Transsiberian:
 
     def read_svg(self, base):
         with open(base % "svg", "rb") as f:
-            return f.read()
+            x = f.read()
+            dic = TrListas.transsiberian()
+            for k, v in dic.iteritems():
+                x = x.replace(k, v)
+            return x
 
     def read_dat(self, base):
         lines = []

@@ -380,7 +380,7 @@ class WPosicion(QtGui.QWidget):
         pos = QTUtil.escondeWindow(self.wparent)
         seguir = True
         if self.chb_scanner_ask.valor() and not QTUtil2.pregunta(None, _("Bring the window to scan to front"),
-                                                                 etiSi=_("Capture"), etiNo=_("Cancel"), si_top=True):
+                                                                 etiSi=_("Accept"), etiNo=_("Cancel"), si_top=True):
             seguir = False
         if seguir:
             fich_png = self.configuracion.ficheroTemporal("png")
@@ -800,13 +800,21 @@ class Voyager(QTVarios.WDialogo):
         self.reject()
 
 
-def voyagerFEN(wowner, fen):
-    pos = QTUtil.escondeWindow(wowner)
+def voyagerFEN(wowner, fen, si_esconde=True, wownerowner=None):
+    if si_esconde:
+        pos = QTUtil.escondeWindow(wowner)
+        if wownerowner:
+            pos_ownerowner = QTUtil.escondeWindow(wownerowner)
     partida = Partida.Partida(fen=fen)
     dlg = Voyager(wowner, False, partida)
     resp = dlg.resultado if dlg.exec_() else None
-    wowner.move(pos)
-    wowner.show()
+    if si_esconde:
+        if wownerowner:
+            wownerowner.move(pos_ownerowner)
+            wownerowner.show()
+        wowner.move(pos)
+        wowner.show()
+
     return resp
 
 

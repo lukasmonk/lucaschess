@@ -20,7 +20,8 @@ class WTranssiberian(QTVarios.WDialogo):
 
         self.procesador = procesador
         wsvg = QtSvg.QSvgWidget()
-        wsvg.load(QtCore.QByteArray(self.route.get_txt()))
+        x = self.route.get_txt().encode("utf-8")
+        wsvg.load(QtCore.QByteArray(x))
         wsvg.setFixedSize(762, 762.0 * 658.0 / 1148.0)
         lySVG = Colocacion.H().relleno(1).control(wsvg).relleno(1)
 

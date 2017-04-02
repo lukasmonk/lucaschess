@@ -241,7 +241,7 @@ class GestorMateMap(Gestor.Gestor):
 
         mensaje = _("Game ended")
         if quien == kGanamos:
-            mensaje = _("Congratulations you have win %s.") % self.workmap.nameAim()
+            mensaje = _("Congratulations you have won %s.") % self.workmap.nameAim()
             self.workmap.winAim(self.partida.pv())
 
         QTUtil2.mensaje(self.pantalla, mensaje)

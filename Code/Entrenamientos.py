@@ -639,7 +639,6 @@ class Entrenamientos:
             title = _("Uwe Auerswald")
             folder = "Trainings/Tactics by Uwe Auerswald"
             icono = Iconos.Uwe()
-            li_tam_blocks = (6, 10, 15, 30, 45, 90)
             li_tam_blocks = (5, 10, 20, 40, 80)
 
         resp = PantallaTurnOnLights.pantallaTurnOnLigths(self.procesador, name, title, icono, folder, li_tam_blocks)

@@ -677,8 +677,8 @@ class Procesador:
 
         menu1 = menu.submenu(_("Database"), Iconos.Database())
         menu1.opcion("database", _("Complete games"), Iconos.DatabaseC())
-        # menu1.separador()
-        # menu1.opcion("databaseFEN", _("Positions"), Iconos.DatabaseF()) # TODO
+        menu1.separador()
+        menu1.opcion("databaseFEN", _("Positions"), Iconos.DatabaseF()) # TODO
         menu.separador()
 
         menu.opcion("manual_save", _("Save positions to FNS/PGN"), Iconos.ManualSave())

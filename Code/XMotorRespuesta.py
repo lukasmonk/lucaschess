@@ -824,10 +824,25 @@ class MRespuestaMotor:
             if sel <= t:
                 return k
 
-    def mejorMovAjustadoSuperior(self, nivel, mindifpuntos, maxmate, aterrizaje):
-
+    def mejorMovAjustadoBlundersNegativo(self, mindifpuntos, maxmate):
+        rm0 = self.liMultiPV[0]
         if self.mejorMovDetectaBlunders(None, mindifpuntos, maxmate):
-            return self.liMultiPV[0]
+            return rm0
+        if rm0.puntosABS() < -10:
+            li = []
+            for rm in self.liMultiPV:
+                if rm.puntosABS() == rm0.puntosABS():
+                    li.append(rm)
+            if len(li) == 1:
+                return rm0
+            else:
+                return random.choice(li)
+        return None
+
+    def mejorMovAjustadoSuperior(self, nivel, mindifpuntos, maxmate, aterrizaje):
+        resp = self.mejorMovAjustadoBlundersNegativo(mindifpuntos, maxmate)
+        if resp:
+            return resp
 
         # Buscamos una jugada positiva que no sea de mate
         # Si no la hay, cogemos el ultimo
@@ -859,9 +874,9 @@ class MRespuestaMotor:
         return li[0] if nLi < nivel else li[-nivel]
 
     def mejorMovAjustadoInferior(self, nivel, mindifpuntos, maxmate, aterrizaje):
-
-        if self.mejorMovDetectaBlunders(None, mindifpuntos, maxmate):
-            return self.liMultiPV[0]
+        resp = self.mejorMovAjustadoBlundersNegativo(mindifpuntos, maxmate)
+        if resp:
+            return resp
 
         # Buscamos una jugada positiva que no sea de mate
         # Si no la hay, cogemos el ultimo
@@ -891,9 +906,9 @@ class MRespuestaMotor:
         return li[-1] if nLi < nivel else li[nivel - 1]
 
     def mejorMovAjustadoSimilar(self, mindifpuntos, maxmate, aterrizaje):
-
-        if self.mejorMovDetectaBlunders(None, mindifpuntos, maxmate):
-            return self.liMultiPV[0]
+        resp = self.mejorMovAjustadoBlundersNegativo(mindifpuntos, maxmate)
+        if resp:
+            return resp
 
         # Buscamos una jugada positiva que no sea de mate
         # Si no la hay, cogemos el ultimo
@@ -925,7 +940,6 @@ class MRespuestaMotor:
 
     def mejorMovAjustado(self, nTipo):
         if self.liMultiPV:
-
             rmSel = None
             aterrizaje = 50
             siPersonalidad = nTipo >= 1000  # Necesario para grabar los puntos

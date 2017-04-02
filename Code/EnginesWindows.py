@@ -240,14 +240,14 @@ def leeRivales():
     cm.ponMultiPV(20, 500)
     mas(cm)
 
-    cm = ConfigMotor("deepfish", "Tord Romstad, Marco Costalba, Joona Kiiski, fork by Marco Zerbinati", "7 32bit", "https://github.com/Zerbinati/DeepFishMZ")
-    cm.path = "windows/DeepFishMZ 32.exe"
-    cm.path_64 = "windows/DeepFishMZ 64 BMI2.exe", "7 64bit bmi2"
+    cm = ConfigMotor("mcbrain", "Michael Byrne (based on stockfish)", "2.1a 32bit", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McBrain_2017_v21a_x32_old.exe"
+    cm.path_64 = "McBrain_2017_v21a_x64_bmi2.exe", "2.1a 64bit bmi2"
     cm.elo = 3200
-    cm.ordenUCI("Ponder", "false")
+    cm.ordenUCI("Tactical", "8")
     cm.ordenUCI("Hash", "64")
     cm.ordenUCI("Threads", "1")
-    cm.ponMultiPV(20, 500)
+    cm.ponMultiPV(20, 256)
     mas(cm)
 
     cm = ConfigMotor("gull", "Vadim Demichev", "3 32bit", "https://sourceforge.net/projects/gullchess/")
@@ -258,7 +258,7 @@ def leeRivales():
     cm.ponMultiPV(20, 64)
     mas(cm)
 
-    cm = ConfigMotor("irina", "Lucas Monge", "0.15", "")
+    cm = ConfigMotor("irina", "Lucas Monge", "0.15", "https://github.com/lukasmonk/irina")
     cm.path = "irina.exe"
     cm.elo = 1200
     mas(cm)
@@ -279,6 +279,7 @@ def dicMotoresFixedElo():
             ("rodent", 600, 2600),
             ("amyan", 1000, 2400),
             ("rhetoric", 1300, 2600),
+            ("mcbrain", 1200, 2800),
             ("cheng", 800, 2500),
             ("greko", 1600, 2400),
             ("hamsters", 1000, 2000),

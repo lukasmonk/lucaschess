@@ -353,6 +353,8 @@ class EntrenamientoApertura(QTVarios.WDialogo):
         bloque = self.editar(None)
         if bloque:
             self.liBloques.append(bloque)
+            if not self.edNombre.texto().strip():
+                self.edNombre.ponTexto(bloque.trNombre)
             self.grid.refresh()
             self.grid.gobottom()
 
@@ -382,15 +384,18 @@ class EntrenamientoApertura(QTVarios.WDialogo):
                 self.grid.refresh()
 
     def aceptar(self):
-        self.nombre = self.edNombre.texto().strip()
-
-        if not self.nombre:
-            QTUtil2.mensError(self, _("Not indicated the name of training"))
-            return
-
         if not self.liBloques:
             QTUtil2.mensError(self, _("you have not indicated any opening"))
             return
+
+        self.nombre = self.edNombre.texto().strip()
+        if not self.nombre:
+            if len(self.liBloques) == 1:
+                self.nombre = self.liBloques[0].trNombre
+            else:
+                QTUtil2.mensError(self, _("Not indicated the name of training"))
+                return
+
 
         self.accept()
 

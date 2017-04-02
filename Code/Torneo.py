@@ -259,7 +259,7 @@ class Game:
 
         base = self._partida.pgnBase()
 
-        return cabecera + "\n" + base + " %s\n" % rs
+        return cabecera + "\n" + base + " %s\n\n" % rs
 
 
 class Torneo:
@@ -456,16 +456,20 @@ class Torneo:
     def liGames(self):
         return self._liGames
 
-    def randomize(self, n=0):
-        if n == 50:
-            return
+    def randomize(self):
         random.shuffle(self._liGames)
-        prev = self._liGames[0]
-        for gm in self._liGames[1:]:
-            if gm.hwhite() == prev.hwhite() and gm.hblack() == prev.hblack():
-                return self.randomize(n+1)
-            prev = gm
-        return
+        num_games = len(self._liGames)
+        for n in range(1, num_games-1):
+            gm1 = self._liGames[n]
+            gm0 = self._liGames[n-1]
+            if gm0.hwhite() == gm1.hwhite() or gm0.hblack() == gm1.hblack():
+                for pos in range(n+1, num_games):
+                    gm2 = self._liGames[pos]
+                    if not(gm2.hwhite() == gm1.hwhite() or gm2.hblack() == gm1.hblack()
+                           or gm2.hwhite() == gm0.hwhite() or gm2.hblack() == gm0.hblack()):
+                        self._liGames[pos] = gm1
+                        self._liGames[n] = gm2
+                        break
 
     def delGames(self, lista):
         li = []

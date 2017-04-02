@@ -431,6 +431,9 @@ class DBgames:
 
         self.rowidReader = Util.RowidReader(self.nomFichero, self.tabla)
 
+    def reset_cache(self):
+        self.cache = {}
+
     def addcache(self, rowid, reg):
         if len(self.cache) > self.maxcache:
             keys = self.cache.keys()
@@ -879,9 +882,18 @@ class DBgames:
         self._cursor.execute("SELECT %s FROM %s WHERE rowid =%d" % (select, self.tabla, rowid))
         return self._cursor.fetchone()
 
+    def leeRegAllRecno(self, recno):
+        raw = self.leeAllRecno(recno)
+        alm = Util.Almacen()
+        for campo in self.liCamposAll:
+            setattr(alm, campo, raw[campo])
+        return alm, raw
+
     def leePartidaRecno(self, recno):
         raw = self.leeAllRecno(recno)
+        return self.leePartidaRaw(raw)
 
+    def leePartidaRaw(self, raw):
         p = Partida.PartidaCompleta()
         xpgn = raw["PGN"]
         rtags = None
@@ -1005,6 +1017,8 @@ class DBgames:
         self.dbSTAT.append(pvAnt, resAnt, -1)
         self.dbSTAT.append(pvNue, resNue, +1)
 
+        del self.cache[rowid]
+
         return True
 
     def inserta(self, partidaCompleta):
@@ -1038,3 +1052,74 @@ class DBgames:
 
     def guardaPartidaRecno(self, recno, partidaCompleta):
         return self.inserta(partidaCompleta) if recno is None else self.modifica(recno, partidaCompleta)
+
+    def massive_change_tags(self, li_tags_change, liRegistros, remove, overwrite):
+        dtag = Util.SymbolDict({tag:val for tag, val in li_tags_change})
+
+        def work_tag(tag, alm):
+            if tag in dtag:
+                ant = getattr(alm, tag.upper())
+                if (ant and overwrite) or not ant:
+                    setattr(alm, tag.upper(), dtag[tag])
+
+        if remove:
+            remove = remove.upper()
+
+        for recno in liRegistros:
+            alm, raw = self.leeRegAllRecno(recno)
+
+            work_tag("Event", alm)
+            work_tag("Site", alm)
+            work_tag("Date", alm)
+
+            p = self.leePartidaRaw(raw)
+            if remove:
+                for n, (tag, val) in enumerate(p.liTags):
+                    if tag.upper() == remove:
+                        del p.liTags[n]
+                        break
+                setattr(alm, remove, "")
+
+            st_tag_ant_upper = set()
+            for n, (tag, val) in enumerate(p.liTags):
+                if overwrite:
+                    if tag in dtag:
+                        p.liTags[n] = [tag, dtag[tag]]
+                st_tag_ant_upper.add(tag.upper())
+                setattr(alm, tag.upper(), p.liTags[n][1])
+
+            for tag_new in dtag:
+                if tag_new.upper() not in st_tag_ant_upper:
+                    p.liTags.append([tag_new, dtag[tag_new]])
+                    setattr(alm, tag_new.upper(), dtag[tag_new])
+
+            rowid = self.liRowids[recno]
+            pgn = {"FULLGAME": p.save()}
+            xpgn = Util.var2blob(pgn)
+            sql = "UPDATE GAMES SET EVENT=?, SITE=?, DATE=?, WHITE=?, BLACK=?, RESULT=?, " \
+                  "ECO=?, WHITEELO=?, BLACKELO=?, PGN=? WHERE ROWID = %d" % rowid
+            self._cursor.execute(sql, (alm.EVENT, alm.SITE, alm.DATE, alm.WHITE, alm.BLACK, alm.RESULT,
+                                       alm.ECO, alm.WHITEELO, alm.BLACKELO, xpgn))
+
+        self._conexion.commit()
+
+        self.reset_cache()
+
+    def insert_pks(self, path_pks):
+        f = open(path_pks, "rb")
+        txt = f.read()
+        f.close()
+        dic = Util.txt2dic(txt)
+        fen = dic.get("FEN")
+        if fen:
+            return _("This pks file is not a complete game")
+
+        liTags = dic.get("liPGN", [])
+
+        partidaCompleta = Partida.PartidaCompleta(liTags=liTags)
+        partidaCompleta.recuperaDeTexto(dic["PARTIDA"])
+
+        if not self.inserta(partidaCompleta):
+            return _("This game already exists.")
+
+        return None

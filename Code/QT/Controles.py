@@ -193,6 +193,7 @@ class CB(QtGui.QComboBox):
     def rehacer(self, liOpciones, valorInicial):
         self.liOpciones = liOpciones
         self.clear()
+        nindex = 0
         for n, opcion in enumerate(liOpciones):
             if len(opcion) == 2:
                 etiqueta, clave = opcion
@@ -201,7 +202,8 @@ class CB(QtGui.QComboBox):
                 etiqueta, clave, icono = opcion
                 self.addItem(icono, etiqueta, clave)
             if clave == valorInicial:
-                self.setCurrentIndex(n)
+                nindex = n
+        self.setCurrentIndex(nindex)
 
     def ponValor(self, valor):
         for n, opcion in enumerate(self.liOpciones):

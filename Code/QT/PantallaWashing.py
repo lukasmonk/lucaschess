@@ -206,7 +206,7 @@ class WWashing(QTVarios.WDialogo):
                 menu.opcion(fich, fich, Iconos.PuntoRojo())
             resp = menu.lanza()
             if resp:
-                if QTUtil2.pregunta(self, "%s\n%s" % (  _("Current data will be removed and overwrited."),
+                if QTUtil2.pregunta(self, "%s\n%s" % (  _("Current data will be removed and overwritten."),
                                                         _("Are you sure?")) ):
                     shutil.copy(os.path.join(self.configuracion.carpeta, resp+".wsm"), self.dbwashing.file)
                     self.wreload = True
@@ -214,7 +214,7 @@ class WWashing(QTVarios.WDialogo):
                     self.accept()
         elif resp.startswith("new_"):
             tactic = resp[4:]
-            if QTUtil2.pregunta(self, "%s\n%s" % (  _("Current data will be removed and overwrited."),
+            if QTUtil2.pregunta(self, "%s\n%s" % (  _("Current data will be removed and overwritten."),
                                                     _("Are you sure?")) ):
                 self.dbwashing.new(tactic)
                 self.wreload = True

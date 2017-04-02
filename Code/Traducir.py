@@ -4,10 +4,12 @@ import os
 
 
 def _F(txt):
-    return _(txt)
+    return _(txt) if txt else ""
 
 
 def _SP(clave):
+    if not clave:
+        return ""
     clave = clave.strip()
     t = _F(clave)
     if t == clave:
@@ -21,6 +23,8 @@ def _SP(clave):
 
 
 def _X(clave, op1, op2=None, op3=None):
+    if not clave:
+        return ""
     resp = clave.replace("%1", op1)
     if op2:
         resp = resp.replace("%2", op2)

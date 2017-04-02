@@ -357,7 +357,7 @@ class WEntMaquina(QTVarios.WDialogo):
         self.edRtiempo.setEnabled(num == 0)
 
     def posicionEditar(self):
-        resp = Voyager.voyagerFEN(self, self.fen)
+        resp = Voyager.voyagerFEN(self, self.fen, wownerowner=self.procesador.pantalla)
         if resp is not None:
             self.fen = resp
             self.muestraPosicion()

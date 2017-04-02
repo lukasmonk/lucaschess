@@ -401,3 +401,14 @@ class PartidaCompleta(Partida):
         txt += "\n%s"%self.pgnBase()
         return txt
 
+    def resetFEN(self, fen):
+        ok = False
+        for n, tag in enumerate(self.liTags):
+            if tag[0] == "FEN":
+                self.liTags[n] = ("FEN", fen)
+                ok = True
+                break
+        if not ok and fen != ControlPosicion.FEN_INICIAL:
+            self.liTags.append(("FEN", fen))
+        Partida.resetFEN(self, fen)
+

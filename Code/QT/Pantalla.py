@@ -184,8 +184,11 @@ class Pantalla():
 
     def muestraVariantes(self, titulo):
         flags = QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint
+
         self.setWindowFlags(flags)
+
         self.setWindowTitle(titulo if titulo else "-")
+
         return self.exec_()
 
     def ajustaTam(self):

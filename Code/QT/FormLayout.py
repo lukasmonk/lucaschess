@@ -64,10 +64,12 @@ class CHSpinbox:
 
 
 class Combobox:
-    def __init__(self, label, lista):
+    def __init__(self, label, lista, si_editable=False, tooltip=None):
         self.tipo = COMBOBOX
         self.lista = lista  # (clave,titulo),....
         self.label = label + ":"
+        self.si_editable = si_editable
+        self.tooltip = tooltip
 
 
 class FontCombobox:
@@ -422,6 +424,11 @@ class FormWidget(QtGui.QWidget):
                             field.valueChanged.connect(dispatch)
                     elif tipo == COMBOBOX:
                         field = Controles.CB(self, config.lista, value)
+                        if config.si_editable:
+                            field.setEditable(True)
+                        if config.tooltip:
+                            field.setToolTip(config.tooltip)
+
                         field.lista = config.lista
                         if dispatch:
                             field.currentIndexChanged.connect(dispatch)

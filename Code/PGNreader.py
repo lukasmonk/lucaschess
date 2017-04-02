@@ -315,6 +315,10 @@ def readGames(pgnfile):
                         siCab = False
                         siMov = True
                         pgnMov = [linea, ]
+                else:
+                    siCab = False
+                    siMov = True
+                    pgnMov = []
             elif siMov:
                 if linea:
                     if linea[0] == '[' and linea.endswith("]"):

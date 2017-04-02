@@ -77,7 +77,7 @@ class GestorEntMaq(Gestor.Gestor):
 
         self.book = dic.get("BOOK", None)
         elo = getattr(self.cm, "elo", 0)
-        self.maxMoveBook = elo / 200 if 0 <= elo <= 1700 else 9999
+        self.maxMoveBook = elo / 200 if 0 < elo <= 1700 else 9999
         if self.book:
             self.book.polyglot()
             self.bookRR = dic.get("BOOKRR", "mp")
@@ -358,7 +358,7 @@ class GestorEntMaq(Gestor.Gestor):
         if siPregunta:
             if not QTUtil2.pregunta(self.pantalla, _("Restart the game?")):
                 return
-
+        self.analizaTerminar()
         self.partida.reset()
         if self.siTiempo:
             self.pantalla.paraReloj()
@@ -792,13 +792,14 @@ class GestorEntMaq(Gestor.Gestor):
                         if num:
                             rmTutor = self.mrmTutor.rmBest()
                             menu = QTVarios.LCMenu(self.pantalla)
-                            submenu = menu.submenu(_("There are %d best moves") % num, Iconos.Motor())
-                            submenu.opcion("tutor", "%s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()),
+                            menu.opcion("None", _("There are %d best moves") % num, Iconos.Motor())
+                            menu.separador()
+                            menu.opcion("tutor", "&1. %s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()),
                                            Iconos.Tutor())
-                            submenu.separador()
-                            submenu.opcion("try", _("Try again"), Iconos.Atras())
-                            submenu.separador()
-                            submenu.opcion("user", "%s (%s)" % (_("Select my move"), rmUser.abrTextoBase()),
+                            menu.separador()
+                            menu.opcion("try", "&2. %s" % _("Try again"), Iconos.Atras())
+                            menu.separador()
+                            menu.opcion("user", "&3. %s (%s)" % (_("Select my move"), rmUser.abrTextoBase()),
                                            Iconos.Player())
                             self.pantalla.cursorFueraTablero()
                             resp = menu.lanza()

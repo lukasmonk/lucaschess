@@ -1,3 +1,5 @@
+from Code import TrListas
+
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -5,8 +7,8 @@ from Code.QT import Delegados
 from Code.QT import Grid
 from Code.QT import Iconos
 from Code.QT import QTVarios
-from Code import TrListas
-from Code import Util
+from Code.QT import FormLayout
+
 
 
 class WEtiquetasPGN(QTVarios.WDialogo):
@@ -45,17 +47,13 @@ class WEtiquetasPGN(QTVarios.WDialogo):
         self.recuperarVideo()
 
     def creaLista(self, liPGN):
-        sd = Util.SymbolDict()
-        for eti, val in liPGN:
-            sd[eti] = val
+        st = {eti for eti, val in liPGN}
 
-        li = []
+        li = liPGN[:]
         listandard = ("Event", "Site", "Date", "Round", "White", "Black", "Result", "ECO", "WhiteElo", "BlackElo")
         for eti in listandard:
-            li.append([eti, sd.get(eti,"")])
-        for eti, val in liPGN:
-            if eti not in listandard:
-                li.append([eti,val])
+            if eti not in st:
+                li.append([eti, ""])
         while len(li) < 30:
             li.append(["", ""])
         self.liPGN = li
@@ -119,3 +117,127 @@ def editarEtiquetasPGN(procesador, liPGN):
         return li
     else:
         return None
+
+
+def massive_change_tags(owner, configuracion, num_selected):
+    APPLY_ALL, APPLY_SELECTED = range(2)
+    SAVE_NOTHING, SAVE_LABELS, SAVE_LABELS_VALUES = range(3)
+    NUM_OTHERS = 4
+
+    dic = configuracion.leeVariables("MASSIVE_CHANGE_TAGS")
+    if not dic:
+        dic = {}
+
+    liBase = []
+    sep = (None, None)
+
+    def sepBase():
+        liBase.append(sep)
+
+    sepBase()
+
+    liBase.append((None, _("Basic tags")))
+    liBase.append(("%s:" % _("Event"), dic.get("EVENT", "")))
+    liBase.append(("%s:" % _("Site"), dic.get("SITE", "")))
+    liBase.append(("%s:" % _("Date"), dic.get("DATE", "")))
+
+    sepBase()
+
+    liBaseOther = ["Round", "White", "Black", "Result", "WhiteTitle", "BlackTitle", "WhiteElo", "BlackElo",
+                   "WhiteUSCF", "BlackUSCF", "WhiteNA", "BlackNA", "WhiteType", "BlackType", "EventDate",
+                   "EventSponsor", "Section", "Stage", "Board", "Opening", "Variation", "SubVariation",
+                   "ECO", "Time", "UTCTime", "UTCDate", "TimeControl", "SetUp", "Termination"]
+    li0 = ["", "Event", "Site", "Date"]
+    li0.extend(liBaseOther)
+    li = [[uno, uno] for uno in li0]
+    combo = FormLayout.Combobox(_("Remove the tag (in English)"), li, si_editable=True)
+    liBase.append((combo, ""))
+
+    sepBase()
+
+    liBase.append((None, _("Configuration")))
+
+    liA = [(_("All read"), APPLY_ALL), ("%s [%d]"%(_("Only selected"), num_selected), APPLY_SELECTED)]
+    config = FormLayout.Combobox(_("Apply to"), liA)
+    liBase.append((config, dic.get("APPLY", APPLY_SELECTED if num_selected > 1 else APPLY_ALL)))
+    sepBase()
+
+    liBase.append((_("Overwrite"), dic.get("OVERWRITE", True)))
+    sepBase()
+
+    liS = [(_("Nothing"), SAVE_NOTHING),
+           (_("Labels"), SAVE_LABELS),
+           ("%s+%s" % (_("Labels"), _("Values")), SAVE_LABELS_VALUES)
+           ]
+    config = FormLayout.Combobox(_("Save as default"), liS)
+    liBase.append((config, dic.get("SAVE", SAVE_LABELS_VALUES)))
+
+
+    liOther = [sep]
+
+    for x in range(NUM_OTHERS):
+        li = [[uno, uno] for uno in liBaseOther]
+        previo = dic.get("OTHERS_TAG_%d" % x, "")
+        li.insert(0, [previo, previo])
+        if previo:
+            li.insert(0, ["", ""])
+
+        combo = FormLayout.Combobox("%s %d" % (_("Tag"), x + 1), li, si_editable=True)
+        liOther.append((combo, previo))
+        liOther.append(("%s %d:" % (_("Value"), x+1), dic.get("OTHERS_VALUE_%d" % x, "")))
+        liOther.append(sep)
+
+    liOther.append((None, "** %s" % _("All official tags must be indicated with their name in English.")))
+
+
+    lista = []
+    lista.append((liBase, _("Base"), ""))
+    lista.append((liOther, _("Others"), ""))
+
+    # Editamos
+    resultado = FormLayout.fedit(lista, title=_("Massive change of tags"), parent=owner, anchoMinimo=640, icon=Iconos.PGN())
+    if resultado:
+        accion, resp = resultado
+        liBase, liOther = resp
+
+        dic = {}
+        dic["EVENT"], dic["SITE"], dic["DATE"], dic["REMOVE"], dic["APPLY"], dic["OVERWRITE"], dic["SAVE"] = liBase
+
+        liTags = []
+        for tag in ("Event", "Site", "Date"):
+            tagu = tag.upper()
+            if dic[tagu]:
+                liTags.append((tag, dic[tagu]))
+
+        for x in range(0, NUM_OTHERS*2, 2):
+            tag = liOther[x]
+            if tag and tag.upper!= "FEN":
+                val = liOther[x + 1]
+                ntag = x / 2
+                dic["OTHERS_TAG_%d" % ntag] = tag
+                dic["OTHERS_VALUE_%d" % ntag] = val
+                if val:
+                   liTags.append((tag, val))
+
+        save = dic["SAVE"]
+
+        if save == SAVE_NOTHING or save == SAVE_LABELS:
+            for x in ("EVENT", "SITE", "DATE"):
+                del dic[x]
+            for x in range(NUM_OTHERS):
+                key = "OTHERS_VALUE_%d" % x
+                if key in dic:
+                    del dic[key]
+                if save == SAVE_NOTHING:
+                    key = "OTHERS_TAG_%d" % x
+                    if key in dic:
+                        del dic[key]
+
+        configuracion.escVariables("MASSIVE_CHANGE_TAGS", dic)
+
+        if liTags or dic["REMOVE"]:
+            return (liTags, dic["REMOVE"], dic["OVERWRITE"], dic["APPLY"] == APPLY_ALL)
+
+    return None
+
+

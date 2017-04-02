@@ -57,8 +57,8 @@ class GestorPartida(Gestor.Gestor):
 
         self.siguienteJugada()
 
-    def reiniciar(self,):
-        if self.siCambios and not QTUtil2.pregunta(self.pantalla, _("You will lost all changes, are you sure?")):
+    def reiniciar(self):
+        if self.siCambios and not QTUtil2.pregunta(self.pantalla, _("You will loose all changes, are you sure?")):
             return
         p = Partida.PartidaCompleta()
         p.restore(self.reinicio)
@@ -322,33 +322,11 @@ class GestorPartida(Gestor.Gestor):
                     self.tablero.rotaTablero()
 
         elif resp == "posicion":
-            resp = Voyager.voyagerFEN(self.pantalla, self.fen)
-            if resp is not None:
-                self.fen = resp
-                self.posicApertura = None
-
-                if self.xpgn:
-                    siInicio = self.fen == ControlPosicion.FEN_INICIAL
-                    li = self.xpgn.split("\n")
-                    lin = []
-                    siFen = False
-                    for linea in li:
-                        if linea.startswith("["):
-                            if "FEN " in linea:
-                                siFen = True
-                                if siInicio:
-                                    continue
-                                linea = '[FEN "%s"]' % self.fen
-                            lin.append(linea)
-                        else:
-                            break
-                    if not siFen:
-                        linea = '[FEN "%s"]' % self.fen
-                        lin.append(linea)
-                    self.liPGN = lin
-                    self.xpgn = "\n".join(lin) + "\n\n*"
-
-                self.reiniciar()
+            ini_fen = self.partida.iniPosicion.fen()
+            cur_fen = Voyager.voyagerFEN(self.pantalla, ini_fen)
+            if cur_fen and cur_fen != ini_fen:
+                self.partida.resetFEN(cur_fen)
+                self.inicio(self.partida, self.siCompleta)
 
         elif resp == "pasteposicion":
             texto = QTUtil.traePortapapeles()

@@ -91,7 +91,7 @@ class WManualSave(QTVarios.WDialogo):
         self.bt_fns = Controles.PB(self, "", self.fns_select, plano=False).anchoMinimo(300)
         bt_no_fns = Controles.PB(self, "", self.fns_unselect).ponIcono(Iconos.Delete()).anchoFijo(16)
         ## Codec
-        lb_codec = Controles.LB(self, _("Write with the codec") + ": ")
+        lb_codec = Controles.LB(self, _("Encoding") + ": ")
         liCodecs = [k for k in set(v for k, v in encodings.aliases.aliases.iteritems())]
         liCodecs.sort()
         liCodecs = [(k, k) for k in liCodecs]
@@ -366,7 +366,7 @@ class WManualSave(QTVarios.WDialogo):
     def change_position(self):
         prev = self.analyzing
         self.stop()
-        fen = Voyager.voyagerFEN(self, self.posicion.fen())
+        fen = Voyager.voyagerFEN(self, self.posicion.fen(), wownerowner=self.procesador.pantalla)
         if fen is not None:
             self.em_solucion.ponTexto("")
             self.posicion.leeFen(fen)
@@ -378,12 +378,13 @@ class WManualSave(QTVarios.WDialogo):
             self.start()
 
     def reset_motor(self):
+        clave = self.cb_engine.valor()
+        if not clave:
+            return
         self.analyzing = False
         if self.gestor_motor:
             self.gestor_motor.terminar()
         self.stop()
-
-        clave = self.cb_engine.valor()
         conf_motor  = self.configuracion.buscaRivalExt(clave)
 
         multipv = self.sb_multipv.valor()
@@ -396,7 +397,7 @@ class WManualSave(QTVarios.WDialogo):
         valor = self.cb_engine.valor()
         liMotores = self.configuracion.comboMotoresCompleto()
         motor = self.configuracion.tutor.clave
-        for clave, rotulo in liMotores:
+        for rotulo, clave in liMotores:
             if clave == valor:
                 motor = valor
                 break
