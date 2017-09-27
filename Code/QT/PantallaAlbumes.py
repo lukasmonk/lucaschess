@@ -52,7 +52,7 @@ class WAlbum(QTVarios.WDialogo):
             layout.controlc(pb, fila * 2, col)
             layout.controlc(lb, fila * 2 + 1, col)
 
-        mensaje = _("Select an slot to play against and get its image if you win") if pte else ""
+        mensaje = _("Select a slot to play against and get its image if you win") if pte else ""
         lb = Controles.LB(self, mensaje)
 
         pbExit = Controles.PB(self, _("Close"), self.quit, plano=False).ponIcono(Iconos.MainMenu())

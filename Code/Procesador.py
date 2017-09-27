@@ -72,7 +72,7 @@ class Procesador:
 
         self.user = user
 
-        self.web = "http://www-lucaschess.rhcloud.com"
+        self.web = "http://lucaschess.pythonanywhere.com"
         self.blog = "http://lucaschess.blogspot.com"
 
         self.liOpcionesInicio = [k_terminar, k_play,

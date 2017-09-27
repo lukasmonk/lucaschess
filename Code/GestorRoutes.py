@@ -660,11 +660,11 @@ class GestorRoutesTactics(GestorRoutes):
         if self.estado == kFinJuego:
             return
 
-        fenM2 = self.partida.ultPosicion.fenM2()
-        if not self.dicFen.get(fenM2, None):
+        if self.partida.numJugadas() == self.nDicMoves:
             self.lineaTerminada()
             return
 
+        fenM2 = self.partida.ultPosicion.fenM2()
         self.estado = kJugando
 
         self.siJuegaHumano = False

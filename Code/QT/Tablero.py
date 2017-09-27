@@ -155,8 +155,11 @@ class Tablero(QtGui.QGraphicsView):
             elif key == Qt.Key_N and siAlt:
                 self.pantalla.gestor.rightMouse(False, False, True)
             # ALT-C -> show captures
-            elif key == Qt.Key_C and siAlt:
-                self.pantalla.gestor.rightMouse(False, True, False)
+            elif key == Qt.Key_C:
+                if siAlt:
+                    self.pantalla.gestor.rightMouse(False, True, False)
+                else:
+                    okseguir = True
 
         else:
             okseguir = True
