@@ -24,7 +24,7 @@ Dependencies
 Links
 -----
 
-* [Web: http://www-lucaschess.rhcloud.com/](http://www-lucaschess.rhcloud.com/).
+* [Web: http://lucaschess.pythonanywhere.com/](http://lucaschess.pythonanywhere.com/).
 * [Blog: http://lucaschess.blogspot.com.es/](http://lucaschess.blogspot.com.es/).
 
 Legal Details
