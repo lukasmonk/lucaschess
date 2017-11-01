@@ -30,7 +30,6 @@ class Pantalla():
         self.capturas = self.base.capturas
         self.capturas.hide()
         self.siCapturas = False
-        self.capturas.hide()
         self.informacionPGN = WInformacion.InformacionPGN(self)
         self.siInformacionPGN = False
         self.informacionPGN.hide()
@@ -119,8 +118,13 @@ class Pantalla():
         else:
             self.showNormal()
 
-    def closeEvent(self, event):  # Cierre con X
+    def procesosFinales(self):
+        self.tablero.cierraGuion()
         self.guardarVideo()
+        self.tablero.terminar()
+
+    def closeEvent(self, event):  # Cierre con X
+        self.procesosFinales()
         if not self.gestor.finalX0():
             event.ignore()
 
@@ -189,7 +193,12 @@ class Pantalla():
 
         self.setWindowTitle(titulo if titulo else "-")
 
-        return self.exec_()
+        self.recuperarVideo(siTam=False)
+        self.ajustaTam()
+
+        resp = self.exec_()
+        self.guardarVideo()
+        return resp
 
     def ajustaTam(self):
         if self.isMaximized():
@@ -304,8 +313,8 @@ class Pantalla():
                 self.informacionPGN.splitter.setSizes(sizes)
                 break
 
-    def ponCapturas(self, dic, jg, apertura):
-        self.capturas.pon(dic, jg, apertura)
+    def ponCapturas(self, dic):
+        self.capturas.pon(dic)
 
     def ponInformacionPGN(self, partida, jg, apertura):
         self.informacionPGN.ponJG(partida, jg, apertura)
@@ -388,10 +397,18 @@ class PantallaWidget(QTVarios.WWidget, Pantalla):
         Pantalla.__init__(self, gestor, owner)
 
     def accept(self):
+        self.tablero.cierraGuion()
         self.close()
 
     def reject(self):
+        self.tablero.cierraGuion()
         self.close()
+
+    def closeEvent(self, event):  # Cierre con X
+        self.tablero.cierraGuion()
+        self.guardarVideo()
+        if not self.gestor.finalX0():
+            event.ignore()
 
 
 class PantallaDialog(QTVarios.WDialogo, Pantalla):
@@ -403,3 +420,10 @@ class PantallaDialog(QTVarios.WDialogo, Pantalla):
         extparam = "maind"
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
         Pantalla.__init__(self, gestor, owner)
+
+    def closeEvent(self, event):  # Cierre con X
+        self.tablero.cierraGuion()
+        self.guardarVideo()
+        if not self.gestor.finalX0():
+            event.ignore()
+

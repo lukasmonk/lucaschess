@@ -10,7 +10,6 @@ from Code.QT import QTVarios
 from Code.QT import FormLayout
 
 
-
 class WEtiquetasPGN(QTVarios.WDialogo):
     def __init__(self, procesador, liPGN):
         titulo = _("Edit PGN labels")
@@ -172,7 +171,6 @@ def massive_change_tags(owner, configuracion, num_selected):
     config = FormLayout.Combobox(_("Save as default"), liS)
     liBase.append((config, dic.get("SAVE", SAVE_LABELS_VALUES)))
 
-
     liOther = [sep]
 
     for x in range(NUM_OTHERS):
@@ -181,14 +179,20 @@ def massive_change_tags(owner, configuracion, num_selected):
         li.insert(0, [previo, previo])
         if previo:
             li.insert(0, ["", ""])
-
         combo = FormLayout.Combobox("%s %d" % (_("Tag"), x + 1), li, si_editable=True)
         liOther.append((combo, previo))
-        liOther.append(("%s %d:" % (_("Value"), x+1), dic.get("OTHERS_VALUE_%d" % x, "")))
+
+        previo_value = dic.get("OTHERS_VALUE_%d" % x)
+        rotulo = "%s %d" % (_("Value"), x + 1)
+        if previo_value:
+            li=[["", ""], [previo_value, previo_value]]
+            combo = FormLayout.Combobox(rotulo, li, si_editable=True)
+            liOther.append((combo, ""))
+        else:
+            liOther.append((rotulo, ""))
         liOther.append(sep)
 
     liOther.append((None, "** %s" % _("All official tags must be indicated with their name in English.")))
-
 
     lista = []
     lista.append((liBase, _("Base"), ""))
@@ -239,5 +243,4 @@ def massive_change_tags(owner, configuracion, num_selected):
             return (liTags, dic["REMOVE"], dic["OVERWRITE"], dic["APPLY"] == APPLY_ALL)
 
     return None
-
 

@@ -97,7 +97,7 @@ def dicDisk(configuracion):
     # Raw
     dicDisk_SQL(backup, configuracion.ficheroConfTableros)
     dicDisk_SQL(backup, configuracion.ficheroGMhisto)
-    dicDisk_SQL(backup, configuracion.ficheroRecursos, siAllTables=True)
+    # dicDisk_SQL(backup, configuracion.ficheroRecursos, siAllTables=True)
 
 
 def dicDisk_SQL(backup, path, tabla=None, siAllTables=False, pickle=True):

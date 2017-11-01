@@ -1,0 +1,455 @@
+import collections
+
+from PyQt4 import QtCore, QtGui
+
+from Code.QT import Colocacion
+from Code.QT import Controles
+from Code.QT import Iconos
+from Code.QT import QTVarios
+
+
+class SelectUna(Controles.LB):
+    def __init__(self, owner, pmVacio, siAddText):
+        self.owner = owner
+        self.pixmap = None
+        self.id = None
+        self.toolTip = None
+        self.seleccionada = False
+        Controles.LB.__init__(self, owner)
+        self.ponImagen(pmVacio)
+        self.set_style()
+        self.siAddText = siAddText
+
+    def pon(self, pixmap, tooltip, xid):
+        if pixmap:
+            if pixmap.height() != 32:
+                pixmap = pixmap.scaled(32, 32)
+            self.ponImagen(pixmap)
+        self.id = xid
+        self.setToolTip(tooltip)
+        self.pixmap = pixmap
+
+    def seleccionar(self, si_seleccionada):
+        if not self.siAddText:
+            self.seleccionada = si_seleccionada
+            self.set_style()
+
+    def set_style(self):
+        color = "orange" if self.seleccionada else "lightgray"
+        self.setStyleSheet("*{ border: 1px solid %s; padding:2px; background: white}" % color)
+
+    def mousePressEvent(self, event):
+        if self.siAddText:
+            self.owner.addText()
+        else:
+            eb = event.button()
+            if self.id is None or eb == QtCore.Qt.RightButton:
+                self.owner.editar(self)
+            else:
+                if eb == QtCore.Qt.LeftButton:
+                    self.owner.seleccionar(self)
+
+
+class SelectBanda(QtGui.QWidget):
+    def __init__(self, owner):
+        QtGui.QWidget.__init__(self)
+
+        numElem, ancho = 10, 32
+        self.owner = owner
+        self.ancho = ancho
+        self.seleccionada = None
+
+        layout = Colocacion.G()
+        layout.setSpacing(2)
+        layout.setMargin(0)
+        self.liLB = []
+        self.liLB_F = []
+        pm = Iconos.pmEnBlanco()
+        if ancho != 32:
+            pm = pm.scaled(ancho, ancho)
+        self.pmVacio = pm
+        color = "lightgray"
+        for n in range(numElem):
+            lb_f = Controles.LB("F%d" % (n+1,))
+            lb_f.setStyleSheet("*{ border: 1px solid %s; background: %s;}" % (color, color))
+            lb_f.anchoFijo(24)
+            lb_f.altoFijo(36)
+            lb_f.alinCentrado()
+            layout.controlc(lb_f, n, 1)
+            if n == 9:
+                lb = SelectUna(self, Iconos.pmTexto().scaled(ancho, ancho), True)
+                lb.addText = True
+            else:
+                lb = SelectUna(self, self.pmVacio, False)
+
+            lb_f.mousePressEvent = lb.mousePressEvent
+            self.liLB.append(lb)
+            self.liLB_F.append(lb_f)
+            layout.controlc(lb, n, 0)
+        lb_f =  Controles.LB("%s F10\n%s" % (_("CTRL"), _("Changes")))
+        lb_f.setStyleSheet("*{ border: 1px solid %s; background: %s;}" % (color, color))
+        lb_f.anchoFijo(64)
+        lb_f.altoFijo(36)
+        lb_f.alinCentrado()
+        self.lb_change_graphics = lb_f
+        lb_f.mousePressEvent = self.mousePressEventGraphics
+        layout.controlc(lb_f, numElem, 0, 1, 2)
+        self.dicDatos = collections.OrderedDict()
+        self.setLayout(layout)
+
+        st = "*{ border: 1px solid %s; background:%s;}"
+        self.style_f = {True: st % ("orange", "orange"),
+                   False: st % ("lightgray", "lightgray")
+                   }
+
+        self.liTipos = (
+            (_("Arrows"), Iconos.Flechas(), self.owner.flechas),
+            (_("Boxes"), Iconos.Marcos(), self.owner.marcos),
+            (_("Images"), Iconos.SVGs(), self.owner.svgs),
+            (_("Markers"), Iconos.Markers(), self.owner.markers)
+        )
+
+    def mousePressEventGraphics(self, event):
+        self.seleccionar(None)
+
+    def menu(self, lb, liMore=None):
+        # Los dividimos por tipos
+        dic = collections.OrderedDict()
+        for xid, (nom, pm, tipo) in self.dicDatos.iteritems():
+            if tipo not in dic:
+                dic[tipo] = collections.OrderedDict()
+            dic[tipo][xid] = (nom, pm)
+
+        menu = QTVarios.LCMenu(self)
+        dicmenu = {}
+        for xid, (nom, pm, tp) in self.dicDatos.iteritems():
+            if tp not in dicmenu:
+                ico = Iconos.PuntoVerde()
+                for txt, icot, rut in self.liTipos:
+                    if tp == txt:
+                        ico = icot
+                dicmenu[tp] = menu.submenu(tp, ico)
+                # menu.separador()
+            dicmenu[tp].opcion(xid, nom, QtGui.QIcon(pm))
+
+        menu.separador()
+        if liMore:
+            for txt, ico, rut in liMore:
+                if type(rut) == list:
+                    submenu = menu.submenu(txt, ico)
+                    for stxt, sico, srut in rut:
+                        submenu.opcion(srut, stxt, sico)
+                        submenu.separador()
+                else:
+                    menu.opcion(rut, txt, ico)
+                menu.separador()
+
+        submenu = menu.submenu(_("Edit"), Iconos.Modificar())
+        if lb and lb.id is not None:
+            submenuCurrent = submenu.submenu(_("Current"), QtGui.QIcon(lb.pixmap))
+            submenuCurrent.opcion(-1, _("Edit"), Iconos.Modificar())
+            submenuCurrent.separador()
+            submenuCurrent.opcion(-2, _("Remove"), Iconos.Delete())
+            submenu.separador()
+
+        for txt, ico, rut in self.liTipos:
+            submenu.opcion(rut, txt, ico)
+            submenu.separador()
+
+        return menu.lanza()
+
+    def editar(self, lb):
+        resp = self.menu(lb)
+        if resp is not None:
+            if resp == -1:
+                self.owner.editarBanda(lb.id)
+                return
+            if resp == -2:
+                lb.pon(self.pmVacio, None, None)
+                self.test_seleccionada()
+                return
+            for txt, ico, rut in self.liTipos:
+                if rut == resp:
+                    rut()
+                    return
+            nom, pm, tp = self.dicDatos[resp]
+            lb.pon(pm, nom, resp)
+            self.seleccionar(lb)
+
+    def menuParaExterior(self, liMore=None):
+        resp = self.menu(None, liMore)
+        if resp is not None:
+            for txt, ico, rut in self.liTipos:
+                if rut == resp:
+                    rut()
+                    return None
+        return resp
+
+    def iniActualizacion(self):
+        self.setControl = set()
+
+    def actualiza(self, xid, nombre, pixmap, tipo):
+        self.dicDatos[xid] = (nombre, pixmap, tipo)
+        self.setControl.add(xid)
+
+    def finActualizacion(self):
+        st = set()
+        for xid in self.dicDatos:
+            if xid not in self.setControl:
+                st.add(xid)
+        for xid in st:
+            del self.dicDatos[xid]
+
+        for n, lb in enumerate(self.liLB):
+            if lb.id is not None:
+                if lb.id in st:
+                    lb.pon(self.pmVacio, None, None)
+                else:
+                    self.pon(lb.id, n)
+
+    def pon(self, xid, pos_en_banda):
+        if pos_en_banda < len(self.liLB):
+            if xid in self.dicDatos:
+                nom, pm, tipo = self.dicDatos[xid]
+                lb = self.liLB[pos_en_banda]
+                lb.pon(pm, nom, xid)
+
+    def idLB(self, num):
+        if 0 <= num < len(self.liLB):
+            return self.liLB[num].id
+        else:
+            return None
+
+    def guardar(self):
+        li = [(lb.id, n) for n, lb in enumerate(self.liLB) if lb.id is not None]
+        return li
+
+    def recuperar(self, li):
+        for xid, a in li:
+            self.pon(xid, a)
+
+    def seleccionar(self, lb):
+        for n in range(10):
+            lbt = self.liLB[n]
+            lb_f = self.liLB_F[n]
+            ok = lb == lbt
+            lbt.seleccionar(ok)
+            lb_f.setStyleSheet(self.style_f[ok])
+
+        self.lb_change_graphics.setStyleSheet(self.style_f[lb is None])
+        self.seleccionada = lb
+        self.owner.seleccionar(lb)
+
+    def addText(self):
+        self.owner.addText()
+
+    def numSeleccionada(self):
+        for n in range(10):
+            lbt = self.liLB[n]
+            if lbt == self.seleccionada:
+                return n
+        return None
+
+    def seleccionarNum(self, num):
+        lb = self.liLB[num]
+        if lb.pixmap:
+            self.seleccionar(lb)
+
+    def test_seleccionada(self):
+        if not self.seleccionada.id:
+            self.seleccionada.seleccionar(False)
+            self.seleccionada = None
+
+
+class DragUna(Controles.LB):
+    def __init__(self, owner, pmVacio):
+        self.owner = owner
+        self.pixmap = None
+        self.id = None
+        self.toolTip = None
+        Controles.LB.__init__(self, owner)
+        self.ponImagen(pmVacio)
+
+    def pon(self, pixmap, tooltip, xid):
+        if pixmap:
+            self.ponImagen(pixmap)
+        self.id = xid
+        self.setToolTip(tooltip)
+        self.pixmap = pixmap
+
+    def mousePressEvent(self, event):
+        eb = event.button()
+        if self.id is None or eb == QtCore.Qt.RightButton:
+
+            self.owner.editar(self)
+
+        else:
+            if eb == QtCore.Qt.LeftButton:
+                self.owner.startDrag(self)
+
+
+class DragBanda(QtGui.QWidget):
+    def __init__(self, owner, liElem, ancho, margen=None):
+        QtGui.QWidget.__init__(self)
+
+        self.owner = owner
+        self.ancho = ancho
+
+        layout = Colocacion.G()
+        self.liLB = []
+        pm = Iconos.pmEnBlanco()
+        if ancho != 32:
+            pm = pm.scaled(ancho, ancho)
+        self.pmVacio = pm
+        for fila, numElem in enumerate(liElem):
+            for n in range(numElem):
+                lb = DragUna(self, self.pmVacio)
+                self.liLB.append(lb)
+                layout.control(lb, fila, n)
+        if margen:
+            layout.margen(margen)
+        self.dicDatos = collections.OrderedDict()
+        self.setLayout(layout)
+
+    def editar(self, lb):
+        if not self.dicDatos:
+            return
+
+        liTipos = (
+            (_("Arrows"), Iconos.Flechas(), self.owner.flechas),
+            (_("Boxes"), Iconos.Marcos(), self.owner.marcos),
+            (_("Images"), Iconos.SVGs(), self.owner.svgs),
+            (_("Markers"), Iconos.Markers(), self.owner.markers)
+        )
+
+        # Los dividimos por tipos
+        dic = collections.OrderedDict()
+        for xid, (nom, pm, tipo) in self.dicDatos.iteritems():
+            if tipo not in dic:
+                dic[tipo] = collections.OrderedDict()
+            dic[tipo][xid] = (nom, pm)
+
+        menu = QTVarios.LCMenu(self)
+        dicmenu = {}
+        for xid, (nom, pm, tp) in self.dicDatos.iteritems():
+            if tp not in dicmenu:
+                ico = Iconos.PuntoVerde()
+                for txt, icot, rut in liTipos:
+                    if tp == txt:
+                        ico = icot
+                dicmenu[tp] = menu.submenu(tp, ico)
+                # menu.separador()
+            dicmenu[tp].opcion(xid, nom, QtGui.QIcon(pm))
+
+        menu.separador()
+        submenu = menu.submenu(_("Edit"), Iconos.Modificar())
+        if lb.id is not None:
+            submenuCurrent = submenu.submenu(_("Current"), QtGui.QIcon(lb.pixmap))
+            submenuCurrent.opcion(-1, _("Edit"), Iconos.Modificar())
+            submenuCurrent.separador()
+            submenuCurrent.opcion(-2, _("Remove"), Iconos.Delete())
+            submenu.separador()
+
+        for txt, ico, rut in liTipos:
+            submenu.opcion(rut, txt, ico)
+            submenu.separador()
+
+        resp = menu.lanza()
+        if resp is not None:
+            if resp == -1:
+                self.owner.editarBanda(lb.id)
+                return
+            if resp == -2:
+                lb.pon(self.pmVacio, None, None)
+                return
+            for txt, ico, rut in liTipos:
+                if rut == resp:
+                    rut()
+                    return
+            nom, pm, tp = self.dicDatos[resp]
+            lb.pon(pm, nom, resp)
+
+    def menuParaExterior(self, masOpciones):
+        if not self.dicDatos:
+            return None
+
+        # Los dividimos por tipos
+        dic = collections.OrderedDict()
+        for xid, (nom, pm, tipo) in self.dicDatos.iteritems():
+            if tipo not in dic:
+                dic[tipo] = collections.OrderedDict()
+            dic[tipo][xid] = (nom, pm)
+
+        menu = QTVarios.LCMenu(self)
+        dicmenu = {}
+        for xid, (nom, pm, tp) in self.dicDatos.iteritems():
+            if tp not in dicmenu:
+                dicmenu[tp] = menu.submenu(tp, Iconos.PuntoVerde())
+                menu.separador()
+            dicmenu[tp].opcion((xid, tp), nom, QtGui.QIcon(pm))
+        for clave, nombre, icono in masOpciones:
+            menu.separador()
+            menu.opcion(clave, nombre, icono)
+
+        resp = menu.lanza()
+
+        return resp
+
+    def iniActualizacion(self):
+        self.setControl = set()
+
+    def actualiza(self, xid, nombre, pixmap, tipo):
+        self.dicDatos[xid] = (nombre, pixmap, tipo)
+        self.setControl.add(xid)
+
+    def finActualizacion(self):
+        st = set()
+        for xid in self.dicDatos:
+            if xid not in self.setControl:
+                st.add(xid)
+        for xid in st:
+            del self.dicDatos[xid]
+
+        for n, lb in enumerate(self.liLB):
+            if lb.id is not None:
+                if lb.id in st:
+                    lb.pon(self.pmVacio, None, None)
+                else:
+                    self.pon(lb.id, n)
+
+    def pon(self, xid, a):
+        if a < len(self.liLB):
+            if xid in self.dicDatos:
+                nom, pm, tipo = self.dicDatos[xid]
+                lb = self.liLB[a]
+                lb.pon(pm, nom, xid)
+
+    def idLB(self, num):
+        if 0 <= num < len(self.liLB):
+            return self.liLB[num].id
+        else:
+            return None
+
+    def guardar(self):
+        li = [(lb.id, n) for n, lb in enumerate(self.liLB) if lb.id is not None]
+        return li
+
+    def recuperar(self, li):
+        for xid, a in li:
+            self.pon(xid, a)
+
+    def startDrag(self, lb):
+        pixmap = lb.pixmap
+        dato = lb.id
+        itemData = QtCore.QByteArray(str(dato))
+
+        mimeData = QtCore.QMimeData()
+        mimeData.setData('image/x-lc-dato', itemData)
+
+        drag = QtGui.QDrag(self)
+        drag.setMimeData(mimeData)
+        drag.setHotSpot(QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2))
+        drag.setPixmap(pixmap)
+
+        drag.exec_(QtCore.Qt.MoveAction)
+

@@ -15,6 +15,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code.QT import Histogram
+from Code.QT import WCapturas
 
 
 class WAnalisisGraph(QTVarios.WDialogo):
@@ -54,11 +55,11 @@ class WAnalisisGraph(QTVarios.WDialogo):
         anchoGrid = max(gridB.fixMinWidth(), anchoGrid)
         self.registrarGrid(gridB)
 
-        lbIndexes = Controles.LB(self, alm.indexesHTML)
+        self.emIndexes = Controles.EM(self, alm.indexesHTML).soloLectura()
         pbSave = Controles.PB(self, _("Save to game comments"), self.saveIndexes, plano=False)
         pbSave.ponIcono(Iconos.Grabar())
         ly0 = Colocacion.H().control(pbSave).relleno()
-        ly = Colocacion.V().control(lbIndexes).otro(ly0).relleno()
+        ly = Colocacion.V().control(self.emIndexes).otro(ly0).relleno()
         wIdx = QtGui.QWidget()
         wIdx.setLayout(ly)
 
@@ -76,41 +77,47 @@ class WAnalisisGraph(QTVarios.WDialogo):
         self.tablero.ponerPiezasAbajo(True)
         self.tablero.dispatchSize(self.tableroSizeChanged)
 
+        self.capturas = WCapturas.CapturaLista(self, self.tablero)
+        ly_tc = Colocacion.H().control(self.tablero).control(self.capturas)
+
         self.rbShowValues = Controles.RB(self, _("Values"), rutina=self.cambiadoShow).activa(True)
-        self.rbShowElo = Controles.RB(self, _("Elo perfomance"), rutina=self.cambiadoShow)
+        self.rbShowElo = Controles.RB(self, _("Elo performance"), rutina=self.cambiadoShow)
         self.chbShowLostPoints = Controles.CHB(self, _("Show lost points"), self.getShowLostPoints()).capturaCambiado(self, self.showLostPointsChanged)
         ly_rb = Colocacion.H().espacio(40).control(self.rbShowValues).espacio(20).control(self.rbShowElo).espacio(30).control(self.chbShowLostPoints).relleno(1)
 
         layout = Colocacion.G()
         layout.controlc(tabGrid, 0, 0)
         layout.otroc(ly_rb, 1, 0)
-        layout.controlc(self.tablero, 0, 1, numFilas=2)
+        layout.otroc(ly_tc, 0, 1, numFilas=2)
 
         Controles.Tab().ponPosicion("W")
-        ancho = self.tablero.width() + anchoGrid + 10
+        ancho = self.tablero.width() + anchoGrid
         self.htotal = [ Histogram.Histogram(self, alm.hgame, gridAll, ancho, True),
                         Histogram.Histogram(self, alm.hwhite, gridW, ancho, True),
                         Histogram.Histogram(self, alm.hblack, gridB, ancho, True),
-                        Histogram.Histogram(self, alm.hgame, gridAll, ancho, False),
-                        Histogram.Histogram(self, alm.hwhite, gridW, ancho, False),
-                        Histogram.Histogram(self, alm.hblack, gridB, ancho, False)]
+                        Histogram.Histogram(self, alm.hgame, gridAll, ancho, False, alm.eloT),
+                        Histogram.Histogram(self, alm.hwhite, gridW, ancho, False, alm.eloW),
+                        Histogram.Histogram(self, alm.hblack, gridB, ancho, False, alm.eloB)
+        ]
         lh = Colocacion.V()
         for x in range(6):
             lh.control(self.htotal[x])
             if x:
                 self.htotal[x].hide()
 
-        layout.otroc(lh, 2, 0, 1, 2)
+        layout.otroc(lh, 2, 0, 1, 3)
         self.setLayout(layout)
 
-        self.recuperarVideo(siTam=False)
+        self.recuperarVideo()
 
         gridAll.gotop()
         gridB.gotop()
         gridW.gotop()
         self.gridBotonIzquierdo(gridAll, 0, None)
-        self.tabGrid.setFixedHeight(self.tablero.height())
+        th = self.tablero.height()
+        self.tabGrid.setFixedHeight(th)
         self.adjustSize()
+        self.emIndexes.setFixedHeight(th - 72)
 
     def valorShowLostPoints(self):
         # Llamada desde histogram
@@ -129,7 +136,9 @@ class WAnalisisGraph(QTVarios.WDialogo):
         self.tabChanged(self.tabGrid.currentIndex())
 
     def tableroSizeChanged(self):
-        self.tabGrid.setFixedHeight(self.tablero.height())
+        th = self.tablero.height()
+        self.tabGrid.setFixedHeight(th)
+        self.emIndexes.setFixedHeight(th - 72)
         self.adjustSize()
         self.cambiadoShow()
 
@@ -161,8 +170,12 @@ class WAnalisisGraph(QTVarios.WDialogo):
         rm = mrm.liMultiPV[0]
         self.tablero.creaFlechaMulti(rm.movimiento(), False)
         grid.setFocus()
-        self.htotal[self.tabActive].setPointActive(fila)
-        self.htotal[self.tabActive+3].setPointActive(fila)
+        ta = self.tabActive if self.tabActive < 3 else 0
+        self.htotal[ta].setPointActive(fila)
+        self.htotal[ta+3].setPointActive(fila)
+
+        dic, siBlancas = jg.posicion.capturas()
+        self.capturas.pon(dic)
 
     def gridDobleClick(self, grid, fila, columna):
         jg = self.dicLiJG[grid.id][fila]
@@ -265,12 +278,12 @@ class WMuestra(QtGui.QWidget):
         self.colorNegativo = QTUtil.qtColorRGB(255, 0, 0)
         self.colorImpares = QTUtil.qtColorRGB(231, 244, 254)
         oColumnas = Columnas.ListaColumnas()
-        siFigurinesPGN = VarGen.configuracion.figurinesPGN
+        self.siFigurinesPGN = VarGen.configuracion.figurinesPGN
         oColumnas.nueva("JUGADAS", "%d %s" % (len(self.listaRM), _("Moves")), 120, siCentrado=True,
-                        edicion=Delegados.EtiquetaPGN(um.jg.siBlancas() if siFigurinesPGN else None))
+                        edicion=Delegados.EtiquetaPGN(um.jg.siBlancas() if self.siFigurinesPGN else None))
         self.wrm = Grid.Grid(self, oColumnas, siLineas=False)
 
-        self.wrm.tipoLetra(puntos=9)
+        self.wrm.tipoLetra(puntos=VarGen.configuracion.puntosPGN)
         nAncho = self.wrm.anchoColumnas() + 20
         self.wrm.setFixedWidth(nAncho)
         self.wrm.goto(self.um.posElegida, 0)
@@ -374,7 +387,7 @@ class WMuestra(QtGui.QWidget):
             self.jugarPosicion()
         elif accion == "FEN":
             QTUtil.ponPortapapeles(self.um.fenActual())
-            QTUtil2.mensajeTemporal(self, _("FEN is in clipboard"), 1)
+            QTUtil2.mensaje(self, _("FEN is in clipboard"))
 
     def jugarPosicion(self):
         posicion, desde, hasta = self.um.posicionBaseActual()
@@ -434,7 +447,8 @@ class WAnalisis(QTVarios.WDialogo):
         self.mAnalisis = mAnalisis
         self.muestraActual = None
 
-        confTablero = VarGen.configuracion.confTablero("ANALISIS", 48)
+        configuracion = VarGen.configuracion
+        confTablero = configuracion.confTablero("ANALISIS", 48)
         self.siLibre = siLibre
         self.siGrabar = siGrabar
         self.siBlancas = siBlancas
@@ -449,8 +463,8 @@ class WAnalisis(QTVarios.WDialogo):
 
         self.lbMotor = Controles.LB(self).alinCentrado()
         self.lbTiempo = Controles.LB(self).alinCentrado()
-        self.lbPuntuacion = Controles.LB(self).alinCentrado().ponTipoLetra(puntos=10, peso=75)
-        self.lbPGN = Controles.LB(self).ponTipoLetra(peso=75).ponWrap()
+        self.lbPuntuacion = Controles.LB(self).alinCentrado().ponTipoLetra(puntos=configuracion.puntosPGN, peso=75)
+        self.lbPGN = Controles.LB(self).ponWrap().ponTipoLetra(puntos=configuracion.puntosPGN)
 
         self.setStyleSheet("QStatusBar::item { border-style: outset; border-width: 1px; border-color: LightSlateGray ;}")
 

@@ -5,6 +5,7 @@ import random
 
 from Code import Util
 
+
 class ThanksTo:
     def __init__(self):
         d = self.dic = collections.OrderedDict()
@@ -17,6 +18,7 @@ class ThanksTo:
         d["Training"] = _("Training")
         d["Engines-1"] = "%s/1" % _("Engines")
         d["Engines-2"] = "%s/2" % _("Engines")
+        d["Engines-3"] = "%s/3" % _("Engines")
         d["Games"] = _("Games")
         d["Programming"] = _("Programming")
         d["Dedicated"] = _("Dedicated to")
@@ -34,7 +36,8 @@ class ThanksTo:
             ["Chispa 4.0.3", "Federico Corigliano", "http://chispachess.blogspot.com/"],
             ["Gaïa 3.5", "Jean-Francois Romang, David Rabel", "http://gaiachess.free.fr"],
             ["Simplex 0.9.8", "Antonio Torrecillas", "http://sites.google.com/site/barajandotrebejos/"],
-            ["Greko 12.9", "Vladimir Medvedev", "http://sourceforge.net/projects/greko"],
+            ["Greko 12.9", "Vladimir Medvedev", "http://greko.su/index_en.html"],
+            ["Greko 7.1", "Vladimir Medvedev", "http://greko.su/index_en.html"],
             ["Pawny 0.3.1", "Mincho Georgiev", "http://pawny.netii.net/"],
             ["Hamsters 0.5", "Alessandro Scotti", "https://chessprogramming.wikispaces.com/Alessandro+Scotti"],
             ["Umko 0.7", "Borko Boskovic", "http://umko.sourceforge.net/"],
@@ -54,23 +57,33 @@ class ThanksTo:
             ["Discocheck 5.2.1", "Lucas Braesch", "https://github.com/lucasart"],
             ["Gaviota 1.0", "Miguel A. Ballicora", "https://sites.google.com/site/gaviotachessengine"],
             ["Toga deepTogaNPS 1.9.6", "WHMoweryJr,Thomas Gaksch,Fabien Letouzey", "http://www.computerchess.info/tdbb/phpBB3/viewtopic.php?f=9&t=357"],
-            ["Komodo 8 32bit", "Don Dailey, Larry Kaufman, Mark Lefler", "http://komodochess.com/"],
+            ["Komodo 9.02", "Don Dailey, Larry Kaufman, Mark Lefler", "http://komodochess.com/"],
             ["Rybka 2.3.2a 32-bit", "Vasik Rajlich", "http://rybkachess.com/"],
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
-            ["Texel 1.05", "Peter Österlund", "http://web.comhem.se/petero2home/javachess/index.html#texel"],
+            ["Texel 1.07", "Peter Österlund", "http://hem.bredband.net/petero2b/javachess/index.html#texel"],
             ["Stockfish 8", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["McBrain 2.1a", "Michael Byrne (based on stockfish)", "https://github.com/MichaelB7/Stockfish/releases"],
+            ["McBrain 2.7", "Michael Byrne (based on stockfish)", "https://github.com/MichaelB7/Stockfish/releases"],
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
+            ["Delfi 5.4", "Fabio Cavicchio", "http://www.msbsoftware.it/delfi/"],
+            # ["SmartThink 1.97", "Sergei S. Markoff", "http://genes1s.net/smarthink.php"],
+            ["Monarch 1.7", "Steve Maughan", "http://www.monarchchess.com/"],
+            ["Andscacs 0.9032n", "Daniel José Queraltó", "http://www.andscacs.com/"],
+            ["Arminius 2017-01-01", "Volker Annus", "http://www.nnuss.de/Hermann/Arminius2017-01-01.zip"],
+            ["WildCat", "Igor Korshunov", "http://www.igorkorshunov.narod.ru/WildCat"],
+            ["Demolito", "Lucas Braesch", "https://github.com/lucasart/Demolito"],
+            ["Hannibal 1.7", "Samuel N. Hamilton and Edsel G. Apostol", "http://sites.google.com/site/edapostol/hannibal"],
+            ["Spike 1.4", "Volker Böhm and Ralf Schäfer", "http://spike.lazypics.de/index_en.html"],
+            ["Zappa 1.1", "Anthony Cozzie", "http://www.acoz.net/zappa/"],
+            ["Irina 0.15", "Lucas Monge", "https://github.com/lukasmonk/irina"],
+            ["Houdini 1.5a", "Robert Houdart", "http://www.cruxis.com/chess/houdini.htm"],
+            ["Paladin 0.1", "Ankan Banerjee", "https://github.com/ankan-ban/chess_cpu"],
         ]
         li.sort(key=lambda x: x[0])
-        # Gaia y godel con dos puntos
-        # for n, a, u in li:
-        #     k = n.split(" ")[0].lower()
-        #     p rint '                                    ( "%s", "%s", "%s", "%s" ),'%(k,a,n,u)
-        if bloque == "1":
-            return li[:len(li) / 2]
-        else:
-            return li[len(li) / 2:]
+        n = len(li)
+        x = n*1.0/3
+        bl = [0, int(x), int(2*x), len(li)]
+        nbl = int(bloque)
+        return li[bl[nbl-1]:bl[nbl]]
 
     def texto(self, clave):
         if "-" in clave:
@@ -108,6 +121,11 @@ class ThanksTo:
             txt += "</b></td>"
             txt += "</tr>"
             return txt
+
+        # Version 11
+        liBase = ["Alfonso Solbes", "Max Aloyau", "tico-tico", "Nils Andersson", "Bernhard", "Ed Smith", "Rob", "Giovanni di Maria", "vga", "Remes", "Péter Rabi"]
+        liResto = ["Immortalchess forum",]
+        txt += version(11, liBase, liResto)
 
         # Version 10
         liBase = ["Remes", "Max Aloyau", "Alfonso Solbes", "tico-tico", "Nils Andersson", "Bernhard", "Ed Smith"]
@@ -147,7 +165,7 @@ class ThanksTo:
         dic = {
             _("Portuguese"): ("Rui Grafino", ""),
             _("French"): ("Max Aloyau", "Lolo S."),
-            _("Russian"): ("Reinhard, Vladimir", "Slavik Pavlov"),
+            _("Russian"): ("Nils Andersson, Reinhard, Vladimir", "Slavik Pavlov"),
             _("German"): ("Alfons", "Georg Pfefferle"),
             _("Italiano"): ("Maurizio Peroni,Michele Tumbarello", ""),
             _("Azeri"): ("Shahin Jafarli (shahinjy)", ""),
@@ -165,6 +183,7 @@ class ThanksTo:
             _("Chinese simplified"): ("Kevin Sicong Jiang,Stephen Yang", ""),
             _("Romanian"):("Dan-Alexandru Raportaru",""),
             _("Greek"): ("Nick Delta", ""),
+            _("Ukrainian"): ("Volodymyr Soltys", "Maxym Makarchuk"),
         }
 
         def r(lng):
@@ -252,6 +271,7 @@ class ThanksTo:
             ("Felicia", _("Permission of author")),
             ("Mohammed Abdalazez", _("Permission of author")),
             ("Red Hood", _("Permission of author")),
+            ("Michael Byrne", _("Permission of author")),
         ]
         for autor, licencia in li:
             txt += "<tr>"
@@ -392,8 +412,12 @@ class ThanksTo:
         txt += "</tr>"
         for nombre, autor, url in self.listaMotores(orden):
             txt += "<tr>"
-            txt += "<th>%s</th>" % nombre
-            txt += "<th>%s</th>" % autor
+            if "McBrain" in nombre:
+                txt += '<th><font color="darkred">%s (%s)</font></th>' % (nombre, _("default"))
+                txt += '<th><font color="darkred">%s</font></th>' % autor
+            else:
+                txt += "<td>%s</td>" % nombre
+                txt += "<td>%s</td>" % autor
             txt += "<td><a href=\"%s\">%s</a></td>" % (url, url)
             txt += "</tr>"
         txt += self.tableEnd()

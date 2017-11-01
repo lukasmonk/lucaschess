@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2016  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,27 +26,112 @@
 #ifndef ENGINECONTROL_HPP_
 #define ENGINECONTROL_HPP_
 
-#include "search.hpp"
 #include "transpositionTable.hpp"
 #include "position.hpp"
 #include "move.hpp"
+#include "parallel.hpp"
+#include "history.hpp"
+#include "killerTable.hpp"
 
 #include <vector>
+#include <map>
 #include <iosfwd>
 #include <thread>
 #include <mutex>
 #include <memory>
 #include <atomic>
 
+class MoveList;
+class Search;
 class SearchParams;
+class SearchListener;
+class EngineControl;
 
+/** State needed by the main engine search thread. */
+class EngineMainThread {
+public:
+    EngineMainThread();
+    ~EngineMainThread();
+    EngineMainThread(const EngineMainThread&) = delete;
+    EngineMainThread& operator=(const EngineMainThread&) = delete;
+
+    /** Called by the main search thread. Waits for and acts upon start and quit
+     *  calls from another thread. */
+    void mainLoop();
+
+    /** Tells the main loop to terminate. */
+    void quit();
+
+    void setupTT();
+    TranspositionTable& getTT();
+
+    /** Tell the search thread to start searching. */
+    void startSearch(EngineControl* engineControl,
+                     std::shared_ptr<Search>& sc, const Position& pos,
+                     std::shared_ptr<MoveList>& moves,
+                     bool ownBook, bool analyseMode,
+                     int maxDepth, int maxNodes,
+                     int maxPV, int minProbeDepth,
+                     std::atomic<bool>& ponder, std::atomic<bool>& infinite);
+
+    /** Wait for the search thread to stop searching. */
+    void waitStop();
+
+    /** Set UCI option as soon as search threads are idle. */
+    void setOptionWhenIdle(const std::string& optionName,
+                           const std::string& optionValue);
+
+    /** Wait until all changes requested by setOptionWhenIdle() have been made. */
+    void waitOptionsSet();
+
+    Communicator* getCommunicator() const;
+
+    /** Clear history tables in all helper threads when starting next search. */
+    void setClearHistory();
+
+private:
+    void doSearch();
+    void setOptions();
+
+    /** Wait for notifier. If cluster is enabled, only wait a short period of time
+     *  since MPI communication needs polling. */
+    void notifierWait();
+
+    Notifier notifier;
+    TranspositionTable tt;
+    std::unique_ptr<ThreadCommunicator> comm;
+    std::vector<std::shared_ptr<WorkerThread>> children;
+
+    std::mutex mutex;
+    std::condition_variable searchStopped;
+    std::condition_variable optionsSet;    // To wait for UCI options to be set
+    std::atomic<bool> search { false };
+    std::atomic<bool> quitFlag { false };
+
+    EngineControl* engineControl = nullptr;
+    std::shared_ptr<Search> sc;
+    Position pos;
+    std::shared_ptr<MoveList> moves;
+    bool ownBook = false;
+    bool analyseMode = false;
+    int maxDepth = -1;
+    int maxNodes = -1;
+    int maxPV = 1;
+    int minProbeDepth = 0;
+    std::atomic<bool>* ponder = nullptr;
+    std::atomic<bool>* infinite = nullptr;
+    bool clearHistory = false;
+
+    std::map<std::string, std::string> pendingOptions;
+    bool optionsSetFinished = true;
+};
 
 /**
  * Control the search thread.
  */
 class EngineControl {
 public:
-    EngineControl(std::ostream& o);
+    EngineControl(std::ostream& o, EngineMainThread& engineThread, SearchListener& listener);
     ~EngineControl();
 
     void startSearch(const Position& pos, const std::vector<Move>& moves, const SearchParams& sPar);
@@ -59,43 +144,25 @@ public:
 
     void newGame();
 
+    static void printOptions(std::ostream& os);
+
+    void setOption(const std::string& optionName, const std::string& optionValue);
+
+    /** If the engine is not searching, wait until all pending options have been processed. */
+    void waitReady();
+
+    void finishSearch(Position& pos, const Move& bestMove);
+
+private:
     /**
      * Compute thinking time for current search.
      */
     void computeTimeLimit(const SearchParams& sPar);
 
-    static void printOptions(std::ostream& os);
-
-    void setOption(const std::string& optionName, const std::string& optionValue,
-                   bool deferIfBusy);
-
-private:
-    /**
-     * This class is responsible for sending "info" strings during search.
-     */
-    class SearchListener : public Search::Listener {
-    public:
-        SearchListener(std::ostream& os0);
-
-        void notifyDepth(int depth) override;
-
-        void notifyCurrMove(const Move& m, int moveNr) override;
-
-        void notifyPV(int depth, int score, int time, U64 nodes, int nps, bool isMate,
-                      bool upperBound, bool lowerBound, const std::vector<Move>& pv,
-                      int multiPVIndex, U64 tbHits) override;
-
-        void notifyStats(U64 nodes, int nps, U64 tbHits, int time) override;
-
-    private:
-        std::ostream& os;
-    };
-
-    void startThread(int minTimeLimit, int maxTimeLimit, int maxDepth, int maxNodes);
+    void startThread(int minTimeLimit, int maxTimeLimit, int earlyStopPercentage,
+                     int maxDepth, int maxNodes);
 
     void stopThread();
-
-    void setupTT();
 
     void setupPosition(Position pos, const std::vector<Move>& moves);
 
@@ -104,24 +171,18 @@ private:
      */
     Move getPonderMove(Position pos, const Move& m);
 
-    static std::string moveToString(const Move& m);
-
 
     std::ostream& os;
 
     int hashParListenerId;
     int clearHashParListenerId;
-    std::map<std::string, std::string> pendingOptions;
 
-    std::shared_ptr<std::thread> engineThread;
-    std::mutex threadMutex;
-    std::atomic<bool> shouldDetach;
+    EngineMainThread& engineThread;
+    SearchListener& listener;
     std::shared_ptr<Search> sc;
-    TranspositionTable tt;
-    ParallelData pd;
     KillerTable kt;
     History ht;
-    std::shared_ptr<Evaluate::EvalHashTables> et;
+    std::unique_ptr<Evaluate::EvalHashTables> et;
     TreeLogger treeLog;
 
     Position pos;
@@ -133,6 +194,7 @@ private:
 
     int minTimeLimit;
     int maxTimeLimit;
+    int earlyStopPercentage;
     int maxDepth;
     int maxNodes;
     std::vector<Move> searchMoves;
@@ -141,5 +203,19 @@ private:
     U64 randomSeed;
 };
 
+inline TranspositionTable&
+EngineMainThread::getTT() {
+    return tt;
+}
+
+inline Communicator*
+EngineMainThread::getCommunicator() const {
+    return comm.get();
+}
+
+inline void
+EngineMainThread::setClearHistory() {
+    clearHistory = true;
+}
 
 #endif /* ENGINECONTROL_HPP_ */

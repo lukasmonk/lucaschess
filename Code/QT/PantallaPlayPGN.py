@@ -24,6 +24,21 @@ class PlayPGNs(Util.DicSQL):
         self.__setitem__(k, valor)
         self.regKeys = self.keys(True, True)
 
+    def appendHash(self, xhash, valor):
+        """Usado desde databases-partidas, el hash = hash del xpv"""
+        k = str(Util.hoy()) + "|" + str(xhash)
+        self.__setitem__(k, valor)
+        self.regKeys = self.keys(True, True)
+
+    def recnoHash(self, xhash):
+        """Usado desde databases-partidas"""
+        for recno, key in enumerate(self.regKeys):
+            if "|" in key:
+                h = int(key.split("|")[1])
+                if xhash == h:
+                    return recno
+        return None
+
     def cambiaRegistro(self, num, valor):
         self.__setitem__(self.regKeys[num], valor)
 
@@ -112,6 +127,10 @@ class WPlayBase(QTVarios.WDialogo):
         self.db.close()
         self.accept()
 
+    def closeEvent(self, QCloseEvent):
+        self.guardarVideo()
+        self.db.close()
+
     def nuevo(self):
         unpgn = PantallaPGN.eligePartida(self)
         if unpgn and unpgn.partida.numJugadas():
@@ -134,7 +153,7 @@ class WPlayBase(QTVarios.WDialogo):
         li = self.grid.recnosSeleccionados()
         if len(li) > 0:
             recno = li[0]
-            w = WPlay1(self, recno)
+            w = WPlay1(self, self.configuracion, self.db, recno)
             if w.exec_():
                 self.recno = recno
                 self.siBlancas = w.siBlancas
@@ -142,21 +161,20 @@ class WPlayBase(QTVarios.WDialogo):
 
 
 class WPlay1(QTVarios.WDialogo):
-    def __init__(self, owner, numRegistro):
+    def __init__(self, owner, configuracion, db, recno):
 
         QTVarios.WDialogo.__init__(self, owner, _("Play against a game"), Iconos.PlayGame(), "play1game")
 
         self.owner = owner
-        self.db = owner.db
-        self.procesador = owner.procesador
-        self.configuracion = self.procesador.configuracion
-        self.numRegistro = numRegistro
-        self.registro = self.db.leeRegistro(numRegistro)
+        self.db = db
+        self.configuracion = configuracion
+        self.recno = recno
+        self.registro = self.db.leeRegistro(recno)
 
         self.partida = Partida.Partida()
         self.partida.recuperaDeTexto(self.registro["PARTIDA"])
 
-        self.lbRotulo = Controles.LB(self, self.db.rotulo(numRegistro)).ponTipoLetra(puntos=12).ponColorFondoN("#076C9F", "#EFEFEF")
+        self.lbRotulo = Controles.LB(self, self.db.rotulo(recno)).ponTipoLetra(puntos=12).ponColorFondoN("#076C9F", "#EFEFEF")
 
         self.liIntentos = self.registro.get("LIINTENTOS", [])
 
@@ -170,7 +188,7 @@ class WPlay1(QTVarios.WDialogo):
 
         # Tool bar
         liAcciones = (
-            (_("Quit"), Iconos.MainMenu(), self.terminar), None,
+            (_("Close"), Iconos.MainMenu(), self.terminar), None,
             (_("Train"), Iconos.Entrenar(), self.empezar), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
         )
@@ -204,10 +222,10 @@ class WPlay1(QTVarios.WDialogo):
             elif c == "w":
                 return _("White")
         if col == "POINTS":
-            return str(reg["POINTS"])
+            return "%d (%d)" % (reg["POINTS"], reg["POINTSMAX"])
         if col == "TIME":
-            s = reg["SECONDS"]
-            m = s / 60
+            s = int(reg["TIME"])
+            m = int(s / 60)
             s -= m * 60
             return "%d\' %d\"" % (m, s)
 
@@ -218,9 +236,12 @@ class WPlay1(QTVarios.WDialogo):
         self.registro["LIINTENTOS"] = self.liIntentos
         self.db.cambiaRegistro(self.numRegistro, self.registro)
 
-    def terminar(self):
+    def terminar(self, siAccept=False):
         self.guardarVideo()
-        self.accept()
+        if siAccept:
+            self.accept()
+        else:
+            self.reject()
 
     def borrar(self):
         li = self.grid.recnosSeleccionados()
@@ -235,4 +256,4 @@ class WPlay1(QTVarios.WDialogo):
 
     def empezar(self):
         self.siBlancas = QTVarios.blancasNegras(self)
-        self.terminar()
+        self.terminar(True)

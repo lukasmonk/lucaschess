@@ -29,3 +29,13 @@ std::mutex& Logger::getLogMutex() {
     static std::mutex m;
     return m;
 }
+
+
+std::ostream& Logger::getOutStream() {
+    if (false) {
+        static std::ofstream out("/home/petero/texel.log");
+        return out;
+    } else {
+        return std::cout;
+    }
+}

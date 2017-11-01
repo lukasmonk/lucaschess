@@ -92,7 +92,6 @@ class GestorResistance(Gestor.Gestor):
         self.ponRotulo2(rotulo)
 
     def procesarAccion(self, clave):
-
         if clave == k_rendirse:
             self.finJuego(False)
 

@@ -8,6 +8,7 @@ from Code.Constantes import *
 class ControlPGN:
     def __init__(self, gestor):
         self.gestor = gestor
+        self.siFigurines = gestor.configuracion.figurinesPGN
         # self.partida = self.gestor.partida
         self.siMostrar = True
         self.showVariantes = gestor.configuracion.showVariantes
@@ -47,7 +48,10 @@ class ControlPGN:
 
         jg = self.soloJugada(fila, clave)
         if jg:
-            return jg.pgnSP() if self.siMostrar else "-"
+            if self.siMostrar:
+                return jg.pgnFigurinesSP() if self.siFigurines else jg.pgnSP()
+            else:
+                return "-"
         else:
             return " "
 

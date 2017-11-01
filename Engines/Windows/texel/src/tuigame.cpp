@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2015  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,9 +33,9 @@
 #include <fstream>
 #include <iomanip>
 
-TUIGame::TUIGame(const std::shared_ptr<Player>& whitePlayer,
-                 const std::shared_ptr<Player>& blackPlayer)
-    : Game(whitePlayer, blackPlayer) {
+TUIGame::TUIGame(std::unique_ptr<Player>&& whitePlayer,
+                 std::unique_ptr<Player>&& blackPlayer)
+    : Game(std::move(whitePlayer), std::move(blackPlayer)) {
 }
 
 bool
@@ -102,12 +102,12 @@ TUIGame::handleTestSuite(const std::string& cmd) {
         }
 //        std::cout << "file:" << filename << " time:" << timeStr << " (" << timeLimit << ")" << std::endl;
         fr.open(filename.c_str());
-        std::shared_ptr<Player> pl = whitePlayer->isHumanPlayer() ? blackPlayer : whitePlayer;
-        if (pl->isHumanPlayer()) {
+        Player& pl = whitePlayer->isHumanPlayer() ? *blackPlayer : *whitePlayer;
+        if (pl.isHumanPlayer()) {
             std::cout << "No computer player available" << std::endl;
             return;
         }
-        std::shared_ptr<ComputerPlayer> cp = std::static_pointer_cast<ComputerPlayer>(pl);
+        ComputerPlayer& cp = static_cast<ComputerPlayer&>(pl);
         int numRight = 0;
         int numTotal = 0;
         std::string line;
@@ -130,8 +130,8 @@ TUIGame::handleTestSuite(const std::string& cmd) {
             std::string bm = line.substr(idx1+4, idx2 - (idx1+4));
 //            std::cout << "Line " << std::setw(3) << lineNo << ": fen:" << fen << " bm:" << bm << std::endl;
             Position testPos = TextIO::readFEN(fen);
-            cp->clearTT();
-            std::pair<Move, std::string> ret = cp->searchPosition(testPos, timeLimit);
+            cp.clearTT();
+            std::pair<Move, std::string> ret = cp.searchPosition(testPos, timeLimit);
             Move sm = ret.first;
             std::string PV = ret.second;
             Move m(sm);
@@ -208,10 +208,10 @@ TUIGame::play() {
             activateHumanPlayer();
 
         // Get command from current player and act on it
-        std::shared_ptr<Player> pl = getPos().isWhiteMove() ? whitePlayer : blackPlayer;
+        Player& pl = getPos().isWhiteMove() ? *whitePlayer : *blackPlayer;
         std::vector<Position> posList;
         getHistory(posList);
-        std::string moveStr = pl->getCommand(getPos(), haveDrawOffer(), posList);
+        std::string moveStr = pl.getCommand(getPos(), haveDrawOffer(), posList);
         if (moveStr == "quit")
             return;
         bool ok = processString(moveStr);

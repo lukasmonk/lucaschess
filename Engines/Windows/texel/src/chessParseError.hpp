@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2013  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 class ChessParseError : public std::exception {
 public:
     ChessParseError();
-    ChessParseError(const std::string& msg);
+    explicit ChessParseError(const std::string& msg);
 
     virtual const char* what() const noexcept override;
 

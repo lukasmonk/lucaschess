@@ -79,6 +79,7 @@ class SVGSC(TabBloques.BloqueEspSC):
         posicion.alto = int(posiciono.alto * xk)
 
     def contiene(self, p):
+        p = self.mapFromScene(p)
         def distancia(p1, p2):
             t = p2 - p1
             return ((t.x()) ** 2 + (t.y()) ** 2) ** 0.5
@@ -111,12 +112,19 @@ class SVGSC(TabBloques.BloqueEspSC):
         self.expX = p.x()
         self.expY = p.y()
 
+    def mousePressExt(self, event):
+        p = event.pos()
+        p = self.mapFromScene(p)
+        self.expX = p.x()
+        self.expY = p.y()
+
     def mouseMoveEvent(self, event):
         event.ignore()
         if not (self.siMove or self.tpSize):
             return
 
-        p = event.scenePos()
+        p = event.pos()
+        p = self.mapFromScene(p)
         x = p.x()
         y = p.y()
 
@@ -165,6 +173,14 @@ class SVGSC(TabBloques.BloqueEspSC):
                 self.rutinaPulsada(self.rutinaPulsadaCarga)
             else:
                 self.rutinaPulsada()
+
+    def mouseReleaseExt(self):
+        if self.siActivo:
+            if self.siMove or self.tpSize:
+                self.escena.update()
+                self.siMove = False
+                self.tpSize = None
+            self.activa(False)
 
     def pixmapX(self):
         bm = self.bloqueDatos

@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2016  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,12 +29,17 @@
 namespace SearchConst {
     const int MATE0 = 32000;
     const int UNKNOWN_SCORE = -32767; // Represents unknown static eval score
-    const int plyScale = 8; // Fractional ply resolution
-    const int MIN_SMP_DEPTH = 10; // Minimum depth for SMP work sharing
-    const int MAX_SP_PER_THREAD = 32; // Maximum number of SplitPoints per thread
+    const int BUSY = -32766; // Represents a busy node in the ABDADA algorithm
 
     inline bool isWinScore(int score) { return score > MATE0 / 2; }
     inline bool isLoseScore(int score) { return score < -(MATE0 / 2); }
+
+    const int minFrustrated = 35; // Minimum score for frustrated win
+    const int maxFrustrated = 70; // Maximum score for frustrated win
+
+    const int MAX_SEARCH_DEPTH = 100;
+
+    const int MAX_CLUSTER_BUF_SIZE = 8192; // Max size of cluster message
 }
 
 namespace TType {

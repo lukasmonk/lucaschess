@@ -15,6 +15,7 @@ from Code.QT import Iconos
 from Code.QT import QTVarios
 from Code.QT import QTUtil2
 from Code.QT import FormLayout
+from Code.QT import PantallaSavePGN
 
 
 class WWashing(QTVarios.WDialogo):
@@ -169,8 +170,13 @@ class WWashing(QTVarios.WDialogo):
         submenu.opcion("new_UNED", _("UNED chess school"), Iconos.Uned())
         submenu.separador()
         submenu.opcion("new_UWE", _("Uwe Auerswald"), Iconos.Uwe())
+        submenu.separador()
+        submenu.opcion("new_SM", _("Singular moves"), Iconos.Singular())
         menu.separador()
-        menu.opcion("savedb", _("Save as database"), Iconos.DatabaseC())
+        submenu = menu.submenu(_("Export to"), Iconos.DatabaseMas())
+        submenu.opcion("save_pgn", _("A PGN file"), Iconos.FichPGN())
+        submenu.separador()
+        submenu.opcion("save_db", _("Database"), Iconos.DatabaseC())
 
         resp = menu.lanza()
         if resp is None:
@@ -220,22 +226,15 @@ class WWashing(QTVarios.WDialogo):
                 self.wreload = True
                 self.guardarVideo()
                 self.accept()
-        elif resp == "savedb":
-            ext = "lcg"
-            path = QTUtil2.salvaFichero(self, _("Database of complete games"), self.configuracion.ficheroDBgames,
-                                        _("File") + " %s (*.%s)"%(ext, ext),
-                                        False)
-            if path:
-                if not path.lower().endswith(".lcg"):
-                    path += ".lcg"
-                me = QTUtil2.mensEspera.inicio(self, _("Saving..."))
-                dbn = DBgames.DBgames(path)
+
+        elif resp.startswith("save_"):
+            def other_pc():
                 for engine in self.washing.liEngines:
                     if engine.state == Washing.ENDED:
                         game = self.dbwashing.restoreGame(engine)
                         pc = Partida.PartidaCompleta()
                         pc.leeOtra(game)
-                        dt = engine.date
+                        dt = engine.date if engine.date else Util.hoy()
                         if engine.color:
                             white = self.configuracion.jugador
                             black = engine.nombre
@@ -263,8 +262,34 @@ class WWashing(QTVarios.WDialogo):
                             tags.append( ["ECO", ap.eco] )
                             tags.append( ["Opening", ap.trNombre] )
                         pc.setTags(tags)
+                        yield pc
+
+            if resp == "save_db":
+                ext = "lcg"
+                path = QTUtil2.salvaFichero(self, _("Database of complete games"), self.configuracion.ficheroDBgames,
+                                            _("File") + " %s (*.%s)" % (ext, ext),
+                                            False)
+                if path:
+                    if not path.lower().endswith(".lcg"):
+                        path += ".lcg"
+                    me = QTUtil2.mensEspera.inicio(self, _("Saving..."))
+                    dbn = DBgames.DBgames(path)
+                    for pc in other_pc():
                         dbn.inserta(pc)
-                me.final()
+                    me.final()
+                    QTUtil2.mensaje(self, _X(_("Saved to %1"), path))
+            else:
+                w = PantallaSavePGN.WSaveVarios(self, self.configuracion)
+                if w.exec_():
+                    ws = PantallaSavePGN.FileSavePGN(self, w.dic_result)
+                    if ws.open():
+                        ws.um()
+                        for n, pc in enumerate(other_pc()):
+                            if n or not ws.is_new:
+                                ws.write("\n\n")
+                        ws.write(pc.pgn())
+                    ws.close()
+                    ws.um_final()
 
     def gridNumDatos(self, grid):
         return self.washing.numEngines()

@@ -265,12 +265,21 @@ class WDailyTest(QTVarios.WDialogo):
 
         self.siguienteJugada()
 
+    def terminar(self):
+        self.xtutor.terminar()
+        self.guardarVideo()
+        self.reject()
+
     def procesarTB(self):
         accion = self.sender().clave
-        if accion in ["abandonar", "terminar", "cancelar"]:
-            self.xtutor.terminar()
-            self.guardarVideo()
-            self.reject()
+        if accion == "abandonar":
+            if QTUtil2.pregunta(self, _("Are you sure you want to resign?")):
+                self.terminar()
+        elif accion == "cancelar":
+            if QTUtil2.pregunta(self, _("Are you sure you want to cancel?")):
+                self.terminar()
+        elif accion in "terminar":
+            self.terminar()
         elif accion == "empezar":
             self.siguienteJugada()
         elif accion == "seguir":

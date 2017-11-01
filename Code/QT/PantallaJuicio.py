@@ -23,6 +23,7 @@ class WJuicio(QTVarios.WDialogo):
         self.rmUsu = rmUsu
         self.mrm = mrm
         self.analisis = analisis
+        self.siAnalisisCambiado = False
         self.xmotor = xmotor
         self.gestor = gestor
 
@@ -73,6 +74,9 @@ class WJuicio(QTVarios.WDialogo):
 
     def difPuntos(self):
         return self.rmUsu.puntosABS_5() - self.rmOP.puntosABS_5()
+
+    def difPuntosMax(self):
+        return self.mrm.mejorMov().puntosABS_5() - self.rmUsu.puntosABS_5()
 
     def ponPuntos(self):
         pts = self.difPuntos()
@@ -244,6 +248,7 @@ class WJuicio(QTVarios.WDialogo):
 
         self.rmOP = rmOPN
         self.analisis = self.mrm, pos
+        self.siAnalisisCambiado = True
 
         self.mrm = mrm
 

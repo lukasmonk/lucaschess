@@ -169,7 +169,7 @@ class GestorEntPos(Gestor.Gestor):
         QTUtil.xrefreshGUI()
 
         if self.xrival is None:
-            self.xrival = self.procesador.creaGestorMotor(self.configuracion.tutor, self.configuracion.tiempoTutor, None)
+            self.xrival = self.procesador.creaGestorMotor(self.configuracion.tutor, self.configuracion.tiempoTutor, self.configuracion.depthTutor)
 
         self.siAnalizadoTutor = False
 
@@ -204,13 +204,17 @@ class GestorEntPos(Gestor.Gestor):
 
         elif clave == k_utilidades:
             if "/Tactics/" in self.entreno:
-                liMasOpciones = ()
+                liMasOpciones = []
             else:
-                liMasOpciones = (("tactics", _("Create tactics training"), Iconos.Tacticas()),)
+                liMasOpciones = [("tactics", _("Create tactics training"), Iconos.Tacticas()),
+                                 (None, None, None)]
+            liMasOpciones.append(("play", _('Play current position'), Iconos.MoverJugar()))
 
             resp = self.utilidades(liMasOpciones)
             if resp == "tactics":
                 self.createTactics()
+            elif resp == "play":
+                self.jugarPosicionActual()
 
         elif clave == k_pgnInformacion:
             self.pgnInformacionMenu(self.dicEtiquetasPGN)
@@ -333,7 +337,6 @@ class GestorEntPos(Gestor.Gestor):
 
         self.siJuegaHumano = True
         self.activaColor(siBlancas)
-        self.siAnalizadoTutor = False
 
     def piensaRival(self):
         self.rivalPensando = True
@@ -517,11 +520,9 @@ class GestorEntPos(Gestor.Gestor):
 
         siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
         if siBien:
+            self.siAnalizadoTutor = False
             self.partida.ultPosicion = jg.posicion
-            if not self.siTutorActivado:
-                self.siAnalizadoTutor = False
-            else:
-
+            if self.siTutorActivado:
                 if not self.siDirigido:
                     self.analizaTutor()  # Que analice antes de activar humano, para que no tenga que esperar
                     self.siAnalizadoTutor = True

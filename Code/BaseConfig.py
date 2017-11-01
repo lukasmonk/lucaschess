@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import base64
 import copy
 import operator
@@ -232,7 +233,14 @@ class ConfigMotorBase:
 
     def actMultiPV(self, xMultiPV):
         if xMultiPV == "PD":
-            self.multiPV = min(self.maxMultiPV, 10)
+            multiPV = min(self.maxMultiPV, 10)
+            multiPV = max(multiPV, self.multiPV)
+            for comando, valor in self.liUCI:
+                if comando == "MultiPV":
+                    multiPV = int(valor)
+                    break
+            self.multiPV = multiPV
+
         elif xMultiPV == "MX":
             self.multiPV = self.maxMultiPV
         else:
@@ -258,6 +266,9 @@ class ConfigMotor(ConfigMotorBase):
         self.siExterno = False
 
         self._nombre = None
+
+    def removeLog(self, fich):
+        Util.borraFichero(os.path.join(VarGen.folder_engines, self.carpeta, fich))
 
     def graba(self):
         return self.clave + "#" + self.categorias.graba()
@@ -552,16 +563,16 @@ class ConfigTabBase:
 
 
 class ConfigTablero:
-    def __init__(self, ident, anchoPieza, padre="BASE"):
-        self._id = ident
+    def __init__(self, xid, anchoPieza, padre="BASE"):
+        self._id = xid
         self._anchoPieza = anchoPieza
         self._anchoPiezaDef = anchoPieza
         self._tema = ConfigTabTema()
-        self._tema._siTemaDefecto = ident != "BASE"
+        self._tema._siTemaDefecto = xid != "BASE"
         self._base = ConfigTabBase()
         self._confPadre = None
         self._padre = padre
-        self.siBase = ident == "BASE"
+        self.siBase = xid == "BASE"
 
     def __str__(self):
         return self._tema.graba()

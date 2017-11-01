@@ -7,6 +7,29 @@ from Code import VarGen
 NOABANDONO, ABANDONO, ABANDONORIVAL = "N", "S", "R"
 
 
+def creaDicHTML():
+    base = '<img src="IntFiles/Figs/%s%s.png">'
+    dic = {}
+    for x in "nbrqk":
+        dic[x.upper()] = base % ("w", x)
+        dic[x] = base % ("b", x)
+    return dic
+
+# def creaDicHTML():
+#     base = '<span style="font-family:Chess Diagramm Pirat;font-size:18pt">%s</span>'
+#     ori = "KQRBNPkqrbnp"
+#     des = "rstuvw" + chr(126) + chr(130) + chr(131) + chr(132) + chr(133) + chr(134)
+#     def haz(c):
+#         return des[ori.index(c)]
+#     dic = {}
+#     for x in "nbrqk":
+#         dic[x.upper()] = base % haz(x.upper())
+#         dic[x] = base % haz(x)
+#     return dic
+
+dicHTMLFigs = creaDicHTML()
+
+
 class Jugada:
     def __init__(self):
         self.analisis = None
@@ -76,16 +99,32 @@ class Jugada:
     def movimiento(self):
         return self.desde + self.hasta + self.coronacion
 
-    def pgnSP(self):
+    def pgnBaseSP(self):
         dConv = TrListas.dConv()
         resp = self.pgnBase
         for k in dConv.keys():
             if k in resp:
                 resp = resp.replace(k, dConv[k])
-        return resp + self.resultadoSP()
+        return resp
+
+    def pgnSP(self):
+        return self.pgnBaseSP() + self.resultadoSP()
 
     def pgnFigurinesSP(self):
         return self.pgnBase + self.resultadoSP()
+
+    def pgnHTML(self):
+        siBlancas = self.siBlancas()
+        li = []
+        for c in self.pgnBase:
+            if c in "NBRQK":
+                c = dicHTMLFigs[c if siBlancas else c.lower()]
+            li.append(c)
+        resp = "".join(li) + self.resto()
+        result = self.resultado()
+        if result:
+            resp += " " + result
+        return resp
 
     def etiAbandono(self):
         xab = self.siAbandono
@@ -108,8 +147,6 @@ class Jugada:
             resp = "-" + _("Stalemate")
         elif self.siTablas():
             resp = "-" + _("Draw")
-        elif self.criticaDirecta:
-            resp = self.criticaDirecta
         else:
             resp = ""
         return resp
@@ -153,16 +190,14 @@ class Jugada:
         return li
 
     def pgnEN(self):
-        resp = self.pgnBase
-        # if self.siJaqueMate:
-        # resp += "#"
-        # elif self.siDesconocido:
-        # resp += "*"
-        # elif self.siJaque:
-        # resp += "+"
-        # elif self.criticaDirecta:
-        # resp += self.criticaDirecta
+        resp = self.pgnBase + self.resto()
+        result = self.resultado()
+        if result:
+            resp += " " + result
+        return resp
 
+    def resto(self):
+        resp = ""
         if self.criticaDirecta:
             resp += self.criticaDirecta
 
@@ -184,10 +219,7 @@ class Jugada:
                 if x:
                     resp += " (%s)" % x.strip()
 
-        result = self.resultado()
-        if result:
-            resp += " " + result
-        return resp
+        return (" %s" % resp.strip()) if resp else ""
 
     def resultado(self):
         if self.siAbandono != NOABANDONO:
@@ -197,7 +229,7 @@ class Jugada:
         elif self.siDesconocido:
             result = "*"
         else:
-            result = None
+            result = ""
         return result
 
     def guardaEnTexto(self):
@@ -369,6 +401,20 @@ class Jugada:
         self.comentario = ""
         self.critica = ""
         self.criticaDirecta = ""
+
+    def calc_elo(self, formula):
+        if self.analisis:
+            mrm, pos = self.analisis
+            pts = mrm.liMultiPV[pos].puntosABS_5()
+            pts0 = mrm.liMultiPV[0].puntosABS_5()
+            lostp_abs = pts0 - pts
+            self.elo = max(int(eval(formula.replace("xlost", str(lostp_abs)))), 800)
+            self.verybad_move = lostp_abs > 200
+            self.bad_move = lostp_abs > 90 if not self.verybad_move else False
+        else:
+            self.elo = 0
+            self.bad_move = False
+            self.verybad_move = False
 
 
 def dameJugada(posicionBase, desde, hasta, coronacion):

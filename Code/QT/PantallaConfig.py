@@ -100,6 +100,12 @@ def opciones(parent, configuracion):
     liTT = [separador]
     liTT.append((_("Engine") + ":", configuracion.ayudaCambioTutor()))
     liTT.append((_("Duration of tutor analysis (secs)") + ":", float(configuracion.tiempoTutor / 1000.0)))
+    liDepths = [("--", 0)]
+    for x in range(1, 51):
+        liDepths.append((str(x), x))
+    config = FormLayout.Combobox(_("Depth"), liDepths)
+    liTT.append((config, configuracion.depthTutor))
+
     li = [(_("Maximum"), 0)]
     for x in (1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200):
         li.append((str(x), x))
@@ -170,6 +176,14 @@ def opciones(parent, configuracion):
     liT.append((_("Enable information panel by default") + ":", configuracion.siActivarInformacion))
     liT.append(separador)
     liT.append((_X(_("Enable %1"), _("DGT board")) + ":", configuracion.siDGT))
+    liT.append(separador)
+    # liT.append((FormLayout.Dial(_("Opacity of tool icon"), 1, 9, siporc=False), configuracion.opacityToolBoard))
+    liT.append((_("Show configuration icon"), configuracion.opacityToolBoard > 6))
+    liPos = [configuracion.positionToolBoard, ("B", _("Bottom")), ("T", _("Top"))]
+    liT.append((_("Configuration icon position") + ":", liPos))
+    liT.append(separador)
+    liT.append((_("Show icon when position has graphic information"), configuracion.directorIcon))
+    liT.append(separador)
 
     lista = []
     lista.append((liGen, _("General"), ""))
@@ -206,7 +220,7 @@ def opciones(parent, configuracion):
 
         (configuracion.siSuenaBeep, configuracion.siSuenaResultados, configuracion.siSuenaJugada, configuracion.siSuenaNuestro) = liSon
 
-        (configuracion.tutor.clave, tiempoTutor, configuracion.tutorMultiPV,
+        (configuracion.tutor.clave, tiempoTutor, configuracion.depthTutor, configuracion.tutorMultiPV,
             configuracion.tutorActivoPorDefecto, configuracion.tutorDifPts, configuracion.tutorDifPorc) = liTT
         configuracion.tiempoTutor = int(tiempoTutor * 1000)
 
@@ -218,7 +232,9 @@ def opciones(parent, configuracion):
             configuracion.efectosVisuales, rapidezMovPiezas,
             configuracion.siAtajosRaton, configuracion.showCandidates, configuracion.showVariantes,
             configuracion.cursorThinking, configuracion.siActivarCapturas, configuracion.tipoMaterial,
-            configuracion.siActivarInformacion, siDGT) = liT
+            configuracion.siActivarInformacion, siDGT, toolIcon, configuracion.positionToolBoard,
+            configuracion.directorIcon) = liT
+        configuracion.opacityToolBoard = 10 if toolIcon else 1
         configuracion.rapidezMovPiezas = drap[rapidezMovPiezas]
         if configuracion.siDGT != siDGT:
             if siDGT:

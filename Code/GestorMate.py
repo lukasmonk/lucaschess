@@ -443,13 +443,15 @@ class GestorMate(Gestor.Gestor):
         if not jg:
             return False
 
-        self.partida.ultPosicion = jg.posicion
         self.partida.append_jg(jg)
         if self.siAyuda:
             self.tablero.quitaFlechas()
         self.movimientosPiezas(jg.liMovs, False)
         if self.siTerminada():
-            self.siguienteMate()
+            if jg.siJaqueMate:
+                self.siguienteMate()
+            else:
+                self.repiteMate(True, True)
             return
 
         self.numMov += 1
@@ -464,7 +466,6 @@ class GestorMate(Gestor.Gestor):
         coronacion = rm.coronacion
 
         siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
-        self.partida.ultPosicion = jg.posicion
         self.partida.append_jg(jg)
         self.ponFlechaSC(jg.desde, jg.hasta)
         self.movimientosPiezas(jg.liMovs, False)

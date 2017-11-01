@@ -194,7 +194,7 @@ class TreeSTAT:
             alm.O += o
         return self._writeRow(hfen, alm)
 
-    def append(self, pv, result, r=+1):
+    def append(self, pv, result, r=+1, siCommit=False):
         w = b = d = o = 0
         if result == "1-0":
             w += r
@@ -434,6 +434,23 @@ class DBgames:
     def reset_cache(self):
         self.cache = {}
 
+    def guardaConfig(self, clave, valor):
+        with Util.DicRaw(self.nomFichero, "config") as dbconf:
+            dbconf[clave] = valor
+
+    def recuperaConfig(self, clave):
+        with Util.DicRaw(self.nomFichero, "config") as dbconf:
+            return dbconf[clave]
+
+    def guardaOrden(self):
+        self.guardaConfig("LIORDEN", self.liOrden)
+
+    def recuperaOrden(self):
+        liOrden = self.recuperaConfig("LIORDEN")
+        if liOrden:
+            self.ponOrden(liOrden)
+        return self.liOrden
+
     def addcache(self, rowid, reg):
         if len(self.cache) > self.maxcache:
             keys = self.cache.keys()
@@ -443,6 +460,56 @@ class DBgames:
                 ncache[k] = self.cache[k]
             self.cache = ncache
         self.cache[rowid] = reg
+
+    def intercambia(self, nfila, siUP):
+        rowid = self.liRowids[nfila]
+        if siUP:
+            # buscamos el mayor, menor que rowid
+            filOther = None
+            rowidOther = -1
+            for fil0, rowid0 in enumerate(self.liRowids):
+                if rowid0 < rowid:
+                    if rowid0 > rowidOther:
+                        filOther = fil0
+                        rowidOther = rowid0
+            if filOther is None:
+                return None
+        else:
+            # buscamos el menor, mayor que rowid
+            filOther = None
+            rowidOther = 999999999999
+            for fil0, rowid0 in enumerate(self.liRowids):
+                if rowid0 > rowid:
+                    if rowid0 < rowidOther:
+                        filOther = fil0
+                        rowidOther = rowid0
+            if filOther is None:
+                return None
+        # Hay que intercambiar rowid, con rowidOther
+        selectAll = ",".join(self.liCamposAll)
+        self._cursor.execute("SELECT %s FROM GAMES WHERE rowid =%d" % (selectAll, rowid))
+        reg = self._cursor.fetchone()
+        self._cursor.execute("SELECT %s FROM GAMES WHERE rowid =%d" % (selectAll, rowidOther))
+        regOther = self._cursor.fetchone()
+
+        # Problema con error por XPV unico cuando se intercambia, en RowidOther ponemos un xpv ficticio
+        sql = "UPDATE GAMES SET XPV=? WHERE ROWID = %d" % rowidOther
+        self._cursor.execute(sql, ("?????",))
+
+        updateAll = ",".join(["%s=?"%campo for campo in self.liCamposAll])
+        sql = "UPDATE GAMES SET %s" % updateAll + " WHERE ROWID = %d"
+
+        self._cursor.execute(sql % rowid, regOther)
+        self._cursor.execute(sql % rowidOther, reg)
+        self._conexion.commit()
+
+        self.addcache(rowid, regOther)
+        self.addcache(rowidOther, reg)
+
+        return filOther
+
+    def getROWID(self, nfila):
+        return self.liRowids[nfila]
 
     def field(self, nfila, name):
         rowid = self.liRowids[nfila]
@@ -562,6 +629,7 @@ class DBgames:
             self.dbSTAT.append(pv, result, -1)
             self._cursor.execute(cSQL,(self.liRowids[recno],))
             del self.liRowids[recno]
+        self.dbSTAT.commit()
         self._conexion.commit()
 
     def getSummary(self, pvBase, dicAnalisis, siFigurinesPGN, allmoves=True):
@@ -715,7 +783,7 @@ class DBgames:
                     self.dbSTAT.commit()
             self.dbSTAT.commit()
 
-    def leerPGN(self, fichero, dlTmp):
+    def leerPGNs(self, ficheros, dlTmp):
         erroneos = duplicados = importados = n = 0
 
         t1 = time.time()-0.7  # para que empiece enseguida
@@ -726,7 +794,7 @@ class DBgames:
 
         # fich_erroneos = "UsrData/fich_erroneos.pgn"
 
-        codec = Util.file_encoding(fichero)
+        codec = Util.file_encoding(ficheros[0])
         sicodec = codec not in ("utf-8", "ascii")
 
         liRegs = []
@@ -740,69 +808,71 @@ class DBgames:
         liCabs = self.liCamposBase[:-1] # all except PLIES PGN, TAGS
         liCabs.append("PLYCOUNT")
 
-        with LCEngine.PGNreader(fichero, self.depthStat()) as fpgn:
-            for n, (pgn, pv, dCab, raw, liFens) in enumerate(fpgn, 1):
-                if not pv:
-                    erroneos += 1
-                else:
-                    fen = dCab.get("FEN", None)
-                    if fen and fen != ControlPosicion.FEN_INICIAL:
+        for fichero in ficheros:
+            dlTmp.pon_titulo(os.path.basename(fichero))
+            with LCEngine.PGNreader(fichero, self.depthStat()) as fpgn:
+                for n, (pgn, pv, dCab, raw, liFens) in enumerate(fpgn, 1):
+                    if not pv:
                         erroneos += 1
                     else:
-                        xpv = pv2xpv(pv)
-                        if xpv in stRegs:
-                            dup = True
+                        fen = dCab.get("FEN", None)
+                        if fen and fen != ControlPosicion.FEN_INICIAL:
+                            erroneos += 1
                         else:
-                            cursor.execute("SELECT COUNT(*) FROM games WHERE XPV = ?", (xpv,))
-                            num = cursor.fetchone()[0]
-                            dup = num > 0
-                        if dup:
-                            duplicados += 1
-                        else:
-                            stRegs.add(xpv)
-                            if sicodec:
-                                for k, v in dCab.iteritems():
-                                    dCab[k] = unicode(v, encoding=codec, errors="ignore")
+                            xpv = pv2xpv(pv)
+                            if xpv in stRegs:
+                                dup = True
+                            else:
+                                cursor.execute("SELECT COUNT(*) FROM games WHERE XPV = ?", (xpv,))
+                                num = cursor.fetchone()[0]
+                                dup = num > 0
+                            if dup:
+                                duplicados += 1
+                            else:
+                                stRegs.add(xpv)
+                                if sicodec:
+                                    for k, v in dCab.iteritems():
+                                        dCab[k] = unicode(v, encoding=codec, errors="ignore")
+                                    if pgn:
+                                        pgn = unicode(pgn, encoding=codec, errors="ignore")
+
+                                if raw: # si no tiene variantes ni comentarios, se graba solo las tags que faltan
+                                    liRTags = [(k,v) for k, v in dCab.iteritems() if k not in liCabs] # k is always upper
+                                    if liRTags:
+                                        pgn = {}
+                                        pgn["RTAGS"] = liRTags
+                                    else:
+                                        pgn = None
+
+                                event = dCab.get("EVENT", "")
+                                site = dCab.get("SITE", "")
+                                date = dCab.get("DATE", "")
+                                white = dCab.get("WHITE", "")
+                                black = dCab.get("BLACK", "")
+                                result = dCab.get("RESULT", "")
+                                eco = dCab.get("ECO", "")
+                                whiteelo = dCab.get("WHITEELO", "")
+                                blackelo = dCab.get("BLACKELO", "")
+                                plies = (pv.count(" ")+1) if pv else 0
                                 if pgn:
-                                    pgn = unicode(pgn, encoding=codec, errors="ignore")
+                                    pgn = Util.var2blob(pgn)
 
-                            if raw: # si no tiene variantes ni comentarios, se graba solo las tags que faltan
-                                liRTags = [(k,v) for k, v in dCab.iteritems() if k not in liCabs] # k is always upper
-                                if liRTags:
-                                    pgn = {}
-                                    pgn["RTAGS"] = liRTags
-                                else:
-                                    pgn = None
-
-                            event = dCab.get("EVENT", "")
-                            site = dCab.get("SITE", "")
-                            date = dCab.get("DATE", "")
-                            white = dCab.get("WHITE", "")
-                            black = dCab.get("BLACK", "")
-                            result = dCab.get("RESULT", "")
-                            eco = dCab.get("ECO", "")
-                            whiteelo = dCab.get("WHITEELO", "")
-                            blackelo = dCab.get("BLACKELO", "")
-                            plies = (pv.count(" ")+1) if pv else 0
-                            if pgn:
-                                pgn = Util.var2blob(pgn)
-
-                            reg = (xpv, event, site, date, white, black, result, eco, whiteelo, blackelo, pgn, plies)
-                            self.dbSTAT.append_fen(pv, result, liFens)
-                            liRegs.append(reg)
-                            nRegs += 1
-                            importados += 1
-                            if nRegs == 10000:
-                                cursor.executemany(sql, liRegs)
-                                liRegs = []
-                                stRegs = set()
-                                conexion.commit()
-                if n == next_n:
-                    if time.time()-t1> 0.8:
-                        if not dlTmp.actualiza(erroneos+duplicados+importados, erroneos, duplicados, importados):
-                            break
-                        t1 = time.time()
-                    next_n = n + random.randint(100, 500)
+                                reg = (xpv, event, site, date, white, black, result, eco, whiteelo, blackelo, pgn, plies)
+                                self.dbSTAT.append_fen(pv, result, liFens)
+                                liRegs.append(reg)
+                                nRegs += 1
+                                importados += 1
+                                if nRegs == 10000:
+                                    cursor.executemany(sql, liRegs)
+                                    liRegs = []
+                                    stRegs = set()
+                                    conexion.commit()
+                    if n == next_n:
+                        if time.time()-t1> 0.8:
+                            if not dlTmp.actualiza(erroneos+duplicados+importados, erroneos, duplicados, importados):
+                                break
+                            t1 = time.time()
+                        next_n = n + random.randint(100, 500)
 
         if liRegs:
             cursor.executemany(sql, liRegs)
@@ -814,7 +884,6 @@ class DBgames:
         self.dbSTAT.massive_append_set(False)
         self.dbSTAT.commit()
         conexion.commit()
-
         dlTmp.ponContinuar()
 
     def appendDB(self, db, liRecnos, dlTmp):
@@ -899,7 +968,7 @@ class DBgames:
         rtags = None
         if xpgn:
             xpgn = Util.blob2var(xpgn)
-            if type(xpgn) == str:  # Version -9
+            if type(xpgn) in (str, unicode):  # Version -9
                 p.readPGN(VarGen.configuracion, xpgn)
                 return p
             if "RTAGS" in xpgn:
@@ -935,7 +1004,7 @@ class DBgames:
         rtags = None
         if xpgn:
             xpgn = Util.blob2var(xpgn)
-            if type(xpgn) == str:  # Version -9
+            if type(xpgn) in (str, unicode):
                 return xpgn
             if "RTAGS" in xpgn:
                 rtags = xpgn["RTAGS"]
@@ -945,6 +1014,7 @@ class DBgames:
                 return p.pgn()
 
         p = Partida.PartidaCompleta()
+
         p.leerPV(xpv2pv(raw["XPV"]))
         rots = ["Event", "Site", "Date", "Round", "White", "Black", "Result",
                 "WhiteTitle", "BlackTitle", "WhiteElo", "BlackElo", "WhiteUSCF", "BlackUSCF", "WhiteNA", "BlackNA",
@@ -1016,6 +1086,7 @@ class DBgames:
         resNue = dTags.get("RESULT", "*")
         self.dbSTAT.append(pvAnt, resAnt, -1)
         self.dbSTAT.append(pvNue, resNue, +1)
+        self.dbSTAT.commit()
 
         del self.cache[rowid]
 
@@ -1025,7 +1096,8 @@ class DBgames:
         pv = partidaCompleta.pv()
         xpv = pv2xpv(pv)
         self._cursor.execute("SELECT COUNT(*) FROM games WHERE XPV = ?", (xpv,))
-        num = self._cursor.fetchone()[0]
+        raw = self._cursor.fetchone()
+        num = raw[0]
         if num > 0:
             return False
 
@@ -1047,6 +1119,7 @@ class DBgames:
         self._cursor.execute(sql, data)
         self._conexion.commit()
         self.dbSTAT.append(pv, dTags.get("RESULT", "*"), +1)
+        self.dbSTAT.commit()
 
         return True
 

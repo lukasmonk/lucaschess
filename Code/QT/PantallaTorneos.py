@@ -727,17 +727,11 @@ class WUnTorneo(QTVarios.WDialogo):
                 self.gridGames.refresh()
                 self.borraResult()
 
-    def pgnActual(self):
-        nrec = self.gridGames.reccount()
-        if not nrec:
-            return None
+    def gmMostrar(self):
         li = self.gridGames.recnosSeleccionados()
         if not li:
-            li = range(nrec)
-        return self.torneo.grabaPGNgames(li)
-
-    def gmMostrar(self):
-        pgn = self.pgnActual()
+            return
+        pgn = self.torneo.grabaPGNgames(li[:1])
         if pgn:
             fpgn = Util.ficheroTemporal("Tmp", "pgn")
             f = codecs.open(fpgn, "w", "utf-8", 'ignore')
@@ -750,10 +744,23 @@ class WUnTorneo(QTVarios.WDialogo):
             XRun.run_lucas(fpgn)
 
     def gmGuardar(self):
-        pgn = self.pgnActual()
+        nrec = self.gridGames.reccount()
+        if not nrec:
+            return None
+        li = self.gridGames.recnosSeleccionados()
+        if not li:
+            li = range(nrec)
+
+        pgn = self.torneo.grabaPGNgames(li)
+
         if pgn:
-            w = PantallaSavePGN.WSave(self, pgn, self.configuracion)
-            w.exec_()
+            w = PantallaSavePGN.WSaveVarios(self, self.configuracion)
+            if w.exec_():
+                ws = PantallaSavePGN.FileSavePGN(self, w.dic_result)
+                if ws.open():
+                    ws.write(pgn)
+                    ws.close()
+                    ws.um_final()
 
 
 class WTorneos(QTVarios.WDialogo):

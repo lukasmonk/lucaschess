@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2015  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@
 #include <cassert>
 
 
-Game::Game(const std::shared_ptr<Player>& whitePlayer,
-           const std::shared_ptr<Player>& blackPlayer) {
-    this->whitePlayer = whitePlayer;
-    this->blackPlayer = blackPlayer;
+Game::Game(std::unique_ptr<Player>&& whitePlayer,
+           std::unique_ptr<Player>&& blackPlayer)
+    : whitePlayer(std::move(whitePlayer)),
+      blackPlayer(std::move(blackPlayer)) {
     handleCommand("new");
 }
 

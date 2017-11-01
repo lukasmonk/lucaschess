@@ -49,7 +49,7 @@ class GestorPartida(Gestor.Gestor):
         self.ponPiezasAbajo(partidaCompleta.iswhite())
         self.pgnRefresh(True)
         self.ponCapInfoPorDefecto()
-        self.ponteAlPrincipio()
+        self.ponteAlFinal()
 
         self.ponPosicionDGT()
 
@@ -112,13 +112,13 @@ class GestorPartida(Gestor.Gestor):
         if self.siCambios:
             resp = QTUtil2.preguntaCancelar(self.pantalla, _("Do you want to cancel changes?"), _("Yes"), _("No"))
             if not resp:
-                return
+                return False
 
         self.pantalla.reject()
+        return True
 
     def finalX(self):
-        self.finPartida()
-        return False
+        return self.finPartida()
 
     def siguienteJugada(self):
         if self.estado == kFinJuego:
@@ -157,6 +157,7 @@ class GestorPartida(Gestor.Gestor):
         self.ponIndicador(siBlancas)
         self.refresh()
 
+        self.siJuegaHumano = True
         self.activaColor(siBlancas)
 
     def mueveHumano(self, desde, hasta, coronacion=None):

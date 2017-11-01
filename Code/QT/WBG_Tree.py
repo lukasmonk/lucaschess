@@ -135,7 +135,7 @@ class TreeMoves(QtGui.QTreeWidget):
             menu.opcion("mark_add", _("Add bookmark"), self.iconBookmark)
 
         tr = move.transpositions()
-        if tr:
+        if tr and tr>1:
             menu.separador()
             menutr = menu.submenu(_("Transpositions"), Iconos.Transposition())
             for n, mv in enumerate(tr):
@@ -195,7 +195,6 @@ class TreeMoves(QtGui.QTreeWidget):
             unMove.item(item)
 
     def showFrom(self, unMove, siExpand, siRoot=False):
-
         if siExpand:
             mens = QTUtil2.mensEspera
             mens.inicio(self, _("Expanding"), siCancelar=True)
@@ -268,29 +267,6 @@ class TreeMoves(QtGui.QTreeWidget):
         ico = self.iconBookmark if mark else self.noIcon
         item.setIcon(self.posBookmark, ico)
 
-        # def showChildrenPV(self, moveRoot, pv):
-        # self.showChildren( moveRoot, True)
-        # if not pv:
-        # return
-
-        # unMove = moveRoot
-        # li = pv.split(" ")
-        # for unPV in li:
-        # ok = False
-        # for uno in unMove.children():
-        # if uno.pv() == unPV:
-        # ok = True
-        # unMove = uno
-        # break
-        # if ok:
-        # self.showChildren( unMove, True)
-        # else:
-        # break
-        # item = unMove.item()
-        # self.scrollToItem(item)
-        # self.setCurrentItem(item)
-        # self.seleccionado(item)
-
     def resetValoracion(self, move):
         self.ponIconoValoracion(move.item(), move.nag())
 
@@ -333,7 +309,6 @@ class TreeMoves(QtGui.QTreeWidget):
         model.removeRow(index.row(), index.parent())
 
     def newBookmark(self, move):
-
         comment = move.comment()
         allpgn = move.allPGN()
         siComment = len(comment) > 0

@@ -288,8 +288,8 @@ class GestorWashingTactics(Gestor.Gestor):
         self.siRivalConBlancas = not siBlancas
         self.ponPosicion(self.partida.ultPosicion)
         self.ponPiezasAbajo(siBlancas)
-        r1 = self.line.label
-        self.ponRotulo1(r1)
+        #r1 = self.line.label
+        self.ponRotulo1("")
         r2 = "<b>%s: %d</b>" % (_("Pending"), self.num_lines)
         self.ponRotulo2(r2)
         self.pgnRefresh(True)
@@ -354,6 +354,8 @@ class GestorWashingTactics(Gestor.Gestor):
             self.siguienteJugada()
 
         else:
+            self.ayudasEsteMov = 0
+            self.erroresEsteMov = 0
             self.siJuegaHumano = True
             self.timekeeper.start()
             self.activaColor(siBlancas)
@@ -372,6 +374,8 @@ class GestorWashingTactics(Gestor.Gestor):
             liOpciones.append(k_siguiente)
 
         self.pantalla.ponToolBar(liOpciones)
+
+        self.ponRotulo1(self.line.label)
 
         if ok:
             r2 = "<b>%s: %d</b>" % (_("Pending"), self.num_lines)
@@ -401,6 +405,7 @@ class GestorWashingTactics(Gestor.Gestor):
             return True
 
         self.errores += 1
+        self.erroresEsteMov += 1
         self.sigueHumano()
         return False
 
@@ -442,9 +447,13 @@ class GestorWashingTactics(Gestor.Gestor):
         self.error = ""
 
     def ayuda(self):
+        self.ponRotulo1(self.line.label)
         self.ayudas += 1
         mov = self.line.get_move(self.num_move).lower()
         self.tablero.markPosition(mov[:2])
+        self.ayudasEsteMov += 1
+        if self.ayudasEsteMov > 1 and self.erroresEsteMov > 0:
+            self.tablero.ponFlechasTmp([(mov[:2], mov[2:], True), ], 1200 )
 
     def finPartida(self):
         self.procesador.inicio()
@@ -637,7 +646,7 @@ class GestorWashingCreate(Gestor.Gestor):
             return
         if self.continueTt and estado:
             self.pensando(True)
-            self.mrmTutor = self.xtutor.ac_final(self.xtutor.motorTiempoJugada)
+            self.mrmTutor = self.xtutor.ac_final(max(self.xtutor.motorTiempoJugada,5000))
             self.pensando(False)
         else:
             self.mrmTutor = self.analizaTutor()

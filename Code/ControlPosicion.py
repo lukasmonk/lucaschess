@@ -74,9 +74,10 @@ class ControlPosicion:
         self.casillas = d
 
         li = fen.split(" ")
-        if len(li) == 4:
-            li.append("0")
-            li.append("1")
+        nli = len(li)
+        if nli < 6:
+            lid = ["w", "-", "-", "0", "1"]
+            li.extend(lid[nli-1:])
         posicion, color, self.enroques, self.alPaso, mp, jg = li
 
         self.siBlancas = color == "w"
@@ -303,6 +304,14 @@ class ControlPosicion:
 
     def siTerminada(self):
         return self.setLCE() == 0
+
+    def valor_material(self):
+        valor = 0
+        d = { "R": 5, "Q": 10, "B": 3, "N": 3, "P": 1, "K": 0 }
+        for v in self.casillas.itervalues():
+            if v:
+                valor += d[v.upper()]
+        return valor
 
     def siFaltaMaterial(self):
         # Rey y Rey

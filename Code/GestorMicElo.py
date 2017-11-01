@@ -207,6 +207,9 @@ class GestorMicElo(Gestor.Gestor):
 
         self.ponPosicionDGT()
 
+        if not self.siJugamosConBlancas:
+            QTUtil2.mensaje(self.pantalla, "Press the continue button to start.")
+
         self.siguienteJugada()
 
     def ponToolBar(self):
@@ -355,7 +358,8 @@ class GestorMicElo(Gestor.Gestor):
                 self.liRMrival.append(self.rmRival)
                 if self.valoraRMrival(self.siRivalConBlancas):
                     self.siguienteJugada()
-
+            else:
+                self.ponResultado(kGanamos)
         else:
             self.relojStart(True)
 

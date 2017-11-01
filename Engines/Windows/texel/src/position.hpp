@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2015  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,6 +35,11 @@
 #include "material.hpp"
 #include <algorithm>
 #include <iostream>
+
+
+namespace TBProbeData {
+    extern int maxPieces;
+}
 
 /**
  * Stores the state of a chess position.
@@ -77,11 +82,14 @@ public:
     /** Return the material identifier. */
     int materialId() const;
 
+    /** Return number of pieces, including kings and pawns. */
+    int nPieces() const;
+
     /**
      * Decide if two positions are equal in the sense of the draw by repetition rule.
      * @return True if positions are equal, false otherwise.
      */
-    bool drawRuleEquals(Position other) const;
+    bool drawRuleEquals(const Position& other) const;
 
     bool isWhiteMove() const;
 
@@ -92,6 +100,9 @@ public:
 
     /** Set a square to a piece value. */
     void setPiece(int square, int piece);
+
+    /** Remove a piece from a square. */
+    void clearPiece(int square);
 
     /**
      * Set a square to a piece value.
@@ -212,12 +223,7 @@ private:
     void movePieceNotPawn(int from, int to);
     void movePieceNotPawnB(int from, int to);
 
-    void removeCastleRights(int square);
 
-    static U64 getRandomHashVal(int rndNo);
-
-
-    int wKingSq_, bKingSq_;  // Cached king positions
     int wMtrl_;              // Total value of all white pieces and pawns
     int bMtrl_;              // Total value of all black pieces and pawns
     int wMtrlPawns_;         // Total value of all white pawns
@@ -248,14 +254,14 @@ private:
     U64 pHashKey;          // Cached Zobrist pawn hash key
     MatId matId;           // Cached material identifier
 
-    static U64 psHashKeys[Piece::nPieceTypes][64];    // [piece][square]
+    static U8 castleSqMask[64]; // Castle masks retained for each square
 
-    static U64 whiteHashKey;
-    static U64 castleHashKeys[16];   // [castleMask]
-    static U64 epHashKeys[9];        // [epFile + 1] (epFile==-1 for no ep)
-    static U64 moveCntKeys[101];     // [min(halfMoveClock, 100)]
+    const static U64 psHashKeys[Piece::nPieceTypes][64];    // [piece][square]
 
-    static const U64 zobristRndKeys[];
+    const static U64 whiteHashKey = 0xc98143a7869aa213ULL;
+    const static U64 castleHashKeys[16];   // [castleMask]
+    const static U64 epHashKeys[9];        // [epFile + 1] (epFile==-1 for no ep)
+    const static U64 moveCntKeys[101];     // [min(halfMoveClock, 100)]
 };
 
 /** For debugging. */
@@ -297,7 +303,9 @@ Position::kingZobristHash() const {
 inline U64
 Position::historyHash() const {
     U64 ret = hashKey;
-    if (halfMoveClock >= 40) {
+    if (nPieces() <= TBProbeData::maxPieces) {
+        ret ^= moveCntKeys[std::min(halfMoveClock, 100)];
+    } else if (halfMoveClock >= 40) {
         if (halfMoveClock < 80)
             ret ^= moveCntKeys[halfMoveClock / 10];
         else
@@ -318,8 +326,13 @@ Position::materialId() const {
     return matId();
 }
 
+inline int
+Position::nPieces() const {
+    return BitBoard::bitCount(occupiedBB());
+}
+
 inline bool
-Position::drawRuleEquals(Position other) const {
+Position::drawRuleEquals(const Position& other) const {
     for (int i = 0; i < 64; i++)
         if (squares[i] != other.squares[i])
             return false;
@@ -402,9 +415,11 @@ Position::getCastleMask() const {
 
 inline void
 Position::setCastleMask(int castleMask) {
-    hashKey ^= castleHashKeys[this->castleMask];
-    hashKey ^= castleHashKeys[castleMask];
-    this->castleMask = castleMask;
+    if (castleMask != this->castleMask) {
+        hashKey ^= castleHashKeys[this->castleMask];
+        hashKey ^= castleHashKeys[castleMask];
+        this->castleMask = castleMask;
+    }
 }
 
 inline int
@@ -517,12 +532,8 @@ Position::setPieceB(int square, int piece) {
     if (piece != Piece::EMPTY) {
         if (Piece::isWhite(piece)) {
             whiteBB_ |= sqMask;
-            if (piece == Piece::WKING)
-                wKingSq_ = square;
         } else {
             blackBB_ |= sqMask;
-            if (piece == Piece::BKING)
-                bKingSq_ = square;
         }
     }
 }
@@ -541,13 +552,9 @@ Position::movePieceNotPawnB(int from, int to) {
     if (Piece::isWhite(piece)) {
         whiteBB_ &= ~sqMaskF;
         whiteBB_ |= sqMaskT;
-        if (piece == Piece::WKING)
-            wKingSq_ = to;
     } else {
         blackBB_ &= ~sqMaskF;
         blackBB_ |= sqMaskT;
-        if (piece == Piece::BKING)
-            bKingSq_ = to;
     }
 }
 
@@ -607,26 +614,13 @@ Position::getY(int square) {
 
 inline int
 Position::mirrorY(int square) {
-    return square ^ 56;
+    return square ^ 0x38;
 }
 
 /** Return true if (x,y) is a dark square. */
 inline bool
 Position::darkSquare(int x, int y) {
     return (x & 1) == (y & 1);
-}
-
-inline void
-Position::removeCastleRights(int square) {
-    if (square == getSquare(0, 0)) {
-        setCastleMask(castleMask & ~(1 << A1_CASTLE));
-    } else if (square == getSquare(7, 0)) {
-        setCastleMask(castleMask & ~(1 << H1_CASTLE));
-    } else if (square == getSquare(0, 7)) {
-        setCastleMask(castleMask & ~(1 << A8_CASTLE));
-    } else if (square == getSquare(7, 7)) {
-        setCastleMask(castleMask & ~(1 << H8_CASTLE));
-    }
 }
 
 inline int Position::getFullMoveCounter() const {
@@ -679,11 +673,11 @@ inline U64 Position::occupiedBB() const {
 }
 
 inline int Position::wKingSq() const {
-    return wKingSq_;
+    return BitBoard::firstSquare(pieceTypeBB_[Piece::WKING]);
 }
 
 inline int Position::bKingSq() const {
-    return bKingSq_;
+    return BitBoard::firstSquare(pieceTypeBB_[Piece::BKING]);
 }
 
 inline int Position::wMtrl() const {

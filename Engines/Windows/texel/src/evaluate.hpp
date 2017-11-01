@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2016  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 #ifndef EVALUATE_HPP_
 #define EVALUATE_HPP_
 
-#include "parameters.hpp"
 #include "piece.hpp"
 #include "position.hpp"
 #include "util/alignedAlloc.hpp"
@@ -55,13 +54,13 @@ private:
         MaterialHashData();
         int id;
         int score;
-        S16 wPawnIPF, bPawnIPF;
-        S16 wKnightIPF, bKnightIPF;
+        S16 pawnIPF;
+        S16 knightIPF;
         S16 castleIPF, queenIPF;
         S16 wPassedPawnIPF, bPassedPawnIPF;
         S16 kingSafetyIPF;
         S16 diffColorBishopIPF;
-        S16 wKnightOutPostIPF, bKnightOutPostIPF;
+        S16 knightOutPostIPF;
         U8 endGame;
     };
 
@@ -72,16 +71,24 @@ private:
         S16 current;        // For hash replacement policy
     };
 
+    struct EvalHashData {
+        EvalHashData();
+        U64 data;    // 0-15: Score, 16-63 hash key
+    };
+
 public:
     struct EvalHashTables {
         EvalHashTables();
         std::vector<PawnHashData> pawnHash;
         std::vector<MaterialHashData> materialHash;
         vector_aligned<KingSafetyHashData> kingSafetyHash;
+
+        using EvalHashType = std::array<EvalHashData,(1<<16)>;
+        EvalHashType evalHash;
     };
 
     /** Constructor. */
-    Evaluate(EvalHashTables& et);
+    explicit Evaluate(EvalHashTables& et);
 
     static int pieceValueOrder[Piece::nPieceTypes];
 
@@ -89,7 +96,10 @@ public:
     static const int* psTab2[Piece::nPieceTypes];
 
     /** Get evaluation hash tables. */
-    static std::shared_ptr<EvalHashTables> getEvalHashTables();
+    static std::unique_ptr<EvalHashTables> getEvalHashTables();
+
+    /** Prefetch hash table cache lines. */
+    void prefetch(U64 key);
 
     /**
      * Static evaluation of a position.
@@ -101,8 +111,12 @@ public:
     int evalPosPrint(const Position& pos);
 
     /** Compute "swindle" score corresponding to an evaluation score when
-     * the position is a known TB draw. */
-    static int swindleScore(int evalScore);
+     * the position is a known TB draw.
+     * @param distToWin For draws that would be a win if the 50-move rule
+     *                  did not exist, this is the number of extra plies
+     *                  past halfMoveClock = 100 that are needed to win.
+     */
+    static int swindleScore(int evalScore, int distToWin);
 
     /**
      * Interpolate between (x1,y1) and (x2,y2).
@@ -120,6 +134,8 @@ public:
 
 private:
     template <bool print> int evalPos(const Position& pos);
+
+    EvalHashData& getEvalHashEntry(EvalHashTables::EvalHashType& evalHash, U64 key);
 
     /** Compute score based on piece square tables. Positive values are good for white. */
     int pieceSquareEval(const Position& pos);
@@ -163,6 +179,9 @@ private:
     /** Compute king safety for both kings. */
     int kingSafety(const Position& pos);
 
+    /** Compute number of white contact checks minus number of black contact checks. */
+    int getNContactChecks(const Position& pos) const;
+
     KingSafetyHashData& getKingSafetyHashEntry(vector_aligned<KingSafetyHashData>& ksHash, U64 key);
     int kingSafetyKPPart(const Position& pos);
 
@@ -178,12 +197,16 @@ private:
     const MaterialHashData* mhd;
 
     vector_aligned<KingSafetyHashData>& kingSafetyHash;
+    EvalHashTables::EvalHashType& evalHash;
 
      // King safety variables
     U64 wKingZone, bKingZone;       // Squares close to king that are worth attacking
     int wKingAttacks, bKingAttacks; // Number of attacks close to white/black king
-    U64 wAttacksBB, bAttacksBB;
+    U64 wAttacksBB, bAttacksBB;     // Attacks by pieces and pawns, but not king
     U64 wPawnAttacks, bPawnAttacks; // Squares attacked by white/black pawns
+    U64 wQueenContactChecks;        // White queen checks adjacent to black king
+    U64 bQueenContactChecks;
+    U64 wContactSupport, bContactSupport; // Attacks from P,N,B,R,K
 };
 
 
@@ -207,10 +230,22 @@ Evaluate::KingSafetyHashData::KingSafetyHashData()
 }
 
 inline
+Evaluate::EvalHashData::EvalHashData()
+    : data(0xffffffffffff0000ULL) {
+}
+
+inline
 Evaluate::EvalHashTables::EvalHashTables() {
-    pawnHash.resize(1<<16);
+    pawnHash.resize(1 << 16);
     kingSafetyHash.resize(1 << 15);
     materialHash.resize(1 << 14);
+}
+
+inline void
+Evaluate::prefetch(U64 key) {
+#ifdef HAS_PREFETCH
+    __builtin_prefetch(&getEvalHashEntry(evalHash, key));
+#endif
 }
 
 inline int
@@ -265,6 +300,12 @@ Evaluate::getPawnHashEntry(std::vector<Evaluate::PawnHashData>& pawnHash, U64 ke
     }
 }
 
+inline Evaluate::EvalHashData&
+Evaluate::getEvalHashEntry(EvalHashTables::EvalHashType& evalHash, U64 key) {
+    int e0 = (int)key & (evalHash.size() - 1);
+    return evalHash[e0];
+}
+
 inline Evaluate::KingSafetyHashData&
 Evaluate::getKingSafetyHashEntry(vector_aligned<Evaluate::KingSafetyHashData>& ksHash, U64 key) {
     int e0 = (int)key & (ksHash.size() - 2);
@@ -288,6 +329,16 @@ Evaluate::getKingSafetyHashEntry(vector_aligned<Evaluate::KingSafetyHashData>& k
         ksHash[e1].current = 0;
         return ksHash[e0];
     }
+}
+
+inline int
+Evaluate::getNContactChecks(const Position& pos) const {
+    int nContact = 0;
+    nContact += BitBoard::bitCount(wQueenContactChecks & ~bAttacksBB &
+                                   wContactSupport & ~pos.whiteBB());
+    nContact -= BitBoard::bitCount(bQueenContactChecks & ~wAttacksBB &
+                                   bContactSupport & ~pos.blackBB());
+    return nContact;
 }
 
 #endif /* EVALUATE_HPP_ */

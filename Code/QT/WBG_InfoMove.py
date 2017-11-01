@@ -11,28 +11,6 @@ from Code.QT import Tablero
 from Code import VarGen
 
 
-class LBPGN(Controles.LB):
-    def mouseReleaseEvent(self, event):
-        Controles.LB.mousePressEvent(self, event)
-        if event.button() == QtCore.Qt.LeftButton:
-            n = self.selectionStart()
-            if n >= 0:
-                li = []
-                html = False
-                for c in self.text():
-                    if html:
-                        if c == ">":
-                            html = False
-                    elif c == "<":
-                        html = True
-                    else:
-                        li.append(c)
-
-                txt = "".join(li)[:n + 1].strip()
-                pos = txt.count(" ")
-                self.colocate(pos)
-
-
 class WInfomove(QtGui.QWidget):
     def __init__(self, winBookGuide, siMoves=True):
         QtGui.QWidget.__init__(self)
@@ -45,12 +23,12 @@ class WInfomove(QtGui.QWidget):
             self.tree = None
         self.movActual = None
 
-        confTablero = VarGen.configuracion.confTablero("INFOMOVEBOOKGUIDE", 32)
+        configuracion = VarGen.configuracion
+        confTablero = configuracion.confTablero("INFOMOVEBOOKGUIDE", 32)
         self.tablero = Tablero.Tablero(self, confTablero)
         self.tablero.crea()
         self.tablero.ponerPiezasAbajo(True)
         self.tablero.ponMensajero(self.mueveHumano)
-        self.tablero.si_borraMovibles = False
         self.cpActual = ControlPosicion.ControlPosicion()
         self.historia = None
         self.posHistoria = None
@@ -59,10 +37,16 @@ class WInfomove(QtGui.QWidget):
 
         lybt, bt = QTVarios.lyBotonesMovimiento(self, "", siTiempo=True, siLibre=False, tamIcon=24)
 
-        self.lbPGN = LBPGN("").anchoFijo(self.tablero.ancho).ponWrap()
+        self.lbPGN = Controles.LB(self).anchoFijo(self.tablero.ancho).ponWrap()
         self.lbPGN.colocate = self.colocatePartida
-        self.lbPGN.setStyleSheet("QWidget { border-style: groove; border-width: 2px; border-color: LightSlateGray; padding: 8px;}")
-        self.lbPGN.ponTipoLetra(puntos=10)
+        self.lbPGN.setStyleSheet("QLabel{ border-style: groove; border-width: 2px; border-color: LightSlateGray; padding: 8px;}")
+        self.lbPGN.ponTipoLetra(puntos=configuracion.puntosPGN)
+        self.lbPGN.setOpenExternalLinks(False)
+        def muestraPos(txt):
+            self.colocatePartida(int(txt))
+        self.connect(self.lbPGN, QtCore.SIGNAL("linkActivated(QString)"), muestraPos)
+
+        self.siFigurines = configuracion.figurinesPGN
 
         if siMoves:
             tree = winBookGuide.wmoves.tree
@@ -172,7 +156,6 @@ class WInfomove(QtGui.QWidget):
             self.cbValoracion.ponValor(move.nag())
             self.cbVentaja.ponValor(move.adv())
             self.emComentario.ponTexto(move.comment())
-            self.tablero.importaMovibles(move.graphics())
 
     def camposEdicion(self, siVisible):
         if self.siMoves:
@@ -183,7 +166,6 @@ class WInfomove(QtGui.QWidget):
             self.emComentario.setVisible(siVisible)
 
     def mueveHumano(self, desde, hasta, coronacion=""):
-
         if self.cpActual.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(self.cpActual.siBlancas)
             if coronacion is None:
@@ -264,13 +246,13 @@ class WInfomove(QtGui.QWidget):
                 pgn += '<span style="%s">%d.</span>' % (style_number, numJugada)
                 numJugada += 1
 
-            xp = jg.pgnSP()
+            xp = jg.pgnHTML() if self.siFigurines else jg.pgnSP()
             if n == pos:
-                xp = '<span style="%s">%s </span>' % (style_select, xp)
+                xp = '<span style="%s">%s</span>' % (style_select, xp)
             else:
-                xp = '<span style="%s">%s </span>' % (style_moves, xp)
+                xp = '<span style="%s">%s</span>' % (style_moves, xp)
 
-            pgn += xp
+            pgn += '<a href="%d" style="text-decoration:none;">%s</a> ' % (n, xp)
 
         self.lbPGN.ponTexto(pgn)
 
@@ -344,7 +326,6 @@ class WInfomove(QtGui.QWidget):
                     return
 
             self.siReloj = True
-            # if self.siMoves and (self.posHistoria >= len(self.historia) - 1):
             self.MoverInicio()
             self.lanzaReloj()
 

@@ -18,6 +18,7 @@ from Code.QT import PantallaAnalisisParam
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
+from Code.QT import PantallaSavePGN
 from Code import SQL
 from Code import TrListas
 from Code import Util
@@ -34,8 +35,8 @@ class EstadoWpgn:
         # grid
         grid = window.grid
         self.recno = grid.recno()
-        self.dicVideoGrid = {}
-        grid.guardarVideo(self.dicVideoGrid)
+        # self.dicVideoGrid = {}
+        # grid.guardarVideo(self.dicVideoGrid)
 
         # ventana
         self.pos = window.pos()
@@ -106,8 +107,9 @@ class WElegir(QTVarios.WDialogo):
                 creaCol(clave.upper(), rotulo, clave != "EVENT")
                 self.liOrdenClaves.append(clave.upper())
 
-        dicVideoGrid = self.estado.dicVideoGrid if siRepite else None
-        self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, dicVideo=dicVideoGrid, siSeleccionMultiple=True)
+        # dicVideoGrid = self.estado.dicVideoGrid if siRepite else None
+        # self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, dicVideo=dicVideoGrid, siSeleccionMultiple=True)
+        self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, siSeleccionMultiple=True)
         self.registrarGrid(self.grid)
 
         if siRepite:
@@ -240,6 +242,10 @@ class WElegir(QTVarios.WDialogo):
             valor = valor.replace("?", "")
         return valor
 
+    def gridTeclaControl(self, grid, k, siShift, siControl, siAlt):
+        if k in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return):
+            self.elegir()
+
     def filtrar(self):
         w = WFiltrar(self, self.grid.oColumnas, self.liFiltro)
         if w.exec_():
@@ -269,40 +275,29 @@ class WElegir(QTVarios.WDialogo):
         else:
             liSelected = [0]
 
-        extension = "pgn"
-        resp = QTUtil2.salvaFichero(self, _("File to save"), self.gestor.configuracion.dirSalvados,
-                                    _("File") + " %s (*.%s)" % (extension, extension), False)
-        if resp:
-            antSelect = self.dbf.select
-            nueSelect = antSelect + ",PGN"
-            self.dbf.ponSelect(nueSelect)
-            self.dbf.leer()
-            self.dbf.gotop()
-            li = []
-            for i in liSelected:
-                self.dbf.goto(i)
-                dic = self.dbf.dicValores()
-                li.append(dic["PGN"])
-            dato = "\n\n".join(li)
-            try:
-                modo = "w"
-                if Util.existeFichero(resp):
-                    modo = "a"
-                    dato = "\n" * 2 + dato
-                f = codecs.open(resp, modo, 'utf-8', 'ignore')
-                f.write(dato.replace("\n", "\r\n"))
-                f.close()
-                QTUtil2.mensaje(self, _X(_("Saved to %1"), resp))
-                direc = os.path.dirname(resp)
-                if direc != self.gestor.configuracion.dirSalvados:
-                    self.gestor.configuracion.dirSalvados = direc
-                    self.gestor.configuracion.graba()
-            except:
-                QTUtil.ponPortapapeles(dato)
-                QTUtil2.mensError(self, "%s : %s\n\n%s" % (
-                    _("Unable to save"), resp, _("It is saved in the clipboard to paste it wherever you want.")))
+        w = PantallaSavePGN.WSaveVarios(self, self.gestor.configuracion)
+        if w.exec_():
+            ws = PantallaSavePGN.FileSavePGN(self, w.dic_result)
+            if ws.open():
+                ws.um()
 
-            self.dbf.ponSelect(antSelect)
+                antSelect = self.dbf.select
+                nueSelect = antSelect + ",PGN"
+                self.dbf.ponSelect(nueSelect)
+                self.dbf.leer()
+                self.dbf.gotop()
+
+                for i in liSelected:
+                    self.dbf.goto(i)
+                    dic = self.dbf.dicValores()
+                    pgn = dic["PGN"]
+                    if i > 0 or not ws.is_new:
+                        ws.write("\n\n")
+                    ws.write(pgn)
+
+                ws.close()
+                self.dbf.ponSelect(antSelect)
+                ws.um_final()
 
     def borrar(self):
 
@@ -583,7 +578,18 @@ class WElegir(QTVarios.WDialogo):
             self.dbf.goto(n)
             self.grid.goto(n, 0)
 
-            jugadas = self.dbf.leeOtroCampo(n, "PGN").replace("\n", " ").replace("\r", "").strip()
+            pgn = self.dbf.leeOtroCampo(n, "PGN")
+            li = []
+            grabar = False
+            for linea in pgn.split("\n"):
+                if not grabar:
+                    if not linea.startswith("["):
+                        grabar = True
+                if grabar:
+                    li.append(linea.strip())
+            jugadas = " ".join(li)
+            while "  " in jugadas:
+                jugadas = jugadas.replace("  ", " ")
 
             dic = self.dbf.dicValores()
 
@@ -626,7 +632,7 @@ class WElegir(QTVarios.WDialogo):
             if wb:
                 titulo += "<br>%s" % wb
 
-            txt = fen + "|%s|%s\n" % (titulo, jugadas)
+            txt = fen + "|%s|%s\n" % (titulo, jugadas.strip())
 
             f.write(txt)
 

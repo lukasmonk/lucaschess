@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import os
 import collections
 
 from Code import BaseConfig
+
 
 def leeRivales():
     dicRivales = collections.OrderedDict()
@@ -75,20 +77,9 @@ def leeRivales():
     cm.elo = 2396
     mas(cm)
 
-    cm = ConfigMotor("greko", "Vladimir Medvedev", "12.9", "http://sourceforge.net/projects/greko")
-    cm.path = "12/GreKo.exe"
-    cm.elo = 2508
-    mas(cm)
-
     cm = ConfigMotor("pawny", "Mincho Georgiev", "0.3.1", "http://pawny.netii.net/")
     cm.path = "windows/pawny_0.3.1_x86.exe"
     cm.elo = 2484
-    cm.ordenUCI("OwnBook", "false")
-    mas(cm)
-
-    cm = ConfigMotor("hamsters", "Alessandro Scotti", "0.5", "https://chessprogramming.wikispaces.com/Alessandro+Scotti")
-    cm.path = "Hamsters.exe"
-    cm.elo = 2487
     cm.ordenUCI("OwnBook", "false")
     mas(cm)
 
@@ -108,11 +99,6 @@ def leeRivales():
     cm.elo = 2532
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "32")
-    mas(cm)
-
-    cm = ConfigMotor("amyan", "Antonio Dieguez R.", "1.62", "http://www.pincha.cl/amyan/amyane.html")
-    cm.path = "amyan.exe"
-    cm.elo = 2545
     mas(cm)
 
     cm = ConfigMotor("alaric", "Peter Fendrich", "707", "http://alaric.fendrich.se/index.html")
@@ -186,23 +172,16 @@ def leeRivales():
     cm.path = "gaviota-1.0-win32.exe"
     cm.elo = 2950
     cm.ponMultiPV(20, 32)
+    cm.ordenUCI("Log", "false")
     mas(cm)
 
-    cm = ConfigMotor("toga", "WHMoweryJr,Thomas Gaksch,Fabien Letouzey", "deepTogaNPS 1.9.6",
-                     "http://www.computerchess.info/tdbb/phpBB3/viewtopic.php?f=9&t=357")
-    cm.path = "DeepToga1.9.6nps.exe"
-    cm.elo = 2843
-    cm.ordenUCI("Hash", "32")
-    cm.ponMultiPV(20, 40)
-    mas(cm)
-
-    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman, Mark Lefler", "8 32bit", "http://komodochess.com/")
-    cm.path = "komodo-8-32bit.exe"
-    cm.path_64 = "komodo-8-64bit.exe", "8 64bit"
+    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman, Mark Lefler", "9.02 32bit", "http://komodochess.com/")
+    cm.path = "komodo-9.02-32bit.exe"
+    cm.path_64 = "komodo-9.02-64bit.exe", "9.02 64bit"
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "64")
-    cm.elo = 3181
-    cm.ponMultiPV(20, 99)
+    cm.elo = 3240
+    cm.ponMultiPV(20, 218)
     mas(cm)
 
     cm = ConfigMotor("rybka", "Vasik Rajlich", "2.3.2a 32-bit", "http://rybkachess.com/")
@@ -222,7 +201,7 @@ def leeRivales():
     cm.ponMultiPV(20, 100)
     mas(cm)
 
-    cm = ConfigMotor("texel", "Peter Österlund", "1.05 32bit", "http://web.comhem.se/petero2home/javachess/index.html#texel")
+    cm = ConfigMotor("texel", "Peter Österlund", "1.07 32bit", "http://hem.bredband.net/petero2b/javachess/index.html#texel")
     cm.path = "texel32old.exe"
     cm.elo = 3100
     cm.ordenUCI("Hash", "32")
@@ -240,13 +219,14 @@ def leeRivales():
     cm.ponMultiPV(20, 500)
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne (based on stockfish)", "2.1a 32bit", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "McBrain_2017_v21a_x32_old.exe"
-    cm.path_64 = "McBrain_2017_v21a_x64_bmi2.exe", "2.1a 64bit bmi2"
+    cm = ConfigMotor("mcbrain", "Michael Byrne (based on stockfish)", "2.7 32bit", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "SF-McBrain-27_x32_old.exe"
+    cm.path_64 = "SF-McBrain-27_x64_bmi2.exe", "2.7 64bit bmi2"
     cm.elo = 3200
-    cm.ordenUCI("Tactical", "8")
+    cm.ordenUCI("Respect", "30")
     cm.ordenUCI("Hash", "64")
     cm.ordenUCI("Threads", "1")
+    cm.ordenUCI("SyzygyPath", os.path.normpath(os.path.abspath("./IntFiles/syzygy")))
     cm.ponMultiPV(20, 256)
     mas(cm)
 
@@ -270,7 +250,96 @@ def leeRivales():
     cm.ordenUCI("Hash", "64")
     mas(cm)
 
+    cm = ConfigMotor("amyan", "Antonio Dieguez R.", "1.62", "http://www.pincha.cl/amyan/amyane.html")
+    cm.path = "amyan.exe"
+    cm.elo = 2545
+    mas(cm)
+
+    cm = ConfigMotor("hamsters", "Alessandro Scotti", "0.5", "https://chessprogramming.wikispaces.com/Alessandro+Scotti")
+    cm.path = "Hamsters.exe"
+    cm.elo = 2487
+    cm.ordenUCI("OwnBook", "false")
+    cm.removeLog("problem_log.txt")
+    mas(cm)
+
+    cm = ConfigMotor("toga", "WHMoweryJr,Thomas Gaksch,Fabien Letouzey", "deepTogaNPS 1.9.6",
+                     "http://www.computerchess.info/tdbb/phpBB3/viewtopic.php?f=9&t=357")
+    cm.path = "DeepToga1.9.6nps.exe"
+    cm.elo = 2843
+    cm.ordenUCI("Hash", "32")
+    cm.ponMultiPV(20, 40)
+    mas(cm)
+
+    cm = ConfigMotor("greko", "Vladimir Medvedev", "12.9", "http://sourceforge.net/projects/greko")
+    cm.path = "12/GreKo.exe"
+    cm.elo = 2508
+    mas(cm)
+
+    cm = ConfigMotor("delfi", "Fabio Cavicchio", "5.4", "http://www.msbsoftware.it/delfi/")
+    cm.path = "delfi.exe"
+    cm.elo = 2686
+    mas(cm)
+
+    # cm = ConfigMotor("smartthink", "Sergei S. Markoff", "1.97", "http://genes1s.net/smarthink.php")
+    # cm.path = "SmarThink_v197_x32.exe"
+    # cm.nombre = "SmartThink"
+    # cm.elo = 2970
+    # mas(cm)
+
+    cm = ConfigMotor("monarch", "Steve Maughan", "1.7", "http://www.monarchchess.com/")
+    cm.path = "Monarch(v1.7).exe"
+    cm.elo = 2100
+    mas(cm)
+
+    cm = ConfigMotor("andscacs", "Daniel José Queraltó", "0.9032n", "http://www.andscacs.com/")
+    cm.path = "andscacs32.exe"
+    cm.elo = 3150
+    mas(cm)
+
+    cm = ConfigMotor("arminius", "Volker Annus", "2017-01-01", "http://www.nnuss.de/Hermann/Arminius2017-01-01.zip")
+    cm.path = "Arminius2017-01-01-32Bit.exe"
+    cm.elo = 2662
+    mas(cm)
+
+    cm = ConfigMotor("wildcat", "Igor Korshunov", "8", "http://www.igorkorshunov.narod.ru/WildCat")
+    cm.path = "WildCat_8.exe"
+    cm.elo = 2627
+    mas(cm)
+
+    cm = ConfigMotor("demolito", "Lucas Braesch", "32bit", "https://github.com/lucasart/Demolito")
+    cm.path = "demolito_32bit_old.exe"
+    cm.elo = 2627
+    mas(cm)
+
+    cm = ConfigMotor("hannibal", "Samuel N. Hamilton and Edsel G. Apostol", "1.7", "http://sites.google.com/site/edapostol/hannibal")
+    cm.path = "Hannibal1.7w32.exe"
+    cm.elo = 3050
+    cm.removeLog("log.txt")
+    mas(cm)
+
+    cm = ConfigMotor("spike", "Volker Böhm and Ralf Schäfer", "1.4", "http://spike.lazypics.de/index_en.html")
+    cm.path = "Spike1.4.exe"
+    cm.elo = 2921
+    mas(cm)
+
+    cm = ConfigMotor("zappa", "Anthony Cozzie", "1.1", "http://www.acoz.net/zappa/")
+    cm.path = "zappa.exe"
+    cm.elo = 2581
+    cm.removeLog("zappa_log.txt")
+    mas(cm)
+
+    cm = ConfigMotor("houdini", "Robert Houdart", "1.5a", "http://www.cruxis.com/chess/houdini.htm")
+    cm.path = "Houdini_15a_w32.exe"
+    cm.elo = 3093
+    mas(cm)
+
+    cm = ConfigMotor("paladin", "Ankan Banerjee", "0.1", "https://github.com/ankan-ban/chess_cpu")
+    cm.path = "Paladin_32bit.exe"
+    cm.elo = 2254
+    mas(cm)
+
     return dicRivales
+
 
 def dicMotoresFixedElo():
     d = leeRivales()
@@ -278,13 +347,15 @@ def dicMotoresFixedElo():
     for nm, desde, hasta in (
             ("rodent", 600, 2600),
             ("amyan", 1000, 2400),
+            ("mcbrain", 1500, 2800),
             ("rhetoric", 1300, 2600),
-            ("mcbrain", 1200, 2800),
             ("cheng", 800, 2500),
             ("greko", 1600, 2400),
             ("hamsters", 1000, 2000),
             ("rybka", 1200, 2400),
             ("ufim", 700, 2000),
+            ("delfi", 1000, 1000),
+            ("spike", 1100, 2500),
     ):
         for elo in range(desde, hasta + 100, 100):
             cm = d[nm].clona()

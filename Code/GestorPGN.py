@@ -3,6 +3,7 @@ import sys
 
 from Code import Gestor
 from Code import PGN
+from Code import Partida
 from Code.QT import Iconos
 from Code.QT import PantallaPGN
 from Code.QT import QTUtil
@@ -67,7 +68,7 @@ class GestorPGN(Gestor.Gestor):
                 (None, None, None),
                 ("bookguide", _("Personal Opening Guide"), Iconos.BookGuide()),
                 (None, None, None),
-                ("juega_solo", _X(_('Open in "%1"'), _("Create your own game")), Iconos.JuegaSolo()),
+                ("jugarSolo", _X(_('Open in "%1"'), _("Create your own game")), Iconos.JuegaSolo()),
                 (None, None, None),
                 ("play", _('Play current position'), Iconos.MoverJugar())
             )
@@ -76,8 +77,8 @@ class GestorPGN(Gestor.Gestor):
                 self.librosConsulta(False)
             elif resp == "bookguide":
                 self.bookGuide()
-            elif resp == "juega_solo":
-                self.procesador.jugarSolo(pgn=self.actualPGN())
+            elif resp == "jugarSolo":
+                self.procesador.jugarSolo(partida=self.partidaCompleta())
             elif resp == "play":
                 self.jugarPosicionActual()
 
@@ -225,11 +226,20 @@ class GestorPGN(Gestor.Gestor):
             path = self.nuestroFichero
         elif siBuscar:
             # Elegimos el fichero
-            path = QTVarios.select_pgn(self.pantalla)
-            if not path:
+            files = QTVarios.select_pgns(self.pantalla)
+            if not files:
                 if self.muestraInicial:
                     self.finPartida()
                 return
+            if len(files) == 1:
+                path = files[0]
+            else:
+                path = self.configuracion.ficheroTemporal("pgn")
+                with open(path, "wb") as q:
+                    for fich in files:
+                        with open(fich, "rb") as f:
+                            q.write(f.read())
+
         # ~ else ya esta el nombre
 
         fpgn = PGN.PGN()
@@ -357,3 +367,19 @@ class GestorPGN(Gestor.Gestor):
             else:
                 break
         return cab + "\n" + self.partida.pgnBase() + " " + result
+
+    def partidaCompleta(self):
+        txt = self.pgnPaste.strip()
+        liTags = []
+        for linea in txt.split("\n"):
+            if linea.startswith("["):
+                ti = linea.split('"')
+                if len(ti) == 3:
+                    clave = ti[0][1:].strip()
+                    valor = ti[1].strip()
+                    liTags.append([clave, valor])
+            else:
+                break
+        pc = Partida.PartidaCompleta(liTags=liTags)
+        pc.leeOtra(self.partida)
+        return pc

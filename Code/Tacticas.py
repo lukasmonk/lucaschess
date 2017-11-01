@@ -218,49 +218,41 @@ class Tactica(BaseTactica):
 
             self.filesw.append((f, w, d, h))  # file, weight,from,to
 
-        self.db = None
-
     def tituloAmpliado(self):
         return self.tts.nombre + " " + self.titulo
 
     def ponPosActual(self, pos):
-        self.db["POSACTIVE"] = pos
+        with self.dbdatos() as db:
+            db["POSACTIVE"] = pos
 
-    def close(self):
-        if self.db:
-            self.db.close()
-            self.db = None
+    def dbdatos(self):
+        return Util.DicSQL(self.fichero, tabla=self.nombre)
 
     def leeDatos(self, carpetaUser):
-        fcache = "%s/%s%s.tdb" % (carpetaUser, self.tts.nombre, self.tts.tipo)
-        self.db = Util.DicSQL(fcache, tabla=self.nombre)
-        self.liFNS = self.db["LIFNS"]
-        # if self.liFNS is None:
-        # self.genera()
-        # self.liFNS = self.db["LIFNS"]
+        self.fichero = "%s/%s%s.tdb" % (carpetaUser, self.tts.nombre, self.tts.tipo)
+        with self.dbdatos() as db:
+            self.liFNS = db["LIFNS"]
+            self.liOrder = db["ORDER"]
+            if self.liFNS is None:
+                self.liFNS = []
+            if self.liOrder is None:
+                self.liOrder = []
 
-        self.liOrder = self.db["ORDER"]
+            self.posActive = db["POSACTIVE"]
 
-        self.posActive = self.db["POSACTIVE"]
+            showtext = db["SHOWTEXT"]
+            if showtext:
+                self.SHOWTEXT = showtext
+            if not self.SHOWTEXT:
+                self.SHOWTEXT = [1, ]
 
-        if self.liFNS is None:
-            self.liFNS = []
-        if self.liOrder is None:
-            self.liOrder = []
+            errores = db["ERRORS"]
+            if errores is None:
+                db["ERRORS"] = 0
 
-        showtext = self.db["SHOWTEXT"]
-        if showtext:
-            self.SHOWTEXT = showtext
-        if not self.SHOWTEXT:
-            self.SHOWTEXT = [1, ]
-
-        errores = self.db["ERRORS"]
-        if errores is None:
-            self.db["ERRORS"] = 0
-
-        reference = self.db["REFERENCE"]
-        if reference is None:
-            self.db["REFERENCE"] = ""
+            reference = db["REFERENCE"]
+            if reference is None:
+                db["REFERENCE"] = ""
 
     def listaFicheros(self, clave):
         dalias = self.tts.dic.get("ALIAS", {})
@@ -291,135 +283,138 @@ class Tactica(BaseTactica):
         return li
 
     def genera(self):
-        num = self.PUZZLES
+        with self.dbdatos() as db:
+            num = self.PUZZLES
 
-        # Determinamos la lista de fens, teniendo en cuenta el peso asociado a cada fichero
-        lif = []
+            # Determinamos la lista de fens, teniendo en cuenta el peso asociado a cada fichero
+            lif = []
 
-        wt = 0
-        for f, w, d, h in self.filesw:
-            lif0 = []
-            for fich in self.listaFicheros(f):
-                q = codecs.open(fich, "r", "utf-8", 'ignore')
-                for linea in q:
-                    linea = linea.strip()
-                    if linea and "|" in linea:
-                        lif0.append(linea)
-                q.close()
-            if d and d <= h:
-                d -= 1
-                lif0 = lif0[d:h]
-            lif.append([w, lif0])
-            wt += w
-        t = 0
-        for li in lif:
-            li[0] = int(li[0] * num / wt)
-            t += li[0]
-        t -= self.PUZZLES
-        n = 0
-        while t:
-            lif[0][n] += 1
-            t -= 1
-            n += 1
-            if n == len(lif):
-                n = 0
+            wt = 0
+            for f, w, d, h in self.filesw:
+                lif0 = []
+                for fich in self.listaFicheros(f):
+                    q = codecs.open(fich, "r", "utf-8", 'ignore')
+                    for linea in q:
+                        linea = linea.strip()
+                        if linea and "|" in linea:
+                            lif0.append(linea)
+                    q.close()
+                if d and d <= h:
+                    d -= 1
+                    lif0 = lif0[d:h]
+                lif.append([w, lif0])
+                wt += w
+            t = 0
+            for li in lif:
+                li[0] = int(li[0] * num / wt)
+                t += li[0]
+            t -= self.PUZZLES
+            n = 0
+            while t:
+                lif[0][n] += 1
+                t -= 1
+                n += 1
+                if n == len(lif):
+                    n = 0
 
-        liFNS = []
-        for li in lif:
-            n = li[0]
-            lif0 = li[1]
-            if len(lif0) < n:
-                n = len(lif0)
-            lir = lif0[:n]
-            for x in lir:
-                liFNS.append(x)
+            liFNS = []
+            for li in lif:
+                n = li[0]
+                lif0 = li[1]
+                if len(lif0) < n:
+                    n = len(lif0)
+                lir = lif0[:n]
+                for x in lir:
+                    liFNS.append(x)
 
-        self.db["LIFNS"] = liFNS
-        self.liFNS = liFNS
+            db["LIFNS"] = liFNS
+            self.liFNS = liFNS
 
-        numPuzzles = len(liFNS)
+            numPuzzles = len(liFNS)
 
-        # Deteminamos la lista indice con el orden de cada fen en liFNS
-        liJUMPS = self.JUMPS
+            # Deteminamos la lista indice con el orden de cada fen en liFNS
+            liJUMPS = self.JUMPS
 
-        li = [None] * (len(liJUMPS) * 2 * numPuzzles)  # Creamos un list muy grande, mayor del que vamos a usar
+            li = [None] * (len(liJUMPS) * 2 * numPuzzles)  # Creamos un list muy grande, mayor del que vamos a usar
 
-        def busca(desde, salto):
-            if salto == 0:
-                for x in range(desde, len(li)):
-                    if li[x] is None:
-                        return x
-                li.extend([None] * 1000)
-                return busca(desde, salto)
-            else:
-                while salto:
-                    desde = busca(desde + 1, 0)
-                    salto -= 1
-                return desde
+            def busca(desde, salto):
+                if salto == 0:
+                    for x in range(desde, len(li)):
+                        if li[x] is None:
+                            return x
+                    li.extend([None] * 1000)
+                    return busca(desde, salto)
+                else:
+                    while salto:
+                        desde = busca(desde + 1, 0)
+                        salto -= 1
+                    return desde
 
-        for x in range(numPuzzles):
-            n = busca(0, 0)
-            li[n] = x
-            for m in liJUMPS:
-                n = busca(n + 1, int(m))
+            for x in range(numPuzzles):
+                n = busca(0, 0)
                 li[n] = x
+                for m in liJUMPS:
+                    n = busca(n + 1, int(m))
+                    li[n] = x
 
-        liBase = []
-        for x in li:
-            if x is not None:
-                liBase.append(x)
+            liBase = []
+            for x in li:
+                if x is not None:
+                    liBase.append(x)
 
-        liOrder = []
+            liOrder = []
 
-        liNueva = liBase[:]
-        for repeat in self.REPEAT:
-            if repeat == 0:  # Original
-                liNueva = liBase[:]
-            elif repeat == 1:
-                liNueva = liBase[:]
-                random.shuffle(liNueva)
-            else:
-                liNueva = liNueva[:]
-            liOrder.extend(liNueva)
+            liNueva = liBase[:]
+            for repeat in self.REPEAT:
+                if repeat == 0:  # Original
+                    liNueva = liBase[:]
+                elif repeat == 1:
+                    liNueva = liBase[:]
+                    random.shuffle(liNueva)
+                else:
+                    liNueva = liNueva[:]
+                liOrder.extend(liNueva)
 
-        self.db["ORDER"] = liOrder
-        self.liOrder = liOrder
+            db["ORDER"] = liOrder
+            self.liOrder = liOrder
 
-        self.db["POSACTIVE"] = 0
+            db["POSACTIVE"] = 0
 
-        self.db["SHOWTEXT"] = self.SHOWTEXT
+            db["SHOWTEXT"] = self.SHOWTEXT
 
-        self.db["POINTVIEW"] = self.POINTVIEW
+            db["POINTVIEW"] = self.POINTVIEW
 
-        self.db["REFERENCE"] = self.REFERENCE
+            db["REFERENCE"] = self.REFERENCE
 
-        # 6.3d---------------+
-        liHisto = self.db["HISTO"]
-        if not liHisto:
-            liHisto = []
-        dicActual = {"FINICIAL": Util.hoy(), "FFINAL": None, "SECONDS": 0.0, "POS": self.numPosiciones(), "ERRORS": 0,
-                     "PUZZLES": self.PUZZLES, "FILESW": self.filesw, "JUMPS": self.JUMPS, "REPEAT": self.REPEAT,
-                     "SHOWTEXT": self.SHOWTEXT, "PENALIZATION": self.PENALIZATION}
-        liHisto.insert(0, dicActual)
-        self.db["HISTO"] = liHisto
-        # 6.3d---------------+
+            # 6.3d---------------+
+            liHisto = db["HISTO"]
+            if not liHisto:
+                liHisto = []
+            dicActual = {"FINICIAL": Util.hoy(), "FFINAL": None, "SECONDS": 0.0, "POS": self.numPosiciones(), "ERRORS": 0,
+                         "PUZZLES": self.PUZZLES, "FILESW": self.filesw, "JUMPS": self.JUMPS, "REPEAT": self.REPEAT,
+                         "SHOWTEXT": self.SHOWTEXT, "PENALIZATION": self.PENALIZATION}
+            liHisto.insert(0, dicActual)
+            db["HISTO"] = liHisto
+            # 6.3d---------------+
 
-        # 7.0---------------+
-        self.db["SECONDS"] = 0.0
-        self.db["ERRORS"] = 0
-        # 7.0---------------+
+            # 7.0---------------+
+            db["SECONDS"] = 0.0
+            db["ERRORS"] = 0
+            # 7.0---------------+
 
-        self.db.pack()
+            db.pack()
 
     def listaOrden(self):
         return self.liOrder
 
     def posActual(self):
-        return self.db["POSACTIVE"]
+        with self.dbdatos() as db:
+            return db["POSACTIVE"]
 
     def terminada(self):
-        pactive = self.db["POSACTIVE"]
-        return not self.historico() or pactive is None or pactive >= self.numPosiciones()
+        with self.dbdatos() as db:
+            pactive = db["POSACTIVE"]
+            return not self.historico() or pactive is None or pactive >= self.numPosiciones()
 
     def numPosiciones(self):
         return len(self.liOrder)
@@ -456,52 +451,61 @@ class Tactica(BaseTactica):
         return self.liFNS[pos]
 
     def pointView(self):
-        n = self.db["POINTVIEW"]
-        if n is None:
-            n = 0
-        return int(n)
+        with self.dbdatos() as db:
+            n = db["POINTVIEW"]
+            if n is None:
+                n = 0
+            return int(n)
 
     def masSegundos(self, mas):
-        if "SECONDS" in self.db:
-            self.db["SECONDS"] += mas
+        with self.dbdatos() as db:
+            if "SECONDS" in db:
+                db["SECONDS"] += mas
 
     def segundosActivo(self):
-        return self.db["SECONDS"]
+        with self.dbdatos() as db:
+            return db["SECONDS"]
 
     def referenciaActivo(self):
-        return self.db["REFERENCE"]
+        with self.dbdatos() as db:
+            return db["REFERENCE"]
 
     def erroresActivo(self):
-        return self.db["ERRORS"]
+        with self.dbdatos() as db:
+            return db["ERRORS"]
 
     def nuevoError(self):
-        self.db["ERRORS"] += 1
+        with self.dbdatos() as db:
+            db["ERRORS"] += 1
 
     def finalEntrenamiento(self):
-        liHisto = self.db["HISTO"]
-        if not liHisto:
-            liHisto = []
-            dicActual = {"FINICIAL": Util.hoy(), "FFINAL": None, "SECONDS": 0.0, "POS": self.numPosiciones(),
-                         "ERRORS": 0}
-            liHisto.insert(0, dicActual)
-        liHisto[0]["FFINAL"] = Util.hoy()
-        liHisto[0]["SECONDS"] = self.db["SECONDS"]
-        liHisto[0]["ERRORS"] = self.db["ERRORS"]
-        liHisto[0]["REFERENCE"] = self.db["REFERENCE"]
+        with self.dbdatos() as db:
+            liHisto = db["HISTO"]
+            if not liHisto:
+                liHisto = []
+                dicActual = {"FINICIAL": Util.hoy(), "FFINAL": None, "SECONDS": 0.0, "POS": self.numPosiciones(),
+                             "ERRORS": 0}
+                liHisto.insert(0, dicActual)
+            liHisto[0]["FFINAL"] = Util.hoy()
+            liHisto[0]["SECONDS"] = db["SECONDS"]
+            liHisto[0]["ERRORS"] = db["ERRORS"]
+            liHisto[0]["REFERENCE"] = db["REFERENCE"]
 
-        self.db["HISTO"] = liHisto
-        self.db["POSACTIVE"] = None
+            db["HISTO"] = liHisto
+            db["POSACTIVE"] = None
 
     def historico(self):
-        liHisto = self.db["HISTO"]
-        return [] if liHisto is None else liHisto
+        with self.dbdatos() as db:
+            liHisto = db["HISTO"]
+            return [] if liHisto is None else liHisto
 
     def borraListaHistorico(self, liNum):
-        liHisto = self.historico()
-        liNueHisto = []
-        for x in range(len(liHisto)):
-            if x not in liNum:
-                liNueHisto.append(liHisto[x])
-        self.db["HISTO"] = liNueHisto
-        if 0 in liNum:
-            self.db["POSACTIVE"] = None
+        with self.dbdatos() as db:
+            liHisto = self.historico()
+            liNueHisto = []
+            for x in range(len(liHisto)):
+                if x not in liNum:
+                    liNueHisto.append(liHisto[x])
+            db["HISTO"] = liNueHisto
+            if 0 in liNum:
+                db["POSACTIVE"] = None

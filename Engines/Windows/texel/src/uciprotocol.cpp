@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012,2014-2015  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,24 +27,121 @@
 #include "searchparams.hpp"
 #include "computerPlayer.hpp"
 #include "textio.hpp"
+#include "util/logger.hpp"
+#include "cluster.hpp"
 
 #include <iostream>
 
 
+SearchListener::SearchListener(std::ostream& os)
+    : os(os) {
+}
+
+void
+SearchListener::notifyDepth(int depth) {
+//    std::lock_guard<std::mutex> L(Logger::getLogMutex());
+    os << "info depth " << depth << std::endl;
+}
+
+void
+SearchListener::notifyCurrMove(const Move& m, int moveNr) {
+//    std::lock_guard<std::mutex> L(Logger::getLogMutex());
+    os << "info currmove " << moveToString(m) << " currmovenumber " << moveNr << std::endl;
+}
+
+void
+SearchListener::notifyPV(int depth, int score, S64 time, S64 nodes, S64 nps, bool isMate,
+                         bool upperBound, bool lowerBound, const std::vector<Move>& pv,
+                         int multiPVIndex, S64 tbHits) {
+//    std::lock_guard<std::mutex> L(Logger::getLogMutex());
+    std::string pvBuf;
+    for (size_t i = 0; i < pv.size(); i++) {
+        pvBuf += ' ';
+        pvBuf += moveToString(pv[i]);
+    }
+    std::string bound;
+    if (upperBound) {
+        bound = " upperbound";
+    } else if (lowerBound) {
+        bound = " lowerbound";
+    }
+    os << "info depth " << depth << " score " << (isMate ? "mate " : "cp ")
+       << score << bound << " time " << time << " nodes " << nodes
+       << " nps " << nps;
+    if (tbHits > 0)
+        os << " tbhits " << tbHits;
+    if (multiPVIndex >= 0)
+        os << " multipv " << (multiPVIndex + 1);
+    os << " pv" << pvBuf << std::endl;
+}
+
+void
+SearchListener::notifyStats(S64 nodes, S64 nps, int hashFull, S64 tbHits, S64 time) {
+    os << "info nodes " << nodes << " nps " << nps << " hashfull " << hashFull;
+    if (tbHits > 0)
+        os << " tbhits " << tbHits;
+    os << " time " << time << std::endl;
+}
+
+void
+SearchListener::notifyPlayedMove(const Move& bestMove, const Move& ponderMove) {
+    os << "bestmove " << moveToString(bestMove);
+    if (!ponderMove.isEmpty())
+        os << " ponder " << moveToString(ponderMove);
+    os << std::endl;
+}
+
+std::string
+SearchListener::moveToString(const Move& m) {
+    if (m.isEmpty())
+        return "0000";
+    std::string ret = TextIO::squareToString(m.from());
+    ret += TextIO::squareToString(m.to());
+    switch (m.promoteTo()) {
+    case Piece::WQUEEN:
+    case Piece::BQUEEN:
+        ret += 'q';
+        break;
+    case Piece::WROOK:
+    case Piece::BROOK:
+        ret += 'r';
+        break;
+    case Piece::WBISHOP:
+    case Piece::BBISHOP:
+        ret += 'b';
+        break;
+    case Piece::WKNIGHT:
+    case Piece::BKNIGHT:
+        ret += 'n';
+        break;
+    default:
+        break;
+    }
+    return ret;
+}
+
+// ----------------------------------------------------------------------------
+
 void
 UCIProtocol::main(bool autoStart) {
-    UCIProtocol uciProt;
-    uciProt.mainLoop(std::cin, std::cout, autoStart);
+    UCIProtocol uciProt(std::cin, std::cout);
+    auto f = [autoStart,&uciProt](){
+        uciProt.mainLoop(autoStart);
+    };
+    std::thread thread(f);
+    uciProt.engineThread.mainLoop();
+    thread.join();
 }
 
-UCIProtocol::UCIProtocol()
-    : pos(TextIO::readFEN(TextIO::startPosFEN)),
-      quit(false)
-{
+UCIProtocol::UCIProtocol(std::istream& is, std::ostream& os)
+    : is(is), os(os), pos(TextIO::readFEN(TextIO::startPosFEN)),
+      searchListener(os), quit(false) {
 }
 
 void
-UCIProtocol::mainLoop(std::istream& is, std::ostream& os, bool autoStart) {
+UCIProtocol::mainLoop(bool autoStart) {
+    if (!Cluster::instance().isMasterNode())
+        return;
     if (autoStart)
         handleCommand("uci", os);
     std::string line;
@@ -59,6 +156,7 @@ UCIProtocol::mainLoop(std::istream& is, std::ostream& os, bool autoStart) {
         if (quit)
             break;
     }
+    engineThread.quit();
 }
 
 void
@@ -77,6 +175,7 @@ UCIProtocol::handleCommand(const std::string& cmdLine, std::ostream& os) {
             os << "uciok" << std::endl;
         } else if (cmd == "isready") {
             initEngine(os);
+            engine->waitReady();
             os << "readyok" << std::endl;
         } else if (cmd == "setoption") {
             initEngine(os);
@@ -96,7 +195,7 @@ UCIProtocol::handleCommand(const std::string& cmdLine, std::ostream& os) {
                         optionValue += ' ';
                     }
                 }
-                engine->setOption(trim(optionName), trim(optionValue), true);
+                engine->setOption(trim(optionName), trim(optionValue));
             }
         } else if (cmd == "ucinewgame") {
             if (engine)
@@ -200,7 +299,7 @@ UCIProtocol::handleCommand(const std::string& cmdLine, std::ostream& os) {
 void
 UCIProtocol::initEngine(std::ostream& os) {
     if (!engine)
-        engine = std::make_shared<EngineControl>(os);
+        engine = make_unique<EngineControl>(os, engineThread, searchListener);
 }
 
 /** Convert a string to tokens by splitting at whitespace characters. */

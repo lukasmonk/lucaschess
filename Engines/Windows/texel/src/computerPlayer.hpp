@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2015  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,12 +29,13 @@
 #include "player.hpp"
 #include "transpositionTable.hpp"
 #include "book.hpp"
-#include "search.hpp"
+#include "evaluate.hpp"
 
 #include <string>
 #include <memory>
 
 class ComputerPlayerTest;
+class Search;
 
 /**
  * A computer algorithm player.
@@ -43,15 +44,12 @@ class ComputerPlayer : public Player {
     friend class ComputerPlayerTest;
 public:
     static std::string engineName;
-    bool verbose;
 
     ComputerPlayer();
     ComputerPlayer(const ComputerPlayer& other) = delete;
     ComputerPlayer& operator=(const ComputerPlayer& other) = delete;
 
     void setTTLogSize(int logSize);
-
-    void setListener(const std::shared_ptr<Search::Listener>& listener);
 
     std::string getCommand(const Position& posIn, bool drawOffer, const std::vector<Position>& history) override;
 
@@ -87,23 +85,16 @@ private:
 
     int maxNodes;
     TranspositionTable tt;
-    ParallelData pd;
-    std::shared_ptr<Evaluate::EvalHashTables> et;
+    std::unique_ptr<Evaluate::EvalHashTables> et;
     Book book;
     bool bookEnabled;
     Search* currentSearch;
-    std::shared_ptr<Search::Listener> listener;
 };
 
 
 inline void
 ComputerPlayer::setTTLogSize(int logSize) {
     tt.reSize(logSize);
-}
-
-inline void
-ComputerPlayer::setListener(const std::shared_ptr<Search::Listener>& listener) {
-    this->listener = listener;
 }
 
 inline bool

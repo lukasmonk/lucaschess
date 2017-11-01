@@ -17,6 +17,154 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code import TrListas
 from Code import Util
+from Code import VarGen
+
+
+class WBaseSave(QtGui.QWidget):
+    def __init__(self, wowner, configuracion, with_remcomments=False):
+        QtGui.QWidget.__init__(self, wowner)
+
+        self.wowner = wowner
+        self.file = ""
+        self.configuracion = configuracion
+        self.with_remcomments = with_remcomments
+        self.vars_read()
+
+        lb_file = Controles.LB(self, _("File to save") + ": ")
+        bt_history = Controles.PB(self, "", self.history).ponIcono(Iconos.Favoritos(), 24).ponToolTip(_("Previous"))
+        bt_boxrooms = Controles.PB(self, "", self.boxrooms).ponIcono(Iconos.Trasteros(), 24).ponToolTip(_("Boxrooms PGN"))
+        self.bt_file = Controles.PB(self, "", self.file_select, plano=False).anchoMinimo(300)
+
+        # Codec
+        lb_codec = Controles.LB(self, _("Encoding") + ": ")
+        liCodecs = [k for k in set(v for k, v in encodings.aliases.aliases.iteritems())]
+        liCodecs.sort()
+        liCodecs = [(k, k) for k in liCodecs]
+        liCodecs.insert(0, (_("Same as file"), "file"))
+        liCodecs.insert(0, ("%s: %s" % (_("By default"), _("UTF-8")), "default"))
+        self.cb_codecs = Controles.CB(self, liCodecs, self.codec)
+
+        # Rest
+        self.chb_overwrite = Controles.CHB(self, _("Overwrite"), False)
+        if with_remcomments:
+            self.chb_remove_c_v = Controles.CHB(self, _("Remove comments and variations"), self.remove_c_v)
+
+        lyF = Colocacion.H().control(lb_file).control(self.bt_file).control(bt_history).control(bt_boxrooms).relleno(1)
+        lyC = Colocacion.H().control(lb_codec).control(self.cb_codecs).relleno(1)
+        ly = Colocacion.V().espacio(15).otro(lyF).otro(lyC).control(self.chb_overwrite)
+        if with_remcomments:
+            ly.control(self.chb_remove_c_v)
+        ly.relleno(1)
+
+        self.chb_overwrite.hide()
+
+        self.setLayout(ly)
+
+    def file_select(self):
+        last_dir = ""
+        if self.file:
+            last_dir = os.path.dirname(self.file)
+        elif self.history_list:
+            last_dir = os.path.dirname(self.history_list[0])
+            if not os.path.isdir(last_dir):
+                last_dir = ""
+
+        fich = QTUtil2.leeCreaFichero(self, last_dir, "pgn")
+        if fich:
+            if not fich.lower().endswith(".pgn"):
+                fich += ".pgn"
+            self.file = fich
+            self.show_file()
+
+    def show_file(self):
+        self.file = os.path.normpath(self.file)
+        self.bt_file.ponTexto(self.file)
+        if os.path.isfile(self.file):
+            self.chb_overwrite.show()
+        else:
+            self.chb_overwrite.hide()
+        self.wowner.check_toolbar()
+
+    def vars_read(self):
+        dicVariables = self.configuracion.leeVariables("SAVEPGN")
+        self.history_list = dicVariables.get("LIHISTORICO", [])
+        self.codec = dicVariables.get("CODEC", "default")
+
+    def vars_save(self):
+        dicVariables = {}
+        dicVariables["LIHISTORICO"] = self.history_list
+        dicVariables["CODEC"] = self.cb_codecs.valor()
+        self.configuracion.escVariables("SAVEPGN", dicVariables)
+
+    def history(self):
+        menu = QTVarios.LCMenu(self, puntos=9)
+        menu.setToolTip(_("To choose: <b>left button</b> <br>To erase: <b>right button</b>"))
+        rp = QTVarios.rondoPuntos()
+        for pos, txt in enumerate(self.history_list):
+            menu.opcion(pos, txt, rp.otro())
+        pos = menu.lanza()
+        if pos is not None:
+            if menu.siIzq:
+                self.file = self.history_list[pos]
+                self.show_file()
+            elif menu.siDer:
+                del self.history_list[pos]
+        self.wowner.check_toolbar()
+
+    def boxrooms(self):
+        menu = QTVarios.LCMenu(self, puntos=9)
+        menu.setToolTip(_("To choose: <b>left button</b> <br>To erase: <b>right button</b>"))
+
+        icoTras = Iconos.Trastero()
+        liTras = self.configuracion.liTrasteros
+        for ntras, uno in enumerate(liTras):
+            carpeta, trastero = uno
+            menu.opcion((0, ntras), "%s  (%s)" % (trastero, carpeta), icoTras)
+        menu.separador()
+        menu.opcion((1, 0), _("New boxroom"), Iconos.Trastero_Nuevo())
+
+        resp = menu.lanza()
+        if resp is not None:
+
+            op, ntras = resp
+            if op == 0:
+                if menu.siIzq:
+                    carpeta, trastero = liTras[ntras]
+                    self.file = os.path.join(carpeta, trastero)
+                    self.show_file()
+                elif menu.siDer:
+                    del self.configuracion.liTrasteros[ntras]
+                    self.configuracion.graba()
+
+            elif op == 1:
+                resp = QTUtil2.salvaFichero(self, _("Boxrooms PGN"), self.configuracion.dirSalvados +"/",
+                                            _("File") + " pgn (*.pgn)", False)
+                if resp:
+                    resp = os.path.normpath(resp)
+                    carpeta, trastero = os.path.split(resp)
+                    if carpeta != self.configuracion.dirSalvados:
+                        self.configuracion.dirSalvados = carpeta
+                        self.configuracion.graba()
+
+                    orden = None
+                    for n, (carpeta1, trastero1) in enumerate(self.configuracion.liTrasteros):
+                        if carpeta1.lower() == carpeta.lower() and trastero1.lower() == trastero.lower():
+                            orden = len(self.configuracion.liTrasteros) - 1
+                            break
+
+                    if orden is None:
+                        self.configuracion.liTrasteros.append((carpeta, trastero))
+                        self.configuracion.graba()
+        self.wowner.check_toolbar()
+
+    def terminar(self):
+        self.dic_result = {
+            "FILE": self.file,
+            "CODEC": self.cb_codecs.valor(),
+            "OVERWRITE": self.chb_overwrite.valor(),
+            "REMCOMMENTSVAR": self.chb_remove_c_v.valor() if self.with_remcomments else False
+        }
+        self.vars_save()
 
 
 class WSave(QTVarios.WDialogo):
@@ -234,7 +382,8 @@ class WSave(QTVarios.WDialogo):
         pgn += "\n%s\n" % self.em_body.texto().strip()
         if "\r\n" in pgn:
             pgn = pgn.replace("\r\n", "\n")
-        pgn = pgn.replace("\n", "\r\n")
+        if VarGen.isWindows:
+            pgn = pgn.replace("\n", "\r\n")
 
         if self.chb_remove_c_v.isChecked():
             pgn = PGN.rawPGN(pgn)
@@ -268,7 +417,7 @@ class WSave(QTVarios.WDialogo):
         try:
             f = codecs.open(self.file, modo, codec, 'ignore')
             if modo == "a":
-                f.write("\r\n\r\n")
+                f.write("\r\n\r\n" if VarGen.isWindows else "\n\n")
             f.write(pgn)
             f.close()
             if self.file in self.history_list:
@@ -342,3 +491,76 @@ class WSave(QTVarios.WDialogo):
                     clave = ""
             return clave
         return self.li_labels[fila][1]
+
+
+class WSaveVarios(QTVarios.WDialogo):
+    def __init__(self, owner, configuracion):
+        titulo = _("Save to PGN")
+        icono = Iconos.PGN()
+        extparam = "savepgnvarios"
+        QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
+
+        # Opciones
+        liOpciones = [
+            (_("Save"), Iconos.GrabarFichero(), self.aceptar), None,
+            (_("Cancel"), Iconos.Cancelar(), self.reject), None,
+        ]
+        self.tb = Controles.TBrutina(self, liOpciones)
+
+        self.wbase = WBaseSave(self, configuracion)
+
+        layout = Colocacion.V().control(self.tb).control(self.wbase)
+
+        self.setLayout(layout)
+
+        self.recuperarVideo()
+
+        self.check_toolbar()
+
+    def check_toolbar(self):
+        self.tb.setPosVisible(0, len(self.wbase.file)>0)
+
+    def aceptar(self):
+        if self.wbase.file:
+            self.wbase.terminar()
+            self.dic_result = self.wbase.dic_result
+            self.guardarVideo()
+            self.accept()
+        else:
+            self.reject()
+
+
+class FileSavePGN:
+    def __init__(self, owner, dic_vars):
+        self.owner = owner
+        self.file = dic_vars["FILE"]
+        self.overwrite = dic_vars["OVERWRITE"]
+        self.codec = dic_vars["CODEC"]
+        if self.codec == "default":
+            self.codec = "UTF-8"
+
+        self.xum = None
+
+    def open(self):
+        try:
+            modo = "w" if self.overwrite else "a"
+            self.f = codecs.open(self.file, modo, self.codec)
+            self.is_new = self.overwrite or not os.path.isfile(self.file)
+            return True
+        except:
+            QTUtil2.mensError(self.owner, QTUtil2.mensError(self, "%s : %s\n" % (_("Unable to save"), self.file)))
+            return False
+
+    def write(self, pgn):
+        self.f.write(pgn)
+
+    def close(self):
+        self.f.close()
+
+    def um(self):
+        self.xum = QTUtil2.unMomento(self.owner, _("Saving..."))
+
+    def um_final(self):
+        if self.xum:
+            self.xum.final()
+        QTUtil2.mensaje(self.owner, _X(_("Saved to %1"), self.file))

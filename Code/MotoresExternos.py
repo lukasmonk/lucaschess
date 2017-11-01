@@ -33,6 +33,20 @@ class OpcionUCI:
         elif self.tipo == "combo":
             self.liVars = eval(li[4])
 
+    def label_default(self):
+        if self.tipo == "spin":
+            return "%d:%d-%d" % (self.default, self.min, self.max)
+
+        elif self.tipo == "check":
+            return str(self.default).lower()
+
+        elif self.tipo == "button":
+            return str(self.default).lower()
+
+        elif self.tipo == "combo":
+            return self.default
+        return ""
+
     def grabaTXT(self):
         x = VarGen.XSEP
         txt = self.tipo + x + self.nombre + x + str(self.default) + x + str(self.valor) + x
@@ -152,6 +166,7 @@ class MotorExterno:
         self.maxMultiPV = 0
         self.multiPV = 0
         self.elo = 0
+        self.args = []
 
     def actMultiPV(self, xMultiPV):
         if xMultiPV == "PD":
@@ -215,19 +230,6 @@ class MotorExterno:
         self.multiPV = 0
         txtop = dic["OPCIONES"]
         self.liOpciones = []
-
-        # if self.nombre.startswith("GreKo 12"):
-        #     li = txtop.split("|")
-        #     c = ""
-        #     for n in li:
-        #         l = n.split(VarGen.XSEP)
-        #         nombre = l[1]
-        #         default = l[2]
-        #         valor = l[3]
-        #         if default != valor:
-        #             c += "| %s=%s "%(nombre,valor)
-
-        #     p rint self.alias, self.elo, c
 
         for parte in txtop.split("|"):
             if parte:

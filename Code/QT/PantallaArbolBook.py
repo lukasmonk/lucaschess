@@ -319,12 +319,12 @@ class InfoMove(QtGui.QWidget):
         self.lbTituloLibro.ponTexto("<h2>" + titulo + "</h2>")
 
     def inicio(self):
-        if self.mov.actual:
+        if self.movActual:
             self.movActual.inicio()
         self.ponValores()
 
     def atras(self):
-        if self.mov.actual:
+        if self.movActual:
             self.movActual.atras()
         self.ponValores()
 
@@ -334,7 +334,7 @@ class InfoMove(QtGui.QWidget):
         self.ponValores()
 
     def final(self):
-        if self.mov.actual:
+        if self.movActual:
             self.movActual.final()
         self.ponValores()
 

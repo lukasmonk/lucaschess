@@ -104,7 +104,7 @@ def lanzaGUI(procesador):
 
     app.setEffectEnabled(QtCore.Qt.UI_AnimateMenu)
 
-    # QtGui.QFontDatabase.addApplicationFont('IntFiles/ChessAlpha2.ttf') # TODO
+    QtGui.QFontDatabase.addApplicationFont('IntFiles/PIRATDIA.TTF')
 
     if configuracion.familia:
         font = Controles.TipoLetra(configuracion.familia)

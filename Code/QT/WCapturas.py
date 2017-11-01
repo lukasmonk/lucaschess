@@ -11,8 +11,8 @@ class CapturaLista(QtGui.QWidget):
     def __init__(self, wParent, tablero):
         super(CapturaLista, self).__init__(wParent)
 
-        self.setFixedWidth(10)
         anchoPZ = int(tablero.ancho/DIVISOR)
+        self.setFixedWidth(tablero.anchoCasilla+2)
         self.pantalla = wParent.parent()
 
         self.tipoMaterial = VarGen.configuracion.tipoMaterial
@@ -43,8 +43,8 @@ class CapturaLista(QtGui.QWidget):
         for k, li in self.dic.iteritems():
             for lb in li:
                 tablero.piezas.change_label(lb, anchoPZ)
-        self.setMinimumWidth(anchoPZ + 4)
-        self.adjustSize()
+        # self.setMinimumWidth(anchoPZ + 4)
+        # self.adjustSize()
 
     def ponLayout(self, siBlancasAbajo):
         layout = self.layout()
@@ -90,7 +90,7 @@ class CapturaLista(QtGui.QWidget):
             for x in range(len(d)):
                 d[x].hide()
 
-    def pon(self, dicCapturas, jg, apertura):
+    def pon(self, dicCapturas):
         if dicCapturas:
             cPiezas = "PNBRQ"
 
@@ -138,3 +138,5 @@ class CapturaLista(QtGui.QWidget):
                         liDif.append((pieza.lower(), vB))
 
             self.ponLI(liDif)
+        else:
+            self.ponLI([])

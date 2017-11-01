@@ -17,14 +17,14 @@ def leeDicParametros(configuracion):
     alm = Util.Almacen()
     alm.motor = dic.get("MOTOR", configuracion.tutor.clave)
     alm.tiempo = dic.get("TIEMPO", configuracion.tiempoTutor)
-    alm.depth = dic.get("DEPTH", 0)
+    alm.depth = dic.get("DEPTH", configuracion.depthTutor)
     alm.timedepth = dic.get("TIMEDEPTH", False)
     alm.kblunders = dic.get("KBLUNDERS", 50)
     alm.ptbrilliancies = dic.get("PTBRILLIANCIES", 100)
     alm.dpbrilliancies = dic.get("DPBRILLIANCIES", 7)
     alm.desdeelfinal = dic.get("DESDEELFINAL", False)
     alm.multiPV = dic.get("MULTIPV", "PD")
-    alm.priority = dic.get("PRIORITY", EngineThread.PRIORITY_NORMAL)
+    alm.priority = dic.get("PRIORITY", EngineThread.priorities.normal)
 
     alm.libro = dic.get("LIBRO", None)
 
@@ -144,13 +144,7 @@ def paramAnalisis(parent, configuracion, siModoAmpliado, siTodosMotores=False):
 
     # Priority
     liGen.append(SEPARADOR)
-    li = [(_("Normal"), EngineThread.PRIORITY_NORMAL),
-          (_("Low"), EngineThread.PRIORITY_LOW),
-          (_("Very low"), EngineThread.PRIORITY_VERYLOW),
-          (_("High"), EngineThread.PRIORITY_HIGH),
-          (_("Very high"), EngineThread.PRIORITY_VERYHIGH)
-          ]
-    config = FormLayout.Combobox(_("Process priority"), li)
+    config = FormLayout.Combobox(_("Process priority"), EngineThread.priorities.combo())
     liGen.append((config, alm.priority))
 
     # Completo
@@ -310,7 +304,7 @@ def paramAnalisis(parent, configuracion, siModoAmpliado, siTodosMotores=False):
         return None
 
 
-def paramAnalisisMasivo(parent, configuracion, siVariosSeleccionados):
+def paramAnalisisMasivo(parent, configuracion, siVariosSeleccionados, siDatabase=False):
     alm = leeDicParametros(configuracion)
 
     # Datos
@@ -460,7 +454,7 @@ def paramAnalisisMasivo(parent, configuracion, siVariosSeleccionados):
         Util.guardaVar(configuracion.ficheroAnalisis, dic)
 
         if not (alm.tacticblunders or alm.pgnblunders or alm.bmtblunders or alm.fnsbrilliancies or
-                    alm.pgnbrilliancies or alm.bmtbrilliancies):
+                    alm.pgnbrilliancies or alm.bmtbrilliancies or siDatabase):
             QTUtil2.mensError(parent, _("No file was specified where to save results"))
             return
 

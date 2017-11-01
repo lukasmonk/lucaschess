@@ -86,6 +86,7 @@ class MarkerSC(TabBloques.BloqueEspSC):
         self.posicion2xy()
 
     def contiene(self, p):
+        p = self.mapFromScene(p)
         def distancia(p1, p2):
             t = p2 - p1
             return ((t.x()) ** 2 + (t.y()) ** 2) ** 0.5
@@ -115,12 +116,23 @@ class MarkerSC(TabBloques.BloqueEspSC):
         self.expX = p.x()
         self.expY = p.y()
 
+    def mousePressExt(self, event):
+        p = event.pos()
+        p = self.mapFromScene(p)
+
+        self.expX = p.x()
+        self.expY = p.y()
+        self.siMove = True
+        self.tpSize = None
+
     def mouseMoveEvent(self, event):
         event.ignore()
         if not (self.siMove or self.tpSize):
             return
 
-        p = event.scenePos()
+        p = event.pos()
+        p = self.mapFromScene(p)
+
         x = p.x()
         y = p.y()
 
@@ -170,6 +182,15 @@ class MarkerSC(TabBloques.BloqueEspSC):
                 self.rutinaPulsada(self.rutinaPulsadaCarga)
             else:
                 self.rutinaPulsada()
+
+    def mouseReleaseExt(self):
+        if self.siActivo:
+            if self.siMove or self.tpSize:
+                self.xy2posicion()
+                self.escena.update()
+                self.siMove = False
+                self.tpSize = None
+            self.activa(False)
 
     def pixmapX(self):
         pm = QtGui.QPixmap(33, 33)

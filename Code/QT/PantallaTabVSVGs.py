@@ -4,6 +4,7 @@ import os
 
 from PyQt4 import QtCore, QtGui
 
+from Code import TabVisual
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -15,7 +16,6 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import TabTipos
 from Code.QT import Tablero
-from Code import TabVisual
 from Code import Util
 from Code import VarGen
 
@@ -80,7 +80,7 @@ class WTV_SVG(QtGui.QDialog):
 
         # Tablero
         confTablero = owner.tablero.confTablero
-        self.tablero = Tablero.TableroVisual(self, confTablero)
+        self.tablero = Tablero.Tablero(self, confTablero, siDirector=False)
         self.tablero.crea()
         self.tablero.copiaPosicionDe(owner.tablero)
 
@@ -194,7 +194,7 @@ class WTV_SVGs(QTVarios.WDialogo):
 
         # Tablero
         confTablero = owner.tablero.confTablero
-        self.tablero = Tablero.TableroVisual(self, confTablero)
+        self.tablero = Tablero.Tablero(self, confTablero, siDirector=False)
         self.tablero.crea()
         self.tablero.copiaPosicionDe(owner.tablero)
 

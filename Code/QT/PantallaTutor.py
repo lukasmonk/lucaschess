@@ -195,6 +195,12 @@ def cambioTutor(parent, configuracion):
 
     # # Decimas de segundo a pensar el tutor
     liGen.append((_("Duration of engine analysis (secs)") + ":", float(configuracion.tiempoTutor / 1000.0)))
+    liDepths = [("--", 0)]
+    for x in range(1, 51):
+        liDepths.append((str(x), x))
+    config = FormLayout.Combobox(_("Depth"), liDepths)
+    liGen.append((config, configuracion.depthTutor))
+
     li = [(_("Maximum"), 0)]
     for x in (1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200):
         li.append((str(x), x))
@@ -209,9 +215,10 @@ def cambioTutor(parent, configuracion):
     resultado = FormLayout.fedit(liGen, title=_("Tutor change"), parent=parent, anchoMinimo=460, icon=Iconos.Opciones())
 
     if resultado:
-        claveMotor, tiempo, multiPV, difpts, difporc = resultado[1]
+        claveMotor, tiempo, depth, multiPV, difpts, difporc = resultado[1]
         configuracion.tutor = configuracion.buscaTutor(claveMotor)
         configuracion.tiempoTutor = int(tiempo * 1000)
+        configuracion.depthTutor = depth
         configuracion.tutorMultiPV = multiPV
         configuracion.tutorDifPts = difpts
         configuracion.tutorDifPorc = difporc

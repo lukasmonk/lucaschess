@@ -104,6 +104,22 @@ class TodasPiezas:
     def iconoDefecto(self, pieza):
         return self.icono(pieza, "Cburnett")
 
+    def saveAllPNG(self, nombre, px):
+        for pieza in "pnbrqk":
+            for color in "wb":
+                fich = os.path.join("Pieces", nombre, "%s%s.svg" % (color, pieza))
+                f = codecs.open(fich, "r", 'utf-8', 'ignore')
+                qb = QtCore.QByteArray(f.read())
+                f.close()
+                pm = QtGui.QPixmap(px, px)
+                pm.fill(QtCore.Qt.transparent)
+                render = QtSvg.QSvgRenderer(qb)
+                painter = QtGui.QPainter()
+                painter.begin(pm)
+                render.render(painter)
+                painter.end()
+                pm.save("IntFiles/Figs/%s%s.png" % (color, pieza), "PNG")
+
 HIDE, GREY, CHECKER, SHOW = range(4)
 
 

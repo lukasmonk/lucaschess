@@ -50,7 +50,6 @@ class GestorEntMaq(Gestor.Gestor):
             if hasattr(self.cm, "icono"):
                 delattr(self.cm, "icono") # problem with configuracion.escVariables and saving qt variables
 
-
         self.siAtras = dic["ATRAS"]
 
         self.rmRival = None
@@ -640,6 +639,25 @@ class GestorEntMaq(Gestor.Gestor):
         self.relojStart(True)
         self.timekeeper.start()
         self.activaColor(siBlancas)
+
+        # posicion = self.partida.ultPosicion.copia()
+        # from Code import LibChess
+        # t4 = LibChess.T4()
+        # fen = posicion.fen()
+        # pv0 = pv = t4.best_move(fen)
+        # dic = t4.checkFen(fen)
+
+        # # n = 0
+        # # while pv:
+        # #     n += 1
+        # #     print n, pv,
+        # #     posicion.moverPV(pv)
+        # #     fen = posicion.fen()
+        # #     pv = t4.best_move(fen)
+        # # print
+        # print pv0, "[MATE %d]" % ((dic[pv][1]+2)/2, )
+        # t4.close()
+        # print
 
     def juegaRival(self):
         self.pensando(True)

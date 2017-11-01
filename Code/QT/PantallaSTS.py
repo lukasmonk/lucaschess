@@ -118,6 +118,9 @@ class WRun(QTVarios.WDialogo):
             self.tablero.show()
 
     def run(self):
+        if not Util.existeFichero(self.work.pathToExe()):
+            QTUtil2.mensError(self, "%s\n%s" % (self.work.pathToExe(), _("Path does not exist.")))
+            return
         self.tb.setAccionVisible(self.pause, True)
         self.tb.setAccionVisible(self.run, False)
         self.playing = True
@@ -150,7 +153,7 @@ class WRun(QTVarios.WDialogo):
                 return
             t0 = time.time()
             mrm = self.xengine.analiza(self.elem.fen)
-            t1 = time.time() - t0
+            t_dif = time.time() - t0
             if mrm:
                 rm = mrm.mejorMov()
                 if rm:
@@ -158,7 +161,7 @@ class WRun(QTVarios.WDialogo):
                     if mov:
                         if not self.hideBoard:
                             self.tablero.creaFlechaTmp(rm.desde, rm.hasta, True)
-                        self.sts.setResult(self.work, self.ngroup, self.nfen, mov, t1)
+                        self.sts.setResult(self.work, self.ngroup, self.nfen, mov, t_dif)
                         self.grid.refresh()
 
         else:
@@ -523,7 +526,7 @@ class WUnSTS(QTVarios.WDialogo):
         li = self.grid.recnosSeleccionados()
         if li:
             if QTUtil2.pregunta(self, _("Do you want to delete all selected records?")):
-                li.reverse()
+                li.sort(reverse=True)
                 for fila in li:
                     self.sts.removeWork(fila)
                 self.sts.save()

@@ -7,13 +7,11 @@ from Code import Gestor60
 from Code import GestorAperturas
 from Code import GestorBooks
 from Code import GestorResistance
-from Code import GestorEntTac
+from Code import GestorTacticas
 from Code import GestorTurnOnLights
 from Code import GestorGM
 from Code import GestorMate
-from Code import GestorUnJuego
 from Code import Memoria
-from Code import Partida
 from Code.QT import DatosNueva
 from Code.QT import Iconos
 from Code.QT import PantallaAperturas
@@ -25,7 +23,6 @@ from Code.QT import PantallaEverest
 from Code.QT import PantallaGM
 from Code.QT import PantallaHorses
 from Code.QT import PantallaLearnPGN
-from Code.QT import PantallaPlayPGN
 from Code.QT import PantallaPotencia
 from Code.QT import PantallaPuente
 from Code.QT import PantallaTacticas
@@ -33,6 +30,7 @@ from Code.QT import PantallaVisualiza
 from Code.QT import PantallaTurnOnLights
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
+from Code.QT import Controles
 from Code import Tacticas
 from Code import TrListas
 from Code import Util
@@ -116,8 +114,19 @@ class Entrenamientos:
         dicMenu = {}
         menu = QTVarios.LCMenu(self.parent)
 
+        tpirat = Controles.TipoLetra("Chess Diagramm Pirat", self.configuracion.puntosMenu+4)
+
         def xopcion(menu, clave, texto, icono, siDeshabilitado=False):
-            menu.opcion(clave, texto, icono, siDeshabilitado)
+            if "KP" in texto:
+                d = {"K":"r", "P":"w", "k":chr(126), "p":chr(134)}
+                k2 = texto.index("K", 2)
+                texto = texto[:k2] + texto[k2:].lower()
+                texton = ""
+                for c in texto:
+                    texton += d[c]
+                menu.opcion(clave, texton, icono, siDeshabilitado, tipoLetra=tpirat)
+            else:
+                menu.opcion(clave, texto, icono, siDeshabilitado)
             dicMenu[clave] = (clave, texto, icono, siDeshabilitado)
 
         # Posiciones de entrenamiento --------------------------------------------------------------------------
@@ -445,7 +454,7 @@ class Entrenamientos:
                     self.learnPGN()
 
                 elif resp == "playPGN":
-                    self.playPGN()
+                    self.procesador.playPGN()
 
                 elif resp == "lucaselo":
                     self.procesador.lucaselo(False)
@@ -547,7 +556,7 @@ class Entrenamientos:
                 um.final()
             self.procesador.tipoJuego = kJugEntTac
             self.procesador.estado = kJugando
-            self.procesador.gestor = GestorEntTac.GestorEntTac(self.procesador)
+            self.procesador.gestor = GestorTacticas.GestorTacticas(self.procesador)
             self.procesador.gestor.inicio(tactica)
 
     def entrenaGM(self):
@@ -610,21 +619,6 @@ class Entrenamientos:
     def learnPGN(self):
         w = PantallaLearnPGN.WLearnBase(self.procesador)
         w.exec_()
-
-    def playPGN(self):
-        w = PantallaPlayPGN.WPlayBase(self.procesador)
-        if w.exec_():
-            recno = w.recno
-            if recno is not None:
-                siBlancas = w.siBlancas
-                db = PantallaPlayPGN.PlayPGNs(self.configuracion.ficheroPlayPGN)
-                reg = db.leeRegistro(recno)
-                partidaObj = Partida.Partida()
-                partidaObj.recuperaDeTexto(reg["PARTIDA"])
-                nombreObj = reg.get("WHITE" if siBlancas else "BLACK", _("Player"))
-                self.procesador.gestor = GestorUnJuego.GestorUnJuego(self.procesador)
-                self.procesador.gestor.inicio(recno, partidaObj, nombreObj, siBlancas, db.rotulo(recno))
-                db.close()
 
     def everest(self):
         PantallaEverest.everest(self.procesador)

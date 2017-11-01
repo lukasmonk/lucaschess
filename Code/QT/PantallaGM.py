@@ -21,7 +21,6 @@ from Code import VarGen
 
 class WGM(QTVarios.WDialogo):
     def __init__(self, procesador):
-
         self.configuracion = procesador.configuracion
         self.procesador = procesador
 
@@ -341,6 +340,7 @@ class WGM(QTVarios.WDialogo):
                         self.lbJdepth, self.cbJdepth,
                         self.lbJshow, self.cbJshow,
                         self.lbJmultiPV, self.cbJmultiPV,
+                        self.chbEvals,
                         ):
             control.setVisible(si)
 

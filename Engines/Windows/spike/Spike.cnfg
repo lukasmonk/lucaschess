@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet href="SpikeConfig.xslt" type="text/xsl"?>
+
+<spike>
+  <setting protocol="uci" enabled="yes">
+    <bibliothek enabled="yes" filename=""/>
+    <hash size="32"/>
+    <log enabled="no" filename="Spike.log"/>
+    <resign enabled="yes" value="900"/>
+    <contempt value="0"/>
+    <poslearning enabled="no" filename=""/>
+    <booklearning enabled="no" filename=""/>
+    <tablebases enabled="yes" hash="4" path="" depth="4"/>
+    <MPSetting cpu="1"/>
+  </setting>
+  <setting protocol="winboard" enabled="yes">
+    <bibliothek enabled="yes" filename=""/>
+    <hash size="32"/>
+    <log enabled="no" filename="Spike.log"/>
+    <resign enabled="yes" value="900"/>
+    <contempt value="0"/>
+    <poslearning enabled="no" filename=""/>
+    <booklearning enabled="no" filename=""/>
+    <tablebases enabled="yes" hash="4" path="" depth="4"/>
+    <MPSetting cpu="1"/>
+  </setting>
+</spike>

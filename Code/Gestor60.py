@@ -243,12 +243,10 @@ class Gestor60(Gestor.Gestor):
                             self.ponResultado()
                     else:
                         break
-                self.tablero.resetMouse()
                 self.atajosRatonReset()
                 return
         self.errores += 1
         self.ponRotulo2n()
-        self.tablero.resetMouse()
         self.atajosRatonReset()
 
     def ponResultado(self):

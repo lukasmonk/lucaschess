@@ -67,7 +67,8 @@ class T4:
             LCEngine.movePV(pv[:2], pv[2:4], pv[4:])
             xfen = LCEngine.getFen()
             wdl, dtz = self.wdl_dtz(xfen)
-            dic[pv] = -wdl, -dtz
+            if wdl is not None and dtz is not None:
+                dic[pv] = -wdl, -dtz
         return dic
 
     def wd_move(self, fen, move):

@@ -8,6 +8,8 @@ from PyQt4 import QtCore, QtGui, QtSvg
 
 from Code.QT import Iconos
 
+from Code import VarGen
+
 dicPM = {}
 dicPZ = {}
 dicNG = {}
@@ -155,7 +157,7 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
         yTotal = rect.y()
 
         if option.state & QtGui.QStyle.State_Selected:
-            painter.fillRect(rect, QtGui.QColor("#678DB2"))  # sino no se ve en CDE-Motif-Windows
+            painter.fillRect(rect, QtGui.QColor("#678DB2" if VarGen.configuracion.tablaSelBackground is None else VarGen.configuracion.tablaSelBackground))  # sino no se ve en CDE-Motif-Windows
             # painter.fillRect(option.rect, palette.highlight().color())
         elif self.siFondo:
             fondo = index.model().getFondo(index)
@@ -297,3 +299,63 @@ class PmIconosColor(QtGui.QStyledItemDelegate):
         painter.translate(option.rect.x(), option.rect.y())
         painter.drawPixmap(4, 4, self.dicIconos[pos])
         painter.restore()
+
+
+class HTMLDelegate(QtGui.QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        options = QtGui.QStyleOptionViewItemV4(option)
+        self.initStyleOption(options,index)
+
+        style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
+
+        doc = QtGui.QTextDocument()
+        doc.setHtml(options.text)
+
+        options.text = ""
+        style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter)
+
+        ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
+        if option.state & QtGui.QStyle.State_Selected:
+            ctx.palette.setColor(QtGui.QPalette.Text, option.palette.color(QtGui.QPalette.Active, QtGui.QPalette.HighlightedText))
+        else:
+            ctx.palette.setColor(QtGui.QPalette.Text, option.palette.color(QtGui.QPalette.Active, QtGui.QPalette.HighlightedText))
+
+        textRect = style.subElementRect(QtGui.QStyle.SE_ItemViewItemText, options)
+        painter.save()
+        painter.translate(textRect.topLeft())
+        painter.setClipRect(textRect.translated(-textRect.topLeft()))
+        doc.documentLayout().draw(painter, ctx)
+
+        painter.restore()
+
+    def sizeHint(self, option, index):
+        options = QtGui.QStyleOptionViewItemV4(option)
+        self.initStyleOption(options,index)
+
+        doc = QtGui.QTextDocument()
+        doc.setHtml(options.text)
+        doc.setTextWidth(options.rect.width())
+        return QtCore.QSize(doc.idealWidth(), doc.size().height())
+
+
+class MultiEditor(QtGui.QItemDelegate):
+    def __init__(self, wparent):
+        QtGui.QItemDelegate.__init__(self, None)
+        self.win_me = wparent
+
+    def createEditor(self, parent, option, index):
+        editor = self.win_me.me_setEditor(parent)
+        if editor:
+            editor.installEventFilter(self)
+        return editor
+
+    def setEditorData(self, editor, index):
+        value = index.model().data(index, QtCore.Qt.DisplayRole)
+        self.win_me.me_ponValor(editor, value)
+
+    def setModelData(self, editor, model, index):
+        value = self.win_me.me_leeValor(editor)
+        model.setData(index, value)
+
+    def updateEditorGeometry(self, editor, option, index):
+        editor.setGeometry(option.rect)

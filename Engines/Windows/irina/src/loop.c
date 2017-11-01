@@ -60,6 +60,8 @@ void loop(void)
         open_log();
     #endif
 
+    printf("Irina is a free adaptation of Winglet, chess engine created by Stef Luijten.\nUsed to implement child personalities of Lucas Chess GUI.\n\n");
+
     for (;;)
     {
         if (!fgets(s, 2048, stdin))

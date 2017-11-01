@@ -3,6 +3,7 @@ import time
 
 import LCEngine
 
+from Code import Util
 from Code import Books
 from Code import ControlPosicion
 from Code import Gestor
@@ -20,15 +21,26 @@ from Code.Constantes import *
 class GR_Engine:
     def __init__(self, procesador, nlevel):
         self._label = "%s - %s %d" % (_("Engine"), _("Level"), nlevel)
+        self.configuracion = procesador.configuracion
         self.level = nlevel
         if nlevel == 0:
             self.gestor = None
+            self._nombre = self._label
         else:
             dEngines = self.elos()
-            nom_engine, depth, elo = random.choice(dEngines[nlevel])
-            rival = procesador.configuracion.buscaRival(nom_engine)
+            x = +1 if nlevel < 6 else -1
+            while True:
+                if len(dEngines[nlevel]) > 0:
+                    nom_engine, depth, elo = random.choice(dEngines[nlevel])
+                    break
+                else:
+                    nlevel += x
+                    if nlevel > 6:
+                        nlevel = 1
+            rival = self.configuracion.buscaRival(nom_engine)
             self.gestor = procesador.creaGestorMotor(rival, None, depth)
-            self._label += "\n%s %s %d\n%s: %d" % (rival.nombre, _("Depth"), depth, _("Estimated elo"), elo)
+            self._nombre = "%s %s %d" % (rival.nombre, _("Depth"), depth)
+            self._label += "\n%s\n%s: %d" % (self._nombre, _("Estimated elo"), elo)
 
     def close(self):
         if self.gestor and self.gestor != self:
@@ -38,6 +50,10 @@ class GR_Engine:
     @property
     def label(self):
         return self._label
+
+    @property
+    def nombre(self):
+        return self._nombre
 
     def play(self, fen):
         if self.gestor:
@@ -93,7 +109,8 @@ toga 1236 1495 1928 2132"""
                 tp = 6
             else:
                 return
-            d[tp].append((engine, depth, elo))
+            if engine in self.configuracion.dicRivales:
+                d[tp].append((engine, depth, elo))
 
         for line in x.split("\n"):
             engine, d1, d2, d3, d4 = line.split(" ")
@@ -312,6 +329,8 @@ class GestorRoutesPlay(GestorRoutes):
 
         siwin = (jgUlt.siBlancas() == self.siJugamosConBlancas) and not jgUlt.siTablas()
 
+        self.guardarGanados(siwin)
+
         if siwin:
             if self.route.end_playing():
                 QTUtil2.mensaje(self.pantalla, _("Congratulations, you have completed the game."))
@@ -327,10 +346,10 @@ class GestorRoutesPlay(GestorRoutes):
 
     def actualPGN(self):
         resp = '[Event "%s"]\n' % _("Transsiberian Railway")
+        hoy = Util.hoy()
+        resp += '[Date "%d-%d-%d"]\n' % (hoy.year, hoy.month, hoy.day)
 
-        lbe = _("Internal engine")
-        if getattr(self.engine, "level", 0):
-            lbe += " %s %d" % (_("Basic"), self.engine.level)
+        lbe = self.engine.nombre
 
         white, black = self.configuracion.jugador, lbe
         if not self.siJugamosConBlancas:
@@ -503,7 +522,7 @@ class GestorRoutesEndings(GestorRoutes):
                     pgn = Partida.pv_pgn(jgSel.posicionBase.fen(), pvObj)
                     QTUtil2.mensajeTemporal(self.pantalla, _("You have selected one correct move, but the line use %s") % pgn, 4)
                 else:
-                    QTUtil2.mensajeTemporal(self.pantalla, _("Wrong move"), 2)
+                    QTUtil2.mensajeTemporal(self.pantalla, _("Wrong move"), 1)
                     self.warnings += 1
                     self.ponWarnings()
                 self.sigueHumano()
@@ -587,7 +606,8 @@ class GestorRoutesTactics(GestorRoutes):
         GestorRoutes.inicio(self, route)
 
         tactica = self.route.get_tactic()
-        self.dicFen, self.nDicMoves = PGN.leeEntDirigidoBaseM2(tactica.fen, tactica.pgn)
+
+        self.partida_objetivo = PGN.pgn_partida(tactica.fen, tactica.pgn)
 
         self.rivalPensando = False
 
@@ -656,15 +676,17 @@ class GestorRoutesTactics(GestorRoutes):
         else:
             Gestor.Gestor.rutinaAccionDef(self, clave)
 
+    def jugadaObjetivo(self):
+        return self.partida_objetivo.jugada(self.partida.numJugadas())
+
     def siguienteJugada(self):
         if self.estado == kFinJuego:
             return
 
-        if self.partida.numJugadas() == self.nDicMoves:
+        if self.partida.numJugadas() == self.partida_objetivo.numJugadas():
             self.lineaTerminada()
             return
 
-        fenM2 = self.partida.ultPosicion.fenM2()
         self.estado = kJugando
 
         self.siJuegaHumano = False
@@ -677,11 +699,9 @@ class GestorRoutesTactics(GestorRoutes):
 
         siRival = siBlancas == self.siRivalConBlancas
         if siRival:
-            for siMain, jg in self.dicFen[fenM2]:
-                if siMain:
-                    self.mueveRival(jg.desde, jg.hasta, jg.coronacion)
-                    self.siguienteJugada()
-                    return
+            jg = self.jugadaObjetivo()
+            self.mueveRival(jg.desde, jg.hasta, jg.coronacion)
+            self.siguienteJugada()
         else:
             self.siJuegaHumano = True
             self.activaColor(siBlancas)
@@ -691,33 +711,18 @@ class GestorRoutesTactics(GestorRoutes):
         if not jgSel:
             return False
 
-        fenM2 = self.partida.ultPosicion.fenM2()
-        liOpciones = self.dicFen[fenM2]
-        liMovs = []
-        siEsta = False
-        posMain = None
-        ok = False
-        for siMain, jg1 in liOpciones:
-            mv = jg1.movimiento()
-            if siMain:
-                posMain = mv[:2]
-            if mv.lower() == jgSel.movimiento().lower():
-                siEsta = True
-                if siMain:
-                    ok = True
-                    break
-            liMovs.append((jg1.desde, jg1.hasta, siMain))
-
-        if not ok:
-            self.ponPosicion(self.partida.ultPosicion)
-            if siEsta:
-                if posMain != jgSel.desde:
-                    self.tablero.markPosition(posMain)
-                else:
-                    self.tablero.ponFlechasTmp(liMovs)
-            else:
-                self.route.error_tactic(self.nDicMoves)
-                self.ponRotulo2(self.route.mens_tactic(False))
+        jgObj = self.jugadaObjetivo()
+        if jgObj.movimiento() != jgSel.movimiento():
+            for pvar in jgObj.pvariantes:
+                jgObjV = pvar.jugada(0)
+                if jgObjV.movimiento() == jgSel.movimiento():
+                    QTUtil2.mensajeTemporal(self.pantalla, _("You have selected one correct move, but the line use %s") % jgObj.pgnSP(), 3, posicion="ad")
+                    self.ayuda(False)
+                    self.sigueHumano()
+                    return False
+            QTUtil2.mensajeTemporal(self.pantalla, _("Wrong move"), 0.8, posicion="ad")
+            self.route.error_tactic(self.partida_objetivo.numJugadas())
+            self.ponRotulo2(self.route.mens_tactic(False))
             self.sigueHumano()
             return False
 
@@ -736,19 +741,23 @@ class GestorRoutesTactics(GestorRoutes):
         self.movimientosPiezas(jg.liMovs, True)
         return True
 
-    def ayuda(self):
-        fenM2 = self.partida.ultPosicion.fenM2()
-        liOpciones = self.dicFen[fenM2]
-        liMovs = [(jg1.desde, jg1.hasta, siMain) for siMain, jg1 in liOpciones]
+    def ayuda(self, siQuitarPuntos=True):
+        jgObj = self.jugadaObjetivo()
+        liMovs = [(jgObj.desde, jgObj.hasta, True)]
+        for pvar in jgObj.pvariantes:
+            jg0 = pvar.jugada(0)
+            liMovs.append((jg0.desde, jg0.hasta, False))
         self.tablero.ponFlechasTmp(liMovs)
-        self.route.error_tactic(self.nDicMoves)
-        self.ponRotulo2(self.route.mens_tactic(False))
+        if siQuitarPuntos:
+            self.route.error_tactic(self.partida_objetivo.numJugadas())
+            self.ponRotulo2(self.route.mens_tactic(False))
 
     def lineaTerminada(self):
         self.desactivaTodas()
         self.refresh()
         km = self.route.end_tactic()
-        QTUtil2.mensaje(self.pantalla, _("Done") + "<br>" + _("You have traveled %s") % Routes.km_mi(km, self.route.is_miles))
+        if not self.route.go_fast:
+            QTUtil2.mensaje(self.pantalla, _("Done") + "<br>" + _("You have traveled %s") % Routes.km_mi(km, self.route.is_miles))
         self.siJuegaHumano = False
         self.estado = kFinJuego
         if self.route.go_fast:

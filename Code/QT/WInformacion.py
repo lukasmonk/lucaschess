@@ -3,12 +3,156 @@ import os
 from PyQt4 import QtGui, QtCore
 
 from Code.Constantes import *
+from Code import PGN
 from Code.QT import Colocacion
 from Code.QT import Controles
 from Code.QT import Iconos
 from Code.QT import QTVarios
 from Code import TrListas
 from Code import VarGen
+
+
+class Variantes(QtGui.QWidget):
+
+    def __init__(self, owner):
+        self.owner = owner
+        configuracion = VarGen.configuracion
+        self.siFigurines = configuracion.figurinesPGN
+        puntos = configuracion.puntosPGN
+
+        QtGui.QWidget.__init__(self, self.owner)
+
+        liAcciones = (
+            (_("Append"), Iconos.Mas(), self.tbMasVariante), None,
+            ("%s+%s" % (_("Append"), _("Engine")), Iconos.MasR(), self.tbMasVarianteR), None,
+            (_("Edit"), Iconos.ComentarioEditar(), self.tbEditarVariante), None,
+            (_("Remove"), Iconos.Borrar(), self.tbBorrarVariante), None,
+        )
+        tbVariantes = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
+
+        self.em = Controles.EM(self)#.capturaCambios(self.variantesCambiado)
+        self.em.setReadOnly(True)
+        self.em.capturaDobleClick(self.dobleClick)
+
+        ly = Colocacion.V().control(tbVariantes).control(self.em).margen(3)
+
+        f = Controles.TipoLetra(puntos=puntos)
+
+        gbVariantes = Controles.GB(self.owner, _("Variants"), ly).ponFuente(f)
+
+        layout = Colocacion.H().control(gbVariantes).margen(0)
+        self.setLayout(layout)
+
+        self.liVariantes = []
+
+        self.jg = None
+
+    def ponJugada(self, jg):
+        self.jg = jg
+
+        variantes = jg.variantes
+        self.liVariantes = []
+        if variantes:
+            lista = variantes.split("\n\n")
+
+            fen = self.jg.posicionBase.fen()
+
+            for lineaPGN in lista:
+                uno = PGN.UnPGN()
+                uno.leeTexto('[FEN "%s"]\n%s' % (fen, lineaPGN))
+                self.liVariantes.append(uno.partida)
+        self.mostrar()
+
+    def mostrar(self):
+        if self.liVariantes:
+            html = '<table cellpadding="2" cellspacing="0" border="1" style="border-color: lightgray" width="100%">'
+            for n, partida in enumerate(self.liVariantes):
+                bgcolor = "#F5F5F5" if n%2 else "white"
+                pgn = partida.pgnHTML(siFigurines=self.siFigurines)
+                html += '<tr bgcolor="%s"><td>%s</td></tr>' % (bgcolor, pgn)
+            html += "</table>"
+        else:
+            html = ""
+        self.em.ponHtml(html)
+
+    def select(self):
+        if len(self.liVariantes) == 0:
+            return None
+        menu = QTVarios.LCMenu(self)
+        rondo = QTVarios.rondoPuntos()
+        for num, variante in enumerate(self.liVariantes):
+            jg = variante.jugada(0)
+            menu.opcion(num, "%d. %s" % (num+1, jg.pgnBaseSP()), rondo.otro())
+        return menu.lanza()
+
+    def editar(self, numero, siEngineActivo=False):
+        import Code.Variantes as Variantes
+
+        gestor = self.owner.wParent.gestor
+
+        siCompetitivo = False
+        if hasattr(gestor, "siCompetitivo"):
+            if gestor.siCompetitivo:
+                siCompetitivo = gestor.estado != kFinJuego
+
+        if siCompetitivo:
+            siEngineActivo = False
+
+        fen = self.jg.posicionBase.fen()
+        if numero == -1:
+            pgn = ""
+        else:
+            pgn = self.liVariantes[numero].pgnBaseRAW()
+
+        resp = Variantes.editaVariante(gestor.procesador, gestor, fen, pgn, siEngineActivo=siEngineActivo, siCompetitivo=siCompetitivo)
+        if resp:
+            lineaPGN, pv = resp
+            fen = self.jg.posicionBase.fen()
+
+            uno = PGN.UnPGN()
+            uno.leeTexto('[FEN "%s"]\n%s' % (fen, lineaPGN))
+            if numero == -1:
+                self.liVariantes.append(uno.partida)
+            else:
+                self.liVariantes[numero] = uno.partida
+            self.guardar()
+            self.mostrar()
+
+    def guardar(self):
+        if self.liVariantes:
+            self.jg.variantes = "\n\n".join([variante.pgnBaseRAW() for variante in self.liVariantes])
+        else:
+            self.jg.variantes = ""
+
+    def dobleClick(self, event):
+        txt = self.em.texto()
+        pos = self.em.posicion()
+        # Hay que ver cuantos \n hay antes de esa posicion
+        fila = txt[:pos].count("\n")-1
+        if fila == -1:
+            self.tbMasVariante()
+        else:
+            self.editar(fila)
+
+    def tbMasVariante(self, siEngineActivo=False):
+        self.editar(-1, False)
+
+    def tbMasVarianteR(self):
+        self.editar(-1, True)
+
+    def tbEditarVariante(self):
+        num = self.select()
+        if num is None:
+            self.editar(-1)
+        else:
+            self.editar(num)
+
+    def tbBorrarVariante(self):
+        num = self.select()
+        if num is not None:
+            del self.liVariantes[num]
+            self.guardar()
+            self.mostrar()
 
 
 class InformacionPGN(QtGui.QWidget):
@@ -20,10 +164,11 @@ class InformacionPGN(QtGui.QWidget):
         self.jg = None
         self.partida = None
 
-        puntos = VarGen.configuracion.puntosPGN
+        configuracion = VarGen.configuracion
+
+        puntos = configuracion.puntosPGN
 
         f = Controles.TipoLetra(puntos=puntos, peso=75)
-        # ftxt = Controles.TipoLetra( nombre="Courier New", puntos=puntos )
         f9 = Controles.TipoLetra(puntos=puntos)
         ftxt = f9
 
@@ -47,16 +192,17 @@ class InformacionPGN(QtGui.QWidget):
         self.maxNAGs = 10
         self.liNAGs = []
         for x in range(self.maxNAGs):
-            cb = Controles.CB(self, liOpciones, "").ponAnchoMinimo().capturaCambiado(self.valoracionCambiada).ponFuente(
-                    f9)
+            cb = Controles.CB(self, liOpciones, "").ponAnchoMinimo().capturaCambiado(self.valoracionCambiada).ponFuente(f9)
             if x:
                 cb.hide()
             self.liNAGs.append(cb)
 
+        btNAGS = Controles.PB(self, "", self.masNAGs).ponIcono(Iconos.Mas()).anchoFijo(22)
+
         liOpciones = [(x, x) for x in ("-", "!", "!!", "?", "??", "!?", "?!")]
         self.valoracionDirecta = Controles.CB(self, liOpciones, "-").ponAnchoFijo(42).capturaCambiado(self.valoracionDirectaCambiada)
 
-        lyH = Colocacion.H().control(self.valoracionDirecta).control(self.liNAGs[0])
+        lyH = Colocacion.H().control(self.valoracionDirecta).control(self.liNAGs[0]).control(btNAGS)
         ly = Colocacion.V().otro(lyH)
         for x in range(1, self.maxNAGs):
             ly.control(self.liNAGs[x])
@@ -65,74 +211,31 @@ class InformacionPGN(QtGui.QWidget):
 
         # Comentarios
         self.comentario = Controles.EM(self, siHTML=False).capturaCambios(self.comentarioCambiado).ponFuente(ftxt).anchoMinimo(200)
-
-        ly = Colocacion.H().control(self.comentario)
+        ly = Colocacion.H().control(self.comentario).margen(3)
         self.gbComentario = Controles.GB(self, _("Comments"), ly).ponFuente(f)
 
         # Variantes
-        liAcciones = (
-            (_("Append"), Iconos.Mas(), self.tbMasVariante), None,
-            ("%s+%s" % (_("Append"), _("Engine")), Iconos.MasR(), self.tbMasVarianteR), None,
-            (_("Edit"), Iconos.ComentarioEditar(), self.tbEditarVariante), None,
-            (_("Remove"), Iconos.Borrar(), self.tbBorrarVariante), None,
-        )
-        tbVariantes = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
-
-        self.variantes = Controles.EM(self, siHTML=False).capturaCambios(self.variantesCambiado).ponFuente(ftxt)
-        self.variantes.capturaDobleClick(self.variantesDobleClick)
-        self.variantes.setReadOnly(True)
-        ly = Colocacion.V().control(tbVariantes).control(self.variantes)
-        self.gbVariantes = Controles.GB(self, _("Variants"), ly).ponFuente(f)
+        self.variantes = Variantes(self)
 
         self.splitter = splitter = QtGui.QSplitter(self)
         self.splitter.setOrientation(QtCore.Qt.Vertical)
         splitter.addWidget(self.gbComentario)
-        splitter.addWidget(self.gbVariantes)
+        splitter.addWidget(self.variantes)
 
         layout = Colocacion.V()
         layout.control(self.lbApertura)
         layout.control(self.gbValoracion)
         layout.control(self.splitter)
-        # layout.control(self.gbComentario)
-        # layout.control(self.gbVariantes)
-        layout.margen(5)
+        layout.margen(1)
 
         self.setLayout(layout)
 
-    def tbMasVariante(self, siEngineActivo=False):
-        resp = self.editaVariante("", siEngineActivo)
-        if resp is not None:
-            txt = self.getVariantes()
-            if txt:
-                txt += "\n\n"
-            nuevaLinea, a1h8 = resp
-            txt += nuevaLinea
-            self.setVariantes(txt)
-            self.variantesCambiado()
-
-    def tbMasVarianteR(self):
-        self.tbMasVariante(siEngineActivo=True)
-
-    def tbEditarVariante(self):
-        self.variantesDobleClick(None)
-
-    def tbBorrarVariante(self):
-        txt = self.getVariantes()
-        pos = self.variantes.posicion()
-        li = txt.replace("\n\n", "\n").split("\n")
-        n = 0
-        nLinea = -1
-        for nLineaT, linea in enumerate(li):
-            n += len(linea) + 1
-            if pos < n:
-                nLinea = nLineaT
-                break
-        if nLinea >= 0:
-            del li[nLinea]
-            txt = "\n\n".join(li)
-            txt = txt.strip()
-            self.setVariantes(txt)
-            self.variantesCambiado()
+    def masNAGs(self):
+        for cb in self.liNAGs:
+            if not cb.isVisible():
+                cb.ponValor("-")
+                cb.show()
+                return
 
     def ponJG(self, partida, jg, apertura):
         self.partida = partida
@@ -143,7 +246,7 @@ class InformacionPGN(QtGui.QWidget):
 
         siJG = self.jg is not None
         self.gbValoracion.setVisible(siJG)
-        self.gbVariantes.setVisible(siJG)
+        self.variantes.setVisible(siJG)
 
         if siJG:
             self.gbComentario.ponTexto(_("Comments"))
@@ -156,7 +259,7 @@ class InformacionPGN(QtGui.QWidget):
                 self.lbApertura.show()
 
             self.comentario.ponTexto(jg.comentario)
-            self.setVariantes(jg.variantes)
+            self.variantes.ponJugada(jg)
 
             li = jg.critica.split(" ")
 
@@ -181,14 +284,14 @@ class InformacionPGN(QtGui.QWidget):
                 cb.ponValor(nag)
                 cb.show()
                 n += 1
-        siShow = True
-        for x in range(n, self.maxNAGs):
-            cb = self.liNAGs[x]
+        if n == 0:
+            cb = self.liNAGs[0]
             cb.ponValor("-")
-            if siShow:
-                siShow = False
-                cb.show()
-            else:
+            cb.show()
+        else:
+            for x in range(n, self.maxNAGs):
+                cb = self.liNAGs[x]
+                cb.ponValor("-")
                 cb.hide()
 
     def keyPressEvent(self, event):
@@ -199,10 +302,6 @@ class InformacionPGN(QtGui.QWidget):
             self.jg.comentario = self.comentario.texto()
         else:
             self.partida.firstComment = self.comentario.texto()
-
-    def variantesCambiado(self):
-        if self.jg:
-            self.jg.variantes = self.getVariantes()
 
     def valoracionCambiada(self, npos):
         if self.jg:
@@ -218,50 +317,4 @@ class InformacionPGN(QtGui.QWidget):
         if self.jg:
             criticaDirecta = self.valoracionDirecta.valor()
             self.jg.criticaDirecta = criticaDirecta if criticaDirecta != "-" else ""
-
-    def variantesDobleClick(self, event):
-        txt = self.getVariantes()
-        pos = self.variantes.posicion()
-        li = txt.replace("\n\n", "\n").split("\n")
-        n = 0
-        lineaPGN = ""
-        for linea in li:
-            n += len(linea) + 1
-            if pos < n:
-                lineaPGN = linea
-                break
-        if not lineaPGN.strip():
-            self.tbMasVariante()
-        else:
-            resp = self.editaVariante(lineaPGN)
-            if resp is not None:
-                nuevaLinea, a1h8 = resp
-                txt = txt.replace(lineaPGN, nuevaLinea)
-                self.setVariantes(txt)
-                self.variantesCambiado()
-
-    def editaVariante(self, linea, siEngineActivo=False):
-        import Code.Variantes as Variantes
-
-        siCompetitivo = False
-        if hasattr(self.wParent, "gestor") and hasattr(self.wParent.gestor, "siCompetitivo"):
-            if self.wParent.gestor.siCompetitivo:
-                siCompetitivo = self.wParent.gestor.estado != kFinJuego
-
-        if siCompetitivo:
-            siEngineActivo = False
-
-        gestor = self.wParent.gestor
-        pos, jg = gestor.jugadaActiva()
-        if jg is None:
-            return None
-        fen = jg.posicionBase.fen()
-
-        return Variantes.editaVariante(gestor.procesador, gestor, fen, linea, siEngineActivo=siEngineActivo, siCompetitivo=siCompetitivo)
-
-    def setVariantes(self, txt):
-        self.variantes.ponTexto(txt)
-
-    def getVariantes(self):
-        return self.variantes.texto().strip()
 

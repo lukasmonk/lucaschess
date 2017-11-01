@@ -206,7 +206,7 @@ class WPosicion(QtGui.QWidget):
             if ant == pieza:
                 pieza = pieza.lower()
         self.ultimaPieza = pieza
-        self.ponCursor(QtCore.Qt.ArrowCursor)
+        self.ponCursor()
 
     def mueve(self, desde, hasta):
         if desde == hasta:

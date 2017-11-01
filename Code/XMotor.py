@@ -1,17 +1,19 @@
+import sys
 import os
 import signal
-import struct
 import time
+import psutil
 
 from PyQt4 import QtCore
+import subprocess
 
-from Code.Constantes import *
+from Code import VarGen
 from Code import XMotorRespuesta
 from Code import EngineThread
 
 
 class XMotor:
-    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=0, priority=EngineThread.PRIORITY_NORMAL, args=None):
+    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=0, priority=None, args=None):
         self.nombre = nombre
 
         self.ponder = False
@@ -31,14 +33,8 @@ class XMotor:
         if not os.path.isfile(exe):
             return
 
-        self.engine = EngineThread.EnginePOP(exe, priority, args)
+        self.engine = EngineThread.Engine(exe, priority, args)
         self.engine.start()
-
-        # time.sleep(0.01)
-        # n = 100
-        # while self.engine.starting and n:
-        #     time.sleep(0.1 if n > 50 else 0.2)
-        #     n-= 1
 
         self.lockAC = True
         self.pid = self.engine.pid
@@ -48,11 +44,13 @@ class XMotor:
         txt_uci_analysemode = "UCI_AnalyseMode"
         uci_analysemode = False
 
+        setoptions = False
         if liOpcionesUCI:
             for opcion, valor in liOpcionesUCI:
                 if type(valor) == bool:
                     valor = str(valor).lower()
                 self.set_option(opcion, valor)
+                setoptions = True
                 if opcion == txt_uci_analysemode:
                     uci_analysemode = True
                 if opcion.lower() == "ponder":
@@ -65,9 +63,14 @@ class XMotor:
                 for line in self.uci_lines:
                     if "UCI_AnalyseMode" in line:
                         self.set_option("UCI_AnalyseMode", "true")
+                        setoptions = True
+        if setoptions:
+            self.put_line("isready")
+            self.wait_mrm("readyok", 1000)
 
     def get_lines(self):
-        return self.engine.get_lines()
+        li = self.engine.get_lines()
+        return li
 
     def put_line(self, line):
         self.engine.put_line(line)
@@ -110,6 +113,7 @@ class XMotor:
                 stop = True
             if not self.engine.hay_datos():
                 if not self.dispatch():
+                    self.put_line("stop")
                     return False
                 time.sleep(0.090)
 
@@ -229,10 +233,13 @@ class XMotor:
         posInicial = "startpos" if partida.siFenInicial() else "fen %s" % partida.iniPosicion.fen()
         li = [jg.movimiento().lower() for n, jg in enumerate(partida.liJugadas) if n < njg]
         moves = " moves %s" % (" ".join(li)) if li else ""
+        if not li:
+            self.work_ok("ucinewgame")
         self.work_ok("position %s%s" % (posInicial, moves))
         self.is_white = partida.siBlancas() if njg > 9000 else partida.jugada(njg).siBlancas()
 
     def set_fen_position(self, fen):
+        self.work_ok("ucinewgame")
         self.work_ok("position fen %s" % fen)
         self.is_white = "w" in fen
 
@@ -258,11 +265,10 @@ class XMotor:
         self.ac_lee()
         self.mrm.ordena()
         rm = self.mrm.mejorMov()
-        dt = rm.time
-        while dt < minimoTiempo:
+        while rm.time < minimoTiempo:
             self.ac_lee()
             time.sleep(0.1)
-            dt += 100
+            rm = self.mrm.mejorMov()
         self.lockAC = lockAC
         return self.ac_estado()
 
@@ -270,11 +276,10 @@ class XMotor:
         self.ac_lee()
         self.mrm.ordena()
         rm = self.mrm.mejorMov()
-        dt = rm.time
-        while dt < minTime or rm.depth < minDepth:
+        while rm.time < minTime or rm.depth < minDepth:
             self.ac_lee()
             time.sleep(0.1)
-            dt += 100
+            rm = self.mrm.mejorMov()
         self.lockAC = lockAC
         return self.ac_estado()
 
@@ -328,9 +333,9 @@ class XMotor:
         if self.pid:
             try:
                 self.engine.close()
-                os.kill(self.pid, signal.SIGTERM)
             except:
-                pass
+                os.kill(self.pid, signal.SIGTERM)
+                sys.stderr.write("INFO X CLOSE: except - the engine %s won't close properly.\n" % self.nombre)
             self.pid = None
 
     def order_uci(self):
@@ -381,6 +386,8 @@ class XMotor:
         li1 = pv.split(" ")
         li.extend(li1[:2])
         moves = " moves %s" % (" ".join(li)) if li else ""
+        if not li:
+            self.work_ok("ucinewgame")
         self.pondering = True
         self.work_ok("position %s%s" % (posInicial, moves))
         self.put_line("go ponder")
@@ -390,159 +397,102 @@ class XMotor:
         self.pondering = False
 
 
-class DirectMotor(QtCore.QProcess):
-    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=None, args = []):
-        QtCore.QProcess.__init__(self)
+class FastEngine(object):
+    def __init__(self, nombre, exe, liOpcionesUCI=None, nMultiPV=0, priority=None, args=None):
+        self.nombre = nombre
 
-        absexe = os.path.abspath(exe)
-        direxe = os.path.abspath(os.path.dirname(exe))
-        self.setWorkingDirectory(direxe)
-        self.start(absexe, args, mode=QtCore.QIODevice.ReadWrite)
-        self.waitForStarted()
-        self.nMultiPV = nMultiPV
-        self.lockAC = True
-        self.pid = self.pid()
-        hp, ht, self.pid, dt = struct.unpack("PPII", self.pid.asstring(16))
+        self.ponder = False
+        self.pondering = False
 
-        # Control de lectura
-        self._buffer = ""
-
-        self.siDebug = False
-        self.nomDebug = nombre
-
-        self.connect(self, QtCore.SIGNAL("readyReadStandardOutput()"), self._lee)
+        self.is_white = True
 
         self.guiDispatch = None
         self.ultDispatch = 0
-        self.minDispatch = 1.0 #segundos
+        self.minDispatch = 1.0  # segundos
         self.whoDispatch = nombre
-        self.siBlancas = True
+        self.uci_ok = False
+        self.pid = None
 
-        # Configuramos
-        self.nombre = nombre
-        self.uci = self.orden_uci()
+        self.uci_lines = []
 
+        if not os.path.isfile(exe):
+            return
+
+        exe = os.path.abspath(exe)
+        direxe = os.path.dirname(exe)
+        xargs = [os.path.basename(exe), ]
+        if args:
+            xargs.extend(args)
+
+        if VarGen.isLinux and VarGen.isWine and exe.lower().endswith(".exe"):
+            xargs.insert(0, "/usr/bin/wine")
+
+        if VarGen.isWindows:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+        else:
+            startupinfo = None
+        curdir = os.path.abspath(os.curdir)
+        os.chdir(direxe)
+        self.process = subprocess.Popen(xargs, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                                         startupinfo=startupinfo, shell=False)
+        os.chdir(curdir)
+
+        self.pid = self.process.pid
+        if priority is not None:
+            p = psutil.Process(self.pid)
+            p.nice(EngineThread.priorities.value(priority))
+
+        self.stdout = self.process.stdout
+        self.stdin = self.process.stdin
+
+        self.orden_uci()
+
+        setoptions = False
         if liOpcionesUCI:
             for opcion, valor in liOpcionesUCI:
-                if valor is None:  # button en motores externos
-                    self.orden_ok("setoption name %s" % opcion)
-                else:
-                    if type(valor) == bool:
-                        valor = str(valor).lower()
-                    self.orden_ok("setoption name %s value %s" % (opcion, valor))
-        if nMultiPV:
-            self.ponMultiPV(nMultiPV)
+                if type(valor) == bool:
+                    valor = str(valor).lower()
+                self.set_option(opcion, valor)
+                setoptions = True
+                if opcion.lower() == "ponder":
+                    self.ponder = valor == "true"
 
-    def ponGuiDispatch(self, guiDispatch, whoDispatch=None):
-        self.guiDispatch = guiDispatch
-        if whoDispatch is not None:
-            self.whoDispatch = whoDispatch
+        if setoptions:
+            self.pwait_list("isready", "readyok", 1000)
 
-    def ponMultiPV(self, nMultiPV):
-        self.orden_ok("setoption name MultiPV value %s" % nMultiPV)
+    def put_line(self, line):
+        self.stdin.write(line + "\n")
 
-    def flush(self):
-        self.readAllStandardOutput()
-        self._buffer = ""
-
-    def buffer(self):
-        self._lee()
-        resp = self._buffer
-        self._buffer = ""
-        return resp
-
-    def apagar(self):
-        self.write("stop\n")
-        self.waitForReadyRead(90)
-        self.cerrar()
-
-    def cerrar(self):
-        if self.pid:
-            try:
-                os.kill(self.pid, signal.SIGTERM)
-            except:
-                self.close()
-            self.pid = None
-
-    def _lee(self):
-        x = str(self.readAllStandardOutput())
-        if x:
-            self._buffer += x
-            if self.siDebug:
-                prlk(x)
-            return True
-        return False
-
-    def escribe(self, linea):
-        self.write(str(linea) + "\n")
-        if self.siDebug:
-            prlkn(self.nomDebug, "W", linea)
-
-    def dispatch(self):
-        QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
-        if self.guiDispatch:
-            tm = time.time()
-            if tm-self.ultDispatch < self.minDispatch:
-                return True
-            self.ultDispatch = tm
-            mrm = XMotorRespuesta.MRespuestaMotor(self.nombre, self.siBlancas)
-            if self._buffer.endswith("\n"):
-                b = self._buffer
-            else:
-                n = self._buffer.rfind("\n")
-                b = self._buffer[:-n + 1] if n > 1 else ""
-            mrm.dispatch(b)
-            mrm.ordena()
-            rm = mrm.mejorMov()
-            rm.whoDispatch = self.whoDispatch
-            if not self.guiDispatch(rm):
-                return False
-        return True
-
-    def espera(self, txt, msStop, siStop=True):
-        iniTiempo = time.time()
-        stop = False
-        tamBuffer = len(self._buffer)
-        while True:
-            if tamBuffer != len(self._buffer):
-                tamBuffer = len(self._buffer)
-                if txt in self._buffer:
-                    if self._buffer.endswith("\n"):
-                        self.dispatch()
-                        return True
-
-            if not self.dispatch():
-                return False
-
-            queda = msStop - int((time.time() - iniTiempo) * 1000)
-            if queda <= 0:
-                if stop:
-                    return True
-                if siStop:
-                    self.escribe("stop")
-                msStop += 2000
-                stop = True
-            self.waitForReadyRead(90)
-
-    def orden_ok(self, orden):
-        self.escribe(orden)
-        self.escribe("isready")
-        self.espera("readyok", 1000)
-        return self.buffer()
+    def pwait_list(self, orden, txt_busca, maxtime):
+        self.put_line(orden)
+        ini = time.time()
+        li = []
+        while time.time()-ini < maxtime:
+            line = self.stdout.readline()
+            li.append(line.strip())
+            if line.startswith(txt_busca):
+                return li, True
+        return li, False
 
     def orden_uci(self):
-        self.escribe("uci")
-        self.espera("uciok", 5000)
-        return self.buffer()
+        li, self.uci_ok = self.pwait_list("uci", "uciok", 10000)
+        self.uci_lines = [x for x in li if x.startswith("id ") or x.startswith("option name")] if self.uci_ok else []
 
-    def orden_bestmove(self, orden, msMaxTiempo):
-        self.flush()
-        self.escribe(orden)
-        self.espera("bestmove", msMaxTiempo, siStop=True)
-        return self.buffer()
+    def set_option(self, name, value):
+        if value:
+            self.put_line("setoption name %s value %s" % (name, value))
+        else:
+            self.put_line("setoption name %s" % name)
+
+    def orden_ok_nop(self, orden):
+        self.put_line(orden)
+        self.put_line("isready")
 
     def bestmove_fen(self, fen, maxTiempo, maxProfundidad):
-        self.orden_ok("position fen %s" % fen)
+        self.orden_ok_nop("ucinewgame")
+        self.orden_ok_nop("position fen %s" % fen)
         self.siBlancas = siBlancas = "w" in fen
         return self._mejorMov(maxTiempo, maxProfundidad, siBlancas)
 
@@ -559,14 +509,30 @@ class DirectMotor(QtCore.QProcess):
         elif maxProfundidad:
             msTiempo = int(maxProfundidad * msTiempo / 3.0)
 
-        resp = self.orden_bestmove(env, msTiempo)
-        if not resp:
+        li_resp, result = self.pwait_list(env, "bestmove", msTiempo)
+        if not result:
             return None
 
         mrm = XMotorRespuesta.MRespuestaMotor(self.nombre, siBlancas)
-        for linea in resp.split("\n"):
-            mrm.dispatch(linea.strip())
+        for linea in li_resp:
+            mrm.dispatch(linea)
         mrm.maxTiempo = maxTiempo
         mrm.maxProfundidad = maxProfundidad
         mrm.ordena()
         return mrm
+
+    def close(self):
+        if self.pid:
+            if self.process.poll() is None:
+                self.put_line("quit")
+                wtime = 40  # wait for it, wait for it...
+                while self.process.poll() is None and wtime > 0:
+                    time.sleep(0.05)
+                    wtime -= 1
+
+                if self.process.poll() is None:  # nope, no luck
+                    sys.stderr.write("INFO X CLOSE525: the engine %s won't close properly.\n" % self.exe)
+                    self.process.kill()
+                    self.process.terminate()
+
+            self.pid = None

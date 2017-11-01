@@ -365,7 +365,7 @@ class TiempoSC(BloqueSC):
 
 
 class PixmapSC(BloqueSC):
-    def __init__(self, escena, bloqueImagen, pixmap=None):
+    def __init__(self, escena, bloqueImagen, pixmap=None, rutina = None):
 
         posicion = bloqueImagen.posicion
 
@@ -383,5 +383,12 @@ class PixmapSC(BloqueSC):
         r = self.pixmap.rect()
         self.pmRect = QtCore.QRectF(0, 0, r.width(), r.height())
 
+        self.rutina = rutina
+
     def paint(self, painter, option, widget):
         painter.drawPixmap(self.rect, self.pixmap, self.pmRect)
+
+    def mousePressEvent(self, event):
+        if self.rutina and self.contains(event.pos()):
+            self.rutina()
+

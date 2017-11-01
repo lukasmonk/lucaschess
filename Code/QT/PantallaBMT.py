@@ -1455,8 +1455,19 @@ class WBMT(QTVarios.WDialogo):
 
     def nuevo(self):
 
+        tpirat = Controles.TipoLetra("Chess Diagramm Pirat", self.configuracion.puntosMenu+4)
+
         def xopcion(menu, clave, texto, icono, siDeshabilitado=False):
-            menu.opcion(clave, texto, icono, siDeshabilitado)
+            if "KP" in texto:
+                d = {"K":"r", "P":"w", "k":chr(126), "p":chr(134)}
+                k2 = texto.index("K", 2)
+                texto = texto[:k2] + texto[k2:].lower()
+                texton = ""
+                for c in texto:
+                    texton += d[c]
+                menu.opcion(clave, texton, icono, siDeshabilitado, tipoLetra=tpirat)
+            else:
+                menu.opcion(clave, texto, icono, siDeshabilitado)
 
         # Elegimos el entrenamiento
         menu = QTVarios.LCMenu(self)

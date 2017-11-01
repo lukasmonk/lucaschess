@@ -4,6 +4,7 @@ from Code.QT import Colocacion
 from Code.QT import Controles
 from Code.QT import Iconos
 from Code.QT import QTUtil
+from Code import VarGen
 from Code.Constantes import *
 
 
@@ -33,6 +34,8 @@ def _lfTituloFiltro(extension, titulo):
         filtro = extension
     else:
         pathext = "*.%s" % extension
+        if extension == "*" and VarGen.isLinux:
+            pathext = "*"
         filtro = _("File") + " %s (%s)" % (extension, pathext)
     return titulo, filtro
 
@@ -42,6 +45,12 @@ def leeFichero(owner, carpeta, extension, titulo=None):
     resp = QtGui.QFileDialog.getOpenFileName(owner, titulo, carpeta, filtro)
     # if resp : #+pyside
     # resp = resp[0] #+pyside
+    return resp
+
+
+def leeFicheros(owner, carpeta, extension, titulo=None):
+    titulo, filtro = _lfTituloFiltro(extension, titulo)
+    resp = QtGui.QFileDialog.getOpenFileNames(owner, titulo, carpeta, filtro)
     return resp
 
 
@@ -84,7 +93,7 @@ def salvaFichero(pantalla, titulo, carpeta, filtro, siConfirmarSobreescritura=Tr
 
 
 class MensEspera(QtGui.QWidget):
-    def __init__(self, parent, mensaje, siCancelar, siMuestraYa, opacity, posicion, fixedSize, titCancelar, background, pmImagen=None):
+    def __init__(self, parent, mensaje, siCancelar, siMuestraYa, opacity, posicion, fixedSize, titCancelar, background, pmImagen=None, puntos=12, conImagen=True):
 
         assert parent is not None
 
@@ -92,17 +101,16 @@ class MensEspera(QtGui.QWidget):
 
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
         self.setStyleSheet("QWidget, QLabel { background: %s }" % background)
-        lbi = QtGui.QLabel(self)
-        lbi.setPixmap(pmImagen if pmImagen else Iconos.pmMensEspera())
-        if fixedSize:
-            self.setFixedWidth(fixedSize)
+        if conImagen:
+            lbi = QtGui.QLabel(self)
+            lbi.setPixmap(pmImagen if pmImagen else Iconos.pmMensEspera())
 
         self.owner = parent
 
         self.posicion = posicion
         self.siCancelado = False
 
-        self.lb = lb = Controles.LB(parent, resalta(mensaje)).ponFuente(Controles.TipoLetra(puntos=12)).ponWrap()
+        self.lb = lb = Controles.LB(parent, resalta(mensaje)).ponFuente(Controles.TipoLetra(puntos=puntos)).ponWrap()
 
         if siCancelar:
             if not titCancelar:
@@ -110,7 +118,10 @@ class MensEspera(QtGui.QWidget):
             self.btCancelar = Controles.PB(self, titCancelar, rutina=self.cancelar, plano=False).ponIcono(
                     Iconos.Cancelar()).anchoFijo(100)
 
-        ly = Colocacion.G().control(lbi, 0, 0, 3, 1).control(lb, 1, 1)
+        ly = Colocacion.G()
+        if conImagen:
+            ly.control(lbi, 0, 0, 3, 1)
+        ly.control(lb, 1, 1)
         if siCancelar:
             ly.controlc(self.btCancelar, 2, 1)
 
@@ -118,12 +129,17 @@ class MensEspera(QtGui.QWidget):
         self.setLayout(ly)
         self.teclaPulsada = None
 
+        if fixedSize:
+            self.setFixedWidth(fixedSize)
+
         self.setWindowOpacity(opacity)
         if siMuestraYa:
             self.muestra()
 
     def cancelar(self):
         self.siCancelado = True
+        self.btCancelar.hide()
+        QTUtil.refreshGUI()
 
     def cancelado(self):
         QTUtil.refreshGUI()
@@ -170,14 +186,14 @@ class ControlMensEspera:
         self.me = None
 
     def inicio(self, parent, mensaje, siCancelar=False, siMuestraYa=True, opacity=0.80,
-               posicion="c", fixedSize=256, titCancelar=None, background=None, pmImagen=None):
+               posicion="c", fixedSize=256, titCancelar=None, background=None, pmImagen=None, puntos=12, conImagen=True):
         QTUtil.refreshGUI()
         if self.me:
             self.final()
         if background is None:
             background = "#79b600"
         self.me = MensEspera(parent, mensaje, siCancelar, siMuestraYa, opacity, posicion, fixedSize, titCancelar,
-                             background, pmImagen)
+                             background, pmImagen, puntos, conImagen)
         QTUtil.refreshGUI()
         return self
 
@@ -221,9 +237,18 @@ class ControlMensEspera:
 mensEspera = ControlMensEspera()
 
 
-def mensajeTemporal(pantalla, mensaje, segundos, background=None, pmImagen=None):
-    me = mensEspera.inicio(pantalla, mensaje, background=background, pmImagen=pmImagen, siCancelar=segundos > 3.0, titCancelar=_("Continue"))
-    me.time(segundos)
+def mensajeTemporal(pantalla, mensaje, segundos, background=None, pmImagen=None, posicion="c"):
+    me = mensEspera.inicio(pantalla, mensaje, background=background, pmImagen=pmImagen, siCancelar=segundos > 3.0, titCancelar=_("Continue"), posicion=posicion)
+    if segundos:
+        me.time(segundos)
+    return me
+
+
+def mensajeTemporalSinImagen(pantalla, mensaje, segundos, background=None, puntos=12, posicion="c"):
+    me = mensEspera.inicio(pantalla, mensaje, posicion=posicion, conImagen=False, puntos=puntos, fixedSize=None, background=background)
+    if segundos:
+        me.time(segundos)
+    return me
 
 
 class BarraProgreso2(QtGui.QDialog):
@@ -610,8 +635,10 @@ def comboBoxLB(parent, liOpciones, valor, etiqueta=None):
         return cb
 
 
-def unMomento(owner):
-    return mensEspera.inicio(owner, _("One moment please..."))
+def unMomento(owner, mensaje=None):
+    if mensaje is None:
+        mensaje = _("One moment please...")
+    return mensEspera.inicio(owner, mensaje)
 
 
 def analizando(owner):

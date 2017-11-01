@@ -27,6 +27,7 @@
 #define NUMA_HPP_
 
 #include <vector>
+#include <map>
 
 
 /** Bind search threads to suitable NUMA nodes. */
@@ -35,12 +36,13 @@ public:
     /** Get singleton instance. */
     static Numa& instance();
 
+    /** Get number of NUMA nodes, cores and threads. For a non-NUMA system,
+     *  the number of NUMA nodes is 1. */
+    void getConcurrency(int& nodes, int& cores, int& threads);
+
     /** Disable NUMA awareness. Useful when running several single-threaded
      *  test games simultaneously on NUMA hardware. */
     void disable();
-
-    /** Preferred node for a given search thread. */
-    int nodeForThread(int threadNo) const;
 
     /** Bind current thread to NUMA node determined by nodeForThread(). */
     void bindThread(int threadNo) const;
@@ -51,20 +53,23 @@ public:
 private:
     Numa();
 
-    /** Thread number to node number. */
-    std::vector<int> threadToNode;
+    /** Preferred node for a given search thread. */
+    int nodeForThread(int threadNo) const;
 
     struct NodeInfo {
-        explicit NodeInfo(int n = 0, int c = 0, int t = 0);
-        int node;
-        int numCores;
-        int numThreads;
+        int node = 0;
+        int numCores = 0;
+        int numThreads = 0;
     };
-};
+    /** Get information about all NUMA nodes. Not used for WIN32. */
+    void getNodeInfo(std::vector<NodeInfo>& nodes);
 
-inline
-Numa::NodeInfo::NodeInfo(int n, int c, int t)
-    : node(n), numCores(c), numThreads(t) {
-}
+    /** Get information about all NUMA nodes. Not used for WIN32.
+     *  On non-NUMA hardware, node -1 is used. */
+    void getNodeInfoMap(int maxNode, std::map<int, NodeInfo>& nodeInfo);
+
+    /** Thread number to node number. */
+    std::vector<int> threadToNode;
+};
 
 #endif /* NUMA_HPP_ */

@@ -259,6 +259,18 @@ class WSummary(QtGui.QWidget):
             self.actualizaPV(pv)
             self.cambiaInfoMove()
 
+    def rehazActual(self):
+        recno = self.grid.recno()
+        if recno >= 0:
+            dic = self.liMoves[recno]
+            if "pv" in dic:
+                pv = dic["pv"]
+                if pv:
+                    li = pv.split(" ")
+                    pv = " ".join(li[:-1])
+                self.actualizaPV(pv)
+                self.cambiaInfoMove()
+
     def siguiente(self):
         recno = self.grid.recno()
         if recno >= 0:

@@ -44,14 +44,14 @@ class Pelicula:
         self.pantalla = gestor.pantalla
         self.siEmpiezaConNegras = gestor.partida.siEmpiezaConNegras
         self.tablero = gestor.tablero
-        self.pgn = gestor.pgn
         self.segundos = segundos
         self.siInicio = siInicio
         self.rapidez = 1.0
 
+        self.w_pgn = self.pantalla.base.pgn
         self.siPGN = siPGN
         if not siPGN:
-            self.pantalla.base.pgn.hide()
+            self.w_pgn.hide()
 
         liAcciones = (
             k_peliculaTerminar, k_peliculaLento, k_peliculaPausa, k_peliculaSeguir, k_peliculaRapido,
@@ -131,8 +131,6 @@ class Pelicula:
 
         self.tablero.ponPosicion(jg.posicion)
 
-        # self.gestor.pgnMueve( fila, jg.posicion.siBlancas )
-
         self.gestor.ponVista()
 
         cpu.reset()
@@ -159,9 +157,9 @@ class Pelicula:
         elif clave == k_peliculaPGN:
             self.siPGN = not self.siPGN
             if self.siPGN:
-                self.pantalla.base.pgn.show()
+                self.w_pgn.show()
             else:
-                self.pantalla.base.pgn.hide()
+                self.w_pgn.hide()
 
     def terminar(self):
         self.siStop = True
@@ -169,7 +167,7 @@ class Pelicula:
         self.gestor.ponRutinaAccionDef(None)
         self.gestor.xpelicula = None
         if not self.siPGN:
-            self.pantalla.base.pgn.show()
+            self.w_pgn.show()
 
     def lento(self):
         self.rapidez /= 1.2

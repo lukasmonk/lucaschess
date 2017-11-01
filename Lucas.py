@@ -4,17 +4,33 @@
 # ==============================================================================
 # Author : Lucas Monge, lukasmonk@gmail.com
 # Web : http://lucaschess.pythonanywhere.com/
-# Blog : http://lucaschess.blogspot.com/
+# Blog : http://lucaschess.blogspot.com
 # Licence : GPL
 # ==============================================================================
+
+#philmath scanner: A simpler feature would be to mark all the squares where it's unsure (below a certain threshold), so that the user will quickly see all the necessary corrections.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import os
 import sip
 import sys
-
-
-
-
 
 reload(sys)
 sys.setdefaultencoding("latin-1")
@@ -32,7 +48,10 @@ current_dir = os.path.dirname(sys.argv[0])
 if current_dir:
     os.chdir(current_dir)
 
+import Code.VarGen
+
 sys.path.append(os.path.join(current_dir, "Code"))
+sys.path.append(os.path.join(current_dir, Code.VarGen.folder_engines, "_tools"))
 
 import Code.Traducir as Traducir
 Traducir.install()
@@ -40,6 +59,7 @@ Traducir.install()
 nArgs = len(sys.argv)
 if nArgs == 1:
     import Code.Init
+
     Code.Init.init()
 
 elif nArgs >= 2:
@@ -53,3 +73,4 @@ elif nArgs >= 2:
     elif arg == "-kibitzer":
         import Code.RunKibitzer
         Code.RunKibitzer.run(sys.argv[2])
+

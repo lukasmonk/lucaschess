@@ -1,6 +1,5 @@
 import base64
 import codecs
-import collections
 import os
 
 from PyQt4 import QtCore, QtGui, QtSvg
@@ -13,176 +12,6 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code import Util
 from Code import VarGen
-
-
-class DragUna(Controles.LB):
-    def __init__(self, owner, pmVacio):
-        self.owner = owner
-        self.pixmap = None
-        self.id = None
-        self.toolTip = None
-        Controles.LB.__init__(self, owner)
-        self.ponImagen(pmVacio)
-
-    def pon(self, pixmap, tooltip, xid):
-        if pixmap:
-            self.ponImagen(pixmap)
-        self.id = xid
-        self.setToolTip(tooltip)
-        self.pixmap = pixmap
-
-    def mousePressEvent(self, event):
-        eb = event.button()
-        if self.id is None or eb == QtCore.Qt.RightButton:
-
-            self.owner.seleccionar(self)
-
-        else:
-            if eb == QtCore.Qt.LeftButton:
-                self.owner.startDrag(self)
-
-
-class DragBanda(QtGui.QWidget):
-    def __init__(self, owner, liElem, ancho, margen=None):
-        QtGui.QWidget.__init__(self)
-
-        self.owner = owner
-        self.ancho = ancho
-
-        layout = Colocacion.G()
-        self.liLB = []
-        pm = Iconos.pmEnBlanco()
-        if ancho != 32:
-            pm = pm.scaled(ancho, ancho)
-        self.pmVacio = pm
-        for fila, numElem in enumerate(liElem):
-            for n in range(numElem):
-                lb = DragUna(self, self.pmVacio)
-                self.liLB.append(lb)
-                layout.control(lb, fila, n)
-        if margen:
-            layout.margen(margen)
-        self.dicDatos = collections.OrderedDict()
-        self.setLayout(layout)
-
-    def seleccionar(self, lb):
-        if not self.dicDatos:
-            return
-
-        # Los dividimos por tipos
-        dic = collections.OrderedDict()
-        for xid, (nom, pm, tipo) in self.dicDatos.iteritems():
-            if tipo not in dic:
-                dic[tipo] = collections.OrderedDict()
-            dic[tipo][xid] = (nom, pm)
-
-        menu = LCMenu(self)
-        dicmenu = {}
-        for xid, (nom, pm, tp) in self.dicDatos.iteritems():
-            if tp not in dicmenu:
-                dicmenu[tp] = menu.submenu(tp, Iconos.PuntoVerde())
-                menu.separador()
-            dicmenu[tp].opcion(xid, nom, QtGui.QIcon(pm))
-        if lb.id is not None:
-            menu.separador()
-            menu.opcion(-1, _("Edit"), Iconos.Modificar())
-            menu.separador()
-            menu.opcion(-2, _("Remove"), Iconos.Delete())
-        resp = menu.lanza()
-
-        if resp is not None:
-            if resp == -1:
-                self.owner.editarBanda(lb.id)
-            elif resp == -2:
-                lb.pon(self.pmVacio, None, None)
-            else:
-                nom, pm, tp = self.dicDatos[resp]
-                lb.pon(pm, nom, resp)
-
-    def menuParaExterior(self, masOpciones):
-        if not self.dicDatos:
-            return None
-
-        # Los dividimos por tipos
-        dic = collections.OrderedDict()
-        for xid, (nom, pm, tipo) in self.dicDatos.iteritems():
-            if tipo not in dic:
-                dic[tipo] = collections.OrderedDict()
-            dic[tipo][xid] = (nom, pm)
-
-        menu = LCMenu(self)
-        dicmenu = {}
-        for xid, (nom, pm, tp) in self.dicDatos.iteritems():
-            if tp not in dicmenu:
-                dicmenu[tp] = menu.submenu(tp, Iconos.PuntoVerde())
-                menu.separador()
-            dicmenu[tp].opcion((xid, tp), nom, QtGui.QIcon(pm))
-        for clave, nombre, icono in masOpciones:
-            menu.separador()
-            menu.opcion(clave, nombre, icono)
-
-        resp = menu.lanza()
-
-        return resp
-
-    def iniActualizacion(self):
-        self.setControl = set()
-
-    def actualiza(self, xid, nombre, pixmap, tipo):
-        self.dicDatos[xid] = (nombre, pixmap, tipo)
-        self.setControl.add(xid)
-
-    def finActualizacion(self):
-        st = set()
-        for xid in self.dicDatos:
-            if xid not in self.setControl:
-                st.add(xid)
-        for xid in st:
-            del self.dicDatos[xid]
-
-        for n, lb in enumerate(self.liLB):
-            if lb.id is not None:
-                if lb.id in st:
-                    lb.pon(self.pmVacio, None, None)
-                else:
-                    self.pon(lb.id, n)
-
-    def pon(self, xid, a):
-        if a < len(self.liLB):
-            if xid in self.dicDatos:
-                nom, pm, tipo = self.dicDatos[xid]
-                lb = self.liLB[a]
-                lb.pon(pm, nom, xid)
-
-    def idLB(self, num):
-        if 0 <= num < len(self.liLB):
-            return self.liLB[num].id
-        else:
-            return None
-
-    def guardar(self):
-        li = [(lb.id, n) for n, lb in enumerate(self.liLB) if lb.id is not None]
-        return li
-
-    def recuperar(self, li):
-        for xid, a in li:
-            self.pon(xid, a)
-
-    def startDrag(self, lb):
-
-        pixmap = lb.pixmap
-        dato = lb.id
-        itemData = QtCore.QByteArray(str(dato))
-
-        mimeData = QtCore.QMimeData()
-        mimeData.setData('image/x-lc-dato', itemData)
-
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
-        drag.setHotSpot(QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2))
-        drag.setPixmap(pixmap)
-
-        drag.exec_(QtCore.Qt.MoveAction)
 
 
 class WSave():
@@ -220,9 +49,9 @@ class WSave():
             dic["SP_%s" % name] = sp.sizes()
 
         Util.guardaDIC(dic, self.ficheroVideo)
+        return dic
 
     def recuperarDicVideo(self):
-
         if Util.tamFichero(self.ficheroVideo) > 0:
             return Util.recuperaDIC(self.ficheroVideo)
         else:
@@ -246,7 +75,7 @@ class WSave():
                 self.move(x, y)
             for grid in self.liGrids:
                 grid.recuperarVideo(dic)
-                grid.ponAnchosColumnas()
+                grid.releerColumnas()
             for sp, name in self.liSplitters:
                 k = "SP_%s" % name
                 if k in dic:
@@ -1044,6 +873,9 @@ class ImportarFichero(QtGui.QDialog):
 
         self.setLayout(layout)
 
+    def pon_titulo(self, titulo):
+        self.setWindowTitle(titulo)
+
     def hideDuplicados(self):
         self.lbRotDuplicados.hide()
         self.lbDuplicados.hide()
@@ -1204,6 +1036,18 @@ def select_pgn(wowner):
     return path
 
 
+def select_pgns(wowner):
+    configuracion = VarGen.configuracion
+    files = QTUtil2.leeFicheros(wowner, configuracion.dirPGN, "pgn")
+    if files:
+        path = files[0]
+        carpeta, fichero = os.path.split(path)
+        if configuracion.dirPGN != carpeta:
+            configuracion.dirPGN = carpeta
+            configuracion.graba()
+    return files
+
+
 def select_ext(wowner, ext):
     configuracion = VarGen.configuracion
     path = QTUtil2.leeFichero(wowner, configuracion.dirSalvados, ext)
@@ -1226,3 +1070,45 @@ def list_irina():
         ("Snake", _("Snake"), Iconos.Snake()),
         ("Steven", _("Steven"), Iconos.Steven())
     )
+
+
+def selectDB(owner, configuracion, siFEN):
+    if siFEN:
+        ext = "lcf"
+        rot = _("Positions Database")
+        base = configuracion.ficheroDBgamesFEN
+    else:
+        ext = "lcg"
+        rot = _("Database of complete games")
+        base = configuracion.ficheroDBgames
+
+    carpeta = os.path.abspath(os.path.dirname(base))
+    lista = [fich for fich in os.listdir(carpeta) if fich.lower().endswith("." + ext)]
+    other = "\\"
+
+    menu = LCMenu(owner)
+    if lista:
+        rp = rondoPuntos()
+        for fich in lista:
+            menu.opcion(fich, _F(fich[:-4]), rp.otro())
+        menu.separador()
+        menu.opcion(other, _("Open/create another database"), Iconos.DatabaseC())
+    else:
+        menu.opcion(other, _("Create a new database"), Iconos.NuevaDB())
+    database = menu.lanza()
+    if database is None:
+        return None
+
+    if database == other:
+        database = QTUtil2.leeCreaFichero(owner, carpeta, ext, rot)
+        if database:
+            if not database.lower().endswith("." + ext):
+                database = database + "." + ext
+    else:
+        database = os.path.join(carpeta, database)
+    if siFEN:
+        configuracion.ficheroDBgamesFEN = database
+    else:
+        configuracion.ficheroDBgames = database
+    configuracion.graba()
+    return database

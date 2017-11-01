@@ -35,6 +35,14 @@ def pgn_pks(estado, pgn, jugada_inicial=None):
                 BLOQUEAPERTURA=None, POSICAPERTURA=None, SIJUEGAMOTOR=False, PARTIDA=unpgn.partida.guardaEnTexto(),
                 SIBLANCASABAJO=si_blancas_abajo)
 
+
+def partida_pks(estado, partidaCompleta):
+    fen = None if partidaCompleta.siFenInicial() else partidaCompleta.iniPosicion.fen()
+    siBlancasAbajo = True if fen is None else " w " in fen
+    return dict(VOLTEO=False, liPGN=partidaCompleta.liTags, FEN=fen, ESTADO=estado,
+                BLOQUEAPERTURA=None, POSICAPERTURA=None, SIJUEGAMOTOR=False, PARTIDA=partidaCompleta.guardaEnTexto(),
+                SIBLANCASABAJO=siBlancasAbajo)
+
 # def pgn_json(estado, pgn, jugadaInicial=None):
 #     unpgn = PGN.UnPGN()
 #     unpgn.leeTexto(pgn)
@@ -69,9 +77,8 @@ class GestorSolo(Gestor.Gestor):
         siPGN = False
         if fichero:
             siExterno = True
-            f = open(fichero, "rb")
-            txt = f.read()
-            f.close()
+            with open(fichero, "rb") as f:
+                txt = f.read()
             dic = Util.txt2dic(txt)
             dic["ULTIMOFICHERO"] = fichero
         elif pgn:
@@ -79,6 +86,14 @@ class GestorSolo(Gestor.Gestor):
             dic = pgn_pks(kJugando, pgn, jugadaInicial)
 
             self.resultadoPGN = None, None
+        elif dic is None:
+            li = self.listaHistorico()
+            if li:
+                fichero = li[0]
+                with open(fichero, "rb") as f:
+                    txt = f.read()
+                dic = Util.txt2dic(txt)
+                dic["ULTIMOFICHERO"] = fichero
 
         if dic is None:
             dic = {}
@@ -177,6 +192,8 @@ class GestorSolo(Gestor.Gestor):
         if "SICAMBIORIVAL" in dic:
             self.cambioRival()
             del dic["SICAMBIORIVAL"]  # que no lo vuelva a pedir
+
+        self.valor_inicial = self.dame_valor_actual()
 
         self.siguienteJugada()
 
@@ -277,6 +294,7 @@ class GestorSolo(Gestor.Gestor):
 
     def finPartida(self):
         # Comprobamos que no haya habido cambios desde el ultimo grabado
+        self.siCambios = self.siCambios or self.valor_inicial != self.dame_valor_actual()
         if self.siCambios and self.partida.numJugadas():
             resp = QTUtil2.preguntaCancelar(self.pantalla, _("Do you want to save changes to a file?"), _("Yes"), _("No"))
             if resp is None:
@@ -451,6 +469,11 @@ class GestorSolo(Gestor.Gestor):
 
         return resp
 
+    def dame_valor_actual(self):
+        dic = self.creaDic()
+        dic["PARTIDA"] = self.partida.guardaEnTexto()
+        return Util.dic2txt(dic)
+
     def creaDic(self):
         dic = {}
         dic["VOLTEO"] = self.siVolteoAutomatico
@@ -490,6 +513,7 @@ class GestorSolo(Gestor.Gestor):
             dic["SIBLANCASABAJO"] = self.tablero.siBlancasAbajo
             with open(fichero, "wb") as f:
                 f.write(Util.dic2txt(dic))
+            self.valor_inicial = self.dame_valor_actual()
             self.guardaDir(fichero)
             self.siCambios = False
             nombre = os.path.basename(fichero)
@@ -556,6 +580,9 @@ class GestorSolo(Gestor.Gestor):
         self.guardaDir(fich)
         dic = Util.txt2dic(txt)
         dic["ULTIMOFICHERO"] = fich
+        self.xfichero = None
+        self.xpgn = None
+        self.xjugadaInicial = None
         self.reiniciar(dic)
         self.ponToolBar(True, True)
         self.guardarHistorico(fich)
@@ -585,6 +612,9 @@ class GestorSolo(Gestor.Gestor):
             return self.leeFichero(resp[2:])
 
     def nuevo(self):
+        self.xfichero = None
+        self.xpgn = None
+        self.xjugadaInicial = None
         self.reiniciar({})
         self.ponToolBar(False, True)
 
@@ -676,6 +706,9 @@ class GestorSolo(Gestor.Gestor):
                 self.bloqueApertura = w.resultado()
                 # self.posicApertura = ps
                 self.fen = None
+                self.xfichero = None
+                self.xpgn = None
+                self.xjugadaInicial = None
                 self.reiniciar()
 
         elif resp == "posicion":
@@ -687,6 +720,9 @@ class GestorSolo(Gestor.Gestor):
                 cp = ControlPosicion.ControlPosicion()
                 try:
                     cp.leeFen(str(texto))
+                    self.xfichero = None
+                    self.xpgn = None
+                    self.xjugadaInicial = None
                     self.fen = cp.fen()
                     self.bloqueApertura = None
                     self.posicApertura = None
@@ -700,6 +736,9 @@ class GestorSolo(Gestor.Gestor):
                 self.bloqueApertura = None
                 self.posicApertura = None
                 self.fen = unpgn.dic.get("FEN", None)
+                self.xfichero = None
+                self.xpgn = None
+                self.xjugadaInicial = None
                 dic = self.creaDic()
                 dic["PARTIDA"] = unpgn.partida.guardaEnTexto()
                 dic["liPGN"] = unpgn.listaCabeceras()
@@ -715,6 +754,9 @@ class GestorSolo(Gestor.Gestor):
                 if unpgn.siError:
                     QTUtil2.mensError(self.pantalla, _("The text from the clipboard does not contain a chess game in PGN format"))
                     return
+                self.xfichero = None
+                self.xpgn = None
+                self.xjugadaInicial = None
                 self.bloqueApertura = None
                 self.posicApertura = None
                 self.fen = unpgn.dic.get("FEN", None)
@@ -738,6 +780,9 @@ class GestorSolo(Gestor.Gestor):
         elif resp == "voyager":
             ptxt = Voyager.voyagerPartida(self.pantalla, self.partida)
             if ptxt:
+                self.xfichero = None
+                self.xpgn = None
+                self.xjugadaInicial = None
                 dic = self.creaDic()
                 dic["PARTIDA"] = ptxt
                 p = self.partida.copia()
@@ -765,30 +810,12 @@ class GestorSolo(Gestor.Gestor):
     def startPosition(self):
         resp = Voyager.voyagerFEN(self.pantalla, self.fen)
         if resp is not None:
+            self.xfichero = None
+            self.xpgn = None
+            self.xjugadaInicial = None
             self.fen = resp
             self.bloqueApertura = None
             self.posicApertura = None
-
-            if self.xpgn:
-                siInicio = self.fen == ControlPosicion.FEN_INICIAL
-                li = self.xpgn.split("\n")
-                lin = []
-                siFen = False
-                for linea in li:
-                    if linea.startswith("["):
-                        if "FEN " in linea:
-                            siFen = True
-                            if siInicio:
-                                continue
-                            linea = '[FEN "%s"]' % self.fen
-                        lin.append(linea)
-                    else:
-                        break
-                if not siFen:
-                    linea = '[FEN "%s"]' % self.fen
-                    lin.append(linea)
-                self.liPGN = lin
-                self.xpgn = "\n".join(lin) + "\n\n*"
 
             self.reiniciar()
 
@@ -803,6 +830,9 @@ class GestorSolo(Gestor.Gestor):
                 self.bloqueApertura = None
                 self.posicApertura = None
                 self.fen = unpgn.dic.get("FEN", None)
+                self.xfichero = None
+                self.xpgn = None
+                self.xjugadaInicial = None
                 dic = self.creaDic()
                 dic["PARTIDA"] = unpgn.partida.guardaEnTexto()
                 dic["liPGN"] = unpgn.listaCabeceras()
@@ -811,6 +841,9 @@ class GestorSolo(Gestor.Gestor):
                 self.reiniciar(dic)
             else:
                 cp.leeFen(str(texto))
+                self.xfichero = None
+                self.xpgn = None
+                self.xjugadaInicial = None
                 self.fen = cp.fen()
                 self.bloqueApertura = None
                 self.posicApertura = None
@@ -859,6 +892,12 @@ class GestorSolo(Gestor.Gestor):
             self.ponRotulo1(dic["ROTULO1"])
             self.siJuegaMotor = True
             self.configuracion.escVariables("ENG_GESTORSOLO", dic)
+            self.siJugamosConBlancas = dic["SIBLANCAS"]
+            if self.partida.ultPosicion.siBlancas != self.siJugamosConBlancas and not self.partida.siEstaTerminada():
+                self.siJuegaMotor = False
+                self.desactivaTodas()
+                self.juegaRival()
+                self.siJuegaMotor = True
 
     def atras(self):
         if self.partida.numJugadas():

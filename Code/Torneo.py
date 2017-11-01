@@ -1,4 +1,3 @@
-import copy
 import os
 import random
 
@@ -28,8 +27,24 @@ class Engine(MotoresExternos.MotorExterno):
                 return
 
     def copiar(self, liEngines):
-        otro = copy.deepcopy(self)
+        otro = Engine()
+        otro.restore(self.save())
+        otro._depth = self._depth
+        otro._time = self._time
+        otro._book = self._book
+        otro._bookRR = self._bookRR
         otro.ponHuella(liEngines)
+        otro.alias += "-1"
+        d = 1
+        esta = True
+        while esta:
+            esta = False
+            for uno in liEngines:
+                if uno.alias == otro.alias:
+                    d += 1
+                    otro.alias = self.alias + "-%d" % d
+                    esta = True
+                    break
         return otro
 
     def huella(self):

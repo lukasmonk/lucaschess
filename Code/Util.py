@@ -483,11 +483,11 @@ class SymbolDict:
     def keys(self):
         return self._keys[:]
 
-        # def __str__( self ):
-        # x = ""
-        # for t in self._keys:
-        # x+= "[%s]=[%s]\n"%(t, str(self.__getitem__(t)) )
-        # return x.strip()
+    def __str__( self ):
+        x = ""
+        for t in self._keys:
+           x += "[%s]=[%s]\n"%(t, str(self.__getitem__(t)) )
+        return x.strip()
 
 
 class IPC(object):
@@ -868,8 +868,6 @@ class DicSQL(object):
             cursor.execute(sql)
             self._conexion.commit()
             cursor.close()
-        else:
-            self.pack()
 
         self.stKeys = set()
         cursor = self._conexion.cursor()
@@ -891,7 +889,7 @@ class DicSQL(object):
     def __setitem__(self, key, obj):
         cursor = self._conexion.cursor()
         dato = base64.encodestring(cPickle.dumps(obj))
-        # key = str(key)
+        key = str(key)
         siYaEsta = key in self.stKeys
         if siYaEsta:
             sql = "UPDATE %s SET VALUE=? WHERE KEY = ?" % self.table
@@ -971,6 +969,12 @@ class DicSQL(object):
         cursor.execute("VACUUM")
         cursor.close()
         self._conexion.commit()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, xtype, value, traceback):
+        self.close()
 
 
 class LIdisk:

@@ -95,9 +95,9 @@ class RespuestaMotor:
     def puntosABS(self):
         if self.mate:
             if self.mate < 0:
-                puntos = -10000 - (self.mate + 1) * 10
+                puntos = -30000 - (self.mate + 1) * 10
             else:
-                puntos = +10000 - (self.mate - 1) * 10
+                puntos = +30000 - (self.mate - 1) * 10
         else:
             puntos = self.puntos
 
@@ -106,9 +106,9 @@ class RespuestaMotor:
     def puntosABS_5(self):
         if self.mate:
             if self.mate < 0:
-                puntos = -10000 - (self.mate + 1) * 100
+                puntos = -30000 - (self.mate + 1) * 100
             else:
-                puntos = +10000 - (self.mate - 1) * 100
+                puntos = +30000 - (self.mate - 1) * 100
         else:
             puntos = self.puntos
 
@@ -287,16 +287,24 @@ class MRespuestaMotor:
     def ordena(self):
         li = []
         setYa = set()
-        for k, rm in self.dicMultiPV.iteritems():
+        dic = self.dicMultiPV
+        keys = dic.keys()
+        keys.sort(key= lambda k: int(k))
+        for k in keys:
+            rm = dic[k]
             mov = rm.movimiento()
-            if mov in setYa:
-                continue
-            setYa.add(mov)
-            li.append(rm)
+            if mov not in setYa:
+                setYa.add(mov)
+                li.append(rm)
         self.liMultiPV = sorted(li, key=lambda rm: -rm.puntosABS())  # de mayor a menor
 
     def __len__(self):
         return len(self.liMultiPV)
+
+    def getTime(self):
+        if len(self.liMultiPV):
+            return self.liMultiPV[0].time
+        return 0
 
     def miraPV(self, pvBase):
         dClaves = self.miraClaves(pvBase, st_uci_claves)
@@ -313,7 +321,9 @@ class MRespuestaMotor:
                 return
 
         if "score" in dClaves:
-            if "mate 0 " in pvBase:
+            if "mate 0 " in pvBase or \
+                "mate -0 " in pvBase or \
+                "mate +0 " in pvBase:
                 return
 
         if "multipv" in dClaves:
@@ -541,6 +551,13 @@ class MRespuestaMotor:
             if rm.movimiento() == movimiento:
                 return rm, n
         return None, -1
+
+    def contiene(self, movimiento):
+        movimiento = movimiento.lower()
+        for n, rm in enumerate(self.liMultiPV):
+            if rm.movimiento() == movimiento:
+                return True
+        return False
 
     def mejorMovQue(self, movimiento):
         if self.liMultiPV:

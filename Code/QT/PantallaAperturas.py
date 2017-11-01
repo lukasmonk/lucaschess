@@ -396,7 +396,6 @@ class EntrenamientoApertura(QTVarios.WDialogo):
                 QTUtil2.mensError(self, _("Not indicated the name of training"))
                 return
 
-
         self.accept()
 
     def cancelar(self):
@@ -502,7 +501,10 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
         f.close()
 
         # Ejecutamos
-        exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
+        if VarGen.isWindows:
+            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
+        else:
+            exe = 'Engines/Linux/_tools/polyglot/polyglot'
         li = [os.path.abspath(exe),
               'make-book',
               "-pgn", fichTMP,
@@ -804,7 +806,7 @@ class AperturasPersonales(QTVarios.WDialogo):
 
         self.procesador.procesador = self.procesador  # ya que editaVariante espera un gestor
 
-        resp = Variantes.editaVariante(self.procesador, self.procesador, fen, pgn, titulo=nombre)
+        resp = Variantes.editaVariante(self.procesador, self.procesador, fen, pgn, titulo=nombre, siBlancasAbajo=True)
 
         if resp:
             pgn, a1h8 = resp

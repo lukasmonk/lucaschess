@@ -4,6 +4,7 @@ import os
 
 from PyQt4 import QtCore, QtGui
 
+from Code import TabVisual
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -13,9 +14,7 @@ from Code.QT import Iconos
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
-from Code.QT import TabTipos
 from Code.QT import Tablero
-from Code import TabVisual
 from Code import Util
 from Code import VarGen
 
@@ -43,7 +42,7 @@ class WTV_Marker(QtGui.QDialog):
 
         # Tablero
         confTablero = owner.tablero.confTablero
-        self.tablero = Tablero.TableroVisual(self, confTablero)
+        self.tablero = Tablero.Tablero(self, confTablero, siDirector=False)
         self.tablero.crea()
         self.tablero.copiaPosicionDe(owner.tablero)
 
@@ -163,26 +162,13 @@ class WTV_Markers(QTVarios.WDialogo):
 
         # Tablero
         confTablero = owner.tablero.confTablero
-        self.tablero = Tablero.TableroVisual(self, confTablero)
+        self.tablero = Tablero.Tablero(self, confTablero, siDirector=False)
         self.tablero.crea()
         self.tablero.copiaPosicionDe(owner.tablero)
 
         # Layout
         layout = Colocacion.H().otro(ly).control(self.tablero)
         self.setLayout(layout)
-
-        # Ejemplos
-        liMovs = ["g4h3", "e2e4", "d6f4"]
-        self.liEjemplos = []
-        regMarker = TabTipos.Marker()
-        with open("./IntFiles/rival.svg") as f:
-            xml = f.read()
-        for a1h8 in liMovs:
-            regMarker.a1h8 = a1h8
-            regMarker.xml = xml
-            regMarker.siMovible = True
-            marker = self.tablero.creaMarker(regMarker, siEditando=True)
-            self.liEjemplos.append(marker)
 
         self.grid.gotop()
         self.grid.setFocus()
@@ -210,13 +196,13 @@ class WTV_Markers(QTVarios.WDialogo):
     def gridCambiadoRegistro(self, grid, fila, oColumna):
         if fila >= 0:
             regMarker = self.liPMarkers[fila]
-            for ejemplo in self.liEjemplos:
-                a1h8 = ejemplo.bloqueDatos.a1h8
-                bd = copy.deepcopy(regMarker)
-                bd.a1h8 = a1h8
-                bd.anchoCasilla = self.tablero.anchoCasilla
-                ejemplo.bloqueDatos = bd
-                ejemplo.reset()
+            self.tablero.borraMovibles()
+            # Ejemplos
+            liMovs = ["g4h3", "e2e4", "d6f4"]
+            for a1h8 in liMovs:
+                regMarker.a1h8 = a1h8
+                regMarker.siMovible = True
+                self.tablero.creaMarker(regMarker, siEditando=True)
             self.tablero.escena.update()
 
     def mas(self):

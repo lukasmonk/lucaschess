@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2013  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2013-2015  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public:
      * A negative p indicates the CPU is idle. */
     void setPUseful(double p);
 
-    /** Return elapsed time size last reset, the amount of useful time spent,
+    /** Return elapsed time since last reset, the amount of useful time spent,
      * and the amount of time the CPU has been idle. */
     void getStats(double& elapsed, double& useful, double& sleep);
 
@@ -150,7 +150,7 @@ public:
  * The sample value is equal to the amount of time this object is in scope. */
 class ScopedTimeSample {
 public:
-    ScopedTimeSample(TimeSampleStatistics& tStat);
+    explicit ScopedTimeSample(TimeSampleStatistics& tStat);
     ~ScopedTimeSample();
     ScopedTimeSample(ScopedTimeSample&) = delete;
     ScopedTimeSample& operator=(const ScopedTimeSample&) = delete;

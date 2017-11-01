@@ -2,6 +2,7 @@ import copy
 
 from PyQt4 import QtCore, QtGui
 
+from Code import TabVisual
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -13,7 +14,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import TabTipos
 from Code.QT import Tablero
-from Code import TabVisual
+from Code.QT import TabFlechas
 from Code import Util
 from Code import VarGen
 
@@ -47,7 +48,7 @@ class WTV_Flecha(QtGui.QDialog):
         # Tablero
         confTablero = owner.tablero.confTablero.copia(owner.tablero.confTablero.id())
         confTablero.anchoPieza(32)
-        self.tablero = Tablero.TableroVisual(self, confTablero)
+        self.tablero = Tablero.Tablero(self, confTablero, siDirector=False)
         self.tablero.crea()
         self.tablero.copiaPosicionDe(owner.tablero)
 
@@ -135,6 +136,7 @@ class WTV_Flecha(QtGui.QDialog):
         self.setLayout(layout1)
 
         # Ejemplos
+        self.tablero.borraMovibles()
         liMovs = ["d2d6", "a8h8", "h5b7"]
         self.liEjemplos = []
         for a1h8 in liMovs:
@@ -183,13 +185,18 @@ class WTV_Flecha(QtGui.QDialog):
                 QTUtil2.mensError(self, _("Name missing"))
                 return
 
+        bf = regFlecha
+        p = bf.posicion
+        p.x = 0
+        p.y = 16
+        p.ancho = 32
+        p.alto = 16
+
+        pm = TabFlechas.pixmapArrow(bf, 32, 32)
+        buf = QtCore.QBuffer()
+        pm.save(buf, "PNG")
+        regFlecha.png = str(buf.buffer())
         self.regFlecha = regFlecha
-
-        pm = self.liEjemplos[0].pixmap()
-        bf = QtCore.QBuffer()
-        pm.save(bf, "PNG")
-        self.regFlecha.png = str(bf.buffer())
-
         self.accept()
 
 
@@ -234,7 +241,7 @@ class WTV_Flechas(QTVarios.WDialogo):
 
         # Tablero
         confTablero = owner.tablero.confTablero
-        self.tablero = Tablero.TableroVisual(self, confTablero)
+        self.tablero = Tablero.Tablero(self, confTablero, siDirector=False)
         self.tablero.crea()
         self.tablero.copiaPosicionDe(owner.tablero)
 

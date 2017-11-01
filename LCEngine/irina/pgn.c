@@ -59,6 +59,7 @@ char * pgn_game(void)
 void pgn_start(char * fich, int depth)
 {
     int i;
+    int c;
 
     if( depth > 256 ) depth = 256;
     max_depth = depth;
@@ -73,6 +74,13 @@ void pgn_start(char * fich, int depth)
         values[i] = (char *) malloc(256);
         fens[i] = (char *) malloc(128);
     }
+    c = fgetc(fpgn);
+    if( c == 0xef ) { // UTF-BOM
+        c = fgetc(fpgn);
+        if( c == 0xbb ) c = fgetc(fpgn);
+        else rewind(fpgn);
+    }
+    else rewind(fpgn);
     w_pgn = pgn;
 }
 
@@ -173,6 +181,7 @@ int pgn_read( void )
     {
         if(!fgets(w_pgn, 1024, fpgn)) return false;
 //        printf("PL:[%s]", w_pgn);
+
         if(w_pgn[0] == '[' )
         {
             mas_label();
@@ -224,6 +233,7 @@ int pgn_gen_pv(void)
     char from_AH, from_18;
     char to_AH, to_18;
     char *p_pv;
+    bool ok;
 
     int par;
     int to;
@@ -473,6 +483,7 @@ int pgn_gen_pv(void)
             /*movegen();*/
             /*movegen_piece(PZNAME[piece]);*/
             movegen_piece_to((int)PZNAME[(int)piece], (unsigned)to);
+            ok = false;
             for (k = board.ply_moves[board.ply - 1]; k < board.ply_moves[board.ply]; k++)
             {
                 move = board.moves[k];
@@ -501,9 +512,11 @@ int pgn_gen_pv(void)
 
                     make_move(move);
                     if( pos_fens < max_depth ) board_fenM2( fens[pos_fens++] );
+                    ok = true;
                     break;
                 }
             }
+            if( !ok ) return false;
             piece = 'P';
             from_AH = 0;
             from_18 = 0;
@@ -518,7 +531,7 @@ int pgn_gen_pv(void)
 
 char * pgn_pv(void)
 {
-    pgn_gen_pv();
+    if( ! pgn_gen_pv() ) pv[0] = 0;
     return pv;
 }
 

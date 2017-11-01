@@ -207,13 +207,15 @@ class GraphToolTip(QtGui.QGraphicsItem):
 
 
 class Histogram(QtGui.QGraphicsView):
-    def __init__(self, owner, hserie, grid, ancho, si_values):
+    def __init__(self, owner, hserie, grid, ancho, si_values, elo_medio=None):
         super(Histogram, self).__init__()
 
         self.hserie = hserie
 
         self.owner = owner
         self.grid = grid
+
+        self.elo_medio = elo_medio
 
         self.steps = hserie.steps()
         self.step = ancho / self.steps
@@ -248,6 +250,7 @@ class Histogram(QtGui.QGraphicsView):
         self.tooltip.hide()
 
         self.scale(0.90, 0.8)
+        #self.scale(0.45, 0.4)
         self.setMinimumSize(sz_width+26, sz_height+26)
         self.setPointActive(0)
 
@@ -309,26 +312,40 @@ class Histogram(QtGui.QGraphicsView):
 
         # Eje de las y a la izquierda
         painter.setPen(QtGui.QColor("#545454"))
-        align = QtCore.Qt.AlignRight
+        align_right = QtCore.Qt.AlignRight
         h = 12
         w = 24
         coord = [-3.0, -1.5, 0.0, +1.5, +3.0]
         plant = "%+0.1f"
 
+        x = left - 31
         if self.si_values:
-            x = left - 26
             if not serie.siPawns:
                 coord = [int(rx*100) for rx in coord]
                 plant = "%+d"
             for d in coord:
                 y = bottom - height/2 - d*serie.factor - h/2
-                painter.drawText(x, y, w, h, align, plant % d)
+                painter.drawText(x, y, w, h, align_right, plant % d)
         else:
-            x = left - 26
-            for d in coord:
-                y = bottom - height / 2 - d * serie.factor - h / 2
-                d = 1000+ 600*(d*2+6)/3
-                painter.drawText(x, y, w, h, align, "%d" % d)
+            coord[4] = +3.25  # 3500 = max = 1300/400
+            for n, d in enumerate(coord):
+                y = bottom - height/2 - d * serie.factor - h/2
+                if n == 0:
+                    rot = _("Min elo")
+                elif n == 4:
+                    rot = _("Max elo")
+                else:
+                    d = int(1000 + 600 * (d * 2 + 6) / 3)
+                    rot = str(d)
+                painter.drawText(x-100, y, w+100, h, align_right, rot)
+            pen = painter.pen()
+            pen.setWidth(4)
+            pen.setColor(QtCore.Qt.darkGreen)
+            painter.setPen(pen)
+            d = (self.elo_medio - 1000)/400.0 - 3.0
+            y = bottom - height / 2 - d * serie.factor
+            painter.drawLine(left, y, right, y)
+            painter.drawText(right + 5, y - h/2, 500, h*2, QtCore.Qt.AlignLeft, "%d %s" % (self.elo_medio, _("Average")))
 
         # Linea de referencia en la mitad-horizontal
         painter.setPen(QtCore.Qt.black)
@@ -393,11 +410,12 @@ class Histogram(QtGui.QGraphicsView):
 
     def mousePressEvent(self, event):
         super(Histogram, self).mousePressEvent(event)
-        ep = self.mapToScene( event.pos() )
-        for p in self.hserie.liPoints:
-            if p.rlostp:
-                if p.rect_lost.contains(ep):
-                    self.dispatch(p.gridPos)
+        ep = self.mapToScene(event.pos())
+        if self.owner.valorShowLostPoints():
+            for p in self.hserie.liPoints:
+                if p.rlostp:
+                    if p.rect_lost.contains(ep):
+                        self.dispatch(p.gridPos)
         if event.button() == QtCore.Qt.RightButton:
             menu = QTVarios.LCMenu(self)
             menu.opcion("clip", _("Copy to clipboard"), Iconos.Clip())
@@ -443,7 +461,7 @@ def genHistograms(partida, sicentipawns):
     porcT = 0
     porcW = 0
     porcB = 0
-    with open( "IntFiles/Formulas/eloperfomance.formula") as f:
+    with open( "IntFiles/Formulas/eloperformance.formula") as f:
         eloformula = f.read().strip()
 
     for num, jg in enumerate(partida.liJugadas):
@@ -452,7 +470,7 @@ def genHistograms(partida, sicentipawns):
             siBlancas = jg.siBlancas()
             pts = mrm.liMultiPV[pos].puntosABS_5()
             pts0 = mrm.liMultiPV[0].puntosABS_5()
-            lostp_abs = pts0 - pts
+            jg.lostp_abs = lostp_abs = pts0 - pts
 
             elo_base = int(eval(eloformula.replace("xlost", str(lostp_abs))))
             jg.elo_real = max(elo_base, 0)
@@ -518,29 +536,3 @@ def genHistograms(partida, sicentipawns):
 
     return alm
 
-# if __name__ == '__main__':
-
-#     import sys
-
-#     app = QtGui.QApplication(sys.argv)
-
-#     wt = ['7.Ngf3', '8.O-O', '9.Qb3', '10.Qc3', '11.e3', '12.b3', '13.a3', '14.h4', '15.Ng5', '16.f3', '17.f4', '18.Rfd1', '19.Nh3', '20.Nf1', '21.a4', '22.Rd2', '23.Bh1', '24.Rg2', '25.bxc4', '26.Nf2', '27.Nd2', '28.Nd1', '29.Rxa5', '30.Rxa8', '31.Rxe8', '32.Rxf8+', '33.Nf2', '34.Nf1', '35.Rh2', '36.Rb8', '37.Rxb5', '38.g4', '39.Bxf3', '40.gxf5', '41.d5', '42.h5', '43.e4', '44.Nxe4', '45.d6', '46.f6', '47.Rd2', '48.Rxe2', '49.Kf2', '50.Kxf1', '51.Ke2', '52.Ke3', '53.Ke4']
-#     wr = [0.66, 0.65, 0.78, 0.86, -1.35, -1.32, -1.37, -1.11, 0.2, 0.83, -0.03, -1.01, -0.83, -0.72, -0.96, -0.68, -1.54, -1.92, -2.24, -1.96, -2.05, -1.46, -1.68, -8.3, -1.51, -1.51, -1.51, -1.51, -1.51, -1.03, -1.98, -1.98, -1.58, -2.39, -2.24, -2.84, -2.23, -3.57, -4.15, -4.35, -4.27, -0.79, -0.79, -0.8, -0.79, -0.96, -51.39]
-#     bt = ['6...Nc6', '7...O-O', '8...d6', '9...Kh8', '10...e5', '11...a5', '12...Qe8', '13...Qh5', '14...Ng4', '15...Bd7', '16...Nf6', '17...e4', '18...h6', '19...d5', '20...Ne7', '21...Nc6', '22...Nb4', '23...Qe8', '24...dxc4', '25...Bxa4', '26...Bd7', '27...b5', '28...Nd3', '29...b4', '30...bxc3', '31...c2', '32...Kh7', '33...c1=Q+', '34...Ne1', '35...Qxc4', '36...Bb5', '37...Qxb5', '38...Nf3+', '39...exf3', '40...Qe2', '41...Kg8', '42...Kh7', '43...Nxe4', '44...Qxe4', '45...cxd6', '46...gxf6', '47...Qe2', '48...fxe2', '49...exf1=Q+', '50...Kg7', '51...Kf7', '52...Ke6', '53...d5+']
-#     br = [-0.91, -0.08, -0.65, -1.02, -1.23, -1.36, -0.84, -1.65, -1.55, -2.18, -2.08, -1.87, 1.44, 0.83, 0.59, 0.83, 1.1, 1.94, 1.92, 2.24, 2.05, 2.05, 1.68, 1.68, 1.51, 1.51, 1.51, 1.51, 1.51, 0.34, 0.01, 1.98, 1.58, 1.58, 0.2, 1.2, 1.17, 2.23, 3.57, 4.15, 4.32, 0.79, 0.79, 0.79, 0.78, 0.78, 51.57, 49.11]
-
-#     hserie = HSerie(True, "#DACA99")
-
-#     for x in range(len(bt)):
-#         lb = bt[x]
-#         nummove = int(lb.split(".")[0])
-#         value = br[x]
-#         tooltip = lb + " %+0.02f" % value
-#         lostp = abs(value/3)
-#         p = HPoint(nummove, value, lostp, tooltip)
-#         hserie.addPoint(p)
-
-#     widget = Histogram(hserie, True)
-#     widget.show()
-
-#     sys.exit(app.exec_())

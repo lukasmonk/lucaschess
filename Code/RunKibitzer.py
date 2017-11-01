@@ -5,9 +5,14 @@ import time
 import LCEngine
 from PyQt4 import QtCore, QtGui
 
+import struct
+import psutil
+
 from Code import AnalisisIndexes
 from Code import ControlPosicion
+from Code import Configuracion
 from Code import Partida
+from Code import EngineThread
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -18,9 +23,11 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import Tablero
+from Code.QT import PantallaKibitzers
 from Code import Util
 from Code import VarGen
 from Code import XMotorRespuesta
+from Code import Kibitzers
 
 CONFIGURACION = "C"
 FEN = "F"
@@ -44,7 +51,7 @@ class VentanaMultiPV(QtGui.QDialog):
         self.fen = ""
 
         self.liData = []
-        self.dicLineasDepth = {}
+        self.dicLineas = {}
 
         self.setWindowTitle(cpu.titulo)
         self.setWindowIcon(Iconos.Motor())
@@ -56,7 +63,7 @@ class VentanaMultiPV(QtGui.QDialog):
         VarGen.configuracion = cpu.configuracion
 
         VarGen.todasPiezas = Piezas.TodasPiezas()
-        confTablero = cpu.configuracion.confTablero("moscas" + cpu.titulo, 24)
+        confTablero = cpu.configuracion.confTablero("kib" + cpu.kibitzer.huella, 24)
         self.tablero = Tablero.Tablero(self, confTablero)
         self.tablero.crea()
 
@@ -77,6 +84,7 @@ class VentanaMultiPV(QtGui.QDialog):
             (_("Board"), Iconos.Tablero(), self.confTablero),
             ("%s: %s" % (_("Enable"), _("window on top")), Iconos.Top(), self.windowTop),
             ("%s: %s" % (_("Disable"), _("window on top")), Iconos.Bottom(), self.windowBottom),
+            ( _("Options"), Iconos.Opciones(), self.changeOptions),
         )
         self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
         self.tb.setAccionVisible(self.play, False)
@@ -102,6 +110,32 @@ class VentanaMultiPV(QtGui.QDialog):
 
         self.motor = None
         self.lanzaMotor()
+
+    def changeOptions(self):
+        self.pause()
+        w = PantallaKibitzers.WKibitzerLive(self, self.cpu.configuracion, self.cpu.numkibitzer)
+        if w.exec_():
+            xprioridad = w.result_xprioridad
+            if xprioridad is not None:
+                pid = self.motor.pid()
+                if VarGen.isWindows:
+                    hp, ht, pid, dt = struct.unpack("PPII", pid.asstring(16))
+                p = psutil.Process(pid)
+                p.nice(xprioridad)
+            if w.result_posicionBase is not None:
+                self.cpu.posicionBase = w.result_posicionBase
+                self.fen = self.cpu.fenBase if self.cpu.posicionBase else self.cpu.fen
+            if w.result_opciones:
+                for opcion, valor in w.result_opciones:
+                    if valor is None:
+                        orden = "setoption name %s" % opcion
+                    else:
+                        if type(valor) == bool:
+                            valor = str(valor).lower()
+                        orden = "setoption name %s value %s" % (opcion, valor)
+                    self.ready_ok(orden)
+        self.play()
+        self.runOrdenes()
 
     def ponFlags(self):
         if self.siTop:
@@ -193,7 +227,16 @@ class VentanaMultiPV(QtGui.QDialog):
         self.motor.waitForStarted()
         self.connect(self.motor, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
 
+        if self.cpu.prioridad:
+            pid = self.motor.pid()
+            if VarGen.isWindows:
+                hp, ht, pid, dt = struct.unpack("PPII", pid.asstring(16))
+            p = psutil.Process(pid)
+            p.nice(self.cpu.prioridad)
+
         self.numMultiPV = configMotor.multiPV
+        if self.numMultiPV <= 1:
+            self.numMultiPV = min(configMotor.maxMultiPV, 20)
 
         configMotor.liUCI.append(("MultiPV", str(self.numMultiPV)))
 
@@ -323,57 +366,40 @@ class VentanaMultiPV(QtGui.QDialog):
             li = li[:-1]
 
         for linea in li:
-            if linea.startswith("info ") and " pv " in linea and " depth " in linea and "multipv" in linea:
-                n = linea.index("depth")
-                depth = int(linea[n:].split(" ")[1].strip())
-                n = linea.index("multipv")
-                multipv = int(linea[n:].split(" ")[1].strip())
-                if depth not in self.dicLineasDepth:
-                    self.dicLineasDepth[depth] = {}
-                self.dicLineasDepth[depth][multipv] = linea.strip()
-        mxdepth = 0
-        liBorrar = []
-        for depth, lista in self.dicLineasDepth.iteritems():
-            if len(lista) == self.numMovesDepth:
-                if depth > mxdepth:
-                    liBorrar.append(depth)
-                    mxdepth = depth
+            if "multipv" in linea:
+                self.mrm.dispatch(linea)
+                self.si_read_multipv = True
+            else:
+                if self.si_read_multipv:
+                    self.si_read_multipv = False
+                    self.mrm.ordena()
+                    self.liData = self.mrm.liMultiPV
+                    rm = self.mrm.liMultiPV[0]
+                    self.lbDepth.ponTexto("%s: %d" % (_("Depth"), rm.depth))
+                    partida = Partida.Partida(fen=self.fen)
+                    partida.leerPV(rm.pv)
+                    if partida.numJugadas():
+                        self.tablero.quitaFlechas()
+                        jg0 = partida.jugada(0)
+                        self.tablero.ponPosicion(jg0.posicion)
+                        tipo = "mt"
+                        opacidad = 100
+                        salto = (80 - 15) * 2 / (self.nArrows - 1) if self.nArrows > 1 else 1
+                        cambio = max(30, salto)
 
-        if mxdepth:
-            mrm = XMotorRespuesta.MRespuestaMotor(self.cpu.titulo, self.siW)
-            for multipv, linea in self.dicLineasDepth[mxdepth].iteritems():
-                mrm.miraPV(linea)
-            mrm.ordena()
-            self.liData = mrm.liMultiPV
+                        for njg in range(min(partida.numJugadas(), self.nArrows)):
+                            tipo = "ms" if tipo == "mt" else "mt"
+                            jg = partida.jugada(njg)
+                            self.tablero.creaFlechaMov(jg.desde, jg.hasta, tipo + str(opacidad))
+                            if njg % 2 == 1:
+                                opacidad -= cambio
+                                cambio = salto
 
-            # Borramos hasta esa depth
-            for depth in liBorrar:
-                del self.dicLineasDepth[depth]
-
-            rm = mrm.liMultiPV[0]
-            self.lbDepth.ponTexto("%s: %d" % (_("Depth"), rm.depth))
-            partida = Partida.Partida(fen=self.fen)
-            partida.leerPV(rm.pv)
-            if partida.numJugadas():
-                self.tablero.quitaFlechas()
-                jg0 = partida.jugada(0)
-                self.tablero.ponPosicion(jg0.posicion)
-                tipo = "mt"
-                opacidad = 100
-                salto = (80 - 15) * 2 / (self.nArrows - 1) if self.nArrows > 1 else 1
-                cambio = max(30, salto)
-
-                for njg in range(min(partida.numJugadas(), self.nArrows)):
-                    tipo = "ms" if tipo == "mt" else "mt"
-                    jg = partida.jugada(njg)
-                    self.tablero.creaFlechaMov(jg.desde, jg.hasta, tipo + str(opacidad))
-                    if njg % 2 == 1:
-                        opacidad -= cambio
-                        cambio = salto
-
-            self.grid.refresh()
+                    self.grid.refresh()
+                    self.mrm = XMotorRespuesta.MRespuestaMotor(self.cpu.titulo, self.siW)
 
         self.lock = False
+        QTUtil.refreshGUI()
 
     def readOutput(self):
         if not self.lock:
@@ -402,6 +428,8 @@ class VentanaMultiPV(QtGui.QDialog):
 
         self.siW = posicionInicial.siBlancas
         self.centipawns = self.cpu.configuracion.centipawns
+        self.mrm = XMotorRespuesta.MRespuestaMotor(self.cpu.titulo, self.siW)
+        self.si_read_multipv = False
 
         self.tablero.ponPosicion(posicionInicial)
 
@@ -454,7 +482,7 @@ class VentanaMultiPV(QtGui.QDialog):
         self.play()
 
     def ponFen(self, fen):
-        self.dicLineasDepth = {}
+        self.dicLineas = {}
         self.liData = []
         self.lbDepth.ponTexto("-")
         if fen:
@@ -498,7 +526,7 @@ class Ventana(QtGui.QDialog):
 
         VarGen.configuracion = cpu.configuracion
         VarGen.todasPiezas = Piezas.TodasPiezas()
-        confTablero = cpu.configuracion.confTablero("moscas" + cpu.titulo, 24)
+        confTablero = cpu.configuracion.confTablero("kib" + cpu.kibitzer.huella, 24)
 
         self.siWidgets = siWidgets
         if siWidgets:
@@ -521,6 +549,7 @@ class Ventana(QtGui.QDialog):
                 (_("Board"), Iconos.Tablero(), self.confTablero),
                 ("%s: %s" % (_("Enable"), _("window on top")), Iconos.Top(), self.windowTop),
                 ("%s: %s" % (_("Disable"), _("window on top")), Iconos.Bottom(), self.windowBottom),
+                ( _("Options"), Iconos.Opciones(), self.changeOptions),
             )
             self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
 
@@ -538,6 +567,38 @@ class Ventana(QtGui.QDialog):
 
         self.recuperarVideo()
         self.ponFlags()
+
+    def pause(self):
+        pass
+
+    def play(self):
+        pass
+
+    def changeOptions(self):
+        self.pause()
+        w = PantallaKibitzers.WKibitzerLive(self, self.cpu.configuracion, self.cpu.numkibitzer)
+        if w.exec_():
+            xprioridad = w.result_xprioridad
+            if xprioridad is not None:
+                pid = self.motor.pid()
+                if VarGen.isWindows:
+                    hp, ht, pid, dt = struct.unpack("PPII", pid.asstring(16))
+                p = psutil.Process(pid)
+                p.nice(xprioridad)
+            if w.result_posicionBase is not None:
+                self.cpu.posicionBase = w.result_posicionBase
+                self.fen = self.cpu.fenBase if self.cpu.posicionBase else self.cpu.fen
+            if w.result_opciones:
+                for opcion, valor in w.result_opciones:
+                    if valor is None:
+                        orden = "setoption name %s" % opcion
+                    else:
+                        if type(valor) == bool:
+                            valor = str(valor).lower()
+                        orden = "setoption name %s value %s" % (opcion, valor)
+                    self.ready_ok(orden)
+        self.play()
+        self.runOrdenes()
 
     def ponFlags(self):
         if self.siTop:
@@ -629,7 +690,6 @@ class Ventana(QtGui.QDialog):
         Util.guardaDIC(dic, self.ficheroVideo)
 
     def recuperarVideo(self):
-
         if Util.tamFichero(self.ficheroVideo) > 0:
             dic = Util.recuperaDIC(self.ficheroVideo)
             if dic:
@@ -687,6 +747,12 @@ class Ventana(QtGui.QDialog):
         self.motor.start(exe, args, mode=QtCore.QIODevice.Unbuffered | QtCore.QIODevice.ReadWrite)
         self.motor.waitForStarted()
         self.connect(self.motor, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
+        if self.cpu.prioridad:
+            pid = self.motor.pid()
+            if VarGen.isWindows:
+                hp, ht, pid, dt = struct.unpack("PPII", pid.asstring(16))
+            p = psutil.Process(pid)
+            p.nice(self.cpu.prioridad)
 
         if siMultiPV:
             configMotor.liUCI.append(("MultiPV", str(configMotor.maxMultiPV)))
@@ -1353,6 +1419,7 @@ class VentanaLinea(Ventana):
             (_("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
             (_("Analyze only color"), Iconos.P_16c(), self.color),
             (_("Change window position"), Iconos.TamTablero(), self.mover),
+            (_("Options"), Iconos.Opciones(), self.changeOptions),
         )
         self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
         self.tb.setFixedSize(120, 24)
@@ -1377,6 +1444,7 @@ class VentanaLinea(Ventana):
         self.siMover = not self.siMover
         self.setWindowFlags(self.flags[self.siMover])
         self.show()
+        self.recuperarVideo()
         QTUtil.refreshGUI()
 
     def pause(self):
@@ -1558,7 +1626,6 @@ class CPU:
         self.motor = None
 
     def run(self):
-
         # Primero espera la orden de lucas
         while True:
             orden = self.recibe()
@@ -1581,15 +1648,35 @@ class CPU:
     def procesa(self, orden):
         clave = orden.clave
         if clave == CONFIGURACION:
-            self.configuracion = orden.dv["CONFIGURACION"]
-            self.titulo = orden.dv["TITULO"]
-            self.configMotor = orden.dv["CONFIG_MOTOR"]
-            self.ficheroVideo = orden.dv["FVIDEO"]
-            self.tipo = orden.dv["TIPO"]
+            user = orden.dv["USER"]
+            self.configuracion = Configuracion.Configuracion(user)
+            self.configuracion.lee()
+            self.configuracion.leeConfTableros()
+            VarGen.configuracion = self.configuracion
+            self.numkibitzer = orden.dv["NUMKIBITZER"]
+            kibitzers = Kibitzers.Kibitzers()
+            self.kibitzer = kibitzers.kibitzer(self.numkibitzer)
+            prioridad = self.kibitzer.prioridad
+
+            priorities = EngineThread.priorities
+
+            if prioridad != priorities.normal:
+                self.prioridad = priorities.value(prioridad)
+            else:
+                self.prioridad = None
+
+            self.titulo = self.kibitzer.nombre
+
+            self.configMotor = self.kibitzer.configMotor()
+
+            self.ficheroVideo = self.configuracion.plantillaVideo % ("KIB%s" % self.kibitzer.huella,)
+            self.tipo = self.kibitzer.tipo
+            self.posicionBase = self.kibitzer.posicionBase
             self.lanzaVentana()
 
         elif clave == FEN:
-            fen = orden.dv["FEN"]
+            self.fen, self.fenBase = orden.dv["FEN"].split("|")
+            fen = self.fenBase if self.posicionBase else self.fen
             if self.tipo == "C":
                 li = fen.split(" ")
                 li[1] = "w" if li[1] == "b" else "b"

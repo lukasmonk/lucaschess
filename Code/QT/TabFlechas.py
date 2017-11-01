@@ -7,7 +7,6 @@ from Code.QT import TabBloques
 
 class FlechaSC(TabBloques.BloqueEspSC):
     def __init__(self, escena, bloqueFlecha, rutinaPulsada=None):
-
         super(FlechaSC, self).__init__(escena, bloqueFlecha)
 
         self.rutinaPulsada = rutinaPulsada
@@ -87,6 +86,7 @@ class FlechaSC(TabBloques.BloqueEspSC):
         self.posicion2xy()
 
     def contiene(self, p):
+        p = self.mapFromScene(p)
         for x in (self.poligonoSizeTop, self.poligonoSizeBottom, self.poligonoMove):
             if x:
                 if x.containsPoint(p, QtCore.Qt.OddEvenFill):
@@ -107,12 +107,25 @@ class FlechaSC(TabBloques.BloqueEspSC):
         self.expX = p.x()
         self.expY = p.y()
 
+    def mousePressExt(self, event):
+        p = event.pos()
+        p = self.mapFromScene(p)
+        if self.poligonoSizeTop:
+            self.siSizeTop = self.poligonoSizeTop.containsPoint(p, QtCore.Qt.OddEvenFill)
+            self.siSizeBottom = self.poligonoSizeBottom.containsPoint(p, QtCore.Qt.OddEvenFill)
+            self.siMove = self.poligonoMove.containsPoint(p, QtCore.Qt.OddEvenFill)
+
+        self.expX = p.x()
+        self.expY = p.y()
+
     def mouseMoveEvent(self, event):
         event.ignore()
         if not (self.siMove or self.siSizeTop or self.siSizeBottom):
             return
 
-        p = event.scenePos()
+        p = event.pos()
+        p = self.mapFromScene(p)
+
         x = p.x()
         y = p.y()
 
@@ -137,6 +150,24 @@ class FlechaSC(TabBloques.BloqueEspSC):
 
         self.escena.update()
 
+    def mouseMoveExt(self, event):
+        p = event.pos()
+        p = self.mapFromScene(p)
+        x = p.x()
+        y = p.y()
+
+        dx = x - self.expX
+        dy = y - self.expY
+
+        self.expX = x
+        self.expY = y
+
+        posicion = self.bloqueDatos.posicion
+        posicion.ancho += dx
+        posicion.alto += dy
+
+        self.escena.update()
+
     def mouseReleaseEvent(self, event):
         QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
         if self.siActivo:
@@ -151,6 +182,12 @@ class FlechaSC(TabBloques.BloqueEspSC):
                 self.rutinaPulsada(self.rutinaPulsadaCarga)
             else:
                 self.rutinaPulsada()
+
+    def mouseReleaseExt(self):
+        self.xy2posicion()
+        self.escena.update()
+        self.siMove = self.siSizeTop = self.siSizeBottom = False
+        self.activa(False)
 
     def pixmap(self):
         bf = self.bloqueDatos
@@ -322,6 +359,7 @@ def paintArrow(painter, bf):
             elif forma == "3":
                 painter.drawPolygon(
                         QtGui.QPolygonF([p_base1, p_basecab, p_ala1, p_fin, p_ala2, p_basecab, p_base2, p_base1]))
+
     return poligonoSizeBottom, poligonoMove, poligonoSizeTop
 
 

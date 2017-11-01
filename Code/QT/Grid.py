@@ -19,6 +19,7 @@ siempre que la rutina se haya definido en la ventana:
 from PyQt4 import QtCore, QtGui
 
 from Code.QT import QTUtil
+from Code import VarGen
 
 
 class ControlGrid(QtCore.QAbstractTableModel):
@@ -226,6 +227,12 @@ class Grid(QtGui.QTableView):
 
         QtGui.QTableView.__init__(self)
 
+        if VarGen.configuracion.tablaSelBackground:
+            p = self.palette()
+            p.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Highlight, QtGui.QBrush(QtGui.QColor(VarGen.configuracion.tablaSelBackground)))
+            p.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Highlight, QtGui.QBrush(QtGui.QColor(VarGen.configuracion.tablaSelBackground)))
+            self.setPalette(p)
+
         self.wParent = wParent
         self.id = xid
 
@@ -264,6 +271,9 @@ class Grid(QtGui.QTableView):
         self.ponAnchosColumnas()  # es necesario llamarlo desde aqui
 
         self.siEditable = siEditable
+
+    def buscaCabecera(self, clave):
+        return self.oColumnas.buscaColumna(clave)
 
     def coloresAlternados(self):
         self.setAlternatingRowColors(True)

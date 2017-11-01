@@ -3,6 +3,8 @@ from Code import ControlPosicion
 from Code import Jugada
 from Code import AperturasStd
 
+OPENING, MIDDLEGAME, ENDGAME, ALLGAME = range(4)
+
 
 class Partida:
     def __init__(self, iniPosicion=None, fen=None):
@@ -19,16 +21,17 @@ class Partida:
 
     def reset(self, iniPosicion=None):
         self.liJugadas = []
-        self.pendienteApertura = True
         self.apertura = None
 
         self.siEmpiezaConNegras = False
         if iniPosicion:
             self.iniPosicion = iniPosicion.copia()
             self.siEmpiezaConNegras = not self.iniPosicion.siBlancas
+            self.pendienteApertura = self.iniPosicion.fen() == ControlPosicion.FEN_INICIAL
         else:
             self.iniPosicion = ControlPosicion.ControlPosicion()
             self.iniPosicion.posInicial()
+            self.pendienteApertura = True
 
         self.ultPosicion = self.iniPosicion.copia()
 
@@ -179,19 +182,33 @@ class Partida:
 
     def pgnBase(self, numJugada=None):
         resp = self.pgnBaseRAW(numJugada)
-        li = resp.split(" ")
-
-        n = 0
-        rp = ""
-        for x in li:
-            n += len(x) + 1
-            if n > 80:
-                rp += "\n" + x
-                n = len(x)
-            else:
-                rp += " " + x
-
-        return rp.strip()
+        li = []
+        ln = len(resp)
+        pos = 0
+        while pos < ln:
+            while resp[pos] == " ":
+                pos += 1
+            final = pos + 80
+            txt = resp[pos:final]
+            if txt[-1] == " ":
+                txt = txt[:-1]
+            elif final < ln:
+                if resp[final] == " ":
+                    final += 1
+                else:
+                    while final > pos and resp[final - 1] != " ":
+                        final -= 1
+                    if final > pos:
+                        txt = resp[pos:final]
+                    else:
+                        final = pos + 80
+            li.append(txt)
+            pos = final
+        if li:
+            li[-1] = li[-1].strip()
+            return "\n".join(li)
+        else:
+            return ""
 
     def setFirstComment(self, txt, siReplace=False):
         if siReplace or not self.firstComment:
@@ -222,6 +239,29 @@ class Partida:
             resp += jg.pgnSP() + " "
 
         return resp.strip()
+
+    def pgnHTML(self, numJugada=None, hastaJugada=9999, siFigurines=True):
+        liResp = []
+        if self.firstComment:
+            liResp.append("{%s}" % self.firstComment)
+        if numJugada is None:
+            numJugada = self.primeraJugada()
+        if self.siEmpiezaConNegras:
+            liResp.append('<span style="color:navy">%d...</span>' % numJugada)
+            numJugada += 1
+            salta = 1
+        else:
+            salta = 0
+        for n, jg in enumerate(self.liJugadas):
+            if n > hastaJugada:
+                break
+            if n % 2 == salta:
+                x = '<span style="color:navy">%d.</span>' % numJugada
+                numJugada += 1
+            else:
+                x = ""
+            liResp.append(x + (jg.pgnHTML() if siFigurines else jg.pgnSP()))
+        return " ".join(liResp)
 
     def siTerminada(self):
         if self.liJugadas:
@@ -341,6 +381,81 @@ class Partida:
         for jg in self.liJugadas:
             jg.analisis = None
 
+    def calc_elo_color(self, formula, siBlancas):
+        bad_moves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+        verybad_moves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+        nummoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+        sumelos = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+        for jg in self.liJugadas:
+            if jg.analisis:
+                if jg.siBlancas() != siBlancas:
+                    continue
+                if jg.siApertura:
+                    std = jg.estadoOME = OPENING
+                else:
+                    material = jg.posicionBase.valor_material()
+                    std = jg.estadoOME = ENDGAME if material < 15 else MIDDLEGAME
+                jg.calc_elo(formula)
+                if jg.bad_move:
+                    bad_moves[std] += 1
+                elif jg.verybad_move:
+                    verybad_moves[std] += 1
+                nummoves[std] += 1
+                sumelos[std] += jg.elo
+
+        def calc_tope(verybad, bad, nummoves):
+            if verybad or bad:
+                return int(max(3500 - 16000.0*verybad/nummoves - 4000.0*bad/nummoves, 1200.0))
+            else:
+                return 3500
+
+        topes = {}
+        elos = {}
+        for std in (OPENING, MIDDLEGAME, ENDGAME):
+            nume = nummoves[std]
+            sume = sumelos[std]
+            tope = topes[std] = calc_tope(verybad_moves[std], bad_moves[std], nummoves[std])
+            if nume:
+                elos[std] = int((sume*1.0/nume)*tope/3500.0)
+            else:
+                elos[std] = 0
+
+        sume = 0
+        nume = 0
+        tope = 3500
+        for std in (OPENING, MIDDLEGAME, ENDGAME):
+            sume += sumelos[std]
+            nume += nummoves[std]
+            if topes[std] < tope:
+                tope = topes[std]
+
+        if nume:
+            elos[ALLGAME] = int((sume*1.0/nume)*tope/3500.0)
+        else:
+            elos[ALLGAME] = 0
+
+        return elos
+
+    def calc_elos(self, configuracion):
+        if self.siFenInicial():
+            aps = AperturasStd.ListaAperturasStd(configuracion, False, False)
+            aps.asignaApertura(self)
+        else:
+            for jg in self.liJugadas:
+                jg.siApertura = False
+        with open("IntFiles/Formulas/eloperformance.formula") as f:
+            formula = f.read().strip()
+
+        elos = {}
+        for siBlancas in (True, False):
+            elos[siBlancas] = self.calc_elo_color(formula, siBlancas)
+
+        elos[None] = {}
+        for std in (OPENING, MIDDLEGAME, ENDGAME, ALLGAME):
+            elos[None][std] = int((elos[True][std] + elos[False][std])/2.0)
+
+        return elos
+
 
 def pv_san(fen, pv):
     p = Partida(fen=fen)
@@ -353,6 +468,12 @@ def pv_pgn(fen, pv):
     p = Partida(fen=fen)
     p.leerPV(pv)
     return p.pgnSP()
+
+
+def pv_pgn_raw(fen, pv):
+    p = Partida(fen=fen)
+    p.leerPV(pv)
+    return p.pgnBaseRAW()
 
 
 class PartidaCompleta(Partida):
@@ -381,10 +502,14 @@ class PartidaCompleta(Partida):
                 return v
         return ""
 
+    def dicTags(self):
+        return {k:v for k, v in self.liTags}
+
     def readPGN(self, configuracion, pgn):
-        from Code import PGN # evita el circulo vicioso
+        from Code import PGN  # evita el circulo vicioso
         unpgn = PGN.UnPGN()
-        unpgn.leeTexto(pgn)
+        if not unpgn.leeTexto(pgn):
+            return None
         self.recuperaDeTexto(unpgn.partida.guardaEnTexto())
         self.asignaApertura(configuracion)
 

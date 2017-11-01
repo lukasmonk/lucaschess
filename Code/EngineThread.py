@@ -1,9 +1,11 @@
 import os
+import sys
 
 import time
 
 import psutil
 
+from Code import VarGen
 from Code.Constantes import *
 
 DEBUG = False
@@ -28,19 +30,45 @@ def xprli(li):
 
 if DEBUG:
     tdbg = [time.time()]
-
     xpr("DEBUG XMOTOR")
 
-PRIORITY_NORMAL                  = psutil.NORMAL_PRIORITY_CLASS
-PRIORITY_LOW, PRIORITY_VERYLOW   = psutil.BELOW_NORMAL_PRIORITY_CLASS, psutil.IDLE_PRIORITY_CLASS
-PRIORITY_HIGH, PRIORITY_VERYHIGH = psutil.ABOVE_NORMAL_PRIORITY_CLASS, psutil.HIGH_PRIORITY_CLASS
+
+class Priorities:
+    def __init__(self):
+        self.normal, self.low, self.verylow, self.high, self.veryhigh = range(5)
+
+        if VarGen.isLinux:
+            p_normal = 0
+            p_low, p_verylow = 10, 20
+            p_high, p_veryhigh = -10, -20
+        else:
+            p_normal = psutil.NORMAL_PRIORITY_CLASS
+            p_low, p_verylow = psutil.BELOW_NORMAL_PRIORITY_CLASS, psutil.IDLE_PRIORITY_CLASS
+            p_high, p_veryhigh = psutil.ABOVE_NORMAL_PRIORITY_CLASS, psutil.HIGH_PRIORITY_CLASS
+
+        self.values = [p_normal, p_low, p_verylow, p_high, p_veryhigh]
+
+    def value(self, priority):
+        return self.values[priority] if priority in range(5) else self.value(self.normal)
+
+    def labels(self):
+        return [_("Normal"), _("Low"), _("Very low"), _("High"), _("Very high")]
+
+    def combo(self):
+        labels = self.labels()
+        return [(labels[pr], pr) for pr in range(5)]
+
+    def texto(self, prioridad):
+        return self.labels()[prioridad]
+
+priorities = Priorities()
 
 import subprocess
 import threading
 import collections
 
 
-class EnginePOP(object):
+class Engine(object):
     def __init__(self, exe, priority, args):
         self.pid = None
         self.exe = os.path.abspath(exe)
@@ -49,9 +77,12 @@ class EnginePOP(object):
         self.working = True
         self.liBuffer = []
         self.starting = True
-        self.args = [self.exe, ]
+        self.args = [os.path.basename(self.exe), ]
         if args:
             self.args.extend(args)
+
+        if VarGen.isLinux and VarGen.isWine and self.exe.lower().endswith(".exe"):
+            self.args.insert(0, "/usr/bin/wine")
 
     def cerrar(self):
         self.working = False
@@ -67,7 +98,6 @@ class EnginePOP(object):
         li = self.liBuffer
         self.liBuffer = []
         self.stdout_lock.release()
-        assert xprli(li)
         return li
 
     def hay_datos(self):
@@ -80,6 +110,7 @@ class EnginePOP(object):
         try:
             while self.working:
                 line = stdout.readline()
+                assert xpr(line)
                 if not line:
                     break
                 lock.acquire()
@@ -91,16 +122,22 @@ class EnginePOP(object):
             stdout.close()
 
     def start(self):
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        startupinfo.wShowWindow = subprocess.SW_HIDE
-        self.process = subprocess.Popen(self.args, stdout=subprocess.PIPE, stdin=subprocess.PIPE, cwd=self.direxe,
+        if VarGen.isWindows:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+        else:
+            startupinfo = None
+        curdir = os.path.abspath(os.curdir)  # problem with "." as curdir
+        os.chdir(self.direxe)  # to fix problems with non ascii folders
+        self.process = subprocess.Popen(self.args, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
                                          startupinfo=startupinfo, shell=False)
+        os.chdir(curdir)
 
         self.pid = self.process.pid
-        if self.priority != PRIORITY_NORMAL:
+        if self.priority is not None:
             p = psutil.Process(self.pid)
-            p.nice(self.priority)
+            p.nice(priorities.value(self.priority))
 
         self.stdout_lock = threading.Lock()
         self.stdout_queue = collections.deque()
@@ -116,6 +153,17 @@ class EnginePOP(object):
     def close(self):
         self.working = False
         if self.pid:
-            self.process.kill()
-            self.process.terminate()
+            if self.process.poll() is None:
+                self.put_line("stop")
+                self.put_line("quit")
+                wtime = 40  # wait for it, wait for it...
+                while self.process.poll() is None and wtime > 0:
+                    time.sleep(0.05)
+                    wtime -= 1
+
+                if self.process.poll() is None:  # nope, no luck
+                    sys.stderr.write("INFO ENGINE: the engine %s won't close properly.\n" % self.exe)
+                    self.process.kill()
+                    self.process.terminate()
+
             self.pid = None

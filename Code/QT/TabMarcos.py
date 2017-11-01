@@ -39,7 +39,6 @@ class MarcoSC(TabBloques.BloqueEspSC):
         self.update()
 
     def posicion2xy(self):
-
         bm = self.bloqueDatos
         posicion = bm.posicion
         ac = bm.anchoCasilla
@@ -57,7 +56,6 @@ class MarcoSC(TabBloques.BloqueEspSC):
         posicion.alto = (hf - df + 1) * ac
 
     def xy2posicion(self):
-
         bm = self.bloqueDatos
         posicion = bm.posicion
         ac = bm.anchoCasilla
@@ -80,6 +78,7 @@ class MarcoSC(TabBloques.BloqueEspSC):
         self.posicion2xy()
 
     def contiene(self, p):
+        p = self.mapFromScene(p)
         def distancia(p1, p2):
             t = p2 - p1
             return ((t.x()) ** 2 + (t.y()) ** 2) ** 0.5
@@ -107,8 +106,16 @@ class MarcoSC(TabBloques.BloqueEspSC):
 
     def mousePressEvent(self, event):
         QtGui.QGraphicsItem.mousePressEvent(self, event)
+        self.mousePressExt(event)
 
         p = event.scenePos()
+        self.expX = p.x()
+        self.expY = p.y()
+
+    def mousePressExt(self, event):
+        """Needed in Scripts"""
+        p = event.pos()
+        p = self.mapFromScene(p)
         self.expX = p.x()
         self.expY = p.y()
 
@@ -117,7 +124,9 @@ class MarcoSC(TabBloques.BloqueEspSC):
         if not (self.siMove or self.tpSize):
             return
 
-        p = event.scenePos()
+        p = event.pos()
+        p = self.mapFromScene(p)
+
         x = p.x()
         y = p.y()
 
@@ -152,6 +161,23 @@ class MarcoSC(TabBloques.BloqueEspSC):
 
         self.escena.update()
 
+    def mouseMoveExt(self, event):
+        p = event.pos()
+        p = self.mapFromScene(p)
+        x = p.x()
+        y = p.y()
+
+        dx = x - self.expX
+        dy = y - self.expY
+
+        self.expX = x
+        self.expY = y
+
+        posicion = self.bloqueDatos.posicion
+        posicion.ancho += dx
+        posicion.alto += dy
+        self.escena.update()
+
     def mouseReleaseEvent(self, event):
         QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
         if self.siActivo:
@@ -167,6 +193,13 @@ class MarcoSC(TabBloques.BloqueEspSC):
                 self.rutinaPulsada(self.rutinaPulsadaCarga)
             else:
                 self.rutinaPulsada()
+
+    def mouseReleaseExt(self):
+        self.xy2posicion()
+        self.escena.update()
+        self.siMove = False
+        self.tpSize = None
+        self.activa(False)
 
     def pixmap(self):
         bm = self.bloqueDatos

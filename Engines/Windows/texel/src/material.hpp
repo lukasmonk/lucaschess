@@ -54,7 +54,7 @@ public:
     /** Remove a piece from the material configuration. */
     void removePiece(int pType);
 
-    /** Add cnt pieces of tyep ptype to the material configuration. */
+    /** Add cnt pieces of type ptype to the material configuration. */
     void addPieceCnt(int pType, int cnt);
 
     /** Get the material configuration identifier. */

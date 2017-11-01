@@ -12,9 +12,15 @@ from Code import MotoresExternos
 from Code import TrListas
 from Code import Traducir
 from Code import Util
+from Code import VarGen
 from Code.Constantes import *
 
-import Code.EnginesWindows as Engines
+if VarGen.isLinux32:
+    import Code.EnginesLinux32 as Engines
+elif VarGen.isLinux64:
+    import Code.EnginesLinux64 as Engines
+else:
+    import Code.EnginesWindows as Engines
 
 NIVELBAK = 1
 
@@ -69,7 +75,7 @@ class Configuracion:
         self.rapidezMovPiezas = 100
         self.guardarVariantesTutor = True
 
-        self.siAtajosRaton = False  # predicitvo=True
+        self.siAtajosRaton = False  # predictivo=True
         self.showCandidates = False
 
         self.siActivarCapturas = False
@@ -93,7 +99,14 @@ class Configuracion:
 
         self.siDGT = False
 
+        self.opacityToolBoard = 10
+        self.positionToolBoard = "T"
+
+        self.directorIcon = False
+
         self.coloresPGNdefecto()
+
+        self.tablaSelBackground = None
 
         self.tamFontRotulos = 10
         self.anchoPGN = 283
@@ -132,7 +145,7 @@ class Configuracion:
 
         self.dicRivales = Engines.leeRivales()
 
-        self.rivalInicial = "tarrasch"
+        self.rivalInicial = "rocinante" if VarGen.isLinux else "tarrasch"
         self.rival = self.buscaRival(self.rivalInicial)
 
         self.tutorInicial = "mcbrain"
@@ -142,6 +155,7 @@ class Configuracion:
         self.tutorDifPorc = 0
 
         self.tiempoTutor = 3000
+        self.depthTutor = 0
 
         self.siSuenaBeep = False
         self.siSuenaNuestro = False
@@ -165,6 +179,8 @@ class Configuracion:
         self.grupos.nuevo("Greko", 2401, 2599, 1800)
         self.grupos.nuevo("Alaric", 2600, 2799, 3600)
         self.grupos.nuevo("Rybka", 2800, 3400, 6000)
+
+        self._dbFEN = None
 
     def start(self, version):
         self.lee()
@@ -220,6 +236,7 @@ class Configuracion:
         self.ficheroPuntuacion = "%s/punt.pke" % self.carpeta
         self.ficheroDirSound = "%s/direc.pkv" % self.carpeta
         self.ficheroKibitzers = "%s/moscas.pkv" % self.carpeta
+        self.ficheroKibitzersN = "%s/kibitzers.pkv" % self.carpeta
         self.ficheroEntAperturas = "%s/entaperturas.pkd" % self.carpeta
         self.ficheroEntAperturasPar = "%s/entaperturaspar.pkd" % self.carpeta
         self.ficheroPersAperturas = "%s/persaperturas.pkd" % self.carpeta
@@ -232,6 +249,7 @@ class Configuracion:
         self.ficheroPuente = "%s/bridge.db" % self.carpeta
         self.ficheroMoves = "%s/moves.dbl" % self.carpeta
         self.ficheroRecursos = "%s/recursos.dbl" % self.carpeta
+        self.ficheroFEN = self.ficheroRecursos
         self.ficheroConfTableros = "%s/confTableros.pk" % self.carpeta
         self.ficheroBoxing = "%s/boxing.pk" % self.carpeta
         self.ficheroTrainings = "%s/trainings.pk" % self.carpeta
@@ -244,6 +262,7 @@ class Configuracion:
         self.ficheroPuntuaciones = "%s/hpoints.pkd" % self.carpeta
 
         self.ficheroSelectedPositions = "%s/Selected positions.fns" % self.dirPersonalTraining
+        self.ficheroPresentationPositions = "%s/Challenge 101.fns" % self.dirPersonalTraining
 
         self.ficheroVariables = "%s/Variables.pk" % self.carpeta
 
@@ -259,6 +278,7 @@ class Configuracion:
         Util.creaCarpeta(self.carpetaScanners)
 
         self.ficheroExpeditions = "%s/Expeditions.db" % self.carpeta
+        self.ficheroSingularMoves = "%s/SingularMoves.db" % self.carpeta
 
     def compruebaBMT(self):
         if not Util.existeFichero(self.ficheroBMT):
@@ -427,6 +447,7 @@ class Configuracion:
         dic["JUGADOR"] = self.jugador
         dic["ESTILO"] = self.estilo
         dic["TIEMPOTUTOR"] = self.tiempoTutor
+        dic["DEPTHTUTOR"] = self.depthTutor
 
         dic["SIBEEP"] = self.siSuenaBeep
         dic["SISUENANUESTRO"] = self.siSuenaNuestro
@@ -466,7 +487,13 @@ class Configuracion:
 
         dic["SIDGT"] = self.siDGT
 
+        dic["OPACITYTOOLBOARD"] = self.opacityToolBoard
+        dic["POSITIONTOOLBOARD"] = self.positionToolBoard
+
+        dic["DIRECTORICON"] = self.directorIcon
+
         dic["FICHEROBMT"] = self.ficheroBMT
+        dic["FICHEROFEN"] = self.ficheroFEN
 
         dic["FAMILIA"] = self.familia
 
@@ -483,6 +510,8 @@ class Configuracion:
         dic["COLOR_NAG4"] = self.color_nag4
         dic["COLOR_NAG5"] = self.color_nag5
         dic["COLOR_NAG6"] = self.color_nag6
+
+        dic["TABLASELBACKGROUND"] = self.tablaSelBackground
 
         dic["TAMFONTROTULOS"] = self.tamFontRotulos
         dic["ANCHOPGN"] = self.anchoPGN
@@ -541,7 +570,8 @@ class Configuracion:
                 self.jugador = dic["JUGADOR"]
                 self.estilo = dg("ESTILO", "Cleanlooks")
                 self.tiempoTutor = dic["TIEMPOTUTOR"]
-                if self.tiempoTutor == 0:
+                self.depthTutor = dg("DEPTHTUTOR", 0)
+                if self.tiempoTutor == 0 and self.depthTutor == 0:
                     self.tiempoTutor = 3000
 
                 self.siSuenaBeep = dic["SIBEEP"]
@@ -598,6 +628,11 @@ class Configuracion:
 
                 self.siDGT = dg("SIDGT", False)
 
+                self.opacityToolBoard = dg("OPACITYTOOLBOARD", self.opacityToolBoard)
+                self.positionToolBoard = dg("POSITIONTOOLBOARD", self.positionToolBoard)
+
+                self.directorIcon = dg("DIRECTORICON", self.directorIcon)
+
                 self.familia = dg("FAMILIA", self.familia)
 
                 self.puntosMenu = dg("PUNTOSMENU", self.puntosMenu)
@@ -613,6 +648,9 @@ class Configuracion:
                 self.color_nag4 = dg("COLOR_NAG4", self.color_nag4)
                 self.color_nag5 = dg("COLOR_NAG5", self.color_nag5)
                 self.color_nag6 = dg("COLOR_NAG6", self.color_nag6)
+
+                self.tablaSelBackground = dg("TABLASELBACKGROUND", None)
+
                 self.tamFontRotulos = dg("TAMFONTROTULOS", self.tamFontRotulos)
                 self.anchoPGN = dg("ANCHOPGN", self.anchoPGN)
                 self.puntosPGN = dg("PUNTOSPGN", self.puntosPGN)
@@ -622,6 +660,7 @@ class Configuracion:
                 self.tipoMaterial = dg("TIPOMATERIAL", self.tipoMaterial)
 
                 self.ficheroBMT = dg("FICHEROBMT", self.ficheroBMT)
+                self.ficheroFEN = dg("FICHEROFEN", self.ficheroFEN)
 
                 self.liTrasteros = dg("TRASTEROS", [])
                 self.liFavoritos = dg("FAVORITOS", [])
@@ -633,7 +672,7 @@ class Configuracion:
 
                 self.notbackground = dg("NOTBACKGROUND", self.notbackground)
                 self.bmi2 = dg("BMI2", self.bmi2)
-                if self.bmi2 and not Util.is64Windows():
+                if self.bmi2 and VarGen.isWindows and not Util.is64Windows():
                     self.bmi2 = False
 
                 self.checkforupdate = dg("CHECKFORUPDATE", self.checkforupdate)
@@ -800,6 +839,13 @@ class Configuracion:
         #     f.write(db["BASE"])
         db.close()
 
+    def resetConfTablero(self, key, tamDef):
+        db = Util.DicSQL(self.ficheroConfTableros)
+        del db[key]
+        db.close()
+        self.leeConfTableros()
+        return self.confTablero(key, tamDef)
+
     def cambiaConfTablero(self, confTablero):
         xid = confTablero._id
         if xid:
@@ -828,3 +874,26 @@ class Configuracion:
 
     def dicMotoresFixedElo(self):
         return Engines.dicMotoresFixedElo()
+
+    def fich_dbFEN(self):
+        if self._dbFEN is None:
+            self._dbFEN = Util.DicSQL(self.ficheroFEN, tabla="FEN")
+        return self._dbFEN
+
+    def close_dbFEN(self):
+        if self._dbFEN is not None:
+            self._dbFEN.close()
+            self._dbFEN = None
+
+    def dbFEN(self, fenM2):
+        dbFEN = self.fich_dbFEN()
+        return dbFEN[fenM2]
+
+    def esta_dbFEN(self, fenM2):
+        dbFEN = self.fich_dbFEN()
+        return fenM2 in dbFEN
+
+    def save_dbFEN(self, fenM2, data):
+        dbFEN = self.fich_dbFEN()
+        dbFEN[fenM2] = data
+

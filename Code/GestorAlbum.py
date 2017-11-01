@@ -284,4 +284,5 @@ class GestorAlbum(Gestor.Gestor):
         self.guardarGanados(quien == kGanamos)
         QTUtil2.mensaje(self.pantalla, mensaje)
         self.ponFinJuego()
+        self.xrival.cerrar()
         self.pantalla.ponToolBar((k_mainmenu, k_configurar, k_utilidades))

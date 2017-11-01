@@ -1,7 +1,7 @@
 import codecs
 import os
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from Code import Partida
 from Code import DBgamesFEN
@@ -46,6 +46,7 @@ class WGamesFEN(QtGui.QWidget):
 
             ancho = 140 if clave == "FEN" else 70  # para que sirva con WBG_GamesFEN
             oColumnas.nueva(clave, rotulo, ancho, siCentrado=siCentrado)
+        oColumnas.nueva("rowid", _("Row ID"), 70, siCentrado=True)
 
         self.grid = Grid.Grid(self, oColumnas, siSelecFilas=True, siSeleccionMultiple=True, xid="wgamesfen")
 
@@ -64,6 +65,8 @@ class WGamesFEN(QtGui.QWidget):
             (_("Filter"), Iconos.Filtrar(), self.tw_filtrar), None,
             (_("Remove"), Iconos.Borrar(), self.tw_borrar),None,
             (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
+            (_("Move up"), Iconos.Arriba(), self.tw_up), None,
+            (_("Move down"), Iconos.Abajo(), self.tw_down), None,
         ]
 
         self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
@@ -111,6 +114,8 @@ class WGamesFEN(QtGui.QWidget):
         clave = ocol.clave
         if clave == "numero":
             return str(nfila + 1)
+        elif clave == "rowid":
+            return str(self.dbGamesFEN.getROWID(nfila))
         return self.dbGamesFEN.field(nfila, clave)
 
     def gridDobleClick(self, grid, fil, col):
@@ -143,6 +148,10 @@ class WGamesFEN(QtGui.QWidget):
         self.dbGamesFEN.ponOrden(liOrden)
         self.grid.refresh()
         self.updateStatus()
+
+    def gridTeclaControl(self, grid, k, siShift, siControl, siAlt):
+        if k in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return):
+            self.tw_editar()
 
     def closeEvent(self, event):
         self.tw_terminar()
@@ -187,6 +196,20 @@ class WGamesFEN(QtGui.QWidget):
 
     def tw_gotop(self):
         self.grid.gotop()
+
+    def tw_up(self):
+        fila = self.grid.recno()
+        filaNueva = self.dbGamesFEN.intercambia(fila, True)
+        if filaNueva is not None:
+            self.grid.goto(filaNueva, 0)
+            self.grid.refresh()
+
+    def tw_down(self):
+        fila = self.grid.recno()
+        filaNueva = self.dbGamesFEN.intercambia(fila, False)
+        if filaNueva is not None:
+            self.grid.goto(filaNueva, 0)
+            self.grid.refresh()
 
     def tw_nuevo(self):
         # Se genera un PGN
@@ -245,17 +268,32 @@ class WGamesFEN(QtGui.QWidget):
 
     def tw_utilities(self):
         menu = QTVarios.LCMenu(self)
-        menu.opcion(self.tg_massive_change_tags, _("Massive change of tags"), Iconos.PGN())
+        menu.opcion(self.tw_massive_change_tags, _("Massive change of tags"), Iconos.PGN())
+        menu.separador()
+        menu.opcion(self.tw_uti_tactic, _("Create tactics training"), Iconos.Tacticas())
         resp = menu.lanza()
         if resp:
             resp()
 
+    def tw_uti_tactic(self):
+        def rutinaDatos(recno):
+            dic = {}
+            for clave in self.dbGamesFEN.liCamposBase:
+                dic[clave] = self.dbGamesFEN.field(recno, clave)
+            p = self.dbGamesFEN.leePartidaRecno(recno)
+            dic["PGN"] = p.pgn()
+            return dic
+
+        liRegistros = self.grid.recnosSeleccionados()
+        if len(liRegistros) < 2:
+            liRegistros = range(self.dbGamesFEN.reccount())
+
+        PantallaPGN.crearTactic(self.procesador, self, liRegistros, rutinaDatos)
+
     def tg_file(self):
         menu = QTVarios.LCMenu(self)
 
-        menu.opcion(self.tg_createDB, _("Create a new database"), Iconos.NuevaDB())
-        menu.separador()
-        menu.opcion(self.tg_change, _("Open another database"), Iconos.DatabaseC())
+        menu.opcion(self.tg_change,_("Open/create another database"), Iconos.DatabaseC())
         menu.separador()
 
         submenu = menu.submenu(_("Import from"), Iconos.DatabaseCNew())
@@ -291,7 +329,7 @@ class WGamesFEN(QtGui.QWidget):
             self.actualiza(True)
             self.grid.gobottom(0)
 
-    def tg_massive_change_tags(self):
+    def tw_massive_change_tags(self):
         resp = PantallaSolo.massive_change_tags(self, self.configuracion, len(self.grid.recnosSeleccionados()))
         if resp:
             recno = self.grid.recno()
@@ -308,25 +346,11 @@ class WGamesFEN(QtGui.QWidget):
                 um.final()
 
     def tg_change(self):
-        pathFich = QTUtil2.leeFichero(self, os.path.dirname(self.configuracion.ficheroDBgames), "lcf",
-                                          _("Positions Database"))
-        if pathFich:
-            if not pathFich.lower().endswith(".lcf"):
-                pathFich += ".lcf"
-            path = os.path.dirname(pathFich)
+        database = QTVarios.selectDB(self, self.configuracion, True)
+        if database:
+            path = os.path.dirname(database)
             if os.path.isdir(path):
-                self.changeDBgames(pathFich)
-
-    def tg_createDB(self):
-        pathFich = QTUtil2.creaFichero(self, os.path.dirname(self.configuracion.ficheroDBgames), "lcf",
-                                          _("Positions Database"))
-        if pathFich:
-            if not pathFich.lower().endswith(".lcf"):
-                pathFich += ".lcf"
-            path = os.path.dirname(pathFich)
-            if os.path.isdir(path):
-                Util.borraFichero(pathFich)
-                self.changeDBgames(pathFich)
+                self.changeDBgames(database)
 
     def tg_exportar(self, ext):
         li = self.grid.recnosSeleccionados()

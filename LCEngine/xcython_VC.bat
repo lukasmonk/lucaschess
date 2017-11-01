@@ -14,6 +14,5 @@ set LIBPATH=%VCINSTALLDIR%\Lib;%WindowsSdkDir%\Lib;%LIBPATH%
 
 
 python setup.py build_ext --inplace
-del ..\LCEngine.pyd
-copy LCEngine.pyd ..
+copy LCEngine.pyd ..\Engines\Windows\_tools
 

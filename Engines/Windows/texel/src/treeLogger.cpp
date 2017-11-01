@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2013  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,15 +34,12 @@
 #include <cassert>
 
 void
-TreeLoggerWriter::open(const std::string& filename,
-                       ParallelData& pd0, int threadNo0) {
+TreeLoggerWriter::open(const std::string& filename, int threadNo0) {
     auto fn = filename + std::string(".") + num2Str(threadNo0);
     os.open(fn.c_str(), std::ios_base::out |
                         std::ios_base::binary |
                         std::ios_base::trunc);
     opened = true;
-
-    pd = &pd0;
     threadNo = threadNo0;
 }
 
@@ -59,29 +56,25 @@ TreeLoggerWriter::close() {
 }
 
 void
-TreeLoggerWriter::writePosition(const Position& pos, int owningThread, U64 parentIndex, int moveNo) {
+TreeLoggerWriter::writePosition(const Position& pos) {
     Position::SerializeData data;
     pos.serialize(data);
 
     entry.type = (nextIndex == 0) ? EntryType::POSITION_INCOMPLETE : EntryType::POSITION_PART0;
     entry.p0.nextIndex = endMark;
     entry.p0.word0 = data.v[0];
-    entry.p0.word1 = data.v[1];
     appendEntry(entry);
     nextIndex++;
 
     entry.type = EntryType::POSITION_PART1;
-    entry.p1.t0Index = pd->t0Index;
+    entry.p1.word1 = data.v[1];
     entry.p1.word2 = data.v[2];
-    entry.p1.word3 = data.v[3];
     appendEntry(entry);
     nextIndex++;
 
     entry.type = EntryType::POSITION_PART2;
+    entry.p2.word3 = data.v[3];
     entry.p2.word4 = data.v[4];
-    entry.p2.owningThread = owningThread;
-    entry.p2.parentIndex = parentIndex;
-    entry.p2.moveNo = moveNo;
     appendEntry(entry);
     nextIndex++;
 }
@@ -213,8 +206,7 @@ TreeLoggerReader::flushForwardPointerData(std::vector<std::pair<U64,U64>>& toWri
 }
 
 void
-TreeLoggerReader::getRootNode(U64 index, Position& pos, int& owningThread,
-                              U64& parentIndex, int& moveNo, U64& t0Index) {
+TreeLoggerReader::getRootNode(U64 index, Position& pos) {
     readEntry(index, entry);
     if (entry.type == EntryType::POSITION_PART1) {
         index--;
@@ -228,20 +220,16 @@ TreeLoggerReader::getRootNode(U64 index, Position& pos, int& owningThread,
 
     Position::SerializeData data;
     data.v[0] = entry.p0.word0;
-    data.v[1] = entry.p0.word1;
 
     readEntry(index + 1, entry);
     assert(entry.type == EntryType::POSITION_PART1);
-    t0Index = entry.p1.t0Index;
+    data.v[1] = entry.p1.word1;
     data.v[2] = entry.p1.word2;
-    data.v[3] = entry.p1.word3;
 
     readEntry(index + 2, entry);
     assert(entry.type == EntryType::POSITION_PART2);
+    data.v[3] = entry.p2.word3;
     data.v[4] = entry.p2.word4;
-    owningThread = entry.p2.owningThread;
-    parentIndex = entry.p2.parentIndex;
-    moveNo = entry.p2.moveNo;
 
     pos.deSerialize(data);
 }
@@ -354,31 +342,6 @@ TreeLoggerReader::mainLoop() {
             int n = getArg(cmdStr, 1);
             for (int i = 0; i < n; i++)
                 currIndex = findParent(currIndex);
-        } else if (startsWith(cmdStr, "lp")) {
-            std::vector<int> args;
-            getArgs(cmdStr, 0, args);
-            if (args.size() == 2) {
-                int th = args[0];
-                U64 idx = args[1];
-                std::vector<U64> positions;
-                findChildren(-1, positions);
-                for (size_t p = 0; p < positions.size(); p++) {
-                    U64 posIdx = positions[p];
-                    Position pos;
-                    int owningThread, moveNo;
-                    U64 parentIndex;
-                    U64 t0Index;
-                    getRootNode(posIdx, pos, owningThread, parentIndex, moveNo, t0Index);
-                    if ((owningThread == th) && (parentIndex == idx)) {
-                        printNodeInfo(posIdx, p);
-                        std::vector<U64> children;
-                        findChildren(posIdx, children);
-                        for (size_t c = 0; c < children.size(); c++)
-                            printNodeInfo(children[c], c);
-                    }
-                }
-            }
-            doPrint = false;
         } else if (startsWith(cmdStr, "l")) {
             std::vector<U64> children;
             findChildren(currIndex, children);
@@ -567,7 +530,6 @@ TreeLoggerReader::printHelp() {
     std::cout << "  n              - Print node info corresponding to move sequence" << std::endl;
     std::cout << "  l [move]       - List child nodes, optionally only for one move" << std::endl;
     std::cout << "  lb [move]      - List best child nodes, optionally only for one move" << std::endl;
-    std::cout << "  lp th idx      - List positions requested by thread th at index idx" << std::endl;
     std::cout << "  d [n1 [n2...]] - Go to child \"n\"" << std::endl;
     std::cout << "  move           - Go to child \"move\", if unique" << std::endl;
     std::cout << "  u [levels]     - Move up" << std::endl;
@@ -761,17 +723,13 @@ TreeLoggerReader::printNodeInfo(U64 index, int childNo, const std::string& filte
         std::string m = moveToStr(se.getMove());
         if ((filterMove.length() > 0) && (m != filterMove))
             return;
-        using SearchConst::plyScale;
         std::cout << std::setw(3) << childNo
                   << ' '   << std::setw(8) << index
-                  << ' '   << std::setw(8) << se.t0Index
-                  << ' '   << std::setw(8) << ee.t0Index
                   << ' '   << m
                   << " a:" << std::setw(6) << se.alpha
                   << " b:" << std::setw(6) << se.beta
                   << " p:" << std::setw(2) << (int)se.ply
-                  << " d:" << std::setw(2) << (int)se.depth/plyScale
-                           << '.' << ((int)se.depth % plyScale);
+                  << " d:" << std::setw(2) << (int)se.depth;
         if (haveEE) {
             int subTreeNodes = (se.endIndex - ee.startIndex - 1) / 2;
             std::string type;
@@ -790,16 +748,9 @@ TreeLoggerReader::printNodeInfo(U64 index, int childNo, const std::string& filte
                (entry.type == EntryType::POSITION_PART1) ||
                (entry.type == EntryType::POSITION_PART2)) {
         Position pos;
-        int owningThread, moveNo;
-        U64 parentIndex;
-        U64 t0Index;
-        getRootNode(index, pos, owningThread, parentIndex, moveNo, t0Index);
+        getRootNode(index, pos);
         std::cout << std::setw(3) << childNo
                   << ' ' << std::setw(8) << index
-                  << ' ' << owningThread
-                  << ' ' << std::setw(8) << parentIndex
-                  << ' ' << std::setw(2) << moveNo
-                  << ' ' << std::setw(8) << t0Index
                   << ' ' << TextIO::toFEN(pos) << std::endl;
     } else
         assert(false);

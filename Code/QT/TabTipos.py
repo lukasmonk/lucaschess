@@ -1,4 +1,10 @@
-from PyQt4 import QtCore
+from PyQt4 import QtGui, QtCore
+
+from Code import VarGen
+from Code.QT import Controles
+from Code.QT import Colocacion
+from Code.QT import Iconos
+from Code.QT import QTUtil
 
 
 class Posicion:
@@ -241,3 +247,111 @@ class Marker(Bloque):
             ("png", "c", "")  # png para usar como boton
         ]
         Bloque.__init__(self)
+
+
+class Pizarra(QtGui.QWidget):
+    def __init__(self, guion, tablero, ancho, editMode=False, withContinue=False):
+        QtGui.QWidget.__init__(self)
+
+        self.guion = guion
+        self.tarea = None
+
+        self.mensaje = Controles.EM(self).ponTipoLetra(puntos=VarGen.configuracion.tamFontRotulos)
+
+        self.pb = None
+        self.chb = None
+        if editMode:
+            self.chb = Controles.CHB(self, _("With continue button"), False).capturaCambiado(self, self.save)
+            self.mensaje.capturaCambios(self.save)
+        elif withContinue:
+            self.pb = Controles.PB(self, _("Continue"), self.continuar, plano=False)
+            self.bloqueada = True
+            self.mensaje.soloLectura()
+        else:
+            self.mensaje.soloLectura()
+
+        self.pbLeft = Controles.PB(self, "", self.goLeft).ponIcono(Iconos.AnteriorF()).anchoFijo(24)
+        self.pbRight = Controles.PB(self, "", self.goRight).ponIcono(Iconos.SiguienteF()).anchoFijo(24)
+        self.pbDown = Controles.PB(self, "", self.goDown).ponIcono(Iconos.Abajo()).anchoFijo(24)
+
+        cajon = QtGui.QWidget(self)
+        ly = Colocacion.H()
+        ly.control(self.pbLeft).control(self.pbDown)
+        ly.control(self.pbRight).margen(0)
+        if self.pb:
+            ly.control(self.pb)
+        if self.chb:
+            ly.control(self.chb)
+        cajon.setLayout(ly)
+        cajon.setFixedHeight(20)
+
+        layout = Colocacion.V().control(self.mensaje).espacio(-6).control(cajon).margen(0)
+
+        self.setLayout(layout)
+        self.setWindowFlags(QtCore.Qt.ToolTip)
+
+        posTabl = tablero.pos()
+        posTablGlobal = tablero.mapToGlobal(posTabl)
+        self.anchoTabl = tablero.width()
+        self.anchoPizarra = ancho
+        self.x = posTablGlobal.x() - posTabl.x()
+        self.y = posTablGlobal.y() - posTabl.y()
+
+        if self.guion.posPizarra == "R":
+            self.goRight()
+        elif self.guion.posPizarra == "L":
+            self.goLeft()
+        else:
+            self.goDown()
+
+        if editMode:
+            self.clearFocus()
+            self.mensaje.setFocus()
+
+    def showLRD(self, l, r, d):
+        self.pbRight.setVisible(r)
+        self.pbLeft.setVisible(l)
+        self.pbDown.setVisible(d)
+
+    def goDown(self):
+        y = self.y + self.anchoTabl
+        self.setGeometry(self.x, y, self.anchoTabl, self.anchoPizarra)
+        self.showLRD(True, True, False)
+        self.guion.posPizarra = "D"
+
+    def goRight(self):
+        x = self.x + self.anchoTabl
+        self.setGeometry(x, self.y, self.anchoPizarra, self.anchoTabl)
+        self.showLRD(True, False, True)
+        self.guion.posPizarra = "R"
+
+    def goLeft(self):
+        x = self.x - self.anchoPizarra
+        self.setGeometry(x, self.y, self.anchoPizarra, self.anchoTabl)
+        self.showLRD(False, True, True)
+        self.guion.posPizarra = "L"
+
+    def write(self, tarea):
+        self.mensaje.ponHtml(tarea.texto())
+        self.tarea = tarea
+        if self.chb:
+            ok = self.tarea.continuar()
+            self.chb.ponValor(False if ok is None else ok)
+
+    def save(self):
+        if not self.tarea:
+            return
+        self.tarea.texto(self.mensaje.html())
+        if self.chb:
+            self.tarea.continuar(self.chb.valor())
+        self.guion.savedPizarra()
+
+    def siBloqueada(self):
+        if self.bloqueada:
+            QTUtil.refreshGUI()
+        return self.bloqueada
+
+    def continuar(self):
+        self.bloqueada = False
+        self.pb.hide()
+

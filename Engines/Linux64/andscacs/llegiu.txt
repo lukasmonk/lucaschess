@@ -1,0 +1,44 @@
+ANDSCACS
+========
+http://www.andscacs.com/
+
+Andscacs és un mòdul d'anàlisi d'escacs. Està en estat alpha, és a dir en estat inicial de desenvolupament, i no ofereix cap garantia de cap mena. Així doncs useu-lo sota la vostra pròpia responsabilitat!
+
+Està fet per Daniel José Queraltó cdani @ yahoo.com.
+
+És un mòdul UCI, per tant requereix una interfície gràfica compatible per usar-lo.
+Per exemple es pot usar l'entorn gràfic gratuït Arena:
+http://www.playwitharena.com/
+
+O el comercial Chessbase
+http://chessbase-shop.com/es
+
+Vull agrair la molta gent que publica informació sobre programació de mòduls d'anàlisi d'escacs a internet, especialment http://chessprogramming.wikispaces.com/, http://talkchess.com!
+També fer menció especial a mòduls de codi obert que son molt instructius, com Stockfish, Crafty, Protector, Discocheck, Gull...
+
+
+Versions
+========
+Teniu cinc versions al zip:
+* andscacsb.exe Windows 64 bits, requereix una Cpu amb suport BMI2 per la instrucció PEXT i és la més ràpida: (https://en.wikipedia.org/wiki/Bit_Manipulation_Instruction_Sets#BMI2_.28Bit_Manipulation_Instruction_Set_2.29)
+* andscacs.exe Windows 64 bits, requereix una Cpu amb suport per la instrucció POPCNT i és una mica més ràpida que les dues següents: (http://en.wikipedia.org/wiki/Bit_Manipulation_Instruction_Sets).
+* andscacsn.exe Windows 64 bits, no requereix cap instrucció especial.
+* andscacs32.exe per qualsevol Windows 32 bits. És uns 50 punts d'elo més dèbil.
+* linux/andscacs, una versió x64 popcnt per Linux.
+
+
+Exemples d'instal·lació
+=======================
+
+Primer posa el fitxer andscacs.exe a qualsevol carpeta que es vulgui.
+
+Amb arena, anar a "Engines" -> "Install new engine". Busca andscacs.exe. Selecciona Uci com a tipus de mòdul.
+
+Al Chessbase, començar una nova partida, anar a "Módulos" -> "Crear módulo UCI".
+Amb el botó "...", busca el fitxer andscacs.exe.
+
+
+Altres agraïments
+=================
+Capaç d'oferir més rendiment en màquines de més de 64 cores a Windows gràcies a un parxe de Texel i Stockfish:
+https://github.com/official-stockfish/Stockfish/commit/0d9a9f5e985c13852cf9f29767e95f295bb29575

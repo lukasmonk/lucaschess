@@ -41,7 +41,7 @@ class W_EligeMovimientos(QTVarios.WDialogo):
 
         # Tablero
         confTablero = VarGen.configuracion.confTablero("ELIGEMOVS", 24)
-        self.tablero = Tablero.TableroVisual(self, confTablero)
+        self.tablero = Tablero.Tablero(self, confTablero, siDirector=False)
         self.tablero.crea()
         self.tablero.desactivaTodas()
 

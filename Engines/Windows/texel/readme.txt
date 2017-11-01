@@ -15,11 +15,14 @@ The Texel distribution contains the following pre-compiled executables:
 
 texel-arm      : For the armv7-a architecture. Should work on most modern
                  android devices.
+texel-arm64    : For the armv8-a 64-bit architecture.
 texel32.exe    : For 32-bit windows systems with SSE42 and POPCOUNT.
 texel32old.exe : For 32-bit windows systems without SSE42 and POPCOUNT.
 texel64        : For 64-bit linux intel systems with SSE42 and POPCOUNT.
-texel64.exe    : For 64-bit windows intel systems with SSE42 and POPCOUNT.
+texel64.exe    : For 64-bit windows 7 or later intel systems with SSE42 and POPCOUNT.
 texel64amd.exe : For 64-bit windows systems with SSE42 and POPCOUNT.
+texel64bmi.exe : For 64-bit windows 7 or later intel systems with BMI2 and POPCOUNT.
+texel64cl.exe  : Cluster version of texel64.exe. Requires Microsoft MPI to be installed.
 texel64old.exe : For 64-bit windows systems without SSE42 and POPCOUNT.
 
 If you need an executable for a different system, see the "Compiling" section
@@ -38,8 +41,16 @@ Hash
 
 OwnBook
 
-  When set to true, Texel uses a small built in opening book. When set to false,
+  When set to true, Texel uses its own opening book. When set to false,
   Texel relies on the GUI to handle the opening book.
+
+BookFile
+
+  If set to the file name of an existing polyglot opening book file, Texel uses
+  this book when OwnBook is set to true. If set to an empty string, Texel uses
+  its own small built in book when OwnBook is true. BookFile is not used when
+  OwnBook is false. An opening book called texelbook.bin is included in this
+  distribution.
 
 Ponder
 
@@ -69,6 +80,11 @@ MultiPV
   position. This setting has no effect when playing games. The GUI normally
   handles this option so the user does not have to set it manually.
 
+UseNullMove
+
+  When set to true, the null move search heuristic is disabled. This can be
+  beneficial when analyzing positions where zugzwang is an important factor.
+
 GaviotaTbPath
 
   Semicolon separated list of directories that will be searched for Gaviota
@@ -94,6 +110,13 @@ Clear Hash
 
   When activated, clears the hash table and the history heuristic table, so that
   the next search behaves as if the engine had just been started.
+
+AnalysisAgeHash
+
+  When set to false the transposition table is not "aged" when starting a new
+  search in analysis mode. This helps keeping older but deeper entries around in
+  the transposition table, which is useful when analysing a position and making
+  and un-making moves to explore the position.
 
 
 Tablebases
@@ -156,11 +179,65 @@ that there are no more than one thread per core and such that as few NUMA nodes
 as possible are used. This arrangement speeds up memory accesses.
 
 
+Cluster
+-------
+
+Texel can run on computer clusters by using the MPI system. It has only been
+tested using MPICH in linux and MS-MPI in windows but should work with other MPI
+implementations as well.
+
+The pre-compiled windows executable texel64cl.exe is compiled and linked against
+MS-MPI version 8.1. It requires the MS-MPI redistributable package to be
+installed and configured on all computers in the cluster.
+
+Running on a cluster is an advanced functionality and probably requires some
+knowledge of cluster systems to set up.
+
+Texel uses a so called hybrid MPI design. This means that it uses a single MPI
+process per computer. On each computer it uses threads and shared memory, and
+optionally NUMA awareness.
+
+After texel has been started, use the "Threads" UCI option to control the total
+number of search threads to use. Texel automatically decides how many threads to
+use for each computer, and can also handle the case where different computers
+have different number of CPUs and cores.
+
+* Example using MPICH and linux:
+
+If there are 4 linux computers called host1, host2, host3, host4 and
+MPICH is installed on all computers, start Texel like this:
+
+  mpiexec -hosts host1,host2,host3,host4 /path/to/texel
+
+Note that /path/to/texel must be valid for all computers in the cluster, so
+either install texel on all computers or install it on a network disk that is
+mounted on all computers.
+
+Note that it must be possible to ssh from host1 to the other hosts without
+specifying a password. Use for example ssh-agent and ssh-add to achieve this.
+
+* Example using MS-MPI and windows:
+
+If there are two computers called host1 and host2 and MS-MPI is installed on
+both computers, proceed as follows:
+
+1. On all computers, log in as the same user.
+2. On all computers, add firewall exceptions to allow the programs mpiexec and
+   smpd (located in C:\Program Files\Microsoft MPI\Bin) to communicate over the
+   network.
+3. On all computers, start a command prompt and execute:
+   smpd -d 0
+4. Make sure texel is installed in the same directory on all computers.
+5. On the host1 computer, start a command prompt and execute:
+   cd /directory/where/texel/is/installed
+   mpiexec -hosts 2 host1 host2 texel64cl.exe
+
+
 Compiling
 ---------
 
-The distribution contains a Makefile set up to to compile the program using the
-GCC compiler.
+The distribution contains a Makefile set up to compile the program using the GCC
+compiler.
 
 To build a generic executable that does not require any special CPU
 instructions, type "make" in a terminal window.
@@ -174,3 +251,39 @@ terminal window.
 There are other targets in the Makefile that can be used to build versions
 optimized for Intel CPUs and versions using the POPCNT CPU instruction. See the
 Makefile for details.
+
+
+Additional source code
+----------------------
+
+Source code for Texel's automatic test suite is provided in the test directory.
+The test program can be compiled by typing "make texeltest" in a terminal
+window.
+
+Source code for various tools used during Texel development is provided in the
+util directory. The utility program can be compiled by typing "make texelutil"
+in a terminal window. Note that this program uses OpenMP and depends on the
+libraries armadillo and gsl. It may not work unmodified in Windows.
+
+Source code for an interactive interface to the texel book building algorithm is
+provided in the bookgui directory. It depends on gtkmm and can probably only be
+compiled in linux.
+
+
+Copyright
+---------
+
+The core Texel chess engine is developed by Peter Österlund, but Texel also
+contains auxiliary code written by other people:
+
+Gaviota Tablebases Probing Code, Copyright 2010 Miguel A. Ballicora.
+See src/gtb/readme.txt for more information.
+
+LZMA compression by Igor Pavlov, used by the Gaviota Tablebases Probing code.
+
+Syzygy tablebases probing code, Copyright 2011-2013 Ronald de Man.
+
+Chess Cases font by Matthieu Leschemelle, used by the opening book builder
+graphical user interface.
+
+CUTE unit testing framework, Copyright Peter Sommerlad and Emanuel Graf.

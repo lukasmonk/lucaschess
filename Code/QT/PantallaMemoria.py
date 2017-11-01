@@ -77,6 +77,7 @@ class WMemoria(QTVarios.WDialogo):
         self.tablero.ponDispatchDrop(self.dispatchDrop)
         self.tablero.baseCasillasSC.setAcceptDrops(True)
         self.ultimaPieza = "P"
+        self.piezas = self.tablero.piezas
 
         tamPiezas = max(16, int(32 * self.tablero.confTablero.anchoPieza() / 48))
         self.listaPiezasW = QTVarios.ListaPiezas(self, "P,N,B,R,Q,K", self.tablero, tamPiezas, margen=0)
@@ -289,6 +290,12 @@ class WMemoria(QTVarios.WDialogo):
         self.gbAyuda.setVisible(si)
         self.listaPiezasW.setEnabled(si)
         self.listaPiezasB.setEnabled(si)
+
+    def ponCursor(self):
+        cursor = self.piezas.cursor(self.ultimaPieza)
+        for item in self.tablero.escena.items():
+            item.setCursor(cursor)
+        self.tablero.setCursor(cursor)
 
     def comprobar(self):
 

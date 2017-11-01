@@ -3,6 +3,12 @@ import random
 import sys
 import webbrowser
 
+from Code import Routes
+from Code import Util
+from Code import VarGen
+from Code import XGestorMotor
+from Code.Constantes import *
+
 from Code import Albums
 from Code import CPU
 from Code import Configuracion
@@ -20,11 +26,13 @@ from Code import GestorCompeticion
 from Code import GestorPGN
 from Code import GestorPerson
 from Code import GestorRoutes
+from Code import GestorSingularM
 from Code import GestorSolo
 from Code import GestorPartida
 from Code import GestorTorneo
 from Code import Presentacion
 from Code import GestorWashing
+from Code import GestorPlayPGN
 from Code.QT import DatosNueva
 from Code.QT import Iconos
 from Code.QT import Info
@@ -41,10 +49,12 @@ from Code.QT import PantallaMotores
 from Code.QT import PantallaRoutes
 from Code.QT import PantallaSTS
 from Code.QT import PantallaSonido
+from Code.QT import PantallaSingularM
 from Code.QT import PantallaTorneos
 from Code.QT import PantallaUsuarios
 from Code.QT import PantallaWashing
 from Code.QT import PantallaWorkMap
+from Code.QT import PantallaPlayPGN
 from Code.QT import Piezas
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
@@ -52,13 +62,8 @@ from Code.QT import QTVarios
 from Code.QT import PantallaDatabase
 from Code.QT import PantallaManualSave
 from Code.QT import WBDatabaseFEN
-from Code.QT import WBGuide
-from Code import Routes
-from Code import Util
-from Code import VarGen
-from Code import XGestorMotor
-from Code import EngineThread
-from Code.Constantes import *
+from Code.QT import WOpeningGuide
+from Code.QT import PantallaKibitzers
 
 
 class Procesador:
@@ -66,7 +71,8 @@ class Procesador:
     Vinculo entre pantalla y gestores
     """
     def __init__(self):
-        self.liEngines = []
+        if VarGen.listaGestoresMotor is None:
+            VarGen.listaGestoresMotor = XGestorMotor.ListaGestoresMotor()
 
     def iniciaConUsuario(self, user):
 
@@ -75,8 +81,8 @@ class Procesador:
         self.web = "http://lucaschess.pythonanywhere.com"
         self.blog = "http://lucaschess.blogspot.com"
 
-        self.liOpcionesInicio = [k_terminar, k_play,
-                                 k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
+        self.liOpcionesInicio = [k_terminar, k_play, k_entrenamiento, k_competir,
+                                 k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
 
         self.configuracion = Configuracion.Configuracion(user)
         self.configuracion.start(self.version)
@@ -101,8 +107,6 @@ class Procesador:
         self.replayBeep = None
 
         self.liKibitzersActivas = []
-
-        self.liEngines = []
 
     def setVersion(self, version):
         self.version = version
@@ -193,6 +197,7 @@ class Procesador:
         self.siPresentacion = siEmpezar
         if not siEmpezar:
             self.cpu.stop()
+            self.tablero.ponerPiezasAbajo(True)
             self.tablero.activaMenuVisual(True)
             self.tablero.ponPosicion(self.posicionInicial)
             self.tablero.setToolTip("")
@@ -212,7 +217,7 @@ class Procesador:
             # Presentacion.basico( self, hx )
             # Presentacion.partidaDia(self, hx)
             self.tablero.activaMenuVisual(True)
-            self.gM1 = Presentacion.GestorM1(self)
+            Presentacion.GestorChallenge101(self)
 
             # self.cpu.start()
 
@@ -252,14 +257,14 @@ class Procesador:
             self.gestor.inicio(aplazamiento["IDGAME"], aplazamiento["SICOMPETITIVO"], aplazamiento=aplazamiento)
 
     def XTutor(self):
-        # if not self.xtutor:
-            # self.creaXTutor()
-        self.cambiaXTutor()
+        if self.xtutor is None or not self.xtutor.activo:
+            self.creaXTutor()
         return self.xtutor
 
     def creaXTutor(self):
         xtutor = XGestorMotor.GestorMotor(self, self.configuracion.tutor)
-        xtutor.opciones(self.configuracion.tiempoTutor, None, True)
+        xtutor.nombre += ("(%s)" % _("tutor"))
+        xtutor.opciones(self.configuracion.tiempoTutor, self.configuracion.depthTutor, True)
         if self.configuracion.tutorMultiPV == 0:
             xtutor.maximizaMultiPV()
         else:
@@ -268,8 +273,6 @@ class Procesador:
         self.xtutor = xtutor
         VarGen.xtutor = xtutor
 
-        self.liEngines.append(xtutor)
-
     def cambiaXTutor(self):
         if self.xtutor:
             self.xtutor.terminar()
@@ -277,14 +280,14 @@ class Procesador:
         self.cambiaXAnalyzer()
 
     def XAnalyzer(self):
-        if not self.xanalyzer:
+        if self.xanalyzer is None or not self.xanalyzer.activo:
             self.creaXAnalyzer()
-        self.cambiaXAnalyzer()
         return self.xanalyzer
 
     def creaXAnalyzer(self):
         xanalyzer = XGestorMotor.GestorMotor(self, self.configuracion.tutor)
-        xanalyzer.opciones(self.configuracion.tiempoTutor, None, True)
+        xanalyzer.nombre += ("(%s)" % _("analyzer"))
+        xanalyzer.opciones(self.configuracion.tiempoTutor, self.configuracion.depthTutor, True)
         if self.configuracion.tutorMultiPV == 0:
             xanalyzer.maximizaMultiPV()
         else:
@@ -293,24 +296,19 @@ class Procesador:
         self.xanalyzer = xanalyzer
         VarGen.xanalyzer = xanalyzer
 
-        self.liEngines.append(xanalyzer)
-
     def cambiaXAnalyzer(self):
         if self.xanalyzer:
             self.xanalyzer.terminar()
         self.creaXAnalyzer()
 
-    def creaGestorMotor(self, confMotor, tiempo, nivel, siMultiPV=False, priority=EngineThread.PRIORITY_NORMAL):
+    def creaGestorMotor(self, confMotor, tiempo, nivel, siMultiPV=False, priority=None):
         xgestor = XGestorMotor.GestorMotor(self, confMotor)
         xgestor.opciones(tiempo, nivel, siMultiPV)
         xgestor.setPriority(priority)
-        self.liEngines.append(xgestor)
         return xgestor
 
     def pararMotores(self):
-        for xgestormotor in self.liEngines:
-            xgestormotor.terminar()
-        self.liEngines = []
+        VarGen.listaGestoresMotor.closeAll()
 
     def cambiaRival(self, nuevo):
         """
@@ -322,29 +320,6 @@ class Procesador:
     def menuPlay(self):
         menu = QTVarios.LCMenu(self.pantalla)
         menu.opcion(("free", None), _("Play against an engine of your choice"), Iconos.Libre())
-        menu.separador()
-
-        menu.opcion(("competition", None), _("Competition"), Iconos.NuevaPartida())
-        menu.separador()
-
-        submenu = menu.submenu(_("Elo-Rating"), Iconos.Elo())
-        submenu.opcion(("lucaselo",0), "%s (%d)" % (_("Lucas-Elo"), self.configuracion.elo), Iconos.Elo())
-        submenu.separador()
-        submenu.opcion(("micelo",0), "%s (%d)" % (_("Tourney-Elo"), self.configuracion.michelo), Iconos.EloTimed())
-        submenu.separador()
-        fics = self.configuracion.fics
-        menuf = submenu.submenu("%s (%d)" % (_("Fics-Elo"), fics), Iconos.Fics())
-        rp = QTVarios.rondoPuntos()
-        for elo in range(900, 2800, 100):
-            if (elo == 900) or (0 <= (elo + 99 - fics) <= 400 or 0 <= (fics - elo) <= 400):
-                menuf.opcion(("fics", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
-        submenu.separador()
-        fide = self.configuracion.fide
-        menuf = submenu.submenu("%s (%d)" % (_("Fide-Elo"), fide), Iconos.Fide())
-        for elo in range(1500, 2700, 100):
-            if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
-                menuf.opcion(("fide", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
-
         menu.separador()
 
         # Principiantes ----------------------------------------------------------------------------------------
@@ -383,21 +358,6 @@ class Procesador:
             tipo, rival = resp
             if tipo == "free":
                 self.procesarAccion(k_libre)
-
-            elif tipo == "competition":
-                self.competicion()
-
-            elif tipo == "lucaselo":
-                self.lucaselo(True)
-
-            elif tipo == "micelo":
-                self.micelo(True)
-
-            elif tipo == "fics":
-                self.ficselo(True, rival)
-
-            elif tipo == "fide":
-                self.fideelo(True, rival)
 
             elif tipo == "person":
                 self.playPerson(rival)
@@ -468,6 +428,65 @@ class Procesador:
         self.gestor = GestorAlbum.GestorAlbum(self)
         self.gestor.inicio(album, cromo)
 
+    def menuCompetir(self):
+        menu = QTVarios.LCMenu(self.pantalla)
+        menu.opcion(("competition", None), _("Competition with tutor"), Iconos.NuevaPartida())
+        menu.separador()
+
+        submenu = menu.submenu(_("Elo-Rating"), Iconos.Elo())
+        submenu.opcion(("lucaselo",0), "%s (%d)" % (_("Lucas-Elo"), self.configuracion.elo), Iconos.Elo())
+        submenu.separador()
+        if VarGen.isWindows or VarGen.isWine:
+            submenu.opcion(("micelo",0), "%s (%d)" % (_("Tourney-Elo"), self.configuracion.michelo), Iconos.EloTimed())
+            submenu.separador()
+        fics = self.configuracion.fics
+        menuf = submenu.submenu("%s (%d)" % (_("Fics-Elo"), fics), Iconos.Fics())
+        rp = QTVarios.rondoPuntos()
+        for elo in range(900, 2800, 100):
+            if (elo == 900) or (0 <= (elo + 99 - fics) <= 400 or 0 <= (fics - elo) <= 400):
+                menuf.opcion(("fics", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
+        submenu.separador()
+        fide = self.configuracion.fide
+        menuf = submenu.submenu("%s (%d)" % (_("Fide-Elo"), fide), Iconos.Fide())
+        for elo in range(1500, 2700, 100):
+            if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
+                menuf.opcion(("fide", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
+        menu.separador()
+        submenu = menu.submenu(_("Singular moves"), Iconos.Singular())
+        submenu.opcion(("strenght101", 0), _("Calculate your strength"), Iconos.Strength())
+        submenu.separador()
+        submenu.opcion(("challenge101",0), _("Challenge 101"), Iconos.Wheel())
+
+        resp = menu.lanza()
+        if resp:
+            tipo, rival = resp
+            if tipo == "competition":
+                self.competicion()
+
+            elif tipo == "lucaselo":
+                self.lucaselo(True)
+
+            elif tipo == "micelo":
+                self.micelo(True)
+
+            elif tipo == "fics":
+                self.ficselo(True, rival)
+
+            elif tipo == "fide":
+                self.fideelo(True, rival)
+
+            elif tipo == "challenge101":
+                Presentacion.GestorChallenge101(self)
+
+            elif tipo == "strenght101":
+                self.strenght101()
+
+    def strenght101(self):
+        w = PantallaSingularM.WSingularM(self.pantalla, self.configuracion)
+        if w.exec_():
+            self.gestor = GestorSingularM.GestorSingularM(self)
+            self.gestor.inicio(w.sm)
+
     def procesarAccion(self, clave):
         if self.siPresentacion:
             self.presentacion(False)
@@ -475,11 +494,14 @@ class Procesador:
         if clave == k_terminar:
             if hasattr(self, "cpu"):
                 self.cpu.stop()
-            self.pantalla.guardarVideo()
+            self.pantalla.procesosFinales()
             self.pantalla.accept()
 
         elif clave == k_play:
             self.menuPlay()
+
+        elif clave == k_competir:
+            self.menuCompetir()
 
         elif clave == k_libre:
             self.libre()
@@ -594,8 +616,9 @@ class Procesador:
 
         menu.opcion("lucaselo", "%s (%d)" % (_("Lucas-Elo"), self.configuracion.elo), Iconos.Elo())
         menu.separador()
-        menu.opcion("micelo", "%s (%d)" % (_("Tourney-Elo"), self.configuracion.michelo), Iconos.EloTimed())
-        menu.separador()
+        if VarGen.isWindows or VarGen.isWine:
+            menu.opcion("micelo", "%s (%d)" % (_("Tourney-Elo"), self.configuracion.michelo), Iconos.EloTimed())
+            menu.separador()
         fics = self.configuracion.fics
         menuf = menu.submenu("%s (%d)" % (_("Fics-Elo"), fics), Iconos.Fics())
         rp = QTVarios.rondoPuntos()
@@ -697,6 +720,8 @@ class Procesador:
         menu1.opcion("sts", _("STS: Strategic Test Suite"), Iconos.STS())
         menu1.separador()
         menu1.opcion("motores", _("External engines"), Iconos.Motores())
+        menu1.separador()
+        menu1.opcion("kibitzers", _("Kibitzers"), Iconos.Kibitzer())
         menu.separador()
 
         resp = menu.lanza()
@@ -713,6 +738,8 @@ class Procesador:
                 self.motoresExternos()
             elif resp == "sts":
                 self.sts()
+            elif resp == "kibitzers":
+                self.kibitzers()
 
             elif resp == "manual_save":
                 self.manual_save()
@@ -726,8 +753,12 @@ class Procesador:
             elif resp == "aperturaspers":
                 self.aperturaspers()
             elif resp == "bookguide":
-                w = WBGuide.WBGuide(self.pantalla, self)
+                w = WOpeningGuide.WOpeningGuide(self.pantalla, self)
                 w.exec_()
+
+    def kibitzers(self):
+        w = PantallaKibitzers.WKibitzers(self.pantalla, self)
+        w.exec_()
 
     def externBMT(self, fichero):
         self.configuracion.ficheroBMT = fichero
@@ -803,10 +834,13 @@ class Procesador:
         dic["FINEXIT"] = True
         self.gestor.inicio(dic)
 
-    def jugarSolo(self, fichero=None, pgn=None):
+    def jugarSolo(self, fichero=None, pgn=None, partida=None):
         self.gestor = GestorSolo.GestorSolo(self)
-        if pgn:
+        if pgn is not None:
             dic = GestorSolo.pgn_pks(kJugando, pgn)
+            self.gestor.inicio(dic)
+        elif partida is not None:
+            dic = GestorSolo.partida_pks(kJugando, partida)
             self.gestor.inicio(dic)
         else:
             self.gestor.inicio(fichero=fichero)
@@ -848,6 +882,25 @@ class Procesador:
         if PantallaEverest.show_expedition(self.pantalla, self.configuracion, recno):
             self.playEverest(recno)
 
+    def playPGN(self):
+        w = PantallaPlayPGN.WPlayBase(self)
+        if w.exec_():
+            recno = w.recno
+            if recno is not None:
+                siBlancas = w.siBlancas
+                self.gestor = GestorPlayPGN.GestorUnJuego(self)
+                self.gestor.inicio(recno, siBlancas)
+
+    def playPGNshow(self, recno):
+        db = PantallaPlayPGN.PlayPGNs(self.configuracion.ficheroPlayPGN)
+        w = PantallaPlayPGN.WPlay1(self.pantalla, self.configuracion, db, recno)
+        if w.exec_():
+            if w.recno is not None:
+                siBlancas = w.siBlancas
+                self.gestor = GestorPlayPGN.GestorUnJuego(self)
+                self.gestor.inicio(w.recno, siBlancas)
+        db.close()
+
     def showTurnOnLigths(self, name):
         self.entrenamientos.turn_on_lights(name)
 
@@ -860,7 +913,6 @@ class Procesador:
 
     def informacion(self):
         liBlog = (
-            ("Director", "http://lucaschess.blogspot.com.es/2012/05/director.html"),
             ("Tactical training with your own blunders",
              "http://lucaschess.blogspot.com.es/2011/11/tactical-training-with-your-own.html"),
             ("Announcements sounds", "http://lucaschess.blogspot.com.es/2011/10/announcements-sounds.html"),
@@ -952,10 +1004,10 @@ class Procesador:
     def clonVariantes(self, wpantalla, liKibitzersActivas=None, xtutor=None):
         if liKibitzersActivas is None:
             liKibitzersActivas = []
-        return ProcesadorVariantes(wpantalla, liKibitzersActivas, xtutor, self.liEngines)
+        return ProcesadorVariantes(wpantalla, liKibitzersActivas, xtutor)
 
     def gestorUnPGN(self, wpantalla, pgn, jugadaInicial=None, siGrabar=True):
-        clonProcesador = ProcesadorVariantes(wpantalla, self.liKibitzersActivas, self.xtutor, self.liEngines)
+        clonProcesador = ProcesadorVariantes(wpantalla, self.liKibitzersActivas, self.xtutor)
 
         clonProcesador.gestor = GestorSolo.GestorSolo(clonProcesador)
         clonProcesador.gestor.inicio(pgn=pgn, jugadaInicial=jugadaInicial, siGrabar=siGrabar)
@@ -965,7 +1017,7 @@ class Procesador:
         return getattr(clonProcesador, "valorPGN", (None, None, None))
 
     def gestorPartida(self, wpantalla, partidaCompleta, siCompleta):
-        clonProcesador = ProcesadorVariantes(wpantalla, self.liKibitzersActivas, self.xtutor, self.liEngines)
+        clonProcesador = ProcesadorVariantes(wpantalla, self.liKibitzersActivas, self.xtutor)
 
         clonProcesador.gestor = GestorPartida.GestorPartida(clonProcesador)
         clonProcesador.gestor.inicio(partidaCompleta, siCompleta)
@@ -978,24 +1030,19 @@ class Procesador:
     def saveAsPKS(self, estado, partida, pgn):
         dic = GestorSolo.pgn_pks(estado, pgn)
         dic["PARTIDA"] = partida.guardaEnTexto()
-
         return dic
-
-    # def saveAsJSON(self, estado, partida, pgn):
-    #     dic = GestorSolo.pgn_json(estado, pgn)
-    #     return dic
 
 
 class ProcesadorVariantes(Procesador):
 
-    def __init__(self, wpantalla, liKibitzersActivas, xtutor, liEngines):
+    def __init__(self, wpantalla, liKibitzersActivas, xtutor):
         self.liKibitzersActivas = liKibitzersActivas
 
         # self.configuracion = copy.deepcopy( VarGen.configuracion )
         self.configuracion = VarGen.configuracion
 
-        self.liOpcionesInicio = [k_terminar, k_play, k_competicion, k_elo,
-                                 k_entrenamiento, k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
+        self.liOpcionesInicio = [k_terminar, k_play, k_entrenamiento, k_competir,
+                                 k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada
 
         self.siPresentacion = False
 
@@ -1014,4 +1061,3 @@ class ProcesadorVariantes(Procesador):
         self.posicionInicial = None
 
         self.cpu = CPU.CPU(self.pantalla)
-        self.liEngines = liEngines

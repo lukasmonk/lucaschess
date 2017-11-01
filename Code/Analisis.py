@@ -149,8 +149,8 @@ class AnalizaPartida:
             return
 
         # Esta creado el folder
-        before = "BeforeBlunders.fns"
-        after = "AfterBlunders.fns"
+        before = "AvoidBlunders.fns"
+        after = "ExploitBlunders.fns"
         if not os.path.isdir(self.tacticblunders):
             dtactics = os.path.join(self.configuracion.dirPersonalTraining, "Tactics")
             if not os.path.isdir(dtactics):
@@ -600,7 +600,7 @@ class UnaMuestra:
         self.posMovActual = 0
 
     def pgnActual(self):
-        return self.partida.pgnSP(self.mAnalisis.posJugada / 2 + 1)
+        return self.partida.pgnHTML(self.mAnalisis.posJugada / 2 + 1, siFigurines=self.siFigurines)
 
     def puntuacionActual(self):
         rm = self.listaRM[self.posRMactual][0]
@@ -705,19 +705,20 @@ class MuestraAnalisis:
         if hasattr(jg, "analisis") and jg.analisis:
             mrm, pos = jg.analisis
         else:
-            me = QTUtil2.mensEspera.inicio(pantalla, _("Analyzing the move...."), posicion="ad")
+            me = QTUtil2.mensEspera.inicio(pantalla, _("Analyzing the move...."), posicion="ad") #, siCancelar=True)
             mrm, pos = xmotor.analizaJugada(jg, xmotor.motorTiempoJugada, xmotor.motorProfundidad)
             jg.analisis = mrm, pos
-
             me.final()
+
         um = UnaMuestra(self, mrm, pos, 0, xmotor)
         self.liMuestras.append(um)
         return um
 
     def creaMuestra(self, pantalla, alm):
         xmotor = None
+        busca = alm.motor[1:] if alm.motor.startswith("*") else alm.motor
         for um in self.liMuestras:
-            if um.xmotor.clave == alm.motor:
+            if um.xmotor.clave == busca:
                 xmotor = um.xmotor
                 xmotor.actMultiPV(alm.multiPV)
                 break
@@ -725,6 +726,7 @@ class MuestraAnalisis:
             confMotor = self.configuracion.buscaMotor(alm.motor)
             confMotor.actMultiPV(alm.multiPV)
             xmotor = self.procesador.creaGestorMotor(confMotor, alm.tiempo, alm.depth, siMultiPV=True)
+
         me = QTUtil2.mensEspera.inicio(pantalla, _("Analyzing the move...."), posicion="ad")
         mrm, pos = xmotor.analizaJugada(self.jg, alm.tiempo, alm.depth)
         me.final()
@@ -741,6 +743,8 @@ def muestraAnalisis(procesador, xtutor, jg, siBlancas, maxRecursion, posJugada, 
     if xtutor is None:
         xtutor = procesador.XTutor()
     um0 = ma.creaMuestraInicial(pantalla, xtutor)
+    if not um0:
+        return
     siLibre = maxRecursion > 0
     wa = PantallaAnalisis.WAnalisis(ma, pantalla, siBlancas, siLibre, siGrabar, um0)
     wa.exec_()
@@ -860,7 +864,7 @@ class AnalisisVariantes:
             elif accion == "MoverFEN":
                 jg = self.partidaTutor.jugada(self.posTutor)
                 QTUtil.ponPortapapeles(jg.posicion.fen())
-                QTUtil2.mensajeTemporal(self.w, _("FEN is in clipboard"), 1)
+                QTUtil2.mensaje(self.w, _("FEN is in clipboard"))
 
     def mueveTutor(self, siInicio=False, nSaltar=0, siFinal=False, siBase=False):
         if nSaltar:

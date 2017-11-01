@@ -191,9 +191,8 @@ class WBase(QtGui.QWidget):
 
         liOpciones = ((_("Quit"), Iconos.Terminar(), k_terminar),
                       (_("Play"), Iconos.Libre(), k_play),
-                      # (_("Competition"), Iconos.NuevaPartida(), k_competicion),
-                      # (_("Elo-Rating"), Iconos.Elo(), k_elo),
-                      (_("Training"), Iconos.Entrenamiento(), k_entrenamiento),
+                      (_("Compete"), Iconos.NuevaPartida(), k_competir),
+                      (_("Train"), Iconos.Entrenamiento(), k_entrenamiento),
                       (_("Options"), Iconos.Opciones(), k_opciones),
                       (_("Information"), Iconos.Informacion(), k_informacion),
                       (_("Save"), Iconos.Grabar(), k_grabar),
@@ -437,55 +436,7 @@ class WBase(QtGui.QWidget):
         return pgn, color, info, indicadorInicial, liNAGs
 
     def gridPonValor(self, grid, fila, oColumna, valor):
-        """
-        Al a_adir los editores, pasa por aqui
-        """
         pass
-        # ~ #--------------------------------------------------------------------------------------------------------------------------------
-        # ~ def gridColorTexto( self, fila, oColumna ):
-        # ~ analisis = self.gestor.pgn.analisis(fila, oColumna.clave)
-        # ~ if analisis:
-        # ~ mate = analisis.mate
-        # ~ if mate:
-        # ~ return self.colorBlanco
-        # ~ else:
-        # ~ puntos = analisis.puntos
-        # ~ if puntos > 0:
-        # ~ if puntos < 1000:
-        # ~ return self.colorPositivo.darker( 1000-puntos )
-        # ~ else:
-        # ~ return self.colorBlanco
-        # ~ else:
-        # ~ if puntos > -1000:
-        # ~ return self.colorNegativo.darker( -(-1000-puntos) )
-        # ~ else:
-        # ~ return self.colorBlanco
-
-        # ~ return None
-        # ~ #--------------------------------------------------------------------------------------------------------------------------------
-        # ~ def gridColorFondo( self, fila, oColumna ):
-        # ~ analisis = self.gestor.pgn.analisis(fila, oColumna.clave)
-        # ~ if analisis:
-        # ~ mate = analisis.mate
-        # ~ if mate:
-        # ~ if mate < 0:
-        # ~ return self.colorMateNegativo
-        # ~ else:
-        # ~ return self.colorMatePositivo
-        # ~ else:
-        # ~ puntos = analisis.puntos
-        # ~ if puntos > 0:
-        # ~ if puntos < 1000:
-        # ~ return self.colorPositivo.lighter( 1000-puntos )
-        # ~ else:
-        # ~ return self.colorPositivo
-        # ~ else:
-        # ~ if puntos > -1000:
-        # ~ return self.colorNegativo.lighter( -(-1000-puntos) )
-        # ~ else:
-        # ~ return self.colorNegativo
-
-        # ~ return None
 
     def keyPressEvent(self, event):
         self.teclaPulsada("V", event.key())
@@ -631,10 +582,14 @@ class WBase(QtGui.QWidget):
         return self.lbRotulo3
 
     def ponRelojBlancas(self, tm, tm2):
-        self.lbRelojBlancas.ponTexto(tm + '<br><FONT SIZE="-4">' + tm2)
+        if tm2 is not None:
+            tm += '<br><FONT SIZE="-4">' + tm2
+        self.lbRelojBlancas.ponTexto(tm)
 
     def ponRelojNegras(self, tm, tm2):
-        self.lbRelojNegras.ponTexto(tm + '<br><FONT SIZE="-4">' + tm2)
+        if tm2 is not None:
+            tm += '<br><FONT SIZE="-4">' + tm2
+        self.lbRelojNegras.ponTexto(tm)
 
     def creaCapturas(self):
         self.capturas = WCapturas.CapturaLista(self, self.tablero)

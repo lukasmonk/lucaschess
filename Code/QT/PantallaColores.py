@@ -960,9 +960,20 @@ def cambiaColores(parent, configuracion):
     config = FormLayout.Colorbox(dicNAGs[6], 40, 20, siSTR=True)
     liPGN.append((config, configuracion.color_nag6))
 
+    liTables = []
+    liTables.append(separador)
+    liTables.append((_("By default") + ":", False))
+    liTables.append(separador)
+
+    liTables.append((None, _("Selected row")))
+    config = FormLayout.Colorbox(_("Background"), 40, 20, siSTR=True)
+    color = "#678DB2" if configuracion.tablaSelBackground is None else configuracion.tablaSelBackground
+    liTables.append((config, color))
+
     lista = []
     lista.append((liColor, _("Windows"), ""))
     lista.append((liPGN, _("PGN"), ""))
+    lista.append((liTables, _("Tables"), ""))
 
     # Editamos
     resultado = FormLayout.fedit(lista, title=_("Colors"), parent=parent, anchoMinimo=240, icon=Iconos.Opciones())
@@ -970,7 +981,7 @@ def cambiaColores(parent, configuracion):
     if resultado:
         accion, resp = resultado
 
-        liColor, liPGN = resp
+        liColor, liPGN, liTables = resp
 
         if liColor[0]:
             palette = None
@@ -985,6 +996,12 @@ def cambiaColores(parent, configuracion):
         else:
             (configuracion.color_nag1, configuracion.color_nag2, configuracion.color_nag3,
              configuracion.color_nag4, configuracion.color_nag5, configuracion.color_nag6) = liPGN[1:]
+
+        if liTables[0]:
+            configuracion.tablaSelBackground = None
+        else:
+            configuracion.tablaSelBackground = liTables[1]
+
         configuracion.graba()
 
         return True

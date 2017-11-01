@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/main">
+    <file compressed="true" preprocess="xml-stripblanks">bookgui_glade.xml</file>
+  </gresource>
+  <gresource prefix="/font">
+    <file compressed="false">ChessCases.ttf</file>
+  </gresource>
+</gresources>

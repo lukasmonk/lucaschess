@@ -187,7 +187,7 @@ def listSTD():
             (_("Budapest: Fajarowicz, Steiner variation"), "A51", "d2d4 g8f6 c2c4 e7e5 d4e5 f6e4 d1c2", "1. d4 Nf6 2. c4 e5 3. dxe5 Ne4 4. Qc2", False),
             (_("Budapest: Rubinstein variation"), "A52", "d2d4 g8f6 c2c4 e7e5 d4e5 f6g4 c1f4", "1. d4 Nf6 2. c4 e5 3. dxe5 Ng4 4. Bf4", False),
             (_("Canard opening"), "A45", "d2d4 g8f6 f2f4", "1. d4 Nf6 2. f4", False),
-            (_("Caro-Kann defence"), "B10", "e2e4 c7c6", "1. e4 c6", False),
+            (_("Caro-Kann defence"), "B10", "e2e4 c7c6", "1. e4 c6", True),
             (_("Caro-Kann: 3.Nd2"), "B12", "e2e4 c7c6 d2d4 d7d5 b1d2", "1. e4 c6 2. d4 d5 3. Nd2", False),
             (_("Caro-Kann: Alekhine gambit"), "B15", "e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 f1d3", "1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nf6 5. Bd3", False),
             (_("Caro-Kann: Bronstein-Larsen variation"), "B16", "e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 e4f6 g7f6", "1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nf6 5. Nxf6+ gxf6", False),
@@ -2143,6 +2143,7 @@ def dicTraining():
         "Attacking Defender": _("Attacking Defender"),
 
         "All tactics": _("All tactics"),
+        'Pawn endings': _("Pawn endings")
     }
 
     for n in range(1,10):
@@ -2221,7 +2222,6 @@ def transsiberian():
                 "Irkutsk": _("Irkutsk"),
                 "Ulan-Ude": _("Ulan-Ude"),
                 "Chita": _("Chita"),
-                "Skovrodino": _("Skovrodino"),
                 "Belogorsk": _("Belogorsk"),
                 "Khabarovsk": _("Khabarovsk"),
                 "Vladivostok": _("Vladivostok"),

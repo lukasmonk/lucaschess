@@ -1,6 +1,6 @@
 from PyQt4 import QtGui
 
-from Code import BookGuide
+from Code import OpeningGuide
 from Code import DBgames
 from Code.QT import Colocacion
 from Code.QT import Controles
@@ -26,7 +26,7 @@ class WBDatabase(QTVarios.WDialogo):
 
         dicVideo = self.recuperarDicVideo()
 
-        self.bookGuide = BookGuide.BookGuide(self)
+        self.bookGuide = OpeningGuide.OpeningGuide(self)
         self.wsummary = WBG_Summary.WSummary(procesador, self, self.dbGames, siMoves=False)
 
         self.wgames = WBG_Games.WGames(procesador, self, self.dbGames, self.wsummary, siMoves=False)

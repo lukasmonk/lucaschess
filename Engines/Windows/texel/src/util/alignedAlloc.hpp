@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2013  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,16 +36,7 @@ private:
     enum { ALIGN = 64 };
     using U64 = uint64_t;
 public:
-    using pointer = T*;
-    using const_pointer = const T*;
-    using void_pointer = void*;
-    using const_void_pointer = const void*;
-    using reference = T&;
-    using const_reference = const T&;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
     using value_type = T;
-    template <typename U> struct rebind { using other = AlignedAllocator<U>; };
 
     T* allocate(size_t n) {
         size_t needed_size = n*sizeof(T) + sizeof(U64) + ALIGN;
@@ -61,18 +52,6 @@ public:
     void deallocate(T* p, size_t n) {
         U64 mem = *(U64*)(((U64)p) - sizeof(U64));
         free((void*)mem);
-    }
-
-    size_t max_size() const {
-        return (std::numeric_limits<size_t>::max() - ALIGN - sizeof(U64)) / sizeof(T);
-    }
-
-    void construct(T* p, const T& value) {
-        new (p) T(value);
-    }
-
-    void destroy(T* p) {
-        p->~T();
     }
 
     template <typename U>

@@ -78,8 +78,8 @@ class WEngine:
 
     def cindex(self):
         return "%0.02f" % self.index()
-        x = self.elo - self.hints*5 - self.games*47
-        return x*100.0/self.elo if x > 0 else 0.0
+        #x = self.elo - self.hints*5 - self.games*47
+        #return x*100.0/self.elo if x > 0 else 0.0
 
     def lbTime(self):
         return Util.secs2str(self.secs)
@@ -105,7 +105,7 @@ class WEngine:
             games=self.games,
             state=self.state,
             liNumTactics=self.liNumTactics,
-            date = self.date,
+            date=self.date,
         )
         return d
 
@@ -223,11 +223,11 @@ class Washing:
 
     def saveGame(self, db, game, siFinal):
         eng = self.liEngines[-1]
-        eng.saveGame(db, game)
         if siFinal:
             self.assign_tactics(eng)
             if eng.state == ENDED:
                 eng.assign_date()
+        eng.saveGame(db, game)
         self.save(db)
 
     def createTactics(self, db, tipo):
@@ -235,11 +235,13 @@ class Washing:
             self.createTacticsUNED(db)
         elif tipo == "UWE":
             self.createTacticsUWE(db)
+        elif tipo == "SM":
+            self.createTacticsSM(db)
         else:
             self.createTacticsUNED(db)
 
     def createTacticsUNED(self, db):
-        folder = "Trainings/Tactics by UNED chess school"
+        folder = "./Trainings/Tactics by UNED chess school"
         li = []
         for fns in os.listdir(folder):
             if fns.endswith(".fns"):
@@ -254,7 +256,7 @@ class Washing:
         db["POSTACTICS"] = 0
 
     def createTacticsUWE(self, db):
-        folder = "Trainings/Tactics by Uwe Auerswald"
+        folder = "./Trainings/Tactics by Uwe Auerswald"
         d = {}
         for x in range(1, 6):
             d[x] = []
@@ -271,7 +273,23 @@ class Washing:
             random.shuffle(d[x])
             li.extend(d[x])
 
-        self.liTactics =  li
+        self.liTactics = li
+        db["TACTICS"] = li
+        self.posTactics = 0
+        db["POSTACTICS"] = 0
+
+    def createTacticsSM(self, db):
+        file = "./IntFiles/tactic0.bm"
+        li = []
+        with open(file) as f:
+            for linea in f:
+                linea = linea.strip()
+                if linea:
+                    fen, a8, mov, pgn, dif = linea.split("|")
+                    li.append("%s|%s %s|%s" %(fen, _("Difficulty"), dif, mov))
+
+        li = random.sample(li, 1000)
+        self.liTactics = li
         db["TACTICS"] = li
         self.posTactics = 0
         db["POSTACTICS"] = 0
@@ -352,6 +370,8 @@ class DBWashing:
     def done_reinit(self, engine):
         self.washing.assign_tactics(engine)
         if engine.state == ENDED:
+            engine.assign_date()
+
             with Util.DicRaw(self.file) as db:
                 db.pack()
         self.saveWashing()

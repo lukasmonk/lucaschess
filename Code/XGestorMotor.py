@@ -1,9 +1,25 @@
 import LCEngine
 
+from Code import VarGen
 from Code import XMotor
 from Code import XMotorRespuesta
 from Code import EngineThread
 from Code.Constantes import *
+
+
+class ListaGestoresMotor:
+    def __init__(self):
+        self.lista = []
+
+    def append(self, gestorMotor):
+        self.lista.append(gestorMotor)
+
+    def listaActivos(self):
+        return [gestorMotor for gestorMotor in self.lista if gestorMotor.activo]
+
+    def closeAll(self):
+        for gestorMotor in self.lista:
+            gestorMotor.terminar()
 
 
 class GestorMotor:
@@ -16,11 +32,14 @@ class GestorMotor:
         self.clave = confMotor.clave
         self.nMultiPV = 0
 
-        self.priority = EngineThread.PRIORITY_NORMAL
+        self.priority = EngineThread.priorities.normal
 
         self.dispatching = None
 
+        self.activo = True  # No es suficiente con motor == None para saber si esta activo y se puede logear
+
         self.direct = direct
+        VarGen.listaGestoresMotor.append(self)
 
     def set_direct(self):
         self.direct = True
@@ -40,7 +59,7 @@ class GestorMotor:
         self.motorProfundidad = profundidad
 
     def setPriority(self, priority):
-        self.priority = priority
+        self.priority = priority if priority else EngineThread.priorities.normal
 
     def maximizaMultiPV(self):
         self.nMultiPV = 9999
@@ -76,7 +95,7 @@ class GestorMotor:
         args = self.confMotor.argumentos()
         liUCI = self.confMotor.liUCI
         if self.direct:
-            self.motor = XMotor.DirectMotor(self.nombre, exe, liUCI, self.nMultiPV, args=args)
+            self.motor = XMotor.FastEngine(self.nombre, exe, liUCI, self.nMultiPV, priority=self.priority, args = args)
         else:
             self.motor = XMotor.XMotor(self.nombre, exe, liUCI, self.nMultiPV, priority=self.priority, args = args)
         if self.confMotor.siDebug:
@@ -189,6 +208,7 @@ class GestorMotor:
         if self.motor:
             self.motor.close()
             self.motor = None
+            self.activo = False
 
     def analizaJugada(self, jg, tiempo, depth=0, brDepth=5, brPuntos=50):
         self.testEngine()

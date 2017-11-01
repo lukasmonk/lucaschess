@@ -302,3 +302,9 @@ class ListaColumnas:
             if clave not in liActual:
                 return clave
             numero += 1
+
+    def buscaColumna(self, clave):
+        for col in self.liColumnas:
+            if col.clave == clave:
+                return col
+        return None

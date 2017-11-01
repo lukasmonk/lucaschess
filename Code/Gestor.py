@@ -12,6 +12,8 @@ from Code import ControlPGN
 from Code import DGT
 from Code import Jugada
 from Code import Partida
+from Code import DBgames
+from Code import DBgamesFEN
 from Code.QT import Histogram
 from Code.QT import FormLayout
 from Code.QT import Iconos
@@ -20,14 +22,15 @@ from Code.QT import PantallaArbol
 from Code.QT import PantallaArbolBook
 from Code.QT import PantallaSavePGN
 from Code.QT import PantallaTutor
+from Code.QT import PantallaKibitzers
 from Code.QT import Pelicula
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
-from Code.QT import WBGuide
+from Code.QT import WOpeningGuide
 from Code import Util
 from Code import VarGen
-from Code import XKibitzers
+from Code import Kibitzers
 from Code import XRun
 from Code.Constantes import *
 
@@ -233,9 +236,6 @@ class Gestor:
         if a1h8 is None or not self.tablero.siActivasPiezas:
             self.atajosRatonReset()
             return
-        # Que hay en esa casilla:
-        # vacia o pieza contraria = destino
-        # pieza nuestra = origen
 
         numJugadas, nj, fila, siBlancas = self.jugadaActual()
         if nj < numJugadas - 1:
@@ -246,96 +246,131 @@ class Gestor:
 
         posicion = self.partida.ultPosicion
         LCEngine.setFen(posicion.fen())
-        li = LCEngine.getExMoves()
-        if not li:
+        li_moves = LCEngine.getExMoves()
+        if not li_moves:
             return
 
         # Se comprueba si algun movimiento puede empezar o terminar ahi
-        siOrigen = siDestino = False
-        for mov in li:
+        li_destinos = []
+        li_origenes = []
+        for mov in li_moves:
             desde = mov.desde()
             hasta = mov.hasta()
             if a1h8 == desde:
-                siOrigen = True
-                break
+                li_destinos.append(hasta)
             if a1h8 == hasta:
-                siDestino = True
-                break
-        if not (siOrigen or siDestino):
+                li_origenes.append(desde)
+        if not (li_destinos or li_origenes):
             self.atajosRatonReset()
             return
 
-        siPredictivo = self.configuracion.siAtajosRaton
+        def mueve():
+            self.tablero.muevePiezaTemporal(self.atajosRatonOrigen, self.atajosRatonDestino)
+            if (not self.tablero.mensajero(self.atajosRatonOrigen, self.atajosRatonDestino)) and self.atajosRatonOrigen:
+                self.tablero.reponPieza(self.atajosRatonOrigen)
+            self.atajosRatonReset()
 
-        pieza = posicion.casillas.get(a1h8, None)
-        if pieza is None:
-            self.atajosRatonDestino = a1h8
-        elif self.siJugamosConBlancas:
-            if pieza.isupper():
-                self.atajosRatonOrigen = a1h8
-            else:
-                self.atajosRatonDestino = a1h8
-        else:
-            if pieza.isupper():
-                self.atajosRatonDestino = a1h8
-            else:
-                self.atajosRatonOrigen = a1h8
-
-        if not siPredictivo:
-            if self.atajosRatonOrigen and self.atajosRatonDestino:
-                self.tablero.muevePiezaTemporal(self.atajosRatonOrigen, self.atajosRatonDestino)
-                if not self.tablero.mensajero(self.atajosRatonOrigen, self.atajosRatonDestino):
-                    self.tablero.reponPieza(self.atajosRatonOrigen)
-                self.atajosRatonReset()
-            elif not self.atajosRatonOrigen:
-                self.atajosRatonReset()
-            elif self.configuracion.showCandidates:
+        def showCandidates():
+            if self.configuracion.showCandidates:
                 liC = []
-                for mov in li:
+                for mov in li_moves:
                     a1 = mov.desde()
                     h8 = mov.hasta()
                     if a1 == self.atajosRatonOrigen:
                         liC.append((h8, "C"))
-                self.otherCandidates(li, posicion, liC)
+                self.otherCandidates(li_moves, posicion, liC)
                 self.tablero.showCandidates(liC)
+
+        if not self.configuracion.siAtajosRaton:
+            if li_destinos:
+                self.atajosRatonOrigen = a1h8
+                if self.atajosRatonDestino and self.atajosRatonDestino in li_destinos:
+                    mueve()
+                else:
+                    self.atajosRatonDestino = None
+                    showCandidates()
+                return
+            elif li_origenes:
+                self.atajosRatonDestino = a1h8
+                if self.atajosRatonOrigen and self.atajosRatonOrigen in li_origenes:
+                    mueve()
+                else:
+                    self.atajosRatonOrigen = None
+                    showCandidates()
             return
 
-        # else tipo = predictivo
-        # Si no es posible el movimiento -> y estan los dos -> reset + nuevo intento
-        # Miramos todos los movimientos que cumplan
-        liC = []
-        for mov in li:
-            a1 = mov.desde()
-            h8 = mov.hasta()
-            siO = (self.atajosRatonOrigen == a1) if self.atajosRatonOrigen else None
-            siD = (self.atajosRatonDestino == h8) if self.atajosRatonDestino else None
+        if li_origenes:
+            self.atajosRatonDestino = a1h8
+            if self.atajosRatonOrigen and self.atajosRatonOrigen in li_origenes:
+                mueve()
+            elif len(li_origenes) == 1:
+                self.atajosRatonOrigen = li_origenes[0]
+                mueve()
+            else:
+                showCandidates()
+            return
 
-            if (siO and siD) or ((siO is None) and siD) or ((siD is None) and siO):
-                t = (a1, h8)
-                if not (t in liC):
-                    liC.append(t)
+        if li_destinos:
+            self.atajosRatonOrigen = a1h8
+            if self.atajosRatonDestino and self.atajosRatonDestino in li_destinos:
+                mueve()
+            elif len(li_destinos) == 1:
+                self.atajosRatonDestino = li_destinos[0]
+                mueve()
+            else:
+                showCandidates()
+            return
 
-        nlc = len(liC)
-        if nlc == 0:
-            if (self.atajosRatonDestino == a1h8) and self.atajosRatonOrigen and self.atajosRatonOrigen != a1h8:
-                self.atajosRatonOrigen = None
-                self.atajosRaton(a1h8)
-        elif nlc == 1:
-            desde, hasta = liC[0]
-            self.tablero.muevePiezaTemporal(desde, hasta)
-            if not self.tablero.mensajero(desde, hasta):
-                    self.tablero.reponPieza(desde)
-            self.atajosRatonReset()
-        elif self.configuracion.showCandidates:
+        # if self.atajosRatonOrigen and self.atajosRatonDestino:
+        #     elif not self.atajosRatonOrigen:
+        #         self.atajosRatonReset()
+        #     elif self.configuracion.showCandidates:
+        #         liC = []
+        #         for mov in li_moves:
+        #             a1 = mov.desde()
+        #             h8 = mov.hasta()
+        #             if a1 == self.atajosRatonOrigen:
+        #                 liC.append((h8, "C"))
+        #         self.otherCandidates(li_moves, posicion, liC)
+        #         self.tablero.showCandidates(liC)
+        #     return
 
-            # -CONTROL-
-            if hasattr(self.pgn, "jugada"):  # gestor60 no tiene por ejemplo
-                if self.atajosRatonOrigen:
-                    liC = [(hasta, "C") for desde, hasta in liC]
-                else:
-                    liC = [(desde, "C") for desde, hasta in liC]
-                self.otherCandidates(li, posicion, liC)
-                self.tablero.showCandidates(liC)
+        # # else tipo = predictivo
+        # # Si no es posible el movimiento -> y estan los dos -> reset + nuevo intento
+        # # Miramos todos los movimientos que cumplan
+        # liC = []
+        # for mov in li_moves:
+        #     a1 = mov.desde()
+        #     h8 = mov.hasta()
+        #     siO = (self.atajosRatonOrigen == a1) if self.atajosRatonOrigen else None
+        #     siD = (self.atajosRatonDestino == h8) if self.atajosRatonDestino else None
+
+        #     if (siO and siD) or ((siO is None) and siD) or ((siD is None) and siO):
+        #         t = (a1, h8)
+        #         if not (t in liC):
+        #             liC.append(t)
+
+        # nlc = len(liC)
+        # if nlc == 0:
+        #     if (self.atajosRatonDestino == a1h8) and self.atajosRatonOrigen and self.atajosRatonOrigen != a1h8:
+        #         self.atajosRatonOrigen = None
+        #         self.atajosRaton(a1h8)
+        # elif nlc == 1:
+        #     desde, hasta = liC[0]
+        #     self.tablero.muevePiezaTemporal(desde, hasta)
+        #     if not self.tablero.mensajero(desde, hasta):
+        #             self.tablero.reponPieza(desde)
+        #     self.atajosRatonReset()
+        # elif self.configuracion.showCandidates:
+
+        #     # -CONTROL-
+        #     if hasattr(self.pgn, "jugada"):  # gestor60 no tiene por ejemplo
+        #         if self.atajosRatonOrigen:
+        #             liC = [(hasta, "C") for desde, hasta in liC]
+        #         else:
+        #             liC = [(desde, "C") for desde, hasta in liC]
+        #         self.otherCandidates(li_moves, posicion, liC)
+        #         self.tablero.showCandidates(liC)
 
     def repiteUltimaJugada(self):
         # Gestor ent tac + ent pos si hay partida
@@ -413,13 +448,26 @@ class Gestor:
         return self.pgn.numDatos()
 
     def ponVista(self):
+        if not hasattr(self.pgn, "jugada"):  # gestor60 por ejemplo
+            return
+        fila, columna = self.pantalla.pgnPosActual()
+        posJugada, jg = self.pgn.jugada(fila, columna.clave)
+
+        if jg:
+            posicion = jg.posicionBase if columna.clave == "NUMERO" else jg.posicion
+        else:
+            posicion = self.partida.iniPosicion
+        self.tablero.setUltPosicion(posicion)
+
         if self.pantalla.siCapturas or self.pantalla.siInformacionPGN or self.liKibitzersActivas:
-            if not hasattr(self.pgn, "jugada"):  # gestor60 por ejemplo
-                return
-            fila, columna = self.pantalla.pgnPosActual()
-            posJugada, jg = self.pgn.jugada(fila, columna.clave)
             if jg:
                 dic, siBlancas = jg.posicion.capturas()
+                if hasattr(jg, "analisis") and jg.analisis:
+                    mrm, pos = jg.analisis
+                    if pos:  # no se muestra la mejor jugada si es la realizada
+                        rm0 = mrm.mejorMov()
+                        self.tablero.ponFlechaSCvar([(rm0.desde, rm0.hasta),])
+
             else:
                 dic, siBlancas = self.partida.ultPosicion.capturas()
 
@@ -428,7 +476,7 @@ class Gestor:
             if apertura:
                 nomApertura = apertura.trNombre
             if self.pantalla.siCapturas:
-                self.pantalla.ponCapturas(dic, jg, nomApertura)
+                self.pantalla.ponCapturas(dic)
             if self.pantalla.siInformacionPGN:
                 if (fila == 0 and columna.clave == "NUMERO") or fila < 0:
                     self.pantalla.ponInformacionPGN(self.partida, None, nomApertura)
@@ -448,13 +496,15 @@ class Gestor:
 
     def miraKibitzers(self, jg, columnaClave):
         if jg:
-            fen = jg.posicionBase.fen() if columnaClave == "NUMERO" else jg.posicion.fen()
+            fenBase = jg.posicionBase.fen()
+            fen = fenBase if columnaClave == "NUMERO" else jg.posicion.fen()
         else:
             fen = self.partida.ultPosicion.fen()
+            fenBase = fen
         liApagadas = []
         for n, xkibitzer in enumerate(self.liKibitzersActivas):
             if xkibitzer.siActiva():
-                xkibitzer.ponFen(fen)
+                xkibitzer.ponFen(fen, fenBase)
             else:
                 liApagadas.append(n)
         if liApagadas:
@@ -897,8 +947,17 @@ class Gestor:
                 maxRecursion = 9999
 
         if not (hasattr(jg, "analisis") and jg.analisis):
-            me = QTUtil2.mensEspera.inicio(self.pantalla, _("Analyzing the move...."), posicion="ad")
-            mrm, pos = self.xtutor.analizaJugadaPartida(self.partida, pos_jg, self.xtutor.motorTiempoJugada, self.xtutor.motorProfundidad)
+            siCancelar = self.xtutor.motorTiempoJugada > 5000 or self.xtutor.motorProfundidad > 7
+            me = QTUtil2.mensEspera.inicio(self.pantalla, _("Analyzing the move...."), posicion="ad", siCancelar = siCancelar)
+            if siCancelar:
+                def test_me(txt):
+                    return not me.cancelado()
+                self.xanalyzer.ponGuiDispatch(test_me)
+            mrm, pos = self.xanalyzer.analizaJugadaPartida(self.partida, pos_jg, self.xtutor.motorTiempoJugada, self.xtutor.motorProfundidad)
+            if siCancelar:
+                if me.cancelado():
+                    me.final()
+                    return
             jg.analisis = mrm, pos
             me.final()
 
@@ -997,21 +1056,14 @@ class Gestor:
                     'h':kMoverFinal }
             self.mueveJugada(dic[letra])
 
-    def kibitzers(self, liKibitzers, orden):
-        if orden == "nueva":
-            liKibitzers = XKibitzers.nuevaKibitzer(self.pantalla, self.configuracion)
-            if liKibitzers:
-                self.kibitzers(liKibitzers, str(len(liKibitzers) - 1))
-
-        elif orden.startswith("quitar"):
-            nquitar = int(orden[7:])
-            del liKibitzers[nquitar]
-            XKibitzers.listaKibitzersGrabar(self.configuracion, liKibitzers)
+    def kibitzers(self, orden):
+        if orden == "edit":
+            w = PantallaKibitzers.WKibitzers(self.pantalla, self.procesador)
+            w.exec_()
 
         else:
             nkibitzer = int(orden)
-            kibitzer = liKibitzers[nkibitzer]
-            xkibitzer = XKibitzers.XKibitzer(self, kibitzer)
+            xkibitzer = Kibitzers.IPCKibitzer(self, nkibitzer)
             self.liKibitzersActivas.append(xkibitzer)
             self.ponVista()
 
@@ -1247,41 +1299,38 @@ class Gestor:
         icoFichero = Iconos.GrabarFichero()
         icoCamara = Iconos.Camara()
         icoClip = Iconos.Clip()
-        icoAzul = Iconos.PuntoAzul()
-        icoNegro = Iconos.PuntoNegro()
-        icoVerde = Iconos.PuntoVerde()
-        icoNaranja = Iconos.PuntoNaranja()
-        icoMagenta = Iconos.PuntoMagenta()
-        icoRojo = Iconos.PuntoRojo()
-        icoAmarillo = Iconos.PuntoAmarillo()
 
         trFichero = _("Save to a file")
         trPortapapeles = _("Copy to clipboard")
 
-        menuGR = menu.submenu(_("Save"), icoGrabar)
+        menuSave = menu.submenu(_("Save"), icoGrabar)
 
-        menuGR.opcion("pgnfichero", _("PGN Format"), icoAzul)
+        menuSave.opcion("pgnfichero", _("PGN Format"), Iconos.PGN())
 
-        menuGR.separador()
+        menuSave.separador()
 
-        menuFEN = menuGR.submenu(_("FEN Format"), icoAzul)
+        menuFEN = menuSave.submenu(_("FEN Format"), Iconos.Naranja())
         menuFEN.opcion("fenfichero", trFichero, icoFichero)
         menuFEN.opcion("fenportapapeles", trPortapapeles, icoClip)
 
-        menuGR.separador()
+        menuSave.separador()
 
-        menuFNS = menuGR.submenu(_("List of FENs"), icoAzul)
+        menuFNS = menuSave.submenu(_("List of FENs"), Iconos.InformacionPGNUno())
         menuFNS.opcion("fnsfichero", trFichero, icoFichero)
         menuFNS.opcion("fnsportapapeles", trPortapapeles, icoClip)
 
-        menuGR.separador()
+        menuSave.separador()
 
-        menuGR.opcion("pksfichero", "%s -> %s" % (_("PKS Format"), _("Create your own game")),
+        menuSave.opcion("pksfichero", "%s -> %s" % (_("PKS Format"), _("Create your own game")),
                       Iconos.JuegaSolo())
 
-        menuGR.separador()
+        menuSave.separador()
 
-        menuV = menuGR.submenu(_("Board -> Image"), icoCamara)
+        menuSave.opcion("dbfichero", _("Database"), Iconos.DatabaseCNew())
+
+        menuSave.separador()
+
+        menuV = menuSave.submenu(_("Board -> Image"), icoCamara)
         menuV.opcion("volfichero", trFichero, icoFichero)
         menuV.opcion("volportapapeles", trPortapapeles, icoClip)
 
@@ -1317,23 +1366,15 @@ class Gestor:
             menu.separador()
             menuKibitzers = menu.submenu(_("Kibitzers"), Iconos.Kibitzer())
 
-            liKibitzers = XKibitzers.listaKibitzersRecuperar(self.configuracion)
-
-            dico = {"S": icoVerde, "C": icoAzul, "J": icoNaranja, "I": icoNegro, "L": icoMagenta, "M": icoRojo, "E": icoAmarillo}
-            for nkibitzer, kibitzer in enumerate(liKibitzers):
-                menuKibitzers.opcion("kibitzer_%d" % nkibitzer, kibitzer["NOMBRE"], dico[kibitzer["TIPO"]])
-
+            kibitzers = Kibitzers.Kibitzers()
+            for num, (nombre, ico) in enumerate(kibitzers.lista_menu()):
+                menuKibitzers.opcion("kibitzer_%d" % num, nombre, ico)
             menuKibitzers.separador()
-            menuKibitzers.opcion("kibitzer_nueva", _("New"), Iconos.Nuevo())
-            if liKibitzers:
-                menuKibitzers.separador()
-                menuKibitzersBorrar = menuKibitzers.submenu(_("Remove"), Iconos.Borrar())
-                for nkibitzer, kibitzer in enumerate(liKibitzers):
-                    menuKibitzersBorrar.opcion("kibitzer_quitar_%d" % nkibitzer, kibitzer["NOMBRE"], icoNegro)
+            menuKibitzers.opcion("kibitzer_edit", _("Edition"), Iconos.ModificarP())
 
         # Juega por mi
-        if self.siJuegaPorMi and self.estado == kJugando and (
-                    self.ayudas or self.tipoJuego in (kJugEntMaq, kJugSolo, kJugEntPos, kJugEntTac)):
+        if self.siJuegaPorMi and self.estado == kJugando and \
+                (self.ayudas or self.tipoJuego in (kJugEntMaq, kJugSolo, kJugEntPos, kJugEntTac)):
             menu.separador()
             menu.opcion("juegapormi", _("Plays instead of me") + "  [^1]", Iconos.JuegaPorMi()),
 
@@ -1376,11 +1417,8 @@ class Gestor:
         elif resp == "pelicula":
             self.pelicula()
 
-        elif resp.startswith("trastero"):
-            self.trasteros(resp[9:])
-
         elif resp.startswith("kibitzer_"):
-            self.kibitzers(liKibitzers, resp[9:])
+            self.kibitzers(resp[9:])
 
         elif resp == "arbol":
             self.arbol()
@@ -1402,6 +1440,9 @@ class Gestor:
         elif resp == "pgnfichero":
             self.salvaPGN()
 
+        elif resp == "dbfichero":
+            self.salvaDB()
+
         elif resp.startswith("fen") or resp.startswith("fns"):
             extension = resp[:3]
             si_fichero = resp.endswith("fichero")
@@ -1412,15 +1453,41 @@ class Gestor:
     def showAnalisis(self):
         um = self.procesador.unMomento()
         alm = Histogram.genHistograms(self.partida, self.configuracion.centipawns)
-        alm.indexesHTML, alm.indexesRAW = AnalisisIndexes.genIndexes(self.partida, alm)
+        alm.indexesHTML, alm.indexesRAW, alm.eloW, alm.eloB, alm.eloT = AnalisisIndexes.genIndexes(self.procesador.configuracion, self.partida, alm)
         um.final()
         PantallaAnalisis.showGraph(self.pantalla, self, alm, Analisis.muestraAnalisis)
 
+    def salvaDB(self):
+        siFen = not self.partida.siFenInicial()
+        database = QTVarios.selectDB(self.pantalla, self.configuracion, siFen)
+        if database is None:
+            return
+
+        pgn = self.listado("pgn")
+        liTags = []
+        for linea in pgn.split("\n"):
+            if linea.startswith("["):
+                ti = linea.split('"')
+                if len(ti) == 3:
+                    clave = ti[0][1:].strip()
+                    valor = ti[1].strip()
+                    liTags.append([clave, valor])
+            else:
+                break
+
+        pc = Partida.PartidaCompleta(liTags=liTags)
+        pc.leeOtra(self.partida)
+
+        db = DBgamesFEN.DBgamesFEN(database) if siFen else DBgames.DBgames(database)
+        resp = db.inserta(pc)
+        db.close()
+        if resp:
+            QTUtil2.mensaje(self.pantalla, _("Saved"))
+        else:
+            QTUtil2.mensError(self.pantalla, _("This game already exists."))
+
     def salvaPKS(self):
         pgn = self.listado("pgn")
-        # p rint "jjjjjjjjjjjjjjjjjjjjj-abajo"
-        # dic = self.procesador.saveAsJSON(self.estado, self.partida, pgn)
-        # p rint str(dic)
         dic = self.procesador.saveAsPKS(self.estado, self.partida, pgn)
         extension = "pks"
         fichero = self.configuracion.dirJS
@@ -1540,7 +1607,7 @@ class Gestor:
             fenM2 = self.partida.iniPosicion.fenM2()
             move = None
 
-        w = WBGuide.WBGuide(self.pantalla, self, fenM2inicial=fenM2, pvInicial=move)
+        w = WOpeningGuide.WOpeningGuide(self.pantalla, self, fenM2inicial=fenM2, pvInicial=move)
         w.exec_()
 
     # Para elo games + entmaq

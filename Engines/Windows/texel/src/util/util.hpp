@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2015  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <vector>
 #include <array>
 #include <algorithm>
+#include <memory>
 #include <atomic>
 #include <cctype>
 #include <iomanip>
@@ -54,6 +55,12 @@ template <typename T> class AlignedAllocator;
 /** std::vector with cache line aware allocator. */
 template <typename T>
 class vector_aligned : public std::vector<T, AlignedAllocator<T>> { };
+
+template <typename T, typename ...Args>
+inline std::unique_ptr<T>
+make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
 
 
 /** Helper class to perform static initialization of a class T. */
@@ -185,7 +192,7 @@ contains(const std::vector<T>& v, const T& e) {
 
 /** Return true if vector v contains element e converted to a string. */
 inline bool
-contains(const std::vector<std::string> v, const char* e) {
+contains(const std::vector<std::string>& v, const char* e) {
     return contains(v, std::string(e));
 }
 
@@ -201,81 +208,6 @@ trim(const std::string& s) {
     }
     return "";
 }
-
-// ----------------------------------------------------------------------------
-
-// A fixed size array that can compute the sum of a range of values in time O(log N)
-template <int N>
-class RangeSumArray {
-public:
-
-    /** Get value at index i. */
-    int get(size_t i) const {
-        return arr[i];
-    }
-
-    /** Add delta to value at index i. */
-    void add(size_t i, int delta) {
-        arr[i] += delta;
-        pairs.add(i/2, delta);
-    }
-
-    /** Compute sum of all elements in [b,e). */
-    int sum(size_t b, size_t e) const {
-        int result = 0;
-        sumHelper(b, e, result);
-        return result;
-    }
-
-private:
-    template <int N2> friend class RangeSumArray;
-
-    void sumHelper(size_t b, size_t e, int& result) const {
-        if (b >= e)
-            return;
-        if (b & 1) {
-            result += arr[b];
-            b++;
-        }
-        if (e & 1) {
-            if (e != N)
-                result -= arr[e];
-            e++;
-        }
-        pairs.sumHelper(b/2, e/2, result);
-    }
-
-    std::array<std::atomic<int>, N> arr {};
-    RangeSumArray<(N+1)/2> pairs;
-};
-
-template<>
-class RangeSumArray<1> {
-public:
-    int get(size_t i) const {
-        return value;
-    }
-
-    void add(size_t i, int delta) {
-        value += delta;
-    }
-
-    int sum(size_t b, size_t e) const {
-        int result = 0;
-        sumHelper(b, e, result);
-        return result;
-    }
-
-private:
-    template <int N2> friend class RangeSumArray;
-
-    void sumHelper(size_t b, size_t e, int& result) const {
-        if (b < e)
-            result += value;
-    }
-
-    std::atomic<int> value { 0 };
-};
 
 // ----------------------------------------------------------------------------
 

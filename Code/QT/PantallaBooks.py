@@ -93,7 +93,10 @@ class WBooksCrear(QtGui.QDialog):
         fichTemporal = self.wParent.damePGNtemporal()
 
         # Creamos la linea de ordenes
-        exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
+        if VarGen.isWindows:
+            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
+        else:
+            exe = 'Engines/Linux/_tools/polyglot/polyglot'
         li = [os.path.abspath(exe), 'make-book', "-pgn", fichTemporal, "-bin", self.fichero]
         Util.borraFichero(self.fichero)
 
@@ -183,7 +186,10 @@ def polyglotUnir(owner):
         else:
             return
 
-        exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
+        if VarGen.isWindows:
+            exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
+        else:
+            exe = 'Engines/Linux/_tools/polyglot/polyglot'
         li = [os.path.abspath(exe), 'merge-book', "-in1", f1, "-in2", f2, "-out", fr]
         try:
             os.remove(fr)

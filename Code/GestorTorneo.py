@@ -42,7 +42,6 @@ class GestorTorneo(Gestor.Gestor):
             self.wresult.terminar()
 
     def siguienteJuego(self, gm, ngame, numGames):
-
         self.estado = kJugando
 
         self.gm = gm
@@ -268,12 +267,10 @@ class GestorTorneo(Gestor.Gestor):
         self.refresh()
 
     def relojStart(self, siBlancas):
-        # if self.siPrimeraJugadaHecha:
         self.tiempo[siBlancas].iniciaMarcador()
         self.pantalla.iniciaReloj(self.ponReloj, transicion=200)
 
     def relojStop(self, siBlancas):
-        # if self.siPrimeraJugadaHecha:
         self.tiempo[siBlancas].paraMarcador(self.segundosJugada)
         self.ponReloj()
         self.pantalla.paraReloj()
@@ -281,8 +278,6 @@ class GestorTorneo(Gestor.Gestor):
     def procesarAccion(self, clave):
         if clave == k_cancelar:
             self.siTerminar = True
-            self.xmotor[True].terminar()
-            self.xmotor[False].terminar()
 
     def finalX(self):
         self.siTerminar = True
@@ -299,11 +294,6 @@ class GestorTorneo(Gestor.Gestor):
             return False, None, None, None
 
     def masJugada(self, jg):
-
-        # if not self.siPrimeraJugadaHecha:
-        # self.siPrimeraJugadaHecha = True
-
-        # Preguntamos al mono si hay movimiento
         if self.siTerminada():
             jg.siJaqueMate = jg.siJaque
             jg.siAhogado = not jg.siJaque
@@ -328,6 +318,7 @@ class GestorTorneo(Gestor.Gestor):
             jg.siTablasFaltaMaterial = True
 
         self.ponFlechaSC(jg.desde, jg.hasta)
+        self.ponVista()
 
         self.pgnRefresh(self.partida.ultPosicion.siBlancas)
 

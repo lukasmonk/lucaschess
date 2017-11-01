@@ -1,6 +1,6 @@
 /*
     Texel - A UCI chess engine.
-    Copyright (C) 2012-2014  Peter Österlund, peterosterlund2@gmail.com
+    Copyright (C) 2012-2015  Peter Österlund, peterosterlund2@gmail.com
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ private:
 
     static int kqkpEval(int wKing, int wQueen, int bKing, int bPawn, bool whiteMove, int score);
     static int kqkrpEval(int wKing, int wQueen, int bKing, int bRook, int bPawn, bool whiteMove, int score);
+    static bool kqkrmFortress(bool bishop, int wQueen, int bRook, int bMinor, U64 wPawns, U64 bPawns);
 
     static int kpkEval(int wKing, int bKing, int wPawn, bool whiteMove);
     static bool kpkpEval(int wKing, int bKing, int wPawn, int bPawn, int& score);

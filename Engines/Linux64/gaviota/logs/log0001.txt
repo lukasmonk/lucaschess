@@ -1,0 +1,238 @@
+Gaviota
+Compiled: Mar  8 2014 09:49:40
+
+Playing Session
+---------------
+
+Book[0]: gavibook-small.bin --> ok
+Book[1]:  --> not provided
+Book[2]:  --> not provided
+Book[3]:  --> not provided
+Book[4]:  --> not provided
+Book system: Succesful book loading
+				received <-- uci
+>> Attempt to stop engine = Already IDLE
+to_gui --> option name Ponder type check default false
+to_gui --> option name UCI_AnalyseMode type check default false
+to_gui --> option name OwnBook type check default true
+to_gui --> option name Hash type spin default 16 min 8 max 16384
+to_gui --> option name Cores type spin default 1 min 1 max 64
+to_gui --> option name MultiPV type spin default 1 min 1 max 32
+to_gui --> option name Easy moves allowed type check default true
+to_gui --> option name Mute_plies type spin default 8 min 1 max 64
+to_gui --> option name Terse_plies type spin default 14 min 1 max 64
+to_gui --> option name Current move info type check default false
+to_gui --> option name Book use type check default true
+to_gui --> option name Book file 1 type string default gavibook-small.bin
+to_gui --> option name Book file 2 type string default 
+to_gui --> option name Book file 3 type string default 
+to_gui --> option name Book file 4 type string default 
+to_gui --> option name Book file 5 type string default 
+to_gui --> option name Book Restart type button 
+to_gui --> option name Log type check default true
+to_gui --> option name Log files (max) type spin default 100 min 1 max 100
+to_gui --> option name Log Path type string default logs
+to_gui --> option name SMP depth (min) type spin default 4 min 0 max 10
+to_gui --> option name SMP width (min) default type spin default 1 min 1 max 5
+to_gui --> option name SMP width (min) cut type spin default 2 min 1 max 5
+to_gui --> option name SMP width (min) all type spin default 1 min 1 max 5
+to_gui --> option name SMP width (min) pv type spin default 1 min 1 max 5
+to_gui --> option name SMP split (max) cut type spin default 2 min 0 max 32
+to_gui --> option name SMP split (max) all type spin default 16 min 0 max 32
+to_gui --> option name SMP split (max) pv type spin default 4 min 0 max 32
+to_gui --> option name Nullmove type check default true
+to_gui --> option name Consider lag type check default true
+to_gui --> option name GaviotaTbPath type string default gtb/
+to_gui --> option name GaviotaTbCache type spin default 8 min 1 max 2048
+to_gui --> option name GaviotaTbScheme type combo default cp4 var none var cp1 var cp2 var cp3 var cp4
+to_gui --> option name TB Endgame type combo default Gaviota var Gaviota var none
+to_gui --> option name TB probing hard depth type spin default 5 min 0 max 10
+to_gui --> option name TB probing soft depth type spin default 2 min 0 max 10
+to_gui --> option name TB Restart type button 
+to_gui --> option name TB pouncing mode type check default true
+to_gui --> option name TB long output type check default false
+to_gui --> uciok
+				received <-- position fen rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1 moves d2d4
+>> Attempt to stop engine = Already IDLE
+Force mode activated
+Setting position (soft): |rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1 |
+UCI position set
+>> Attempt to stop engine = Already IDLE
+Force mode activated
+				received <-- isready
+received isready
+Initialization pending routine.
+BOOK_ON=1
+Book[0]: gavibook-small.bin --> ok
+Book[1]:  --> not provided
+Book[2]:  --> not provided
+Book[3]:  --> not provided
+Book[4]:  --> not provided
+Book system: Succesful book loading
+
+GTB PATHS
+  main: gtb/
+    #1: gtb/
+
+GTB initialization
+  Compression  Scheme = 4
+  Compression Indexes (3-pc) = PASSED
+  Compression Indexes (4-pc) = **FAILED**
+  Compression Indexes (5-pc) = **FAILED**
+
+Success allocating hash
+
+
+NEW_GAME initialization (UCI)
+
+
+SEED for rand_table_init(): 1482432968
+
+to_gui --> readyok
+				received <-- go movetime 2000
+token:|movetime|
+s v m:|movetime|0|0|
+token:|2000|
+UCI Parameters set
+UCI go --> command processed
+engine thread --> about to launched...
+thread --> about to be created...
+Decision Phase --> Ponder_flag=0
+internal_clock_kickoff
+Remaining_time_at_start = 6.000
+BOOK is ON, will try to find a move.
+
+-------------- ITERATION ----------------
+
+Signature[1]: 85ca1f99
+rnbqkbnr/pppppppp/8/8/3P4/4P3/PPP2PPP/RNBQKBNR b KQkq - 0 2
++-----------------+
+| r n b q k b n r | [Black]
+| p p p p p p p p |
+| . . . . . . . . |
+| . . . . . . . . |    Castling: KQkq
+| . . . P . . . . |    ep: -
+| . . . . P . . . |
+| P P P . . P P P |
+| R N B Q K B N R |
++-----------------+
+
+legal moves available = 20
+iterative_deepening() --> start
+Game Time: 0.093000
+iterative deepening --> start, thread=0
+Previous position not found in score sheet
+Current  position has aging id: 0
+Remaining_time_at_start = 6.000
+LAG --> estimated average = 0 ms
+
+Clocktest.n=0
+set timer to 2.000000 , max_ply 64, panic time: 2.000000
+Game Time: 0.093000
+
+==> TC_hitstart & chessclock_reset()
+Game Time: 0.093000
+      8096   8:      0.0    -0.37  d5 2.Nc3 Nf6 3.Nf3 Nc6 4.Bb5 Ne4 5.Ne5
+     20023   9:      0.0    -0.33  d5 2.Nc3 Nf6 3.Nf3 Nc6 4.Ne5 a6 5.Bd3
+                                   g6
+     37761  10:      0.1    -0.28  d5 2.Nc3 Nf6 3.Nf3 g6 4.Ne5 Bg7 5.Bd2
+                                   Ne4 6.Nxe4 dxe4
+    252914  11:      0.6    -0.26  Nf6 2.d5 c6 3.Nc3 cxd5 4.Nxd5 Qa5+
+                                   5.Nc3 d6 6.Nf3 Ne4 7.Bb5+ Nc6
+    468903  12:      1.1    -0.32  Nf6 2.Nf3 d5 3.c4 e6 4.Nc3 Ne4 5.Nd2
+                                   Bb4 6.Ndxe4 dxe4 7.Bd2 Qh4
+
+Interrupted search (last limit) at: 744704
+Game Time: 2.100000
+
+TIME'S EXPIRED --> curr part eval: -87, alpha: -183, moves searched: 4, returned eval: -87
+
+Time's up --> failing: NOT low... 
+Game Time: 2.100000
+
+--------------------------------------------------------------------------
+Score: -0.34 (-87)  Evals: 485460  Time: 2.0s  nps: 369794  Q/all: 0.25
+hashtable attempts: 560919  hits: 25.9%  perfect:  6.0%
+--------------------------------------------------------------------------
+
+
+Side-to-wait attack calls: 0 calls/node: 0.000%
+Lazy evals = low:0  cutoff:0  normal:0
+-------------------------------------------------------------------
+                            hits         missed     efficiency
+-------------------------------------------------------------------
+ BB cached in eval         25203         460113      0.052
+  Checks Cheap/Exp        744469           4649      0.994
+InChecks Cheap/Exp        712309          31990      0.957
+Attacks generation             0              0      0.000
+       Attacks SEE       1355006         818023      0.624
+         Pawn hash        190250          75140      0.717
+     Material hash        964621           1895      0.998
+   Evaluation hash        744606         485316      0.605
+ Make normal moves        744449           4649      0.994
+-------------------------------------------------------------------
+
+WDL CACHE STATS
+  easy hits:                 0
+  hard probes:               0
+  soft probes:               0
+  size:                6291456
+  occupancy:               0.0 %
+
+DTM CACHE STATS
+  easy hits:                 0
+  hard probes:               0
+  soft probes:               0
+  size:                2097152
+  occupancy:               0.0 %
+
+GENERAL GTB PROBE STATS
+  total hits:                0
+  memory hits:               0
+  drive hits:                0
+  drive misses:              0
+  bytes read:                0
+  files opened:              0
+  mem. efficiency:         0.0 %
+
+PROFILE of SMP potential splitting
+  Total    time         :   0.00 s
+  External time (1 core):   0.00 s
+  Internal time (multi) :   0.00 s
+
+searchers_done() --> start
+Game Time: 2.100000
+Green Lights for n=2 threads
+go to join threads
+join[0]=1
+join[1]=1
+go to destroy mutexes
+go to destroy semaphores
+Game Time: 2.100000
+searchers_done() --> end
+
+iterative_deepening() --> done
+
+---------------------------------------------
+
+Game Time: 2.100000
+think() --> wait for exit allowed
+think() --> exit allowed!
+
+CLOCK ADJUSTMENT
+  Remaining_time_at_start (old): 6.000
+  clock_consumed: 2.007
+  increment: 0.000
+  Remaining_time_at_start (upd): 6.000
+  TC_time: 3.993
+  TC_waslast: 1
+
+think() --> exit
+thought... --> completed
+cycle of pondering and thinking...
+!is_special...
+ENGINE_STATE = MOVING
+play chosen move internally
+UCI - output bestmove
+bestmove g8f6 ponder g1f3
+ENGINE --> IDLE

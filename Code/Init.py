@@ -1,20 +1,18 @@
-DEBUG = False
-VERSION = "10.13"
-
 import os
 import sys
-
-from Code.Constantes import *
-
-if DEBUG:
-    prlkn("DEBUG " * 20)
-
 from Code import VarGen
 from Code import Util
 from Code import Procesador
 from Code import Sonido
-
 from Code.QT import Gui
+
+from Code.Constantes import *
+
+DEBUG = False
+VERSION = "11.00"
+
+if DEBUG:
+    prlkn("DEBUG " * 20)
 
 
 def init():
@@ -33,5 +31,5 @@ def init():
         if sys.argv[0].endswith(".py"):
             exe = os.path.abspath(sys.argv[0])
         else:
-            exe = "Lucas.exe"
+            exe = "Lucas.exe" if VarGen.isWindows else "Lucas"
         VarGen.startfile(exe)
