@@ -101,7 +101,8 @@ class Entrenamientos:
         self.procesador = procesador
         self.parent = procesador.pantalla
         self.configuracion = procesador.configuracion
-        self.menu, self.dicMenu = self.creaMenu()
+        self.menu = None
+        self.dicMenu = None
 
     def menuFNS(self, menu, rotulo, xopcion):
         td = TrainingDir("Trainings")

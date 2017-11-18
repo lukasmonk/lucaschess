@@ -2,6 +2,7 @@ from operator import attrgetter
 
 from Code import TrListas
 from Code import Util
+from Code import VarGen
 
 
 class AperturaStd:
@@ -31,7 +32,12 @@ class AperturaStd:
 
 
 class ListaAperturasStd:
-    def __init__(self, configuracion, siBasic, siEntrenar):
+    def __init__(self):
+        self.dic = None
+        self.hijos = None
+        self.lia1h8 = None
+
+    def reset(self, configuracion, siBasic, siEntrenar):
         self.dic = {}
         self.hijos = []
         ficheroPers = configuracion.ficheroPersAperturas
@@ -199,3 +205,12 @@ class ListaAperturasStd:
                     li.append(ap)
 
         return li if li else None
+
+
+ap = ListaAperturasStd()
+apTrain = ListaAperturasStd()
+
+def reset():
+    configuracion = VarGen.configuracion
+    ap.reset(configuracion, False, False)
+    apTrain.reset(configuracion, True, True)

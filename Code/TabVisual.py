@@ -189,13 +189,12 @@ class GT_Flecha(GT_Item):
         return bd.a1h8
 
     def run(self):
-        if self._itemSC:
-            self._itemSC.show()
-
         sc = self.guion.tablero.creaFlecha(self._bloqueDatos)
         sc.ponRutinaPulsada(None, self.id())
         self.itemSC(sc)
         self.marcado(True)
+        if self._itemSC:
+            self._itemSC.show()
 
 
 class GT_Marco(GT_Item):
@@ -507,6 +506,12 @@ class Guion:
             self.pizarra.close()
             self.pizarra = None
 
+    def borrarPizarraActiva(self):
+        if self.winDirector:
+            self.winDirector.borrarPizarraActiva()
+        else:
+            self.cierraPizarra()
+
     def nuevaCopia(self, ntarea):
         tarea = copy.copy(self.tarea(ntarea))
         tarea._id = Util.nuevoID()
@@ -618,7 +623,7 @@ class Guion:
 
     def recupera(self):
         fenM2 = self.tablero.ultPosicion.fenM2()
-        lista = self.tablero.configuracion.dbFEN(fenM2)
+        lista = self.tablero.dbVisual_lista(fenM2)
         self.liGTareas = []
         if lista is None:
             return
@@ -644,3 +649,8 @@ class Guion:
             if self.cerrado:
                 return
 
+
+class DBvisual(Util.DicSQL):
+    def __init__(self, fichero):
+        self.fichero = fichero
+        Util.DicSQL.__init__(self, fichero, tabla="FEN")

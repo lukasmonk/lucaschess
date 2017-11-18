@@ -195,6 +195,7 @@ class WBase(QtGui.QWidget):
                       (_("Train"), Iconos.Entrenamiento(), k_entrenamiento),
                       (_("Options"), Iconos.Opciones(), k_opciones),
                       (_("Information"), Iconos.Informacion(), k_informacion),
+                      (_("File"), Iconos.File(), k_file),
                       (_("Save"), Iconos.Grabar(), k_grabar),
                       (_("Save as"), Iconos.GrabarComo(), k_grabarComo),
                       (_("Open"), Iconos.Recuperar(), k_recuperar),

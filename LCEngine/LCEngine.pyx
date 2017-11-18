@@ -279,7 +279,7 @@ def liNMinimo(x, y, celdas_ocupadas):
         li = knightmoves(x, y, ot, 0, nv)
     return li
 
-def xpv2pv(xpv):
+def xpv2lipv(xpv):
     li = []
     siBlancas = True
     for c in xpv:
@@ -294,7 +294,10 @@ def xpv2pv(xpv):
         else:
             c = {50: "q", 51: "r", 52: "b", 53: "n"}.get(x, "")
             li[-1] += c
-    return " ".join(li)
+    return li
+
+def xpv2pv(xpv):
+    return " ".join(xpv2lipv(xpv))
 
 def pv2xpv(pv):
     if pv:
@@ -352,6 +355,37 @@ def getPGN(desdeA1H8, hastaA1H8, coronacion):
 
     toSan(num, san)
     return san
+
+def xpv2pgn(xpv):
+    cdef char san[10]
+    setFenInicial()
+    siW = True
+    num = 1
+    li = []
+    tam = 0
+    for pv in xpv2lipv(xpv):
+        if siW:
+            x = str(num)+"."
+            tam += len(x)
+            li.append(x)
+            num += 1
+        siW = not siW
+
+        numMove = searchMove( pv[:2], pv[2:4], pv[4:] )
+        if numMove == -1:
+            break
+        toSan(numMove, san)
+        x = str(san)
+        li.append(x)
+        tam += len(x)
+        if tam >= 80:
+            li.append("\n")
+            tam = 0
+        else:
+            li.append(" ")
+            tam += 1
+        make_nummove(numMove)
+    return "".join(li)
 
 def isCheck():
     return inCheck()
@@ -466,10 +500,12 @@ def fen2fenM2(fen):
     sp2 = fen.rfind(" ", 0, sp1)
     return fen[:sp2]
 
-
-def makePV(pv):
+def setFenInicial():
     inifen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     setFen(inifen)
+
+def makePV(pv):
+    setFenInicial()
     if pv:
         for move in pv.split(" "):
             makeMove(move)

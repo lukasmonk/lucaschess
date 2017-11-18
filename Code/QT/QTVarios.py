@@ -1072,7 +1072,44 @@ def list_irina():
     )
 
 
-def selectDB(owner, configuracion, siFEN):
+def listaDB(configuracion, siFEN):
+    if siFEN:
+        ext = "lcf"
+        base = configuracion.ficheroDBgamesFEN
+    else:
+        ext = "lcg"
+        base = configuracion.ficheroDBgames
+    base = os.path.abspath(base)
+    lista = [fich for fich in os.listdir(configuracion.carpeta)
+             if fich.endswith("." + ext) and os.path.abspath(os.path.join(configuracion.carpeta, fich)) != base
+        ]
+    return lista
+
+    # menu = LCMenu(owner)
+    # if lista:
+    #     rp = rondoPuntos()
+    #     for fich in lista:
+    #         menu.opcion(fich, _F(fich[:-4]), rp.otro())
+    #     menu.separador()
+    # database = menu.lanza()
+    # if database is None:
+    #     return None
+    #
+    # if database == other:
+    #     database = QTUtil2.leeCreaFichero(owner, carpeta, ext, rot)
+    #     if database:
+    #         if not database.lower().endswith("." + ext):
+    #             database = database + "." + ext
+    # else:
+    #     database = os.path.join(carpeta, database)
+    # if siFEN:
+    #     configuracion.ficheroDBgamesFEN = database
+    # else:
+    #     configuracion.ficheroDBgames = database
+    # configuracion.graba()
+    # return database
+
+def createDB(owner, configuracion, siFEN):
     if siFEN:
         ext = "lcf"
         rot = _("Positions Database")
@@ -1081,34 +1118,9 @@ def selectDB(owner, configuracion, siFEN):
         ext = "lcg"
         rot = _("Database of complete games")
         base = configuracion.ficheroDBgames
-
     carpeta = os.path.abspath(os.path.dirname(base))
-    lista = [fich for fich in os.listdir(carpeta) if fich.lower().endswith("." + ext)]
-    other = "\\"
-
-    menu = LCMenu(owner)
-    if lista:
-        rp = rondoPuntos()
-        for fich in lista:
-            menu.opcion(fich, _F(fich[:-4]), rp.otro())
-        menu.separador()
-        menu.opcion(other, _("Open/create another database"), Iconos.DatabaseC())
-    else:
-        menu.opcion(other, _("Create a new database"), Iconos.NuevaDB())
-    database = menu.lanza()
-    if database is None:
-        return None
-
-    if database == other:
-        database = QTUtil2.leeCreaFichero(owner, carpeta, ext, rot)
-        if database:
-            if not database.lower().endswith("." + ext):
-                database = database + "." + ext
-    else:
-        database = os.path.join(carpeta, database)
-    if siFEN:
-        configuracion.ficheroDBgamesFEN = database
-    else:
-        configuracion.ficheroDBgames = database
-    configuracion.graba()
+    database = QTUtil2.leeCreaFichero(owner, carpeta, ext, rot)
+    if database:
+        if not database.lower().endswith("." + ext):
+            database = database + "." + ext
     return database

@@ -404,7 +404,7 @@ class OpeningGuide:
 
     def generarStandard(self, ventana, siBasic):
 
-        oLista = AperturasStd.ListaAperturasStd(self.configuracion, True, True)
+        oLista = AperturasStd.apTrain
         dic = oLista.dic
 
         titulo = _("Openings")

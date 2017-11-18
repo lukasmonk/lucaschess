@@ -273,11 +273,12 @@ class Pizarra(QtGui.QWidget):
         self.pbLeft = Controles.PB(self, "", self.goLeft).ponIcono(Iconos.AnteriorF()).anchoFijo(24)
         self.pbRight = Controles.PB(self, "", self.goRight).ponIcono(Iconos.SiguienteF()).anchoFijo(24)
         self.pbDown = Controles.PB(self, "", self.goDown).ponIcono(Iconos.Abajo()).anchoFijo(24)
+        self.pbClose = Controles.PB(self, "", self.borrar).ponIcono(Iconos.CancelarPeque()).anchoFijo(24)
 
         cajon = QtGui.QWidget(self)
         ly = Colocacion.H()
         ly.control(self.pbLeft).control(self.pbDown)
-        ly.control(self.pbRight).margen(0)
+        ly.control(self.pbRight).control(self.pbClose).margen(0)
         if self.pb:
             ly.control(self.pb)
         if self.chb:
@@ -354,4 +355,17 @@ class Pizarra(QtGui.QWidget):
     def continuar(self):
         self.bloqueada = False
         self.pb.hide()
+
+    def mousePressEvent(self, event):
+        m = int(event.modifiers())
+        siCtrl = (m & QtCore.Qt.ControlModifier) > 0
+        if siCtrl and event.button() == QtCore.Qt.LeftButton:
+            self.guion.borrarPizarraActiva()
+
+    def borrar(self):
+        self.guion.borrarPizarraActiva()
+
+
+
+
 

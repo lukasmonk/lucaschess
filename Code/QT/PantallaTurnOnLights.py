@@ -1,3 +1,5 @@
+import time
+
 from Code import TurnOnLights
 from Code.QT import Colocacion
 from Code.QT import Columnas
@@ -84,6 +86,41 @@ class WTurnOnLights(QTVarios.WDialogo):
             self.num_block = block
             self.guardarVideo()
             self.accept()
+
+    def gridBotonDerecho(self, grid, fila, oColumna, modificadores):
+        col = oColumna.clave
+        if not col.startswith("BLOCK"):
+            return
+        num_block = int(col[5:])
+        num_theme = fila
+        block = self.tol.get_block(num_theme, num_block)
+        litimes = block.times
+        nmoves = block.num_moves()
+        if len(litimes) == 0:
+            return
+        menu = QTVarios.LCMenu(self)
+        menu.ponTipoLetra(nombre="Courier New", puntos=10)
+        tt = 0
+        d =  {  "0": Iconos.Gris32(),
+                "1": Iconos.Amarillo32(),
+                "2": Iconos.Naranja32(),
+                "3": Iconos.Verde32(),
+                "4": Iconos.Azul32(),
+                "5": Iconos.Magenta32(),
+                "6": Iconos.Rojo32(),
+                "7": Iconos.Light32()
+            }
+        for segs, fecha in litimes:
+            txt, ico = TurnOnLights.qualification(segs)
+            menu.opcion(None, "%d-%02d-%02d %02d:%02d %6.02f  %6.02f  %s" % (fecha.year, fecha.month, fecha.day,
+                                                                           fecha.hour, fecha.minute, segs,
+                                                                           segs*nmoves, txt), d[ico])
+            tt += segs*nmoves
+        menu.separador()
+        menu.opcion(None, "%16s %6.02f" %(_("Average"), tt/(nmoves*len(litimes))))
+        menu.separador()
+        menu.opcion(None, "%16s         %6.02f  %s" %(_("Total time"), tt, time.strftime("%H:%M:%S", time.gmtime(tt))))
+        menu.lanza()
 
     def goto_previous(self):
         self.tol.work_level -= 1

@@ -139,6 +139,7 @@ class GestorCompeticion(Gestor.Gestor):
             aplazamiento["PUNTOS"] = self.puntos
 
             self.configuracion.graba(aplazamiento)
+            self.estado = kFinJuego
             self.pantalla.accept()
 
     def finalX(self):

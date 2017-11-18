@@ -438,8 +438,7 @@ class Partida:
 
     def calc_elos(self, configuracion):
         if self.siFenInicial():
-            aps = AperturasStd.ListaAperturasStd(configuracion, False, False)
-            aps.asignaApertura(self)
+            AperturasStd.ap.asignaApertura(self)
         else:
             for jg in self.liJugadas:
                 jg.siApertura = False
@@ -516,9 +515,11 @@ class PartidaCompleta(Partida):
         self.liTags = unpgn.listaCabeceras()
         return self
 
-    def asignaApertura(self, configuracion):
-        ap = AperturasStd.ListaAperturasStd(configuracion, False, False)
+    def asignaApertura_raw(self, ap):
         ap.asignaApertura(self)
+
+    def asignaApertura(self, configuracion):
+        AperturasStd.ap.asignaApertura(self)
 
     def pgn(self):
         li = ['[%s "%s"]\n'%(k,v) for k,v in self.liTags]

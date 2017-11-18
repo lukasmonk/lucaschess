@@ -31,7 +31,7 @@ class WAperturas(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         # Variables--------------------------------------------------------------------------
-        self.apStd = AperturasStd.ListaAperturasStd(configuracion, True, True)
+        self.apStd = AperturasStd.apTrain
         self.configuracion = configuracion
         self.partida = Partida.Partida()
         self.bloqueApertura = bloqueApertura
@@ -414,7 +414,7 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
         self.procesador = procesador
         self.ficheroDatos = procesador.configuracion.ficheroEntAperturas
         self.ficheroParam = procesador.configuracion.ficheroEntAperturasPar
-        self.listaAperturasStd = AperturasStd.ListaAperturasStd(procesador.configuracion, True, True)
+        self.listaAperturasStd = AperturasStd.apTrain
         self.lista = self.leer()
 
         owner = procesador.pantalla
@@ -466,7 +466,8 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
     def masaperturas(self):
         w = AperturasPersonales(self.procesador, self)
         w.exec_()
-        self.listaAperturasStd = AperturasStd.ListaAperturasStd(self.procesador.configuracion, True, True)
+        AperturasStd.reset()
+        self.listaAperturasStd = AperturasStd.apTrain
 
     def polyglot(self):
         recno = self.grid.recno()

@@ -95,6 +95,7 @@ class GestorAlbum(Gestor.Gestor):
             aplazamiento["JUGADAS"] = self.partida.guardaEnTexto()
 
             self.configuracion.graba(aplazamiento)
+            self.estado = kFinJuego
             self.pantalla.accept()
 
     def finalX(self):

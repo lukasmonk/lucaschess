@@ -71,9 +71,10 @@ class WGames(QtGui.QWidget):
             (_("Last"), Iconos.Final(), self.tw_gobottom), None,
             (_("Filter"), Iconos.Filtrar(), self.tw_filtrar), None,
             (_("Remove"), Iconos.Borrar(), self.tw_borrar),None,
-            (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
             (_("Move up"), Iconos.Arriba(), self.tw_up), None,
             (_("Move down"), Iconos.Abajo(), self.tw_down), None,
+            (_("Config"), Iconos.Configurar(), self.tw_configure), None,
+            (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
         ]
 
         self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
@@ -113,6 +114,7 @@ class WGames(QtGui.QWidget):
 
     def setInfoMove(self, infoMove):
         self.infoMove = infoMove
+        self.graphicBoardReset()
 
     def setNameToolBar(self):
         nomFichero = self.dbGames.rotulo()
@@ -200,21 +202,23 @@ class WGames(QtGui.QWidget):
         self.winBookGuide.terminar()
 
     def actualiza(self, siObligatorio=False):
+        def pvSummary(summary):
+            if summary is None:
+                return ""
+            lipv = summary.get("pv", "").split(" ")
+            return " ".join(lipv[:-1])
         summaryActivo = self.wsummary.movActivo()
-        if siObligatorio or self.summaryActivo != summaryActivo or self.liFiltro:
+        if siObligatorio or pvSummary(self.summaryActivo) != pvSummary(summaryActivo) or self.liFiltro:
             self.where = None
             self.summaryActivo = summaryActivo
             pv = ""
             if self.summaryActivo:
-                alm = self.summaryActivo.get("alm")
-                if alm:
-                    if len(alm.LIALMS) > 1:
-                        pv = [ralm.PV for ralm in alm.LIALMS]
-                    else:
-                        pv = self.summaryActivo.get("pv")
-                        if pv:
-                            lipv = pv.split(" ")
-                            pv = " ".join(lipv[:-1])
+                pv = self.summaryActivo.get("pv")
+                if pv:
+                    lipv = pv.split(" ")
+                    pv = " ".join(lipv[:-1])
+                else:
+                    pv = ""
             self.dbGames.filterPV(pv)
             self.updateStatus()
             self.numJugada = pv.count(" ")
@@ -261,7 +265,12 @@ class WGames(QtGui.QWidget):
                 QTUtil2.mensError(self, _("This game already exists."))
             else:
                 self.actualiza(True)
-                self.grid.goto(recno, 0)
+                if recno is None:
+                    self.grid.gobottom()
+                else:
+                    self.grid.goto(recno, 0)
+                    self.gridCambiadoRegistro(self, recno, None)
+
                 self.wsummary.rehazActual()
 
     def tw_nuevo(self):
@@ -357,7 +366,16 @@ class WGames(QtGui.QWidget):
 
     def tg_file(self):
         menu = QTVarios.LCMenu(self)
-        menu.opcion(self.tg_change,_("Open/create another database"), Iconos.DatabaseC())
+        lista = QTVarios.listaDB(self.configuracion, False)
+        if lista:
+            smenu = menu.submenu( _("Open another database"), Iconos.DatabaseC())
+            rp = QTVarios.rondoPuntos()
+            for fich in lista:
+                smenu.opcion(os.path.join(self.configuracion.carpeta, fich), _F(fich[:-4]), rp.otro())
+                smenu.separador()
+            menu.separador()
+
+        menu.opcion(self.tg_create,_("Create a new database"), Iconos.NuevaDB())
         menu.separador()
 
         submenu = menu.submenu(_("Import from"), Iconos.DatabaseCNew())
@@ -376,7 +394,56 @@ class WGames(QtGui.QWidget):
 
         resp = menu.lanza()
         if resp:
+            if type(resp) == str:
+                self.changeDBgames(resp)
+            else:
+                resp()
+
+    def tw_configure(self):
+        siShow = self.dbGames.recuperaConfig("GRAPHICS_SHOW_ALLWAYS", False)
+        siGraphicsSpecific = self.dbGames.recuperaConfig("GRAPHICS_SPECIFIC", False)
+        menu = QTVarios.LCMenu(self)
+        dico = {True: Iconos.Aceptar(), False: Iconos.PuntoAmarillo()}
+        menu1 = menu.submenu(_("Graphic elements (Director)"), Iconos.Script())
+        menu2 = menu1.submenu(_("Show allways"), Iconos.PuntoAzul())
+        menu2.opcion(self.tw_dir_show_yes, _("Yes"), dico[siShow], siDeshabilitado=siShow)
+        menu2.separador()
+        menu2.opcion(self.tw_dir_show_no, _("No"), dico[not siShow], siDeshabilitado=not siShow)
+        menu1.separador()
+        menu2 = menu1.submenu(_("Specific to this database"), Iconos.PuntoAzul())
+        menu2.opcion(self.tw_locale_yes, _("Yes"), dico[siGraphicsSpecific], siDeshabilitado=siGraphicsSpecific)
+        menu2.separador()
+        menu2.opcion(self.tw_locale_no, _("No"), dico[not siGraphicsSpecific], siDeshabilitado=not siGraphicsSpecific)
+        resp = menu.lanza()
+        if resp:
             resp()
+
+    def readVarsConfig(self):
+        showAllways = self.dbGames.recuperaConfig("GRAPHICS_SHOW_ALLWAYS")
+        specific = self.dbGames.recuperaConfig("GRAPHICS_SPECIFIC")
+        return showAllways, specific
+
+    def graphicBoardReset(self):
+        showAllways, specific = self.readVarsConfig()
+        fichGraphic = self.dbGames.nomFichero if specific else None
+        self.infoMove.tablero.dbVisual_setFichero(fichGraphic)
+        self.infoMove.tablero.dbVisual_setShowAllways(showAllways)
+
+    def tw_dir_show_yes(self):
+        self.dbGames.guardaConfig("GRAPHICS_SHOW_ALLWAYS", True)
+        self.graphicBoardReset()
+
+    def tw_dir_show_no(self):
+        self.dbGames.guardaConfig("GRAPHICS_SHOW_ALLWAYS", False)
+        self.graphicBoardReset()
+
+    def tw_locale_yes(self):
+        self.dbGames.guardaConfig("GRAPHICS_SPECIFIC", True)
+        self.graphicBoardReset()
+
+    def tw_locale_no(self):
+        self.dbGames.guardaConfig("GRAPHICS_SPECIFIC", False)
+        self.graphicBoardReset()
 
     def tw_utilities(self):
         menu = QTVarios.LCMenu(self)
@@ -591,6 +658,11 @@ class WGames(QtGui.QWidget):
         dbn = DBgames.DBgames(path)
         dbn.appendDB(self.dbGames, li, dlTmp)
 
+    def tg_create(self):
+        database = QTVarios.createDB(self, self.configuracion, False)
+        if database:
+            self.changeDBgames(database)
+
     def tg_exportar_PGN(self):
         li = self.grid.recnosSeleccionados()
         if li:
@@ -613,15 +685,20 @@ class WGames(QtGui.QWidget):
             if w.exec_():
                 ws = PantallaSavePGN.FileSavePGN(self, w.dic_result)
                 if ws.open():
-                    ws.um()
+                    pb = QTUtil2.BarraProgreso1(self, _("Saving..."), formato1="%p%")
+                    pb.mostrar()
+                    pb.ponTotal(len(li))
                     for n, recno in enumerate(li):
-                        pgn = self.dbGames.leePGNRecno(recno)
+                        pb.pon(n)
+                        pgn, result = self.dbGames.leePGNRecno(recno)
+                        if pb.siCancelado():
+                            break
                         if n > 0 or not ws.is_new:
                             ws.write("\n\n")
                         ws.write(pgn)
 
+                    pb.close()
                     ws.close()
-                    ws.um_final()
 
     def tg_importar_PGN(self):
         files = QTVarios.select_pgns(self)
@@ -657,26 +734,28 @@ class WGames(QtGui.QWidget):
         self.limpiaColumnas()
         self.actualiza(True)
 
-    def tg_create(self):
-        resp = self.tg_nombre_depth(_("New"))
+    def damePGNtemporal(self, wPantallaBooks):
+        total = self.dbGames.reccount()
+        if total < 1:
+            return None
+        fichTemporalPGN = self.configuracion.ficheroTemporal("pgn")
+        pb = QTUtil2.BarraProgreso1(wPantallaBooks, _("Creating temporary PGN file..."), formato1="%p%")
+        pb.mostrar()
+        pb.ponTotal(total)
 
-        if resp:
-            nombre, depth = resp
-            self.changeDBgames(nombre)
-
-    def damePGNtemporal(self):
-        # Llamado desde PantallaBooks al crear el poliglot
-        fichTemporal = self.configuracion.ficheroTemporal("pgn")
-        with open(fichTemporal, "wb") as q:
+        with open(fichTemporalPGN, "wb") as q:
             for recno in range(self.dbGames.reccount()):
-                result = self.dbGames.field(recno, "RESULT")
+                pb.pon(recno)
+                if pb.siCancelado():
+                    fichTemporalPGN = None
+                    break
+                pgn, result = self.dbGames.leePGNRecno(recno)
                 if result:
                     result = result.replace(" ", "")
                     if result in ("1-0", "0-1", "1/2-1/2"):
-                        pgn = self.dbGames.leePGNRecno(recno)
                         jg = pgn.strip().replace("e.p.", "").replace("#+", "#")
                         if not jg.endswith(result):
                             jg += " " + result
                         q.write(jg + "\n\n")
-        return fichTemporal
-
+            pb.close()
+            return fichTemporalPGN

@@ -36,7 +36,7 @@ class WSummary(QtGui.QWidget):
 
         self.leeConfig()
 
-        self.aperturasStd = AperturasStd.ListaAperturasStd(self.configuracion, False, False)
+        self.aperturasStd = AperturasStd.ap
 
         self.siFigurinesPGN = self.configuracion.figurinesPGN
 
@@ -160,8 +160,7 @@ class WSummary(QtGui.QWidget):
             menu.separador()
         resp = menu.lanza()
         if resp:
-            self.liMoves[fila]["pv"] = resp.PV
-            self.cambiaInfoMove()
+            self.ponPV(resp.PV)
 
     def gridDato(self, grid, nfila, ocol):
         clave = ocol.clave
@@ -285,27 +284,27 @@ class WSummary(QtGui.QWidget):
     def ponPV(self, pvMirar):
         if not pvMirar:
             self.actualizaPV(None)
-            self.cambiaInfoMove()
         else:
             self.analisisMRM = None
             dicAnalisis = {}
             self.fenM2 = None
-            if pvMirar is not None:
-                p = Partida.Partida()
-                if pvMirar:
-                    p.leerPV(pvMirar)
-                self.fenM2 = p.ultPosicion.fenM2()
-                self.analisisMRM = self.bookGuide.dbAnalisis.mrm(self.fenM2)
-                if self.analisisMRM:
-                    for rm in self.analisisMRM.liMultiPV:
-                        dicAnalisis[rm.movimiento()] = rm
+            p = Partida.Partida()
+            if pvMirar:
+                p.leerPV(pvMirar)
+            self.fenM2 = p.ultPosicion.fenM2()
+            self.analisisMRM = self.bookGuide.dbAnalisis.mrm(self.fenM2)
+            if self.analisisMRM:
+                for rm in self.analisisMRM.liMultiPV:
+                    dicAnalisis[rm.movimiento()] = rm
             li = pvMirar.split(" ")
             self.pvBase = " ".join(li[:-1])
             busca = li[-1]
             self.liMoves = self.dbGames.getSummary(pvMirar, dicAnalisis, self.siFigurinesPGN)
             for fila, move in enumerate(self.liMoves):
-                if move["pvmove"] == busca:
+                if move.get("pvmove") == busca:
                     self.grid.goto(fila, 0)
+                    break
+        self.cambiaInfoMove()
 
     def createGuide(self):
         name = os.path.basename(self.dbGames.nomFichero)[:-4]
@@ -524,9 +523,74 @@ class WSummary(QtGui.QWidget):
         self.configuracion.escVariables("DBSUMMARY", dicConfig)
         self.configuracion.graba()
 
+    # def print_repertorio(self):
+    #     siW = True
+    #     basepv = "e2e4"
+    #     k = [0, []]
+    #
+    #     def haz(lipv):
+    #         npv = len(lipv)
+    #         liChildren = self.dbGames.dbSTAT.children(" ".join(lipv), False)
+    #         if len(liChildren) == 0:
+    #             return
+    #         suma = 0
+    #         for n, alm in enumerate(liChildren):
+    #             alm.tt = alm.W + alm.B + alm.D + alm.O
+    #             suma += alm.tt
+    #         if (npv % 2 == 0) and siW:
+    #             # buscamos la que tenga mas tt
+    #             mx = 0
+    #             mx_alm = None
+    #             for alm in liChildren:
+    #                 if alm.tt > mx:
+    #                     mx_alm = alm
+    #                     mx = alm.tt
+    #             li = lipv[:]
+    #             if mx_alm:
+    #                 li.append(mx_alm.move)
+    #                 haz(li)
+    #         else:
+    #             if suma < 2000 and npv < 20:
+    #                 k[0] += 1
+    #                 liLast = k[1]
+    #                 nl = len(liLast)
+    #                 ok = False
+    #                 lip = []
+    #                 for nr, pv in enumerate(lipv):
+    #                     if nr < nl and not ok:
+    #                         if pv == liLast[nr]:
+    #                             lip.append("....")
+    #                         else:
+    #                             lip.append(pv)
+    #                             ok = True
+    #                     else:
+    #                         lip.append(pv)
+    #                 k[1] = lipv
+    #                 # liW = []
+    #                 # liB = []
+    #                 # sitW = True
+    #                 # for pv in lip:
+    #                 #     if sitW:
+    #                 #         liW.append(pv)
+    #                 #     else:
+    #                 #         liB.append(pv)
+    #                 #     sitW = not sitW
+    #                 #
+    #                 # print " ".join(liW)
+    #                 # print " ".join(liB)
+    #                 print " ".join(lip)
+    #                 return
+    #             for alm in liChildren:
+    #                 li = lipv[:]
+    #                 li.append(alm.move)
+    #                 haz(li)
+    #     haz([basepv,])
+
+
     def config(self):
+        # return self.print_repertorio()
         menu = QTVarios.LCMenu(self)
-        menu.opcion("allmoves", _("Show all moves"), siCheckable=True, siChecked=self.allmoves)
+        menu.opcion("allmoves", _("Show all moves"), siChecked=self.allmoves)
         resp = menu.lanza()
         if resp is None:
             return

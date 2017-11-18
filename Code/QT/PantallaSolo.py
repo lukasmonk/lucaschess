@@ -48,7 +48,7 @@ class WEtiquetasPGN(QTVarios.WDialogo):
     def creaLista(self, liPGN):
         st = {eti for eti, val in liPGN}
 
-        li = liPGN[:]
+        li = [[k,v] for k, v in liPGN]
         listandard = ("Event", "Site", "Date", "Round", "White", "Black", "Result", "ECO", "WhiteElo", "BlackElo")
         for eti in listandard:
             if eti not in st:

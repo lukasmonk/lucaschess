@@ -646,7 +646,7 @@ class Menu(QtGui.QMenu):
         self.setFont(f)
         return self
 
-    def opcion(self, clave, rotulo, icono=None, siDeshabilitado=False, tipoLetra=None, siCheckable=False, siChecked=False):
+    def opcion(self, clave, rotulo, icono=None, siDeshabilitado=False, tipoLetra=None, siChecked=None):
         if icono:
             accion = QtGui.QAction(icono, rotulo, self)
         else:
@@ -656,7 +656,7 @@ class Menu(QtGui.QMenu):
             accion.setDisabled(True)
         if tipoLetra:
             accion.setFont(tipoLetra)
-        if siCheckable:
+        if siChecked is not None:
             accion.setCheckable(True)
             accion.setChecked(siChecked)
 

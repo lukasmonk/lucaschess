@@ -64,9 +64,10 @@ class WGamesFEN(QtGui.QWidget):
             (_("Last"), Iconos.Final(), self.tw_gobottom), None,
             (_("Filter"), Iconos.Filtrar(), self.tw_filtrar), None,
             (_("Remove"), Iconos.Borrar(), self.tw_borrar),None,
-            (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
             (_("Move up"), Iconos.Arriba(), self.tw_up), None,
             (_("Move down"), Iconos.Abajo(), self.tw_down), None,
+            (_("Config"), Iconos.Configurar(), self.tw_configure), None,
+            (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
         ]
 
         self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
@@ -97,6 +98,7 @@ class WGamesFEN(QtGui.QWidget):
 
     def setInfoMove(self, infoMove):
         self.infoMove = infoMove
+        self.graphicBoardReset()
 
     def setNameToolBar(self):
         nomFichero = self.dbGamesFEN.rotulo()
@@ -211,26 +213,30 @@ class WGamesFEN(QtGui.QWidget):
             self.grid.goto(filaNueva, 0)
             self.grid.refresh()
 
+
+    def editar(self, recno, partidaCompleta):
+        partidaCompleta = self.procesador.gestorPartida(self, partidaCompleta, False)
+        if partidaCompleta is not None:
+            if not self.dbGamesFEN.guardaPartidaRecno(recno, partidaCompleta):
+                QTUtil2.mensError(self, _("This game already exists."))
+            else:
+                self.actualiza(True)
+                if recno is None:
+                    self.grid.gobottom()
+                else:
+                    self.grid.goto(recno, 0)
+                    self.gridCambiadoRegistro(self, recno, None)
+
     def tw_nuevo(self):
-        # Se genera un PGN
         fen = Voyager.voyagerFEN(self, "", False)
         if fen is not None:
             if self.dbGamesFEN.si_existe_fen(fen):
                 QTUtil2.mensError(self, _("This position already exists."))
                 return
             hoy = Util.hoy()
-            pgn = '[Date "%d.%02d.%02d"]\n[FEN "%s"]' % (hoy.year, hoy.month, hoy.day, fen)
-
-            nuevoPGN, pv, dicPGN = self.procesador.gestorUnPGN(self, pgn)
-            if dicPGN:
-                liTags = [(clave, valor) for clave, valor in dicPGN.iteritems()]
-                partida_completa = Partida.PartidaCompleta(fen=fen, liTags=liTags)
-                if pv:
-                    partida_completa.leerPV(pv)
-                if self.dbGamesFEN.inserta(partida_completa):
-                    self.actualiza()
-                    self.grid.refresh()
-                    self.grid.gobottom()
+            liTags=[['Date', "%d.%02d.%02d" % (hoy.year, hoy.month, hoy.day)],['FEN', fen]]
+            pc = Partida.PartidaCompleta(fen=fen, liTags=liTags)
+            self.editar(None, pc)
 
     def tw_editar(self):
         li = self.grid.recnosSeleccionados()
@@ -238,19 +244,10 @@ class WGamesFEN(QtGui.QWidget):
             recno = li[0]
             partidaCompleta = self.dbGamesFEN.leePartidaRecno(recno)
 
-            fen0 = partidaCompleta.iniPosicion.fen()
-            partidaCompleta = self.procesador.gestorPartida(self, partidaCompleta, False)
-            if partidaCompleta is not None:
-                fen1 = partidaCompleta.iniPosicion.fen()
-                if fen0 != fen1:
-                    if self.dbGamesFEN.si_existe_fen(fen1):
-                        QTUtil2.mensError(self, _("This position already exists."))
-                        return
-
-                self.dbGamesFEN.guardaPartidaRecno(recno, partidaCompleta)
-                self.actualiza()
-                self.grid.refresh()
-                self.updateStatus()
+            if partidaCompleta:
+                self.editar(recno, partidaCompleta)
+            else:
+                QTUtil2.mensaje(self, _("This game is wrong and can not be edited"))
 
     def tw_borrar(self):
         li = self.grid.recnosSeleccionados()
@@ -265,6 +262,53 @@ class WGamesFEN(QtGui.QWidget):
             self.updateStatus()
 
             um.final()
+
+    def tw_configure(self):
+        siShow = self.dbGamesFEN.recuperaConfig("GRAPHICS_SHOW_ALLWAYS", False)
+        siGraphicsSpecific = self.dbGamesFEN.recuperaConfig("GRAPHICS_SPECIFIC", False)
+        menu = QTVarios.LCMenu(self)
+        dico = {True: Iconos.Aceptar(), False: Iconos.PuntoAmarillo()}
+        menu1 = menu.submenu(_("Graphic elements (Director)"), Iconos.Script())
+        menu2 = menu1.submenu(_("Show allways"), Iconos.PuntoAzul())
+        menu2.opcion(self.tw_dir_show_yes, _("Yes"), dico[siShow], siDeshabilitado=siShow)
+        menu2.separador()
+        menu2.opcion(self.tw_dir_show_no, _("No"), dico[not siShow], siDeshabilitado=not siShow)
+        menu1.separador()
+        menu2 = menu1.submenu(_("Specific to this database"), Iconos.PuntoAzul())
+        menu2.opcion(self.tw_locale_yes, _("Yes"), dico[siGraphicsSpecific], siDeshabilitado=siGraphicsSpecific)
+        menu2.separador()
+        menu2.opcion(self.tw_locale_no, _("No"), dico[not siGraphicsSpecific], siDeshabilitado=not siGraphicsSpecific)
+        resp = menu.lanza()
+        if resp:
+            resp()
+
+    def readVarsConfig(self):
+        showAllways = self.dbGamesFEN.recuperaConfig("GRAPHICS_SHOW_ALLWAYS")
+        specific = self.dbGamesFEN.recuperaConfig("GRAPHICS_SPECIFIC")
+        return showAllways, specific
+
+
+    def graphicBoardReset(self):
+        showAllways, specific = self.readVarsConfig()
+        fichGraphic = self.dbGamesFEN.nomFichero if specific else None
+        self.infoMove.tablero.dbVisual_setFichero(fichGraphic)
+        self.infoMove.tablero.dbVisual_setShowAllways(showAllways)
+
+    def tw_dir_show_yes(self):
+        self.dbGamesFEN.guardaConfig("GRAPHICS_SHOW_ALLWAYS", True)
+        self.graphicBoardReset()
+
+    def tw_dir_show_no(self):
+        self.dbGamesFEN.guardaConfig("GRAPHICS_SHOW_ALLWAYS", False)
+        self.graphicBoardReset()
+
+    def tw_locale_yes(self):
+        self.dbGamesFEN.guardaConfig("GRAPHICS_SPECIFIC", True)
+        self.graphicBoardReset()
+
+    def tw_locale_no(self):
+        self.dbGamesFEN.guardaConfig("GRAPHICS_SPECIFIC", False)
+        self.graphicBoardReset()
 
     def tw_utilities(self):
         menu = QTVarios.LCMenu(self)
@@ -293,7 +337,16 @@ class WGamesFEN(QtGui.QWidget):
     def tg_file(self):
         menu = QTVarios.LCMenu(self)
 
-        menu.opcion(self.tg_change,_("Open/create another database"), Iconos.DatabaseC())
+        lista = QTVarios.listaDB(self.configuracion, True)
+        if lista:
+            smenu = menu.submenu( _("Open another database"), Iconos.DatabaseC())
+            rp = QTVarios.rondoPuntos()
+            for fich in lista:
+                smenu.opcion(os.path.join(self.configuracion.carpeta, fich), _F(fich[:-4]), rp.otro())
+                smenu.separador()
+            menu.separador()
+
+        menu.opcion(self.tg_create,_("Create a new database"), Iconos.NuevaDB())
         menu.separador()
 
         submenu = menu.submenu(_("Import from"), Iconos.DatabaseCNew())
@@ -312,7 +365,10 @@ class WGamesFEN(QtGui.QWidget):
 
         resp = menu.lanza()
         if resp:
-            resp()
+            if type(resp) == str:
+                self.changeDBgames(resp)
+            else:
+                resp()
 
     def tg_importar_pks(self):
         path_pks = QTUtil2.leeFichero(self, self.configuracion.dirJS, "pks")
@@ -345,12 +401,10 @@ class WGamesFEN(QtGui.QWidget):
                 self.grid.goto(recno, 0)
                 um.final()
 
-    def tg_change(self):
-        database = QTVarios.selectDB(self, self.configuracion, True)
+    def tg_create(self):
+        database = QTVarios.createDB(self, self.configuracion, True)
         if database:
-            path = os.path.dirname(database)
-            if os.path.isdir(path):
-                self.changeDBgames(database)
+            self.changeDBgames(database)
 
     def tg_exportar(self, ext):
         li = self.grid.recnosSeleccionados()
@@ -470,11 +524,4 @@ class WGamesFEN(QtGui.QWidget):
         self.setNameToolBar()
         self.limpiaColumnas()
         self.actualiza(True)
-
-    def tg_create(self):
-        resp = self.tg_nombre_depth(_("New"))
-
-        if resp:
-            nombre, depth = resp
-            self.changeDBgames(nombre)
 

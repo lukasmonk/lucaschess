@@ -8,21 +8,7 @@
 # Licence : GPL
 # ==============================================================================
 
-#philmath scanner: A simpler feature would be to mark all the squares where it's unsure (below a certain threshold), so that the user will quickly see all the necessary corrections.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Version 11.02
 
 
 

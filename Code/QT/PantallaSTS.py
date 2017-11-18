@@ -4,7 +4,6 @@ import time
 
 from PyQt4 import QtGui, QtCore
 
-from Code import ControlPosicion
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -15,7 +14,6 @@ from Code.QT import PantallaMotores
 from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
-from Code.QT import Tablero
 from Code import STS
 from Code import Util
 from Code import VarGen
@@ -35,21 +33,13 @@ class WRun(QTVarios.WDialogo):
         self.xengine.set_direct( )
         self.playing = False
         self.configuracion = procesador.configuracion
-        dic = self.configuracion.leeVariables("STSRUN")
-        self.hideBoard = dic["HIDEBOARD"] if dic else False
 
         # Toolbar
         liAcciones = [(_("Close"), Iconos.MainMenu(), self.cerrar), None,
                       (_("Run"), Iconos.Run(), self.run),
                       (_("Pause"), Iconos.Pelicula_Pausa(), self.pause), None,
-                      (_("Config"), Iconos.Configurar(), self.config), None,
                       ]
         self.tb = tb = Controles.TBrutina(self, liAcciones, tamIcon=24)
-
-        # Board
-        confTablero = self.configuracion.confTablero("STS", 32)
-        self.tablero = Tablero.Tablero(self, confTablero)
-        self.tablero.crea()
 
         # Area resultados
         oColumnas = Columnas.ListaColumnas()
@@ -72,7 +62,6 @@ class WRun(QTVarios.WDialogo):
         self.colorOth = QTUtil.qtColor("#4668A6")
 
         layout = Colocacion.H()
-        layout.control(self.tablero)
         layout.control(self.grid)
         layout.margen(3)
 
@@ -90,8 +79,6 @@ class WRun(QTVarios.WDialogo):
             self.tb.setAccionVisible(self.pause, False)
             self.tb.setAccionVisible(self.run, False)
 
-        self.setViewBoard()
-
     def cerrar(self):
         self.sts.save()
         self.xengine.terminar()
@@ -101,21 +88,6 @@ class WRun(QTVarios.WDialogo):
 
     def closeEvent(self, event):
         self.cerrar()
-
-    def config(self):
-        menu = QTVarios.LCMenu(self)
-        menu.opcion("show", _("Show board") if self.hideBoard else _("Hide board"), Iconos.Camara())
-        resp = menu.lanza()
-        if resp:
-            self.hideBoard = not self.hideBoard
-            self.configuracion.escVariables("STSRUN", {"HIDEBOARD": self.hideBoard})
-            self.setViewBoard()
-
-    def setViewBoard(self):
-        if self.hideBoard:
-            self.tablero.hide()
-        else:
-            self.tablero.show()
 
     def run(self):
         if not Util.existeFichero(self.work.pathToExe()):
@@ -141,14 +113,6 @@ class WRun(QTVarios.WDialogo):
                 self.calc_max()
                 self.grid.refresh()
                 self.ngroup = ngroup
-            if not self.hideBoard:
-                cp = ControlPosicion.ControlPosicion()
-                cp.leeFen(self.elem.fen)
-                self.tablero.ponPosicion(cp)
-                self.xengine.ponGuiDispatch(self.dispatch)
-                xpt, xa1h8 = self.elem.bestA1H8()
-                self.tablero.quitaFlechas()
-                self.tablero.creaFlechaTmp(xa1h8[:2], xa1h8[2:], False)
             if not self.playing:
                 return
             t0 = time.time()
@@ -159,8 +123,6 @@ class WRun(QTVarios.WDialogo):
                 if rm:
                     mov = rm.movimiento()
                     if mov:
-                        if not self.hideBoard:
-                            self.tablero.creaFlechaTmp(rm.desde, rm.hasta, True)
                         self.sts.setResult(self.work, self.ngroup, self.nfen, mov, t_dif)
                         self.grid.refresh()
 
@@ -173,12 +135,6 @@ class WRun(QTVarios.WDialogo):
             self.playing = False
 
         QTUtil.refreshGUI()
-
-    def dispatch(self, rm):
-        if rm.desde:
-            self.tablero.creaFlechaTmp(rm.desde, rm.hasta, True)
-        QTUtil.refreshGUI()
-        return self.playing
 
     def gridNumDatos(self, grid):
         return len(self.sts.groups)

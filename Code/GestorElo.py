@@ -394,6 +394,7 @@ class GestorElo(Gestor.Gestor):
             aplazamiento["PTABLAS"] = self.datosMotor.ptablas
 
             self.configuracion.graba(aplazamiento)
+            self.estado = kFinJuego
             self.pantalla.accept()
 
     def finalX(self):

@@ -86,14 +86,14 @@ class GestorSolo(Gestor.Gestor):
             dic = pgn_pks(kJugando, pgn, jugadaInicial)
 
             self.resultadoPGN = None, None
-        elif dic is None:
-            li = self.listaHistorico()
-            if li:
-                fichero = li[0]
-                with open(fichero, "rb") as f:
-                    txt = f.read()
-                dic = Util.txt2dic(txt)
-                dic["ULTIMOFICHERO"] = fichero
+        # elif dic is None:
+        #     li = self.listaHistorico()
+        #     if li:
+        #         fichero = li[0]
+        #         with open(fichero, "rb") as f:
+        #             txt = f.read()
+        #         dic = Util.txt2dic(txt)
+        #         dic["ULTIMOFICHERO"] = fichero
 
         if dic is None:
             dic = {}
@@ -224,6 +224,9 @@ class GestorSolo(Gestor.Gestor):
         elif clave == k_atras:
             self.atras()
 
+        elif clave == k_file:
+            self.file()
+
         elif clave == k_reiniciar:
             self.reiniciar(self.reinicio)
 
@@ -254,13 +257,6 @@ class GestorSolo(Gestor.Gestor):
         elif clave == k_pgnInformacion:
             self.informacion()
 
-        elif clave == k_grabar:
-            if self.siPGN:
-                self.grabarPGN()
-                self.pantalla.accept()
-            else:
-                self.grabar()
-
         elif clave in (k_cancelar, k_finpartida):
             self.pantalla.reject()  # self.siPGN
 
@@ -284,10 +280,8 @@ class GestorSolo(Gestor.Gestor):
             else:
                 li = [k_finpartida, k_pgnInformacion, k_configurar, k_utilidades]
         else:
-            li = [k_mainmenu, k_recuperar, k_grabar, k_grabarComo, k_pgnInformacion, k_atras, k_ayudaMover, k_reiniciar,
+            li = [k_mainmenu, k_file, k_pgnInformacion, k_atras, k_ayudaMover, k_reiniciar,
                   k_configurar, k_utilidades]
-            if not siGrabarComo:
-                del li[2]
             if self.finExit:
                 li[0] = k_finpartida
         self.pantalla.ponToolBar(li)
@@ -587,29 +581,60 @@ class GestorSolo(Gestor.Gestor):
         self.ponToolBar(True, True)
         self.guardarHistorico(fich)
 
-    def recuperar(self):
+    def file(self):
         menu = QTVarios.LCMenu(self.pantalla)
-
-        li = self.listaHistorico()
-
-        menu.opcion("open", _("File") + " ...", Iconos.Recuperar())
+        if self.ultimoFichero:
+            menuR = menu.submenu(_("Save"), Iconos.Grabar())
+            menuR.opcion("save", "%s: %s" %( _("Save"), self.ultimoFichero), Iconos.Grabar())
+            menuR.separador()
+            menuR.opcion("saveas", _("Save as"), Iconos.GrabarComo())
+        else:
+            menu.opcion("save", _("Save"), Iconos.Grabar())
         menu.separador()
         menu.opcion("new", _("New"), Iconos.TutorialesCrear())
-
+        menu.separador()
+        menu.opcion("open", _("Open"), Iconos.Recuperar())
+        menu.separador()
+        li = self.listaHistorico()
         if li:
             menu.separador()
             menuR = menu.submenu(_("Reopen"), Iconos.Historial())
             for path in li:
-                menuR.opcion("r_%s" % path, path, Iconos.PuntoNaranja())
+                menuR.opcion("reopen_%s" % path, path, Iconos.PuntoNaranja())
                 menuR.separador()
-
         resp = menu.lanza()
-        if resp:
-            if resp == "open":
-                return self.recuperarPKS()
-            if resp == "new":
-                return self.nuevo()
-            return self.leeFichero(resp[2:])
+        if resp is None:
+            return
+        if resp == "open":
+            self.recuperarPKS()
+        elif resp == "new":
+            self.nuevo()
+        elif resp.startswith("reopen_"):
+            return self.leeFichero(resp[7:])
+        elif resp == "save":
+            self.grabar()
+        elif resp == "saveas":
+            self.grabarComo()
+
+
+
+
+
+                # k_recuperar, k_grabar, k_grabarComo,
+
+    # def recuperar(self):
+    #     menu = QTVarios.LCMenu(self.pantalla)
+    #     menu.opcion("open", _("File") + " ...", Iconos.Recuperar())
+    #     menu.separador()
+    #
+    #
+    #     resp = menu.lanza()
+    #     if resp:
+    #         if resp == "open":
+    #             return self.recuperarPKS()
+    #         if resp == "new":
+    #             return self.nuevo()
+    #         return self.leeFichero(resp[2:])
 
     def nuevo(self):
         self.xfichero = None

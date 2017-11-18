@@ -391,6 +391,7 @@ class GestorEntMaq(Gestor.Gestor):
     def aplazar(self):
         if QTUtil2.pregunta(self.pantalla, _("Do you want to adjourn the game?")):
             self.configuracion.graba(self.genAplazamiento())
+            self.estado = kFinJuego
             self.pantalla.accept()
 
     def pausa(self):

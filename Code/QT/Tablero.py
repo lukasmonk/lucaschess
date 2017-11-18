@@ -56,6 +56,9 @@ class Tablero(QtGui.QGraphicsView):
         self.dirvisual = None
         self.guion = None
         self.lastFenM2 = ""
+        self.dbVisual = None
+        self.nomdbVisual = None
+        self.dbVisual_showAllways = False
 
         self.confTablero = confTablero
 
@@ -760,6 +763,7 @@ class Tablero(QtGui.QGraphicsView):
             self.guion.recupera()
             self.guion.play()
 
+
     def cambiaSize(self):
         imp = WTamTablero(self)
         imp.colocate()
@@ -977,26 +981,57 @@ class Tablero(QtGui.QGraphicsView):
             self.atajosRaton = atajosRaton
         self.init_kb_buffer()
 
+    def dbVisual_setFichero(self, fichero):
+        self.dbVisual_close()
+        self.nomdbVisual = fichero
+
+    def dbVisual_setShowAllways(self, ok):
+        self.dbVisual_showAllways = ok
+
+    def dbVisual_open(self):
+        if self.dbVisual is None:
+            if self.nomdbVisual is None:
+                self.nomdbVisual = self.configuracion.ficheroFEN
+            self.dbVisual = Util.DicSQL(self.nomdbVisual, tabla="FEN")
+        return self.dbVisual
+
+    def dbVisual_close(self):
+        if self.dbVisual:
+            self.dbVisual.close()
+            self.dbVisual = None
+
+    def dbVisual_contiene(self, fenM2):
+        return fenM2 in self.dbVisual_open()
+
+    def dbVisual_lista(self, fenM2):
+        return self.dbVisual_open()[fenM2]
+
+    def dbVisual_save(self, fenM2, lista):
+        self.dbVisual_open()[fenM2] = lista
+
     def setUltPosicion(self, posicion):
         self.cierraGuion()
         self.ultPosicion = posicion
 
-        if self.siDirectorIcon:
+        if self.siDirectorIcon or self.dbVisual_showAllways:
             fenM2 = posicion.fenM2()
             if self.lastFenM2 != fenM2:
                 self.lastFenM2 = fenM2
-                if self.configuracion.esta_dbFEN(fenM2):
-                    self.scriptSC_menu.show()
-                else:
+                if self.dbVisual_contiene(fenM2):
+                    if self.siDirectorIcon:
+                        self.scriptSC_menu.show()
+                    if self.dbVisual_showAllways:
+                        self.lanzaGuion()
+                elif self.siDirectorIcon:
                     self.scriptSC_menu.hide()
 
     def ponPosicion(self, posicion):
         if self.dirvisual:
             self.dirvisual.cambiadaPosicionAntes()
 
-        self.ponPosicionBase(posicion)
         if self.si_borraMovibles:
             self.borraMovibles()
+        self.ponPosicionBase(posicion)
 
         if self.dirvisual:
             self.dirvisual.cambiadaPosicionDespues()
@@ -1008,7 +1043,6 @@ class Tablero(QtGui.QGraphicsView):
         self.liPiezas = []
 
     def ponPosicionBase(self, posicion):
-        self.setUltPosicion(posicion)
         self.siActivasPiezas = False
         self.removePieces()
 
@@ -1025,8 +1059,9 @@ class Tablero(QtGui.QGraphicsView):
             del self.flechaSC
             self.flechaSC = None
             self.quitaFlechas()
-        QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
         self.init_kb_buffer()
+        self.setUltPosicion(posicion)
+        QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
 
     def fila2punto(self, fila):
         factor = (8 - fila) if self.siBlancasAbajo else (fila - 1)
@@ -1700,6 +1735,7 @@ class Tablero(QtGui.QGraphicsView):
         for k, uno in self.dicMovibles.items():
             self.xremoveItem(uno)
         self.dicMovibles = collections.OrderedDict()
+        self.lastFenM2 = None
 
     def bloqueaRotacion(self, siBloquea):  # se usa en la presentacion para que no rote
         self.siPosibleRotarTablero = not siBloquea

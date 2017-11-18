@@ -325,7 +325,10 @@ class STS:
             self.K = dic["K"]
 
     def path(self):
-        return os.path.join(VarGen.configuracion.carpeta, "sts", "%s.sts" % self.name)
+        folder = os.path.join(VarGen.configuracion.carpeta, "sts")
+        if not os.path.isdir(folder):
+            os.mkdir(folder)
+        return os.path.join(folder, "%s.sts" % self.name)
 
     def restore(self):
         dic = Util.recuperaDIC(self.path())

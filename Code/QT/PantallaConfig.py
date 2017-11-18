@@ -41,6 +41,8 @@ def opciones(parent, configuracion):
     liEng.append((_("OS 64bits BMI2 compatible") + ":", configuracion.bmi2))
     liEng.append(separador)
     liEng.append((_("Do not work in background when possible") + ":", configuracion.notbackground))
+    liEng.append(separador)
+    liEng.append((_("Save engines log") + ":", configuracion.siLogEngines))
 
     # Aspect
     liAsp = []
@@ -226,7 +228,7 @@ def opciones(parent, configuracion):
 
         (configuracion.eloNC, configuracion.micheloNC, configuracion.ficsNC, configuracion.fideNC) = liNC
 
-        (configuracion.centipawns, configuracion.bmi2, configuracion.notbackground) = liEng
+        (configuracion.centipawns, configuracion.bmi2, configuracion.notbackground, configuracion.siLogEngines) = liEng
 
         (configuracion.vistaTutor,
             configuracion.efectosVisuales, rapidezMovPiezas,

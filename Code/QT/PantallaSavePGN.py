@@ -91,10 +91,14 @@ class WBaseSave(QtGui.QWidget):
         self.codec = dicVariables.get("CODEC", "default")
 
     def vars_save(self):
-        dicVariables = {}
-        dicVariables["LIHISTORICO"] = self.history_list
-        dicVariables["CODEC"] = self.cb_codecs.valor()
-        self.configuracion.escVariables("SAVEPGN", dicVariables)
+        if self.file:
+            dicVariables = self.configuracion.leeVariables("SAVEPGN")
+            if self.file in self.history_list:
+                del self.history_list[self.history_list.index(self.file)]
+            self.history_list.insert(0, self.file)
+            dicVariables["LIHISTORICO"] = self.history_list
+            dicVariables["CODEC"] = self.cb_codecs.valor()
+            self.configuracion.escVariables("SAVEPGN", dicVariables)
 
     def history(self):
         menu = QTVarios.LCMenu(self, puntos=9)
@@ -500,6 +504,8 @@ class WSaveVarios(QTVarios.WDialogo):
         extparam = "savepgnvarios"
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
+        self.configuracion = configuracion
+
         # Opciones
         liOpciones = [
             (_("Save"), Iconos.GrabarFichero(), self.aceptar), None,
@@ -529,7 +535,6 @@ class WSaveVarios(QTVarios.WDialogo):
         else:
             self.reject()
 
-
 class FileSavePGN:
     def __init__(self, owner, dic_vars):
         self.owner = owner
@@ -548,7 +553,7 @@ class FileSavePGN:
             self.is_new = self.overwrite or not os.path.isfile(self.file)
             return True
         except:
-            QTUtil2.mensError(self.owner, QTUtil2.mensError(self, "%s : %s\n" % (_("Unable to save"), self.file)))
+            QTUtil2.mensError(self.owner, "%s : %s\n" % (_("Unable to save"), self.file))
             return False
 
     def write(self, pgn):

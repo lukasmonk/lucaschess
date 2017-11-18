@@ -1,3 +1,5 @@
+import os
+
 import LCEngine
 
 from Code import VarGen
@@ -38,8 +40,12 @@ class GestorMotor:
 
         self.activo = True  # No es suficiente con motor == None para saber si esta activo y se puede logear
 
+        self.ficheroLog = None
+
         self.direct = direct
         VarGen.listaGestoresMotor.append(self)
+        if VarGen.configuracion.siLogEngines:
+            self.log_open()
 
     def set_direct(self):
         self.direct = True
@@ -53,6 +59,26 @@ class GestorMotor:
 
         if self.clave in ("daydreamer", "cinnamon") and profundidad and profundidad == 1:
             self.motorProfundidad = 2
+
+    def log_open(self):
+        carpeta = os.path.join(VarGen.configuracion.carpeta, "EngineLogs")
+        if not os.path.isdir(carpeta):
+            os.mkdir(carpeta)
+        plantlog = "%s_%%05d"% os.path.join(carpeta, self.nombre)
+        pos = 1
+        nomlog = plantlog % pos
+
+        while os.path.isfile(nomlog):
+            pos += 1
+            nomlog = plantlog % pos
+        self.ficheroLog = nomlog
+        if self.motor:
+            self.motor.log_open(nomlog)
+
+    def log_close(self):
+        self.ficheroLog = None
+        if self.motor:
+            self.motor.log_close()
 
     def cambiaOpciones(self, tiempoJugada, profundidad):
         self.motorTiempoJugada = tiempoJugada
@@ -104,6 +130,8 @@ class GestorMotor:
         if self.dispatching:
             rutina, whoDispatch = self.dispatching
             self.motor.ponGuiDispatch(rutina, whoDispatch)
+        if self.ficheroLog:
+            self.motor.log_open(self.ficheroLog)
 
     def juegaSegundos(self, segundos):
         self.testEngine()

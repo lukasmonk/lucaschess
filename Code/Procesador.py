@@ -3,6 +3,7 @@ import random
 import sys
 import webbrowser
 
+from Code import AperturasStd
 from Code import Routes
 from Code import Util
 from Code import VarGen
@@ -87,6 +88,7 @@ class Procesador:
         self.configuracion = Configuracion.Configuracion(user)
         self.configuracion.start(self.version)
         VarGen.configuracion = self.configuracion
+        AperturasStd.reset()
 
         VarGen.todasPiezas = Piezas.TodasPiezas()
 

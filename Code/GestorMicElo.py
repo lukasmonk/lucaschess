@@ -266,6 +266,7 @@ class GestorMicElo(Gestor.Gestor):
             aplazamiento["TIEMPONEGRAS"] = self.tiempo[False].tiempoAplazamiento()
 
             self.configuracion.graba(aplazamiento)
+            self.estado = kFinJuego
             self.pantalla.accept()
 
     def finalX(self):

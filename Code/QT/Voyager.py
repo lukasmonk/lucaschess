@@ -123,7 +123,7 @@ class WPosicion(QtGui.QWidget):
 
         # COLOCACION -------------------------------------------------------------------------------------------
         hbox = Colocacion.H().control(self.rbWhite).espacio(15).control(self.rbBlack)
-        gbColor = Controles.GB(self, _("Next move"), hbox)
+        gbColor = Controles.GB(self, _("Side to play"), hbox)
 
         ly = Colocacion.G().control(self.cbWoo, 0, 0).control(self.cbBoo, 0, 1)
         ly.control(self.cbWooo, 1, 0).control(self.cbBooo, 1, 1)

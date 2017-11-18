@@ -171,6 +171,8 @@ class Configuracion:
 
         self.checkforupdate = False
 
+        self.siLogEngines = False
+
         self.palette = {}
 
         self.grupos = BaseConfig.Grupos(self)
@@ -179,8 +181,6 @@ class Configuracion:
         self.grupos.nuevo("Greko", 2401, 2599, 1800)
         self.grupos.nuevo("Alaric", 2600, 2799, 3600)
         self.grupos.nuevo("Rybka", 2800, 3400, 6000)
-
-        self._dbFEN = None
 
     def start(self, version):
         self.lee()
@@ -478,6 +478,8 @@ class Configuracion:
         dic["TUTORACTIVODEFECTO"] = self.tutorActivoPorDefecto
         dic["TUTOR_MULTIPV"] = self.tutorMultiPV
 
+        dic["SILOGENGINES"] = self.siLogEngines
+
         dic["SINOMPIEZASEN"] = self.siNomPiezasEN
 
         dic["DBGAMES"] = Util.dirRelativo(self.ficheroDBgames)
@@ -606,6 +608,8 @@ class Configuracion:
                 self.tutorDifPorc = dg("TUTOR_DIFPORC", 0)
                 self.tutorActivoPorDefecto = dg("TUTORACTIVODEFECTO", True)
                 self.tutorMultiPV = dg("TUTOR_MULTIPV", "MX")
+
+                self.siLogEngines = dg("SILOGENGINES", False)
 
                 fich = dg("DBGAMES", self.ficheroDBgames)
                 if os.path.isfile(fich):
@@ -874,24 +878,6 @@ class Configuracion:
 
     def dicMotoresFixedElo(self):
         return Engines.dicMotoresFixedElo()
-
-    def fich_dbFEN(self):
-        if self._dbFEN is None:
-            self._dbFEN = Util.DicSQL(self.ficheroFEN, tabla="FEN")
-        return self._dbFEN
-
-    def close_dbFEN(self):
-        if self._dbFEN is not None:
-            self._dbFEN.close()
-            self._dbFEN = None
-
-    def dbFEN(self, fenM2):
-        dbFEN = self.fich_dbFEN()
-        return dbFEN[fenM2]
-
-    def esta_dbFEN(self, fenM2):
-        dbFEN = self.fich_dbFEN()
-        return fenM2 in dbFEN
 
     def save_dbFEN(self, fenM2, data):
         dbFEN = self.fich_dbFEN()

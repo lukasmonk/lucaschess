@@ -8,6 +8,7 @@ from PyQt4 import QtCore, QtGui
 import struct
 import psutil
 
+from Code import AperturasStd
 from Code import AnalisisIndexes
 from Code import ControlPosicion
 from Code import Configuracion
@@ -1653,6 +1654,7 @@ class CPU:
             self.configuracion.lee()
             self.configuracion.leeConfTableros()
             VarGen.configuracion = self.configuracion
+            AperturasStd.reset()
             self.numkibitzer = orden.dv["NUMKIBITZER"]
             kibitzers = Kibitzers.Kibitzers()
             self.kibitzer = kibitzers.kibitzer(self.numkibitzer)

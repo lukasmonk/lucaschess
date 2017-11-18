@@ -65,7 +65,7 @@ class Gestor:
 
         self.partida = Partida.Partida()
 
-        self.listaAperturasStd = AperturasStd.ListaAperturasStd(self.configuracion, False, False)
+        self.listaAperturasStd = AperturasStd.ap
 
         self.teclaPanico = procesador.teclaPanico
         self.siTeclaPanico = False
@@ -1212,6 +1212,21 @@ class Gestor:
         menu.opcion("ontop", "%s: %s" % (rotulo, _("window on top")),
                     Iconos.Bottom() if self.pantalla.onTop else Iconos.Top())
 
+        # Logs of engines
+        listaGMotores = VarGen.listaGestoresMotor.listaActivos() if VarGen.listaGestoresMotor else []
+        menu.separador()
+        smenu = menu.submenu(_("Save engines log"), Iconos.Grabar())
+        if len(listaGMotores) > 0:
+            for pos, gmotor in enumerate(listaGMotores):
+                ico = Iconos.Cancelar() if gmotor.ficheroLog else Iconos.PuntoVerde()
+                smenu.opcion("log_%d"%pos, gmotor.nombre, ico)
+
+        smenu.separador()
+        if self.configuracion.siLogEngines:
+            smenu.opcion("log_noall", _("Always deactivated for all engines"), Iconos.Cancelar())
+        else:
+            smenu.opcion("log_yesall", _("Always activated for all engines"), Iconos.Aceptar())
+
         menu.separador()
 
         # Mas Opciones
@@ -1230,6 +1245,10 @@ class Gestor:
                 for clave, rotulo, icono in liMasOpciones:
                     if resp == clave:
                         return resp
+
+            if resp.startswith("log_"):
+                resp = resp[4:]
+                self.log_engines(resp)
 
             if resp.startswith("vista_"):
                 resp = resp[6:]
@@ -1268,6 +1287,27 @@ class Gestor:
                     self.tablero.blindfoldConfig()
 
         return None
+
+    def log_engines(self, resp):
+        if resp.isdigit():
+            resp = int(resp)
+            motor = VarGen.listaGestoresMotor.listaActivos()[resp]
+            if motor.ficheroLog:
+                motor.log_close()
+            else:
+                motor.log_open()
+        else:
+            listaGMotores = VarGen.listaGestoresMotor.listaActivos()
+            if resp == "yesall":
+                self.configuracion.siLogEngines = True
+            else:
+                self.configuracion.siLogEngines = False
+            for gmotor in listaGMotores:
+                if resp == "yesall":
+                    gmotor.log_open()
+                else:
+                    gmotor.log_close()
+            self.configuracion.graba()
 
     def config_sonido(self):
         separador = FormLayout.separador

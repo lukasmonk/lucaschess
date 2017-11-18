@@ -448,7 +448,7 @@ class GestorMate(Gestor.Gestor):
             self.tablero.quitaFlechas()
         self.movimientosPiezas(jg.liMovs, False)
         if self.siTerminada():
-            if jg.siJaqueMate:
+            if jg.siJaque:
                 self.siguienteMate()
             else:
                 self.repiteMate(True, True)

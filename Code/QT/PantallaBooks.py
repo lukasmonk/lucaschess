@@ -87,10 +87,12 @@ class WBooksCrear(QtGui.QDialog):
         if not self.fichero:
             return
 
-        me = QTUtil2.unMomento(self)
-
         # Creamos el pgn
-        fichTemporal = self.wParent.damePGNtemporal()
+        fichTemporal = self.wParent.damePGNtemporal(self)
+        if not fichTemporal:
+            return
+
+        me = QTUtil2.unMomento(self)
 
         # Creamos la linea de ordenes
         if VarGen.isWindows:

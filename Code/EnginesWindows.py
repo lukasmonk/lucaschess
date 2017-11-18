@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import collections
 
 from Code import BaseConfig
@@ -226,7 +225,6 @@ def leeRivales():
     cm.ordenUCI("Respect", "30")
     cm.ordenUCI("Hash", "64")
     cm.ordenUCI("Threads", "1")
-    cm.ordenUCI("SyzygyPath", os.path.normpath(os.path.abspath("./IntFiles/syzygy")))
     cm.ponMultiPV(20, 256)
     mas(cm)
 

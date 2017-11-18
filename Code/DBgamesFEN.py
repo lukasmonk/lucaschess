@@ -400,12 +400,19 @@ class DBgamesFEN():
         sql = "insert into GAMES (XPV,PGN,FEN,EVENT,SITE,DATE,WHITE,BLACK,RESULT,PLIES)" \
               " values (?,?,?,?,?,?,?,?,?,?);"
         self._cursor.execute(sql, data)
-        lastrowid = self._cursor.lastrowid
         self._conexion.commit()
 
-        self.liRowids.append(lastrowid)
+        self.liRowids.append(self._cursor.lastrowid)
 
         return True
+
+    def guardaConfig(self, clave, valor):
+        with Util.DicRaw(self.nomFichero, "config") as dbconf:
+            dbconf[clave] = valor
+
+    def recuperaConfig(self, clave, default=None):
+        with Util.DicRaw(self.nomFichero, "config") as dbconf:
+            return dbconf.get(clave, default)
 
     def guardaPartidaRecno(self, recno, partidaCompleta):
         return self.inserta(partidaCompleta) if recno is None else self.modifica(recno, partidaCompleta)
