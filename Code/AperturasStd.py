@@ -206,9 +206,9 @@ class ListaAperturasStd:
 
         return li if li else None
 
-
 ap = ListaAperturasStd()
 apTrain = ListaAperturasStd()
+
 
 def reset():
     configuracion = VarGen.configuracion

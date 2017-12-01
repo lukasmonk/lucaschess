@@ -69,6 +69,14 @@ class TOL_Block:
         av_seconds = self.av_seconds()
         return qualification(av_seconds)
 
+    def calc_current(self, current_line, current_secs, errores, ayudas):
+        nmoves = 0
+        for x in range(current_line+1):
+            nmoves += self.lines[x].num_moves
+        current_secs += errores*5.0 + ayudas*10.0
+        av_secs = current_secs/nmoves
+        return av_secs, qualification(av_secs)[0]
+
 
 class TOL_Line:
     def __init__(self):

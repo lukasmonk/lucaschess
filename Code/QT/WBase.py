@@ -364,15 +364,16 @@ class WBase(QtGui.QWidget):
         color = None
         info = ""
         indicadorInicial = None
-        liNAGs = jg.critica.split(" ")
+        liNAGs = jg.critica.strip().split(" ")
 
         # NAG_1=Jugada buena NAG_2=Jugada mala NAG_3=Muy buena jugada NAG_4=Muy mala jugada
         NAG_0, NAG_1, NAG_2, NAG_3, NAG_4, NAG_5, NAG_6 = range(7)
         nag = NAG_0
+        color_nag = NAG_0
         if jg.analisis:
-            multianalisis, pos = jg.analisis
-            analisis = multianalisis.liMultiPV[pos]
-            mate = analisis.mate
+            mrm, pos = jg.analisis
+            rm = mrm.liMultiPV[pos]
+            mate = rm.mate
             siW = jg.posicionBase.siBlancas
             if mate:
                 if mate == 1:
@@ -382,32 +383,37 @@ class WBase(QtGui.QWidget):
                         mate = -mate
                     info = "(M%+d)" % mate
             else:
-                pts = analisis.puntos
+                pts = rm.puntos
                 if not siW:
                     pts = -pts
                 if self.centipawns:
                     info = "(" + str(pts) + ")"
                 else:
                     info = "(%+0.2f)" % float(pts / 100.0)
-            nb = analisis.nivelBlunder()
-            if nb:
-                if nb > 100:
-                    nag = NAG_4
-                else:
-                    nag = NAG_2
-            elif analisis.nivelBrillante():
-                nag = NAG_3
-            elif pos == 0 or analisis.puntosABS() == multianalisis.liMultiPV[0].puntosABS():
-                nag = NAG_1
+
+            nag, color_nag = mrm.setNAG_Color(rm)
+            # print nag, color_nag
+            # nb = rm.nivelBlunder()
+            # if nb:
+            #     if nb > 100:
+            #         nag = NAG_4
+            #     else:
+            #         nag = NAG_2
+            # elif rm.nivelBrillante():
+            #     nag = NAG_3
+            # elif pos == 0 or rm.puntosABS() == mrm.liMultiPV[0].puntosABS():
+            #     nag = NAG_1
 
             criticaDirecta = jg.criticaDirecta
             if criticaDirecta:
                 nag = {"??": NAG_4, "?": NAG_2, "!!": NAG_3, "!": NAG_1, "!?": NAG_5, "?!": NAG_6}.get(criticaDirecta,
                                                                                                        NAG_0)
+                color_nag = nag
 
             for critica in liNAGs:
                 if critica in ("1", "2", "3", "4", "5", "6"):
                     nag = int(critica)
+                    color_nag = nag
                     break
 
         if jg.siApertura or jg.critica or jg.comentario or jg.variantes:
@@ -427,12 +433,12 @@ class WBase(QtGui.QWidget):
                 indicadorInicial = "M"
 
         pgn = jg.pgnFigurinesSP() if self.gestor.configuracion.figurinesPGN else jg.pgnSP()
-        if nag:
+        if color_nag:
             c = self.gestor.configuracion
             color = \
                 {NAG_1: c.color_nag1, NAG_2: c.color_nag2, NAG_3: c.color_nag3, NAG_4: c.color_nag4,
                  NAG_5: c.color_nag5,
-                 NAG_6: c.color_nag6}[nag]
+                 NAG_6: c.color_nag6}[color_nag]
 
         return pgn, color, info, indicadorInicial, liNAGs
 

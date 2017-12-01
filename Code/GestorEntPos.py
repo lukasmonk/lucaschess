@@ -417,7 +417,6 @@ class GestorEntPos(Gestor.Gestor):
             return False
 
         if siMirarTutor:
-
             fenM2 = self.partida.ultPosicion.fenM2()
             if self.siDirigido and (fenM2 in self.dicDirigidoFenM2):
                 liOpciones = self.dicDirigidoFenM2[fenM2]
@@ -532,7 +531,7 @@ class GestorEntPos(Gestor.Gestor):
 
             self.error = ""
 
-            if self.siDirigido and (self.partida.ultPosicion.fenM2() not in self.dicDirigidoFenM2):
+            if self.siTutorActivado and self.siDirigido and (self.partida.ultPosicion.fenM2() not in self.dicDirigidoFenM2):
                 self.lineaTerminadaOpciones()
 
             return True

@@ -365,7 +365,3 @@ class Pizarra(QtGui.QWidget):
     def borrar(self):
         self.guion.borrarPizarraActiva()
 
-
-
-
-

@@ -15,6 +15,7 @@ class Scanner_vars:
         dic = Util.iniBase8dic(self.fich_vars)
         self.opacity = float(dic.get("OPACITY", 0.3))
         self.last_width = int(dic.get("LAST_WIDTH", 0))
+        self.last_height = int(dic.get("LAST_HEIGHT", self.last_width))
         self.tolerance = int(dic.get("TOLERANCE", 6))
         self.scanner = dic.get("SCANNER", "")
         self.ask = dic.get("ASK", "True") == "True"
@@ -23,6 +24,7 @@ class Scanner_vars:
         dic = {
             "OPACITY": self.opacity,
             "LAST_WIDTH": self.last_width,
+            "LAST_HEIGHT": self.last_height,
             "TOLERANCE": self.tolerance,
             "SCANNER": self.scanner,
             "ASK": self.ask
@@ -45,13 +47,13 @@ class Scanner(QtGui.QDialog):
         self.path = None
         self.selecting = False
         self.selected = False
-        self.x = self.y = self.width = 0
+        self.x = self.y = self.width = self.height = 0
 
     def quit(self, ok):
         self.hide()
         if ok:
             self.vars.write()
-            rect = QtCore.QRect(self.x, self.y, self.width, self.width)
+            rect = QtCore.QRect(self.x, self.y, self.width, self.height)
             desktop = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId(), 0, 0,
                                                QTUtil.anchoEscritorio(), QTUtil.altoEscritorio())
             selected_pixmap = desktop.copy(rect)
@@ -71,29 +73,37 @@ class Scanner(QtGui.QDialog):
     def setPath(self, point):
         width = point.x() - self.x
         height = point.y() - self.y
-        width = max(width, height)
-        if width > 0:
-            self.width = width
-            self.setPathW()
+        siAltModifier = (int(QtGui.QApplication.keyboardModifiers()) & QtCore.Qt.AltModifier) > 0
+        if siAltModifier:
+            if width > 0 and height > 0:
+                self.width = width
+                self.height = height
+                self.setPathW()
+        else:
+            width = max(width, height)
+            if width > 0:
+                self.height = self.width = width
+                self.setPathW()
 
     def setPathW(self):
-        celda = self.width / 8
-        self.width = celda * 8
+        celdaw = self.width / 8
+        self.width = celdaw * 8
+        celdah = self.height / 8
+        self.height = celdah * 8
         rect = QtGui.QPainterPath()
         x = self.x
         y = self.y
-        width = self.width
         for c in range(8):
-            dx = x + c * celda
+            dx = x + c * celdaw
             rect.moveTo(dx, y)
-            rect.lineTo(dx + celda, y)
-            rect.lineTo(dx + celda, y + width)
-            rect.lineTo(dx, y + width)
+            rect.lineTo(dx + celdaw, y)
+            rect.lineTo(dx + celdaw, y + self.height)
+            rect.lineTo(dx, y + self.height)
             rect.lineTo(dx, y)
         for f in range(1, 8):
-            dy = y + f * celda
+            dy = y + f * celdah
             rect.moveTo(x, dy)
-            rect.lineTo(x + width, dy)
+            rect.lineTo(x + self.width, dy)
         rect.closeSubpath()
 
         self.path = rect
@@ -111,6 +121,7 @@ class Scanner(QtGui.QDialog):
             self.x = origin.x()
             self.y = origin.y()
             self.width = 0
+            self.height = 0
         elif eventMouse.button() == QtCore.Qt.RightButton:
             self.quit(True)
             self.close()
@@ -122,17 +133,21 @@ class Scanner(QtGui.QDialog):
         if self.width < 10:
             if self.vars.last_width > 10:
                 self.width = self.vars.last_width
+                self.height = self.vars.last_height
                 self.setPathW()
         else:
             self.vars.last_width = self.width
+            self.vars.last_height = self.height
 
     def keyPressEvent(self, event):
         k = event.key()
         m = int(event.modifiers())
         siCtrl = (m & QtCore.Qt.ControlModifier) > 0
+        siAlt = (m & QtCore.Qt.AltModifier) > 0
         x = self.x
         y = self.y
         width = self.width
+        height = self.height
 
         if k in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter, QtCore.Qt.Key_S):
             self.quit(True)
@@ -156,23 +171,33 @@ class Scanner(QtGui.QDialog):
             if k == QtCore.Qt.Key_Right:
                 if siCtrl:
                     width += 8
+                    height += 8
+                elif siAlt:
+                    width += 8
                 else:
                     x += 1
             elif k == QtCore.Qt.Key_Left:
                 if siCtrl:
                     width -= 8
+                    height -= 8
+                elif siAlt:
+                    width -= 8
                 else:
                     x -= 1
             elif k == QtCore.Qt.Key_Up:
                 if siCtrl:
-                    width += 8
-                    y -= 8
+                    height -= 8
+                    width -= 8
+                elif siAlt:
+                    height -= 8
                 else:
                     y -= 1
             elif k == QtCore.Qt.Key_Down:
                 if siCtrl:
-                    width -= 8
-                    y += 8
+                    height += 8
+                    width += 8
+                elif siAlt:
+                    height += 8
                 else:
                     y += 1
 
@@ -180,6 +205,7 @@ class Scanner(QtGui.QDialog):
                 self.x = x
                 self.y = y
                 self.width = width
+                self.height = height
                 self.setPathW()
 
         event.ignore()

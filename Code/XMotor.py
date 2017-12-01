@@ -285,9 +285,11 @@ class XMotor:
         self.ac_lee()
         self.mrm.ordena()
         rm = self.mrm.mejorMov()
-        while rm.time < minimoTiempo:
+        tm = rm.time # problema cuando da por terminada la lectura y el rm.time siempre es el mismo
+        while rm.time < minimoTiempo and tm < minimoTiempo:
             self.ac_lee()
             time.sleep(0.1)
+            tm += 100
             rm = self.mrm.mejorMov()
         self.lockAC = lockAC
         return self.ac_estado()

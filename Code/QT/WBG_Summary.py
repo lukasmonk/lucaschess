@@ -527,7 +527,7 @@ class WSummary(QtGui.QWidget):
     #     siW = True
     #     basepv = "e2e4"
     #     k = [0, []]
-    #
+
     #     def haz(lipv):
     #         npv = len(lipv)
     #         liChildren = self.dbGames.dbSTAT.children(" ".join(lipv), False)
@@ -585,7 +585,6 @@ class WSummary(QtGui.QWidget):
     #                 li.append(alm.move)
     #                 haz(li)
     #     haz([basepv,])
-
 
     def config(self):
         # return self.print_repertorio()

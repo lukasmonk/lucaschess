@@ -213,7 +213,6 @@ class WGamesFEN(QtGui.QWidget):
             self.grid.goto(filaNueva, 0)
             self.grid.refresh()
 
-
     def editar(self, recno, partidaCompleta):
         partidaCompleta = self.procesador.gestorPartida(self, partidaCompleta, False)
         if partidaCompleta is not None:
@@ -286,7 +285,6 @@ class WGamesFEN(QtGui.QWidget):
         showAllways = self.dbGamesFEN.recuperaConfig("GRAPHICS_SHOW_ALLWAYS")
         specific = self.dbGamesFEN.recuperaConfig("GRAPHICS_SPECIFIC")
         return showAllways, specific
-
 
     def graphicBoardReset(self):
         showAllways, specific = self.readVarsConfig()

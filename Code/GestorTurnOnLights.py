@@ -53,6 +53,20 @@ class GestorTurnOnLights(Gestor.Gestor):
 
         self.next_line_run()
 
+    def pon_rotulos(self):
+        r1 = self.line.label
+        if self.lb_previous:
+            r1 += "<br><b>%s</b>" % self.lb_previous
+            if self.num_line:
+                av_secs, txt = self.block.calc_current(self.num_line - 1, self.total_time_used, self.errores, self.ayudas)
+                r1 += "<br><b>%s: %s - %0.2f\"" % (_("Current"), txt, av_secs)
+        self.ponRotulo1(r1)
+        if self.num_line < self.num_lines:
+            r2 = "<b>%d/%d</b>" % (self.num_line + 1, self.num_lines)
+        else:
+            r2 = None
+        self.ponRotulo2(r2)
+
     def next_line(self):
         if self.num_line < self.num_lines:
             self.line = self.block.line(self.num_line)
@@ -68,18 +82,12 @@ class GestorTurnOnLights(Gestor.Gestor):
             self.siRivalConBlancas = not siBlancas
             self.ponPosicion(self.partida.ultPosicion)
             self.ponPiezasAbajo(siBlancas)
-            r1 = self.line.label
-            if self.lb_previous:
-                r1 += "<br><b>%s</b>" % self.lb_previous
-            self.ponRotulo1(r1)
-            r2 = "<b>%d/%d</b>" % (self.num_line+1, self.num_lines)
-            self.ponRotulo2(r2)
             self.pgnRefresh(True)
 
             self.partida.pendienteApertura = False
+            self.pon_rotulos()
 
     def next_line_run(self):
-
         liOpciones = [k_mainmenu, k_ayuda, k_reiniciar]
         self.pantalla.ponToolBar(liOpciones)
 
@@ -198,6 +206,7 @@ class GestorTurnOnLights(Gestor.Gestor):
                     '</table></center></big><hr>' +
                     txt_more_line
                     )
+            self.pon_rotulos()
             QTUtil2.mensaje(self.pantalla, mens, _("Result of training"))
 
         else:
@@ -205,6 +214,7 @@ class GestorTurnOnLights(Gestor.Gestor):
                 self.next_line_run()
                 return
             QTUtil2.mensajeTemporal(self.pantalla, _("This line training is completed."), 1.3)
+            self.pon_rotulos()
 
         self.estado = kFinJuego
         self.desactivaTodas()

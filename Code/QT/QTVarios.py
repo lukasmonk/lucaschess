@@ -1094,7 +1094,7 @@ def listaDB(configuracion, siFEN):
     # database = menu.lanza()
     # if database is None:
     #     return None
-    #
+
     # if database == other:
     #     database = QTUtil2.leeCreaFichero(owner, carpeta, ext, rot)
     #     if database:
@@ -1108,6 +1108,7 @@ def listaDB(configuracion, siFEN):
     #     configuracion.ficheroDBgames = database
     # configuracion.graba()
     # return database
+
 
 def createDB(owner, configuracion, siFEN):
     if siFEN:

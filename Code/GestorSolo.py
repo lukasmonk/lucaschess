@@ -585,7 +585,10 @@ class GestorSolo(Gestor.Gestor):
         menu = QTVarios.LCMenu(self.pantalla)
         if self.ultimoFichero:
             menuR = menu.submenu(_("Save"), Iconos.Grabar())
-            menuR.opcion("save", "%s: %s" %( _("Save"), self.ultimoFichero), Iconos.Grabar())
+            rpath = os.path.relpath(self.ultimoFichero)
+            if rpath.count("..") > 0:
+                rpath = self.ultimoFichero
+            menuR.opcion("save", "%s: %s" %( _("Save"), rpath), Iconos.Grabar())
             menuR.separador()
             menuR.opcion("saveas", _("Save as"), Iconos.GrabarComo())
         else:
@@ -616,18 +619,13 @@ class GestorSolo(Gestor.Gestor):
         elif resp == "saveas":
             self.grabarComo()
 
-
-
-
-
                 # k_recuperar, k_grabar, k_grabarComo,
 
     # def recuperar(self):
     #     menu = QTVarios.LCMenu(self.pantalla)
     #     menu.opcion("open", _("File") + " ...", Iconos.Recuperar())
     #     menu.separador()
-    #
-    #
+
     #     resp = menu.lanza()
     #     if resp:
     #         if resp == "open":

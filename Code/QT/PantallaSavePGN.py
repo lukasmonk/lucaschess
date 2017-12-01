@@ -535,15 +535,26 @@ class WSaveVarios(QTVarios.WDialogo):
         else:
             self.reject()
 
+
 class FileSavePGN:
     def __init__(self, owner, dic_vars):
         self.owner = owner
         self.file = dic_vars["FILE"]
         self.overwrite = dic_vars["OVERWRITE"]
         self.codec = dic_vars["CODEC"]
-        if self.codec == "default":
-            self.codec = "UTF-8"
-
+        if self.codec == "default" or self.codec is None:
+            self.codec = "utf-8"
+        elif self.codec == "file":
+            self.codec = "utf-8"
+            if Util.existeFichero(self.file):
+                with open(self.file) as f:
+                    u = chardet.universaldetector.UniversalDetector()
+                    for n, x in enumerate(f):
+                        u.feed(x)
+                        if n == 1000:
+                            break
+                    u.close()
+                    self.codec = u.result.get("encoding", "utf-8")
         self.xum = None
 
     def open(self):

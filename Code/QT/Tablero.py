@@ -763,7 +763,6 @@ class Tablero(QtGui.QGraphicsView):
             self.guion.recupera()
             self.guion.play()
 
-
     def cambiaSize(self):
         imp = WTamTablero(self)
         imp.colocate()

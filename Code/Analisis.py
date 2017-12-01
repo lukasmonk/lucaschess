@@ -472,12 +472,9 @@ FILESW=%s:100
                 rm = mrm.liMultiPV[posAct]
                 rm.ponBlunder(0)
                 mj = mrm.liMultiPV[0]
-
                 rm_pts = rm.puntosABS()
 
                 dif = mj.puntosABS() - rm_pts
-                if dif == 0 and len(mrm.liMultiPV) > 2:
-                    jg.masCritica1_4("1")
                 fen = jg.posicionBase.fen()
 
                 if self.siVariantes:
@@ -487,7 +484,6 @@ FILESW=%s:100
                             jg.analisis2variantes(Partida.Partida(), self.alm, self.siBorrarPrevio)
 
                 if dif >= self.kblunders:
-                    jg.masCritica1_4("2" if dif < 100 else "4")
                     rm.ponBlunder(dif)
 
                     self.grabaTactic(dicPGN, partida, njg, mrm, posAct)
@@ -509,6 +505,10 @@ FILESW=%s:100
                     if self.bmtbrilliancies:
                         self.grabaBMT(False, fen, mrm, posAct, clpartida, txtPartida)
                         self.siBMTbrilliancies = True
+                else:
+                    nag, color = mrm.setNAG_Color(rm)
+                    if nag:
+                        jg.masCritica1_4(str(nag))
 
         # Ponemos el texto original en la ultima
         if siPonerPGNOriginalBlunders and self.oriblunders:

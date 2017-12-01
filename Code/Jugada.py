@@ -69,7 +69,7 @@ class Jugada:
         self.siAbandono = ABANDONORIVAL
 
     def masCritica1_4(self, critica):
-        li = self.critica.split(" ")
+        li = self.critica.strip().split(" ")
         ln = []
         for x in li:
             if x not in ("1", "2", "3", "4"):
@@ -408,7 +408,7 @@ class Jugada:
             pts = mrm.liMultiPV[pos].puntosABS_5()
             pts0 = mrm.liMultiPV[0].puntosABS_5()
             lostp_abs = pts0 - pts
-            self.elo = max(int(eval(formula.replace("xlost", str(lostp_abs)))), 800)
+            self.elo = min(max(int(eval(formula.replace("xlost", str(lostp_abs)))), 800), 3500)
             self.verybad_move = lostp_abs > 200
             self.bad_move = lostp_abs > 90 if not self.verybad_move else False
         else:
