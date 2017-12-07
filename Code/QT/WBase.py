@@ -369,8 +369,8 @@ class WBase(QtGui.QWidget):
         NAG_0, NAG_1, NAG_2, NAG_3, NAG_4, NAG_5, NAG_6 = range(7)
 
         color_nag = NAG_0
-        liNAGs = jg.critica.strip().split(" ") if jg.critica else []
-        for critica in liNAGs:
+        stNAGS = set(jg.critica.strip().split(" ") if jg.critica else [])
+        for critica in stNAGS:
             if critica in ("1", "2", "3", "4", "5", "6"):
                 color_nag = critica
                 break
@@ -397,20 +397,21 @@ class WBase(QtGui.QWidget):
                     info = "(%+0.2f)" % float(pts / 100.0)
 
             nag, color_nag = mrm.setNAG_Color(self.configuracion, rm)
-            liNAGs.append(nag)
+            stNAGS.add(str(nag))
 
         criticaDirecta = jg.criticaDirecta
         if criticaDirecta:
             nag = {"??": NAG_4, "?": NAG_2, "!!": NAG_3, "!": NAG_1, "!?": NAG_5, "?!": NAG_6}.get(criticaDirecta,
                                                                                                    NAG_0)
-            liNAGs.append(nag)
+            stNAGS.add(str(nag))
             color_nag = nag
+
 
 
         if jg.siApertura or jg.critica or jg.comentario or jg.variantes:
             siA = jg.siApertura
             nR = 0
-            if jg.critica and nag == NAG_0:
+            if jg.critica:
                 nR += 1
             if jg.comentario:
                 nR += 1
@@ -431,7 +432,7 @@ class WBase(QtGui.QWidget):
                  NAG_5: c.color_nag5,
                  NAG_6: c.color_nag6}[color_nag]
 
-        return pgn, color, info, indicadorInicial, liNAGs
+        return pgn, color, info, indicadorInicial, stNAGS
 
 
     def gridPonValor(self, grid, fila, oColumna, valor):
