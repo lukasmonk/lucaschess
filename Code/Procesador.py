@@ -1018,13 +1018,21 @@ class Procesador:
 
         return getattr(clonProcesador, "valorPGN", (None, None, None))
 
-    def gestorPartida(self, wpantalla, partidaCompleta, siCompleta):
+    def gestorPartida(self, wpantalla, partidaCompleta, siCompleta, tableroFather):
         clonProcesador = ProcesadorVariantes(wpantalla, self.liKibitzersActivas, self.xtutor)
 
         clonProcesador.gestor = GestorPartida.GestorPartida(clonProcesador)
         clonProcesador.gestor.inicio(partidaCompleta, siCompleta)
 
-        if clonProcesador.pantalla.muestraVariantes(clonProcesador.gestor.tituloVentana()):
+        tablero = clonProcesador.pantalla.tablero
+        tablero.dbVisual_setFichero(tableroFather.nomdbVisual)
+        tablero.dbVisual_setShowAllways(tableroFather.dbVisual_showAllways)
+
+        resp = clonProcesador.pantalla.muestraVariantes(clonProcesador.gestor.tituloVentana())
+        tableroFather.dbVisual_setFichero(tableroFather.nomdbVisual)
+        tableroFather.dbVisual_setShowAllways(tableroFather.dbVisual_showAllways)
+
+        if resp:
             return clonProcesador.gestor.partida
         else:
             return None

@@ -259,7 +259,7 @@ class WGames(QtGui.QWidget):
             self.grid.refresh()
 
     def editar(self, recno, partidaCompleta):
-        partidaCompleta = self.procesador.gestorPartida(self, partidaCompleta, True)
+        partidaCompleta = self.procesador.gestorPartida(self, partidaCompleta, True, self.infoMove.tablero)
         if partidaCompleta:
             if not self.dbGames.guardaPartidaRecno(recno, partidaCompleta):
                 QTUtil2.mensError(self, _("This game already exists."))
@@ -406,14 +406,14 @@ class WGames(QtGui.QWidget):
         dico = {True: Iconos.Aceptar(), False: Iconos.PuntoAmarillo()}
         menu1 = menu.submenu(_("Graphic elements (Director)"), Iconos.Script())
         menu2 = menu1.submenu(_("Show allways"), Iconos.PuntoAzul())
-        menu2.opcion(self.tw_dir_show_yes, _("Yes"), dico[siShow], siDeshabilitado=siShow)
+        menu2.opcion(self.tw_dir_show_yes, _("Yes"), dico[siShow])
         menu2.separador()
-        menu2.opcion(self.tw_dir_show_no, _("No"), dico[not siShow], siDeshabilitado=not siShow)
+        menu2.opcion(self.tw_dir_show_no, _("No"), dico[not siShow])
         menu1.separador()
         menu2 = menu1.submenu(_("Specific to this database"), Iconos.PuntoAzul())
-        menu2.opcion(self.tw_locale_yes, _("Yes"), dico[siGraphicsSpecific], siDeshabilitado=siGraphicsSpecific)
+        menu2.opcion(self.tw_locale_yes, _("Yes"), dico[siGraphicsSpecific])
         menu2.separador()
-        menu2.opcion(self.tw_locale_no, _("No"), dico[not siGraphicsSpecific], siDeshabilitado=not siGraphicsSpecific)
+        menu2.opcion(self.tw_locale_no, _("No"), dico[not siGraphicsSpecific])
         resp = menu.lanza()
         if resp:
             resp()

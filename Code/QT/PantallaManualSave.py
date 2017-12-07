@@ -317,7 +317,7 @@ class WManualSave(QTVarios.WDialogo):
     def editar_solucion(self):
         self.reset_motor()
         pc = self.crea_partida()
-        pc = self.procesador.gestorPartida(self, pc, False)
+        pc = self.procesador.gestorPartida(self, pc, False, self.tablero)
         if pc:
             self.posicion = pc.iniPosicion
             self.em_solucion.ponTexto(pc.pgnBaseRAW())

@@ -826,7 +826,7 @@ class Tablero(QtGui.QGraphicsView):
         maximo = self.margenCentro + (self.anchoCasilla * 8)
         siDentro = (minimo < x < maximo) and (minimo < y < maximo)
         if event.button() == QtCore.Qt.RightButton:
-            if siDentro and hasattr(self.pantalla, "boardRightMouse"):
+            if siDentro and hasattr(self.pantalla, "boardRightMouse") and not self.dirvisual:
                 m = int(event.modifiers())
                 siShift = (m & QtCore.Qt.ShiftModifier) > 0
                 siControl = (m & QtCore.Qt.ControlModifier) > 0
@@ -1264,6 +1264,12 @@ class Tablero(QtGui.QGraphicsView):
                         resp = not siBlancas
                 piezaSC.activa(resp)
         self.init_kb_buffer()
+
+    def setDispatchMove(self, rutina):
+        for pieza, piezaSC, siActiva in self.liPiezas:
+            if siActiva:
+                piezaSC.setDispatchMove(rutina)
+
 
     def activaTodas(self):
         self.siActivasPiezas = True

@@ -11,6 +11,7 @@ from Code import GestorTacticas
 from Code import GestorTurnOnLights
 from Code import GestorGM
 from Code import GestorMate
+from Code import TurnOnLights
 from Code import Memoria
 from Code.QT import DatosNueva
 from Code.QT import Iconos
@@ -242,9 +243,19 @@ class Entrenamientos:
         # TOL
         menu1.separador()
         menu2 = menu1.submenu(_("Turn on the lights"), Iconos.TOL())
-        xopcion(menu2, "tol_uned", _("UNED chess school"), Iconos.Uned())
+        menu3 = menu2.submenu(_("Memory mode"), Iconos.TOL())
+        xopcion(menu3, "tol_uned", _("UNED chess school"), Iconos.Uned())
+        menu3.separador()
+        xopcion(menu3, "tol_uwe_easy", "%s (%s)" % (_("Uwe Auerswald"), _("Initial")), Iconos.Uwe())
+        menu3.separador()
+        xopcion(menu3, "tol_uwe", "%s (%s)" % (_("Uwe Auerswald"), _("Complete")), Iconos.Uwe())
         menu2.separador()
-        xopcion(menu2, "tol_uwe", _("Uwe Auerswald"), Iconos.Uwe())
+        menu3 = menu2.submenu(_("Calculation mode"), Iconos.Calculo())
+        xopcion(menu3, "tol_uned_calc", _("UNED chess school"), Iconos.Uned())
+        menu3.separador()
+        xopcion(menu3, "tol_uwe_easy_calc", "%s (%s)" % (_("Uwe Auerswald"), _("Initial")), Iconos.Uwe())
+        menu3.separador()
+        xopcion(menu3, "tol_uwe_calc", "%s (%s)" % (_("Uwe Auerswald"), _("Complete")), Iconos.Uwe())
         # Washing
         menu1.separador()
         xopcion(menu1, "washing_machine", _("The Washing Machine"), Iconos.WashingMachine())
@@ -625,12 +636,18 @@ class Entrenamientos:
         PantallaEverest.everest(self.procesador)
 
     def turn_on_lights(self, name):
-        if name == "uned":
+        if name.startswith("uned"):
             title = _("UNED chess school")
             folder = "Trainings/Tactics by UNED chess school"
             icono = Iconos.Uned()
             li_tam_blocks = (6, 12, 20, 30, 60)
-        elif name == "uwe":
+        elif name.startswith("uwe_easy"):
+            title = "%s (%s)" % (_("Uwe Auerswald"), _("Initial"))
+            TurnOnLights.compruebaUweEasy(self.configuracion, name)
+            folder = self.configuracion.carpetaTemporal()
+            icono = Iconos.Uwe()
+            li_tam_blocks = (4, 6, 9, 18, 36)
+        elif name.startswith("uwe"):
             title = _("Uwe Auerswald")
             folder = "Trainings/Tactics by Uwe Auerswald"
             icono = Iconos.Uwe()

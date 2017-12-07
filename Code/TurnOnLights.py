@@ -8,24 +8,29 @@ from Code import Util
 from Code import VarGen
 
 QUALIFICATIONS = (
-            ("Mind-bending", "7", 0.7),
-            ("Grandmaster", "6", 1.0),
-            ("International Master", "5", 1.5),
-            ("Master", "4", 2.2),
-            ("Candidate Master", "3", 3.1),
-            ("Amateur", "2", 4.2),
-            ("Beginner", "1", 5.5),
-            ("Future beginner", "0", 99.0),
+            ("Mind-bending", "7", 0.7, 0.5),
+            ("Grandmaster", "6", 1.0, 0.8),
+            ("International Master", "5", 1.5, 1.0),
+            ("Master", "4", 2.2, 1.3),
+            ("Candidate Master", "3", 3.1, 1.6),
+            ("Amateur", "2", 4.2, 2.0),
+            ("Beginner", "1", 5.5, 3.0),
+            ("Future beginner", "0", 99.0, 99.0),
 )
 
 
-def qualification(seconds):
-    txt, ico, secs = QUALIFICATIONS[-1]
+def qualification(seconds, think_mode):
+    txt, ico, secs, secsThink = QUALIFICATIONS[-1]
     if seconds is not None:
-        for xtxt, xico, xsecs in QUALIFICATIONS[:-1]:
-            if seconds < xsecs:
-                txt, ico = xtxt, xico
-                break
+        for xtxt, xico, xsecs, xsecsThink in QUALIFICATIONS[:-1]:
+            if think_mode:
+                if seconds < xsecsThink:
+                    txt, ico = xtxt, xico
+                    break
+            else:
+                if seconds < xsecs:
+                    txt, ico = xtxt, xico
+                    break
     return _F(txt), ico
 
 
@@ -33,6 +38,25 @@ class TOL_Block:
     def __init__(self):
         self.lines = []
         self.times = []
+        self.reinits = []
+
+    def update(self):
+        if hasattr(self, "reinits"):
+            return False
+        self.reinits = []
+        return True
+
+    def penaltyError(self, think_mode):
+        if think_mode:
+            return 8.0 + len(self.times)*2.0
+        else:
+            return 5.0
+
+    def penaltyHelp(self, think_mode):
+        if think_mode:
+            return 10.0 + len(self.times)*5.0
+        else:
+            return 10.0
 
     def add_line(self, line):
         self.lines.append(line)
@@ -41,6 +65,10 @@ class TOL_Block:
         today = datetime.datetime.now()
         self.times.append((seconds, today))
         self.times.sort(key=lambda x: x[0])
+
+    def new_reinit(self, seconds):
+        today = datetime.datetime.now()
+        self.reinits.append((seconds, today))
 
     def av_seconds(self):
         return self.times[0][0] if self.times else None
@@ -60,22 +88,22 @@ class TOL_Block:
     def line(self, num):
         return self.lines[num]
 
-    def qualification(self):
+    def qualification(self, think_mode):
         av_seconds = self.av_seconds()
-        txt, val = qualification(av_seconds)
+        txt, val = qualification(av_seconds, think_mode)
         return val
 
-    def cqualification(self):
+    def cqualification(self, think_mode):
         av_seconds = self.av_seconds()
-        return qualification(av_seconds)
+        return qualification(av_seconds, think_mode)
 
-    def calc_current(self, current_line, current_secs, errores, ayudas):
+    def calc_current(self, current_line, current_secs, errores, ayudas, think_mode):
         nmoves = 0
         for x in range(current_line+1):
             nmoves += self.lines[x].num_moves
-        current_secs += errores*5.0 + ayudas*10.0
+        current_secs += errores*self.penaltyError(think_mode) + ayudas*self.penaltyHelp(think_mode)
         av_secs = current_secs/nmoves
-        return av_secs, qualification(av_secs)[0]
+        return av_secs, qualification(av_secs, think_mode)[0]
 
 
 class TOL_Line:
@@ -115,6 +143,12 @@ class TOL_level:
         self.lines_per_block = lines_per_block
         self.num_level = num_level
 
+    def update(self):
+        for liblock in self.themes_blocks:
+            for block in liblock:
+                if not block.update():
+                    break
+
     def set_theme_blocks(self, theme):
         theme_blocks = []
         li = range(len(theme.lines))
@@ -130,21 +164,21 @@ class TOL_level:
     def num_blocks(self):
         return len(self.themes_blocks[0])
 
-    def done(self):
-        return int(self.get_cat_num()[1]) > min(self.num_level, 2)
+    def done(self, think_mode):
+        return int(self.get_cat_num(think_mode)[1]) > min(self.num_level, 2)
 
-    def get_cat_num(self):
+    def get_cat_num(self, think_mode):
         qmin = "?", "7"
         for theme_blocks in self.themes_blocks:
             for block in theme_blocks:
-                q = block.cqualification()
+                q = block.cqualification(think_mode)
                 if q[1] < qmin[1]:
                     qmin = q
         return qmin
 
-    def val_theme_block(self, num_theme, num_block):
+    def val_theme_block(self, num_theme, num_block, think_mode):
         block = self.themes_blocks[num_theme][num_block]
-        return block.qualification()
+        return block.qualification(think_mode)
 
     def get_theme_block(self, num_theme, num_block):
         return self.themes_blocks[num_theme][num_block]
@@ -175,6 +209,25 @@ class TurnOnLights:
         self.li_tam_blocks = li_tam_blocks
         self.num_pos = li_tam_blocks[-1]
         self.go_fast = False
+        self.calculation_mode = name.endswith("_calc")
+
+    def is_calculation_mode(self):
+        return self.calculation_mode
+
+    def recupera(self):
+        filepath = os.path.join(VarGen.configuracion.carpeta, "%s.tol" % self.name)
+        tolr = Util.recuperaVar(filepath)
+        if tolr is None:
+            self.new()
+        else:
+            self.themes = tolr.themes
+            self.levels = tolr.levels
+            for level in self.levels:
+                level.update()
+
+            self.work_level = tolr.work_level
+            self.num_pos = tolr.num_pos
+            self.go_fast = tolr.go_fast
 
     def new(self):
         liFich = os.listdir(self.folder)
@@ -197,7 +250,7 @@ class TurnOnLights:
             prev = True
         if self.work_level < (len(self.levels)-1):
             level = self.levels[self.work_level]
-            if level.done():
+            if level.done(self.calculation_mode):
                 next = True
         return prev, next
 
@@ -218,25 +271,25 @@ class TurnOnLights:
         return _F(tname)
 
     def val_block(self, num_theme, num_block):
-        return self.levels[self.work_level].val_theme_block(num_theme, num_block)
+        return self.levels[self.work_level].val_theme_block(num_theme, num_block, self.calculation_mode)
 
     def get_block(self, num_theme, num_block):
         return self.levels[self.work_level].get_theme_block(num_theme, num_block)
 
     def done_level(self):
-        return self.levels[self.work_level].done()
+        return self.levels[self.work_level].done(self.calculation_mode)
 
     def cat_num_level(self):
-        return self.levels[self.work_level].get_cat_num()
+        return self.levels[self.work_level].get_cat_num(self.calculation_mode)
 
     def islast_level(self):
         return self.work_level == (len(self.levels)-1)
 
     def cat_global(self):
-        cat, num, nada = QUALIFICATIONS[0]
+        cat, num, nada, nada = QUALIFICATIONS[0]
 
         for level in self.levels:
-            cat1, num1 = level.get_cat_num()
+            cat1, num1 = level.get_cat_num(self.calculation_mode)
             if num1 < num:
                 cat, num = cat1, num1
                 if num == "0":
@@ -246,19 +299,8 @@ class TurnOnLights:
 
 
 def read_tol(name, title, folder, li_tam_blocks):
-    filepath = os.path.join(VarGen.configuracion.carpeta, "%s.tol" % name)
-    tol = Util.recuperaVar(filepath)
-    if tol is None:
-        tol = TurnOnLights(name, title, folder, li_tam_blocks)
-        tol.new()
-
-    # for num_level, level in enumerate(tol.levels):
-    #     for theme_blocks in level.themes_blocks:
-    #         for block in theme_blocks:
-    #             # tm = random.randint(6, 55-5*num_level)
-    #             block.new_result(3)
-    # write_tol(tol)
-
+    tol = TurnOnLights(name, title, folder, li_tam_blocks)
+    tol.recupera()
     return tol
 
 
@@ -278,3 +320,17 @@ def numColorMinimum(tol):
         num = 3
     return num, tol.work_level == tol.num_levels-1
 
+
+def compruebaUweEasy(configuracion, name):
+    file = os.path.join(configuracion.carpeta, "%s.tol" % name)
+    if Util.existeFichero(file):
+        return
+    folderDest = configuracion.carpetaTemporal()
+    configuracion.limpiaTemporal()
+    folderOri = "Trainings/Tactics by Uwe Auerswald"
+    for fich in os.listdir(folderOri):
+        if fich.endswith(".fns"):
+            with open(os.path.join(folderOri, fich)) as f, open(os.path.join(folderDest, fich), "wb") as q:
+                for linea in f:
+                    if linea.count("*") < 3:
+                        q.write(linea)

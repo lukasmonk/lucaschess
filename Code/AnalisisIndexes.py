@@ -283,7 +283,7 @@ def tp_gamestage(cp, mrm):
     return _("Game stage"), calc_gamestage(cp, mrm), get_gamestage(cp, mrm)
 
 
-def genIndexes(configuracion, partida, alm):
+def genIndexes(partida, elos, alm):
     average = {True: 0, False: 0}
     domination = {True: 0, False: 0}
     complexity = {True: 0.0, False: 0.0}
@@ -291,8 +291,6 @@ def genIndexes(configuracion, partida, alm):
     efficientmobility = {True: 0.0, False: 0.0}
     piecesactivity = {True: 0.0, False: 0.0}
     exchangetendency = {True: 0.0, False: 0.0}
-
-    elos = partida.calc_elos(configuracion)
 
     n = {True: 0, False: 0}
     for jg in partida.liJugadas:

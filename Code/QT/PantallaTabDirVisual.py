@@ -922,10 +922,9 @@ class DirVisual():
             m = int(event.modifiers())
             siCtrl = (m & QtCore.Qt.ControlModifier) > 0
             li_tareas = self.guion.tareasPosicion(p)
-            if siCtrl and li_tareas:
+            if siCtrl and len(li_tareas) > 0:
                 pos_guion, tarea = li_tareas[0]
-                self.w.g_guion.goto(pos_guion, 0)
-                self.w.gborrar()
+                self.w.gborrar([pos_guion,])
                 return
 
             pz_borrar = self.tablero.dameNomPiezaEn(a1h8)

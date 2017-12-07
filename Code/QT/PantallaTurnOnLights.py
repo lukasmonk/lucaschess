@@ -19,10 +19,21 @@ class WTurnOnLights(QTVarios.WDialogo):
         self.reinit = False
 
         titulo = _("Turn on the lights") + ": " + title
+        if self.tol.is_calculation_mode():
+            tipo = _("Calculation mode")
+            background = "#88AA3A"
+        else:
+            tipo = _("Memory mode")
+            background = "#BDDBE8"
+
         extparam = "tol%s-%d" % (name, self.tol.work_level)
+
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         self.colorTheme = QTUtil.qtColor("#F0F0F0")
+
+        lb = Controles.LB(self, tipo)
+        lb.ponFondoN(background).alinCentrado().ponTipoLetra(puntos=14)
 
         # Toolbar
         tb = Controles.TBrutina(self)
@@ -50,11 +61,11 @@ class WTurnOnLights(QTVarios.WDialogo):
         self.registrarGrid(grid)
 
         # Colocamos ---------------------------------------------------------------
-        ly = Colocacion.V().control(tb).control(self.grid)
+        ly = Colocacion.V().control(lb).control(tb).control(self.grid)
 
         self.setLayout(ly)
 
-        alto = self.tol.num_themes*42 + 116
+        alto = self.tol.num_themes*42 + 146
         self.recuperarVideo(siTam=True, altoDefecto=alto, anchoDefecto=nAnchoPgn)
 
     def terminar(self):
@@ -96,7 +107,7 @@ class WTurnOnLights(QTVarios.WDialogo):
         block = self.tol.get_block(num_theme, num_block)
         litimes = block.times
         nmoves = block.num_moves()
-        if len(litimes) == 0:
+        if not litimes and not block.reinits:
             return
         menu = QTVarios.LCMenu(self)
         menu.ponTipoLetra(nombre="Courier New", puntos=10)
@@ -111,15 +122,25 @@ class WTurnOnLights(QTVarios.WDialogo):
                 "7": Iconos.Light32()
             }
         for segs, fecha in litimes:
-            txt, ico = TurnOnLights.qualification(segs)
+            txt, ico = TurnOnLights.qualification(segs, self.tol.is_calculation_mode())
             menu.opcion(None, "%d-%02d-%02d %02d:%02d %6.02f  %6.02f  %s" % (fecha.year, fecha.month, fecha.day,
                                                                            fecha.hour, fecha.minute, segs,
                                                                            segs*nmoves, txt), d[ico])
             tt += segs*nmoves
-        menu.separador()
-        menu.opcion(None, "%16s %6.02f" %(_("Average"), tt/(nmoves*len(litimes))))
-        menu.separador()
-        menu.opcion(None, "%16s         %6.02f  %s" %(_("Total time"), tt, time.strftime("%H:%M:%S", time.gmtime(tt))))
+        if litimes:
+            menu.separador()
+            menu.opcion(None, "%16s %6.02f" %(_("Average"), tt/(nmoves*len(litimes))))
+            menu.separador()
+        plant = "%16s %15.02f  %s"
+        menu.opcion(None, plant %(_("Total time"), tt, time.strftime("%H:%M:%S", time.gmtime(tt))))
+        if block.reinits:
+            tr = 0.0
+            for segs, fecha in block.reinits:
+                tr += segs
+            menu.separador()
+            menu.opcion(None, plant %(_("Restarts"), tr, time.strftime("%H:%M:%S", time.gmtime(tr))))
+            menu.separador()
+            menu.opcion(None, plant %(_("Working time"), tt+tr, time.strftime("%H:%M:%S", time.gmtime(tt+tr))))
         menu.lanza()
 
     def goto_previous(self):
@@ -141,8 +162,8 @@ class WTurnOnLights(QTVarios.WDialogo):
         smenu = menu.submenu(_("Tactics"), Iconos.Tacticas())
         go_fast = self.tol.go_fast
         dico = {True: Iconos.Aceptar(), False: Iconos.PuntoAmarillo()}
-        smenu.opcion("t_false", _("Stop after solve"), dico[not go_fast], siDeshabilitado=not go_fast)
-        smenu.opcion("t_true", _("Jump to the next after solve"), dico[go_fast], siDeshabilitado=go_fast)
+        smenu.opcion("t_false", _("Stop after solve"), dico[not go_fast])
+        smenu.opcion("t_true", _("Jump to the next after solve"), dico[go_fast])
         menu.separador()
         menu.opcion("remove", _("Remove all results of all levels"), Iconos.Cancelar())
         resp = menu.lanza()
@@ -171,8 +192,9 @@ class WTurnOnLights(QTVarios.WDialogo):
             }
         num, ultimo = TurnOnLights.numColorMinimum(self.tol)
         snum = str(num)
-        for txt, key, secs in TurnOnLights.QUALIFICATIONS:
-            rotulo = "%s < %0.2f\"" % (_F(txt), secs)
+        thinkMode = self.tol.is_calculation_mode()
+        for txt, key, secs, secsThink in TurnOnLights.QUALIFICATIONS:
+            rotulo = "%s < %0.2f\"" % (_F(txt), secsThink if thinkMode else secs )
             if key == snum and not ultimo:
                 rotulo += " = %s" % _("Minimum to access next level")
             menu.opcion(None, rotulo, d[key])

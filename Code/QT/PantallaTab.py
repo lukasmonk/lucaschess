@@ -256,7 +256,7 @@ class SelectBanda(QtGui.QWidget):
             self.seleccionar(lb)
 
     def test_seleccionada(self):
-        if not self.seleccionada.id:
+        if self.seleccionada and not self.seleccionada.id:
             self.seleccionada.seleccionar(False)
             self.seleccionada = None
 

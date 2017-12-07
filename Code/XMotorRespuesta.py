@@ -964,8 +964,7 @@ class MRespuestaMotor:
             siPersonalidad = nTipo >= 1000  # Necesario para grabar los puntos
 
             if siPersonalidad:
-                nTipo, mindifpuntos, maxmate, dbg, aterrizaje = self.ajustaPersonalidad(
-                        self.liPersonalidades[nTipo - 1000])
+                nTipo, mindifpuntos, maxmate, dbg, aterrizaje = self.ajustaPersonalidad(self.liPersonalidades[nTipo - 1000])
 
             if nTipo == kAjustarMejor:
                 rmSel = self.liMultiPV[0]
@@ -1050,7 +1049,7 @@ class MRespuestaMotor:
                 elif dif < minpuntos:  # primeras depths ya se sabia que era buena jugada
                     return
 
-    def setNAG_Color(self, rm):
+    def setNAG_Color(self, configuracion, rm):
         # NAG_1=Jugada buena NAG_2=Jugada mala NAG_3=Muy buena jugada NAG_4=Muy mala jugada
         NORMAL, GOOD, BAD, VERYGOOD, VERYBAD = range(5)
         if rm.nivelBrillante():
@@ -1058,10 +1057,11 @@ class MRespuestaMotor:
         mj_pts = self.liMultiPV[0].puntosABS()
         rm_pts = rm.puntosABS()
         nb = mj_pts - rm_pts
+        perf = configuracion.perfomance
         if nb:
-            if nb > 300:
+            if nb > perf.very_bad_lostp:
                 return VERYBAD, VERYBAD
-            elif nb > 80:
+            elif nb > perf.bad_lostp:
                 return BAD, BAD
             return NORMAL, NORMAL
 
@@ -1092,10 +1092,10 @@ class MRespuestaMotor:
                     if ok:
                         firstDepth = depth
                         break
-            if firstDepth >= 5:
+            if firstDepth >= perf.very_good_depth:
                 nag = VERYGOOD
                 color = VERYGOOD
-            elif firstDepth >= 3:
+            elif firstDepth >= perf.good_depth:
                 nag = GOOD
                 color = GOOD
             else:

@@ -461,8 +461,6 @@ def genHistograms(partida, sicentipawns):
     porcT = 0
     porcW = 0
     porcB = 0
-    with open( "IntFiles/Formulas/eloperformance.formula") as f:
-        eloformula = f.read().strip()
 
     for num, jg in enumerate(partida.liJugadas):
         if jg.analisis:
@@ -471,15 +469,6 @@ def genHistograms(partida, sicentipawns):
             pts = mrm.liMultiPV[pos].puntosABS_5()
             pts0 = mrm.liMultiPV[0].puntosABS_5()
             jg.lostp_abs = lostp_abs = pts0 - pts
-
-            elo_base = int(eval(eloformula.replace("xlost", str(lostp_abs))))
-            jg.elo_real = max(elo_base, 0)
-            elo = max(elo_base, 1000)
-            jg.elo = elo
-
-            li = list({rm.puntosABS_5() for rm in mrm.liMultiPV})
-            li.sort(reverse=True)
-            jg.elo_factor = len(li)
 
             porc = jg.porcentaje = 100 - lostp_abs if lostp_abs < 100 else 0
             porcT += porc
@@ -513,8 +502,8 @@ def genHistograms(partida, sicentipawns):
                 tooltip += " ?" +("%0.02f" if siPawns else "%d") % lostp
             else:
                 tooltip += "!"
-            tooltip += " (%d)" % elo
-            hp = HPoint(nj, pts, lostp, lostp_abs, tooltip, elo)
+            tooltip += " (%d)" % jg.elo
+            hp = HPoint(nj, pts, lostp, lostp_abs, tooltip, jg.elo)
             hgame.addPoint(hp)
             if siBlancas:
                 hwhite.addPoint(hp.clone())

@@ -183,6 +183,8 @@ class PiezaSC(BloqueSC):
         self.limH = ancho - self.limL
         self.dragable = False
 
+        self.dispatchMove = None
+
     def rehazPosicion(self):
         posicion = self.bloquePieza.posicion
         self.setPos(posicion.x, posicion.y)
@@ -210,8 +212,13 @@ class PiezaSC(BloqueSC):
             QtGui.QGraphicsItem.mousePressEvent(self, event)
             self.setZValue(kZvalue_piezaMovimiento)
             self.setCursor(QtCore.Qt.ClosedHandCursor)
+            if self.dispatchMove:
+                self.dispatchMove()
         else:
             event.ignore()
+
+    def setDispatchMove(self, rutina):
+        self.dispatchMove = rutina
 
     def mouseReleaseEvent(self, event):
         QtGui.QGraphicsItem.mouseReleaseEvent(self, event)

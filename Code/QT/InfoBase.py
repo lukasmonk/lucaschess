@@ -241,7 +241,7 @@ class ThanksTo:
             ("Cartoon animal icons", "Martin Bérubé", 'http://www.how-to-draw-funny-cartoons.com/', "Free for personal non-commercial use"),
             ("Album of vehicles", "Icons-Land", "http://www.icons-land.com/vista-icons-transport-icon-set.php", "Icons-Land Demo License Agreement"),
             ("Figurines", 'Armando H. Marroquín', 'http://www.enpassant.dk/chess/fonteng.htm', _("Freeware")),
-            ("Icons for Windows8", 'VisualPharm', 'http://www.visualpharm.com/', "Creative Commons Attribution-NoDerivs 3.0 Unported"),
+            ("Icons for Windows8", 'Icons8', 'https://icons8.com', "Creative Commons Attribution-NoDerivs 3.0 Unported"),
             ("Transsiberian map", "Stefan Ertmann & Lokal Profil",
              "https://commons.wikimedia.org/wiki/File%3ATrans-Siberian_railway_map.svg", "CC BY-SA 2.5 via Wikimedia Commons"),
             ("Washing machine", "Shinnoske", "https://openclipart.org/detail/218905/simple-washing-machine", "Public domain"),

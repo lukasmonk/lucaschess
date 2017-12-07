@@ -1125,3 +1125,15 @@ def createDB(owner, configuracion, siFEN):
         if not database.lower().endswith("." + ext):
             database = database + "." + ext
     return database
+
+def selectDB(owner, configuracion, siFEN):
+    lista = listaDB(configuracion, siFEN)
+    if not lista:
+        return None
+    menu = LCMenu(owner)
+    rp = rondoPuntos()
+    for fich in lista:
+        menu.opcion(os.path.join(configuracion.carpeta, fich), _F(fich[:-4]), rp.otro())
+        menu.separador()
+    return menu.lanza()
+

@@ -1,5 +1,4 @@
 import copy
-import collections
 import time
 
 from Code.QT import TabTipos
@@ -327,10 +326,11 @@ class GT_Action(GTarea):
 
 class GT_Configuration(GTarea):
     GTC_TRANSITION, GTC_NEXT_TRANSITION = "T", "NT"
-    dicTxt = collections.OrderedDict({
-                GTC_TRANSITION:_("General transition time"),
-                GTC_NEXT_TRANSITION:_("Next transition time"),
-            })
+    dicTxt = {
+                GTC_TRANSITION: "General transition time",
+                GTC_NEXT_TRANSITION: "Next transition time",
+    }
+
     def __init__(self, guion):
         GTarea.__init__(self, guion, TP_CONFIGURATION)
         self._configuration = None

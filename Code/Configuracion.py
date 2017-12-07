@@ -53,6 +53,63 @@ def changeFolder(nueva):
         Util.borraFichero(LCFILEFOLDER)
 
 
+class Perfomance:
+    def __init__(self):
+        self.limit_max = 3500.0
+        self.limit_min = 800.0
+        self.lost_factor = 15.0
+        self.lost_exp = 1.35
+
+        self.very_bad_lostp = 200
+        self.bad_lostp = 90
+        self.bad_limit_min = 1200.0
+        self.very_bad_factor = 8
+        self.bad_factor = 2
+
+        self.very_good_depth = 6
+        self.good_depth = 3
+
+    def elo(self, xlost):
+        return min(max(int(self.limit_max - self.lost_factor * (xlost ** self.lost_exp)), self.limit_min), self.limit_max)
+
+    def elo_bad_vbad(self, xlost):
+        elo = self.elo(xlost)
+        vbad = xlost > self.very_bad_lostp
+        bad = False if vbad else xlost > self.bad_lostp
+        return elo, bad, vbad
+
+    def limit(self, verybad, bad, nummoves):
+        if verybad or bad:
+            return int(max(self.limit_max - self.very_bad_factor*1000.0 * verybad / nummoves - self.bad_factor*1000.0 * bad / nummoves, self.bad_limit_min))
+        else:
+            return self.limit_max
+
+    def save_dic(self):
+        dic = {}
+        default = Perfomance()
+        for x in dir(self):
+            if not x.startswith("_"):
+                atr = getattr(self, x)
+                if not callable(atr):
+                    if atr != getattr(default, x):
+                        dic[x] = atr
+        return dic
+
+    def restore_dic(self, dic):
+        for x in dir(self):
+            if x in dic:
+                setattr(self, x, dic[x])
+
+    def save(self):
+        dic = self.save_dic()
+        return str(dic)
+
+    def restore(self, txt):
+        if txt:
+            dic = eval(txt)
+            self.restore_dic(dic)
+
+
 class Configuracion:
     def __init__(self, user):
 
@@ -175,6 +232,8 @@ class Configuracion:
 
         self.palette = {}
 
+        self.perfomance = Perfomance()
+
         self.grupos = BaseConfig.Grupos(self)
         self.grupos.nuevo("TarraschToy", 0, 1999, 0)
         self.grupos.nuevo("Bikjump", 2000, 2400, 600)
@@ -280,6 +339,10 @@ class Configuracion:
         self.ficheroExpeditions = "%s/Expeditions.db" % self.carpeta
         self.ficheroSingularMoves = "%s/SingularMoves.db" % self.carpeta
 
+        if not Util.existeFichero(self.ficheroRecursos):
+            Util.copiaFichero("IntFiles/recursos.dbl", self.ficheroRecursos)
+
+
     def compruebaBMT(self):
         if not Util.existeFichero(self.ficheroBMT):
             self.ficheroBMT = "%s/lucas.bmt" % self.carpeta
@@ -320,6 +383,8 @@ class Configuracion:
         self.salvarCSV = ""
 
         self.rival = self.buscaRival(self.rivalInicial)
+
+        self.perfomance = Perfomance()
 
     def buscaRival(self, clave, defecto=None):
         if clave in self.dicRivales:
@@ -546,6 +611,8 @@ class Configuracion:
         dic["CHECKFORUPDATE"] = self.checkforupdate
         dic["PALETTE"] = self.palette
 
+        dic["PERFOMANCE"] = self.perfomance.save()
+
         for clave, rival in self.dicRivales.iteritems():
             dic["RIVAL_%s" % clave] = rival.graba()
         if aplazamiento:
@@ -682,6 +749,10 @@ class Configuracion:
                 self.checkforupdate = dg("CHECKFORUPDATE", self.checkforupdate)
                 self.palette = dg("PALETTE", self.palette)
 
+                perf = dg("PERFOMANCE")
+                if perf:
+                    self.perfomance.restore(perf)
+
                 for k in dic.keys():
                     if k.startswith("RIVAL_"):
                         claveK = k[6:]
@@ -789,6 +860,11 @@ class Configuracion:
         li.append(("Greko 7.1", "Vladimir Medvedev", "http://greko.110mb.com/index.html"))
         li = sorted(li, key=operator.itemgetter(0))
         return li
+
+    def carpetaTemporal(self):
+        dirTmp = os.path.join(self.carpeta, "tmp")
+        Util.creaCarpeta(dirTmp)
+        return dirTmp
 
     def ficheroTemporal(self, extension):
         dirTmp = os.path.join(self.carpeta, "tmp")

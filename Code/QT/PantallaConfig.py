@@ -120,6 +120,21 @@ def opciones(parent, configuracion):
     liTT.append((FormLayout.Spinbox(_("Minimum difference in points"), 0, 1000, 70), configuracion.tutorDifPts))
     liTT.append((FormLayout.Spinbox(_("Minimum difference in %"), 0, 1000, 70), configuracion.tutorDifPorc))
 
+    # Perfomance
+    perf = configuracion.perfomance
+    liPR = [separador]
+    def d(num):
+        return " (%s %d)" % (_("default"), num)
+    liPR.append((None, _("Bad moves: lost points to consider a move as bad")))
+    liPR.append((FormLayout.Spinbox(_("Bad move") + d(90), 20, 1000, 60), perf.bad_lostp))
+    liPR.append((FormLayout.Spinbox(_("Very bad move") + d(200), 50, 1000, 60), perf.very_bad_lostp))
+    liPR.append(separador)
+    liPR.append((FormLayout.Spinbox(_("Degree of effect of bad moves on the game elo") + d(2), 0, 5, 40), perf.bad_factor))
+    liPR.append(separador)
+    liPR.append((None, _("Good moves: minimum depth required by the engine to discover the move")))
+    liPR.append((FormLayout.Spinbox(_("Good move") + d(3), 2, 20, 40), perf.good_depth))
+    liPR.append((FormLayout.Spinbox(_("Very good move") + d(6), 3, 20, 40), perf.very_good_depth))
+
     # Modo no competitivo
     liNC = [separador]
     liNC.append((FormLayout.Spinbox(_("Lucas-Elo"), 0, 3200, 70), configuracion.eloNC))
@@ -194,6 +209,7 @@ def opciones(parent, configuracion):
     lista.append((liT, _("Boards"), ""))
     lista.append((liEng, _("Engines"), ""))
     lista.append((liAsp, _("Appearance"), ""))
+    lista.append((liPR, _("Perfomance"), ""))
     lista.append((liSA, _("Autosave"), ""))
     lista.append((liNC, _("Non competitive mode"), ""))
 
@@ -203,7 +219,7 @@ def opciones(parent, configuracion):
     if resultado:
         accion, resp = resultado
 
-        liGen, liSon, liTT, liT, liEng, liAsp, liSA, liNC = resp
+        liGen, liSon, liTT, liT, liEng, liAsp, liPR, liSA, liNC = resp
 
         (configuracion.jugador, configuracion.estilo, configuracion.traductor, configuracion.checkforupdate) = liGen
 
@@ -242,6 +258,9 @@ def opciones(parent, configuracion):
             if siDGT:
                 DGT.ponON()
             configuracion.siDGT = siDGT
+
+        perf.bad_lostp, perf.very_bad_lostp, perf.bad_factor, perf.good_depth, perf.very_good_depth = liPR
+        perf.very_bad_factor = perf.bad_factor * 4
 
         (configuracion.salvarFichero, configuracion.salvarGanados, configuracion.salvarPerdidos,
             configuracion.salvarAbandonados, configuracion.guardarVariantesTutor,

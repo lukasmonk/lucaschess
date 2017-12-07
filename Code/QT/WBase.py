@@ -364,12 +364,17 @@ class WBase(QtGui.QWidget):
         color = None
         info = ""
         indicadorInicial = None
-        liNAGs = jg.critica.strip().split(" ")
 
         # NAG_1=Jugada buena NAG_2=Jugada mala NAG_3=Muy buena jugada NAG_4=Muy mala jugada
         NAG_0, NAG_1, NAG_2, NAG_3, NAG_4, NAG_5, NAG_6 = range(7)
-        nag = NAG_0
+
         color_nag = NAG_0
+        liNAGs = jg.critica.strip().split(" ") if jg.critica else []
+        for critica in liNAGs:
+            if critica in ("1", "2", "3", "4", "5", "6"):
+                color_nag = critica
+                break
+
         if jg.analisis:
             mrm, pos = jg.analisis
             rm = mrm.liMultiPV[pos]
@@ -391,30 +396,16 @@ class WBase(QtGui.QWidget):
                 else:
                     info = "(%+0.2f)" % float(pts / 100.0)
 
-            nag, color_nag = mrm.setNAG_Color(rm)
-            # print nag, color_nag
-            # nb = rm.nivelBlunder()
-            # if nb:
-            #     if nb > 100:
-            #         nag = NAG_4
-            #     else:
-            #         nag = NAG_2
-            # elif rm.nivelBrillante():
-            #     nag = NAG_3
-            # elif pos == 0 or rm.puntosABS() == mrm.liMultiPV[0].puntosABS():
-            #     nag = NAG_1
+            nag, color_nag = mrm.setNAG_Color(self.configuracion, rm)
+            liNAGs.append(nag)
 
-            criticaDirecta = jg.criticaDirecta
-            if criticaDirecta:
-                nag = {"??": NAG_4, "?": NAG_2, "!!": NAG_3, "!": NAG_1, "!?": NAG_5, "?!": NAG_6}.get(criticaDirecta,
-                                                                                                       NAG_0)
-                color_nag = nag
+        criticaDirecta = jg.criticaDirecta
+        if criticaDirecta:
+            nag = {"??": NAG_4, "?": NAG_2, "!!": NAG_3, "!": NAG_1, "!?": NAG_5, "?!": NAG_6}.get(criticaDirecta,
+                                                                                                   NAG_0)
+            liNAGs.append(nag)
+            color_nag = nag
 
-            for critica in liNAGs:
-                if critica in ("1", "2", "3", "4", "5", "6"):
-                    nag = int(critica)
-                    color_nag = nag
-                    break
 
         if jg.siApertura or jg.critica or jg.comentario or jg.variantes:
             siA = jg.siApertura
@@ -441,6 +432,7 @@ class WBase(QtGui.QWidget):
                  NAG_6: c.color_nag6}[color_nag]
 
         return pgn, color, info, indicadorInicial, liNAGs
+
 
     def gridPonValor(self, grid, fila, oColumna, valor):
         pass

@@ -381,73 +381,71 @@ class Partida:
         for jg in self.liJugadas:
             jg.analisis = None
 
-    def calc_elo_color(self, formula, siBlancas):
+    def calc_elo_color(self, perfomance, siBlancas):
         bad_moves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
         verybad_moves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
         nummoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
         sumelos = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+        factormoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
         for jg in self.liJugadas:
             if jg.analisis:
                 if jg.siBlancas() != siBlancas:
                     continue
-                if jg.siApertura:
+                if jg.siBook:
                     std = jg.estadoOME = OPENING
                 else:
                     material = jg.posicionBase.valor_material()
                     std = jg.estadoOME = ENDGAME if material < 15 else MIDDLEGAME
-                jg.calc_elo(formula)
+                jg.calc_elo(perfomance)
                 if jg.bad_move:
                     bad_moves[std] += 1
                 elif jg.verybad_move:
                     verybad_moves[std] += 1
                 nummoves[std] += 1
-                sumelos[std] += jg.elo
-
-        def calc_tope(verybad, bad, nummoves):
-            if verybad or bad:
-                return int(max(3500 - 16000.0*verybad/nummoves - 4000.0*bad/nummoves, 1200.0))
-            else:
-                return 3500
+                sumelos[std] += jg.elo*jg.elo_factor
+                factormoves[std] += jg.elo_factor
 
         topes = {}
         elos = {}
         for std in (OPENING, MIDDLEGAME, ENDGAME):
-            nume = nummoves[std]
             sume = sumelos[std]
-            tope = topes[std] = calc_tope(verybad_moves[std], bad_moves[std], nummoves[std])
-            if nume:
-                elos[std] = int((sume*1.0/nume)*tope/3500.0)
+            numf = factormoves[std]
+            tope = topes[std] = perfomance.limit(verybad_moves[std], bad_moves[std], nummoves[std])
+            if numf:
+                elos[std] = int((sume*1.0/numf)*tope/perfomance.limit_max)
             else:
                 elos[std] = 0
 
         sume = 0
-        nume = 0
-        tope = 3500
+        numf = 0
+        tope = perfomance.limit_max
         for std in (OPENING, MIDDLEGAME, ENDGAME):
             sume += sumelos[std]
-            nume += nummoves[std]
+            numf += factormoves[std]
             if topes[std] < tope:
                 tope = topes[std]
 
-        if nume:
-            elos[ALLGAME] = int((sume*1.0/nume)*tope/3500.0)
+        if numf:
+            elos[ALLGAME] = int((sume*1.0/numf)*tope/perfomance.limit_max)
         else:
             elos[ALLGAME] = 0
 
         return elos
 
     def calc_elos(self, configuracion):
+        for jg in self.liJugadas:
+            jg.siBook = False
         if self.siFenInicial():
-            AperturasStd.ap.asignaApertura(self)
-        else:
+            from Code import Apertura
+            ap = Apertura.AperturaPol(999)
             for jg in self.liJugadas:
-                jg.siApertura = False
-        with open("IntFiles/Formulas/eloperformance.formula") as f:
-            formula = f.read().strip()
+                jg.siBook = ap.compruebaHumano(jg.posicionBase.fen(), jg.desde, jg.hasta)
+                if not jg.siBook:
+                    break
 
         elos = {}
         for siBlancas in (True, False):
-            elos[siBlancas] = self.calc_elo_color(formula, siBlancas)
+            elos[siBlancas] = self.calc_elo_color(configuracion.perfomance, siBlancas)
 
         elos[None] = {}
         for std in (OPENING, MIDDLEGAME, ENDGAME, ALLGAME):

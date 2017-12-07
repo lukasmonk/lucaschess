@@ -506,7 +506,7 @@ FILESW=%s:100
                         self.grabaBMT(False, fen, mrm, posAct, clpartida, txtPartida)
                         self.siBMTbrilliancies = True
                 else:
-                    nag, color = mrm.setNAG_Color(rm)
+                    nag, color = mrm.setNAG_Color(self.configuracion, rm)
                     if nag:
                         jg.masCritica1_4(str(nag))
 

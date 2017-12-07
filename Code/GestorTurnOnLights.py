@@ -23,14 +23,19 @@ class GestorTurnOnLights(Gestor.Gestor):
         self.block = self.tol.get_block(self.num_theme, self.num_block)
         self.block.shuffle()
 
+        self.calculation_mode = self.tol.is_calculation_mode()
+        self.penaltyError = self.block.penaltyError(self.calculation_mode)
+        self.penaltyHelp = self.block.penaltyHelp(self.calculation_mode)
+
         self.av_seconds = self.block.av_seconds()
         if self.av_seconds:
-            cat, ico = self.block.cqualification()
+            cat, ico = self.block.cqualification(self.calculation_mode)
             self.lb_previous = "%s - %0.2f\"" % (cat, self.av_seconds)
         else:
             self.lb_previous = None
         self.num_line = 0
         self.num_lines = len(self.block)
+        self.num_moves = 0
 
         self.total_time_used = 0.0
         self.ayudas = 0
@@ -53,16 +58,18 @@ class GestorTurnOnLights(Gestor.Gestor):
 
         self.next_line_run()
 
-    def pon_rotulos(self):
-        r1 = self.line.label
+    def pon_rotulos(self, next):
+        r1 = _("Calculation mode") if self.calculation_mode else _("Memory mode")
+        r1 += "<br>%s" % self.line.label
+
         if self.lb_previous:
             r1 += "<br><b>%s</b>" % self.lb_previous
-            if self.num_line:
-                av_secs, txt = self.block.calc_current(self.num_line - 1, self.total_time_used, self.errores, self.ayudas)
-                r1 += "<br><b>%s: %s - %0.2f\"" % (_("Current"), txt, av_secs)
+        if self.num_line:
+            av_secs, txt = self.block.calc_current(self.num_line - 1, self.total_time_used, self.errores, self.ayudas, self.calculation_mode)
+            r1 += "<br><b>%s: %s - %0.2f\"" % (_("Current"), txt, av_secs)
         self.ponRotulo1(r1)
-        if self.num_line < self.num_lines:
-            r2 = "<b>%d/%d</b>" % (self.num_line + 1, self.num_lines)
+        if next is not None:
+            r2 = "<b>%d/%d</b>" % (self.num_line + next, self.num_lines)
         else:
             r2 = None
         self.ponRotulo2(r2)
@@ -71,7 +78,7 @@ class GestorTurnOnLights(Gestor.Gestor):
         if self.num_line < self.num_lines:
             self.line = self.block.line(self.num_line)
             self.num_move = -1
-            self.time_used = 0.0
+            self.ini_time = None
 
             cp = ControlPosicion.ControlPosicion()
             cp.leeFen(self.line.fen)
@@ -85,7 +92,7 @@ class GestorTurnOnLights(Gestor.Gestor):
             self.pgnRefresh(True)
 
             self.partida.pendienteApertura = False
-            self.pon_rotulos()
+            self.pon_rotulos(1)
 
     def next_line_run(self):
         liOpciones = [k_mainmenu, k_ayuda, k_reiniciar]
@@ -121,6 +128,13 @@ class GestorTurnOnLights(Gestor.Gestor):
             self.next_line_run()
 
     def reiniciar(self):
+        if self.estado == kJugando:
+            if self.ini_time:
+                self.total_time_used += time.time() - self.ini_time
+        if self.total_time_used:
+            self.block.new_reinit(self.total_time_used)
+            self.total_time_used = 0.0
+            TurnOnLights.write_tol(self.tol)
         self.inicio(self.num_theme, self.num_block, self.tol)
 
     def siguienteJugada(self):
@@ -152,8 +166,15 @@ class GestorTurnOnLights(Gestor.Gestor):
 
         else:
             self.siJuegaHumano = True
-            self.ini_time = time.time()
+            if not (self.calculation_mode and self.ini_time is None):  # Se inicia salvo que sea el principio de la linea
+                self.ini_time = time.time()
             self.activaColor(siBlancas)
+            if self.calculation_mode:
+                self.tablero.setDispatchMove(self.dispatchMove)
+
+    def dispatchMove(self):
+        if self.ini_time is None:
+            self.ini_time = time.time()
 
     def finLinea(self):
         self.num_line += 1
@@ -167,11 +188,11 @@ class GestorTurnOnLights(Gestor.Gestor):
             ant_cat_global = self.tol.cat_global()
 
             num_moves = self.block.num_moves()
-            ta = self.total_time_used + self.errores*5.0 + self.ayudas*10.0
+            ta = self.total_time_used + self.errores*self.penaltyError + self.ayudas*self.penaltyHelp
             tm = ta/num_moves
             self.block.new_result(tm)
             TurnOnLights.write_tol(self.tol)
-            cat_block, ico = TurnOnLights.qualification(tm)
+            cat_block, ico = TurnOnLights.qualification(tm, self.calculation_mode)
             cat_level, ico = self.tol.cat_num_level()
             cat_global = self.tol.cat_global()
 
@@ -190,8 +211,8 @@ class GestorTurnOnLights(Gestor.Gestor):
                 if cat_global != ant_cat_global:
                     txt_more_global = '<span style="color:red">%s</span>' % _("New")
 
-            cErrores = '<tr><td align=right> %s </td><td> %d (x5"=%d")</td></tr>' % (_('Errors'), self.errores, self.errores*5) if self.errores else ""
-            cAyudas = '<tr><td align=right> %s </td><td> %d (x10"=%d")</td></tr>' % (_('Hints'), self.ayudas, self.ayudas*10) if self.ayudas else ""
+            cErrores = '<tr><td align=right> %s </td><td> %d (x%d"=%d")</td></tr>' % (_('Errors'), self.errores, self.penaltyError, self.errores*self.penaltyError) if self.errores else ""
+            cAyudas = '<tr><td align=right> %s </td><td> %d (x%d"=%d")</td></tr>' % (_('Hints'), self.ayudas, self.penaltyHelp, self.ayudas*self.penaltyHelp) if self.ayudas else ""
             mens = ('<hr><center><big>'+_('You have finished this block of positions') +
                     '<hr><table>' +
                     '<tr><td align=right> %s </td><td> %0.2f"</td></tr>' % (_('Time used'), self.total_time_used) +
@@ -206,15 +227,16 @@ class GestorTurnOnLights(Gestor.Gestor):
                     '</table></center></big><hr>' +
                     txt_more_line
                     )
-            self.pon_rotulos()
+            self.pon_rotulos(None)
             QTUtil2.mensaje(self.pantalla, mens, _("Result of training"))
+            self.total_time_used = 0
 
         else:
             if self.tol.go_fast:
                 self.next_line_run()
                 return
             QTUtil2.mensajeTemporal(self.pantalla, _("This line training is completed."), 1.3)
-            self.pon_rotulos()
+            self.pon_rotulos(0)
 
         self.estado = kFinJuego
         self.desactivaTodas()

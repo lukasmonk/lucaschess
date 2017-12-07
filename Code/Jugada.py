@@ -202,6 +202,7 @@ class Jugada:
             resp += self.criticaDirecta
 
         if self.critica:
+            self.critica = self.critica.strip()
             if "$" in self.critica:
                 self.critica = self.critica.replace("$", "")
             li = self.critica.split(" ")
@@ -402,15 +403,25 @@ class Jugada:
         self.critica = ""
         self.criticaDirecta = ""
 
-    def calc_elo(self, formula):
+    def calc_elo(self, perfomance):
         if self.analisis:
             mrm, pos = self.analisis
             pts = mrm.liMultiPV[pos].puntosABS_5()
             pts0 = mrm.liMultiPV[0].puntosABS_5()
             lostp_abs = pts0 - pts
-            self.elo = min(max(int(eval(formula.replace("xlost", str(lostp_abs)))), 800), 3500)
-            self.verybad_move = lostp_abs > 200
-            self.bad_move = lostp_abs > 90 if not self.verybad_move else False
+            self.elo, self.bad_move, self.verybad_move = perfomance.elo_bad_vbad(lostp_abs)
+
+            li = list({rm.puntosABS_5() for rm in mrm.liMultiPV})
+            li.sort()
+            ant = li[0]
+            nfactor = 1
+            for x in range(1, len(li)):
+                nue = li[x]
+                if nue-ant > 15:
+                    nfactor += 1
+                    ant = nue
+            self.elo_factor = nfactor
+
         else:
             self.elo = 0
             self.bad_move = False
