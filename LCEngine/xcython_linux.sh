@@ -5,7 +5,7 @@ x=$(pwd)
 export LIBRARY_PATH=$x
 export LD_LIBRARY_PATH=$x
 export PATH=$x:$PATH
-python ./setup.py build_ext --inplace --verbose
+python2 ./setup.py build_ext --inplace --verbose
 
 
 if uname -m | grep 64
