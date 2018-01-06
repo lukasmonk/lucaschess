@@ -15,13 +15,14 @@ from Code.Constantes import *
 
 
 class GestorPGN(Gestor.Gestor):
+
     def inicio(self, opcion):
+        self.finExit = True
         self.tipoJuego = kJugPGN
         self.finExit = False
         self.estado = kFinJuego
         self.nuestroFichero = self.configuracion.salvarFichero
         self.siNuestroFichero = self.nuestroFichero and os.path.isfile(self.nuestroFichero)
-
         liOpciones = [k_mainmenu]
         self.muestraInicial = True  # Para controlar si con un Cancel buscando un PGN se puede terminar
 
@@ -95,8 +96,7 @@ class GestorPGN(Gestor.Gestor):
             Gestor.Gestor.rutinaAccionDef(self, clave)
 
     def comandoExterno(self):
-        self.finExit = True
-        fichero = sys.argv[1]
+        fichero = self.procesador.args.chessFile
         if os.path.isfile(fichero):
             siTemporal = os.path.dirname(fichero).lower() == "tmp"
             self.pantalla.soloEdicionPGN(None if siTemporal else fichero)
@@ -107,7 +107,7 @@ class GestorPGN(Gestor.Gestor):
 
     def finPartida(self):
         if self.finExit:
-            fichero = sys.argv[1]
+            fichero = self.procesador.args.chessFile
             if os.path.dirname(fichero).lower() == "tmp":
                 Util.borraFichero(fichero)
             self.procesador.procesarAccion(k_terminar)

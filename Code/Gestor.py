@@ -2,6 +2,7 @@ import codecs
 import os
 import random
 import time
+import logging
 
 import LCEngine
 
@@ -1366,7 +1367,11 @@ class Gestor:
 
         menuSave.separador()
 
-        menuSave.opcion("dbfichero", _("Database"), Iconos.DatabaseCNew())
+#        menuSave.opcion("dbfichero", _("Database"), Iconos.DatabaseCNew())
+        dbAction = "dbfichero"
+        siFen = not self.partida.siFenInicial()
+        dbMenu = menuSave.submenu(_("Database"), Iconos.DatabaseCNew())
+        QTVarios.crearDBMenu(dbMenu, dbAction, self.configuracion, siFen)
 
         menuSave.separador()
 
@@ -1480,8 +1485,11 @@ class Gestor:
         elif resp == "pgnfichero":
             self.salvaPGN()
 
-        elif resp == "dbfichero":
-            self.salvaDB()
+        elif resp.startswith("dbfichero"):
+            db = resp.split(":")[1]
+            logging.info("Selected DB in menu: %s", db)
+            siFen = not self.partida.siFenInicial()
+            self.salvaDB(db, siFen)
 
         elif resp.startswith("fen") or resp.startswith("fns"):
             extension = resp[:3]
@@ -1498,14 +1506,13 @@ class Gestor:
         um.final()
         PantallaAnalisis.showGraph(self.pantalla, self, alm, Analisis.muestraAnalisis)
 
-    def salvaDB(self):
-        siFen = not self.partida.siFenInicial()
-        database = QTVarios.selectDB(self.pantalla, self.configuracion, siFen)
-        if database is None:
-            return
+
+    def salvaDB(self, dbNom, siFen):
+        logging.info("Saving to DB: %s", dbNom)
 
         pgn = self.listado("pgn")
         liTags = []
+
         for linea in pgn.split("\n"):
             if linea.startswith("["):
                 ti = linea.split('"')
@@ -1519,13 +1526,20 @@ class Gestor:
         pc = Partida.PartidaCompleta(liTags=liTags)
         pc.leeOtra(self.partida)
 
+        database = os.path.abspath(dbNom)
+        logging.info("DB absPath: %s", database)
         db = DBgamesFEN.DBgamesFEN(database) if siFen else DBgames.DBgames(database)
+
+        logging.info("Attempting save to DB: %s", db)
         resp = db.inserta(pc)
         db.close()
+        logging.info("DB response: %s", resp)
+
         if resp:
             QTUtil2.mensaje(self.pantalla, _("Saved"))
         else:
             QTUtil2.mensError(self.pantalla, _("This game already exists."))
+
 
     def salvaPKS(self):
         pgn = self.listado("pgn")

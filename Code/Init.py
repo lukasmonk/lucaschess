@@ -15,11 +15,11 @@ if DEBUG:
     prlkn("DEBUG " * 20)
 
 
-def init():
+def init(args):
     if not DEBUG:
         sys.stderr = Util.Log("bug.log")
 
-    mainProcesador = Procesador.Procesador()
+    mainProcesador = Procesador.Procesador(args)
     mainProcesador.setVersion(VERSION)
     runSound = Sonido.RunSound()
     resp = Gui.lanzaGUI(mainProcesador)

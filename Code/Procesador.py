@@ -2,6 +2,7 @@ import os
 import random
 import sys
 import webbrowser
+import logging
 
 from Code import AperturasStd
 from Code import Routes
@@ -71,9 +72,10 @@ class Procesador:
     """
     Vinculo entre pantalla y gestores
     """
-    def __init__(self):
+    def __init__(self, args):
         if VarGen.listaGestoresMotor is None:
             VarGen.listaGestoresMotor = XGestorMotor.ListaGestoresMotor()
+        self.args = args
 
     def iniciaConUsuario(self, user):
 
@@ -126,45 +128,44 @@ class Procesador:
         self.tablero = self.pantalla.tablero
 
         self.entrenamientos = Entrenamientos.Entrenamientos(self)
+        comando = self.args.chessFile
+        fen = self.args.fen
+        logging.info("Chess file to use: %s", comando)
+        logging.info("Fen to use: %s", fen)
 
 
         if self.configuracion.siAplazada:
             aplazamiento = self.configuracion.aplazamiento
             self.juegaAplazada(aplazamiento)
-        else:
-            if len(sys.argv) > 1:
-                comando = sys.argv[1]
-                comandoL = comando.lower()
-                if comandoL.endswith(".pgn"):
-                    aplazamiento = {}
-                    aplazamiento["TIPOJUEGO"] = kJugPGN
-                    aplazamiento["SIBLANCAS"] = True  # Compatibilidad
-                    self.juegaAplazada(aplazamiento)
-                    return
-                elif comandoL.endswith(".pks"):
-                    aplazamiento = {}
-                    aplazamiento["TIPOJUEGO"] = kJugSolo
-                    aplazamiento["SIBLANCAS"] = True  # Compatibilidad
-                    self.juegaAplazada(aplazamiento)
-                    return
-                elif comandoL.endswith(".lcg"):
-                    self.externDatabase(comando)
-                    return
+        elif comando:
+            comandoL = comando.lower()
+            if comandoL.endswith(".pgn"):
+                aplazamiento = {}
+                aplazamiento["TIPOJUEGO"] = kJugPGN
+                aplazamiento["SIBLANCAS"] = True  # Compatibilidad
+                self.juegaAplazada(aplazamiento)
+                return
+            elif comandoL.endswith(".pks"):
+                aplazamiento = {}
+                aplazamiento["TIPOJUEGO"] = kJugSolo
+                aplazamiento["SIBLANCAS"] = True  # Compatibilidad
+                self.juegaAplazada(aplazamiento)
+                return
+            elif comandoL.endswith(".lcg"):
+                self.externDatabase(comando)
+                return
                 # elif comandoL.endswith(".lcf"):
                 #     self.externDatabaseFEN(comando)
                 #     return
-                elif comandoL.endswith(".bmt"):
-                    self.inicio()
-                    self.externBMT(comando)
-                    return
-                elif comando == "-play":
-                    fen = sys.argv[2]
-                    self.juegaExterno(fen)
-
-                    return
-
-            else:
+            elif comandoL.endswith(".bmt"):
                 self.inicio()
+                self.externBMT(comando)
+                return
+        elif fen:
+            self.juegaExterno(fen)
+            return
+        else:
+            self.inicio()
 
     def reset(self):
         self.pantalla.activaCapturas(False)
@@ -252,7 +253,7 @@ class Procesador:
         elif tipoJuego == kJugPGN:
             self.visorPGN("pgn_comandoExterno")
         elif tipoJuego == kJugSolo:
-            self.jugarSolo(fichero=sys.argv[1])
+            self.jugarSolo(fichero=self.args.chessFile)
         elif tipoJuego in (kJugFics, kJugFide):
             self.gestor = GestorFideFics.GestorFideFics(self)
             self.gestor.selecciona("Fics" if tipoJuego == kJugFics else "Fide")

@@ -21,6 +21,8 @@ from Code.QT import PantallaSavePGN
 from Code.QT import PantallaAnalisisParam
 from Code.QT import PantallaPlayPGN
 
+import logging
+
 
 class WGames(QtGui.QWidget):
     def __init__(self, procesador, winBookGuide, dbGames, wsummary, siMoves=True):
@@ -64,7 +66,7 @@ class WGames(QtGui.QWidget):
         # ToolBar
         liAccionesWork = [
             (_("Close"), Iconos.MainMenu(), self.tw_terminar), None,
-            (_("File"), Iconos.File(), self.tg_file), None,
+            (_("Database"), Iconos.DatabaseC(), self.tg_file), None,
             (_("New"), Iconos.Nuevo(), self.tw_nuevo, _("Add a new game")), None,
             (_("Edit"), Iconos.Modificar(), self.tw_editar), None,
             (_("First"), Iconos.Inicio(), self.tw_gotop), None,
@@ -393,6 +395,7 @@ class WGames(QtGui.QWidget):
         menu.separador()
 
         resp = menu.lanza()
+        logging.info('Selected operation: %s', resp)
         if resp:
             if type(resp) == str:
                 self.changeDBgames(resp)

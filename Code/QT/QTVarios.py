@@ -1,6 +1,8 @@
 import base64
 import codecs
 import os
+import logging
+import re
 
 from PyQt4 import QtCore, QtGui, QtSvg
 
@@ -1072,6 +1074,15 @@ def list_irina():
     )
 
 
+#def baseDB(siFEN):
+#    if siFEN:
+#        base = configuracion.ficheroDBgamesFEN
+#    else:
+#        base = configuracion.ficheroDBgames
+#    base = os.path.abspath(base)
+#    return base
+
+
 def listaDB(configuracion, siFEN):
     if siFEN:
         ext = "lcf"
@@ -1079,10 +1090,15 @@ def listaDB(configuracion, siFEN):
     else:
         ext = "lcg"
         base = configuracion.ficheroDBgames
-    base = os.path.abspath(base)
+
+    logging.info('Base database: %s', base)
+    basepath = os.path.abspath(base)
+    logging.info('Base full path: %s', basepath)
+
     lista = [fich for fich in os.listdir(configuracion.carpeta)
-             if fich.endswith("." + ext) and os.path.abspath(os.path.join(configuracion.carpeta, fich)) != base
+             if fich.endswith("." + ext) and os.path.abspath(os.path.join(configuracion.carpeta, fich)) != basepath
         ]
+
     return lista
 
     # menu = LCMenu(owner)
@@ -1128,6 +1144,13 @@ def createDB(owner, configuracion, siFEN):
 
 def selectDB(owner, configuracion, siFEN):
     lista = listaDB(configuracion, siFEN)
+    if siFEN:
+        base = configuracion.ficheroDBgamesFEN
+    else:
+        base = configuracion.ficheroDBgames
+
+    if True:
+        return base
     if not lista:
         return None
     menu = LCMenu(owner)
@@ -1137,3 +1160,25 @@ def selectDB(owner, configuracion, siFEN):
         menu.separador()
     return menu.lanza()
 
+def crearDBMenu(menuDB, dbAction, configuracion, siFEN):
+    if siFEN:
+        base = configuracion.ficheroDBgamesFEN
+    else:
+        base = configuracion.ficheroDBgames
+
+    rp = rondoPuntos()
+
+    logging.info('Base database: %s', base)
+
+    baseNom = re.search(r'.*/(.*).lc.', base).group(1)
+    menuDB.opcion(dbAction + ":" + base, baseNom, rp.otro())
+
+    lista = listaDB(configuracion, siFEN)
+    if lista:
+        menuDB.separador()
+        for fich in lista:
+            fich = os.path.join(configuracion.carpeta, fich)
+            fichNom = re.search(r'.*/(.*).lc.', fich).group(1)
+            menuDB.opcion(dbAction + ":" + fich, fichNom, rp.otro())
+
+    return

@@ -336,6 +336,7 @@ class WGamesFEN(QtGui.QWidget):
         menu = QTVarios.LCMenu(self)
 
         lista = QTVarios.listaDB(self.configuracion, True)
+
         if lista:
             smenu = menu.submenu( _("Open another database"), Iconos.DatabaseC())
             rp = QTVarios.rondoPuntos()
@@ -522,4 +523,3 @@ class WGamesFEN(QtGui.QWidget):
         self.setNameToolBar()
         self.limpiaColumnas()
         self.actualiza(True)
-
