@@ -65,6 +65,7 @@ from Code.QT import PantallaManualSave
 from Code.QT import WBDatabaseFEN
 from Code.QT import WOpeningGuide
 from Code.QT import PantallaKibitzers
+from Code.QT import POLines
 
 
 class Procesador:
@@ -253,9 +254,9 @@ class Procesador:
             self.visorPGN("pgn_comandoExterno")
         elif tipoJuego == kJugSolo:
             self.jugarSolo(fichero=sys.argv[1])
-        elif tipoJuego in (kJugFics, kJugFide):
+        elif tipoJuego in (kJugFics, kJugFide, kJugLichess):
             self.gestor = GestorFideFics.GestorFideFics(self)
-            self.gestor.selecciona("Fics" if tipoJuego == kJugFics else "Fide")
+            self.gestor.selecciona(tipoJuego)
             self.gestor.inicio(aplazamiento["IDGAME"], aplazamiento["SICOMPETITIVO"], aplazamiento=aplazamiento)
 
     def XTutor(self):
@@ -453,6 +454,13 @@ class Procesador:
         for elo in range(1500, 2700, 100):
             if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
                 menuf.opcion(("fide", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
+        lichess = self.configuracion.lichess
+        submenu.separador()
+        menuf = submenu.submenu("%s (%d)" % (_("Lichess-Elo"), fide), Iconos.Lichess())
+        rp = QTVarios.rondoPuntos()
+        for elo in range(800, 2700, 100):
+            if (elo == 800) or (0 <= (elo + 99 - lichess) <= 400 or 0 <= (lichess - elo) <= 400):
+                menuf.opcion(("lichess", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
         menu.separador()
         submenu = menu.submenu(_("Singular moves"), Iconos.Singular())
         submenu.opcion(("strenght101", 0), _("Calculate your strength"), Iconos.Strength())
@@ -476,6 +484,9 @@ class Procesador:
 
             elif tipo == "fide":
                 self.fideelo(True, rival)
+
+            elif tipo == "lichess":
+                self.lichesselo(True, rival)
 
             elif tipo == "challenge101":
                 Presentacion.GestorChallenge101(self)
@@ -634,6 +645,13 @@ class Procesador:
         for elo in range(1500, 2700, 100):
             if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
                 menuf.opcion("fide%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
+        lichess = self.configuracion.lichess
+        menu.separador()
+        menuf = menu.submenu("%s (%d)" % (_("Lichess-Elo"), lichess), Iconos.Lichess())
+        rp = QTVarios.rondoPuntos()
+        for elo in range(800, 2700, 100):
+            if (elo == 800) or (0 <= (elo + 99 - lichess) <= 400 or 0 <= (lichess - elo) <= 400):
+                menuf.opcion("lichess%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
         resp = menu.lanza()
 
         if resp:
@@ -645,6 +663,8 @@ class Procesador:
                 self.ficselo(True, int(resp[4:]))
             elif resp.startswith("fide"):
                 self.fideelo(True, int(resp[4:]))
+            elif resp.startswith("lichess"):
+                self.lichesselo(True, int(resp[7:]))
 
     def lucaselo(self, siCompetitivo):
         self.gestor = GestorElo.GestorElo(self)
@@ -664,13 +684,19 @@ class Procesador:
 
     def ficselo(self, siCompetitivo, nivel):
         self.gestor = GestorFideFics.GestorFideFics(self)
-        self.gestor.selecciona("Fics")
+        self.gestor.selecciona(kJugFics)
         xid = self.gestor.eligeJuego(siCompetitivo, nivel)
         self.gestor.inicio(xid, siCompetitivo)
 
     def fideelo(self, siCompetitivo, nivel):
         self.gestor = GestorFideFics.GestorFideFics(self)
-        self.gestor.selecciona("Fide")
+        self.gestor.selecciona(kJugFide)
+        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
+        self.gestor.inicio(xid, siCompetitivo)
+
+    def lichesselo(self, siCompetitivo, nivel):
+        self.gestor = GestorFideFics.GestorFideFics(self)
+        self.gestor.selecciona(kJugLichess)
         xid = self.gestor.eligeJuego(siCompetitivo, nivel)
         self.gestor.inicio(xid, siCompetitivo)
 
@@ -681,6 +707,8 @@ class Procesador:
             self.gestor.inicio(resp)
 
     def tools(self):
+        # self.openings()
+        # return
         menu = QTVarios.LCMenu(self.pantalla)
 
         menu.opcion("juega_solo", _("Create your own game"), Iconos.JuegaSolo())
@@ -691,7 +719,7 @@ class Procesador:
         menu1.separador()
         menu1.opcion("pgn_fichero", _("Read PGN"), Iconos.Fichero())
         menu1.separador()
-        menu1.opcion("pgn_jugadadia", _("Game of the day"), Iconos.LM())
+        menu1.opcion("pgn_miniatura", _("Miniature of the day"), Iconos.Miniatura())
         menu1.separador()
         if self.configuracion.liTrasteros:
             menu1.opcion("pgn_trasteros", _("Boxrooms PGN"), Iconos.Trasteros())
@@ -713,7 +741,8 @@ class Procesador:
         menu1.opcion("aperturaspers", _("Custom openings"), Iconos.Apertura())
         menu1.separador()
         menu1.opcion("bookguide", _("Personal Opening Guide"), Iconos.BookGuide())
-        menu.separador()
+        menu1.separador()
+        menu1.opcion("openings", _("Opening lines") + " [WORK IN PROGRESS]", Iconos.OpeningLines())
         menu.separador()
 
         menu1 = menu.submenu(_("Engines"), Iconos.Motores())
@@ -757,6 +786,15 @@ class Procesador:
             elif resp == "bookguide":
                 w = WOpeningGuide.WOpeningGuide(self.pantalla, self)
                 w.exec_()
+            elif resp == "openings":
+                self.openings()
+
+    def openings(self):
+        result = POLines.openingLines(self)
+        if result:
+            fichero, basepv, title = result
+            POLines.study(self, fichero)
+            self.openings()
 
     def kibitzers(self):
         w = PantallaKibitzers.WKibitzers(self.pantalla, self)
@@ -821,9 +859,10 @@ class Procesador:
         self.gestor = GestorPGN.GestorPGN(self)
 
         opcion = opcion[4:]
-        dic = {"paste": k_pgnPaste, "fichero": k_pgnFichero, "jugadadia": k_jugadadia, "trasteros": k_trasteros,
+        dic = {"paste": k_pgnPaste, "fichero": k_pgnFichero, "miniatura": k_jugadadia, "trasteros": k_trasteros,
                "nuestroFichero": k_pgnNuestroFichero,
-               "comandoExterno": k_pgnComandoExterno}
+               "comandoExterno": k_pgnComandoExterno,
+              }
 
         self.gestor.inicio(dic[opcion])
 

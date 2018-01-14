@@ -289,6 +289,7 @@ class Torneo:
         self._ultMinutos = 15
         self._ultSegundosJugada = 0
         self._book = ""  # "":por defecto otro:path to libro polyglot
+        self._bookDepth = 0
         self._fen = ""
         self._norman = True
 
@@ -355,6 +356,11 @@ class Torneo:
             self._book = valor
         return self._book
 
+    def bookDepth(self, valor=None):
+        if valor is not None:
+            self._bookDepth = valor
+        return self._bookDepth
+
     def fichero(self):
         if self._nombre:
             return os.path.join(VarGen.configuracion.carpeta, self._nombre + ".mvm")
@@ -379,6 +385,9 @@ class Torneo:
         self._ultSegundosJugada = dic["ULTSEGUNDOSJUGADA"]
         self._fen = dic.get("FEN", "")
         self._norman = dic.get("NORMAN", False)
+
+        self._book = dic.get("BOOK", "")
+        self._bookDepth = dic.get("BOOKDEPTH", "")
 
         liTxt = dic["ENGINES"]
         li = []
@@ -412,6 +421,9 @@ class Torneo:
         dic["ULTSEGUNDOSJUGADA"] = self._ultSegundosJugada
         dic["FEN"] = self._fen
         dic["NORMAN"] = self._norman
+
+        dic["BOOK"] = self._book
+        dic["BOOKDEPTH"] = self._bookDepth
 
         dic["ENGINES"] = [en.grabarTXT() for en in self._liEngines]
         dic["GAMES"] = [gm.grabarDIC() for gm in self._liGames]

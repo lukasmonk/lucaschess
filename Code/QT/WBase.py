@@ -89,13 +89,13 @@ class WBase(QtGui.QWidget):
         self.pgn.seleccionaFilas(siPoner, False)
 
     def creaBloqueInformacion(self):
-        nAnchoPgn = self.gestor.configuracion.anchoPGN
+        configuracion = self.gestor.configuracion
+        nAnchoPgn = configuracion.anchoPGN
         nAnchoColor = (nAnchoPgn - 35 - 20) / 2
         nAnchoLabels = max(int((nAnchoPgn - 3) / 2), 140)
         # # Pgn
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("NUMERO", _("N."), 35, siCentrado=True)
-        configuracion = self.gestor.configuracion
         siFigurinesPGN = configuracion.figurinesPGN
         oColumnas.nueva("BLANCAS", _("White"), nAnchoColor,
                         edicion=Delegados.EtiquetaPGN(True if siFigurinesPGN else None))
@@ -311,7 +311,7 @@ class WBase(QtGui.QWidget):
 
     def gridBotonDerecho(self, grid, fila, columna, modificadores):
         self.gestor.pgnMueveBase(fila, columna.clave)
-        self.gestor.rightMouse(modificadores.siShift, modificadores.siControl, modificadores.siAlt)
+        self.gestor.gridRightMouse(modificadores.siShift, modificadores.siControl, modificadores.siAlt)
 
     def boardRightMouse(self, siShift, siControl, siAlt):
         if hasattr(self.gestor, "boardRightMouse"):
@@ -368,6 +368,8 @@ class WBase(QtGui.QWidget):
         # NAG_1=Jugada buena NAG_2=Jugada mala NAG_3=Muy buena jugada NAG_4=Muy mala jugada
         NAG_0, NAG_1, NAG_2, NAG_3, NAG_4, NAG_5, NAG_6 = range(7)
 
+        nag = NAG_0
+
         color_nag = NAG_0
         stNAGS = set(jg.critica.strip().split(" ") if jg.critica else [])
         for critica in stNAGS:
@@ -411,7 +413,7 @@ class WBase(QtGui.QWidget):
         if jg.siApertura or jg.critica or jg.comentario or jg.variantes:
             siA = jg.siApertura
             nR = 0
-            if jg.critica:
+            if jg.critica and nag == NAG_0:
                 nR += 1
             if jg.comentario:
                 nR += 1
@@ -430,7 +432,7 @@ class WBase(QtGui.QWidget):
             color = \
                 {NAG_1: c.color_nag1, NAG_2: c.color_nag2, NAG_3: c.color_nag3, NAG_4: c.color_nag4,
                  NAG_5: c.color_nag5,
-                 NAG_6: c.color_nag6}[color_nag]
+                 NAG_6: c.color_nag6}[int(color_nag)]
 
         return pgn, color, info, indicadorInicial, stNAGS
 

@@ -242,7 +242,6 @@ class GestorTorneo(Gestor.Gestor):
         return not self.siTerminar
 
     def ponReloj(self):
-
         # if (not self.siPrimeraJugadaHecha) or (self.estado != kJugando):
         if self.estado != kJugando:
             return
@@ -286,12 +285,13 @@ class GestorTorneo(Gestor.Gestor):
         return False
 
     def eligeJugadaBook(self, book, tipo):
-        fen = self.fenUltimo()
-        pv = book.eligeJugadaTipo(fen, tipo)
-        if pv:
-            return True, pv[:2], pv[2:4], pv[4:]
-        else:
-            return False, None, None, None
+        bdepth = self.torneo.bookDepth()
+        if bdepth == 0 or self.partida.numJugadas() < bdepth:
+            fen = self.fenUltimo()
+            pv = book.eligeJugadaTipo(fen, tipo)
+            if pv:
+                return True, pv[:2], pv[2:4], pv[4:]
+        return False, None, None, None
 
     def masJugada(self, jg):
         if self.siTerminada():

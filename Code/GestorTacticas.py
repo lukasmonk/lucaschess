@@ -283,7 +283,7 @@ class GestorTacticas(Gestor.Gestor):
         self.ponIndicador(siBlancas)
         self.refresh()
 
-        if self.siTerminada():
+        if self.siTerminada() or (self.partida.numJugadas() and self.partida.jugada(-1).siTablas()):
             if not self.siSeguirJugando:
                 self.finLinea()
             return

@@ -7,25 +7,25 @@ from Code import VarGen
 NOABANDONO, ABANDONO, ABANDONORIVAL = "N", "S", "R"
 
 
-def creaDicHTML():
-    base = '<img src="IntFiles/Figs/%s%s.png">'
-    dic = {}
-    for x in "nbrqk":
-        dic[x.upper()] = base % ("w", x)
-        dic[x] = base % ("b", x)
-    return dic
-
 # def creaDicHTML():
-#     base = '<span style="font-family:Chess Diagramm Pirat;font-size:18pt">%s</span>'
-#     ori = "KQRBNPkqrbnp"
-#     des = "rstuvw" + chr(126) + chr(130) + chr(131) + chr(132) + chr(133) + chr(134)
-#     def haz(c):
-#         return des[ori.index(c)]
+#     base = '<img src="IntFiles/Figs/%s%s.png">'
 #     dic = {}
 #     for x in "nbrqk":
-#         dic[x.upper()] = base % haz(x.upper())
-#         dic[x] = base % haz(x)
+#         dic[x.upper()] = base % ("w", x)
+#         dic[x] = base % ("b", x)
 #     return dic
+
+def creaDicHTML():
+    base = '<span style="font-family:Chess Diagramm Pirat">%s</span>'
+    ori = "KQRBNPkqrbnp"
+    des = "rstuvw" + chr(126) + chr(130) + chr(131) + chr(132) + chr(133) + chr(134)
+    def haz(c):
+        return des[ori.index(c)]
+    dic = {}
+    for x in "nbrqk":
+        dic[x.upper()] = base % haz(x.upper())
+        dic[x] = base % haz(x)
+    return dic
 
 dicHTMLFigs = creaDicHTML()
 

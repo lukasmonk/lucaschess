@@ -119,6 +119,19 @@ def escondeWindow(window):
     window.move(screen.width()*2, 0)
     return pos
 
+class EscondeWindow:
+    def __init__(self, window):
+        self.window = window
+
+    def __enter__(self):
+        self.pos = self.window.pos()
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        self.window.move(screen.width()*2, 0)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.window.move(self.pos)
+        self.window.show()
 
 def colorIcon(xcolor, ancho, alto):
     color = QtGui.QColor(xcolor)

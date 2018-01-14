@@ -1,0 +1,2187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.0"
+   width="300.000000pt"
+   height="300.000000pt"
+   viewBox="0 0 300.000000 300.000000"
+   preserveAspectRatio="xMidYMid meet"
+   id="svg2"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="wn.svg">
+  <defs
+     id="defs12">
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter1326">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur1272" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix1274" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite1276" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix1278" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur1280" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix1282" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood1284" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend1286" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer1294">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR1288" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG1290" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB1292" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur1296" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix1298" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix1300" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood1302" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite1304" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite1306" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset1308" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood1310" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite1312" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite1314" />
+      <feMerge
+         result="merge1"
+         id="feMerge1320">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode1316" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode1318" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix1322" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite1324" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter1390">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur1336" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix1338" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite1340" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix1342" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur1344" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix1346" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood1348" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend1350" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer1358">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR1352" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG1354" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB1356" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur1360" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix1362" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix1364" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood1366" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite1368" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite1370" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset1372" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood1374" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite1376" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite1378" />
+      <feMerge
+         result="merge1"
+         id="feMerge1384">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode1380" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode1382" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix1386" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite1388" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter1458">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur1404" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix1406" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite1408" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix1410" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur1412" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix1414" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood1416" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend1418" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer1426">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR1420" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG1422" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB1424" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur1428" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix1430" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix1432" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood1434" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite1436" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite1438" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset1440" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood1442" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite1444" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite1446" />
+      <feMerge
+         result="merge1"
+         id="feMerge1452">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode1448" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode1450" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix1454" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite1456" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter1535">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur1481" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix1483" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite1485" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix1487" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur1489" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix1491" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood1493" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend1495" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer1503">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR1497" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG1499" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB1501" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur1505" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix1507" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix1509" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood1511" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite1513" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite1515" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset1517" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood1519" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite1521" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite1523" />
+      <feMerge
+         result="merge1"
+         id="feMerge1529">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode1525" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode1527" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix1531" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite1533" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter5418">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur5364" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix5366" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite5368" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix5370" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur5372" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix5374" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood5376" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend5378" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer5386">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR5380" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG5382" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB5384" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur5388" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix5390" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix5392" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood5394" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite5396" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite5398" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset5400" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood5402" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite5404" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite5406" />
+      <feMerge
+         result="merge1"
+         id="feMerge5412">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode5408" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode5410" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix5414" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite5416" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter5515">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur5461" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix5463" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite5465" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix5467" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur5469" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix5471" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood5473" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend5475" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer5483">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR5477" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG5479" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB5481" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur5485" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix5487" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix5489" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood5491" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite5493" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite5495" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset5497" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood5499" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite5501" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite5503" />
+      <feMerge
+         result="merge1"
+         id="feMerge5509">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode5505" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode5507" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix5511" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite5513" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter5612">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur5558" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix5560" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite5562" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix5564" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur5566" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix5568" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood5570" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend5572" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer5580">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR5574" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG5576" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB5578" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur5582" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix5584" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix5586" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood5588" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite5590" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite5592" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset5594" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood5596" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite5598" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite5600" />
+      <feMerge
+         result="merge1"
+         id="feMerge5606">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode5602" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode5604" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix5608" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite5610" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter5720">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur5666" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix5668" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite5670" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix5672" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur5674" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix5676" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood5678" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend5680" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer5688">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR5682" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG5684" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB5686" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur5690" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix5692" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix5694" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood5696" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite5698" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite5700" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset5702" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood5704" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite5706" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite5708" />
+      <feMerge
+         result="merge1"
+         id="feMerge5714">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode5710" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode5712" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix5716" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite5718" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter5817">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur5763" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix5765" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite5767" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix5769" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur5771" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix5773" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood5775" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend5777" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer5785">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR5779" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG5781" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB5783" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur5787" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix5789" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix5791" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood5793" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite5795" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite5797" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset5799" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood5801" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite5803" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite5805" />
+      <feMerge
+         result="merge1"
+         id="feMerge5811">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode5807" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode5809" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix5813" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite5815" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter5914">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur5860" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix5862" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite5864" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix5866" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur5868" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix5870" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood5872" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend5874" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer5882">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR5876" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG5878" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB5880" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur5884" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix5886" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix5888" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood5890" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite5892" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite5894" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset5896" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood5898" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite5900" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite5902" />
+      <feMerge
+         result="merge1"
+         id="feMerge5908">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode5904" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode5906" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix5910" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite5912" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter6011">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur5957" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix5959" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite5961" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix5963" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur5965" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix5967" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood5969" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend5971" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer5979">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR5973" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG5975" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB5977" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur5981" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix5983" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix5985" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood5987" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite5989" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite5991" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset5993" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood5995" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite5997" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite5999" />
+      <feMerge
+         result="merge1"
+         id="feMerge6005">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode6001" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode6003" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix6007" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite6009" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter6108">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur6054" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix6056" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite6058" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix6060" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur6062" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix6064" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood6066" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend6068" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer6076">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR6070" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG6072" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB6074" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur6078" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix6080" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix6082" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood6084" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite6086" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite6088" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset6090" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood6092" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite6094" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite6096" />
+      <feMerge
+         result="merge1"
+         id="feMerge6102">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode6098" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode6100" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix6104" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite6106" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter6205">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur6151" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix6153" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite6155" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix6157" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur6159" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix6161" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood6163" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend6165" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer6173">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR6167" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG6169" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB6171" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur6175" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix6177" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix6179" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood6181" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite6183" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite6185" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset6187" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood6189" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite6191" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite6193" />
+      <feMerge
+         result="merge1"
+         id="feMerge6199">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode6195" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode6197" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix6201" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite6203" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter6302">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur6248" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix6250" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite6252" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix6254" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur6256" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix6258" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood6260" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend6262" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer6270">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR6264" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG6266" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB6268" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur6272" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix6274" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix6276" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood6278" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite6280" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite6282" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset6284" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood6286" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite6288" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite6290" />
+      <feMerge
+         result="merge1"
+         id="feMerge6296">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode6292" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode6294" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix6298" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite6300" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drawing"
+       id="filter6399">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="0.6"
+         result="blur1"
+         id="feGaussianBlur6345" />
+      <feConvolveMatrix
+         in="blur1"
+         targetX="1"
+         targetY="1"
+         order="3 3"
+         kernelMatrix="0 250 0 250 -1010 250 0 250 0 "
+         result="convolve1"
+         id="feConvolveMatrix6347" />
+      <feComposite
+         in="convolve1"
+         in2="convolve1"
+         k1="1"
+         k2="1"
+         k4="0"
+         operator="arithmetic"
+         result="composite1"
+         id="feComposite6349" />
+      <feColorMatrix
+         in="composite1"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color1"
+         id="feColorMatrix6351" />
+      <feGaussianBlur
+         stdDeviation="0.6"
+         result="blur2"
+         id="feGaussianBlur6353" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color2"
+         id="feColorMatrix6355" />
+      <feFlood
+         flood-color="rgb(255,255,255)"
+         result="flood1"
+         id="feFlood6357" />
+      <feBlend
+         in2="color2"
+         mode="multiply"
+         result="blend1"
+         id="feBlend6359" />
+      <feComponentTransfer
+         in="blend1"
+         result="component1"
+         id="feComponentTransfer6367">
+        <feFuncR
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncR6361" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncG6363" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 1 1 1"
+           id="feFuncB6365" />
+      </feComponentTransfer>
+      <feGaussianBlur
+         stdDeviation="1"
+         result="blur3"
+         id="feGaussianBlur6369" />
+      <feColorMatrix
+         in="blur3"
+         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.2125 -0.7154 -0.0721 1 0 "
+         result="color3"
+         id="feColorMatrix6371" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -2 "
+         result="color4"
+         id="feColorMatrix6373" />
+      <feFlood
+         flood-color="rgb(0,0,0)"
+         result="flood2"
+         id="feFlood6375" />
+      <feComposite
+         in="flood2"
+         in2="color4"
+         operator="in"
+         result="composite2"
+         id="feComposite6377" />
+      <feComposite
+         in="composite2"
+         in2="composite2"
+         operator="arithmetic"
+         k2="1"
+         result="composite3"
+         id="feComposite6379" />
+      <feOffset
+         dx="0"
+         dy="0"
+         result="offset1"
+         id="feOffset6381" />
+      <feFlood
+         in="color4"
+         flood-color="rgb(165,165,165)"
+         result="flood3"
+         id="feFlood6383" />
+      <feComposite
+         in="flood3"
+         in2="color4"
+         operator="out"
+         result="composite4"
+         id="feComposite6385" />
+      <feComposite
+         in="composite4"
+         in2="composite4"
+         operator="arithmetic"
+         k2="1"
+         result="composite5"
+         id="feComposite6387" />
+      <feMerge
+         result="merge1"
+         id="feMerge6393">
+        <feMergeNode
+           in="composite5"
+           id="feMergeNode6389" />
+        <feMergeNode
+           in="offset1"
+           id="feMergeNode6391" />
+      </feMerge>
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1.3 0 "
+         result="color5"
+         flood-opacity="0.56"
+         id="feColorMatrix6395" />
+      <feComposite
+         in="color5"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite8"
+         id="feComposite6397" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1849"
+     inkscape:window-height="949"
+     id="namedview10"
+     showgrid="false"
+     inkscape:zoom="1.4779572"
+     inkscape:cx="180.68865"
+     inkscape:cy="230.25369"
+     inkscape:window-x="28"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g6335"
+     inkscape:pagecheckerboard="true"
+     showguides="true" />
+  <metadata
+     id="metadata4">
+Created by potrace 1.12, written by Peter Selinger 2001-2015
+<rdf:RDF>
+  <cc:Work
+     rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type
+       rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+    <dc:title></dc:title>
+  </cc:Work>
+</rdf:RDF>
+</metadata>
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke-width:2.23077583"
+     d="m 111.77078,13.800245 c -9.21363,-0.05666 -16.994103,6.286837 -22.111333,13.437501 -10.87717,-5.649438 -26.83356,-0.138551 -29.4375,12.503905 -4.42926,13.556045 2.39749,27.201853 6.25196,39.917969 -1.57616,8.41701 -8.31915,14.64342 -11.35743,22.51953 -9.21249,16.37269 -22.07032,30.30844 -34.14257,44.45117 -5.41165,11.55158 -3.3751,24.75058 -5.52735,36.98438 0.37402,15.74439 14.17452,26.78311 27.15625,33.19531 9.01816,4.26177 19.48273,4.88607 29.00195,2.21484 2.57615,0.21964 7.57093,-0.33933 4.40775,3.22596 -6.55147,13.91573 -9.2252,32.31128 0.45554,45.39904 9.56968,9.89099 24.707113,5.82315 36.765423,6.75117 31.71216,2.34876 63.70018,6.50514 95.56465,5.11602 16.616,0.43533 35.26698,4.48779 50.50586,-4.47265 12.31144,-8.38461 13.78783,-24.52455 14.94558,-38.06471 4.71699,-40.92259 0.28517,-85.1541 -23.68054,-119.85718 -4.48541,-4.82265 -4.83166,-11.30393 -6.76397,-17.328974 C 239.95729,88.926438 228.85028,83.276418 221.52859,75.02876 201.24694,55.580334 177.27083,36.805538 148.32153,33.931796 143.61344,33.262295 138.8831,32.68174 134.23562,31.657668 130.7307,22.33411 122.35772,13.636369 111.77078,13.800245 Z"
+     id="path6315"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="ccccccccccccccccccccc" />
+  <g
+     id="g6335"
+     style="filter:url(#filter6399)"
+     transform="translate(-4.5671147,8.6267721)">
+    <path
+       style="fill:#e6e6e6;fill-opacity:1;stroke-width:2.23077583"
+       d="m 158.95151,251.86319 c -11.13492,-0.9173 -30.87409,-1.9167 -43.86483,-2.22088 l -23.619529,-0.55308 -0.138006,-13.69907 c -0.0759,-7.53447 0.601711,-13.24946 1.505819,-12.69994 0.90411,0.54952 2.73511,-2.25271 4.068888,-6.22718 1.333782,-3.97446 6.051468,-10.20552 10.483758,-13.8468 11.074,-9.09767 34.78348,-32.70937 33.80805,-33.66864 -0.43787,-0.43062 -6.10145,-1.60771 -12.58573,-2.61576 l -11.7896,-1.83283 -7.34986,6.3464 c -4.04242,3.49052 -8.04773,6.3464 -8.90068,6.3464 -2.296446,0 -7.9779,5.9963 -7.9779,8.42002 0,4.78508 -7.674405,7.67635 -22.141326,8.34155 L 55.09201,194.65957 47.145677,188.218 C 37.43556,180.34664 35.287964,171.61374 39.024414,155.19401 l 2.762364,-12.13915 9.334806,-8.92521 c 5.134142,-4.90887 15.159999,-19.37799 22.27968,-32.15361 7.119683,-12.775624 13.936876,-24.43592 15.14932,-25.911775 1.476889,-1.79775 1.1037,-4.853324 -1.130729,-9.258179 -4.941421,-9.74128 -9.233831,-27.88868 -7.591856,-32.096743 l 1.435672,-3.679345 6.813979,3.465296 c 3.747687,1.905912 8.004749,5.340446 9.460135,7.632299 l 2.646155,4.167005 5.03554,-12.184501 c 6.08339,-14.720009 6.11451,-14.753871 11.89698,-12.948976 2.90539,0.906865 5.46919,4.549148 6.91244,9.820207 l 2.29414,8.378688 7.31632,0.417376 c 4.02397,0.229557 12.12458,0.585847 18.00134,0.791753 5.87677,0.205914 10.68503,1.120046 10.68503,2.03142 0,0.911374 3.53759,2.309711 7.86132,3.107414 4.32372,0.797703 11.6074,4.824824 16.18594,8.949157 4.57853,4.124332 9.40849,7.498786 10.73322,7.498786 4.20084,0 37.20283,35.260613 37.20283,39.748948 0,2.36453 2.53067,7.96653 5.6237,12.44889 3.09303,4.48236 5.6237,9.42113 5.6237,10.97503 0,1.55391 0.7592,3.15712 1.68711,3.56269 3.65445,1.59731 10.27512,19.36577 13.87559,37.23918 4.13322,20.51801 4.32798,56.53914 0.34525,63.85768 -1.31723,2.42049 -1.77718,5.98415 -1.02209,7.91923 0.75506,1.93508 0.0981,6.54468 -1.45976,10.24357 l -2.83259,6.72522 -38.47656,-0.67268 c -21.16212,-0.36997 -47.58696,-1.42319 -58.72188,-2.34049 z m 53.09861,-13.38447 c -3.30523,-3.25359 -39.84465,-4.95437 -51.52944,-2.39852 l -8.31761,1.81936 14.62162,1.17038 c 8.04188,0.64371 22.11612,1.37317 31.27608,1.62101 l 16.65447,0.45065 z m 31.25684,1.89216 c 0,-0.53655 -1.01227,-1.59081 -2.24948,-2.34279 -1.23721,-0.75198 -2.24948,-0.31299 -2.24948,0.97555 0,1.28853 1.01227,2.34279 2.24948,2.34279 1.23721,0 2.24948,-0.43899 2.24948,-0.97555 z M 122.32491,228.77131 c 5.29807,-0.22432 13.68192,-0.94721 18.63077,-1.60644 4.94885,-0.65922 21.81799,-1.80418 37.48696,-2.54437 l 28.48905,-1.34581 10.51356,4.57363 10.51356,4.57363 3.64956,-3.58912 3.64955,-3.58912 0.66324,-22.03541 0.66323,-22.0354 -4.6144,-18.0292 c -2.53791,-9.91607 -4.98631,-20.02021 -5.44086,-22.45367 -2.77689,-14.86619 -18.38214,-42.595964 -26.97034,-47.924999 -1.30138,-0.807515 -5.40294,-4.041682 -9.11458,-7.187042 -3.71164,-3.14536 -7.85688,-5.720051 -9.21164,-5.721537 -1.35477,-0.0015 -4.23596,-1.92913 -6.40265,-4.283654 -5.11426,-5.557611 -22.18383,-13.416876 -29.14017,-13.416876 h -5.43762 l 1.13195,4.256883 1.13194,4.256883 -6.85453,3.485917 c -8.43989,4.292164 -11.34961,4.360464 -15.89873,0.373194 -5.93971,-5.20611 -18.17296,-5.396917 -18.17296,-0.283455 0,1.78228 -2.024526,4.306063 -4.498953,5.608406 -2.474426,1.302344 -4.498957,3.485694 -4.498957,4.851889 0,1.366192 -5.558516,13.556791 -12.352259,27.090211 l -12.352258,24.60623 -10.25729,8.43205 -10.257289,8.43205 0.677131,10.07704 c 0.417402,6.21176 2.042455,10.91843 4.236628,12.27062 l 3.559496,2.1936 5.924063,-5.06561 c 3.258234,-2.78609 5.296053,-6.06493 4.528486,-7.28631 -0.833873,-1.32689 -0.249069,-1.52385 1.452963,-0.48936 1.644976,0.99982 3.624663,0.49635 4.685428,-1.19158 l 1.836886,-2.92293 5.775876,2.58808 c 3.910984,1.75246 7.59451,1.9081 11.408485,0.48204 6.740727,-2.52038 6.876384,-3.84439 1.133654,-11.06448 -5.061444,-6.36353 -5.508526,-9.1834 -2.002646,-12.63122 l 2.496312,-2.45498 6.501603,2.22894 c 3.575881,1.22592 6.501601,3.08869 6.501601,4.13949 0,1.0508 3.96525,2.9606 8.81165,4.24399 l 8.81165,2.33344 10.75185,-3.5899 c 5.91351,-1.97444 15.70146,-7.69437 21.75099,-12.71094 l 10.99916,-9.12104 -1.33747,-11.10646 c -0.74996,-6.22776 -0.33415,-12.5641 0.94661,-14.424803 l 2.28407,-3.318343 4.29918,5.459226 c 5.21969,6.6281 6.83712,13.84023 5.6876,25.36094 l -0.86787,8.69788 5.62774,-8.14482 c 6.18312,-8.94861 8.75401,-10.01352 10.89959,-4.51483 1.7665,4.52721 -0.36551,11.72878 -5.01162,16.92832 l -3.54439,3.9666 3.45006,-1.30199 c 1.89754,-0.7161 4.74847,0.23656 6.33539,2.11703 l 2.88531,3.41901 -2.5974,3.07785 c -2.67214,3.16641 -15.6351,6.05119 -34.40177,7.65575 -2.29651,0.19636 -4.66278,3.29065 -5.90796,7.72563 -2.56818,9.14717 -5.75346,13.0495 -29.06469,35.60753 l -18.5582,17.95857 0.0344,7.67886 0.0344,7.67884 2.14246,-3.31834 c 1.27486,-1.97455 6.04338,-3.48351 11.77532,-3.72621 z m -68.163194,-65.14969 -5.43466,-4.18807 5.310533,-4.39425 c 5.832633,-4.82625 8.809182,-5.33909 13.617037,-2.34613 l 3.18122,1.98036 -5.619736,6.56808 -5.619735,6.56808 z M 107.2084,119.66574 c -0.76745,-1.22119 -3.85455,-1.61335 -6.86024,-0.87146 -7.301781,1.80228 -8.985475,-3.00603 -4.63674,-13.24166 l 3.39934,-8.001041 h 7.8552 c 4.32036,0 8.48082,0.995502 9.24546,2.212228 0.76464,1.216723 5.31983,2.212233 10.12265,2.212233 4.80282,0 9.30758,0.91524 10.01057,2.03387 2.0841,3.31631 -5.5954,9.29927 -10.12245,7.88623 -2.84955,-0.88943 -5.30615,0.46393 -7.89485,4.34937 -3.88071,5.82462 -8.68014,7.30095 -11.11894,3.42023 z m 145.06203,96.66256 -0.0345,-4.84695 -2.18057,3.31834 c -2.86402,4.35835 -2.86402,9.48354 0,7.7428 1.23721,-0.75198 2.23397,-3.54836 2.21503,-6.21419 z m 0.0344,-29.31203 c 0,-1.89689 -1.01226,-2.83364 -2.24948,-2.08166 -1.23721,0.75197 -2.24948,2.30398 -2.24948,3.4489 3e-5,1.14492 1.01229,2.08167 2.24951,2.08167 1.23721,0 2.24947,-1.55201 2.24947,-3.44891 z m -3.68545,-35.26509 c -0.71217,-1.82509 -1.69265,-3.31835 -2.17889,-3.31835 -0.48623,0 -0.88407,1.49326 -0.88407,3.31835 0,1.82509 0.9805,3.31834 2.17889,3.31834 1.19836,0 1.59621,-1.49325 0.88407,-3.31834 z M 218.56269,95.33935 c 0,-1.216726 -1.072,-2.212229 -2.38223,-2.212229 -1.31023,0 -1.75662,0.995503 -0.99198,2.212229 0.76464,1.216726 1.83664,2.212229 2.38223,2.212229 0.54559,0 0.99198,-0.995503 0.99198,-2.212229 z M 121.66398,60.496751 c -0.0941,-0.912544 -1.45692,-5.143431 -3.02844,-9.401971 l -2.8573,-7.7428 -1.59514,4.893951 c -1.67636,5.143151 1.77849,13.909991 5.48168,13.909991 1.19368,0 2.09332,-0.746627 1.9992,-1.659171 z"
+       id="path6343"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#aaaaaa;fill-opacity:1;stroke-width:2.23077583"
+       d="m 191.56895,252.28077 c -21.65123,-0.92389 -52.77839,-2.38653 -69.17147,-3.25032 l -29.80559,-1.5705 v -9.51004 c 0,-16.29751 6.684089,-26.96121 30.26548,-48.28514 11.92387,-10.7824 21.29647,-20.73743 20.828,-22.12229 -0.50261,-1.48578 -6.69056,-2.63662 -15.09544,-2.80746 l -14.24369,-0.28953 -4.79966,4.72019 c -2.63982,2.5961 -7.57973,6.51159 -10.977585,8.70108 -3.397853,2.18949 -7.149257,6.49341 -8.336453,9.56427 l -2.158537,5.58336 -8.426081,-0.47735 c -4.634344,-0.26255 -11.167438,0.25684 -14.517982,1.1542 l -6.091903,1.63155 -7.404969,-5.11287 c -4.072735,-2.81208 -8.714701,-6.64267 -10.315484,-8.51244 l -2.910512,-3.39956 1.088297,-16.5375 1.088298,-16.53749 10.13813,-9.28622 C 56.297771,130.82929 63.97261,120.58642 67.776996,113.17478 71.581379,105.76313 78.214939,94.286183 82.518234,87.670445 91.581127,73.737472 91.67305,72.995846 85.890176,60.466313 83.495788,55.278486 80.876706,47.573854 80.069992,43.344905 l -1.466753,-7.688998 3.768376,-1.422116 c 2.505425,-0.9455 6.333223,1.022665 11.421316,5.872577 l 7.652939,7.294691 1.38742,-4.236769 c 8.01976,-24.490067 15.54537,-28.921364 20.3484,-11.981728 l 2.19476,7.740638 13.41331,1.645146 c 21.68692,2.659904 36.63662,6.516205 41.09422,10.600327 2.29084,2.0989 8.13472,6.363977 12.98639,9.477947 17.16651,11.018049 39.53609,34.470069 40.41833,42.37415 0.35628,3.19177 1.63598,7.00007 2.84382,8.46288 2.85737,3.46057 11.41052,18.27118 16.22796,28.10027 7.0424,14.36874 10.55473,35.50456 10.10974,60.83628 -0.40693,23.1646 -3.45522,48.33802 -6.17754,51.01523 -2.29343,2.25546 -24.79152,2.54931 -64.72373,0.84534 z m 51.73801,-13.27713 c 0,-1.14492 -1.5184,-2.08166 -3.37422,-2.08166 -3.47862,0 -4.46904,2.61034 -1.93572,5.10173 1.79718,1.76741 5.30994,-0.2305 5.30994,-3.02007 z m -29.80788,-0.42924 c -1.1,-3.24534 -13.94738,-5.77168 -30.25495,-5.94939 -12.81563,-0.13959 -33.73368,3.63489 -35.47183,6.40071 -0.60337,0.96008 14.14748,1.8684 32.77966,2.01843 l 33.8767,0.27282 z m 11.81205,0.5598 c -4.40532,-2.79979 -7.3832,-2.79979 -5.6237,0 0.76464,1.21673 3.10198,2.19699 5.19409,2.17836 l 3.80383,-0.0339 z m -94.20519,-9.63868 c 9.36441,-0.7141 18.4483,-1.76106 20.18641,-2.32655 1.73811,-0.56547 13.00996,-1.53768 25.04855,-2.16044 l 21.88834,-1.13229 11.85384,3.3248 c 6.51961,1.82866 14.11296,3.88103 16.87411,4.56082 l 5.02029,1.23602 2.43369,-6.29512 c 3.22812,-8.34999 3.0462,-45.02955 -0.30593,-61.67821 -6.78296,-33.68843 -18.76123,-59.2138 -34.48942,-73.496071 -17.34564,-15.751038 -41.26708,-29.043225 -52.62566,-29.24198 l -7.46239,-0.130577 1.25642,3.893091 1.25643,3.893091 -7.09998,3.090713 -7.09999,3.090716 -6.93935,-2.749128 c -13.59001,-5.38388 -14.58436,-5.289925 -21.542607,2.035551 -3.721742,3.918162 -6.766803,7.612232 -6.766803,8.209041 0,0.59681 -5.23835,11.690937 -11.640778,24.653613 l -11.640777,23.56851 -11.228923,10.29991 -11.228921,10.2999 v 10.26856 c 0,6.42458 1.335273,11.58171 3.566969,13.77645 l 3.56697,3.5079 10.055264,-8.10309 10.055264,-8.10309 8.685097,1.24866 c 4.776802,0.68677 10.203494,0.23561 12.059313,-1.00256 l 3.374218,-2.25123 -4.888951,-8.47775 c -5.708869,-9.89954 -4.061828,-15.02492 4.045743,-12.58982 2.938192,0.88248 7.224702,3.2289 9.525582,5.21425 2.90589,2.50741 8.08771,3.53933 16.96858,3.37919 14.18162,-0.25572 19.3154,-2.3618 33.51875,-13.75066 l 9.68118,-7.76278 -0.64325,-12.76446 c -0.72203,-14.32771 1.04556,-17.793591 6.39279,-12.53491 4.58192,4.50605 6.62077,23.81032 3.18213,30.12908 -4.48785,8.24676 1.58519,5.37224 8.50899,-4.02751 3.55479,-4.82599 7.10407,-8.14434 7.88728,-7.37409 3.0874,3.03627 1.16869,12.8124 -3.46705,17.66521 l -4.89108,5.1201 h 6.01582 6.01581 v 4.16183 4.16183 l -9.99403,2.47486 c -5.49672,1.36116 -12.64912,2.47485 -15.89424,2.47485 -8.81351,0 -13.8552,3.51587 -15.3117,10.67778 -0.86832,4.26968 -9.31482,14.26035 -25.29266,29.91659 l -23.98897,23.50614 1.37596,3.52634 c 0.75679,1.93948 1.40816,5.68479 1.44751,8.32291 l 0.0715,4.79658 2.79921,-3.61708 2.7992,-3.61708 17.02621,-1.29841 z m -76.755187,-66.6832 -2.800351,-3.31834 2.800351,-3.31835 c 3.486811,-4.13177 13.496872,-4.38607 13.496872,-0.34286 0,2.83501 -6.857093,10.29789 -9.461973,10.29789 -0.679001,0 -2.494706,-1.49325 -4.034899,-3.31834 z m 46.676677,-44.72297 c -6.612153,-0.98508 -7.466708,-3.66379 -4.016147,-12.58917 2.398844,-6.204954 11.985487,-9.788861 16.446017,-6.148248 1.54614,1.261928 6.84739,2.617478 11.78055,3.012318 11.36747,0.90984 12.6265,7.00778 1.66158,8.04759 -4.4081,0.41802 -8.233,2.39308 -9.63943,4.97751 -2.29986,4.22617 -4.0426,4.51604 -16.23257,2.7 z m 151.27744,100.02868 c 0,-3.04181 -0.89425,-5.53057 -1.98723,-5.53057 -1.093,0 -2.47101,2.48876 -3.06228,5.53057 -0.72089,3.7086 -0.0661,5.53057 1.98723,5.53057 1.76679,0 3.06228,-2.33971 3.06228,-5.53057 z m 0.55056,-30.9712 c 1.18426,-6.09249 -1.51806,-7.58246 -3.6841,-2.03129 -1.91705,4.91302 -1.69924,7.56186 0.62182,7.56186 1.093,0 2.47101,-2.48875 3.06228,-5.53057 z m -171.510933,-7.7428 c 0,-1.21672 -1.012266,-2.21222 -2.249479,-2.21222 -1.237213,0 -2.249479,0.9955 -2.249479,2.21222 0,1.21673 1.012266,2.21223 2.249479,2.21223 1.237213,0 2.249479,-0.9955 2.249479,-2.21223 z M 250.0554,156.17563 c 0,-2.89819 -1.04954,-5.90736 -2.33233,-6.68704 -1.4742,-0.89601 -2.13629,1.44524 -1.79952,6.36319 0.58406,8.52885 4.13185,8.80693 4.13185,0.32385 z M 234.58364,124.8173 c -2.65178,-4.48467 -3.29214,-3.04924 -1.12143,2.51384 0.77143,1.97708 1.87649,3.12867 2.45566,2.55908 0.57917,-0.56958 -0.0202,-2.85239 -1.33423,-5.07292 z M 220.81217,96.716341 c 0,-0.459383 -1.5184,-2.074531 -3.37422,-3.58922 l -3.37421,-2.753978 v 3.589216 c 0,1.974071 1.51839,3.58922 3.37421,3.58922 1.85582,0 3.37422,-0.375858 3.37422,-0.835238 z M 176.78312,61.097307 c -2.3841,-1.77382 -5.347,-3.234654 -6.58422,-3.246295 -1.23721,-0.01172 0.26606,1.87962 3.34061,4.2028 3.07455,2.323181 6.03745,3.784013 6.58423,3.246295 0.54677,-0.537719 -0.95651,-2.42898 -3.34062,-4.2028 z m -52.69853,-1.023054 c 0,-1.144919 -1.01226,-2.696924 -2.24948,-3.448902 -1.23721,-0.751979 -2.24948,-3.240736 -2.24948,-5.530571 0,-6.208589 -3.91945,-7.410707 -6.81486,-2.09016 l -2.54164,4.670445 3.90215,4.240429 c 4.09172,4.446422 9.95331,5.717735 9.95331,2.158759 z"
+       id="path6341"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#6e6e6e;fill-opacity:1;stroke-width:2.23077583"
+       d="m 240.43678,253.27198 c -0.3273,-0.32188 -18.28925,-0.7278 -39.91544,-0.90206 -21.62619,-0.17432 -44.78171,-1.33313 -51.4567,-2.57532 -6.67498,-1.24219 -21.85896,-2.40682 -33.74218,-2.58806 L 93.716629,246.877 93.00587,238.37331 c -0.890078,-10.6491 5.790977,-25.14637 15.56005,-33.76387 18.02944,-15.90416 35.76398,-34.46898 35.76398,-37.43836 v -3.25265 h -15.76837 -15.76837 l -3.91457,4.59869 c -2.15301,2.52928 -6.77359,6.07739 -10.26795,7.8847 -3.49436,1.80731 -7.413166,6.27577 -8.708454,9.9299 l -2.355071,6.6439 -8.802806,-1.4626 c -5.642989,-0.93759 -9.980809,-0.50113 -12.08456,1.21592 l -3.281755,2.67851 -7.444184,-3.474 c -4.094301,-1.9107 -9.415294,-5.62475 -11.824427,-8.25344 l -4.380241,-4.77944 0.501865,-16.4458 0.501866,-16.4458 11.033173,-10.40227 c 6.068245,-5.72124 14.532918,-16.87303 18.810385,-24.78175 4.277467,-7.90872 10.682021,-19.549778 14.232346,-25.869024 L 91.26391,73.46639 86.281434,59.515298 C 81.071727,44.927952 79.837431,33.396951 83.48569,33.396951 c 1.177658,0 5.712913,3.61678 10.078346,8.03729 l 7.937154,8.037289 1.39035,-4.165889 c 4.63844,-13.898078 7.57126,-19.786243 10.85843,-21.800262 l 3.71425,-2.275684 2.24648,3.318342 c 1.23556,1.825089 2.83998,5.998454 3.56537,9.274145 l 1.3189,5.955799 12.67931,1.33473 c 34.3377,3.614675 45.36679,9.243503 76.85333,39.223022 12.51991,11.920697 17.93196,18.662165 17.93196,22.336847 0,2.89474 2.05208,7.59006 4.56021,10.43406 2.50812,2.84399 5.14851,7.47608 5.86756,10.29352 0.71904,2.81744 2.09231,5.12262 3.05169,5.12262 2.10533,0 9.88085,19.40296 13.2979,33.18343 3.60135,14.52371 4.73851,52.13076 2.04023,67.47297 -3.4569,19.65573 -5.02902,22.53948 -12.90771,23.67668 -3.81565,0.55074 -7.20537,0.738 -7.53267,0.41612 z m -10.97532,-11.66685 3.0256,-1.88577 -6.10288,-1.50635 c -7.04599,-1.73914 -10.36241,0.19999 -5.50686,3.21983 4.06508,2.52827 4.78108,2.54265 8.58414,0.17233 z m 14.52669,-1.3345 c 0.24395,-1.20007 -1.32792,-2.51745 -3.49304,-2.92751 -2.46228,-0.46634 -3.93659,0.61869 -3.93659,2.8972 0,3.84881 6.64789,3.87591 7.42963,0.0303 z m -29.01408,-1.99431 c -1.57368,-4.03302 -11.17308,-5.7788 -31.77564,-5.7788 -14.54782,0 -41.11801,5.10478 -41.11801,7.89978 0,0.52202 16.67061,0.94913 37.0458,0.94913 h 37.0458 z m -82.5008,-0.47868 c -0.74748,-0.7351 -2.68766,-0.81368 -4.3115,-0.17454 -1.79448,0.70618 -1.26145,1.23039 1.35906,1.33654 2.37133,0.096 3.69992,-0.42679 2.95244,-1.16191 z m -19.63607,-3.78136 v -2.9057 l 14.05924,-0.15353 c 7.73258,-0.0843 18.16745,-1.25258 23.1886,-2.59602 5.02115,-1.34345 19.699,-2.56218 32.61744,-2.70832 l 23.48808,-0.2656 11.57468,4.53792 11.57468,4.5379 4.01894,-4.36734 4.01895,-4.36734 0.33686,-21.50293 0.33685,-21.50294 -4.99476,-22.12229 C 223.29918,117.38283 214.57896,101.46183 190.99678,83.80885 173.36214,70.608029 159.02363,62.950763 148.26649,60.989374 l -8.43555,-1.538083 v 5.508385 5.508383 l -6.95949,2.834982 -6.9595,2.83498 -6.32208,-3.672707 c -15.00275,-8.715587 -19.17241,-4.916762 -40.494852,36.893396 -8.041886,15.76895 -16.557317,29.76719 -18.923179,31.10719 -13.441233,7.61298 -18.74563,22.76005 -11.682744,33.36087 4.897293,7.35045 7.687042,6.96788 17.109051,-2.34624 l 7.873175,-7.78302 4.498958,1.46673 c 7.385112,2.40767 14.924091,1.61705 18.546049,-1.94493 l 3.403898,-3.34753 -4.998938,-6.90411 c -2.749414,-3.79726 -4.434406,-8.35089 -3.744424,-10.11918 l 1.254514,-3.21508 5.873362,2.19607 c 3.23035,1.20784 7.38783,3.68546 9.23885,5.50583 3.78479,3.72211 18.4235,4.37332 29.30678,1.30373 10.44675,-2.94648 27.15431,-15.86001 29.79802,-23.03136 1.26387,-3.42839 1.66428,-10.77998 0.8898,-16.33687 l -1.40815,-10.10342 2.97664,0.97578 c 7.13386,2.33858 10.42096,23.43612 5.54189,35.56935 -2.83541,7.05107 2.71104,4.01417 9.01988,-4.93874 3.41453,-4.84557 7.09513,-8.27108 8.17911,-7.61224 3.3948,2.06336 2.16025,8.95225 -2.69136,15.01793 l -4.66222,5.82891 h 4.52947 c 5.31921,0 8.44969,3.92738 5.46789,6.85981 -1.14639,1.12741 -8.09344,3.13916 -15.43787,4.47057 -7.34444,1.3314 -15.63112,2.82996 -18.41485,3.33012 -2.93493,0.52733 -5.06755,2.51816 -5.07615,4.73864 -0.0243,6.273 -7.66535,15.95786 -29.33035,37.1755 l -20.4961,20.07288 1.55146,8.13304 c 1.46305,7.6696 5.54972,11.51887 5.54972,5.22734 z m -58.341801,-72.17534 -3.229572,-2.00975 2.94264,-3.48695 c 3.062797,-3.62933 13.639158,-4.88368 13.639158,-1.61759 0,1.86274 -7.373341,9.22232 -9.175041,9.15791 -0.521186,-0.0186 -2.40092,-0.93826 -4.177185,-2.04362 z M 107.2084,117.45352 c -0.76745,-1.2212 -3.86398,-1.61103 -6.88119,-0.86629 l -5.485842,1.35405 v -3.45407 c 0,-10.65606 10.383592,-20.018392 16.586802,-14.955435 1.58072,1.290155 6.84653,2.960515 11.70181,3.711905 10.27701,1.59045 10.94434,2.0011 8.79917,5.41458 -0.88213,1.40368 -3.51505,2.06063 -5.85093,1.4599 -2.71997,-0.69951 -5.77822,0.82208 -8.50542,4.23173 -4.52963,5.66313 -8.08654,6.72825 -10.3644,3.10363 z m 145.00688,105.19513 c 1.58417,-1.87719 2.04761,-5.267 1.11513,-8.15636 l -1.59564,-4.94417 -3.08917,4.15472 c -5.98786,8.05331 -2.67769,16.34879 3.56968,8.94581 z m 1.44162,-35.60484 c 0.79078,-3.09848 0.75502,-6.30503 -0.0794,-7.12568 -1.95457,-1.92221 -5.69241,3.86846 -5.73709,8.88787 -0.0524,5.89926 4.18925,4.61418 5.81655,-1.76219 z M 82.228566,180.32922 c 2.087526,-5.34992 1.729944,-5.69718 -3.196551,-3.10425 -2.50908,1.32058 -3.967737,3.34661 -3.241461,4.50229 1.988056,3.16347 4.90531,2.52998 6.438012,-1.39804 z M 250.0554,156.17563 c 0,-7.34585 -3.3071,-12.36528 -4.95117,-7.51475 -1.49253,4.40343 0.88118,17.47017 2.94569,16.21536 1.10301,-0.67041 2.00548,-4.58568 2.00548,-8.70061 z m -14.39354,-31.18439 c -0.72656,-1.86207 -2.31973,-2.77858 -3.54034,-2.03669 -1.40896,0.85637 -1.21213,2.93491 0.53908,5.69262 2.95989,4.66104 5.18764,1.94734 3.00126,-3.65593 z M 220.81217,97.974402 c 0,-0.984174 -1.4862,-3.721807 -3.30268,-6.083629 l -3.30267,-4.294223 -0.0715,4.608809 c -0.0393,2.534847 0.6033,5.272479 1.42811,6.083628 2.07443,2.040093 5.24877,1.849843 5.24877,-0.314585 z M 179.20824,62.168337 c -5.30494,-5.764831 -25.74556,-11.803683 -22.50621,-6.6491 0.76464,1.216725 3.2429,2.212228 5.50725,2.212228 2.26435,0 6.50673,1.957887 9.42753,4.350859 2.92079,2.392972 6.73275,4.383977 8.47102,4.424457 l 3.16049,0.0736 z m -55.12365,-2.094084 c 0,-2.361645 -1.01226,-4.909152 -2.24948,-5.661131 -1.23721,-0.751978 -2.24948,-3.240735 -2.24948,-5.530571 0,-6.615868 -4.23747,-7.40926 -7.05795,-1.321479 l -2.57814,5.564693 3.74516,5.621193 c 4.43115,6.650797 10.38989,7.412018 10.38989,1.327295 z M 99.340326,58.837579 c 0,-1.825088 -1.518398,-3.318342 -3.374218,-3.318342 -5.854174,0 -3.95704,4.359888 2.811848,6.462036 0.309303,0.09606 0.56237,-1.318605 0.56237,-3.143694 z"
+       id="path6339"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#140000;fill-opacity:1;stroke-width:2.23077583"
+       d="m 165.69995,249.63326 c -13.60935,-0.9175 -34.77285,-2.10723 -47.03001,-2.64388 -24.761455,-1.08408 -26.955475,-2.35637 -24.813182,-14.38897 2.413482,-13.55575 9.246082,-22.93745 31.198912,-42.83861 l 21.51839,-19.50731 -2.15143,-3.95343 -2.15143,-3.95342 -15.17219,0.53076 -15.17219,0.53076 -4.60614,5.30393 c -2.53337,2.91716 -7.389866,6.68423 -10.792203,8.37126 -3.402336,1.68703 -6.186066,4.76822 -6.186066,6.84709 0,6.53869 -4.826049,8.51158 -15.74635,6.43713 -13.832452,-2.62766 -14.16378,-2.5912 -12.611273,1.38757 1.518205,3.89087 1.097471,3.78014 -9.31256,-2.45079 -8.064644,-4.82709 -14.266365,-15.39854 -12.988105,-22.13951 0.454046,-2.39444 0.902988,-7.72192 0.997648,-11.83885 l 0.17211,-7.48533 11.321675,-10.95996 C 58.583651,130.67834 67.391802,118.56533 72.47094,108.97138 77.406481,99.648674 83.904115,87.928389 86.910132,82.926297 L 92.375614,73.831589 86.907502,58.591783 C 81.220096,42.740801 79.904806,33.396951 83.360947,33.396951 c 1.109047,0 5.127183,3.48426 8.929189,7.7428 6.87651,7.702219 11.549144,9.881981 11.549144,5.38762 0,-5.151002 9.72572,-24.191562 12.3568,-24.191562 1.54268,0 4.08024,4.479763 5.63903,9.955028 l 2.83417,9.955029 9.26794,0.261974 c 5.09737,0.144082 10.27587,0.06254 11.50779,-0.181204 4.05637,-0.802581 31.45424,7.054412 33.75181,9.679135 1.23721,1.413386 5.79241,4.954199 10.12265,7.868476 9.06361,6.099862 27.56557,22.191732 25.51538,22.191732 -0.75781,0 1.54241,2.216498 5.11159,4.925553 9.11439,6.917929 11.95913,10.884762 12.04159,16.791278 0.0394,2.81882 2.45373,8.29408 5.3653,12.16726 7.78421,10.35511 19.4505,35.31679 19.4505,41.61711 0,3.0065 0.99762,6.44746 2.21693,7.64657 3.30057,3.24593 3.26449,60.13566 -0.0407,64.05214 -1.47325,1.74581 -2.12083,5.42698 -1.43901,8.18041 0.68182,2.75345 0.0301,7.19071 -1.44803,9.86061 l -2.6877,4.85436 -31.48058,-0.42991 c -17.31425,-0.23644 -42.61543,-1.18057 -56.22477,-2.0981 z m 50.61327,-8.68352 c 0,-1.14216 1.209,-1.34181 2.68668,-0.44369 1.47768,0.89812 8.05741,1.89834 14.62161,2.22267 l 11.93493,0.58969 v -2.96153 c 0,-3.9713 -6.63941,-6.27786 -10.05238,-3.49227 -1.50353,1.22717 -3.15726,1.81465 -3.67495,1.30555 -1.91112,-1.87947 -46.27134,-7.17446 -57.13125,-6.81939 -7.50428,0.24535 -31.83818,5.14989 -34.5298,6.95953 -0.43319,0.29124 -0.26962,1.34241 0.3635,2.3359 1.63747,2.5695 75.78166,2.86649 75.78166,0.30354 z m -83.23071,-1.81554 c 0,-1.21672 -3.28987,-2.11298 -7.31081,-1.99171 l -7.31081,0.22052 5.6237,1.77119 c 7.93796,2.50009 8.99792,2.50009 8.99792,0 z m -12.37214,-7.61597 c 2.47443,0.62471 11.07869,0.10619 19.12057,-1.15213 8.04189,-1.2584 25.75653,-2.83984 39.36588,-3.5143 l 24.74426,-1.22633 13.38329,4.57483 13.38328,4.57484 3.40834,-3.35188 3.40832,-3.3519 0.91813,-22.48033 c 0.58077,-14.21961 -0.18696,-27.02271 -2.0892,-34.84175 -1.65402,-6.79878 -3.08982,-13.85467 -3.19064,-15.67976 -0.27838,-5.03924 -5.80103,-22.93398 -7.85147,-25.44063 -0.99528,-1.21672 -2.89878,-6.22005 -4.23,-11.11851 -5.88766,-21.664684 -53.19381,-58.485223 -75.21571,-58.543832 l -8.58713,-0.02285 1.33384,4.132967 1.33384,4.132969 -6.06628,3.908959 -6.06628,3.908962 -6.92574,-3.403649 c -3.80915,-1.872005 -8.87126,-4.032063 -11.24912,-4.800126 l -4.32339,-1.396479 -5.799265,6.253486 C 96.326299,76.120203 89.814778,86.856303 85.045852,96.538784 80.276923,106.22126 74.382227,118.1253 71.94653,122.99221 c -2.435699,4.8669 -9.415703,13.42232 -15.511118,19.01204 l -11.082574,10.16313 v 9.33931 c 0,10.86479 3.196991,17.89734 8.13611,17.89734 1.913375,0 7.698285,-3.36999 12.855357,-7.48888 l 9.376495,-7.48888 5.501804,2.04727 c 6.66642,2.48063 18.117722,-1.53033 18.117722,-6.34596 0,-1.78974 -2.010739,-5.76799 -4.468308,-8.84055 -2.457569,-3.07255 -3.916228,-6.46496 -3.241461,-7.53867 2.094825,-3.33337 9.079413,-2.15059 13.099803,2.21833 9.75519,10.60086 32.40329,7.11646 51.72535,-7.95791 l 13.17511,-10.27874 -1.36858,-12.877 c -1.42402,-13.3987 0.82979,-16.686878 5.52453,-8.05996 1.67793,3.08333 2.16385,10.44827 1.35011,20.46312 l -1.2713,15.64606 8.66803,-9.48296 c 4.76742,-5.21562 9.13796,-8.69988 9.71231,-7.7428 1.38901,2.31463 -1.98749,10.86338 -5.01829,12.70549 -3.3467,2.03413 -3.02615,8.11162 0.40473,7.67348 5.22497,-0.66725 8.43555,0.15521 8.43555,2.16095 0,2.95401 -12.92926,6.8531 -22.72462,6.8531 -11.80714,0 -20.01548,4.05192 -20.01548,9.88033 0,6.44996 -6.73318,14.78952 -28.92701,35.82828 l -18.80435,17.8257 1.25658,9.71213 c 0.69113,5.34167 1.33054,10.20988 1.42092,10.81824 0.0904,0.60837 1.91329,-1.11191 4.0509,-3.82284 2.54295,-3.22498 5.44189,-4.53628 8.38552,-3.79313 z M 55.414592,161.6093 c -1.814504,-2.88731 2.932981,-8.75201 7.084774,-8.75201 3.816362,0 4.045408,4.82084 0.399406,8.40647 -3.31927,3.2643 -5.584194,3.36887 -7.48418,0.34554 z m 52.923648,-44.15626 c -1.85582,-1.17473 -5.59916,-2.15113 -8.31853,-2.16976 l -4.944308,-0.0339 2.36907,-6.68339 c 3.148358,-8.881835 8.344208,-11.432935 15.429698,-7.5758 3.0727,1.67269 8.87659,3.07654 12.89753,3.11965 4.02094,0.0431 7.31081,1.0739 7.31081,2.29062 0,1.21673 -2.95237,2.21223 -6.56082,2.21223 -4.37671,0 -7.93377,1.827 -10.68502,5.4881 l -4.12421,5.4881 z m 145.79627,100.09382 0.7049,-7.17163 h -3.27608 c -3.59772,0 -6.00689,4.57388 -6.00689,11.40428 0,7.7813 7.77426,3.94527 8.57807,-4.23265 z m 0.41984,-11.22738 c 0,-2.88048 -2.67411,-4.79618 -4.8494,-3.47404 -2.32646,1.41401 -0.32044,5.31756 2.73269,5.31756 1.16419,0 2.11671,-0.82958 2.11671,-1.84352 z m -0.42657,-21.00282 c 0.38399,-4.46867 -0.20416,-8.12485 -1.30701,-8.12485 -3.29274,0 -7.97272,10.47925 -6.43731,14.41421 2.3792,6.09741 7.00258,2.34264 7.74432,-6.28936 z M 83.531206,180.58453 c 1.50567,-1.78418 2.388816,-4.15186 1.962546,-5.26152 -1.232336,-3.20798 -10.897691,1.32936 -10.897691,5.11585 0,4.30574 5.350839,4.39298 8.935145,0.14568 z M 250.47387,156.55548 c 0.33908,-8.87048 -1.04752,-11.5809 -4.76777,-9.31972 -2.63498,1.60154 -3.32082,17.25108 -0.862,19.66918 2.74479,2.69933 5.31131,-2.01883 5.62977,-10.34946 z M 238.808,130.05172 c 0,-1.59254 -1.36388,-4.72986 -3.03086,-6.97182 -3.96628,-5.33441 -7.11298,-0.79643 -3.74245,5.39716 2.73984,5.03468 6.77331,5.97237 6.77331,1.57466 z M 220.81217,96.788333 c 0,-1.636511 -2.02453,-4.777312 -4.49895,-6.979554 L 211.81426,85.8047 v 3.480278 c 0,5.879124 2.57418,10.478829 5.86436,10.478829 1.72346,0 3.13355,-1.338965 3.13355,-2.975474 z M 128.58355,71.004836 c 0,-1.216725 -1.07201,-2.212228 -2.38224,-2.212228 -1.31023,0 -1.75662,0.995503 -0.99198,2.212228 0.76464,1.216726 1.83665,2.212229 2.38224,2.212229 0.54559,0 0.99198,-0.995503 0.99198,-2.212229 z m 49.48853,-11.131394 c -3.09303,-2.340703 -7.84155,-4.277959 -10.55227,-4.305014 -2.71071,-0.02706 -5.56439,-1.060932 -6.3415,-2.297506 -0.77711,-1.236571 -2.35525,-1.675573 -3.50697,-0.975555 -4.03733,2.453886 -2.02941,5.098514 5.02849,6.623019 3.91739,0.846155 9.17559,3.419503 11.68488,5.718548 l 4.56234,4.180084 2.37436,-2.343877 2.37437,-2.343876 z m -53.31525,2.835537 c 0.51576,-0.912544 -1.29723,-6.601309 -4.02887,-12.641698 l -4.96662,-10.982528 -2.58681,4.753464 c -3.32936,6.117951 -3.27197,10.662105 0.20378,16.135494 2.75148,4.332865 9.55166,5.967549 11.37853,2.735268 z M 101.5898,59.874263 c 0,-2.648405 -6.344929,-5.489256 -8.19544,-3.66939 -1.969893,1.937273 1.371397,5.951049 4.953984,5.951049 1.782806,0 3.241456,-1.026746 3.241456,-2.281659 z m 49.48853,-6.567255 3.37422,-2.144477 -5.06132,-0.03388 c -2.78373,-0.01863 -5.06133,0.961626 -5.06133,2.178352 0,2.77175 2.38724,2.77175 6.74843,0 z"
+       id="path6337"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>

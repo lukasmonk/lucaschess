@@ -55,7 +55,7 @@ class WSummary(QtGui.QWidget):
         self.delegadoMove = Delegados.EtiquetaPGN(True if self.siFigurinesPGN else None)
         oColumnas.nueva("move", _("Move"), 60, edicion=self.delegadoMove)
         dicTipos = {"t": Iconos.pmTransposition(),}
-        oColumnas.nueva("trans", "", 24, edicion=Delegados.PmIconosBMT(dicIconos=dicTipos))
+        oColumnas.nueva("trans", "", 28, edicion=Delegados.PmIconosBMT(dicIconos=dicTipos))
         oColumnas.nueva("analisis", _("Analysis"), 60, siDerecha=True)
         oColumnas.nueva("games", _("Games"), 70, siDerecha=True)
         oColumnas.nueva("pgames", "% " + _("Games"), 70, siDerecha=True, siCentrado=True)
@@ -596,3 +596,177 @@ class WSummary(QtGui.QWidget):
         self.allmoves = not self.allmoves
 
         self.actualizaPV(self.pvBase)
+
+
+class WSummaryBase(QtGui.QWidget):
+    def __init__(self, procesador, dbSTAT):
+        QtGui.QWidget.__init__(self)
+
+        self.dbSTAT = dbSTAT
+        self.liMoves = []
+        self.procesador = procesador
+        self.configuracion = procesador.configuracion
+
+        self.siFigurinesPGN = self.configuracion.figurinesPGN
+
+        self.orden = ["games", False]
+
+        # Grid
+        oColumnas = Columnas.ListaColumnas()
+        oColumnas.nueva("numero", _("N."), 35, siCentrado=True)
+        self.delegadoMove = Delegados.EtiquetaPGN(True if self.siFigurinesPGN else None)
+        oColumnas.nueva("move", _("Move"), 60, edicion=self.delegadoMove)
+        dicTipos = {"t": Iconos.pmTransposition(),}
+        oColumnas.nueva("trans", "", 28, edicion=Delegados.PmIconosBMT(dicIconos=dicTipos))
+        oColumnas.nueva("games", _("Games"), 70, siDerecha=True)
+        oColumnas.nueva("pgames", "% " + _("Games"), 70, siDerecha=True, siCentrado=True)
+        oColumnas.nueva("win", _("Win"), 70, siDerecha=True)
+        oColumnas.nueva("draw", _("Draw"), 70, siDerecha=True)
+        oColumnas.nueva("lost", _("Lost"), 70, siDerecha=True)
+        oColumnas.nueva("pwin", "% " + _("Win"), 60, siDerecha=True)
+        oColumnas.nueva("pdraw", "% " + _("Draw"), 60, siDerecha=True)
+        oColumnas.nueva("plost", "% " + _("Lost"), 60, siDerecha=True)
+        oColumnas.nueva("pdrawwin", "%% %s" % _("W+D"), 60, siDerecha=True)
+        oColumnas.nueva("pdrawlost", "%% %s" % _("L+D"), 60, siDerecha=True)
+
+        self.grid = Grid.Grid(self, oColumnas, xid="summarybase", siSelecFilas=True)
+        self.grid.tipoLetra(puntos=self.configuracion.puntosPGN)
+        self.grid.ponAltoFila(self.configuracion.altoFilaPGN)
+
+        layout = Colocacion.V()
+        layout.control(self.grid)
+        layout.margen(1)
+
+        self.setLayout(layout)
+
+        self.qtColor = (QTUtil.qtColorRGB(221, 255, 221), QTUtil.qtColorRGB(247, 247, 247), QTUtil.qtColorRGB(255, 217, 217))
+        self.qtColorTotales = QTUtil.qtColorRGB(170, 170, 170)
+
+    def gridDobleClickCabecera(self, grid, oColumna):
+        clave = oColumna.clave
+
+        if clave == "move":
+            func = lambda dic: dic["move"].upper()
+        else:
+            func = lambda dic: dic[clave]
+        tot = self.liMoves[-1]
+        li = sorted(self.liMoves[:-1], key=func)
+
+        orden, mas = self.orden
+        if orden == clave:
+            mas = not mas
+        else:
+            mas = clave == "move"
+        if not mas:
+            li.reverse()
+        self.orden = clave, mas
+        li.append(tot)
+        self.liMoves = li
+        self.grid.refresh()
+
+    def gridNumDatos(self, grid):
+        return len(self.liMoves)
+
+    def gridDato(self, grid, nfila, ocol):
+        clave = ocol.clave
+
+        # Last=Totals
+        if self.siFilaTotales(nfila):
+            if clave in ("trans", "numero", "pgames"):
+                return ""
+            elif clave == "move":
+                return _("Total")
+
+        if clave == "trans":
+            alm = self.liMoves[nfila]["alm"]
+            return "t" if len(alm.LIALMS) > 1 else "-"
+        if self.liMoves[nfila]["games"] == 0 and clave not in ("numero", "move"):
+            return ""
+        v = self.liMoves[nfila][clave]
+        if clave.startswith("p"):
+            return "%.01f %%" % v
+        elif clave == "numero":
+            if self.siFigurinesPGN:
+                self.delegadoMove.setWhite("..." not in v)
+            return v
+        else:
+            return str(v)
+
+    def posicionFila(self, nfila):
+        dic = self.liMoves[nfila]
+        li = [[k, dic[k]] for k in ("win", "draw", "lost")]
+        li = sorted(li, key=lambda x: x[1], reverse=True)
+        d = {}
+        prev = 0
+        ant = li[0][1]
+        total = 0
+        for cl, v in li:
+            if v < ant:
+                prev += 1
+            d[cl] = prev
+            ant = v
+            total += v
+        if total == 0:
+            d["win"] = d["draw"] = d["lost"] = -1
+        return d
+
+    def gridColorFondo(self, grid, nfila, ocol):
+        clave = ocol.clave
+        if self.siFilaTotales(nfila) and clave not in ("numero", "analisis"):
+            return self.qtColorTotales
+        if clave in ("pwin", "pdraw", "plost"):
+            dic = self.posicionFila(nfila)
+            n = dic[clave[1:]]
+            if n > -1:
+                return self.qtColor[n]
+
+    def siFilaTotales(self, nfila):
+        return nfila == len(self.liMoves)-1
+
+    def noFilaTotales(self, nfila):
+        return nfila < len(self.liMoves)-1
+
+    def actualizaPV(self, pvBase):
+        self.pvBase = pvBase
+        if not pvBase:
+            pvMirar = ""
+        else:
+            pvMirar = self.pvBase
+
+        self.liMoves = self.dbSTAT.getSummary(pvMirar, {}, self.siFigurinesPGN, False)
+
+        self.grid.refresh()
+        self.grid.gotop()
+
+    def gridBotonDerecho(self, grid, fila, columna, modificadores):
+        if self.siFilaTotales(fila):
+            return
+        alm = self.liMoves[fila]["alm"]
+        if not alm or len(alm.LIALMS) < 2:
+            return
+
+        menu = QTVarios.LCMenu(self)
+        rondo = QTVarios.rondoPuntos()
+        for ralm in alm.LIALMS:
+            menu.opcion(ralm, Partida.pv_pgn(None, ralm.PV), rondo.otro())
+            menu.separador()
+        resp = menu.lanza()
+        if resp:
+            self.actualizaPV(resp.PV)
+
+    def gridTeclaControl(self, grid, k, siShift, siControl, siAlt):
+        if k == 16777220:
+            self.siguiente()
+
+    def gridDobleClick(self, grid, fil, col):
+        self.siguiente()
+
+    def siguiente(self):
+        recno = self.grid.recno()
+        if recno >= 0 and self.noFilaTotales(recno):
+            dic = self.liMoves[recno]
+            if "pv" in dic:
+                pv = dic["pv"]
+                if pv.count(" ") > 0:
+                    pv = "%s %s" % (self.pvBase, dic["pvmove"])  # transposition case
+                self.actualizaPV(pv)

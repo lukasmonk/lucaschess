@@ -96,6 +96,12 @@ class Partida:
             self.firstComment = ""
         self.siEmpiezaConNegras = not self.iniPosicion.siBlancas
 
+    def save2blob(self):
+        return Util.str2blob(self.guardaEnTexto())
+
+    def blob2restore(self, blob):
+        self.recuperaDeTexto(Util.blob2str(blob))
+
     def si3repetidas(self):
         nJug = len(self.liJugadas)
         if nJug > 5:
@@ -288,10 +294,10 @@ class Partida:
         return self.resultado() != "*"
 
     def pv(self):
-        resp = ""
-        for jg in self.liJugadas:
-            resp += jg.movimiento() + " "
-        return resp.strip()
+        return " ".join([jg.movimiento() for jg in self.liJugadas])
+
+    def pv_hasta(self, njug):
+        return " ".join([jg.movimiento() for jg in self.liJugadas[:njug+1]])
 
     def anulaUltimoMovimiento(self, siBlancas):
         del self.liJugadas[-1]
@@ -387,15 +393,27 @@ class Partida:
         nummoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
         sumelos = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
         factormoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+        last = OPENING
         for jg in self.liJugadas:
             if jg.analisis:
                 if jg.siBlancas() != siBlancas:
                     continue
-                if jg.siBook:
-                    std = jg.estadoOME = OPENING
+                if last == ENDGAME:
+                    std = ENDGAME
                 else:
-                    material = jg.posicionBase.valor_material()
-                    std = jg.estadoOME = ENDGAME if material < 15 else MIDDLEGAME
+                    if jg.siBook:
+                        std = OPENING
+                    else:
+                        std = MIDDLEGAME
+                        material = jg.posicionBase.valor_material()
+                        if material < 15:
+                            std = ENDGAME
+                        else:
+                            pzW, pzB = jg.posicionBase.numPiezasWB()
+                            if pzW < 3 and pzB < 3:
+                                std = ENDGAME
+                jg.estadoOME = std
+                last = std
                 jg.calc_elo(perfomance)
                 if jg.bad_move:
                     bad_moves[std] += 1

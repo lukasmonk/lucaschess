@@ -576,10 +576,10 @@ class WSTS(QTVarios.WDialogo):
     def leeSTS(self):
         li = []
         Util.creaCarpeta(self.carpetaSTS)
-        for x in Util.listdir(self.carpetaSTS, siUnicode=True):
+        for entry in Util.listdir(self.carpetaSTS, siUnicode=True):
+            x = entry.name
             if x.lower().endswith(".sts"):
-                fich = os.path.join(self.carpetaSTS, x)
-                st = os.stat(fich)
+                st = entry.stat()
                 li.append((x, st.st_ctime, st.st_mtime))
 
         sorted(li, key=lambda x: x[2], reverse=True)  # por ultima modificacin y al reves

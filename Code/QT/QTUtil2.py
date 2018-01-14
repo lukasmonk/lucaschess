@@ -110,7 +110,12 @@ class MensEspera(QtGui.QWidget):
         self.posicion = posicion
         self.siCancelado = False
 
-        self.lb = lb = Controles.LB(parent, resalta(mensaje)).ponFuente(Controles.TipoLetra(puntos=puntos)).ponWrap()
+        if posicion == "tb":
+            fixedSize = self.owner.width()
+
+        self.lb = lb = Controles.LB(parent, resalta(mensaje)).ponFuente(Controles.TipoLetra(puntos=puntos))
+        if fixedSize is not None:
+            lb.ponWrap().anchoFijo(fixedSize-60)
 
         if siCancelar:
             if not titCancelar:
@@ -138,7 +143,8 @@ class MensEspera(QtGui.QWidget):
 
     def cancelar(self):
         self.siCancelado = True
-        self.btCancelar.hide()
+        # self.btCancelar.hide()
+        self.close()
         QTUtil.refreshGUI()
 
     def cancelado(self):
@@ -164,10 +170,13 @@ class MensEspera(QtGui.QWidget):
         v = self.owner
         s = self.size()
         if self.posicion == "c":
-            x = v.x() + (v.width() - s.width()) / 2
-            y = v.y() + (v.height() - s.height()) / 2
+            x = v.x() + (v.width() - self.width()) / 2
+            y = v.y() + (v.height() - self.height()) / 2
         elif self.posicion == "ad":
             x = v.x() + v.width() - s.width()
+            y = v.y() + 4
+        elif self.posicion == "tb":
+            x = v.x() + 4
             y = v.y() + 4
         self.move(x, y)
         QTUtil.refreshGUI()
@@ -186,7 +195,7 @@ class ControlMensEspera:
         self.me = None
 
     def inicio(self, parent, mensaje, siCancelar=False, siMuestraYa=True, opacity=0.80,
-               posicion="c", fixedSize=256, titCancelar=None, background=None, pmImagen=None, puntos=12, conImagen=True):
+               posicion="c", fixedSize=256, titCancelar=None, background=None, pmImagen=None, puntos=11, conImagen=True):
         QTUtil.refreshGUI()
         if self.me:
             self.final()
@@ -237,8 +246,11 @@ class ControlMensEspera:
 mensEspera = ControlMensEspera()
 
 
-def mensajeTemporal(pantalla, mensaje, segundos, background=None, pmImagen=None, posicion="c"):
-    me = mensEspera.inicio(pantalla, mensaje, background=background, pmImagen=pmImagen, siCancelar=segundos > 3.0, titCancelar=_("Continue"), posicion=posicion)
+def mensajeTemporal(pantalla, mensaje, segundos, background=None, pmImagen=None, posicion="c", fixedSize=256, siCancelar=None):
+    if siCancelar is None:
+        siCancelar = segundos > 3.0
+    me = mensEspera.inicio(pantalla, mensaje, background=background, pmImagen=pmImagen, siCancelar=siCancelar,
+                           titCancelar=_("Continue"), posicion=posicion, fixedSize=fixedSize)
     if segundos:
         me.time(segundos)
     return me

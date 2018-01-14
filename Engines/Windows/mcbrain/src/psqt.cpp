@@ -1,22 +1,23 @@
 /*
-  Stockfish, a UCI chess playing engine derived from Glaurung 2.1
-  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
-  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
-  Copyright (C) 2015-2017 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
-
-  Stockfish is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  Stockfish is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ McBrain, a UCI chess playing engine derived from Stockfish and Glaurung 2.1
+ Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
+ Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
+ Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
+ Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+ 
+ McBrain is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ McBrain is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <algorithm>
 
@@ -38,13 +39,13 @@ namespace PSQT {
 const Score Bonus[][RANK_NB][int(FILE_NB) / 2] = {
   { },
   { // Pawn
-   { S(  0, 0), S(  0, 0), S(  0, 0), S( 0, 0) },
-   { S(-11, 7), S(  6,-4), S(  7, 8), S( 3,-2) },
-   { S(-18,-4), S( -2,-5), S( 19, 5), S(24, 4) },
-   { S(-17, 3), S( -9, 3), S( 20,-8), S(35,-3) },
-   { S( -6, 8), S(  5, 9), S(  3, 7), S(21,-6) },
-   { S( -6, 8), S( -8,-5), S( -6, 2), S(-2, 4) },
-   { S( -4, 3), S( 20,-9), S( -8, 1), S(-4,18) }
+   { S(  0, 0), S(  0, 0),  S(  0, 0), S( 0, 0) },
+   { S(-11, 7), S(  6,-4),  S(  7, 8), S( 3,-2) },
+   { S(-18,-4), S( -2,-5),  S( 19, 5), S(24, 4) },
+   { S(-17, 3), S( -9, 3),  S( 20,-8), S(35,-3) },
+   { S( -6, 7), S(  5, 8),  S(  3, 7), S(21, 6) },
+   { S( -6, 8), S( -8, 9),  S( -6, 8), S(-2, 7) },
+   { S( -4, 9), S( 20, 10), S( -8, 9), S(-4, 8) }
   },
   { // Knight
    { S(-161,-105), S(-96,-82), S(-80,-46), S(-73,-14) },
@@ -116,7 +117,7 @@ void init() {
 
       for (Square s = SQ_A1; s <= SQ_H8; ++s)
       {
-          File f = std::min(file_of(s), FILE_H - file_of(s));
+          File f = std::min(file_of(s), ~file_of(s));
           psq[ pc][ s] = v + Bonus[pc][rank_of(s)][f];
           psq[~pc][~s] = -psq[pc][s];
       }

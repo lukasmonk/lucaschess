@@ -77,7 +77,7 @@ class WGames(QtGui.QWidget):
             (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
         ]
 
-        self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
+        self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24, puntos=12)
 
         self.lbName = Controles.LB(self, "").ponWrap().alinCentrado().ponColorFondoN("white", "#4E5A65").ponTipoLetra(puntos=16)
         lyNT = Colocacion.H().control(self.lbName)
@@ -371,7 +371,7 @@ class WGames(QtGui.QWidget):
             smenu = menu.submenu( _("Open another database"), Iconos.DatabaseC())
             rp = QTVarios.rondoPuntos()
             for fich in lista:
-                smenu.opcion(os.path.join(self.configuracion.carpeta, fich), _F(fich[:-4]), rp.otro())
+                smenu.opcion(os.path.join(self.configuracion.carpetaGames, fich), _F(fich[:-4]), rp.otro())
                 smenu.separador()
             menu.separador()
 
@@ -618,14 +618,16 @@ class WGames(QtGui.QWidget):
             li = range(self.dbGames.reccount())
 
         # Fichero donde a?adir
-        path = QTUtil2.salvaFichero(self, _("Export"), self.configuracion.dirSalvados,
-                                      _("File") + " %s (*.%s)"%(ext, ext),
-                                      False)
+        if ext == "lcg":
+            carpeta = self.configuracion.carpetaGames
+        else:
+            carpeta = self.configuracion.dirSalvados
+        path = QTUtil2.salvaFichero(self, _("Export"), carpeta, _("File") + " %s (*.%s)"%(ext, ext), False)
         if path:
             if not path.lower().endswith(".%s"%ext):
                 path += ".%s"%ext
             carpeta, nomf = os.path.split(path)
-            if carpeta != self.configuracion.dirSalvados:
+            if ext != "lcg" and carpeta != self.configuracion.dirSalvados:
                 self.configuracion.dirSalvados = carpeta
                 self.configuracion.graba()
 

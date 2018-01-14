@@ -3,9 +3,9 @@ kInicio, kJugando, kFinJuego, kEntrenando, kVisorPGNini, kVisorPGNfic, kVisorPGN
 kSigueApertura, kSigueUsuario, kMalApertura = range(3)
 
 kJugNueva, kJugEntPos, kJugPGN, kJugEntMaq, kJugGM, kJugRemoto, kJugSolo, kJug60, kJugElo, kJugMicElo, \
-kJugBooks, kJugAperturas, kJugBoxing, kJugEntTac, kJugMvM, kJugAlbum, kJugFics, kJugFide, \
+kJugBooks, kJugAperturas, kJugBoxing, kJugEntTac, kJugMvM, kJugAlbum, kJugFics, kJugFide, kJugLichess, \
 kJugWorldMap, kJugRoute, kJugEntLight, kJugWashingCreate, kJugWashingTactics, kJugWashingReplay, kJugSingularMoves\
-    = range(25)
+    = range(26)
 
 kFinNormal, kFinReinicio = range(2)
 

@@ -367,6 +367,20 @@ class ControlPosicion:
                     num += 1
         return num
 
+    def numPiezasWB(self):
+        nW = nB = 0
+        for i in range(8):
+            for j in range(8):
+                cCol = chr(i + 97)
+                cFil = chr(j + 49)
+                pz = self.casillas[cCol + cFil]
+                if pz and pz not in "pkPK":
+                    if pz.islower():
+                        nB += 1
+                    else:
+                        nW += 1
+        return nW, nB
+
     def pesoWB(self):
         dpesos = {"Q": 110, "N": 30, "B": 32, "R": 50, "P": 10}
         peso = 0

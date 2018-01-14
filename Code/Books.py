@@ -204,6 +204,34 @@ class Libro:
             listaJugadas.append((desde, hasta, coronacion, "%-5s -%7.02f%% -%7d" % (pgn, pc, w), 1.0 * w / maxim))
         return listaJugadas
 
+    def almListaJugadas(self, fen):
+        li = self.book.lista(self.path, fen)
+        posicion = ControlPosicion.ControlPosicion()
+        posicion.leeFen(fen)
+
+        total = 0
+        maxim = 0
+        for entry in li:
+            w = entry.weight
+            total += w
+            if w > maxim:
+                maxim = w
+
+        listaJugadas = []
+        for entry in li:
+            alm = Util.Almacen()
+            pv = entry.pv()
+            w = entry.weight
+            alm.desde, alm.hasta, alm.coronacion = pv[:2], pv[2:4], pv[4:]
+            alm.pgn = posicion.pgnSP(alm.desde, alm.hasta, alm.coronacion)
+            alm.fen = fen
+            alm.porc = "%0.02f%%" %(w * 100.0 / total,) if total else ""
+            alm.weight = w
+            listaJugadas.append(alm)
+
+        return listaJugadas
+
+
     def eligeJugadaTipo(self, fen, tipo):
         maxim = 0
         liMax = []

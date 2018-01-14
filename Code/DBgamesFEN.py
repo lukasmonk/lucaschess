@@ -377,11 +377,17 @@ class DBgamesFEN():
         return True
 
     def si_existe_fen(self, fen):
-        self._cursor.execute("SELECT COUNT(*) FROM GAMES WHERE FEN = ?", (fen,))
+        li = fen.split(" ")
+        busca = " ".join(li[:-2]) + "%"
+        self._cursor.execute("SELECT COUNT(*) FROM GAMES WHERE FEN LIKE ?", (busca,))
         num = self._cursor.fetchone()[0]
         return num
 
     def inserta(self, partidaCompleta):
+        fen = partidaCompleta.iniPosicion.fen()
+        if self.si_existe_fen(fen):
+            return False
+
         pgn = {}
         pgn["FULLGAME"] = partidaCompleta.save()
         xpgn = Util.var2blob(pgn)

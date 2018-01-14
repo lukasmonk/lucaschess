@@ -809,7 +809,14 @@ class Gestor:
         self.pantalla.activaCapturas(False)
         self.ponVista()
 
-    def rightMouse(self, siShift, siControl, siAlt):
+    def nonDistractMode(self):
+        self.nonDistract = self.pantalla.base.nonDistractMode(self.nonDistract)
+        self.pantalla.ajustaTam()
+
+    def boardRightMouse(self, siShift, siControl, siAlt):
+        self.tablero.lanzaDirector()
+
+    def gridRightMouse(self, siShift, siControl, siAlt):
         if siControl:
             self.capturas()
         elif siAlt:
@@ -818,11 +825,6 @@ class Gestor:
             self.pgnInformacion()
         self.pantalla.ajustaTam()
 
-    def boardRightMouse(self, siShift, siControl, siAlt):
-        self.rightMouse(siShift, siControl, siAlt)
-
-    def gridRightMouse(self, siShift, siControl, siAlt):
-        self.rightMouse(siShift, siControl, siAlt)
 
     def listado(self, tipo):
         if tipo == "pgn":
@@ -851,10 +853,6 @@ class Gestor:
         return jg.posicion.fen() if jg else self.fenUltimo()
 
     def fenActivoConInicio(self):
-        """
-        Incluye la posicion inicial
-        """
-
         pos, jg = self.jugadaActiva()
         if pos == 0:
             fila, columna = self.pantalla.pgnPosActual()
@@ -1173,7 +1171,7 @@ class Gestor:
 
         # DGT
         if self.configuracion.siDGT:
-            menu.opcion("dgt", _("Disable %1") if DGT.siON() else _("Enable %1"), _("DGT board"), Iconos.DGT())
+            menu.opcion("dgt", (_("Disable %1") if DGT.siON() else _("Enable %1")).replace("%1", _("DGT board")), Iconos.DGT())
             menu.separador()
 
         # Ciega - Mostrar todas - Ocultar blancas - Ocultar negras
@@ -1281,7 +1279,13 @@ class Gestor:
                     self.pgn.siMostrar = not self.pgn.siMostrar
                     self.pantalla.base.pgnRefresh()
                 elif orden == "change":
-                    self.tablero.blindfoldChange()
+                    x = str(self)
+                    modoPosicionBlind = False
+                    for tipo in ("GestorEntPos",):
+                        if tipo in x:
+                            modoPosicionBlind = True
+                    self.tablero.blindfoldChange(modoPosicionBlind)
+
 
                 elif orden == "conf":
                     self.tablero.blindfoldConfig()
@@ -1366,8 +1370,9 @@ class Gestor:
 
         menuSave.separador()
 
-        menuSave.opcion("dbfichero", _("Database"), Iconos.DatabaseCNew())
-
+        menuDB = menuSave.submenu(_("Database"), Iconos.DatabaseCNew())
+        siFen = not self.partida.siFenInicial()
+        QTVarios.menuDB(menuDB, self.configuracion, siFen, True)
         menuSave.separador()
 
         menuV = menuSave.submenu(_("Board -> Image"), icoCamara)
@@ -1480,8 +1485,8 @@ class Gestor:
         elif resp == "pgnfichero":
             self.salvaPGN()
 
-        elif resp == "dbfichero":
-            self.salvaDB()
+        elif resp.startswith("dbf_"):
+            self.salvaDB(resp[4:])
 
         elif resp.startswith("fen") or resp.startswith("fns"):
             extension = resp[:3]
@@ -1498,12 +1503,7 @@ class Gestor:
         um.final()
         PantallaAnalisis.showGraph(self.pantalla, self, alm, Analisis.muestraAnalisis)
 
-    def salvaDB(self):
-        siFen = not self.partida.siFenInicial()
-        database = QTVarios.selectDB(self.pantalla, self.configuracion, siFen)
-        if database is None:
-            return
-
+    def salvaDB(self, database):
         pgn = self.listado("pgn")
         liTags = []
         for linea in pgn.split("\n"):
@@ -1519,6 +1519,7 @@ class Gestor:
         pc = Partida.PartidaCompleta(liTags=liTags)
         pc.leeOtra(self.partida)
 
+        siFen = not self.partida.siFenInicial()
         db = DBgamesFEN.DBgamesFEN(database) if siFen else DBgames.DBgames(database)
         resp = db.inserta(pc)
         db.close()
@@ -1800,3 +1801,21 @@ class Gestor:
                 cambio = salto
             tipo = "ms" if tipo == "mt" else "mt"
         return True
+
+    def ponFlechasTutor(self, mrm, nArrows):
+        self.tablero.quitaFlechas()
+        if self.tablero.flechaSC:
+            self.tablero.flechaSC.hide()
+
+        rm_mejor = mrm.mejorMov()
+        if not rm_mejor:
+            return
+        rm_peor = mrm.liMultiPV[-1]
+        peso0 = rm_mejor.puntosABS()
+        rango = peso0 - rm_peor.puntosABS()
+        for n, rm in enumerate(mrm.liMultiPV, 1):
+            peso = rm.puntosABS()
+            factor = 1.0 - (peso0-peso)*1.0/rango
+            self.tablero.creaFlechaTutor(rm.desde, rm.hasta, factor)
+            if n >= nArrows:
+                return

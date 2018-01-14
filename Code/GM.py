@@ -205,11 +205,12 @@ def dicGM():
     return dic
 
 
-def listaGM():
+def listaGM(siWoman):
     dic = dicGM()
     li = []
-    for fich in Util.listdir("GM"):
-        fich = fich.lower()
+
+    for entry in Util.listdir("WGM" if siWoman else "GM"):
+        fich = entry.name.lower()
         if fich.endswith(".xgm"):
             gm = fich[:-4].lower()
             try:
@@ -222,8 +223,8 @@ def listaGM():
 
 def listaGMpersonal(carpeta):
     li = []
-    for fich in Util.listdir(carpeta):
-        fich = fich.lower()
+    for entry in Util.listdir(carpeta):
+        fich = entry.name.lower()
         if fich.endswith(".xgm"):
             gm = fich[:-4]
 

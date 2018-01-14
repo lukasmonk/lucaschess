@@ -137,9 +137,6 @@ class WInfomove(QtGui.QWidget):
             self.movActual.comment(self.emComentario.texto())
             self.tree.resetComentario(self.movActual)
 
-    def cambioTablero(self):
-        pass
-
     def ponMovimiento(self, move):
         if self.movActual:
             self.movActual.graphics(self.tablero.exportaMovibles())

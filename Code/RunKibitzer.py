@@ -42,8 +42,9 @@ class VentanaMultiPV(QtGui.QDialog):
 
         self.cpu = cpu
 
-        self.ficheroVideo = cpu.ficheroVideo
-        dicVideo = self.dicVideo()
+        dicVideo = self.cpu.dic_video
+        if not dicVideo:
+            dicVideo = {}
 
         self.siTop = dicVideo.get("SITOP", True)
         self.siShowTablero = dicVideo.get("SHOW_TABLERO", True)
@@ -318,11 +319,7 @@ class VentanaMultiPV(QtGui.QDialog):
 
         self.grid.guardarVideo(dic)
 
-        Util.guardaDIC(dic, self.ficheroVideo)
-
-    def dicVideo(self):
-        dic = Util.recuperaDIC(self.ficheroVideo)
-        return dic if dic else {}
+        self.cpu.save_video(dic)
 
     def recuperarVideo(self, dicVideo):
         if dicVideo:
@@ -507,7 +504,6 @@ class Ventana(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
 
         self.cpu = cpu
-        self.ficheroVideo = cpu.ficheroVideo
         self.motor = None
 
         self.liData = []
@@ -690,44 +686,44 @@ class Ventana(QtGui.QDialog):
 
         Util.guardaDIC(dic, self.ficheroVideo)
 
-    def recuperarVideo(self):
-        if Util.tamFichero(self.ficheroVideo) > 0:
-            dic = Util.recuperaDIC(self.ficheroVideo)
-            if dic:
-                wE, hE = QTUtil.tamEscritorio()
-                x, y = dic["_POSICION_"].split(",")
-                x = int(x)
-                y = int(y)
-                if not (0 <= x <= (wE - 50)):
-                    x = 0
-                if not (0 <= y <= (hE - 50)):
-                    y = 0
-                self.move(x, y)
-                if "_SIZE_" not in dic:
-                    w, h = self.width(), self.height()
-                    for k in dic:
-                        if k.startswith("_TAMA"):
-                            w, h = dic[k].split(",")
-                else:
-                    w, h = dic["_SIZE_"].split(",")
-                w = int(w)
-                h = int(h)
-                if w > wE:
-                    w = wE
-                elif w < 20:
-                    w = 20
-                if h > hE:
-                    h = hE
-                elif h < 20:
-                    h = 20
-                self.resize(w, h)
-                self.siShowTablero = dic.get("SHOW_TABLERO", self.siShowTablero)
-                self.nArrows = dic.get("NARROWS", self.nArrows)
-                self.siTop = dic.get("SITOP", self.siTop)
 
-                if not self.siShowTablero:
-                    if self.siWidgets:
-                        self.tablero.hide()
+    def recuperarVideo(self):
+        dic = self.cpu.dic_video
+        if dic:
+            wE, hE = QTUtil.tamEscritorio()
+            x, y = dic["_POSICION_"].split(",")
+            x = int(x)
+            y = int(y)
+            if not (0 <= x <= (wE - 50)):
+                x = 0
+            if not (0 <= y <= (hE - 50)):
+                y = 0
+            self.move(x, y)
+            if "_SIZE_" not in dic:
+                w, h = self.width(), self.height()
+                for k in dic:
+                    if k.startswith("_TAMA"):
+                        w, h = dic[k].split(",")
+            else:
+                w, h = dic["_SIZE_"].split(",")
+            w = int(w)
+            h = int(h)
+            if w > wE:
+                w = wE
+            elif w < 20:
+                w = 20
+            if h > hE:
+                h = hE
+            elif h < 20:
+                h = 20
+            self.resize(w, h)
+            self.siShowTablero = dic.get("SHOW_TABLERO", self.siShowTablero)
+            self.nArrows = dic.get("NARROWS", self.nArrows)
+            self.siTop = dic.get("SITOP", self.siTop)
+
+            if not self.siShowTablero:
+                if self.siWidgets:
+                    self.tablero.hide()
 
     def lanzaMotor(self, siMultiPV=False):
         self.motor = QtCore.QProcess()
@@ -1671,7 +1667,9 @@ class CPU:
 
             self.configMotor = self.kibitzer.configMotor()
 
-            self.ficheroVideo = self.configuracion.plantillaVideo % ("KIB%s" % self.kibitzer.huella,)
+            self.key_video = "KIB%s" % self.kibitzer.huella
+            self.dic_video = self.configuracion.restore_video(self.key_video)
+
             self.tipo = self.kibitzer.tipo
             self.posicionBase = self.kibitzer.posicionBase
             self.lanzaVentana()
@@ -1690,6 +1688,9 @@ class CPU:
             self.ipc.close()
             self.ventana.finalizar()
             self.ventana.reject()
+
+    def save_video(self, dic):
+        self.configuracion.save_video(self.key_video, dic)
 
     def lanzaVentana(self):
         app = QtGui.QApplication([])

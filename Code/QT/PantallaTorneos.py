@@ -144,11 +144,11 @@ class WUnTorneo(QTVarios.WDialogo):
         self.liResult = None
 
         # Toolbar
-        liAcciones = ((_("Save") + "+" + _("Quit"), Iconos.MainMenu(), "terminar"), None,
-                      (_("Cancel"), Iconos.Cancelar(), "cancelar"), None,
-                      (_("Play"), Iconos.Empezar(), "gmJugar"), None,
+        liAcciones = ((_("Save") + "+" + _("Quit"), Iconos.MainMenu(), self.terminar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                      (_("Play"), Iconos.Empezar(), self.gmJugar), None,
                       )
-        tb = Controles.TB(self, liAcciones)
+        tb = Controles.TBrutina(self, liAcciones)
 
         # Tabs
         self.tab = tab = Controles.Tab()
@@ -180,6 +180,10 @@ class WUnTorneo(QTVarios.WDialogo):
         btNuevoBook = Controles.PB(self, "", self.nuevoBook, plano=False).ponIcono(Iconos.Nuevo(), tamIcon=16)
         lyBook = Colocacion.H().control(self.cbBooks).control(btNuevoBook).relleno()
 
+        lbBookDepth = Controles.LB(self, _("Max depth of book (0=Maximum)") + ": ")
+        self.sbBookDepth = Controles.SB(self, torneo.bookDepth(), 0, 200)
+
+
         # Posicion inicial
         lbFEN = Controles.LB(self, _("Initial position") + ": ")
         self.fen = torneo.fen()
@@ -202,8 +206,9 @@ class WUnTorneo(QTVarios.WDialogo):
         layout.controld(lbDrawMinPly, 2, 0).control(self.sbDrawMinPly, 2, 1)
         layout.controld(lbDrawRange, 3, 0).control(self.sbDrawRange, 3, 1)
         layout.controld(lbBook, 4, 0).otro(lyBook, 4, 1)
-        layout.controld(lbFEN, 5, 0).otro(lyFEN, 5, 1)
-        layout.controld(lbNorman, 6, 0).control(self.chbNorman, 6, 1)
+        layout.controld(lbBookDepth, 5, 0).control(self.sbBookDepth, 5, 1)
+        layout.controld(lbFEN, 6, 0).otro(lyFEN, 6, 1)
+        layout.controld(lbNorman, 7, 0).control(self.chbNorman, 7, 1)
         layoutV = Colocacion.V().relleno().otro(layout).relleno()
         layoutH = Colocacion.H().relleno().otro(layoutV).relleno()
 
@@ -215,13 +220,13 @@ class WUnTorneo(QTVarios.WDialogo):
         self.splitterEngines = QtGui.QSplitter(self)
         self.registrarSplitter(self.splitterEngines, "engines")
         # TB
-        liAcciones = [(_("New"), Iconos.TutorialesCrear(), "enNuevo"), None,
-                      (_("Modify"), Iconos.Modificar(), "enModificar"), None,
-                      (_("Remove"), Iconos.Borrar(), "enBorrar"), None,
-                      (_("Copy"), Iconos.Copiar(), "enCopiar"), None,
-                      (_("Import"), Iconos.MasDoc(), "enImportar"), None,
+        liAcciones = [(_("New"), Iconos.TutorialesCrear(), self.enNuevo), None,
+                      (_("Modify"), Iconos.Modificar(), self.enModificar), None,
+                      (_("Remove"), Iconos.Borrar(), self.enBorrar), None,
+                      (_("Copy"), Iconos.Copiar(), self.enCopiar), None,
+                      (_("Import"), Iconos.MasDoc(), self.enImportar), None,
                       ]
-        tbEnA = Controles.TB(self, liAcciones, tamIcon=24)
+        tbEnA = Controles.TBrutina(self, liAcciones, tamIcon=24)
 
         # Grid engine
         oColumnas = Columnas.ListaColumnas()
@@ -257,12 +262,12 @@ class WUnTorneo(QTVarios.WDialogo):
         # Tab-games --------------------------------------------------
         w = QtGui.QWidget()
         # TB
-        liAcciones = [(_("New"), Iconos.TutorialesCrear(), "gmCrear"), None,
-                      (_("Remove"), Iconos.Borrar(), "gmBorrar"), None,
-                      (_("Show"), Iconos.PGN(), "gmMostrar"), None,
-                      (_("Save") + "(%s)" % _("PGN"), Iconos.GrabarComo(), "gmGuardar"), None,
+        liAcciones = [(_("New"), Iconos.TutorialesCrear(), self.gmCrear), None,
+                      (_("Remove"), Iconos.Borrar(), self.gmBorrar), None,
+                      (_("Show"), Iconos.PGN(), self.gmMostrar), None,
+                      (_("Save") + "(%s)" % _("PGN"), Iconos.GrabarComo(), self.gmGuardar), None,
                       ]
-        tbEnG = Controles.TB(self, liAcciones, tamIcon=24)
+        tbEnG = Controles.TBrutina(self, liAcciones, tamIcon=24)
         # Grid engine
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("WHITE", _("White"), 190, siCentrado=True)
@@ -474,10 +479,6 @@ class WUnTorneo(QTVarios.WDialogo):
         for opcion in me.liOpciones:
             self.liEnActual.append((opcion.nombre, str(opcion.valor)))
 
-    def procesarTB(self):
-        accion = self.sender().clave
-        eval("self.%s()" % accion)
-
     def terminar(self):
         if self.grabar():
             self.guardarVideo()
@@ -530,6 +531,8 @@ class WUnTorneo(QTVarios.WDialogo):
         self.torneo.drawRange(self.sbDrawRange.valor())
         self.torneo.fen(self.fen)
         self.torneo.norman(self.chbNorman.valor())
+        self.torneo.book(self.cbBooks.valor())
+        self.torneo.bookDepth(self.sbBookDepth.valor())
 
         try:
             self.torneo.nombre(nombre)
@@ -811,11 +814,11 @@ class WTorneos(QTVarios.WDialogo):
     def leeTorneos(self):
         li = []
         carpeta = self.configuracion.carpeta
-        for x in Util.listdir(carpeta, siUnicode=True):
-            if x.lower().endswith(".mvm"):
-                fich = os.path.join(carpeta, x)
-                st = os.stat(fich)
-                li.append((x, st.st_ctime, st.st_mtime))
+        for entry in Util.listdir(carpeta, siUnicode=True):
+            filename = entry.name
+            if filename.lower().endswith(".mvm"):
+                st = entry.stat()
+                li.append((filename, st.st_ctime, st.st_mtime))
 
         sorted(li, key=lambda x: x[2], reverse=True)  # por ultima modificacin y al reves
         return li

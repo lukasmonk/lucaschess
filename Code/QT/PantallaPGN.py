@@ -357,7 +357,7 @@ class WElegir(QTVarios.WDialogo):
         menu.opcion("masivo", _("Mass analysis"), icoN)
 
         menu.separador()
-        eti = _("Play like a grandmaster")
+        eti = _("Play like a Grandmaster")
         menu.opcion("gm", _X(_('Create training to %1'), eti), Iconos.GranMaestro())
 
         resp = menu.lanza()
@@ -393,7 +393,7 @@ class WElegir(QTVarios.WDialogo):
 
         liGen.append((_("Which side") + ":", li))
 
-        eti = _("Play like a grandmaster")
+        eti = _("Play like a Grandmaster")
         eti = _X(_('Create training to %1'), eti)
         resultado = FormLayout.fedit(liGen, title=eti, parent=self, anchoMinimo=460, icon=Iconos.GranMaestro())
 
@@ -660,7 +660,7 @@ class WElegir(QTVarios.WDialogo):
 class WFiltrar(QtGui.QDialog):
     def __init__(self, wParent, oColumnas, liFiltro):
 
-        super(WFiltrar, self).__init__(wParent)
+        super(WFiltrar, self).__init__()
 
         self.setWindowTitle(_("Filter"))
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)

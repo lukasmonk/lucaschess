@@ -1,5 +1,8 @@
+# -*- coding: latin-1 -*-
+
 import os
 import sys
+import anydbm
 
 from Code import Gestor
 from Code import PGN
@@ -86,7 +89,7 @@ class GestorPGN(Gestor.Gestor):
             self.ficheroRepite()
 
         elif clave == k_jugadadia:
-            self.jugadaDia()
+            self.miniatura()
 
         elif clave == k_pgnComandoExterno:
             self.comandoExterno()
@@ -157,13 +160,42 @@ class GestorPGN(Gestor.Gestor):
             self.pgnPaste = texto
             self.mostrar(pgn, False)
 
-    def jugadaDia(self):
+    # def jugadaDia(self):
+    #     self.pensando(True)
+    #     dia = Util.hoy().day
+    #     lid = Util.LIdisk("./IntFiles/31.pkl")
+    #     dic = lid[dia - 1]
+    #     lid.close()
+    #     txt = dic["PGN"]
+    #     pgn = PGN.UnPGN()
+    #     pgn.leeTexto(txt)
+    #     self.pensando(False)
+    #     if pgn.siError:
+    #         return
+    #     self.pgnPaste = txt
+    #     self.mostrar(pgn, False)
+
+    def miniatura(self):
         self.pensando(True)
-        dia = Util.hoy().day
-        lid = Util.LIdisk("./IntFiles/31.pkl")
-        dic = lid[dia - 1]
-        lid.close()
-        txt = dic["PGN"]
+
+        db = anydbm.open("./IntFiles/miniaturas.dbm")
+        h = hash(Util.dtos(Util.hoy()))
+        grupo = str(h%7+1)
+        li = db[grupo].split("{")
+        db.close()
+        n = len(li)
+        pos = h % n
+        linea = li[pos]
+        lig = linea.split("|")
+        liTags = []
+        pv = lig[-1]
+        for n in range(len(lig)-1):
+            if "·" in lig[n]:
+                k, v = lig[n].split("·")
+                liTags.append((k, v))
+        p = Partida.PartidaCompleta(liTags=liTags)
+        p.leerPV(pv)
+        txt = p.pgn()
         pgn = PGN.UnPGN()
         pgn.leeTexto(txt)
         self.pensando(False)
@@ -171,6 +203,7 @@ class GestorPGN(Gestor.Gestor):
             return
         self.pgnPaste = txt
         self.mostrar(pgn, False)
+
 
     def mostrar(self, pgn, siRepiteFichero, siBlancas=None):
         self.pensando(True)

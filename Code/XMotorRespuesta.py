@@ -1093,8 +1093,12 @@ class MRespuestaMotor:
                         firstDepth = depth
                         break
             if firstDepth >= perf.very_good_depth:
-                nag = VERYGOOD
-                color = VERYGOOD
+                if len(libest) == 1 and (mj_pts - self.liMultiPV[1].puntosABS()) > 70:
+                    nag = VERYGOOD
+                    color = VERYGOOD
+                else:
+                    nag = GOOD
+                    color = GOOD
             elif firstDepth >= perf.good_depth:
                 nag = GOOD
                 color = GOOD

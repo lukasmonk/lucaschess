@@ -1,22 +1,23 @@
 /*
-  Stockfish, a UCI chess playing engine derived from Glaurung 2.1
-  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
-  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
-  Copyright (C) 2015-2017 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
-
-  Stockfish is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  Stockfish is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ McBrain, a UCI chess playing engine derived from Stockfish and Glaurung 2.1
+ Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
+ Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
+ Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
+ Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+ 
+ McBrain is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ McBrain is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <algorithm> // For std::count
 #include <cassert>
@@ -35,6 +36,7 @@ ThreadPool Threads; // Global object
 Thread::Thread(size_t n) : idx(n), stdThread(&Thread::idle_loop, this) {
 
   wait_for_search_finished();
+  clear(); // Zero-init histories (based on std::array)
 }
 
 
@@ -50,6 +52,21 @@ Thread::~Thread() {
   stdThread.join();
 }
 
+
+/// Thread::clear() reset histories, usually before a new game
+
+void Thread::clear() {
+
+  counterMoves.fill(MOVE_NONE);
+  mainHistory.fill(0);
+  captureHistory.fill(0);
+
+  for (auto& to : contHistory)
+      for (auto& h : to)
+          h.fill(0);
+
+  contHistory[NO_PIECE][0].fill(Search::CounterMovePruneThreshold - 1);
+}
 
 /// Thread::start_searching() wakes up the thread that will start the search
 
@@ -96,7 +113,7 @@ void Thread::idle_loop() {
 
 
 /// ThreadPool::init() creates and launches the threads that will go
-/// immediately to sleep in idle_loop. We cannot use the c'tor because
+/// immediately to sleep in idle_loop. We cannot use the constructor because
 /// Threads is a static object and we need a fully initialized engine at
 /// this point due to allocation of Endgames in the Thread constructor.
 
@@ -171,6 +188,8 @@ void ThreadPool::start_thinking(Position& pos, StateListPtr& states,
       th->rootDepth = th->completedDepth = DEPTH_ZERO;
       th->rootMoves = rootMoves;
       th->rootPos.set(pos.fen(), pos.is_chess960(), &setupStates->back(), th);
+	  th->nmp_ply = 0;
+	  th->pair = -1;
   }
 
   setupStates->back() = tmp;

@@ -757,9 +757,6 @@ class InfoMove(QtGui.QWidget):
 
         self.movActual = None
 
-    def cambioTablero(self):
-        pass
-
     def ponValores(self):
         posicion, desde, hasta = self.movActual.damePosicion()
         self.tablero.ponPosicion(posicion)

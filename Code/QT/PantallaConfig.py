@@ -141,6 +141,7 @@ def opciones(parent, configuracion):
     liNC.append((FormLayout.Spinbox(_("Tourney-Elo"), 0, 3200, 70), configuracion.micheloNC))
     liNC.append((FormLayout.Spinbox(_("Fics-Elo"), 0, 3200, 70), configuracion.ficsNC))
     liNC.append((FormLayout.Spinbox(_("Fide-Elo"), 0, 3200, 70), configuracion.fideNC))
+    liNC.append((FormLayout.Spinbox(_("Lichess-Elo"), 0, 3200, 70), configuracion.lichessNC))
 
     # Salvado automatico
     liSA = [separador]
@@ -183,7 +184,7 @@ def opciones(parent, configuracion):
     liT.append((_("Mouse shortcuts") + ":", liMouseSH))
     liT.append((_("Show candidates") + ":", configuracion.showCandidates))
     liT.append((_("Show arrows of variants") + ":", configuracion.showVariantes))
-    liT.append(separador)
+    liT.append((_("Always promote to queen\nALT key allows to change") + ":", configuracion.autocoronacion))
     liT.append((_("Show cursor when engine is thinking") + ":", configuracion.cursorThinking))
     liT.append(separador)
     liT.append((_("Enable captured material window by default") + ":", configuracion.siActivarCapturas))
@@ -242,13 +243,14 @@ def opciones(parent, configuracion):
             configuracion.tutorActivoPorDefecto, configuracion.tutorDifPts, configuracion.tutorDifPorc) = liTT
         configuracion.tiempoTutor = int(tiempoTutor * 1000)
 
-        (configuracion.eloNC, configuracion.micheloNC, configuracion.ficsNC, configuracion.fideNC) = liNC
+        (configuracion.eloNC, configuracion.micheloNC, configuracion.ficsNC, configuracion.fideNC, configuracion.lichessNC) = liNC
 
         (configuracion.centipawns, configuracion.bmi2, configuracion.notbackground, configuracion.siLogEngines) = liEng
 
         (configuracion.vistaTutor,
             configuracion.efectosVisuales, rapidezMovPiezas,
             configuracion.siAtajosRaton, configuracion.showCandidates, configuracion.showVariantes,
+            configuracion.autocoronacion,
             configuracion.cursorThinking, configuracion.siActivarCapturas, configuracion.tipoMaterial,
             configuracion.siActivarInformacion, siDGT, toolIcon, configuracion.positionToolBoard,
             configuracion.directorIcon) = liT

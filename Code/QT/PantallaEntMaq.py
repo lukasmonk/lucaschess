@@ -34,7 +34,6 @@ class WEntMaquina(QTVarios.WDialogo):
         self.motores = Motores.Motores(self.configuracion)
 
         # Toolbar
-
         liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
                       (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
                       (_("Configurations"), Iconos.Configurar(), self.configuraciones), None,
@@ -42,7 +41,6 @@ class WEntMaquina(QTVarios.WDialogo):
         tb = Controles.TBrutina(self, liAcciones)
 
         # Tab
-
         tab = Controles.Tab()
 
         def nuevoG():
@@ -79,10 +77,9 @@ class WEntMaquina(QTVarios.WDialogo):
             return gb
 
         # TAB General
-
         lyG = nuevoG()
 
-        # Blancas o negras
+        # # Color
         self.rbBlancas = Controles.RB(self, "").activa()
         self.rbBlancas.setIcon(QTVarios.fsvg2ico("Pieces/Chessicons/wp.svg", 64))
         self.rbNegras = Controles.RB(self, "")
@@ -92,12 +89,12 @@ class WEntMaquina(QTVarios.WDialogo):
                 self.rbRandom).relleno()
         _label(lyG, _("Select color"), hbox)
 
-        # Motores
+        # # Motores
         liDepths = [("--", 0)]
         for x in range(1, 31):
             liDepths.append((str(x), x))
 
-        # # Rival
+        # ## Rival
         self.rival = self.configuracion.rivalInicial
         self.rivalTipo = Motores.INTERNO
         self.btRival = Controles.PB(self, "", self.cambiaRival, plano=False)
@@ -106,14 +103,14 @@ class WEntMaquina(QTVarios.WDialogo):
         lbTiempoSegundosR = Controles.LB2P(self, _("Time"))
         lbNivel = Controles.LB2P(self, _("Depth"))
 
-        # # Ajustar rival
+        # ## Ajustar rival
         liAjustes = self.personalidades.listaAjustes(True)
         self.cbAjustarRival = Controles.CB(self, liAjustes, kAjustarMejor).capturaCambiado(self.ajustesCambiado)
         lbAjustarRival = Controles.LB2P(self, _("Set strength"))
         btAjustarRival = Controles.PB(self, _("Personality"), self.cambiaPersonalidades, plano=True).ponIcono(
                 Iconos.Mas(), tamIcon=16)
 
-        # Resign
+        # ## Resign
         lbResign = Controles.LB2P(self, _("Resign/draw by engine"))
         liResign = ((_("Very early"), -100),
                     (_("Early"), -300),
@@ -135,58 +132,66 @@ class WEntMaquina(QTVarios.WDialogo):
         tab.nuevaTab(gb, _("Basic configuration"))
 
         # TAB Ayudas
-        lbAyudas = Controles.LB2P(self, _("Available hints"))
-        self.sbAyudas = Controles.SB(self, 7, 0, 999).tamMaximo(50)
+        lyG = nuevoG()
+
         self.cbAtras = Controles.CHB(self, _("Takeback"), True)
-        self.cbChance = Controles.CHB(self, _("Second chance"), True)
+        self.chbSummary = Controles.CHB(self, _("Save a summary when the game is finished in the main comment"), False)
+
+        # # Tutor
+        lbAyudas = Controles.LB2P(self, _("Available hints"))
+        liAyudas = [(_("Maximum"), 99)]
+        for i in range(1, 21):
+            liAyudas.append((str(i), i))
+        for i in range(25, 51, 5):
+            liAyudas.append((str(i), i))
+        self.cbAyudas = Controles.CB(self, liAyudas, 99)
+        self.chbChance = Controles.CHB(self, _("Second chance"), True)
         btTutorChange = Controles.PB(self, _("Tutor change"), self.tutorChange, plano=False).ponIcono(Iconos.Tutor(), tamIcon=16)
 
         liThinks = [(_("Nothing"), -1), (_("Score"), 0)]
         for i in range(1, 5):
             liThinks.append(("%d %s" % (i, _("ply") if i == 1 else _("plies")), i))
         liThinks.append((_("All"), 9999))
-
-        lb = Controles.LB(self, _("It is showed") + ":")
+        lbThoughtTt = Controles.LB(self, _("It is showed") + ":")
         self.cbThoughtTt = Controles.CB(self, liThinks, -1)
-        self.cbContinueTt = Controles.CHB(self, _("The tutor thinks while you think"), True)
+
+        self.chbContinueTt = Controles.CHB(self, _("The tutor thinks while you think"), True)
+
         lbBoxHeight = Controles.LB2P(self, _("Box height"))
         self.sbBoxHeight = Controles.SB(self, 7, 0, 999).tamMaximo(50)
-        ly1 = Colocacion.H().control(lb).control(self.cbThoughtTt).relleno()
-        ly2 = Colocacion.H().control(lbBoxHeight).control(self.sbBoxHeight).relleno()
-        ly = Colocacion.V().otro(ly1).control(self.cbContinueTt).espacio(16).otro(ly2).relleno()
-        gbThoughtTt = Controles.GB(self, _("Thought of the tutor"), ly)
-        gbThoughtTt.setStyleSheet(gbStyle)
+
+        lbArrows = Controles.LB2P(self, _("Arrows with the best moves"))
+        self.sbArrowsTt = Controles.SB(self, 3, 0, 999).tamMaximo(50)
+
+        lyT1 = Colocacion.H().control(lbAyudas).control(self.cbAyudas).relleno()
+        lyT1.control(self.chbChance).relleno().control(btTutorChange)
+        lyT2 = Colocacion.H().control(self.chbContinueTt).relleno()
+        lyT2.control(lbBoxHeight).control(self.sbBoxHeight).relleno()
+        lyT3 = Colocacion.H().control(lbThoughtTt).control(self.cbThoughtTt).relleno()
+        lyT3.control(lbArrows).control(self.sbArrowsTt)
+
+        ly = Colocacion.V().otro(lyT1).espacio(16).otro(lyT2).otro(lyT3).relleno()
+
+        self.gbTutor = Controles.GB(self, _("Tutor"), ly)
+        self.gbTutor.setCheckable(True)
+        self.gbTutor.setStyleSheet(gbStyle)
 
         lb = Controles.LB(self, _("It is showed") + ":")
         self.cbThoughtOp = Controles.CB(self, liThinks, -1)
         lbArrows = Controles.LB2P(self, _("Arrows to show"))
         self.sbArrows = Controles.SB(self, 7, 0, 999).tamMaximo(50)
-        ly1 = Colocacion.H().control(lb).control(self.cbThoughtOp).relleno()
-        ly2 = Colocacion.H().control(lbArrows).control(self.sbArrows).relleno()
-        ly = Colocacion.V().otro(ly1).otro(ly2).relleno()
+        ly = Colocacion.H().control(lb).control(self.cbThoughtOp).relleno()
+        ly.control(lbArrows).control(self.sbArrows).relleno()
         gbThoughtOp = Controles.GB(self, _("Thought of the opponent"), ly)
         gbThoughtOp.setStyleSheet(gbStyle)
 
-        self.chbSummary = Controles.CHB(self, _("Save a summary when the game is finished in the main comment"), False)
 
-        lyH1 = Colocacion.H().relleno()
-        lyH1.control(lbAyudas).control(self.sbAyudas).relleno()
-        lyH1.control(self.cbAtras).relleno()
-        lyH1.control(self.cbChance).relleno()
-        lyH1.control(btTutorChange).relleno()
-
-        # lyV1 = Colocacion.V().control(gbThoughtOp)
-
-        lyH3 = Colocacion.H().relleno()
-        lyH3.control(gbThoughtOp).relleno()
-        lyH3.control(gbThoughtTt).relleno()
-
-        ly = Colocacion.V().otro(lyH1).otro(lyH3).control(self.chbSummary).margen(16)
+        ly = Colocacion.V().espacio(16).control(self.gbTutor).espacio(16).control(gbThoughtOp)
+        ly.espacio(16).control(self.cbAtras).control(self.chbSummary)
         gb = Controles.GB(self, "", ly)
         tab.nuevaTab(gb, _("Help configuration"))
 
         # TAB Tiempo
-
         lyG = nuevoG()
         self.edMinutos, self.lbMinutos = QTUtil2.spinBoxLB(self, 15, 0, 999, maxTam=50, etiqueta=_("Total minutes"))
         self.edSegundos, self.lbSegundos = QTUtil2.spinBoxLB(self, 6, -999, 999, maxTam=54,
@@ -257,9 +262,7 @@ class WEntMaquina(QTVarios.WDialogo):
         hboxV = Colocacion.V().otro(hbox).otro(hboxRR)
         self.chbBook = _label(lyG, _("Book"), hboxV, siCheck=True)
 
-        ly = Colocacion.V().otro(lyG).relleno()
-
-        gb = Controles.GB(self, "", ly)
+        gb = Controles.GB(self, "", lyG)
         tab.nuevaTab(gb, _("Initial moves"))
 
         layout = Colocacion.V().control(tb).control(tab).relleno().margen(3)
@@ -446,14 +449,15 @@ class WEntMaquina(QTVarios.WDialogo):
         dic["FEN"] = self.fen
         dic["APERTURA"] = self.bloqueApertura
 
-        dic["AYUDAS"] = self.sbAyudas.valor()
+        dic["AYUDAS"] = self.cbAyudas.valor() if self.gbTutor.isChecked() else 0
         dic["ATRAS"] = self.cbAtras.valor()
         dic["ARROWS"] = self.sbArrows.valor()
         dic["BOXHEIGHT"] = self.sbBoxHeight.valor()
         dic["THOUGHTOP"] = self.cbThoughtOp.valor()
         dic["THOUGHTTT"] = self.cbThoughtTt.valor()
-        dic["CONTINUETT"] = self.cbContinueTt.isChecked()
-        dic["2CHANCE"] = self.cbChance.isChecked()
+        dic["ARROWSTT"] =  self.sbArrowsTt.valor()
+        dic["CONTINUETT"] = self.chbContinueTt.isChecked()
+        dic["2CHANCE"] = self.chbChance.isChecked()
         dic["SUMMARY"] = self.chbSummary.isChecked()
 
         dr = dic["RIVAL"] = {}
@@ -509,13 +513,17 @@ class WEntMaquina(QTVarios.WDialogo):
 
         self.fen = dic.get("FEN", "")
 
-        self.sbAyudas.ponValor(dic.get("AYUDAS", 7))
+        ayudas = dic.get("AYUDAS", 7)
+
+        self.gbTutor.setChecked(ayudas > 0)
+        self.cbAyudas.ponValor(ayudas)
         self.sbArrows.ponValor(dic.get("ARROWS", 7))
         self.cbThoughtOp.ponValor(dic.get("THOUGHTOP", -1))
         self.cbThoughtTt.ponValor(dic.get("THOUGHTTT", -1))
         self.sbBoxHeight.ponValor(dic.get("BOXHEIGHT", 64))
-        self.cbContinueTt.setChecked(dic.get("CONTINUETT", True))
-        self.cbChance.setChecked(dic.get("2CHANCE", True))
+        self.sbArrowsTt.ponValor(dic.get("ARROWSTT", 0))
+        self.chbContinueTt.setChecked(dic.get("CONTINUETT", True))
+        self.chbChance.setChecked(dic.get("2CHANCE", True))
         self.chbSummary.setChecked(dic.get("SUMMARY", False))
 
         self.bloqueApertura = dic.get("APERTURA", None)

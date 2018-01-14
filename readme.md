@@ -20,6 +20,7 @@ Dependencies
 * pyllow
 * photohash
 * cython
+* scandir
 
 Links
 -----

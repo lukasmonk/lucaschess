@@ -68,10 +68,14 @@ class WTabDirVisual(QTVarios.WDialogo):
 
         self.registrarGrid(self.g_guion)
 
+        self.chbSaveWhenFinished = Controles.CHB(self, _("Save when finished"), self.dbConfig.get("SAVEWHENFINISHED", False))
+
         # Visuales
         self.selectBanda = PantallaTab.SelectBanda(self)
 
-        lySG = Colocacion.H().control(self.selectBanda).control(self.g_guion)
+        lyG = Colocacion.V().control(self.g_guion).control(self.chbSaveWhenFinished)
+
+        lySG = Colocacion.H().control(self.selectBanda).otro(lyG).relleno(1)
         layout = Colocacion.V().control(self.tb).otro(lySG).margen(3)
         self.setLayout(layout)
 
@@ -638,6 +642,7 @@ class WTabDirVisual(QTVarios.WDialogo):
             self.guion.cierraPizarra()
             self.dbConfig["SELECTBANDA"] = self.selectBanda.guardar()
             self.dbConfig["SELECTBANDANUM"] = self.selectBanda.numSeleccionada()
+            self.dbConfig["SAVEWHENFINISHED"] = self.chbSaveWhenFinished.valor()
             self.dbConfig.close()
             self.dbFlechas.close()
             self.dbMarcos.close()
@@ -650,7 +655,7 @@ class WTabDirVisual(QTVarios.WDialogo):
 
     def test_siGrabar(self):
         if self.siGrabar:
-            if QTUtil2.pregunta(self, _("Save the changes?")):
+            if self.chbSaveWhenFinished.valor():
                 self.grabar()
             self.siGrabar = False
 
@@ -927,39 +932,44 @@ class DirVisual():
                 self.w.gborrar([pos_guion,])
                 return
 
-            pz_borrar = self.tablero.dameNomPiezaEn(a1h8)
-            menu = Controles.Menu(self.tablero)
-            dicPieces = TrListas.dicNomPiezas()
-            icoPiece = self.tablero.piezas.icono
+            siAlt = (m & QtCore.Qt.AltModifier) > 0
 
-            if pz_borrar or len(li_tareas):
-                mrem = menu.submenu(_("Remove"), Iconos.Delete())
-                if pz_borrar:
-                    rotulo = dicPieces[pz_borrar.upper()]
-                    mrem.opcion(("rem_pz", None), rotulo, icoPiece(pz_borrar))
-                    mrem.separador()
-                for pos_guion, tarea in li_tareas:
-                    rotulo = "%s - %s - %s" % (tarea.txt_tipo(), tarea.nombre(), tarea.info())
-                    mrem.opcion(("rem_gr", pos_guion), rotulo, Iconos.Delete())
-                    mrem.separador()
-                menu.separador()
+            if siAlt:
+                pz_borrar = self.tablero.dameNomPiezaEn(a1h8)
+                menu = Controles.Menu(self.tablero)
+                dicPieces = TrListas.dicNomPiezas()
+                icoPiece = self.tablero.piezas.icono
 
-            for pz in "KQRBNPkqrbnp":
-                if pz != pz_borrar:
-                    if pz == "k":
-                        menu.separador()
-                    menu.opcion(("create", pz), dicPieces[pz.upper()], icoPiece(pz))
-            resp = menu.lanza()
-            if resp is not None:
-                orden, arg = resp
-                if orden == "rem_gr":
-                    self.w.g_guion.goto(arg, 0)
-                    self.w.gborrar()
-                elif orden == "rem_pz":
-                    self.w.creaTarea("B", pz_borrar, a1h8, -1)
+                if pz_borrar or len(li_tareas):
+                    mrem = menu.submenu(_("Remove"), Iconos.Delete())
+                    if pz_borrar:
+                        rotulo = dicPieces[pz_borrar.upper()]
+                        mrem.opcion(("rem_pz", None), rotulo, icoPiece(pz_borrar))
+                        mrem.separador()
+                    for pos_guion, tarea in li_tareas:
+                        rotulo = "%s - %s - %s" % (tarea.txt_tipo(), tarea.nombre(), tarea.info())
+                        mrem.opcion(("rem_gr", pos_guion), rotulo, Iconos.Delete())
+                        mrem.separador()
+                    menu.separador()
 
-                elif orden == "create":
-                    self.w.creaTarea("C", arg, a1h8, -1)
+                for pz in "KQRBNPkqrbnp":
+                    if pz != pz_borrar:
+                        if pz == "k":
+                            menu.separador()
+                        menu.opcion(("create", pz), dicPieces[pz.upper()], icoPiece(pz))
+                resp = menu.lanza()
+                if resp is not None:
+                    orden, arg = resp
+                    if orden == "rem_gr":
+                        self.w.g_guion.goto(arg, 0)
+                        self.w.gborrar()
+                    elif orden == "rem_pz":
+                        self.w.creaTarea("B", pz_borrar, a1h8, -1)
+
+                    elif orden == "create":
+                        self.w.creaTarea("C", arg, a1h8, -1)
+            else:
+                self.terminar()
 
             return True
 

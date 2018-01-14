@@ -367,6 +367,8 @@ class XMotor:
         self.put_line("uci")
         li, self.uci_ok = self.wait_list("uciok", 10000)
         self.uci_lines = [x for x in li if x.startswith("id ") or x.startswith("option name")] if self.uci_ok else []
+        self.put_line("ucinewgame")
+        self.put_line("isready")
 
     def set_option(self, name, value):
         if value:

@@ -290,10 +290,10 @@ class OpeningGuide:
         lwbase = self.name.lower()
         liresp = []
         for uno in li:
-            lw = uno.lower()
+            lw = uno.name.lower()
             if lw.endswith(".pgo"):
                 if lwbase != lw[:-4]:
-                    liresp.append(uno[:-4])
+                    liresp.append(uno.name[:-4])
         return liresp
 
     def getTodas(self):
@@ -483,7 +483,6 @@ class OpeningGuide:
                 self.generarStandard(wowner, True)
 
     def grabarPGN(self, ventana, ficheroPGN, maxDepth):
-
         select = "XPV,PV,COMMENT,NAG,ADV,FEN,POS"
         SQLDBF.DBF(self.conexion, self.tablaDatos, select)
 

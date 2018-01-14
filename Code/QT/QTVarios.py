@@ -16,7 +16,7 @@ from Code import VarGen
 
 class WSave():
     def __init__(self, titulo, icono, flag, extparam):
-        self.ficheroVideo = VarGen.configuracion.plantillaVideo % extparam
+        self.key_video = extparam
         self.liGrids = []
         self.liSplitters = []
         self.setWindowTitle(titulo)
@@ -48,14 +48,11 @@ class WSave():
         for sp, name in self.liSplitters:
             dic["SP_%s" % name] = sp.sizes()
 
-        Util.guardaDIC(dic, self.ficheroVideo)
+        VarGen.configuracion.save_video(self.key_video, dic)
         return dic
 
     def recuperarDicVideo(self):
-        if Util.tamFichero(self.ficheroVideo) > 0:
-            return Util.recuperaDIC(self.ficheroVideo)
-        else:
-            return None
+        return VarGen.configuracion.restore_video(self.key_video)
 
     def recuperarVideo(self, siTam=True, anchoDefecto=None, altoDefecto=None, dicDef=None):
         dic = self.recuperarDicVideo()
@@ -1072,68 +1069,60 @@ def list_irina():
     )
 
 
-def listaDB(configuracion, siFEN):
+def listaDB(configuracion, siFEN, siAll=False):
     if siFEN:
         ext = "lcf"
         base = configuracion.ficheroDBgamesFEN
+        carpeta = configuracion.carpetaPositions
     else:
         ext = "lcg"
         base = configuracion.ficheroDBgames
+        carpeta = configuracion.carpetaGames
     base = os.path.abspath(base)
-    lista = [fich for fich in os.listdir(configuracion.carpeta)
-             if fich.endswith("." + ext) and os.path.abspath(os.path.join(configuracion.carpeta, fich)) != base
-        ]
+    if siAll:
+        lista = [fich for fich in os.listdir(carpeta) if fich.endswith("." + ext)]
+    else:
+        lista = [fich for fich in os.listdir(carpeta)
+                 if fich.endswith("." + ext) and os.path.abspath(os.path.join(carpeta, fich)) != base
+            ]
     return lista
-
-    # menu = LCMenu(owner)
-    # if lista:
-    #     rp = rondoPuntos()
-    #     for fich in lista:
-    #         menu.opcion(fich, _F(fich[:-4]), rp.otro())
-    #     menu.separador()
-    # database = menu.lanza()
-    # if database is None:
-    #     return None
-
-    # if database == other:
-    #     database = QTUtil2.leeCreaFichero(owner, carpeta, ext, rot)
-    #     if database:
-    #         if not database.lower().endswith("." + ext):
-    #             database = database + "." + ext
-    # else:
-    #     database = os.path.join(carpeta, database)
-    # if siFEN:
-    #     configuracion.ficheroDBgamesFEN = database
-    # else:
-    #     configuracion.ficheroDBgames = database
-    # configuracion.graba()
-    # return database
 
 
 def createDB(owner, configuracion, siFEN):
     if siFEN:
         ext = "lcf"
         rot = _("Positions Database")
-        base = configuracion.ficheroDBgamesFEN
+        carpeta = configuracion.carpetaPositions
     else:
         ext = "lcg"
         rot = _("Database of complete games")
-        base = configuracion.ficheroDBgames
-    carpeta = os.path.abspath(os.path.dirname(base))
+        carpeta = configuracion.carpetaGames
     database = QTUtil2.leeCreaFichero(owner, carpeta, ext, rot)
     if database:
         if not database.lower().endswith("." + ext):
             database = database + "." + ext
     return database
 
-def selectDB(owner, configuracion, siFEN):
-    lista = listaDB(configuracion, siFEN)
+
+def selectDB(owner, configuracion, siFEN, siAll=False):
+    lista = listaDB(configuracion, siFEN, siAll)
     if not lista:
         return None
     menu = LCMenu(owner)
     rp = rondoPuntos()
+    carpeta = configuracion.carpetaPositions if siFEN else configuracion.carpetaGames
     for fich in lista:
-        menu.opcion(os.path.join(configuracion.carpeta, fich), _F(fich[:-4]), rp.otro())
+        menu.opcion(os.path.join(carpeta, fich), _F(fich[:-4]), rp.otro())
         menu.separador()
     return menu.lanza()
 
+
+def menuDB(submenu, configuracion, siFEN, siAll=False):
+    lista = listaDB(configuracion, siFEN, siAll)
+    if not lista:
+        return
+    rp = rondoPuntos()
+    carpeta = configuracion.carpetaPositions if siFEN else configuracion.carpetaGames
+    for fich in lista:
+        submenu.opcion("dbf_%s" % os.path.join(carpeta, fich), _F(fich[:-4]), rp.otro())
+        submenu.separador()

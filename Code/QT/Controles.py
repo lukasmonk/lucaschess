@@ -855,8 +855,11 @@ class TipoLetra(QtGui.QFont):
 
 
 class Tab(QtGui.QTabWidget):
-    def nuevaTab(self, widget, texto):
-        self.addTab(widget, texto)
+    def nuevaTab(self, widget, texto, pos=None):
+        if pos is None:
+            self.addTab(widget, texto)
+        else:
+            self.insertTab(pos, widget, texto)
 
     def posActual(self):
         return self.currentIndex()

@@ -23,6 +23,8 @@ class GestorGM(Gestor.Gestor):
 
         self.record = record
 
+        self.siWoman = self.record.siWoman
+
         self.gm = record.gm
         self.siBlancas = record.siBlancas
         self.modo = record.modo
@@ -57,7 +59,8 @@ class GestorGM(Gestor.Gestor):
 
         self.pensando(True)
 
-        carpeta = "GM" if self.modo == "estandar" else self.configuracion.dirPersonalTraining
+        default = "WGM" if self.siWoman else "GM"
+        carpeta = default if self.modo == "estandar" else self.configuracion.dirPersonalTraining
         self.motorGM = GM.GM(carpeta, self.gm)
         self.motorGM.colorFilter(self.siBlancas)
         if self.partidaElegida is not None:
@@ -76,7 +79,8 @@ class GestorGM(Gestor.Gestor):
         self.ponPiezasAbajo(self.siBlancas)
         dic = GM.dicGM()
         self.nombreGM = dic[self.gm.lower()] if self.modo == "estandar" else self.gm
-        rotulo1 = _("Grandmaster") + ": <b>%s</b>" if self.modo == "estandar" else "<b>%s</b>"
+        rot = _("Woman Grandmaster") if self.siWoman else _("Grandmaster")
+        rotulo1 = rot + ": <b>%s</b>" if self.modo == "estandar" else "<b>%s</b>"
         self.ponRotulo1(rotulo1 % self.nombreGM)
 
         self.nombreRival = ""

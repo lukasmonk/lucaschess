@@ -99,7 +99,13 @@ class GestorEntMaq(Gestor.Gestor):
         self.thoughtOp = dic.get("THOUGHTOP", -1)
         self.thoughtTt = dic.get("THOUGHTTT", -1)
         self.continueTt = dic.get("CONTINUETT", False)
+        self.nArrowsTt = dic.get("ARROWSTT", 0)
         self.chance = dic.get("2CHANCE", True)
+
+        if self.nArrowsTt and self.ayudas == 0:
+            self.nArrowsTt = 0
+
+        self.childmode = self.nArrowsTt > 0 and self.ayudas > 0
 
         mx = max(self.thoughtOp, self.thoughtTt)
         if mx > -1:
@@ -227,6 +233,9 @@ class GestorEntMaq(Gestor.Gestor):
         self.siAnalizadoTutor = False
 
         self.ponPosicionDGT()
+
+        if self.childmode:
+            self.pantalla.base.btActivarTutor.setVisible(False)
 
         self.siguienteJugada()
 
@@ -462,6 +471,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.analizaTerminar()
             if self.ayudas:
                 self.ayudas -= 1
+                self.childmode = self.nArrowsTt > 0 and self.ayudas > 0
             self.ponAyudasEM()
             self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
             if not self.fen:
@@ -522,15 +532,18 @@ class GestorEntMaq(Gestor.Gestor):
     def analizaInicio(self):
         self.siAnalizando = False
         self.siAnalizadoTutor = False
-        if self.aperturaObl or not self.siTutorActivado or self.ayudasPGN <= 0:
-            return
+        if not self.childmode:
+            if self.aperturaObl or not self.siTutorActivado or self.ayudasPGN <= 0:
+                return
         if self.continueTt:
             if not self.siTerminada():
                 self.xtutor.ac_inicio(self.partida)
                 self.siAnalizando = True
-                QtCore.QTimer.singleShot(200, self.analizaSiguiente)
+                QtCore.QTimer.singleShot(2000 if self.childmode else 200, self.analizaSiguiente)
         else:
-            self.analizaTutor()
+            mrm = self.analizaTutor()
+            if mrm and self.childmode:
+                self.ponFlechasTutor(mrm, self.nArrowsTt)
             self.siAnalizadoTutor = True
 
     def analizaSiguiente(self):
@@ -544,19 +557,24 @@ class GestorEntMaq(Gestor.Gestor):
                         rm = mrm.mejorMov()
                         rm.whoDispatch = True
                         self.guiDispatch(rm)
-                        QtCore.QTimer.singleShot(1000, self.analizaSiguiente)
+                        if self.childmode:
+                            self.ponFlechasTutor(mrm, self.nArrowsTt)
+                        QtCore.QTimer.singleShot(4000 if self.childmode else 2000, self.analizaSiguiente)
 
     def analizaFinal(self):
         estado = self.siAnalizando
         self.siAnalizando = False
-        if self.siAnalizadoTutor or not self.siTutorActivado or self.ayudasPGN <= 0:
-            return
+        if not self.childmode:
+            if self.siAnalizadoTutor or not self.siTutorActivado or self.ayudasPGN <= 0:
+                return
         if self.continueTt and estado:
             self.pensando(True)
             self.mrmTutor = self.xtutor.ac_final(self.xtutor.motorTiempoJugada)
             self.pensando(False)
         else:
             self.mrmTutor = self.analizaTutor()
+            if self.mrmTutor and self.childmode:
+                self.ponFlechasTutor(self.mrmTutor, self.nArrowsTt)
 
     def ajustaPlayer(self, mrm):
         posicion = self.partida.ultPosicion
@@ -641,24 +659,6 @@ class GestorEntMaq(Gestor.Gestor):
         self.timekeeper.start()
         self.activaColor(siBlancas)
 
-        # posicion = self.partida.ultPosicion.copia()
-        # from Code import LibChess
-        # t4 = LibChess.T4()
-        # fen = posicion.fen()
-        # pv0 = pv = t4.best_move(fen)
-        # dic = t4.checkFen(fen)
-
-        # # n = 0
-        # # while pv:
-        # #     n += 1
-        # #     print n, pv,
-        # #     posicion.moverPV(pv)
-        # #     fen = posicion.fen()
-        # #     pv = t4.best_move(fen)
-        # # print
-        # print pv0, "[MATE %d]" % ((dic[pv][1]+2)/2, )
-        # t4.close()
-        # print
 
     def juegaRival(self):
         self.pensando(True)
@@ -789,7 +789,7 @@ class GestorEntMaq(Gestor.Gestor):
             return False
 
         self.analizaFinal()  # tiene que acabar siempre
-        if not siElegido and self.siTutorActivado:
+        if not siElegido and (self.siTutorActivado or self.childmode):
             rmUser, n = self.mrmTutor.buscaRM(movimiento)
             if not rmUser:
                 rmUser = self.xtutor.valora(self.partida.ultPosicion, desde, hasta, jg.coronacion)
@@ -805,7 +805,7 @@ class GestorEntMaq(Gestor.Gestor):
             difporc = self.configuracion.tutorDifPorc
             if self.mrmTutor.mejorRMQue(rmUser, difpts, difporc):
                 if not jg.siJaqueMate:
-                    siTutor = True
+                    siTutor = not self.childmode
                     if self.chance:
                         num = self.mrmTutor.numMejorMovQue(movimiento)
                         if num:
@@ -813,9 +813,10 @@ class GestorEntMaq(Gestor.Gestor):
                             menu = QTVarios.LCMenu(self.pantalla)
                             menu.opcion("None", _("There are %d best moves") % num, Iconos.Motor())
                             menu.separador()
-                            menu.opcion("tutor", "&1. %s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()),
-                                           Iconos.Tutor())
-                            menu.separador()
+                            if siTutor:
+                                menu.opcion("tutor", "&1. %s (%s)" % (_("Show tutor"), rmTutor.abrTextoBase()),
+                                               Iconos.Tutor())
+                                menu.separador()
                             menu.opcion("try", "&2. %s" % _("Try again"), Iconos.Atras())
                             menu.separador()
                             menu.opcion("user", "&3. %s (%s)" % (_("Select my move"), rmUser.abrTextoBase()),
@@ -843,6 +844,7 @@ class GestorEntMaq(Gestor.Gestor):
                             if self.ayudas > 0:  # doble entrada a tutor.
                                 self.reponPieza(desde)
                                 self.ayudas -= 1
+                                self.childmode = self.nArrowsTt > 0 and self.ayudas > 0
                                 desde = tutor.desde
                                 hasta = tutor.hasta
                                 coronacion = tutor.coronacion

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.0"
+   width="300.000000pt"
+   height="300.000000pt"
+   viewBox="0 0 300.000000 300.000000"
+   preserveAspectRatio="xMidYMid meet"
+   id="svg2"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="wp.svg">
+  <defs
+     id="defs12" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1511"
+     inkscape:window-height="947"
+     id="namedview10"
+     showgrid="false"
+     inkscape:zoom="1.4779572"
+     inkscape:cx="68.827917"
+     inkscape:cy="201.68673"
+     inkscape:window-x="7"
+     inkscape:window-y="45"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2"
+     inkscape:pagecheckerboard="true"
+     showguides="false" />
+  <metadata
+     id="metadata4">
+Created by potrace 1.12, written by Peter Selinger 2001-2015
+<rdf:RDF>
+  <cc:Work
+     rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type
+       rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+    <dc:title />
+  </cc:Work>
+</rdf:RDF>
+</metadata>
+  <path
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:300px;line-height:1.25;font-family:'Chess Leipzig';-inkscape-font-specification:'Chess Leipzig, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.75"
+     d="M 147.30859,0.27539062 C 118.06689,-0.21241085 95.732976,35.667696 109.58203,61.564453 c 2.25918,2.220474 3.49588,5.555742 1.00195,8.007813 -6.74708,16.713628 -24.706276,26.167151 -30.363277,43.400394 -0.3072,5.24654 2.728444,10.1601 6.693359,13.36523 C 75.620295,149.78315 79.542308,179.6936 96.5,199.43359 79.037013,215.92616 59.687851,233.56626 54.267578,258.02734 50.760711,270.52673 49.84886,283.581 49.841797,296.51172 H 245.89453 c 5.49972,-37.06836 -15.00334,-73.78684 -44.22656,-95.48047 -3.30791,-1.77005 2.11496,-4.04291 2.71484,-6.4082 13.95111,-16.50448 15.58203,-48.60112 5.79346,-68.91817 7.18765,-5.00155 7.52078,-7.56883 6.88482,-13.38245 C 207.89948,94.371814 196.75262,94.613822 185.36914,66.119141 197.24539,47.097456 191.06044,19.594619 172.0918,7.5605469 164.86248,2.6317308 156.08041,-0.10007306 147.30859,0.27539062 Z"
+     id="text6415"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="cccccccccccccccc" />
+  <g
+     aria-label="p"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:300px;line-height:1.25;font-family:'Chess Leipzig';-inkscape-font-specification:'Chess Leipzig, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
+     id="text817">
+    <path
+       d="m 148.57949,268.69669 h 67.67578 q -4.39453,-17.43164 -16.8457,-30.90821 -4.83399,-5.5664 -9.08203,-9.22851 -14.0625,-11.42578 -22.99805,-26.95313 -9.375,3.51563 -18.75,3.51563 -9.66797,0 -18.75,-3.51563 -9.52149,15.82031 -22.99805,26.95313 -4.39453,3.66211 -9.082029,9.22851 -12.597656,13.47657 -16.845703,30.90821 z m 0,-73.38868 q 16.55273,0 28.27148,-11.71875 11.71875,-11.71875 11.71875,-28.41796 0,-13.62305 -8.49609,-24.4629 -9.81445,-12.59765 -15.08789,-26.66015 -8.78906,-1.17188 -16.40625,-1.17188 -8.05664,0 -16.40625,1.17188 -6.00586,14.9414 -15.23438,26.66015 -8.49609,10.83985 -8.49609,24.4629 0,16.69921 11.71875,28.41796 11.71875,11.71875 28.41797,11.71875 z m 0,-136.962887 q 14.94141,0 14.94141,-14.941406 0,-14.941406 -14.94141,-14.941406 -14.94141,0 -14.94141,14.941406 0,14.941406 14.94141,14.941406 z m 0,34.570313 q 11.13281,0 19.77539,2.783203 -3.36914,-6.152344 -7.03125,-13.623047 -3.51563,-7.617187 -4.54102,-15.087891 -4.10156,1.171875 -8.20312,1.171875 -4.39453,0 -8.34961,-1.171875 -1.17188,7.470704 -4.6875,15.087891 -3.51563,7.470703 -6.73828,13.623047 11.57226,-2.783203 19.77539,-2.783203 z m 0,185.595704 H 68.745505 q 2.783203,-31.49414 26.80664,-53.17383 3.955078,-3.66211 4.394532,-3.95508 12.451173,-10.2539 21.240233,-24.46289 -22.558593,-14.79492 -22.558593,-41.74804 0,-16.69922 10.107423,-30.0293 3.36914,-4.24805 7.17773,-9.66797 3.95508,-5.41992 6.29883,-10.54688 -3.51562,0.87891 -10.69336,2.78321 -7.03125,1.90429 -10.40039,3.22265 10.10742,-9.375 19.18945,-22.265621 9.22852,-12.890625 10.83985,-27.392578 -7.4707,-7.617188 -7.4707,-17.871094 0,-10.253906 7.17773,-17.578125 7.32422,-7.324219 17.72461,-7.324219 10.10742,0 17.43164,7.324219 7.32422,7.324219 7.32422,17.578125 0,10.400391 -7.4707,17.871094 1.61132,14.501953 10.83984,27.392578 9.375,12.890621 19.48242,22.265621 -3.36914,-1.31836 -10.69336,-3.22265 -7.17773,-1.9043 -10.69336,-2.78321 2.34375,5.12696 6.15235,10.54688 3.95507,5.41992 7.4707,9.66797 10.10742,13.33008 10.10742,30.0293 0,26.95312 -22.55859,41.74804 8.34961,14.0625 21.09375,24.46289 2.19726,1.75782 4.39453,3.95508 24.16992,21.67969 26.80664,53.17383 z"
+       style="font-size:300px;stroke-width:0.75"
+       id="path814" />
+  </g>
+</svg>

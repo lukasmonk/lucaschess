@@ -1,6 +1,7 @@
 import os
 import random
 import shutil
+import scandir
 
 from Code import Resistance
 from Code import Gestor60
@@ -58,16 +59,14 @@ class TrainingDir:
         self.read(carpeta)
 
     def read(self, carpeta):
-        isdir = os.path.isdir
         folders = []
         files = []
-        for elem in os.listdir(carpeta):
-            path = os.path.join(carpeta, elem)
-            if isdir(path):
-                folders.append(TrainingDir(path))
-            elif elem.lower().endswith(".fns"):
-                name = self.tr(os.path.basename(path)[:-4])
-                files.append(TrainingFNS(path, name))
+        for elem in scandir.scandir(carpeta):
+            if elem.is_dir():
+                folders.append(TrainingDir(elem.path))
+            elif elem.name.endswith(".fns"):
+                name = self.tr(elem.name[:-4])
+                files.append(TrainingFNS(elem.path, name))
         self.folders = sorted(folders, key=lambda td: td.name)
         self.files = sorted(files, key=lambda td: td.name)
 
@@ -136,8 +135,11 @@ class Entrenamientos:
         menu.separador()
 
         # GM ---------------------------------------------------------------------------------------------------
-        xopcion(menu, "gm", _("Play like a grandmaster"), Iconos.GranMaestro())
+        xopcion(menu, "gm", _("Play like a Grandmaster"), Iconos.GranMaestro())
         menu.separador()
+        xopcion(menu, "wgm", _("Play like a Woman Grandmaster"), Iconos.WGranMaestro())
+        menu.separador()
+
 
         # Mate --------------------------------------------------------------------------------------------------
         menu1 = menu.submenu(_("Training mates"), Iconos.Mate())
@@ -171,28 +173,35 @@ class Entrenamientos:
         def trTraining(txt):
             return dicTraining.get(txt, txt)
 
-        def menuTacticas(tipo, carpetaBase):
-            lista = []
+        def menuTacticas(submenu, tipo, carpetaBase, lista):
             if os.path.isdir(carpetaBase):
-                li = Util.listdir(carpetaBase)
-                for nombre in li:
-                    carpeta = os.path.join(carpetaBase, nombre)
-                    ini = os.path.join(carpeta, "Config.ini")
-                    if os.path.isdir(carpeta) and os.path.isfile(ini):
-                        xopcion(menu1, "tactica|%s|%s|%s|%s" % (tipo, nombre, carpeta, ini), trTraining(nombre),
-                                nico.otro())
-                        menu1.separador()
-                        lista.append((carpeta, nombre))
+                for entry in scandir.scandir(carpetaBase):
+                    if entry.is_dir():
+                        carpeta = entry.path
+                        ini = os.path.join(carpeta, "Config.ini")
+                        if os.path.isfile(ini):
+                            nombre = entry.name
+                            xopcion(submenu, "tactica|%s|%s|%s|%s" % (tipo, nombre, carpeta, ini), trTraining(nombre),
+                                    nico.otro())
+                            menu1.separador()
+                            lista.append((carpeta, nombre))
+                        else:
+                            submenu1 = submenu.submenu(entry.name, nico.otro())
+                            menuTacticas(submenu1, tipo, carpeta, lista)
             return lista
 
-        menuTacticas("B", "Tactics")
+
+        menuTacticas(menu1, "B", "Tactics", [])
+        lista = []
         carpetaTacticasP = os.path.join(self.configuracion.dirPersonalTraining, "Tactics")
-        lista = menuTacticas("P", carpetaTacticasP)
-        if lista:
-            ico = Iconos.Delete()
-            menub = menu1.submenu(_("Remove"), ico)
-            for carpeta, nombre in lista:
-                xopcion(menub, "remtactica|%s|%s" % (carpeta, nombre), trTraining(nombre), ico)
+        if os.path.isdir(carpetaTacticasP):
+            submenu1 = menu1.submenu(_("Personal tactics"), nico.otro())
+            lista = menuTacticas(submenu1, "P", carpetaTacticasP, lista)
+            if lista:
+                ico = Iconos.Delete()
+                menub = menu1.submenu(_("Remove"), ico)
+                for carpeta, nombre in lista:
+                    xopcion(menub, "remtactica|%s|%s" % (carpeta, nombre), trTraining(nombre), ico)
 
         menu.separador()
 
@@ -224,6 +233,14 @@ class Entrenamientos:
         for elo in range(1500, 2700, 100):
             if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
                 xopcion(menuf, "fide%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
+
+        lichess = self.configuracion.lichessNC
+        menuf = menu1.submenu("%s (%d)" % (_("Lichess-Elo"), fide), Iconos.Lichess())
+        rp = QTVarios.rondoPuntos()
+        for elo in range(800, 2700, 100):
+            if (elo == 800) or (0 <= (elo + 99 - lichess) <= 400 or 0 <= (lichess - elo) <= 400):
+                xopcion(menuf, "fide%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
+
 
         menu.separador()
 
@@ -382,6 +399,9 @@ class Entrenamientos:
                 elif resp == "gm":
                     self.entrenaGM()
 
+                elif resp == "wgm":
+                    self.entrenaWGM()
+
                 elif resp.startswith("mate"):
                     self.jugarMate(int(resp[-1]))
 
@@ -480,6 +500,9 @@ class Entrenamientos:
                 elif resp.startswith("fide"):
                     self.procesador.fideelo(False, int(resp[4:]))
 
+                elif resp.startswith("lichess"):
+                    self.procesador.lichesselo(False, int(resp[7:]))
+
                 elif resp.startswith("map_"):
                     nada, mapa = resp.split("_")
                     self.procesador.trainingMap(mapa)
@@ -572,7 +595,15 @@ class Entrenamientos:
             self.procesador.gestor.inicio(tactica)
 
     def entrenaGM(self):
-        w = PantallaGM.WGM(self.procesador)
+        w = PantallaGM.WGM(self.procesador, False)
+        if w.exec_():
+            self.procesador.tipoJuego = kJugGM
+            self.procesador.estado = kJugando
+            self.procesador.gestor = GestorGM.GestorGM(self.procesador)
+            self.procesador.gestor.inicio(w.record)
+
+    def entrenaWGM(self):
+        w = PantallaGM.WGM(self.procesador, True)
         if w.exec_():
             self.procesador.tipoJuego = kJugGM
             self.procesador.estado = kJugando
@@ -646,7 +677,7 @@ class Entrenamientos:
             TurnOnLights.compruebaUweEasy(self.configuracion, name)
             folder = self.configuracion.carpetaTemporal()
             icono = Iconos.Uwe()
-            li_tam_blocks = (4, 6, 9, 18, 36)
+            li_tam_blocks = (4, 6, 9, 12, 18, 36)
         elif name.startswith("uwe"):
             title = _("Uwe Auerswald")
             folder = "Trainings/Tactics by Uwe Auerswald"

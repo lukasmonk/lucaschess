@@ -218,14 +218,13 @@ def leeRivales():
     cm.ponMultiPV(20, 500)
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne (based on stockfish)", "2.7 32bit", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "SF-McBrain-27_x32_old.exe"
-    cm.path_64 = "SF-McBrain-27_x64_bmi2.exe", "2.7 64bit bmi2"
+    cm = ConfigMotor("mcbrain", "Michael Byrne (based on stockfish)", "4.0 32bit", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "SF-McBrain-v40_x32_old.exe"
+    cm.path_64 = "SF-McBrain-v40_x64_bmi2.exe", "4.0 64bit bmi2"
     cm.elo = 3200
-    cm.ordenUCI("Respect", "30")
+    cm.ordenUCI("Tactical", "3")
     cm.ordenUCI("Hash", "64")
-    cm.ordenUCI("Threads", "1")
-    cm.ponMultiPV(20, 256)
+    cm.ponMultiPV(20, 500)
     mas(cm)
 
     cm = ConfigMotor("gull", "Vadim Demichev", "3 32bit", "https://sourceforge.net/projects/gullchess/")
@@ -309,12 +308,6 @@ def leeRivales():
     cm.elo = 2627
     mas(cm)
 
-    cm = ConfigMotor("hannibal", "Samuel N. Hamilton and Edsel G. Apostol", "1.7", "http://sites.google.com/site/edapostol/hannibal")
-    cm.path = "Hannibal1.7w32.exe"
-    cm.elo = 3050
-    cm.removeLog("log.txt")
-    mas(cm)
-
     cm = ConfigMotor("spike", "Volker Böhm and Ralf Schäfer", "1.4", "http://spike.lazypics.de/index_en.html")
     cm.path = "Spike1.4.exe"
     cm.elo = 2921
@@ -331,9 +324,20 @@ def leeRivales():
     cm.elo = 3093
     mas(cm)
 
+    cm = ConfigMotor("hannibal", "Samuel N. Hamilton and Edsel G. Apostol", "1.4b", "http://sites.google.com/site/edapostol/hannibal")
+    cm.path = "Hannibal1.4bx32.exe"
+    cm.elo = 3000
+    cm.removeLog("logfile.txt")
+    mas(cm)
+
     cm = ConfigMotor("paladin", "Ankan Banerjee", "0.1", "https://github.com/ankan-ban/chess_cpu")
-    cm.path = "Paladin_32bit.exe"
+    cm.path = "Paladin_32bits_old.exe"
     cm.elo = 2254
+    mas(cm)
+
+    cm = ConfigMotor("cdrill", "Ferdinand Mosca", "1800 Build 4", "https://sites.google.com/view/cdrill")
+    cm.path = "CDrill_1800_Build_4.exe"
+    cm.elo = 1800
     mas(cm)
 
     return dicRivales

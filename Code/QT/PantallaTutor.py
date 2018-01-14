@@ -133,12 +133,12 @@ class PantallaTutor(QTVarios.WDialogo):
         que = accion[x + 5:]
         self.tutor.mueve(quien, que)
 
-    def cambioTablero(self):
-        self.tableroUsuario.crea()
-        if self.tableroRival:
-            self.tableroRival.crea()
-        if self.tableroApertura:
-            self.tableroApertura.crea()
+    # def cambioTablero(self):
+    #     self.tableroUsuario.crea()
+    #     if self.tableroRival:
+    #         self.tableroRival.crea()
+    #     if self.tableroApertura:
+    #         self.tableroApertura.crea()
 
     def tableroWheelEvent(self, tablero, siAdelante):
         for t in ["Tutor", "Usuario", "Rival", "Apertura"]:

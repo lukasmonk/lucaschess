@@ -24,8 +24,7 @@ class WAbout(QtGui.QDialog):
         cabecera += '<span style="font-size:10pt;color:2D2B2B">%s: %s</span>' % (_("Author"), '<a href="mailto:lukasmonk@gmail.com">Lucas Monge</a>')
         cabecera += ' - <a style="font-size:10pt; color:2D2B2B" href="%s">%s</a>' % (procesador.web, procesador.web)
         cabecera += ' - <a style="font-size:10pt; color:2D2B2B" href="%s">Blog : Fresh news</a><br>' % (procesador.blog,)
-        cabecera += '%s <a style="font-size:10pt; color:2D2B2B" href="http://www.gnu.org/copyleft/gpl.html"> GPL</a>' % _(
-                "License")
+        cabecera += '%s <a style="font-size:10pt; color:2D2B2B" href="http://www.gnu.org/copyleft/gpl.html"> GPL</a>' % _("License")
 
         lbIco = Controles.LB(self).ponImagen(Iconos.pmAplicacion64())
         lbTitulo = Controles.LB(self, cabecera)

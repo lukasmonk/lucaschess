@@ -316,14 +316,15 @@ class HTMLDelegate(QtGui.QStyledItemDelegate):
         style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter)
 
         ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
-        if option.state & QtGui.QStyle.State_Selected:
-            ctx.palette.setColor(QtGui.QPalette.Text, option.palette.color(QtGui.QPalette.Active, QtGui.QPalette.HighlightedText))
-        else:
-            ctx.palette.setColor(QtGui.QPalette.Text, option.palette.color(QtGui.QPalette.Active, QtGui.QPalette.HighlightedText))
+        # if option.state & QtGui.QStyle.State_Selected:
+        #     ctx.palette.setColor(QtGui.QPalette.Text, option.palette.color(QtGui.QPalette.Active, QtGui.QPalette.HighlightedText))
+        # else:
+        #     ctx.palette.setColor(QtGui.QPalette.Text, option.palette.color(QtGui.QPalette.Active, QtGui.QPalette.HighlightedText))
 
         textRect = style.subElementRect(QtGui.QStyle.SE_ItemViewItemText, options)
         painter.save()
-        painter.translate(textRect.topLeft())
+        p = textRect.topLeft()
+        painter.translate(p.x(), p.y()-3)
         painter.setClipRect(textRect.translated(-textRect.topLeft()))
         doc.documentLayout().draw(painter, ctx)
 
@@ -360,3 +361,157 @@ class MultiEditor(QtGui.QItemDelegate):
 
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
+
+
+class EtiquetaPOS(QtGui.QStyledItemDelegate):
+    def __init__(self, siFigurines, siFondo=False, siLineas=True):
+        self.siFigurinesPGN = siFigurines
+        self.siAlineacion = False
+        self.siLineas = siLineas
+        self.siFondo = siFondo
+        QtGui.QStyledItemDelegate.__init__(self, None)
+
+    def rehazPosicion(self):
+        posicion = self.bloquePieza.posicion
+        self.setPos(posicion.x, posicion.y)
+
+    def paint(self, painter, option, index):
+        data = index.model().data(index, QtCore.Qt.DisplayRole)
+        pgn, siBlancas, color, info, indicadorInicial, liNAGs, agrisar, siLine = data
+        if liNAGs:
+            li = []
+            for x in liNAGs:
+                x = str(x)
+                if x in dicNG:
+                    li.append(dicNG[x])
+            liNAGs = li
+
+        iniPZ = None
+        finPZ = None
+        if self.siFigurinesPGN and pgn:
+            if pgn[0] in "QBKRN":
+                iniPZ = pgn[0] if siBlancas else pgn[0].lower()
+                pgn = pgn[1:]
+            elif pgn[-1] in "QBRN":
+                finPZ = pgn[-1] if siBlancas else pgn[-1].lower()
+                pgn = pgn[:-1]
+
+        if info and not finPZ:
+            pgn += info
+            info = None
+
+        rect = option.rect
+        width = rect.width()
+        height = rect.height()
+        x0 = rect.x()
+        y0 = rect.y()
+        if option.state & QtGui.QStyle.State_Selected:
+            painter.fillRect(rect, QtGui.QColor("#678DB2" if VarGen.configuracion.tablaSelBackground is None else VarGen.configuracion.tablaSelBackground))  # sino no se ve en CDE-Motif-Windows
+        elif self.siFondo:
+            fondo = index.model().getFondo(index)
+            if fondo:
+                painter.fillRect(rect, fondo)
+
+        if agrisar:
+            painter.setOpacity(0.18)
+
+        if indicadorInicial:
+            painter.save()
+            painter.translate(x0, y0)
+            painter.drawPixmap(0, 0, dicPM[indicadorInicial])
+            painter.restore()
+
+        documentPGN = QtGui.QTextDocument()
+        documentPGN.setDefaultFont(option.font)
+        if color:
+            pgn = '<font color="%s"><b>%s</b></font>' % (color, pgn)
+        documentPGN.setHtml(pgn)
+        wPGN = documentPGN.idealWidth()
+        hPGN = documentPGN.size().height()
+        hx = hPGN * 80 / 100
+        wpz = int(hx * 0.8)
+
+        if info:
+            documentINFO = QtGui.QTextDocument()
+            documentINFO.setDefaultFont(option.font)
+            if color:
+                info = '<font color="%s"><b>%s</b></font>' % (color, info)
+            documentINFO.setHtml(info)
+            wINFO = documentINFO.idealWidth()
+
+        ancho = wPGN
+        if iniPZ:
+            ancho += wpz
+        if finPZ:
+            ancho += wpz
+        if info:
+            ancho += wINFO
+        if liNAGs:
+            ancho += wpz * len(liNAGs)
+
+        x = x0 + (width - ancho) / 2
+        if self.siAlineacion:
+            alineacion = index.model().getAlineacion(index)
+            if alineacion == "i":
+                x = x0 + 3
+            elif alineacion == "d":
+                x = x0 + (width - ancho - 3)
+
+        y = y0 + (height - hPGN * 0.9) / 2
+
+        if iniPZ:
+            painter.save()
+            painter.translate(x, y)
+            pm = dicPZ[iniPZ]
+            pmRect = QtCore.QRectF(0, 0, hx, hx)
+            pm.render(painter, pmRect)
+            painter.restore()
+            x += wpz
+
+        painter.save()
+        painter.translate(x, y)
+        documentPGN.drawContents(painter)
+        painter.restore()
+        x += wPGN
+
+        if finPZ:
+            painter.save()
+            painter.translate(x - 0.3 * wpz, y)
+            pm = dicPZ[finPZ]
+            pmRect = QtCore.QRectF(0, 0, hx, hx)
+            pm.render(painter, pmRect)
+            painter.restore()
+            x += wpz
+
+        if info:
+            painter.save()
+            painter.translate(x, y)
+            documentINFO.drawContents(painter)
+            painter.restore()
+            x += wINFO
+
+        if liNAGs:
+            for rndr in liNAGs:
+                painter.save()
+                painter.translate(x - 0.2 * wpz, y)
+                pmRect = QtCore.QRectF(0, 0, hx, hx)
+                rndr.render(painter, pmRect)
+                painter.restore()
+                x += wpz
+
+        if agrisar:
+            painter.setOpacity(1.0)
+
+        if self.siLineas:
+            if not siBlancas:
+                pen = QtGui.QPen()
+                pen.setWidth(1)
+                painter.setPen(pen)
+                painter.drawLine(x0, y0+height-1, x0+width, y0+height-1)
+
+            if siLine:
+                pen = QtGui.QPen()
+                pen.setWidth(1)
+                painter.setPen(pen)
+                painter.drawLine(x0+width-2, y0, x0+width-2, y0+height)
+

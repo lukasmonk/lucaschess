@@ -57,7 +57,7 @@ class WGamesFEN(QtGui.QWidget):
         # ToolBar
         liAccionesWork = [
             (_("Close"), Iconos.MainMenu(), self.tw_terminar), None,
-            (_("Database"), Iconos.DatabaseC(), self.tg_file), None,
+            (_("File"), Iconos.File(), self.tg_file), None,
             (_("New"), Iconos.Nuevo(), self.tw_nuevo, _("Add a new game")), None,
             (_("Edit"), Iconos.Modificar(), self.tw_editar), None,
             (_("First"), Iconos.Inicio(), self.tw_gotop), None,
@@ -70,7 +70,7 @@ class WGamesFEN(QtGui.QWidget):
             (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
         ]
 
-        self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
+        self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24, puntos=procesador.configuracion.puntosTB)
 
         self.lbName = Controles.LB(self, "").ponWrap().alinCentrado().ponColorFondoN("white", "#4E5A65").ponTipoLetra(puntos=16)
         lyNT = Colocacion.H().control(self.lbName)
@@ -243,7 +243,7 @@ class WGamesFEN(QtGui.QWidget):
             recno = li[0]
             partidaCompleta = self.dbGamesFEN.leePartidaRecno(recno)
 
-            if partidaCompleta:
+            if partidaCompleta is not None:
                 self.editar(recno, partidaCompleta)
             else:
                 QTUtil2.mensaje(self, _("This game is wrong and can not be edited"))
@@ -340,7 +340,7 @@ class WGamesFEN(QtGui.QWidget):
             smenu = menu.submenu( _("Open another database"), Iconos.DatabaseC())
             rp = QTVarios.rondoPuntos()
             for fich in lista:
-                smenu.opcion(os.path.join(self.configuracion.carpeta, fich), _F(fich[:-4]), rp.otro())
+                smenu.opcion(os.path.join(self.configuracion.carpetaPositions, fich), _F(fich[:-4]), rp.otro())
                 smenu.separador()
             menu.separador()
 

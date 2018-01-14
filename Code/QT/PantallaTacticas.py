@@ -105,9 +105,11 @@ class WHistoricoTacticas(QTVarios.WDialogo):
             if fila == 0 and not seconds:
                 seconds = self.tactica.segundosActivo()
             if seconds:
+                hours = int(seconds / 3600)
+                seconds -= hours*3600
                 minutes = int(seconds / 60)
                 seconds -= minutes * 60
-                return "%d' %d\"" % (minutes, int(seconds))
+                return "%02d:%02d:%02d" % (hours, minutes, int(seconds))
             else:
                 return "-"
 

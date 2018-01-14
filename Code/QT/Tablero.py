@@ -63,7 +63,8 @@ class Tablero(QtGui.QGraphicsView):
         self.confTablero = confTablero
 
         self.blindfold = None
-        # self.opacidad = [0.8, 0.8]
+        self.blindfoldModoPosicion = False
+
 
         self.siInicializado = False
 
@@ -129,18 +130,18 @@ class Tablero(QtGui.QGraphicsView):
         elif key == Qt.Key_K:
             self.showKeys()
 
-        elif hasattr(self.pantalla, "gestor") and self.pantalla.gestor and hasattr(self.pantalla.gestor, "rightMouse") \
+        elif hasattr(self.pantalla, "gestor") and self.pantalla.gestor \
             and key in (Qt.Key_P, Qt.Key_N, Qt.Key_C):
             # P -> show information
-            if key == Qt.Key_P:
-                self.pantalla.gestor.rightMouse(False, False, False)
+            if key == Qt.Key_P and hasattr(self.pantalla.gestor, "pgnInformacion"):
+                self.pantalla.gestor.pgnInformacion()
             # ALT-N -> non distract mode
-            elif key == Qt.Key_N and siAlt:
-                self.pantalla.gestor.rightMouse(False, False, True)
+            elif key == Qt.Key_N and siAlt and hasattr(self.pantalla.gestor, "nonDistractMode"):
+                self.pantalla.gestor.nonDistractMode()
             # ALT-C -> show captures
-            elif key == Qt.Key_C:
-                if  siAlt:
-                    self.pantalla.gestor.rightMouse(False, True, False)
+            elif key == Qt.Key_C and hasattr(self.pantalla.gestor, "capturas"):
+                if siAlt:
+                    self.pantalla.gestor.capturas()
                 else:
                     okseguir = True
         else:
@@ -686,7 +687,8 @@ class Tablero(QtGui.QGraphicsView):
 
                 PantallaColores.ponMenuTemas(menucol, liTemas, "tt_")
                 menucol.separador()
-            for fich in Util.listdir("Themes"):
+            for entry in Util.listdir("Themes"):
+                fich = entry.name
                 if fich.lower().endswith(".lktheme"):
                     nombre = fich[:-8]
                     menucol.opcion("ot_" + fich, nombre, Iconos.Division())
@@ -705,9 +707,9 @@ class Tablero(QtGui.QGraphicsView):
             li = []
             for x in Util.listdir("Pieces"):
                 try:
-                    if os.path.isdir("pieces/%s" % x):
-                        ico = VarGen.todasPiezas.icono("K", x)
-                        li.append((x, ico))
+                    if x.is_dir():
+                        ico = VarGen.todasPiezas.icono("K", x.name)
+                        li.append((x.name, ico))
                 except:
                     pass
             li.sort(key=lambda x: x[0])
@@ -818,6 +820,7 @@ class Tablero(QtGui.QGraphicsView):
     def mousePressEvent(self, event):
         if self.dirvisual and self.dirvisual.mousePressEvent(event):
             return
+        self.blindfoldPosicion(False, None, None)
         QtGui.QGraphicsView.mousePressEvent(self, event)
         pos = event.pos()
         x = pos.x()
@@ -826,12 +829,14 @@ class Tablero(QtGui.QGraphicsView):
         maximo = self.margenCentro + (self.anchoCasilla * 8)
         siDentro = (minimo < x < maximo) and (minimo < y < maximo)
         if event.button() == QtCore.Qt.RightButton:
-            if siDentro and hasattr(self.pantalla, "boardRightMouse") and not self.dirvisual:
-                m = int(event.modifiers())
-                siShift = (m & QtCore.Qt.ShiftModifier) > 0
-                siControl = (m & QtCore.Qt.ControlModifier) > 0
-                siAlt = (m & QtCore.Qt.AltModifier) > 0
-                self.pantalla.boardRightMouse(siShift, siControl, siAlt)
+            if siDentro:
+                self.lanzaDirector()
+            # if siDentro and hasattr(self.pantalla, "boardRightMouse") and not self.dirvisual:
+                # m = int(event.modifiers())
+                # siShift = (m & QtCore.Qt.ShiftModifier) > 0
+                # siControl = (m & QtCore.Qt.ControlModifier) > 0
+                # siAlt = (m & QtCore.Qt.AltModifier) > 0
+                # self.pantalla.boardRightMouse(siShift, siControl, siAlt)
             # QtGui.QGraphicsView.mousePressEvent(self,event)
             return
         if not siDentro:
@@ -1042,6 +1047,8 @@ class Tablero(QtGui.QGraphicsView):
         self.liPiezas = []
 
     def ponPosicionBase(self, posicion):
+        self.blindfoldPosicion(True, posicion, self.ultPosicion)
+
         self.siActivasPiezas = False
         self.removePieces()
 
@@ -1134,9 +1141,10 @@ class Tablero(QtGui.QGraphicsView):
             self.blindfold = kBlindfoldAll
         self.blindfoldReset()
 
-    def blindfoldChange(self):
+    def blindfoldChange(self, modoPosicion):
         self.blindfold = None if self.blindfold else kBlindfoldConfig
         self.blindfoldReset()
+        self.blindfoldModoPosicion = modoPosicion if self.blindfold else False
 
     def blindfoldReset(self):
         ap, apc = self.siActivasPiezas, self.siActivasPiezasColor
@@ -1155,7 +1163,6 @@ class Tablero(QtGui.QGraphicsView):
             self.ponIndicador(apc)
 
         if siFlecha:
-            # self.ponFlechaSC( self.ultMovFlecha[0], self.ultMovFlecha[1])
             self.resetFlechaSC()
 
         self.atajosRaton = atajosRaton
@@ -1165,6 +1172,17 @@ class Tablero(QtGui.QGraphicsView):
         if self.blindfold:
             self.blindfold = None
             self.blindfoldReset()
+
+    def blindfoldPosicion(self, inicio, nueposicion, ultposicion):
+        if self.blindfoldModoPosicion:
+            if inicio:
+                if ultposicion and nueposicion.fen() != ultposicion.fen():
+                    b = self.blindfold
+                    self.blindfold = None
+                    self.blindfoldReset()
+                    self.blindfold = b
+            else:
+                self.blindfoldReset()
 
     def blindfoldConfig(self):
         nomPiezasOri = self.confTablero.nomPiezas()
@@ -1383,6 +1401,23 @@ class Tablero(QtGui.QGraphicsView):
         self.liFlechas.append(flecha)
         flecha.show()
 
+    def creaFlechaTutor(self, desdeA1h8, hastaA1h8, factor):
+        bf = copy.deepcopy(self.confTablero.fTransicion())
+        bf.a1h8 = desdeA1h8 + hastaA1h8
+        bf.opacidad = max(factor, 0.20)
+        bf.ancho = max(bf.ancho*2*(factor**2.2), bf.ancho/3)
+        bf.altocabeza = max(bf.altocabeza*(factor**2.2), bf.altocabeza/3)
+        bf.vuelo = bf.altocabeza/3
+        bf.grosor = 1
+        bf.redondeos = True
+        bf.forma = "1"
+        bf.posicion.orden = kZvalue_pieza + 1
+
+
+        flecha = self.creaFlecha(bf)
+        self.liFlechas.append(flecha)
+        flecha.show()
+
     def ponFlechasTmp(self, lista, ms=None):
         if self.flechaSC:
             self.flechaSC.hide()
@@ -1521,6 +1556,10 @@ class Tablero(QtGui.QGraphicsView):
         self.escena.update()
 
     def peonCoronando(self, siBlancas):
+        if self.configuracion.autocoronacion:
+            modifiers = QtGui.QApplication.keyboardModifiers()
+            if modifiers != QtCore.Qt.AltModifier:
+                return "Q" if siBlancas else "q"
         menu = QTVarios.LCMenu(self)
         for txt, pieza in ((_("Queen"), "Q"), (_("Rook"), "R"), (_("Bishop"), "B"), (_("Knight"), "N")):
             if not siBlancas:

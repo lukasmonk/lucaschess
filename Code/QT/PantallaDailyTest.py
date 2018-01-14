@@ -17,8 +17,6 @@ from Code.QT import QTVarios
 from Code.QT import Tablero
 from Code import Util
 
-# liFens = []
-
 
 class WDailyTestBase(QTVarios.WDialogo):
     def __init__(self, procesador):

@@ -1,22 +1,24 @@
-# Stockfish, a UCI chess playing engine derived from Glaurung 2.1
-# Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
-# Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
-# Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
-#
-# Stockfish is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Stockfish is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+### ==========================================================================
+### Copyright Notice and License Information
+### ==========================================================================
+#   McBrain, a UCI chess playing engine derived from Stockfish and Glaurung 2.1
+#   Copyright (C) 2004-2008 Tord Romstad (Glaurung Author)
+#   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
+#   Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
+#   Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
 
+#   McBrain is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
 
+#   McBrain is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### ==========================================================================
 ### Section 1. General Configuration
 ### ==========================================================================
@@ -28,8 +30,8 @@ ifeq ($(KERNEL),Linux)
 endif
 
 ### Executable name
-EXE = SF-McBrain-27
-# bench =  5127083
+EXE = SF-McBrain-v40
+### bench nodes ->  Nodes searched  : 6376731
 
 ### Installation dir definitions
 PREFIX = /usr/local
@@ -42,7 +44,7 @@ PGOBENCH2 = ./$(EXE) bench 16 2 10
 ### Object files
 OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
-	search.o thread.o timeman.o tt.o uci.o ucioption.o tbprobe.o tzbook.o
+	search.o thread.o timeman.o tt.o uci.o ucioption.o polybook.o tbprobe.o
 
 ### ==========================================================================
 ### Section 2. High-level Configuration
@@ -143,7 +145,7 @@ endif
 
 ### 3.1 Selecting compiler (default = gcc)
 
-CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -fno-rtti -std=c++11 $(EXTRACXXFLAGS)
+CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++11 $(EXTRACXXFLAGS)
 DEPENDFLAGS += -std=c++11
 LDFLAGS += $(EXTRALDFLAGS)
 
@@ -207,7 +209,9 @@ ifeq ($(COMP),clang)
 	CXX=clang++
 	CXXFLAGS += -pedantic -Wextra -Wshadow
 ifneq ($(KERNEL),Darwin)
+ifneq ($(KERNEL),OpenBSD)
 	LDFLAGS += -latomic
+endif
 endif
 
 	ifeq ($(ARCH),armv7)
@@ -276,7 +280,9 @@ endif
 ### 3.3 Optimization
 ifeq ($(optimize),yes)
 
-	CXXFLAGS += -O3
+CXXFLAGS += -O1 -O3 -msse4.2 -mpopcnt -mtune=native 
+####-Os -O1  -mtune=native
+#### for those on macOS High Sierra 10.13 and higher use, "-Os -O1 -mtune=native" for PGO using gcc7
 
 	ifeq ($(comp),gcc)
 
@@ -352,7 +358,7 @@ endif
 ifeq ($(comp),gcc)
 	ifeq ($(optimize),yes)
 	ifeq ($(debug),no)
-		CXXFLAGS += -flto -fno-rtti
+		CXXFLAGS += -flto
 		LDFLAGS += $(CXXFLAGS)
 	endif
 	endif

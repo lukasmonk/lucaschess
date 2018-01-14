@@ -40,6 +40,7 @@ class GestorTurnOnLights(Gestor.Gestor):
         self.total_time_used = 0.0
         self.ayudas = 0
         self.errores = 0
+        self.dicFENayudas = {} # se muestra la flecha a partir de dos del mismo
 
         self.tipoJuego = kJugEntLight
 
@@ -252,7 +253,6 @@ class GestorTurnOnLights(Gestor.Gestor):
         end_time = time.time()
         jg = self.checkMueveHumano(desde, hasta, coronacion)
         if not jg:
-            self.errores += 1
             return False
 
         movimiento = jg.movimiento().lower()
@@ -310,6 +310,13 @@ class GestorTurnOnLights(Gestor.Gestor):
         self.ayudas += 1
         mov = self.line.get_move(self.num_move).lower()
         self.tablero.markPosition(mov[:2])
+        fen = self.partida.ultPosicion.fen()
+        if fen not in self.dicFENayudas:
+            self.dicFENayudas[fen] = 1
+        else:
+            self.dicFENayudas[fen] += 1
+            if self.dicFENayudas[fen] > 2:
+                self.ponFlechaSC(mov[:2], mov[2:4])
 
     def finPartida(self):
         self.procesador.inicio()

@@ -245,10 +245,11 @@ class WColores(QTVarios.WDialogo):
 
         # Temas #############################################################################################################################
         liOpciones = [(_("Your themes"), self.configuracion.ficheroTemas)]
-        for x in Util.listdir("Themes"):
-            if x.endswith("lktheme"):
-                ctema = x[:-8]
-                liOpciones.append((ctema, "Themes/" + x))
+        for entry in Util.listdir("Themes"):
+            filename = entry.name
+            if filename.endswith("lktheme"):
+                ctema = filename[:-8]
+                liOpciones.append((ctema, "Themes/" + filename))
 
         self.cbTemas = Controles.CB(self, liOpciones, liOpciones[0][1]).capturaCambiado(self.cambiadoTema)
         self.lbSecciones = Controles.LB(self, _("Section") + ":")
@@ -403,9 +404,9 @@ class WColores(QTVarios.WDialogo):
         # _nomPiezas
         li = []
         lbPiezas = creaLB(_("Pieces"))
-        for x in Util.listdir("Pieces"):
-            if os.path.isdir("Pieces/%s" % x):
-                li.append((x, x))
+        for entry in Util.listdir("Pieces"):
+            if entry.is_dir():
+                li.append((entry.name, entry.name))
         li.sort(key=lambda x: x[0])
         self.cbPiezas = Controles.CB(self, li, self.confTablero.nomPiezas()).capturaCambiado(self.actualizaTableroM)
         self.chbDefPiezas = xDefecto(self.confTablero.siDefPiezas())

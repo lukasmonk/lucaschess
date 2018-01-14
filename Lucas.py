@@ -21,9 +21,6 @@
 
 
 
-
-
-
 import os
 import sip
 from imp import reload
@@ -45,10 +42,10 @@ current_dir = os.path.dirname(sys.argv[0])
 if current_dir:
     os.chdir(current_dir)
 
-import Code.VarGen
+from Code import VarGen
 
 sys.path.append(os.path.join(current_dir, "Code"))
-sys.path.append(os.path.join(current_dir, Code.VarGen.folder_engines, "_tools"))
+sys.path.append(os.path.join(current_dir, VarGen.folder_engines, "_tools"))
 
 import Code.Traducir as Traducir
 Traducir.install()

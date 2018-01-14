@@ -17,14 +17,13 @@ Linux installation from sources
     - sudo pip install Cython
 
     
-3) chmod -R 777 *  at top-level project directory, (to ensure all engines have exec-permissions)
+3) chmod +x -R Engines/Linux64/ - to ensure all engines have exec-permissions
 
-) 64 bits
+4) 64 bits
     - cd LCEngine/irina
     - ./xmk_linux.sh
-    - 
-
-
+    - cd .. #LXEngine
+    - ./xcython_linux.sh
 
 
 Tested in Mate 14.04

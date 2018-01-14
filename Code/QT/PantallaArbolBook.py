@@ -305,9 +305,6 @@ class InfoMove(QtGui.QWidget):
     def porDefecto(self):
         self.tablero.ponPosicion(self.cpDefecto)
 
-    def cambioTablero(self):
-        pass
-
     def ponValores(self):
         posicion, desde, hasta = self.movActual.damePosicion()
         self.tablero.ponPosicion(posicion)
