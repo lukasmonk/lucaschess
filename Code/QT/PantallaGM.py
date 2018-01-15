@@ -321,7 +321,7 @@ class WGM(QTVarios.WDialogo):
         if not self.grabaDic():  # crea self.ogm
             return
 
-        w = SelectGame(self, self.ogm)
+        w = SelectGame(self, self.ogm, self.siWoman)
         if w.exec_():
             if w.partidaElegida is not None:
                 self.record.partidaElegida = w.partidaElegida
@@ -689,13 +689,13 @@ def importarGM(ownerGM, siWoman):
     return False
 
 class SelectGame(QTVarios.WDialogo):
-    def __init__(self, wgm, ogm):
+    def __init__(self, wgm, ogm, siWoman):
         self.ogm = ogm
         self.liRegs = ogm.genToSelect()
         self.siReverse = False
         self.claveSort = None
 
-        dgm = GM.dicGM()
+        dgm = GM.dicGM(siWoman)
         nombre = dgm.get(ogm.gm, ogm.gm)
         titulo = "%s - %s" % (_("One game"), nombre)
         icono = Iconos.Uno()

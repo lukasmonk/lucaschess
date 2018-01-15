@@ -77,7 +77,7 @@ class GestorGM(Gestor.Gestor):
         self.mostrarIndicador(True)
         self.quitaAyudas()
         self.ponPiezasAbajo(self.siBlancas)
-        dic = GM.dicGM()
+        dic = GM.dicGM(self.siWoman)
         self.nombreGM = dic[self.gm.lower()] if self.modo == "estandar" else self.gm
         rot = _("Woman Grandmaster") if self.siWoman else _("Grandmaster")
         rotulo1 = rot + ": <b>%s</b>" if self.modo == "estandar" else "<b>%s</b>"

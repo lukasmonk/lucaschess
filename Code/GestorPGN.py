@@ -179,7 +179,7 @@ class GestorPGN(Gestor.Gestor):
         self.pensando(True)
 
         db = anydbm.open("./IntFiles/miniaturas.dbm")
-        h = hash(Util.dtos(Util.hoy()))
+        h = hash(Util.hoy())
         grupo = str(h%7+1)
         li = db[grupo].split("{")
         db.close()

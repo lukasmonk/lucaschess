@@ -191,9 +191,12 @@ class GM:
         self.write()
 
 
-def dicGM():
+def dicGM(siWoman):
     dic = {}
-    f = open("gm/listaGM.txt", "rb")
+    nomfich = "GM/listaGM.txt"
+    if siWoman:
+        nomfich = "W" + nomfich
+    f = open(nomfich, "rb")
     for linea in f:
         if linea:
             li = linea.split(VarGen.XSEP)
@@ -206,7 +209,7 @@ def dicGM():
 
 
 def listaGM(siWoman):
-    dic = dicGM()
+    dic = dicGM(siWoman)
     li = []
 
     for entry in Util.listdir("WGM" if siWoman else "GM"):
