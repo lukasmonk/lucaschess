@@ -296,6 +296,9 @@ class Partida:
     def pv(self):
         return " ".join([jg.movimiento() for jg in self.liJugadas])
 
+    def lipv(self):
+        return [jg.movimiento() for jg in self.liJugadas]
+
     def pv_hasta(self, njug):
         return " ".join([jg.movimiento() for jg in self.liJugadas[:njug+1]])
 

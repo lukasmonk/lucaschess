@@ -2,7 +2,8 @@
 
 import os
 import sys
-import anydbm
+import random
+
 
 from Code import Gestor
 from Code import PGN
@@ -160,44 +161,28 @@ class GestorPGN(Gestor.Gestor):
             self.pgnPaste = texto
             self.mostrar(pgn, False)
 
-    # def jugadaDia(self):
-    #     self.pensando(True)
-    #     dia = Util.hoy().day
-    #     lid = Util.LIdisk("./IntFiles/31.pkl")
-    #     dic = lid[dia - 1]
-    #     lid.close()
-    #     txt = dic["PGN"]
-    #     pgn = PGN.UnPGN()
-    #     pgn.leeTexto(txt)
-    #     self.pensando(False)
-    #     if pgn.siError:
-    #         return
-    #     self.pgnPaste = txt
-    #     self.mostrar(pgn, False)
-
     def miniatura(self):
         self.pensando(True)
 
-        db = anydbm.open("./IntFiles/miniaturas.dbm")
-        h = hash(Util.hoy())
-        grupo = str(h%7+1)
-        li = db[grupo].split("{")
-        db.close()
-        n = len(li)
-        pos = h % n
-        linea = li[pos]
-        lig = linea.split("|")
-        liTags = []
-        pv = lig[-1]
-        for n in range(len(lig)-1):
-            if "·" in lig[n]:
-                k, v = lig[n].split("·")
-                liTags.append((k, v))
-        p = Partida.PartidaCompleta(liTags=liTags)
-        p.leerPV(pv)
-        txt = p.pgn()
-        pgn = PGN.UnPGN()
-        pgn.leeTexto(txt)
+        fichero = "./IntFiles/miniaturas.gm"
+        tam = Util.tamFichero(fichero)
+        pos = random.randint(0, tam-600)
+        with open(fichero) as fm:
+            fm.seek(pos)
+            fm.readline()
+            linea = fm.readline()
+            lig = linea.split("|")
+            liTags = []
+            pv = lig[-1]
+            for n in range(len(lig)-1):
+                if "·" in lig[n]:
+                    k, v = lig[n].split("·")
+                    liTags.append((k, v))
+            p = Partida.PartidaCompleta(liTags=liTags)
+            p.leerPV(pv)
+            txt = p.pgn()
+            pgn = PGN.UnPGN()
+            pgn.leeTexto(txt)
         self.pensando(False)
         if pgn.siError:
             return

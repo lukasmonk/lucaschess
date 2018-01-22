@@ -210,7 +210,7 @@ def opciones(parent, configuracion):
     lista.append((liT, _("Boards"), ""))
     lista.append((liEng, _("Engines"), ""))
     lista.append((liAsp, _("Appearance"), ""))
-    lista.append((liPR, _("Perfomance"), ""))
+    lista.append((liPR, _("Performance"), ""))
     lista.append((liSA, _("Autosave"), ""))
     lista.append((liNC, _("Non competitive mode"), ""))
 

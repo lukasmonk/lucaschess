@@ -684,8 +684,7 @@ class Ventana(QtGui.QDialog):
 
         dic["SITOP"] = self.siTop
 
-        Util.guardaDIC(dic, self.ficheroVideo)
-
+        self.cpu.save_video(dic)
 
     def recuperarVideo(self):
         dic = self.cpu.dic_video

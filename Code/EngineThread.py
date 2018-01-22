@@ -8,11 +8,11 @@ import psutil
 from Code import VarGen
 from Code.Constantes import *
 
-DEBUG = False
+DEBUG_ENGINE = False
 
 
 def xpr(line):
-    if DEBUG:
+    if DEBUG_ENGINE:
         t = time.time()
         prlk("%0.04f %s" % (t - tdbg[0], line))
         tdbg[0] = t
@@ -20,7 +20,7 @@ def xpr(line):
 
 
 def xprli(li):
-    if DEBUG:
+    if DEBUG_ENGINE:
         t = time.time()
         dif = t - tdbg[0]
         for line in li:
@@ -28,7 +28,7 @@ def xprli(li):
         tdbg[0] = t
     return True
 
-if DEBUG:
+if DEBUG_ENGINE:
     tdbg = [time.time()]
     xpr("DEBUG XMOTOR")
 

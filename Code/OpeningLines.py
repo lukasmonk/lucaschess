@@ -303,8 +303,12 @@ class Opening:
         cursor = self._conexion.cursor()
 
         base = self.getconfig("BASEPV")
+        partidabase = self.getpartidabase()
+        njugbase = partidabase.numJugadas()
         n = 0
 
+        sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
+        sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
         for n, g in enumerate(PGNreader.readGames(ficheroPGN), 1):
             if not dlTmp.actualiza(n, erroneos, duplicados, importados):
                 break
@@ -322,19 +326,28 @@ class Opening:
                 pv = " ".join([move.pv for move in liMoves])
                 partida.leerPV(pv)
                 pv = partida.pv()
-                if base and not pv.startswith(base):
+                if base and not pv.startswith(base) or partida.numJugadas() <= njugbase:
                     return
                 xpv = LCEngine.pv2xpv(pv)
                 if xpv in self.li_xpv:
                     return
                 line_blob = partida.save2blob()
-                cursor.execute(sql, (xpv, line_blob))
-                self.li_xpv.append(xpv)
+                updated = False
+                for npos, xpv_ant in enumerate(self.li_xpv):
+                    if xpv.startswith(xpv_ant):
+                        cursor.execute(sql_update, (xpv, line_blob, xpv_ant))
+                        self.li_xpv[npos] = xpv
+                        updated = True
+                        break
+                if not updated:
+                    cursor.execute(sql_insert, (xpv, line_blob))
+                    self.li_xpv.append(xpv)
+
                 for njug, move in enumerate(liMoves):
                     if move.variantes:
                         for lim in move.variantes:
                             p = partida.copia(njug-1) if njug > 0 else Partida.Partida()
-                            haz_partida(p, lim)
+                            haz_partida(p, lim.liMoves)
 
             partida = Partida.Partida()
             haz_partida(partida, g.moves.liMoves)
@@ -360,10 +373,15 @@ class Opening:
 
         stFenM2 = set()  # para que no se produzca un circulo vicioso
 
-        p = self.getpartidabase()
-        cp = p.ultPosicion
+        partidabase = self.getpartidabase()
+        cp = partidabase.ultPosicion
 
         liPartidas = []
+
+        setFen = LCEngine.setFen
+        makeMove = LCEngine.makeMove
+        getFen = LCEngine.getFen
+        fen2fenM2 = LCEngine.fen2fenM2
 
         def hazFEN(fen, ply, lipv_ant):
             plyN = ply + 1
@@ -378,14 +396,14 @@ class Opening:
             if liPV:
                 sigue = False
                 for pv in liPV:
-                    cp.leeFen(fen)
-                    cp.mover(pv[:2], pv[2:4], pv[4:])
-                    fenN = cp.fen()
+                    setFen(fen)
+                    makeMove(pv)
+                    fenN = getFen()
 
                     lipv_nue = lipv_ant[:]
                     lipv_nue.append(pv)
                     if plyN < depth:
-                        fenM2 = cp.fenM2()
+                        fenM2 = fen2fenM2(fenN)
                         if fenM2 not in stFenM2:
                             stFenM2.add(fenM2)
                             hazFEN(fenN, plyN, lipv_nue)
@@ -399,18 +417,29 @@ class Opening:
                 bp.ponTotal(len(liPartidas))
                 bp.pon(len(liPartidas))
 
-        hazFEN(cp.fen(), 0, p.pv().split(" "))
+        hazFEN(cp.fen(), 0, partidabase.lipv())
 
         bp.ponRotulo(_("Writing..."))
 
-        sql = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
+        sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
+        sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
         cursor = self._conexion.cursor()
         for partida in liPartidas:
-            xpv = LCEngine.pv2xpv(partida.pv())
-            if xpv not in self.li_xpv:
-                line_blob = partida.save2blob()
-                cursor.execute(sql, (xpv, line_blob))
-                self.li_xpv.append(xpv)
+            if partida.numJugadas() > partidabase.numJugadas():
+                xpv = LCEngine.pv2xpv(partida.pv())
+                if xpv not in self.li_xpv:
+                    line_blob = partida.save2blob()
+                    updated = False
+                    for npos, xpv_ant in enumerate(self.li_xpv):
+                        if xpv.startswith(xpv_ant):
+                            cursor.execute(sql_update, (xpv, line_blob, xpv_ant))
+                            self.li_xpv[npos] = xpv
+                            updated = True
+                            break
+                    if not updated:
+                        cursor.execute(sql_insert, (xpv, line_blob))
+                        self.li_xpv.append(xpv)
+
         cursor.close()
         self._conexion.commit()
         self.li_xpv.sort()
