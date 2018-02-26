@@ -6,7 +6,7 @@ from Code.QT import QTUtil2
 from Code import Util
 from Code import EngineThread
 
-SEPARADOR = (None, None)
+SEPARADOR = FormLayout.separador
 
 
 def leeDicParametros(configuracion):

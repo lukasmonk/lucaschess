@@ -61,8 +61,8 @@ class ThanksTo:
             ["Rybka 2.3.2a 32-bit", "Vasik Rajlich", "http://rybkachess.com/"],
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
             ["Texel 1.07", "Peter Österlund", "http://hem.bredband.net/petero2b/javachess/index.html#texel"],
-            ["Stockfish 8", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["McBrain 4.0", "Michael Byrne (based on stockfish)", "https://github.com/MichaelB7/Stockfish/releases"],
+            ["Stockfish 9", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
+            ["McBrain 9", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
             ["Delfi 5.4", "Fabio Cavicchio", "http://www.msbsoftware.it/delfi/"],
             # ["SmartThink 1.97", "Sergei S. Markoff", "http://genes1s.net/smarthink.php"],
@@ -124,7 +124,7 @@ class ThanksTo:
             return txt
 
         # Version 11
-        liBase = ["Alfonso Solbes", "Max Aloyau", "tico-tico", "Nils Andersson", "Bernhard", "Ed Smith", "Rob", "Giovanni di Maria", "vga", "Remes", "Péter Rabi"]
+        liBase = ["Alfonso Solbes", "Max Aloyau", "tico-tico", "Nils Andersson", "Bernhard", "Ed Smith", "Rob", "Giovanni di Maria", "vga", "Remes", "Péter Rabi", "Iñaki Rodriguez"]
         liResto = ["Immortalchess forum",]
         txt += version(11, liBase, liResto)
 
@@ -391,7 +391,7 @@ class ThanksTo:
             txt += "<tr>"
             if "McBrain" in nombre:
                 txt += '<th><font color="darkred">%s (%s)</font></th>' % (nombre, _("default"))
-                txt += '<th><font color="darkred">%s</font></th>' % autor
+                txt += '<td><font color="darkred">%s</font></td>' % autor
             else:
                 txt += "<td>%s</td>" % nombre
                 txt += "<td>%s</td>" % autor
@@ -425,7 +425,6 @@ class ThanksTo:
             (_("GUI"), "PyQt4 - GPL", "http://www.riverbankcomputing.co.uk"),
             (_("Audio"), "PyAudio v0.2.4 - MIT License", "http://people.csail.mit.edu/hubert/pyaudio/"),
             ("psutil", _X(_("Created by %1"), "Giampaolo Rodola"), "http://code.google.com/p/psutil/"),
-            ("pygal", _X(_("Created by %1"), "Kozea"), "http://pygal.org"),
             ("chardet", _X(_("Created by %1"), "Ian Cordasco"), "https://github.com/chardet/chardet"),
             (_("Polyglot books"), _X(_("Based on work by %1"), "Michel Van den Bergh"), "http://alpha.uhasselt.be/Research/Algebra/Toga/book_format.html"),
             ("Polyglot1.4w", _X(_("Created by %1"), "Fabien Letouzy") + ". " + _X(_("Modified by %1"), "Fonzy Bluemers"), "http://www.geenvis.net/"),

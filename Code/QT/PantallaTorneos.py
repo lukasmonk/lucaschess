@@ -132,7 +132,7 @@ class WUnTorneo(QTVarios.WDialogo):
 
         titulo = _("Competition")
         icono = Iconos.Torneos()
-        extparam = "untorneo"
+        extparam = "untorneo_v1"
         QTVarios.WDialogo.__init__(self, wParent, titulo, icono, extparam)
 
         self.configuracion = VarGen.configuracion
@@ -175,7 +175,7 @@ class WUnTorneo(QTVarios.WDialogo):
         # Comprobamos que todos esten accesibles
         self.listaLibros.comprueba()
         li = [(x.nombre, x.path) for x in self.listaLibros.lista]
-        li.insert(0, ("* " + _("Default"), ""))
+        li.insert(0, ("* " + _("None"), "-"))
         self.cbBooks = Controles.CB(self, li, torneo.book())
         btNuevoBook = Controles.PB(self, "", self.nuevoBook, plano=False).ponIcono(Iconos.Nuevo(), tamIcon=16)
         lyBook = Colocacion.H().control(self.cbBooks).control(btNuevoBook).relleno()
@@ -291,8 +291,8 @@ class WUnTorneo(QTVarios.WDialogo):
         oColumnas.nueva("NUMERO", _("N."), 35, siCentrado=True)
         oColumnas.nueva("MOTOR", _("Engine"), 190, siCentrado=True)
         oColumnas.nueva("GANADOS", _("Wins"), 120, siCentrado=True)
-        oColumnas.nueva("PERDIDOS", _("Lost"), 120, siCentrado=True)
         oColumnas.nueva("TABLAS", _("Draw"), 120, siCentrado=True)
+        oColumnas.nueva("PERDIDOS", _("Lost"), 120, siCentrado=True)
         oColumnas.nueva("PUNTOS", _("Points"), 120, siCentrado=True)
         self.gridResult = Grid.Grid(self, oColumnas, siSelecFilas=True, xid="R")
         self.registrarGrid(self.gridResult)
@@ -402,6 +402,11 @@ class WUnTorneo(QTVarios.WDialogo):
     def borraResult(self):
         self.liResult = None
 
+    def resultLabel(self, lirs):
+        w, b = lirs
+        t = w + b
+        return "0" if t == 0 else "%d (%s:%d - %s:%d)" % (t, _("White"), w, _("Black"), b)
+
     def gridDatoResult(self, fila, columna):
         if self.liResult is None:
             self.liResult = self.torneo.rehacerResult()
@@ -410,21 +415,15 @@ class WUnTorneo(QTVarios.WDialogo):
             return str(fila + 1)
         elif columna == "MOTOR":
             return rs["EN"].alias
-        elif columna == "GANADOS":
-            w, b = rs["WIN"]
-            t = w + b
-            return "0" if t == 0 else "%d (%d-%d)" % (t, w, b)
-        elif columna == "PERDIDOS":
-            w, b = rs["LOST"]
-            t = w + b
-            return "0" if t == 0 else "%d (%d-%d)" % (t, w, b)
-        elif columna == "TABLAS":
-            w, b = rs["DRAW"]
-            t = w + b
-            return "0" if t == 0 else "%d (%d-%d)" % (t, w, b)
         elif columna == "PUNTOS":
             p = rs["PTS"]
             return "%d.%d" % (p / 10, p % 10)
+        elif columna == "GANADOS":
+            return self.resultLabel(rs["WIN"])
+        elif columna == "PERDIDOS":
+            return self.resultLabel(rs["LOST"])
+        elif columna == "TABLAS":
+            return self.resultLabel(rs["DRAW"])
 
     def gridDatoGames(self, fila, columna):
         gm = self.torneo.liGames()[fila]

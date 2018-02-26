@@ -1,3 +1,5 @@
+import base64
+
 from PyQt4 import QtCore, QtGui
 
 from Code.QT import Controles
@@ -384,9 +386,8 @@ class PixmapSC(BloqueSC):
             self.pixmap = pixmap
         else:
             self.pixmap = QtGui.QPixmap()
-            import base64
-
             self.pixmap.loadFromData(base64.b64decode(bloqueImagen.pixmap), "PNG")
+
         r = self.pixmap.rect()
         self.pmRect = QtCore.QRectF(0, 0, r.width(), r.height())
 

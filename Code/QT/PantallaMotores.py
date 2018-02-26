@@ -297,7 +297,7 @@ class WMotor(QtGui.QDialog):
             # # Comprobamos que todos esten accesibles
             self.listaLibros.comprueba()
             li = [(x.nombre, x.path) for x in self.listaLibros.lista]
-            li.insert(0, ("* " + _("Engine book"), "-"))
+            li.insert(0, ("* " + _("None"), "-"))
             li.insert(0, ("* " + _("Default"), "*"))
             self.cbBooks = Controles.CB(self, li, motorExterno.book())
             btNuevoBook = Controles.PB(self, "", self.nuevoBook, plano=False).ponIcono(Iconos.Nuevo(), tamIcon=16)

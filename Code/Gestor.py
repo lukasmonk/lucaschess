@@ -3,7 +3,7 @@ import os
 import random
 import time
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import Analisis
 from Code import AnalisisIndexes
@@ -977,9 +977,13 @@ class Gestor:
         li_del.append((_("Comments") + ":", False))
         li_del.append(separador)
         li_del.append((_("Analysis") + ":", False))
+        li_del.append(separador)
+        li_del.append((_("All") + ":", False))
         resultado = FormLayout.fedit(li_del, title=_("Remove"), parent=self.pantalla, icon=Iconos.Delete())
         if resultado:
-            variants, ratings, comments, analysis = resultado[1]
+            variants, ratings, comments, analysis, all = resultado[1]
+            if all:
+                variants, ratings, comments, analysis = True, True, True, True
             for jg in self.partida.liJugadas:
                 if variants:
                     jg.variantes = ""
@@ -1500,6 +1504,7 @@ class Gestor:
         elos = self.partida.calc_elos(self.configuracion)
         alm = Histogram.genHistograms(self.partida, self.configuracion.centipawns)
         alm.indexesHTML, alm.indexesRAW, alm.eloW, alm.eloB, alm.eloT = AnalisisIndexes.genIndexes(self.partida, elos, alm)
+        alm.siBlancasAbajo = self.tablero.siBlancasAbajo
         um.final()
         PantallaAnalisis.showGraph(self.pantalla, self, alm, Analisis.muestraAnalisis)
 

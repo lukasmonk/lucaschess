@@ -36,7 +36,7 @@ class GestorAlbum(Gestor.Gestor):
         # -Aplazamiento 1/2--------------------------------------------------
         if aplazamiento:
             self.partida.recuperaDeTexto(aplazamiento["JUGADAS"])
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         self.xrival = Albums.GestorMotorAlbum(self, self.cromo)
         self.pantalla.ponToolBar((k_rendirse, k_aplazar, k_configurar, k_utilidades))
@@ -196,7 +196,7 @@ class GestorAlbum(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:

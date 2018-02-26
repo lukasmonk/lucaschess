@@ -1,7 +1,7 @@
 import operator
 import os
 
-from LCEngine import xpv2pv, pv2xpv
+from LCEngineV1 import xpv2pv, pv2xpv
 
 from Code import Jugada
 from Code import Util

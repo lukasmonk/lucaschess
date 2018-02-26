@@ -1,6 +1,6 @@
 import os
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from PyQt4 import QtGui, QtCore
 
@@ -27,6 +27,9 @@ class TabEngine(QtGui.QWidget):
         self.posicion = None
         self.li_analysis = []
         self.gestor_motor = None
+        self.current_mrm = None
+
+        self.dbop = tabsAnalisis.dbop
 
         self.procesador = procesador
         self.configuracion = configuracion
@@ -38,11 +41,16 @@ class TabEngine(QtGui.QWidget):
         self.bt_stop.hide()
 
         self.lb_engine = Controles.LB(self, _("Engine") + ":")
-        liMotores = configuracion.comboMotoresCompleto()
-        self.cb_engine = Controles.CB(self, liMotores, configuracion.tutor.clave).capturaCambiado(self.reset_motor)
+        liMotores = configuracion.comboMotoresCompleto()  # (nombre, clave)
+        default = configuracion.tutor.clave
+        engine = self.dbop.getconfig("ENGINE", default)
+        if len([clave for nombre,clave in liMotores if clave==engine]) == 0:
+            engine = default
+        self.cb_engine = Controles.CB(self, liMotores, engine).capturaCambiado(self.reset_motor)
 
+        multipv = self.dbop.getconfig("ENGINE_MULTIPV", 10)
         lb_multipv = Controles.LB(self, _("Multi PV")+": ")
-        self.sb_multipv = Controles.SB(self, 10, 1, 500).tamMaximo(50)
+        self.sb_multipv = Controles.SB(self, multipv, 1, 500).tamMaximo(50)
 
         self.lb_analisis = Controles.LB(self, "").ponFondoN("#C9D2D7").ponTipoLetra(puntos=configuracion.puntosPGN)
 
@@ -66,7 +74,19 @@ class TabEngine(QtGui.QWidget):
 
         self.reset_motor()
 
+    def saveCurrent(self):
+        if self.current_mrm:
+            fenM2 = self.current_posicion.fenM2()
+            dic = self.dbop.getfenvalue(fenM2)
+            if "ANALISIS" in dic:
+                mrm_ant = dic["ANALISIS"]
+                if mrm_ant.getdepth0() > self.current_mrm.getdepth0():
+                    return
+            dic["ANALISIS"] = self.current_mrm
+            self.dbop.setfenvalue(fenM2, dic)
+
     def setData(self, label, posicion):
+        self.saveCurrent()
         self.posicion = posicion
         self.lb_analisis.ponTexto(label)
         if self.analyzing:
@@ -76,8 +96,18 @@ class TabEngine(QtGui.QWidget):
             self.gestor_motor.ac_inicio(partida)
             self.analyzing = True
             QtCore.QTimer.singleShot(1000, self.lee_analisis)
+        else:
+            fenM2 = posicion.fenM2()
+            dic = self.dbop.getfenvalue(fenM2)
+            if "ANALISIS" in dic:
+                self.show_analisis(dic["ANALISIS"])
+            else:
+                self.li_analysis = []
+                self.grid_analysis.refresh()
 
     def start(self):
+        self.current_mrm = None
+        self.current_posicion = None
         self.sb_multipv.setDisabled(True)
         self.cb_engine.setDisabled(True)
         self.analyzing = True
@@ -98,6 +128,8 @@ class TabEngine(QtGui.QWidget):
         self.bt_stop.show()
 
     def show_analisis(self, mrm):
+        self.current_mrm = mrm
+        self.current_posicion = self.posicion
         li = []
         for rm in mrm.liMultiPV:
             partida = Partida.Partida(self.posicion)
@@ -112,7 +144,10 @@ class TabEngine(QtGui.QWidget):
                 pgn0 = lit[1]
                 pgn1 = " ".join(lit[2:])
 
-            partida.ms_sol = pgn0, siBlancas, None, None, None, None, False, False
+            if self.siFigurines:
+                partida.ms_sol = pgn0, siBlancas, None, None, None, None, False, False
+            else:
+                partida.ms_sol = pgn0
             partida.ms_pgn = pgn1
             partida.ms_pdt = rm.abrTextoPDT()
             li.append(partida)
@@ -126,6 +161,7 @@ class TabEngine(QtGui.QWidget):
             QtCore.QTimer.singleShot(2000, self.lee_analisis)
 
     def stop(self):
+        self.saveCurrent()
         self.sb_multipv.setDisabled(False)
         self.cb_engine.setDisabled(False)
         self.analyzing = False
@@ -134,6 +170,7 @@ class TabEngine(QtGui.QWidget):
             self.gestor_motor.ac_final(0)
 
     def reset_motor(self):
+        self.saveCurrent()
         clave = self.cb_engine.valor()
         if not clave:
             return
@@ -157,6 +194,10 @@ class TabEngine(QtGui.QWidget):
         else:
             return self.li_analysis[fila].ms_pgn
 
+    def saveConfig(self):
+        self.dbop.setconfig("ENGINE", self.cb_engine.valor())
+        self.dbop.setconfig("ENGINE_MULTIPV", self.sb_multipv.valor())
+
 
 class TabBook(QtGui.QWidget):
     def __init__(self, tabsanalisis, book, configuracion):
@@ -170,8 +211,10 @@ class TabBook(QtGui.QWidget):
         book.polyglot()
         self.li_moves = []
 
+        self.siFigurines = configuracion.figurinesPGN
+
         oColumnas = Columnas.ListaColumnas()
-        delegado = Delegados.EtiquetaPOS(True, siLineas=False) if configuracion.figurinesPGN else None
+        delegado = Delegados.EtiquetaPOS(True, siLineas=False) if self.siFigurines else None
         for x in range(20):
             oColumnas.nueva(x, "", 80, siCentrado=True, edicion = delegado)
         self.grid_moves = Grid.Grid(self, oColumnas, siSelecFilas=True, siCabeceraMovible=False, siCabeceraVisible=False)
@@ -190,8 +233,11 @@ class TabBook(QtGui.QWidget):
         li = mv.dato
         key = int(oColumna.clave)
         pgn = li[key]
-        siBlancas = " w " in mv.fen
-        return pgn, siBlancas, None, None, None, None, False, True
+        if self.siFigurines:
+            siBlancas = " w " in mv.fen
+            return pgn, siBlancas, None, None, None, None, False, True
+        else:
+            return pgn
 
     def gridDobleClick(self, grid, fila, oColumna):
         self.lee_subnivel(fila)
@@ -200,7 +246,6 @@ class TabBook(QtGui.QWidget):
     def gridBotonDerecho(self, grid, fila, columna, modificadores):
         self.borra_subnivel(fila)
         self.grid_moves.refresh()
-
 
     def setData(self, posicion):
         self.posicion = posicion
@@ -327,7 +372,7 @@ class TabsAnalisis(QtGui.QWidget):
         self.tabs.tabCloseRequested.connect(self.tabCloseRequested)
 
         layout = Colocacion.V()
-        layout.control(self.tabs).margen(3)
+        layout.control(self.tabs).margen(0)
         self.setLayout(layout)
 
     def changedNextMove(self):
@@ -363,6 +408,7 @@ class TabsAnalisis(QtGui.QWidget):
                 pos = len(self.liTabs)-1
                 self.tabs.nuevaTab(tabbook, book.nombre, pos)
                 self.tabs.setTabIcon(pos, Iconos.Libros())
+                self.setPosicion(self.partida, self.njg, pos)
         elif resp == "dbase":
             nomfichgames = QTVarios.selectDB(self, self.configuracion, False, True)
             if nomfichgames:
@@ -371,11 +417,14 @@ class TabsAnalisis(QtGui.QWidget):
                 self.liTabs.append((resp, tabdb))
                 pos = len(self.liTabs) - 1
                 self.setPosicion(self.partida, self.njg, pos)
-                self.tabs.nuevaTab(tabdb, _("Database"), pos)
+                nombre = os.path.basename(nomfichgames)[:-4]
+                self.tabs.nuevaTab(tabdb, nombre, pos)
                 self.tabs.setTabIcon(pos, Iconos.Database())
         self.tabs.activa(pos)
 
     def setPosicion(self, partida, njg, numTab=None):
+        if partida is None:
+            return
         jg = partida.jugada(njg)
         self.partida = partida
         self.njg = njg
@@ -403,7 +452,6 @@ class TabsAnalisis(QtGui.QWidget):
                 tab.setData(data)
                 tab.start()
 
-
     def seleccionaLibro(self):
         listaLibros = Books.ListaLibros()
         listaLibros.recuperaVar(self.configuracion.ficheroBooks)
@@ -426,7 +474,13 @@ class TabsAnalisis(QtGui.QWidget):
                     nombre = os.path.basename(fbin)[:-4]
                     book = Books.Libro("P", nombre, fbin, True)
                     listaLibros.nuevo(book)
+                    listaLibros.guardaVar(self.configuracion.ficheroBooks)
         else:
             book = None
         return book
+
+    def saveConfig(self):
+        for tipo, wtab in self.liTabs:
+            if tipo == "engine":
+                wtab.saveConfig()
 

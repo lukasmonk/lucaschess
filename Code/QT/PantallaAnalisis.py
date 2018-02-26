@@ -74,7 +74,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
         confTablero = VarGen.configuracion.confTablero("ANALISISGRAPH", 48)
         self.tablero = Tablero.Tablero(self, confTablero)
         self.tablero.crea()
-        self.tablero.ponerPiezasAbajo(True)
+        self.tablero.ponerPiezasAbajo(alm.siBlancasAbajo)
         self.tablero.dispatchSize(self.tableroSizeChanged)
 
         self.capturas = WCapturas.CapturaLista(self, self.tablero)
@@ -431,7 +431,8 @@ class WMuestra(QtGui.QWidget):
         if resp:
             for pos, tp in enumerate(self.um.listaRM):
                 rm = tp[0]
-                partida = Partida.Partida(self.um.jg.posicionBase).leerPV(rm.pv)
+                partida = Partida.Partida(self.um.jg.posicionBase)
+                partida.leerPV(rm.pv)
                 self.um.grabarBase(partida, rm, resp)
             self.um.ponVistaGestor()
 

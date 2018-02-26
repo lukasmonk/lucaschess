@@ -299,7 +299,7 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
                 self.ayudas -= 1
             self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
             if not self.fen:
-                self.listaAperturasStd.asignaApertura(self.partida)
+                self.partida.asignaApertura()
             self.ponteAlFinal()
             self.refresh()
             self.siguienteJugada()
@@ -422,7 +422,7 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:

@@ -151,10 +151,10 @@ def leeRivales():
     cm.ordenUCI("Hash", "64")
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne (based on stockfish)", "4.0", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "SF-McBrain-v40_x32_linux"
+    cm = ConfigMotor("mcbrain", "Michael Byrne", "9", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McBrain-9_x32_linux"
     cm.elo = 3200
-    cm.ordenUCI("Tactical", "3")
+    cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
     cm.ponMultiPV(20, 500)
     mas(cm)

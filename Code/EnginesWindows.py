@@ -208,9 +208,9 @@ def leeRivales():
     cm.ponMultiPV(20, 256)
     mas(cm)
 
-    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "8 32bits", "http://stockfishchess.org/")
-    cm.path = "Windows/stockfish_8_x32.exe"
-    cm.path_64 = "Windows/stockfish_8_x64_bmi2.exe", "8 64bits bmi2"
+    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "9 32bits", "http://stockfishchess.org/")
+    cm.path = "Windows/stockfish_9_x32.exe"
+    cm.path_64 = "Windows/stockfish_9_x64_bmi2.exe", "9 64bits bmi2"
     cm.elo = 3300
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "64")
@@ -218,11 +218,11 @@ def leeRivales():
     cm.ponMultiPV(20, 500)
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne (based on stockfish)", "4.0 32bit", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "SF-McBrain-v40_x32_old.exe"
-    cm.path_64 = "SF-McBrain-v40_x64_bmi2.exe", "4.0 64bit bmi2"
+    cm = ConfigMotor("mcbrain", "Michael Byrne", "9 32bit", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McBrain-9_x32_old.exe"
+    cm.path_64 = "McBrain-9_x64_bmi2.exe", "9 64bit bmi2"
     cm.elo = 3200
-    cm.ordenUCI("Tactical", "3")
+    cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
     cm.ponMultiPV(20, 500)
     mas(cm)

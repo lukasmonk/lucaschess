@@ -275,7 +275,7 @@ class GestorUnJuego(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
         self.movimientosPiezas(jg.liMovs, True)
         self.tablero.ponPosicion(jg.posicion)
         self.ponFlechaSC(jg.desde, jg.hasta)

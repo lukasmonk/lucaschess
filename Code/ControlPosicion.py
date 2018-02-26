@@ -1,4 +1,4 @@
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import TrListas
 
@@ -434,3 +434,6 @@ class ControlPosicion:
             return False
 
         return True
+
+def distancia(desde, hasta):
+    return ((ord(desde[0])-ord(hasta[0]))**2 + (ord(desde[1])-ord(hasta[1]))**2)**0.5

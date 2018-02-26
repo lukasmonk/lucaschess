@@ -152,12 +152,12 @@ class GestorSolo(Gestor.Gestor):
         if self.bloqueApertura:
             self.partida.reset()
             self.partida.leerPV(self.bloqueApertura.a1h8)
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         if "PARTIDA" in dic:
             self.partida.reset()
             self.partida.recuperaDeTexto(dic["PARTIDA"])
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
             cp = self.partida.iniPosicion  # Para ver si las blancas abajo
 
         self.ponToolBar(siExterno, siGrabar)
@@ -383,7 +383,7 @@ class GestorSolo(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:
@@ -585,9 +585,11 @@ class GestorSolo(Gestor.Gestor):
         menu = QTVarios.LCMenu(self.pantalla)
         if self.ultimoFichero:
             menuR = menu.submenu(_("Save"), Iconos.Grabar())
-            rpath = os.path.relpath(self.ultimoFichero)
-            if rpath.count("..") > 0:
-                rpath = self.ultimoFichero
+            rpath = self.ultimoFichero
+            if os.curdir[:1] == rpath[:1]:
+                rpath = os.path.relpath(rpath)
+                if rpath.count("..") > 0:
+                    rpath = self.ultimoFichero
             menuR.opcion("save", "%s: %s" %( _("Save"), rpath), Iconos.Grabar())
             menuR.separador()
             menuR.opcion("saveas", _("Save as"), Iconos.GrabarComo())
@@ -926,7 +928,7 @@ class GestorSolo(Gestor.Gestor):
         if self.partida.numJugadas():
             self.partida.anulaSoloUltimoMovimiento()
             if not self.fen:
-                self.listaAperturasStd.asignaApertura(self.partida)
+                self.partida.asignaApertura()
             self.ponteAlFinal()
             self.estado = kJugando
             self.refresh()

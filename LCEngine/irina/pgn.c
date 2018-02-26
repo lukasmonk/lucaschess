@@ -451,7 +451,8 @@ int pgn_gen_pv(void)
                 {
                     while ( *c && *c != '}' ) c++;
                 }
-                if( *c == ')' ) par--;
+                if( *c == '(' ) par++;
+                else if( *c == ')' ) par--;
             }
             if(raw) raw = false;
             break;

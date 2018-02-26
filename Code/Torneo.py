@@ -16,7 +16,7 @@ class Engine(MotoresExternos.MotorExterno):
         self._depth = 0
         self._time = 0
 
-        self._book = "*"  # "*":por defecto "-":el propio del motor otro:path to libro polyglot
+        self._book = "-"  # "*":por defecto "-":el propio del motor otro:path to libro polyglot
         self._bookRR = "ap"
 
     def ponHuella(self, liEngines):

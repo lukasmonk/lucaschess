@@ -3,7 +3,7 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+ Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
  
  McBrain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -44,23 +44,17 @@ namespace {
   // Doubled pawn penalty
   const Score Doubled = S(18, 38);
 
-  // Lever bonus by rank
-  const Score Lever[RANK_NB] = {
-    S( 0,  0), S( 0,  0), S(0, 0), S(0, 0),
-    S(17, 16), S(33, 32), S(0, 0), S(0, 0)
-  };
-
   // Weakness of our pawn shelter in front of the king by [isKingFile][distance from edge][rank].
   // RANK_1 = 0 is used for files where we have no pawns or our pawn is behind our king.
   const Value ShelterWeakness[][int(FILE_NB) / 2][RANK_NB] = {
-	  { { V( 98), V(20), V(11), V(42), V( 83), V( 84), V(101) }, // Not On King file
-		{ V(103), V( 8), V(33), V(86), V( 87), V(105), V(113) },
-		{ V(100), V( 2), V(65), V(95), V( 59), V( 89), V(115) },
-		{ V( 72), V( 6), V(52), V(74), V( 83), V( 84), V(112) } },
-	  { { V(105), V(19), V( 3), V(27), V( 85), V( 93), V( 84) }, // On King file
-		{ V(121), V( 7), V(33), V(95), V(112), V( 86), V( 72) },
-		{ V(121), V(26), V(65), V(90), V( 65), V( 76), V(117) },
-		{ V( 79), V( 0), V(45), V(65), V( 94), V( 92), V(105) } }
+    { { V( 97), V(17), V( 9), V(44), V( 84), V( 87), V( 99) }, // Not On King file
+      { V(106), V( 6), V(33), V(86), V( 87), V(104), V(112) },
+      { V(101), V( 2), V(65), V(98), V( 58), V( 89), V(115) },
+      { V( 73), V( 7), V(54), V(73), V( 84), V( 83), V(111) } },
+    { { V(104), V(20), V( 6), V(27), V( 86), V( 93), V( 82) }, // On King file
+      { V(123), V( 9), V(34), V(96), V(112), V( 88), V( 75) },
+      { V(120), V(25), V(65), V(91), V( 66), V( 78), V(117) },
+      { V( 81), V( 2), V(47), V(63), V( 94), V( 93), V(104) } }
   };
 
   // Danger of enemy pawns moving toward our king by [type][distance from edge][rank].
@@ -185,9 +179,6 @@ namespace {
 
         if (doubled && !supported)
             score -= Doubled;
-
-        if (lever)
-            score += Lever[relative_rank(Us, s)];
     }
 
     return score;

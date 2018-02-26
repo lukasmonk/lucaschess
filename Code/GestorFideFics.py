@@ -3,7 +3,7 @@ import copy
 import datetime
 import random
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import Apertura
 from Code import Gestor
@@ -414,7 +414,7 @@ class GestorFideFics(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
         self.movimientosPiezas(jg.liMovs, True)
         self.tablero.ponPosicion(jg.posicion)
         self.ponFlechaSC(jg.desde, jg.hasta)
@@ -506,7 +506,7 @@ class GestorFideFics(Gestor.Gestor):
         if self.partida.numJugadas() > 2:
             self.analizaFinal()
             ndel = self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
             self.posJugadaObj -= ndel
             self.analisis = None
             self.ponteAlFinal()

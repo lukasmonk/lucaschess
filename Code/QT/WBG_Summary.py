@@ -502,7 +502,7 @@ class WSummary(QtGui.QWidget):
             p = Partida.Partida()
             p.leerPV(pv)
             p.siTerminada()
-            self.aperturasStd.asignaApertura(p)
+            p.asignaApertura()
             self.infoMove.modoPartida(p, 9999)
             self.setFocus()
             self.grid.setFocus()

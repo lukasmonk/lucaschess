@@ -216,7 +216,7 @@ class GestorWashingReplay(Gestor.Gestor):
         self.partida.append_jg(jg)
 
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         self.ponFlechaSC(jg.desde, jg.hasta)
         self.beepExtendido(siNuestra)
@@ -728,7 +728,7 @@ class GestorWashingCreate(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:
@@ -815,7 +815,7 @@ class GestorWashingCreate(Gestor.Gestor):
         if self.partida.numJugadas():
             self.analizaTerminar()
             self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
             self.ponteAlFinal()
             self.apertura = Apertura.AperturaPol(30, self.engine.elo)
             self.siAnalizadoTutor = False

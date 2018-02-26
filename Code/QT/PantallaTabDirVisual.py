@@ -44,19 +44,21 @@ class WTabDirVisual(QTVarios.WDialogo):
         self.guion = TabVisual.Guion(tablero, self)
 
         # Guion
-        liAcciones = [(_("Close"), Iconos.MainMenu(), self.terminar),
-                      (_("Cancel"), Iconos.Cancelar(), self.cancelar),
-                      (_("Save"), Iconos.Grabar(), self.grabar),
-                      (_("New"), Iconos.Nuevo(), self.gnuevo),
-                      (_("Insert"), Iconos.Insertar(), self.ginsertar),
-                      (_("Remove"), Iconos.Borrar(), self.gborrar), None,
-                      (_("Up"), Iconos.Arriba(), self.garriba),
-                      (_("Down"), Iconos.Abajo(), self.gabajo), None,
-                      (_("Mark"), Iconos.Marcar(), self.gmarcar), None,
-                      (_("File"), Iconos.Recuperar(), self.gfile), None
-                      ]
+        liAcciones = [
+            (_("Close"), Iconos.MainMenu(), self.terminar),
+            (_("Cancel"), Iconos.Cancelar(), self.cancelar),
+            (_("Save"), Iconos.Grabar(), self.grabar),
+            (_("New"), Iconos.Nuevo(), self.gnuevo),
+            (_("Insert"), Iconos.Insertar(), self.ginsertar),
+            (_("Remove"), Iconos.Borrar(), self.gborrar), None,
+            (_("Up"), Iconos.Arriba(), self.garriba),
+            (_("Down"), Iconos.Abajo(), self.gabajo), None,
+            (_("Mark"), Iconos.Marcar(), self.gmarcar), None,
+            (_("File"), Iconos.Recuperar(), self.gfile), None
+        ]
         self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=24)
         self.tb.setAccionVisible(self.grabar, False)
+
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("NUMERO", _("N."), 20, siCentrado=True)
         oColumnas.nueva("MARCADO", "", 20, siCentrado=True, siChecked=True)
@@ -74,9 +76,9 @@ class WTabDirVisual(QTVarios.WDialogo):
         self.selectBanda = PantallaTab.SelectBanda(self)
 
         lyG = Colocacion.V().control(self.g_guion).control(self.chbSaveWhenFinished)
-
         lySG = Colocacion.H().control(self.selectBanda).otro(lyG).relleno(1)
         layout = Colocacion.V().control(self.tb).otro(lySG).margen(3)
+
         self.setLayout(layout)
 
         self.recuperarVideo()
@@ -247,11 +249,11 @@ class WTabDirVisual(QTVarios.WDialogo):
         if tarea is None:
             return None, None
         tarea.registro((tp, xid, a1h8))
+
         self.g_guion.goto(fila, 0)
 
         self.ponMarcado(fila, True)
 
-        self.refresh_guion()
         return tarea, fila
 
     def editaNombre(self, nombre):
@@ -637,22 +639,6 @@ class WTabDirVisual(QTVarios.WDialogo):
             if len(self.guion):
                 self.ponSiGrabar()
 
-    def cierraRecursos(self):
-        if self.guion is not None:
-            self.guion.cierraPizarra()
-            self.dbConfig["SELECTBANDA"] = self.selectBanda.guardar()
-            self.dbConfig["SELECTBANDANUM"] = self.selectBanda.numSeleccionada()
-            self.dbConfig["SAVEWHENFINISHED"] = self.chbSaveWhenFinished.valor()
-            self.dbConfig.close()
-            self.dbFlechas.close()
-            self.dbMarcos.close()
-            self.dbSVGs.close()
-            self.dbMarkers.close()
-
-            self.guardarVideo()
-            self.guion.restoreTablero()
-            self.guion = None
-
     def test_siGrabar(self):
         if self.siGrabar:
             if self.chbSaveWhenFinished.valor():
@@ -742,6 +728,22 @@ class WTabDirVisual(QTVarios.WDialogo):
         self.dbMarcos = Util.DicSQL(fdb, tabla="Marcos")
         self.dbSVGs = Util.DicSQL(fdb, tabla="SVGs")
         self.dbMarkers = Util.DicSQL(fdb, tabla="Markers")
+
+    def cierraRecursos(self):
+        if self.guion is not None:
+            self.guion.cierraPizarra()
+            self.dbConfig["SELECTBANDA"] = self.selectBanda.guardar()
+            self.dbConfig["SELECTBANDANUM"] = self.selectBanda.numSeleccionada()
+            self.dbConfig["SAVEWHENFINISHED"] = self.chbSaveWhenFinished.valor()
+            self.dbConfig.close()
+            self.dbFlechas.close()
+            self.dbMarcos.close()
+            self.dbSVGs.close()
+            self.dbMarkers.close()
+
+            self.guardarVideo()
+            self.guion.restoreTablero()
+            self.guion = None
 
     def actualizaBandas(self):
         self.selectBanda.iniActualizacion()
@@ -855,7 +857,7 @@ class WTabDirVisual(QTVarios.WDialogo):
             self.gborrar()
 
 
-class DirVisual():
+class DirVisual:
     def __init__(self, tablero):
         self.tablero = tablero
         self.ultTareaSelect = None
@@ -905,72 +907,50 @@ class DirVisual():
             return False
 
     def mousePressEvent(self, event):
+        siRight = event.button() == QtCore.Qt.RightButton
         p = event.pos()
         a1h8 = self.punto2a1h8(p)
-        if event.button() == QtCore.Qt.LeftButton:
-            m = int(event.modifiers())
-            siCtrl = (m & QtCore.Qt.ControlModifier) > 0
-            if siCtrl:
-                li_tareas = self.guion.tareasPosicion(p)
-                if li_tareas:
-                    pos_guion, tarea = li_tareas[0]
-                    self.w.g_guion.goto(pos_guion, 0)
-                    self.w.gborrar([pos_guion,])
-                    return
-                a1h8 = self.punto2a1h8(p)
-                pz_borrar = self.tablero.dameNomPiezaEn(a1h8)
+        m = int(event.modifiers())
+        if siRight and (m & QtCore.Qt.ControlModifier) > 0:
+            self.terminar()
+            return True
+
+        li_tareas = self.guion.tareasPosicion(p)
+
+        if siRight:
+            pz_borrar = self.tablero.dameNomPiezaEn(a1h8)
+            menu = Controles.Menu(self.tablero)
+            dicPieces = TrListas.dicNomPiezas()
+            icoPiece = self.tablero.piezas.icono
+
+            if pz_borrar or len(li_tareas):
+                mrem = menu.submenu(_("Remove"), Iconos.Delete())
                 if pz_borrar:
+                    rotulo = dicPieces[pz_borrar.upper()]
+                    mrem.opcion(("rem_pz", None), rotulo, icoPiece(pz_borrar))
+                    mrem.separador()
+                for pos_guion, tarea in li_tareas:
+                    rotulo = "%s - %s - %s" % (tarea.txt_tipo(), tarea.nombre(), tarea.info())
+                    mrem.opcion(("rem_gr", pos_guion), rotulo, Iconos.Delete())
+                    mrem.separador()
+                menu.separador()
+
+            for pz in "KQRBNPkqrbnp":
+                if pz != pz_borrar:
+                    if pz == "k":
+                        menu.separador()
+                    menu.opcion(("create", pz), dicPieces[pz.upper()], icoPiece(pz))
+            resp = menu.lanza()
+            if resp is not None:
+                orden, arg = resp
+                if orden == "rem_gr":
+                    self.w.g_guion.goto(arg, 0)
+                    self.w.gborrar()
+                elif orden == "rem_pz":
                     self.w.creaTarea("B", pz_borrar, a1h8, -1)
-                    return
 
-        elif event.button() == QtCore.Qt.RightButton:
-            m = int(event.modifiers())
-            siCtrl = (m & QtCore.Qt.ControlModifier) > 0
-            li_tareas = self.guion.tareasPosicion(p)
-            if siCtrl and len(li_tareas) > 0:
-                pos_guion, tarea = li_tareas[0]
-                self.w.gborrar([pos_guion,])
-                return
-
-            siAlt = (m & QtCore.Qt.AltModifier) > 0
-
-            if siAlt:
-                pz_borrar = self.tablero.dameNomPiezaEn(a1h8)
-                menu = Controles.Menu(self.tablero)
-                dicPieces = TrListas.dicNomPiezas()
-                icoPiece = self.tablero.piezas.icono
-
-                if pz_borrar or len(li_tareas):
-                    mrem = menu.submenu(_("Remove"), Iconos.Delete())
-                    if pz_borrar:
-                        rotulo = dicPieces[pz_borrar.upper()]
-                        mrem.opcion(("rem_pz", None), rotulo, icoPiece(pz_borrar))
-                        mrem.separador()
-                    for pos_guion, tarea in li_tareas:
-                        rotulo = "%s - %s - %s" % (tarea.txt_tipo(), tarea.nombre(), tarea.info())
-                        mrem.opcion(("rem_gr", pos_guion), rotulo, Iconos.Delete())
-                        mrem.separador()
-                    menu.separador()
-
-                for pz in "KQRBNPkqrbnp":
-                    if pz != pz_borrar:
-                        if pz == "k":
-                            menu.separador()
-                        menu.opcion(("create", pz), dicPieces[pz.upper()], icoPiece(pz))
-                resp = menu.lanza()
-                if resp is not None:
-                    orden, arg = resp
-                    if orden == "rem_gr":
-                        self.w.g_guion.goto(arg, 0)
-                        self.w.gborrar()
-                    elif orden == "rem_pz":
-                        self.w.creaTarea("B", pz_borrar, a1h8, -1)
-
-                    elif orden == "create":
-                        self.w.creaTarea("C", arg, a1h8, -1)
-            else:
-                self.terminar()
-
+                elif orden == "create":
+                    self.w.creaTarea("C", arg, a1h8, -1)
             return True
 
         if self.director:
@@ -1060,4 +1040,3 @@ class DirVisual():
         if self.w:
             self.w.terminar()
             self.w = None
-

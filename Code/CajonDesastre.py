@@ -4,7 +4,7 @@ import os
 import shutil
 import sqlite3
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import BaseConfig
 from Code import Util

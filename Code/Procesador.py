@@ -24,6 +24,7 @@ from Code import GestorFideFics
 from Code import GestorMateMap
 from Code import GestorMicElo
 from Code import GestorCompeticion
+from Code import GestorOpeningLines
 from Code import GestorPGN
 from Code import GestorPerson
 from Code import GestorRoutes
@@ -32,6 +33,7 @@ from Code import GestorSolo
 from Code import GestorPartida
 from Code import GestorTorneo
 from Code import Presentacion
+from Code import OpeningLines
 from Code import GestorWashing
 from Code import GestorPlayPGN
 from Code.QT import DatosNueva
@@ -62,7 +64,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import PantallaDatabase
 from Code.QT import PantallaManualSave
-from Code.QT import WBDatabaseFEN
+from Code.QT import PantallaDatabaseFEN
 from Code.QT import WOpeningGuide
 from Code.QT import PantallaKibitzers
 from Code.QT import POLines
@@ -180,6 +182,8 @@ class Procesador:
         self.pantalla.activaJuego(False, False)
         self.tablero.exePulsadoNum = None
         self.tablero.ponPosicion(self.posicionInicial)
+        self.tablero.borraMovibles()
+        self.tablero.quitaFlechas()
         self.pantalla.ajustaTam()
         self.pantalla.ponTitulo()
         self.pararMotores()
@@ -707,8 +711,6 @@ class Procesador:
             self.gestor.inicio(resp)
 
     def tools(self):
-        # self.openings()
-        # return
         menu = QTVarios.LCMenu(self.pantalla)
 
         menu.opcion("juega_solo", _("Create your own game"), Iconos.JuegaSolo())
@@ -742,7 +744,7 @@ class Procesador:
         menu1.separador()
         menu1.opcion("bookguide", _("Personal Opening Guide"), Iconos.BookGuide())
         menu1.separador()
-        menu1.opcion("openings", _("Opening lines") + " [WORK IN PROGRESS]", Iconos.OpeningLines())
+        menu1.opcion("openings", _("Opening lines"), Iconos.OpeningLines())
         menu.separador()
 
         menu1 = menu.submenu(_("Engines"), Iconos.Motores())
@@ -790,11 +792,41 @@ class Procesador:
                 self.openings()
 
     def openings(self):
-        result = POLines.openingLines(self)
-        if result:
-            fichero, basepv, title = result
-            POLines.study(self, fichero)
+        dicline = POLines.openingLines(self)
+        if dicline:
+            if "TRAIN" in dicline:
+                resp = "tr_%s" % dicline["TRAIN"]
+            else:
+                resp = POLines.study(self, dicline["file"])
+            if resp is None:
+                self.openings()
+            else:
+                pathFichero = os.path.join(self.configuracion.folderOpenings, dicline["file"])
+                if resp == "tr_sequential":
+                    self.openingsTrainingSequential(pathFichero)
+                elif resp == "tr_static":
+                    self.openingsTrainingStatic(pathFichero)
+                elif resp == "tr_positions":
+                    self.openingsTrainingPositions(pathFichero)
+
+
+    def openingsTrainingSequential(self, pathFichero):
+        self.gestor = GestorOpeningLines.GestorOpeningLines(self)
+        self.gestor.inicio(pathFichero, "sequential", 0)
+
+    def openingsTrainingStatic(self, pathFichero):
+        dbop = OpeningLines.Opening(pathFichero)
+        num_linea = POLines.selectLine(self, dbop)
+        dbop.close()
+        if num_linea is not None:
+            self.gestor = GestorOpeningLines.GestorOpeningLines(self)
+            self.gestor.inicio(pathFichero, "static", num_linea)
+        else:
             self.openings()
+
+    def openingsTrainingPositions(self, pathFichero):
+        self.gestor = GestorOpeningLines.GestorOpeningLinesPositions(self)
+        self.gestor.inicio(pathFichero)
 
     def kibitzers(self):
         w = PantallaKibitzers.WKibitzers(self.pantalla, self)
@@ -819,7 +851,7 @@ class Procesador:
     #     self.procesarAccion(k_terminar)
 
     def databaseFEN(self): # TODO
-        w = WBDatabaseFEN.WBDatabaseFEN(self.pantalla, self)
+        w = PantallaDatabaseFEN.WBDatabaseFEN(self.pantalla, self)
         w.exec_()
 
     def manual_save(self):

@@ -3,7 +3,7 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+ Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
  
  McBrain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@ public:
   Pawns::Table pawnsTable;
   Material::Table materialTable;
   Endgames endgames;
-  size_t PVIdx;
-  int selDepth, nmp_ply, pair;
+  size_t PVIdx, multiPV;
+  int selDepth, nmp_ply,  pair;
   std::atomic<uint64_t> nodes, tbHits;
 
   Position rootPos;
@@ -100,11 +100,19 @@ struct ThreadPool : public std::vector<Thread*> {
   void init(size_t); // No constructor and destructor, threads rely on globals that should
   void exit();       // be initialized and valid during the whole thread lifetime.
   void start_thinking(Position&, StateListPtr&, const Search::LimitsType&, bool = false);
+  void clear();
   void set(size_t);
 
   MainThread* main()        const { return static_cast<MainThread*>(front()); }
   uint64_t nodes_searched() const { return accumulate(&Thread::nodes); }
   uint64_t tb_hits()        const { return accumulate(&Thread::tbHits); }
+  
+  Depth lowestDepth(){
+    Depth lowest = DEPTH_MAX;
+    for (Thread* th: *this)
+        lowest = std::min(lowest, th->rootDepth);
+    return lowest;
+  } 
 
   std::atomic_bool stop, ponder, stopOnPonderhit;
 

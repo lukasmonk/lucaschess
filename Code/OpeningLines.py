@@ -1,26 +1,47 @@
 import os
 import sqlite3
-import atexit
+import random
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import Util
 from Code import Partida
 from Code import PGNreader
 from Code import Books
+from Code import DBgames
 from Code.QT import QTVarios
 from Code.QT import QTUtil2
-
 
 class ListaOpenings:
     def __init__(self, configuracion):
         self.folder = configuracion.folderOpenings
-        self.fichero = os.path.join(self.folder, "index.pk")
+        self.fichero = os.path.join(self.folder, "openinglines.pk")
 
         self.lista = Util.recuperaVar(self.fichero)
         if self.lista is None:
-            self.lista = self.read()
+            self.lista = self.read()    # file, lines, title, pv
             self.save()
+        else:
+            self.testdates()
+
+    def testdates(self):
+        index_date = Util.datefile(self.fichero)
+
+        for pos, dic in enumerate(self.lista):
+            pathfile = os.path.join(self.folder, dic["file"])
+            file_date = Util.datefile(pathfile)
+            if file_date is None:
+                self.reiniciar()
+                break
+            if file_date > index_date:
+                op = Opening(pathfile)
+                self.lista[pos]["lines"] = len(op)
+                op.close()
+                self.save()
+
+    def reiniciar(self):
+        self.lista = self.read()
+        self.save()
 
     def __len__(self):
         return len(self.lista)
@@ -29,9 +50,9 @@ class ListaOpenings:
         return self.lista[item] if self.lista and item < len(self.lista) else None
 
     def __delitem__(self, item):
-        name, pv, tit = self.lista[item]
+        dicline = self.lista[item]
         del self.lista[item]
-        os.remove(os.path.join(self.folder, name))
+        os.remove(os.path.join(self.folder, dicline["file"]))
         self.save()
 
     def arriba(self, item):
@@ -50,36 +71,20 @@ class ListaOpenings:
         else:
             return False
 
-    def refresh(self):
-        dic = {}
-        for entry in Util.listdir(self.folder):
-            if entry.name.endswith(".opk"):
-                op = Opening(entry.path)
-                dic[entry.name] = (entry.name, op.basePV, op.title)
-                op.close()
-        liborrar = []
-        st_esta = set()
-        for n, (fichero, basePV, title) in enumerate(self.lista):
-            if fichero in dic:
-                self.lista[n] = dic[fichero]
-                st_esta.add(fichero)
-            else:
-                liborrar.append(n)
-        for x in range(len(liborrar)-1, -1, -1):
-            del self.lista[x]
-
-        for fichero in dic:
-            if fichero not in st_esta:
-                self.lista.append(dic[fichero])
-        self.save()
-
     def read(self):
         li = []
         for entry in Util.listdir(self.folder):
             fichero = entry.name
             if fichero.endswith(".opk"):
                 op = Opening(entry.path)
-                li.append((fichero, op.basePV, op.title))
+                dicline = {
+                    "file": fichero,
+                    "pv": op.basePV,
+                    "title": op.title,
+                    "lines": len(op),
+                    "withtrainings": op.withTrainings()
+                }
+                li.append(dicline)
                 op.close()
         return li
 
@@ -88,9 +93,8 @@ class ListaOpenings:
 
     def select_filename(self, name):
         name = name.strip().replace(" ", "_")
-        name = Util.validNomFichero(name)
-        while "__" in name:
-            name = name.replace("__", "_")
+        name = Util.asciiNomFichero(name)
+
         plant = name + "%d.opk"
         file = name + ".opk"
         num = 0
@@ -100,10 +104,17 @@ class ListaOpenings:
         return file
 
     def filepath(self, num):
-        return os.path.join(self.folder, self.lista[num][0])
+        return os.path.join(self.folder, self.lista[num]["file"])
 
     def new(self, file, basepv, title):
-        self.lista.append((file, basepv, title))
+        dicline = {
+            "file": file,
+            "pv": basepv,
+            "title": title,
+            "lines": 0,
+            "withtrainings": False
+        }
+        self.lista.append(dicline)
         op = Opening(self.filepath(len(self.lista)-1))
         op.setbasepv(basepv)
         op.settitle(title)
@@ -114,11 +125,14 @@ class ListaOpenings:
         op = Opening(self.filepath(num))
         op.settitle(title)
         op.close()
-        file, pv, ant_title = self.lista[num]
-        self.lista[num] = (file, pv, title)
+        self.lista[num]["title"] = title
 
-    def remove(self, lines):
-        pass
+    def add_training_file(self, file):
+        for dicline in self.lista:
+            if file == dicline["file"]:
+                dicline["withtrainings"] = True
+                self.save()
+                return
 
 
 class Opening:
@@ -126,7 +140,6 @@ class Opening:
         self.nomFichero = nomFichero
 
         self._conexion = sqlite3.connect(nomFichero)
-        atexit.register(self.close)
 
         self.cache = {}
         self.max_cache = 4000
@@ -141,10 +154,16 @@ class Opening:
         self.basePV = self.getconfig("BASEPV", "")
         self.title = self.getconfig("TITLE", os.path.basename(nomFichero).split(".")[0])
 
-    def getOtras(self, configuracion):
+        self.tablero = None
+
+    def setdbVisual_Tablero(self, tablero):
+        self.tablero = tablero
+
+    def getOtras(self, configuracion, partida):
         liOp = ListaOpenings(configuracion)
         fich = os.path.basename(self.nomFichero)
-        liOp = [(fichero, titulo) for fichero, pv, titulo in liOp.lista if fichero != fich and pv.startswith(self.basePV)]
+        pvbase = partida.pv()
+        liOp = [(dic["file"], dic["title"]) for dic in liOp.lista if dic["file"] != fich and (pvbase.startswith(dic["pv"]) or dic["pv"].startswith(pvbase))]
         return liOp
 
     def getfenvalue(self, fenM2):
@@ -154,11 +173,199 @@ class Opening:
     def setfenvalue(self, fenM2, dic):
         self.db_fenvalues[fenM2] = dic
 
+    def removeAnalisis(self, tmpBP, mensaje):
+        for n, fenM2 in enumerate(self.db_fenvalues.keys()):
+            tmpBP.inc()
+            tmpBP.mensaje(mensaje%n)
+            if tmpBP.siCancelado():
+                break
+            dic = self.getfenvalue(fenM2)
+            if "ANALISIS" in dic:
+                del dic["ANALISIS"]
+                self.setfenvalue(fenM2, dic)
+        self.packAlTerminar()
+
     def getconfig(self, key, default=None):
         return self.db_config.get(key, default)
 
     def setconfig(self, key, value):
         self.db_config[key] = value
+
+    def training(self):
+        return self.getconfig("TRAINING")
+
+    def setTraining(self, reg):
+        return self.setconfig("TRAINING", reg)
+
+    def preparaTraining(self, reg):
+        lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
+        maxmoves = reg["MAXMOVES"]
+        if maxmoves:
+            for num, lipv in enumerate(lilipv):
+                if len(lipv) > maxmoves:
+                    lilipv[num] = lipv[:maxmoves]
+
+        siBlancas = reg["COLOR"] == "WHITE"
+
+        if reg["RANDOM"]:
+            random.shuffle(lilipv)
+
+        ligamesST = []
+        ligamesSQ = []
+        stPV = set()
+        dicFENm2 = {}
+        for lipv in lilipv:
+            # Siempre termina el usuario
+            if len(lipv) % 2 == (0 if siBlancas else 1):
+                lipv = lipv[:-1]
+
+            # Duplicados
+            pv = "".join(lipv)
+            if pv in stPV:
+                continue
+            stPV.add(pv)
+
+            game = {}
+            game["LIPV"] = lipv
+            game["NOERROR"] = 0
+            game["TRIES"] = []
+
+            ligamesST.append(game)
+            game = dict(game)
+            ligamesSQ.append(game)
+            LCEngine.setFenInicial()
+            for pv in lipv:
+                fen = LCEngine.getFen()
+                fenM2 = LCEngine.fen2fenM2(fen)
+                if fenM2 not in dicFENm2:
+                    dicFENm2[fenM2] = set()
+                dicFENm2[fenM2].add(pv)
+                LCEngine.makeMove(pv)
+
+        reg["LIGAMES_STATIC"] = ligamesST
+        if reg["RANDOM"]:
+            random.shuffle(ligamesSQ)
+        reg["LIGAMES_SEQUENTIAL"] = ligamesSQ
+        reg["DICFENM2"] = dicFENm2
+
+        bcolor = " w " if siBlancas else " b "
+        liTrainPositions = []
+        for fenM2 in dicFENm2:
+            if bcolor in fenM2:
+                data = {}
+                data["FENM2"] = fenM2
+                data["MOVES"] = dicFENm2[fenM2]
+                data["NOERROR"] = 0
+                data["TRIES"] = []
+                liTrainPositions.append(data)
+        random.shuffle(liTrainPositions)
+        reg["LITRAINPOSITIONS"] = liTrainPositions
+
+    def createTraining(self, reg, configuracion):
+        self.preparaTraining(reg)
+
+        reg["DATECREATION"] = Util.hoy()
+        self.setconfig("TRAINING", reg)
+        self.setconfig("ULT_PACK", 100)  # Se le obliga al VACUUM
+
+        lo = ListaOpenings(configuracion)
+        lo.add_training_file(os.path.basename(self.nomFichero))
+
+    def withTrainings(self):
+        return "TRAINING" in self.db_config
+
+    def updateTraining(self):
+        reg = self.training()
+        reg1 = {}
+        for key in ("MAXMOVES", "COLOR", "RANDOM"):
+            reg1[key] = reg[key]
+        self.preparaTraining(reg1)
+
+        for tipo in ("LIGAMES_SEQUENTIAL", "LIGAMES_STATIC"):
+            # Los que estan pero no son, los borramos
+            liBorrados = []
+            for pos, game in enumerate(reg[tipo]):
+                pv = " ".join(game["LIPV"])
+                ok = False
+                for game1 in reg1[tipo]:
+                    pv1 = " ".join(game1["LIPV"])
+                    if pv == pv1:
+                        ok = True
+                        break
+                if not ok:
+                    liBorrados.append(pos)
+            if liBorrados:
+                li = reg[tipo]
+                liBorrados.sort(reverse=True)
+                for x in liBorrados:
+                    del li[x]
+                reg[tipo] = li
+
+            # Los que son pero no estan
+            liMas = []
+            for game1 in reg1[tipo]:
+                pv1 = " ".join(game1["LIPV"])
+                ok = False
+                for game in reg[tipo]:
+                    pv = " ".join(game["LIPV"])
+                    if pv == pv1:
+                        ok = True
+                        break
+                if not ok:
+                    liMas.append(game1)
+            if liMas:
+                li = reg[tipo]
+                liMas.sort(reverse=True)
+                for game in liMas:
+                    li.insert(0, game)
+                reg[tipo] = li
+
+        reg["DICFENM2"] = reg1["DICFENM2"]
+
+        # Posiciones
+
+        # Estan pero no son
+        liBorrados = []
+        tipo = "LITRAINPOSITIONS"
+        for pos, data in enumerate(reg[tipo]):
+            fen = data["FENM2"]
+            ok = False
+            for data1 in reg1[tipo]:
+                fen1 = data1["FENM2"]
+                if fen == fen1:
+                    ok = True
+                    break
+            if not ok:
+                liBorrados.append(pos)
+        if liBorrados:
+            li = reg[tipo]
+            liBorrados.sort(reverse=True)
+            for x in liBorrados:
+                del li[x]
+            reg[tipo] = li
+
+        # Los que son pero no estan
+        liMas = []
+        for data1 in reg1[tipo]:
+            fen1 = data1["FENM2"]
+            ok = False
+            for data in reg[tipo]:
+                fen = data["FENM2"]
+                if fen == fen1:
+                    ok = True
+                    break
+            if not ok:
+                liMas.append(data)
+        if liMas:
+            li = reg[tipo]
+            li.insert(0, liMas)
+            reg[tipo] = li
+
+        self.setconfig("TRAINING", reg)
+        self.packAlTerminar()
+
+    def packAlTerminar(self):
+        self.setconfig("ULT_PACK", 100)  # Se le obliga al VACUUM
 
     def settitle(self, title):
         self.setconfig("TITLE", title)
@@ -199,6 +406,7 @@ class Opening:
             sql = "select XPV from LINES ORDER BY XPV"
             cursor.execute(sql)
             li_xpv = [ raw[0] for raw in cursor.fetchall()]
+        cursor.close()
         return li_xpv
 
     def append(self, partida):
@@ -246,6 +454,7 @@ class Opening:
         cursor.execute(sql, (xpv_nue, partida_nue.save2blob(), xpv_ant))
         self._conexion.commit()
         self.add_cache(xpv_nue, partida_nue)
+        cursor.close()
         return num
 
     def __getitem__(self, num):
@@ -260,6 +469,7 @@ class Opening:
         partida = Partida.Partida()
         partida.blob2restore(blob)
         self.add_cache(xpv, partida)
+        cursor.close()
         return partida
 
     def __delitem__(self, num):
@@ -271,6 +481,7 @@ class Opening:
             del self.cache[xpv]
         del self.li_xpv[num]
         self._conexion.commit()
+        cursor.close()
 
     def __len__(self):
         return len(self.li_xpv)
@@ -285,6 +496,13 @@ class Opening:
             self.db_config.close()
             self.db_config = None
 
+            self.db_fenvalues.close()
+            self.db_fenvalues = None
+
+            if self.tablero:
+                self.tablero.dbVisual_close()
+                self.tablero = None
+
             if si_pack:
                 cursor = conexion.cursor()
                 cursor.execute("VACUUM")
@@ -293,17 +511,15 @@ class Opening:
 
             conexion.close()
 
-    def grabarPGN(self, owner, ficheroPGN, maxDepth):
+    def importarPGN(self, owner, partidabase, ficheroPGN, maxDepth):
         erroneos = duplicados = importados = 0
         dlTmp = QTVarios.ImportarFicheroPGN(owner)
         dlTmp.hideDuplicados()
         dlTmp.show()
 
-        sql = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
         cursor = self._conexion.cursor()
 
         base = self.getconfig("BASEPV")
-        partidabase = self.getpartidabase()
         njugbase = partidabase.numJugadas()
         n = 0
 
@@ -320,9 +536,9 @@ class Opening:
                 continue
 
             def haz_partida(partida, liMoves):
-                njg = partida.numJugadas()
+                njg = len(partida)
                 if len(liMoves) + njg > maxDepth:
-                    liMoves = liMoves[:maxDepth+njg]
+                    liMoves = liMoves[:maxDepth - njg]
                 pv = " ".join([move.pv for move in liMoves])
                 partida.leerPV(pv)
                 pv = partida.pv()
@@ -351,7 +567,7 @@ class Opening:
 
             partida = Partida.Partida()
             haz_partida(partida, g.moves.liMoves)
-            if n %1000:
+            if n % 50:
                 self._conexion.commit()
 
         cursor.close()
@@ -361,66 +577,8 @@ class Opening:
         dlTmp.actualiza(n, erroneos, duplicados, importados)
         dlTmp.ponContinuar()
 
-    def grabarPolyglot(self, ventana, ficheroBIN, depth, whiteBest, blackBest):
-        titulo = _("Import a polyglot book")
-        bp = QTUtil2.BarraProgreso1(ventana, titulo)
-        bp.ponTotal(0)
-        bp.ponRotulo(_X(_("Reading %1"), os.path.basename(ficheroBIN)))
-        bp.mostrar()
-
-        book = Books.Libro("P", ficheroBIN, ficheroBIN, True)
-        book.polyglot()
-
-        stFenM2 = set()  # para que no se produzca un circulo vicioso
-
+    def guardaPartidas(self, liPartidas):
         partidabase = self.getpartidabase()
-        cp = partidabase.ultPosicion
-
-        liPartidas = []
-
-        setFen = LCEngine.setFen
-        makeMove = LCEngine.makeMove
-        getFen = LCEngine.getFen
-        fen2fenM2 = LCEngine.fen2fenM2
-
-        def hazFEN(fen, ply, lipv_ant):
-            plyN = ply + 1
-            siWhite = " w " in fen
-            siMax = False
-            if whiteBest:
-                siMax = siWhite
-            if blackBest:
-                siMax = siMax or not siWhite
-
-            liPV = book.miraListaPV(fen, siMax)
-            if liPV:
-                sigue = False
-                for pv in liPV:
-                    setFen(fen)
-                    makeMove(pv)
-                    fenN = getFen()
-
-                    lipv_nue = lipv_ant[:]
-                    lipv_nue.append(pv)
-                    if plyN < depth:
-                        fenM2 = fen2fenM2(fenN)
-                        if fenM2 not in stFenM2:
-                            stFenM2.add(fenM2)
-                            hazFEN(fenN, plyN, lipv_nue)
-                            sigue = True
-            else:
-                sigue = False
-            if not sigue:
-                p = Partida.Partida()
-                p.leerPV(" ".join(lipv_ant))
-                liPartidas.append(p)
-                bp.ponTotal(len(liPartidas))
-                bp.pon(len(liPartidas))
-
-        hazFEN(cp.fen(), 0, partidabase.lipv())
-
-        bp.ponRotulo(_("Writing..."))
-
         sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
         sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
         cursor = self._conexion.cursor()
@@ -444,8 +602,129 @@ class Opening:
         self._conexion.commit()
         self.li_xpv.sort()
 
+    def importarPolyglot(self, ventana, partidabase, ficheroBIN, depth, siWhite):
+        titulo = _("Import a polyglot book")
+        bp = QTUtil2.BarraProgreso1(ventana, titulo)
+        bp.ponTotal(0)
+        bp.ponRotulo(_X(_("Reading %1"), os.path.basename(ficheroBIN)))
+        bp.mostrar()
+
+        book = Books.Libro("P", ficheroBIN, ficheroBIN, True)
+        book.polyglot()
+
+        cp = partidabase.ultPosicion
+
+        liPartidas = []
+
+        setFen = LCEngine.setFen
+        makeMove = LCEngine.makeMove
+        getFen = LCEngine.getFen
+
+        def hazFEN(fen, lipv_ant):
+            if bp.siCancelado():
+                return
+            siWhite1 = " w " in fen
+
+            liPV = book.miraListaPV(fen, siWhite1 == siWhite)
+            if liPV and len(lipv_ant) < depth:
+                for pv in liPV:
+                    setFen(fen)
+                    makeMove(pv)
+                    fenN = getFen()
+                    lipv_nue = lipv_ant[:]
+                    lipv_nue.append(pv)
+                    hazFEN(fenN, lipv_nue)
+            else:
+                p = Partida.Partida()
+                p.leerLIPV(lipv_ant)
+                liPartidas.append(p)
+                bp.ponTotal(len(liPartidas))
+                bp.pon(len(liPartidas))
+
+        hazFEN(cp.fen(), partidabase.lipv())
+
+        bp.ponRotulo(_("Writing..."))
+        self.guardaPartidas(liPartidas)
         bp.cerrar()
 
         return True
 
+    def importarSummary(self, ventana, partidabase, ficheroSummary, depth, siWhite):
+        titulo = _("Importing the summary of a database")
+        bp = QTUtil2.BarraProgreso1(ventana, titulo)
+        bp.ponTotal(0)
+        bp.ponRotulo(_X(_("Reading %1"), os.path.basename(ficheroSummary)))
+        bp.mostrar()
 
+        dbSTAT = DBgames.TreeSTAT(ficheroSummary)
+
+        if depth == 0:
+            depth = 99999
+
+        pvBase = partidabase.pv()
+        len_partidabase = len(partidabase)
+
+        liPartidas = []
+
+        def hazPV(lipv_ant):
+            if bp.siCancelado():
+                return
+            siWhite1 = len(lipv_ant) % 2 == 0
+
+            pv_ant = " ".join(lipv_ant)
+            liChildren = dbSTAT.children(pv_ant, False)
+
+            if len(liChildren) == 0 or len(lipv_ant) > depth:
+                p = Partida.Partida()
+                p.leerLIPV(lipv_ant)
+                if len(p) > len_partidabase:
+                    liPartidas.append(p)
+                    bp.ponTotal(len(liPartidas))
+                    bp.pon(len(liPartidas))
+                return
+
+            if siWhite1 == siWhite:
+                alm_max = None
+                tt_max = 0
+                for alm in liChildren:
+                    tt = alm.W + alm.B + alm.O + alm.D
+                    if tt > tt_max:
+                        tt_max = tt
+                        alm_max = alm
+                liChildren = [] if tt_max == 0 else [alm_max,]
+
+            for alm in liChildren:
+                li = lipv_ant[:]
+                li.append(alm.move)
+                hazPV(li)
+
+        hazPV(pvBase.split(" "))
+
+        bp.ponRotulo(_("Writing..."))
+        self.guardaPartidas(liPartidas)
+        bp.cerrar()
+
+        return True
+
+    def importarOtra(self, pathFichero, partida):
+        xpvbase = LCEngine.pv2xpv(partida.pv())
+        tambase = len(xpvbase)
+        otra = Opening(pathFichero)
+        liPartidas = []
+        for n, xpv in enumerate(otra.li_xpv):
+            if xpv.startswith(xpvbase) and tambase < len(xpv):
+                liPartidas.append(otra[n])
+        otra.close()
+        self.guardaPartidas(liPartidas)
+
+    def getAllFen(self):
+        stFENm2 = set()
+        lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
+        for lipv in lilipv:
+            LCEngine.setFenInicial()
+            for pv in lipv:
+                fen = LCEngine.getFen()
+                fenM2 = LCEngine.fen2fenM2(fen)
+                stFENm2.add(fenM2)
+                LCEngine.makeMove(pv)
+        return stFENm2

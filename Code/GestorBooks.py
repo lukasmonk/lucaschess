@@ -280,7 +280,7 @@ class GestorBooks(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         self.ponFlechaSC(jg.desde, jg.hasta)
         self.beepExtendido(siNuestra)

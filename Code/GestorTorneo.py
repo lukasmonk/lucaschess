@@ -4,7 +4,6 @@ from Code import Jugada
 from Code import Partida
 from Code.QT import PantallaTorneos
 from Code import Util
-from Code import VarGen
 from Code import XGestorMotor
 from Code.Constantes import *
 
@@ -17,7 +16,6 @@ class GestorTorneo(Gestor.Gestor):
         self.torneo = torneo
         self.torneoTMP = torneo.clone()
         self.torneoTMP._liGames = liGames
-        self.fenInicial = self.torneo.fenNorman()
         self.liGames = liGames
         self.pantalla.ponActivarTutor(False)
         self.ponPiezasAbajo(True)
@@ -33,6 +31,7 @@ class GestorTorneo(Gestor.Gestor):
         numGames = len(self.liGames)
         for ng, gm in enumerate(self.liGames):
             self.siguienteJuego(gm, ng + 1, numGames)
+            self.procesador.pararMotores()
             if self.siTerminar:
                 break
             if self.wresult:
@@ -43,6 +42,7 @@ class GestorTorneo(Gestor.Gestor):
 
     def siguienteJuego(self, gm, ngame, numGames):
         self.estado = kJugando
+        self.fenInicial = self.torneo.fenNorman()
 
         self.gm = gm
         self.maxSegundos = self.gm.minutos() * 60.0
@@ -71,8 +71,8 @@ class GestorTorneo(Gestor.Gestor):
 
             bk = rv.book()
             if bk == "*":
-                bk = VarGen.tbook
-            elif bk == "-":
+                bk = self.torneo.book()
+            if bk == "-":  # Puede que el torneo tenga "-"
                 bk = None
             if bk:
                 self.book[color] = Books.Libro("P", bk, bk, True)
@@ -118,8 +118,6 @@ class GestorTorneo(Gestor.Gestor):
             txt = "<b>[%s]</b> (%s) %s" % (rm.nombre, rm.abrTexto(), p.pgnSP())
             self.ponRotulo3(txt)
             self.showPV(rm.pv, 3)
-            # self.ponFlechaSC( rm.pv[:2], rm.pv[2:4] )
-            # QTUtil.refreshGUI()
         self.refresh()
         return not self.siTerminar
 
@@ -300,7 +298,7 @@ class GestorTorneo(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:

@@ -62,7 +62,7 @@ class WDailyTestBase(QTVarios.WDialogo):
 
     def leeParametros(self):
         param = Util.DicSQL(self.configuracion.ficheroDailyTest, tabla="parametros")
-        motor = param.get("MOTOR", "stockfish")
+        motor = param.get("MOTOR", "mcbrain")
         segundos = param.get("SEGUNDOS", 7)
         pruebas = param.get("PRUEBAS", 5)
         fns = param.get("FNS", "")
@@ -216,7 +216,7 @@ class WDailyTest(QTVarios.WDialogo):
 
         if motor.startswith("*"):
             motor = motor[1:]
-        confMotor = self.configuracion.buscaTutor(motor, "stockfish")
+        confMotor = self.configuracion.buscaTutor(motor, "mcbrain")
         self.xtutor = self.procesador.creaGestorMotor(confMotor, segundos * 1000, None)
         self.xtutor.maximizaMultiPV()
 

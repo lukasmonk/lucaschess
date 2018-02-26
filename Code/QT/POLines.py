@@ -1,13 +1,14 @@
 import os.path
+import copy
 
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 
+from Code import Util
 from Code import Partida
 from Code import OpeningLines
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
-from Code.QT import FormLayout
 from Code.QT import Grid
 from Code.QT import Iconos
 from Code.QT import PantallaAperturas
@@ -18,6 +19,7 @@ from Code.QT import Delegados
 from Code.QT import POLBoard
 from Code.QT import POLAnalisis
 from Code.QT import Voyager
+from Code.QT import FormLayout
 
 
 class WOpeningLines(QTVarios.WDialogo):
@@ -34,9 +36,9 @@ class WOpeningLines(QTVarios.WDialogo):
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("TITLE", _("Name"), 240)
         oColumnas.nueva("BASEPV", _("First moves"), 280)
+        oColumnas.nueva("NUMLINES", _("Lines"), 80, siCentrado=True)
         oColumnas.nueva("FILE", _("File"), 200)
         self.glista = Grid.Grid(self, oColumnas, siSelecFilas=True)
-        self.glista.setMinimumWidth(self.glista.anchoColumnas() + 20)
 
         liAcciones = (
             (_("Close"), Iconos.MainMenu(), self.terminar), None,
@@ -45,17 +47,58 @@ class WOpeningLines(QTVarios.WDialogo):
             (_("Up"), Iconos.Arriba(), self.arriba),
             (_("Down"), Iconos.Abajo(), self.abajo), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
+            (_("Reinit"), Iconos.Reiniciar(), self.reiniciar), None,
         )
         tb = Controles.TBrutina(self, liAcciones)
 
+        sp = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        tb.setSizePolicy(sp)
+
+        liAcciones = (
+            (_("Sequential"), Iconos.TrainSequential(), self.tr_sequential), None,
+            (_("Static"), Iconos.TrainStatic(), self.tr_static), None,
+            (_("Positions"), Iconos.TrainPositions(), self.tr_positions),
+        )
+        tbtrain = Controles.TBrutina(self, liAcciones, siTexto=False)
+
+        lbtrain = Controles.LB(self, _("Trainings")).alinCentrado().ponFondoN("lightgray")
+        lytrain = Colocacion.V().control(lbtrain).control(tbtrain).margen(0)
+        self.wtrain = QtGui.QWidget()
+        self.wtrain.setLayout(lytrain)
+
         # Colocamos
-        ly = Colocacion.V().control(tb).control(self.glista).margen(3)
+
+        lytb = Colocacion.H().control(tb).control(self.wtrain)
+        ly = Colocacion.V().otro(lytb).control(self.glista).margen(3)
 
         self.setLayout(ly)
 
         self.registrarGrid(self.glista)
         self.recuperarVideo()
 
+        self.wtrain.setVisible(False)
+        self.glista.gotop()
+
+    def tr_(self, tipo):
+        recno = self.glista.recno()
+        op = self.listaOpenings[recno]
+        op["TRAIN"] = tipo
+        self.resultado = op
+        self.guardarVideo()
+        self.accept()
+
+    def tr_sequential(self):
+        self.tr_("sequential")
+
+    def tr_static(self):
+        self.tr_("static")
+
+    def tr_positions(self):
+        self.tr_("positions")
+
+    def reiniciar(self):
+        self.listaOpenings.reiniciar()
+        self.glista.refresh()
         self.glista.gotop()
 
     def arriba(self):
@@ -98,24 +141,19 @@ class WOpeningLines(QTVarios.WDialogo):
 
         if si_expl:
             QTUtil2.mensaje(self, _("Secondly you have to choose a name for this opening studio."))
-        while True:
-            liGen = [(None, None)]
-            liGen.append((_("Opening studio name") + ":", name))
-            resultado = FormLayout.fedit(liGen, title=_("Opening studio name"), parent=self, icon=Iconos.OpeningLines(), anchoMinimo=460)
-            if resultado:
-                accion, liResp = resultado
-                name = liResp[0]
-                if name:
-                    file = self.listaOpenings.select_filename(name)
-                    break
-                else:
-                    return
-            else:
-                return
 
-        self.listaOpenings.new(file, pv, name)
-        self.glista.gobottom()
-        self.glista.refresh()
+        liGen = [(None, None)]
+        liGen.append((_("Opening studio name") + ":", name))
+        resultado = FormLayout.fedit(liGen, title=_("Opening studio name"), parent=self, icon=Iconos.OpeningLines(), anchoMinimo=460)
+        if resultado:
+            accion, liResp = resultado
+            name = liResp[0]
+            if name:
+                file = self.listaOpenings.select_filename(name)
+                self.listaOpenings.new(file, pv, name)
+                self.resultado = self.listaOpenings[-1]
+                self.guardarVideo()
+                self.accept()
 
     def borrar(self):
         li = self.glista.recnosSeleccionados()
@@ -123,7 +161,7 @@ class WOpeningLines(QTVarios.WDialogo):
             mens = _("Do you want to delete all selected records?")
             mens += "\n"
             for num, fila in enumerate(li, 1):
-                mens += "\n%d. %s" % (num, self.listaOpenings[fila][2])
+                mens += "\n%d. %s" % (num, self.listaOpenings[fila]["title"])
             if QTUtil2.pregunta(self, mens):
                 li.sort(reverse=True)
                 for fila in li:
@@ -137,14 +175,16 @@ class WOpeningLines(QTVarios.WDialogo):
         col = oColumna.clave
         op = self.listaOpenings[fila]
         if col == "TITLE":
-            return op[2]
+            return op["title"]
         elif col == "FILE":
-            return op[0]
+            return op["file"]
+        elif col == "NUMLINES":
+            return op["lines"]
         elif col == "BASEPV":
-            pv = op[1]
+            pv = op["pv"]
             if pv:
                 p = Partida.Partida()
-                p.leerPV(op[1])
+                p.leerPV(pv)
                 return p.pgnBaseRAW()
             else:
                 return ""
@@ -154,6 +194,14 @@ class WOpeningLines(QTVarios.WDialogo):
         if valor:
             self.listaOpenings.change_title(fila, valor)
 
+    def gridCambiadoRegistro(self, grid, fila, columna):
+        ok = False
+        if fila >= 0:
+            op = self.listaOpenings[fila]
+            ok = op["withtrainings"]
+
+        self.wtrain.setVisible(ok)
+
     def closeEvent(self, event):  # Cierre con X
         self.guardarVideo()
 
@@ -162,30 +210,31 @@ class WOpeningLines(QTVarios.WDialogo):
         self.reject()
 
 
-class WStudy(QTVarios.WDialogo):
+class WLines(QTVarios.WDialogo):
     def __init__(self, procesador, dbop):
-
         self.dbop = dbop
         title = dbop.gettitle()
 
-        QTVarios.WDialogo.__init__(self, procesador.pantalla, title, Iconos.Study(), "studyOpening")
+        QTVarios.WDialogo.__init__(self, procesador.pantalla, title, Iconos.OpeningLines(), "studyOpening")
 
         self.procesador = procesador
         self.configuracion = procesador.configuracion
         self.partidabase = self.dbop.getpartidabase()
         self.num_jg_inicial = self.partidabase.numJugadas()
+        self.num_jg_actual = None
         self.partida = None
+
+        self.resultado = None
         siFigurinesPGN = self.configuracion.figurinesPGN
 
         liAcciones = (
             (_("Close"), Iconos.MainMenu(), self.terminar), None,
-            # (_("New"), Iconos.Nuevo(), self.new), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
-            # (_("Train"), Iconos.Study(), self.train), None,
-            (_("Voyager 2"), Iconos.Voyager1(), self.voyager2), None,
-            (_("Import"), Iconos.Mezclar(), self.importar), None
+            (_("Import"), Iconos.Mezclar(), self.importar), None,
+            (_("Utilities"), Iconos.Utilidades(), self.utilidades), None,
+            (_("Train"), Iconos.Study(), self.train), None,
         )
-        self.tb = tb = Controles.TBrutina(self, liAcciones)
+        self.tb = Controles.TBrutina(self, liAcciones)
 
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("LINE", _("Line"), 35, edicion=Delegados.EtiquetaPOS(False, True))
@@ -199,110 +248,352 @@ class WStudy(QTVarios.WDialogo):
         self.glines.ponAltoFila(self.configuracion.altoFilaPGN)
 
         self.pboard = POLBoard.BoardLines(self, self.configuracion)
-        self.pboard.ponPartidaBase(self.partidabase)
-        self.pboard.ponPartida(self.partidabase)
 
         self.tabsanalisis = POLAnalisis.TabsAnalisis(self, self.procesador, self.configuracion)
-        lyg = Colocacion.H().control(self.tabsanalisis).margen(3)
-        self.gb_analysis = Controles.GB(self, _("Analysis"), lyg)
-        self.gb_analysis.conectar(self.analisis)
-        self.gb_analysis.setChecked(True)
 
-        lyLV = Colocacion.V().control(self.glines).control(self.gb_analysis)
-        ly1 = Colocacion.H().control(self.pboard).otro(lyLV)
-        layout = Colocacion.V().control(tb).otro(ly1)
+        splitter = QtGui.QSplitter(self)
+        splitter.setOrientation(QtCore.Qt.Vertical)
+        splitter.addWidget(self.glines)
+        splitter.addWidget(self.tabsanalisis)
+
+        sp = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        splitter.setSizePolicy(sp)
+
+        self.registrarSplitter(splitter, "SPLITTER")
+
+        lyLV = Colocacion.V().control(splitter)
+        lyTB = Colocacion.V().control(self.tb).control(self.pboard)
+        layout = Colocacion.H().otro(lyTB).otro(lyLV).margen(3)
         self.setLayout(layout)
 
         self.colorPar = QTUtil.qtColor("#DBDAD9")
         self.colorNon = QTUtil.qtColor("#F1EFE9")
         self.colorLine = QTUtil.qtColor("#CDCCCB")
 
-        self.analisis()
         self.partida = self.partidabase
+
         self.pboard.MoverFinal()
 
         self.recuperarVideo()
 
-    def voyager2(self):
+    def utilidades(self):
+        menu = QTVarios.LCMenu(self)
+        submenu = menu.submenu(_("Analysis"), Iconos.Analizar())
+        submenu.opcion(self.ta_massive, _("Mass analysis"), Iconos.Analizar())
+        submenu.separador()
+        submenu.opcion(self.ta_remove, _("Delete all previous analysis"), Iconos.Delete())
+        menu.separador()
+        resp = menu.lanza()
+        if resp:
+            resp()
+
+    def ta_massive(self):
+        dicVar = self.configuracion.leeVariables("MASSIVE_OLINES")
+
+        liGen = [FormLayout.separador]
+
+        config = FormLayout.Combobox(_("Engine"), self.configuracion.comboMotoresMultiPV10(4))
+        liGen.append((config, dicVar.get("ENGINE", self.configuracion.tutor)))
+
+        liGen.append((_("Duration of engine analysis (secs)") + ":", dicVar.get("SEGUNDOS", float(self.configuracion.tiempoTutor / 1000.0))))
+        liDepths = [("--", 0)]
+        for x in range(1, 51):
+            liDepths.append((str(x), x))
+        config = FormLayout.Combobox(_("Depth"), liDepths)
+        liGen.append((config, dicVar.get("DEPTH", self.configuracion.depthTutor)))
+
+        li = [(_("Maximum"), 0)]
+        for x in (1, 3, 5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200):
+            li.append((str(x), x))
+        config = FormLayout.Combobox(_("Number of moves evaluated by engine(MultiPV)"), li)
+        liGen.append((config, dicVar.get("MULTIPV", self.configuracion.tutorMultiPV)))
+
+        liGen.append(FormLayout.separador)
+        liGen.append((_("Redo any existing prior analyses (if they exist)") + ":", dicVar.get("REDO", False)))
+
+        resultado = FormLayout.fedit(liGen, title=_("Mass analysis"), parent=self, anchoMinimo=460,
+                                     icon=Iconos.Analizar())
+        if resultado is None:
+            return
+
+        claveMotor, tiempo, depth, multiPV, redo = resultado[1]
+        ms = int(tiempo * 1000)
+        if ms == 0 and depth == 0:
+            return
+
+        dicVar["ENGINE"] = claveMotor
+        dicVar["SEGUNDOS"] = tiempo
+        dicVar["DEPTH"] = depth
+        dicVar["MULTIPV"] = multiPV
+        dicVar["REDO"] = redo
+        self.configuracion.escVariables("MASSIVE_OLINES", dicVar)
+
+        um = QTUtil2.unMomento(self)
+        stFensM2 = self.dbop.getAllFen()
+        if redo == False:
+            liBorrar = []
+            for fenM2 in stFensM2:
+                dic = self.dbop.getfenvalue(fenM2)
+                if "ANALISIS" in dic:
+                    liBorrar.append(fenM2)
+            for fenM2 in liBorrar:
+                stFensM2.remove(fenM2)
+
+        conf_engine = copy.deepcopy(self.configuracion.buscaMotor(claveMotor))
+        conf_engine.actMultiPV(multiPV)
+        xgestor = self.procesador.creaGestorMotor(conf_engine, ms, depth, True)
+
+        um.final()
+
+        mensaje = _("Move") + "  %d/" + str(len(stFensM2))
+        tmpBP = QTUtil2.BarraProgreso(self, _("Mass analysis"), "", len(stFensM2))
+
+        done = 0
+
+        for n, fenM2 in enumerate(stFensM2, 1):
+
+            if tmpBP.siCancelado():
+                break
+
+            tmpBP.inc()
+            tmpBP.mensaje(mensaje % n)
+
+            mrm = xgestor.analiza(fenM2 + " 0 1")
+            dic = self.dbop.getfenvalue(fenM2)
+            dic["ANALISIS"] = mrm
+            self.dbop.setfenvalue(fenM2, dic)
+            done += 1
+
+        tmpBP.cerrar()
+
+    def ta_remove(self):
+        if QTUtil2.pregunta(self, _("Are you sure?")):
+            total = len(self.dbop.db_fenvalues)
+            mensaje = _("Move") + "  %d/" + str(total)
+            tmpBP = QTUtil2.BarraProgreso(self, "", "", total)
+            self.dbop.removeAnalisis(tmpBP, mensaje)
+            tmpBP.cerrar()
+            self.glines.refresh()
+
+
+    def train(self):
+        if self.train_test():
+            menu = QTVarios.LCMenu(self)
+            menu.opcion("tr_sequential", _("Sequential"), Iconos.TrainSequential())
+            menu.separador()
+            menu.opcion("tr_static", _("Static"), Iconos.TrainStatic())
+            menu.separador()
+            menu.opcion("tr_positions", _("Positions"), Iconos.TrainPositions())
+            menu.separador()
+            submenu = menu.submenu(_("Configuration"), Iconos.Configurar())
+            submenu.opcion("update", _("Update current trainings"), Iconos.Reindexar())
+            submenu.separador()
+            submenu.opcion("new", _("Re-create all trainings"), Iconos.Modificar())
+            resp = menu.lanza()
+            if resp is None:
+                return
+            if resp.startswith("tr_"):
+                self.resultado = resp
+                self.accept()
+            elif resp == "new":
+                self.trainNew()
+            elif resp == "update":
+                self.trainUpdate()
+
+    def train_test(self):
+        if len(self.dbop) == 0:
+            return False
+        training = self.dbop.training()
+        if training is None:
+            return self.trainNew()
+        return True
+
+    def trainNew(self):
+        training = self.dbop.training()
+        if training is None:
+            color = "WHITE"
+            random_order = False
+            max_moves = 0
+        else:
+            color = training["COLOR"]
+            random_order = training["RANDOM"]
+            max_moves = training["MAXMOVES"]
+
+        liGen = [(None, None)]
+
+        liJ = [(_("White"), "WHITE"), (_("Black"), "BLACK")]
+        config = FormLayout.Combobox(_("Play with"), liJ)
+        liGen.append((config, color))
+
+        liGen.append((None, None))
+        liGen.append((_("Random order"), random_order))
+
+        liGen.append((None, None))
+        liGen.append((_("Maximum number of moves (0=all)"), max_moves))
+
+        resultado = FormLayout.fedit(liGen, title=_("New training"), parent=self, anchoMinimo=360, icon=Iconos.Study())
+        if resultado is None:
+            return
+
+        accion, liResp = resultado
+
+        reg = {}
+
+        reg["COLOR"], reg["RANDOM"], reg["MAXMOVES"] = liResp
+
+        self.dbop.createTraining(reg, self.configuracion)
+
+        QTUtil2.mensaje(self, _("The trainings of this opening has been created"))
+
+    def trainUpdate(self):
+        self.dbop.updateTraining()
+        QTUtil2.mensaje(self, _("The trainings have been updated"))
+
+    def addPartida(self, partida):
+        if partida.pv().startswith(self.partidabase.pv()):
+            siNueva, num_linea, siAppend = self.dbop.posPartida(partida)
+            if siNueva:
+                self.dbop.append(partida)
+            else:
+                if siAppend:
+                    self.dbop[num_linea] = partida
+            self.glines.refresh()
+        else:
+            QTUtil2.mensError(self, _X("New line must begin with %1", self.partidabase.pgnSP()))
+
+    def partidaActual(self):
         partida = Partida.Partida()
-        partida.leeOtra(self.partidabase)
-        ptxt = Voyager.voyagerPartida(self.owner, partida)
+        numcol = self.glines.posActualN()[1]
+        partida.leeOtra(self.partida if self.partida and numcol> 0 else self.partidabase)
+        if self.num_jg_actual is not None \
+            and self.num_jg_inicial <= self.num_jg_actual < len(partida):
+            partida.liJugadas = partida.liJugadas[:self.num_jg_actual+1]
+            partida.ultPosicion = partida.jugada(-1).posicion
+        return partida
+
+    def voyager2(self, partida):
+        ptxt = Voyager.voyagerPartida(self, partida)
         if ptxt:
             partida = Partida.Partida()
             partida.recuperaDeTexto(ptxt)
-            if self.partidabase.pv() in partida.pv():
-                siNueva, num_linea, siAppend = self.dbop.posPartida(partida)
-                if siNueva:
-                    self.dbop.append(partida)
-                else:
-                    if siAppend:
-                        self.dbop[num_linea] = partida
-                self.glines.refresh()
-            else:
-                QTUtil2.mensError(self, _X("New line must begin with %1", self.partidabase.pgnSP()))
+            self.addPartida(partida)
 
     def importar(self):
         menu = QTVarios.LCMenu(self)
 
-        liOp = self.dbop.getOtras(self.configuracion)
-        if liOp:
-            otra = menu.submenu(_("Other line openings"), Iconos.OpeningLines())
-            for fichero, titulo in liOp:
-                otra.opcion(("ol", fichero), titulo, Iconos.PuntoVerde())
+        def haz_menu(frommenu, part):
+            liOp = self.dbop.getOtras(self.configuracion, part)
+            if liOp:
+                otra = frommenu.submenu(_("Other opening lines"), Iconos.OpeningLines())
+                for fichero, titulo in liOp:
+                    otra.opcion(("ol", (fichero, part)), titulo, Iconos.PuntoVerde())
+                frommenu.separador()
+            frommenu.opcion(("pgn", part), _("PGN with variants"), Iconos.Tablero())
+            frommenu.separador()
+            frommenu.opcion(("polyglot", part), _("Polyglot book"), Iconos.Libros())
+            frommenu.separador()
+            frommenu.opcion(("summary", part), _("Database summary"), Iconos.DatabaseC())
+            frommenu.separador()
+            frommenu.opcion(("voyager2", part), _("Voyager 2"), Iconos.Voyager1())
+            frommenu.separador()
+            frommenu.opcion(("opening", part), _("Opening"), Iconos.Apertura())
+
+        partida = self.partidaActual()
+        if len(partida) > len(self.partidabase):
+            sub1 = menu.submenu(_("From current position"), Iconos.MoverLibre())
+            haz_menu(sub1, partida)
             menu.separador()
-        menu.opcion(("pgn", None), _("PGN with variants"), Iconos.Tablero())
-        menu.separador()
-        menu.opcion(("polyglot", None), _("Polyglot book"), Iconos.Libros())
-        menu.separador()
-        menu.opcion(("summary", None), _("Database summary"), Iconos.DatabaseC())
-        menu.separador()
+            sub2 = menu.submenu(_("From base position"), Iconos.MoverInicio())
+            haz_menu(sub2, self.partidabase)
+        else:
+            haz_menu(menu, self.partidabase)
+
         resp = menu.lanza()
         if resp is None:
             return
-        tipo, arg = resp
+        tipo, partida = resp
         if tipo == "pgn" :
-            self.importarPGN()
+            self.importarPGN(partida)
         elif tipo == "polyglot":
-            self.importarPolyglot()
+            self.importarPolyglot(partida)
         elif tipo == "summary":
-            pass
+            self.importarSummary(partida)
+        elif tipo == "voyager2":
+            self.voyager2(partida)
+        elif tipo == "opening":
+            self.importarApertura(partida)
         elif tipo == "ol":
-            pass
+            fichero, partida = partida
+            self.importarOtra(fichero, partida)
+
+    def importarOtra(self, fichero, partida):
+        um = QTUtil2.unMomento(self)
+        pathFichero = os.path.join(self.configuracion.folderOpenings, fichero)
+        self.dbop.importarOtra(pathFichero, partida)
+        um.final()
+        self.glines.refresh()
+        self.glines.gotop()
+
+    def importarApertura(self, partida):
+        partida.asignaApertura()
+        w = PantallaAperturas.WAperturas(self, self.configuracion, partida.apertura)
+        if w.exec_():
+            ap = w.resultado()
+            partida = Partida.Partida()
+            partida.leerPV(ap.a1h8)
+            self.addPartida(partida)
+
+    def importarLeeParam(self, titulo, dicData):
+        liGen = [(None, None)]
+
+        liGen.append((None, _("Select a maximum number of moves (plies)<br> to consider from each game")))
+        liGen.append((FormLayout.Spinbox(_("Depth"), 3, 99, 50), dicData.get("DEPTH", 30)))
+        liGen.append((None, None))
+
+        li = [(_("Only white best moves"), True), (_("Only black best moves"), False)]
+        config = FormLayout.Combobox(_("Moves"), li)
+        liGen.append((config, dicData.get("SIWHITE", True)))
+        liGen.append((None, None))
+
+        resultado = FormLayout.fedit(liGen, title=titulo, parent=self, anchoMinimo=360, icon=Iconos.PuntoNaranja())
+        if resultado:
+            accion, liResp = resultado
+            depth, siWhite = liResp
+            dicData["DEPTH"] = depth
+            dicData["SIWHITE"] = siWhite
+            self.configuracion.escVariables("WBG_MOVES", dicData)
+            return dicData
+        return None
+
+    def importarSummary(self, partida):
+        nomfichgames = QTVarios.selectDB(self, self.configuracion, False, True)
+        if nomfichgames:
+            previo = self.configuracion.leeVariables("OPENINGLINES")
+            dicData = self.importarLeeParam(_("Database summary"), previo)
+            if dicData:
+                ficheroSummary = nomfichgames + "_s1"
+                depth, siWhite = dicData["DEPTH"], dicData["SIWHITE"]
+                self.dbop.importarSummary(self, partida, ficheroSummary, depth, siWhite)
+                self.glines.refresh()
+                self.glines.gotop()
 
     def importarPolyglot(self):
-        previo = self.configuracion.leeVariables("WBG_MOVES")
-        carpeta = previo.get("CARPETABIN", "")
+        dicData = self.configuracion.leeVariables("OPENINGLINES")
+        carpeta = dicData.get("CARPETABIN", "")
 
         ficheroBIN = QTUtil2.leeFichero(self, carpeta, "%s (*.bin)" % _("Polyglot book"), titulo=_("File to import"))
         if not ficheroBIN:
             return
-        previo["CARPETABIN"] = os.path.dirname(ficheroBIN)
-        self.configuracion.escVariables("WBG_MOVES", previo)
 
-        liGen = [(None, None)]
-
-        liGen.append((None, _("Select a maximum number of moves (plies)<br> to consider from each game")))
-
-        liGen.append((FormLayout.Spinbox(_("Depth"), 3, 99, 50), 30))
-        liGen.append((None, None))
-
-        liGen.append((_("Only white best moves"), False))
-        liGen.append((None, None))
-
-        liGen.append((_("Only black best moves"), False))
-        liGen.append((None, None))
-
-        resultado = FormLayout.fedit(liGen, title=os.path.basename(ficheroBIN), parent=self, anchoMinimo=360,
-                                     icon=Iconos.PuntoNaranja())
-
-        if resultado:
-            accion, liResp = resultado
-            depth, whiteBest, blackBest = liResp
-            self.dbop.grabarPolyglot(self, ficheroBIN, depth, whiteBest, blackBest)
+        dicData["CARPETABIN"] = os.path.dirname(ficheroBIN)
+        dicData = self.importarLeeParam(dicData)
+        if dicData:
+            depth, siWhite = dicData["DEPTH"], dicData["SIWHITE"]
+            self.dbop.importarPolyglot(self, ficheroBIN, depth, siWhite)
             self.glines.refresh()
             self.glines.gotop()
 
-    def importarPGN(self):
+    def importarPGN(self, partida):
         previo = self.configuracion.leeVariables("OPENINGLINES")
         carpeta = previo.get("CARPETAPGN", "")
 
@@ -326,23 +617,16 @@ class WStudy(QTVarios.WDialogo):
             accion, liResp = resultado
             depth = liResp[0]
 
-            self.dbop.grabarPGN(self, ficheroPGN, depth)
+            self.dbop.importarPGN(self, partida, ficheroPGN, depth)
             self.glines.refresh()
             self.glines.gotop()
 
-    def analisis(self):
-        x = self.gb_analysis.isChecked()
-        if not x:
-            self.tabsanalisis.hide()
-        else:
-            self.tabsanalisis.show()
-
     def gridColorFondo(self, grid, fila, oColumna):
         col = oColumna.clave
-        linea = fila//2
         if col == "LINE":
             return self.colorLine
         else:
+            linea = fila // 2
             return self.colorPar if linea % 2 == 0 else self.colorNon
 
     def gridCambiadoRegistro(self, grid, fila, oColumna):
@@ -355,7 +639,8 @@ class WStudy(QTVarios.WDialogo):
             if not iswhite:
                 njug += 1
         else:
-            njug = self.partida.numJugadas()-1
+            njug = None
+        self.num_jg_actual = njug
         self.pboard.ponPartida(self.partida)
         self.pboard.colocatePartida(njug)
         self.glines.setFocus()
@@ -415,8 +700,12 @@ class WStudy(QTVarios.WDialogo):
         return len(self.dbop)*2
 
     def gridTeclaControl(self, grid, k, siShift, siControl, siAlt):
-        if k == QtCore.Qt.Key_Delete:
-            self.borrar_move()
+        if k in (QtCore.Qt.Key_Delete, QtCore.Qt.Key_Backspace):
+            fila, col = self.glines.posActual()
+            if col.clave == "LINE":
+                self.borrar()
+            else:
+                self.borrar_move()
 
     def borrar_move(self):
         fila, col = self.glines.posActual()
@@ -438,7 +727,8 @@ class WStudy(QTVarios.WDialogo):
             if njug == self.num_jg_inicial:
                 return self.borrar()
 
-            if QTUtil2.pregunta(self, _("Do you want to eliminate this move?")):
+            siUltimo = njug == len(partida)-1  # si es el ultimo no se pregunta
+            if siUltimo or QTUtil2.pregunta(self, _("Do you want to eliminate this move?")):
                 partida.liJugadas = partida.liJugadas[:njug]
                 partida.ultPosicion = partida.jugada(-1).posicion
                 self.dbop[linea] = partida
@@ -446,12 +736,75 @@ class WStudy(QTVarios.WDialogo):
                 self.goto_finlinea()
 
     def borrar(self):
-        fila = self.glines.recno()
-        linea = fila//2
-        if 0 <= linea < len(self.dbop):
-            if QTUtil2.pregunta(self, _X("Do you want to remove line %1", str(linea+1))):
-                del self.dbop[linea]
-                self.goto_finlinea()
+        tam_dbop = len(self.dbop)
+        if tam_dbop == 0:
+            return
+        current = self.glines.recno()//2
+        li = []
+        if 0 <= current < tam_dbop:
+            li.append(["current", _("Remove line %d") % (current+1,), Iconos.Mover()])
+        if tam_dbop > 1:
+            li.append(["lines", _("Remove a list of lines"), Iconos.MoverLibre()])
+
+        if len(li) > 0:
+            menu = QTVarios.LCMenu(self)
+            for key, title, ico in li:
+                menu.opcion(key, title, ico)
+                menu.separador()
+            resp = menu.lanza()
+
+            if resp == "current":
+                del self.dbop[current]
+                self.goto_inilinea()
+
+            else:
+                liGen = [FormLayout.separador]
+                config = FormLayout.Editbox("<div align=\"right\">" + _("Lines") + "<br>" +
+                                            _("By example:") + " -5,8-12,14,19-",
+                                            rx="[0-9,\-,\,]*")
+                liGen.append((config, ""))
+                resultado = FormLayout.fedit(liGen, title=_("Remove a list of lines"), parent=self, anchoMinimo=460, icon=Iconos.OpeningLines())
+                if resultado:
+                    accion, liResp = resultado
+                    clista = liResp[0]
+                    if clista:
+                        ln = Util.ListaNumerosImpresion(clista)
+                        li = ln.selected(range(1, tam_dbop+1))
+                        sli = []
+                        cad = ""
+                        for num in li:
+                            if cad:
+                                cad += "," + str(num)
+                            else:
+                                cad = str(num)
+                            if len(cad) > 80:
+                                sli.append(cad)
+                                cad = ""
+                        if cad:
+                            sli.append(cad)
+                        cli = "\n".join(sli)
+                        if QTUtil2.pregunta(self, _("Do you want to remove the next lines ?") + "\n\n" + cli):
+                            li.sort(reverse=True)
+                            um = QTUtil2.unMomento(self, _("Working..."))
+                            for num in li:
+                                del self.dbop[num-1]
+                            self.glines.refresh()
+                            self.goto_inilinea()
+                            um.final()
+
+    def goto_inilinea(self):
+        nlines = len(self.dbop)
+        if nlines == 0:
+            return
+
+        linea = self.glines.recno() // 2
+        if linea >= nlines:
+            linea = nlines-1
+
+        fila = linea*2
+        ncol = 0
+        self.glines.goto(fila, ncol)
+        self.glines.refresh()
 
     def goto_finlinea(self):
         nlines = len(self.dbop)
@@ -478,6 +831,7 @@ class WStudy(QTVarios.WDialogo):
         self.glines.refresh()
 
     def terminar(self):
+        self.tabsanalisis.saveConfig()
         self.guardarVideo()
         self.accept()
 
@@ -485,9 +839,12 @@ class WStudy(QTVarios.WDialogo):
         # Estamos en la misma linea ?
         # recno = self.glines.recno()
         # Buscamos en las lineas si hay alguna que el pv sea parcial o totalmente igual
+        partida.pendienteApertura = True
         siNueva, num_linea, siAppend = self.dbop.posPartida(partida)
         siBlancas = partida.jugada(-1).siBlancas()
-        ncol = (partida.numJugadas() - self.num_jg_inicial) // 2 + 1
+        ncol = (partida.numJugadas() - self.num_jg_inicial + 1) // 2
+        if self.num_jg_inicial%2 == 1 and siBlancas:
+             ncol += 1
         if siNueva:
             self.dbop.append(partida)
         else:
@@ -504,6 +861,86 @@ class WStudy(QTVarios.WDialogo):
         self.glines.refresh()
 
 
+class WStaticTraining(QTVarios.WDialogo):
+    def __init__(self, procesador, dbop):
+        self.training = dbop.training()
+        self.ligames = self.training["LIGAMES_STATIC"]
+        self.num_games = len(self.ligames)
+        self.elems_fila = 10
+        if self.num_games < self.elems_fila:
+            self.elems_fila = self.num_games
+        self.num_filas = (self.num_games-1) / self.elems_fila + 1
+        self.seleccionado = None
+
+        titulo = "%s - %s" % (_("Opening lines"), _("Static training"))
+
+        extparam = "openlines_static_%s" % dbop.nomFichero
+
+        QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, Iconos.TrainStatic(), extparam)
+
+        lb = Controles.LB(self,  dbop.gettitle())
+        lb.ponFondoN("#BDDBE8").alinCentrado().ponTipoLetra(puntos=14)
+
+        # Toolbar
+        tb = Controles.TBrutina(self)
+        tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
+
+        # Lista
+        ancho = 42
+        oColumnas = Columnas.ListaColumnas()
+        oColumnas.nueva("FILA", "", 36, siCentrado=True)
+        for x in range(self.elems_fila):
+            oColumnas.nueva("COL%d" % x, "%d" % (x+1,), ancho, siCentrado=True, edicion=Delegados.PmIconosWeather())
+
+        self.grid = Grid.Grid(self, oColumnas, altoFila=ancho, background="white")
+        self.grid.setAlternatingRowColors(False)
+        self.grid.tipoLetra(puntos=10, peso=500)
+        nAnchoPgn = self.grid.anchoColumnas() + 20
+        self.grid.setMinimumWidth(nAnchoPgn)
+
+        ly = Colocacion.V().control(lb).control(tb).control(self.grid)
+        self.setLayout(ly)
+
+        alto = self.num_filas*ancho + 146
+        self.recuperarVideo(siTam=True, altoDefecto=alto, anchoDefecto=nAnchoPgn)
+
+    def terminar(self):
+
+        self.guardarVideo()
+        self.reject()
+
+    def gridNumDatos(self, grid):
+        return self.num_filas
+
+    def gridDato(self, grid, fila, oColumna):
+        col = oColumna.clave
+        if col == "FILA":
+            return "%d" % (fila + 1)
+        elif col.startswith("COL"):
+            num = fila*self.elems_fila + int(col[3:])
+            if num >= self.num_games:
+                return None
+            game = self.ligames[num]
+            sinerror = game["NOERROR"]
+            return str(sinerror) if sinerror < 4 else "4"
+
+    def gridDobleClick(self, grid, fila, oColumna):
+        col = oColumna.clave
+        if col.startswith("COL"):
+            num = fila*self.elems_fila + int(col[3:])
+            if num >= self.num_games:
+                return
+            self.seleccionado = num
+            self.guardarVideo()
+            self.accept()
+
+
+def selectLine(procesador, dbop):
+    w = WStaticTraining(procesador, dbop)
+    w.exec_()
+    return w.seleccionado
+
+
 def openingLines(procesador):
     w = WOpeningLines(procesador)
     return w.resultado if w.exec_() else None
@@ -512,7 +949,8 @@ def openingLines(procesador):
 def study(procesador, fichero):
     with QTUtil.EscondeWindow(procesador.pantalla):
         dbop = OpeningLines.Opening(os.path.join(procesador.configuracion.folderOpenings, fichero))
-        w = WStudy(procesador, dbop)
+        w = WLines(procesador, dbop)
         w.exec_()
         dbop.close()
+        return w.resultado
 

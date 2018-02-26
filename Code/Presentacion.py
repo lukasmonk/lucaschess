@@ -2,7 +2,7 @@ import random
 import time
 import codecs
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import Util
 from Code import ControlPosicion

@@ -42,7 +42,7 @@ class Partida:
         try:
             return self.liJugadas[num]
         except:
-            return None
+            return self.liJugadas[-1] if len(self) > 0 else None
 
     def append_jg(self, jg):
         self.liJugadas.append(jg)
@@ -115,9 +115,12 @@ class Partida:
         return None
 
     def leerPV(self, pvBloque):
+        return self.leerLIPV(pvBloque.split(" "))
+
+    def leerLIPV(self, lipv):
         posicion = self.ultPosicion
         pv = []
-        for mov in pvBloque.split(" "):
+        for mov in lipv:
             if len(mov) >= 4 and mov[0] in "abcdefgh" and mov[1] in "12345678" and mov[2] in "abcdefgh" \
                     and mov[3] in "12345678":
                 pv.append(mov)
@@ -266,7 +269,7 @@ class Partida:
                 numJugada += 1
             else:
                 x = ""
-            liResp.append(x + (jg.pgnHTML() if siFigurines else jg.pgnSP()))
+            liResp.append(x + (jg.pgnHTML(siFigurines)))
         return " ".join(liResp)
 
     def siTerminada(self):
@@ -474,6 +477,27 @@ class Partida:
 
         return elos
 
+    def asignaApertura(self):
+        AperturasStd.ap.asignaApertura(self)
+
+    def asignaTransposition(self):
+        AperturasStd.ap.asignaTransposition(self)
+
+    def rotuloApertura(self):
+        return self.apertura.trNombre if hasattr(self, "apertura") and self.apertura is not None else None
+
+    def rotuloTransposition(self):
+        if hasattr(self, "transposition"):
+            ap = self.transposition
+            if ap is not None:
+                return "%s %s" % (self.jg_transposition.pgnSP(), ap.trNombre)
+        return None
+
+    def test_apertura(self):
+        if not hasattr(self, "apertura") or self.pendienteApertura:
+            self.asignaApertura()
+            self.asignaTransposition()
+
 
 def pv_san(fen, pv):
     p = Partida(fen=fen)
@@ -529,16 +553,10 @@ class PartidaCompleta(Partida):
         if not unpgn.leeTexto(pgn):
             return None
         self.recuperaDeTexto(unpgn.partida.guardaEnTexto())
-        self.asignaApertura(configuracion)
+        self.asignaApertura()
 
         self.liTags = unpgn.listaCabeceras()
         return self
-
-    def asignaApertura_raw(self, ap):
-        ap.asignaApertura(self)
-
-    def asignaApertura(self, configuracion):
-        AperturasStd.ap.asignaApertura(self)
 
     def pgn(self):
         li = ['[%s "%s"]\n'%(k,v) for k,v in self.liTags]

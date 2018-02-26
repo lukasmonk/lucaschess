@@ -26,6 +26,7 @@ class GestorTurnOnLights(Gestor.Gestor):
         self.calculation_mode = self.tol.is_calculation_mode()
         self.penaltyError = self.block.penaltyError(self.calculation_mode)
         self.penaltyHelp = self.block.penaltyHelp(self.calculation_mode)
+        # self.factorDistancia = self.block.factorDistancia() # No se usa es menor que 1.0
 
         self.av_seconds = self.block.av_seconds()
         if self.av_seconds:
@@ -167,8 +168,9 @@ class GestorTurnOnLights(Gestor.Gestor):
 
         else:
             self.siJuegaHumano = True
+            self.base_time = time.time()
             if not (self.calculation_mode and self.ini_time is None):  # Se inicia salvo que sea el principio de la linea
-                self.ini_time = time.time()
+                self.ini_time = self.base_time
             self.activaColor(siBlancas)
             if self.calculation_mode:
                 self.tablero.setDispatchMove(self.dispatchMove)
@@ -250,6 +252,8 @@ class GestorTurnOnLights(Gestor.Gestor):
         self.pantalla.ponToolBar(liOpciones)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
+        if self.ini_time is None:
+            self.ini_time = self.base_time
         end_time = time.time()
         jg = self.checkMueveHumano(desde, hasta, coronacion)
         if not jg:

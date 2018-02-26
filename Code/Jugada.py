@@ -113,14 +113,18 @@ class Jugada:
     def pgnFigurinesSP(self):
         return self.pgnBase + self.resultadoSP()
 
-    def pgnHTML(self):
+    def pgnHTML(self, siFigurines):
         siBlancas = self.siBlancas()
-        li = []
-        for c in self.pgnBase:
-            if c in "NBRQK":
-                c = dicHTMLFigs[c if siBlancas else c.lower()]
-            li.append(c)
-        resp = "".join(li) + self.resto()
+        if siFigurines:
+            li = []
+            for c in self.pgnBase:
+                if c in "NBRQK":
+                    c = dicHTMLFigs[c if siBlancas else c.lower()]
+                li.append(c)
+            resp = "".join(li)
+        else:
+            resp = self.pgnBaseSP()
+        resp += self.resto()
         result = self.resultado()
         if result:
             resp += " " + result
@@ -426,6 +430,9 @@ class Jugada:
             self.elo = 0
             self.bad_move = False
             self.verybad_move = False
+
+    def distancia(self):
+        return ControlPosicion.distancia(self.desde, self.hasta)
 
 
 def dameJugada(posicionBase, desde, hasta, coronacion):

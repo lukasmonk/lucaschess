@@ -302,6 +302,31 @@ class PmIconosColor(QtGui.QStyledItemDelegate):
         painter.restore()
 
 
+class PmIconosWeather(QtGui.QStyledItemDelegate):
+    def __init__(self, parent=None):
+        QtGui.QStyledItemDelegate.__init__(self, parent)
+
+        self.dicIconos = {
+                            "0": Iconos.pmInvierno(),
+                            "1": Iconos.pmLluvia(),
+                            "2": Iconos.pmSolNubesLluvia(),
+                            "3": Iconos.pmSolNubes(),
+                            "4": Iconos.pmSol(),
+                          }
+
+    def paint(self, painter, option, index):
+        pos = str(index.model().data(index, QtCore.Qt.DisplayRole))
+        if pos not in self.dicIconos:
+            if pos.isdigit():
+                pos = "4" if int(pos)> 4 else "0"
+            else:
+                return
+        painter.save()
+        painter.translate(option.rect.x(), option.rect.y())
+        painter.drawPixmap(4, 4, self.dicIconos[pos])
+        painter.restore()
+
+
 class HTMLDelegate(QtGui.QStyledItemDelegate):
     def paint(self, painter, option, index):
         options = QtGui.QStyleOptionViewItemV4(option)

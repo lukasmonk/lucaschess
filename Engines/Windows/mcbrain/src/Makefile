@@ -5,7 +5,7 @@
 #   Copyright (C) 2004-2008 Tord Romstad (Glaurung Author)
 #   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
 #   Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
-#   Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+#   Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
 
 #   McBrain is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ ifeq ($(KERNEL),Linux)
 endif
 
 ### Executable name
-EXE = SF-McBrain-v40
-### bench nodes ->  Nodes searched  : 6376731
+EXE = McBrain-9
+### bench nodes ->  Nodes searched  :  6871658
 
 ### Installation dir definitions
 PREFIX = /usr/local
@@ -156,7 +156,7 @@ endif
 ifeq ($(COMP),gcc)
 	comp=gcc
 	CXX=g++
-	CXXFLAGS += -pedantic -Wextra -Wshadow -static-libstdc++
+	CXXFLAGS += -pedantic -Wextra -Wshadow
 
 	ifeq ($(ARCH),armv7)
 		ifeq ($(OS),Android)
@@ -280,9 +280,7 @@ endif
 ### 3.3 Optimization
 ifeq ($(optimize),yes)
 
-CXXFLAGS += -O1 -O3 -msse4.2 -mpopcnt -mtune=native 
-####-Os -O1  -mtune=native
-#### for those on macOS High Sierra 10.13 and higher use, "-Os -O1 -mtune=native" for PGO using gcc7
+	CXXFLAGS += -O3 -mtune=native
 
 	ifeq ($(comp),gcc)
 
@@ -308,8 +306,6 @@ CXXFLAGS += -O1 -O3 -msse4.2 -mpopcnt -mtune=native
 
 	ifeq ($(comp),clang)
 		ifeq ($(KERNEL),Darwin)
-				CXXFLAGS += -flto
-				LDFLAGS += $(CXXFLAGS)
 			ifeq ($(arch),i386)
 				CXXFLAGS += -mdynamic-no-pic
 			endif
@@ -355,24 +351,20 @@ endif
 ### 3.8 Link Time Optimization, it works since gcc 4.5 but not on mingw under Windows.
 ### This is a mix of compile and link time options because the lto link phase
 ### needs access to the optimization flags.
-ifeq ($(comp),gcc)
-	ifeq ($(optimize),yes)
-	ifeq ($(debug),no)
+ifeq ($(optimize),yes)
+ifeq ($(debug), no)
+	ifeq ($(comp),$(filter $(comp),gcc clang))
+		CXXFLAGS += -flto
+		LDFLAGS += $(CXXFLAGS)
+	endif
+
+	ifeq ($(comp),mingw)
+	ifeq ($(KERNEL),Linux)
 		CXXFLAGS += -flto
 		LDFLAGS += $(CXXFLAGS)
 	endif
 	endif
 endif
-
-ifeq ($(comp),mingw)
-	ifeq ($(KERNEL),Linux)
-	ifeq ($(optimize),yes)
-	ifeq ($(debug),no)
-		CXXFLAGS += -flto
-		LDFLAGS += $(CXXFLAGS)
-	endif
-	endif
-	endif
 endif
 
 ### 3.9 Android 5 can only run position independent executables. Note that this
@@ -440,7 +432,6 @@ help:
 build: config-sanity
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) all
 	strip $(EXE)
-	cp $(EXE) /Users/michaelbyrne/cluster.mfb/$(EXE)
 
 profile-build: config-sanity objclean profileclean
 	@echo ""
@@ -460,7 +451,12 @@ profile-build: config-sanity objclean profileclean
 	@echo "Step 5/5. Deleting profile data ..."
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) profileclean
 	strip $(EXE)
-	cp $(EXE) /Users/michaelbyrne/cluster.mfb/$(EXE)
+
+cprom:
+	make -j profile-build ARCH=x86-64-modern COMP=clang
+
+cprob:
+	make -j profile-build ARCH=x86-64-bmi2 COMP=clang
 
 strip:
 	strip $(EXE)

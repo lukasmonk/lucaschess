@@ -664,7 +664,7 @@ class Tablero(QtGui.QGraphicsView):
 
         menu.separador()
         if self.siDirector:
-            menu.opcion("director", _("Director") + " [F1..F10]", Iconos.Director())
+            menu.opcion("director", _("Director") + " [%s] " %_("F1-F10 or Ctrl Right button"), Iconos.Director())
             menu.separador()
 
         if self.siPosibleRotarTablero:
@@ -830,6 +830,10 @@ class Tablero(QtGui.QGraphicsView):
         siDentro = (minimo < x < maximo) and (minimo < y < maximo)
         if event.button() == QtCore.Qt.RightButton:
             if siDentro:
+                if not self.dirvisual:
+                    m = int(event.modifiers())
+                    if (m & QtCore.Qt.ControlModifier) == 0:
+                        return
                 self.lanzaDirector()
             # if siDentro and hasattr(self.pantalla, "boardRightMouse") and not self.dirvisual:
                 # m = int(event.modifiers())
@@ -1000,7 +1004,7 @@ class Tablero(QtGui.QGraphicsView):
         return self.dbVisual
 
     def dbVisual_close(self):
-        if self.dbVisual:
+        if self.dbVisual is not None:
             self.dbVisual.close()
             self.dbVisual = None
 
@@ -1012,6 +1016,30 @@ class Tablero(QtGui.QGraphicsView):
 
     def dbVisual_save(self, fenM2, lista):
         self.dbVisual_open()[fenM2] = lista
+
+    def saveVisual(self):
+        alm = self.almSaveVisual = Util.Almacen()
+        alm.siMenuVisual = self.siMenuVisual
+        alm.siDirector = self.siDirector
+        alm.siDirectorIcon = self.siDirectorIcon
+        alm.dirvisual = self.dirvisual
+        alm.guion = self.guion
+        alm.lastFenM2 = self.lastFenM2
+        alm.dbVisual = self.dbVisual
+        alm.nomdbVisual = self.nomdbVisual
+        alm.dbVisual_showAllways = self.dbVisual_showAllways
+
+    def restoreVisual(self):
+        alm = self.almSaveVisual
+        self.siMenuVisual = alm.siMenuVisual
+        self.siDirector = alm.siDirector
+        self.siDirectorIcon = alm.siDirectorIcon
+        self.dirvisual = alm.dirvisual
+        self.guion = alm.guion
+        self.lastFenM2 = alm.lastFenM2
+        self.dbVisual = alm.dbVisual
+        self.nomdbVisual = alm.nomdbVisual
+        self.dbVisual_showAllways = alm.dbVisual_showAllways
 
     def setUltPosicion(self, posicion):
         self.cierraGuion()

@@ -84,7 +84,6 @@ class Memoria:
         return False
 
     def dameListaFen(self, piezas):
-
         me = self.procesador.unMomento()
 
         li = []

@@ -180,7 +180,8 @@ class WJuicio(QTVarios.WDialogo):
             return None
 
     def gridCambiadoRegistro(self, grid, fila, columna):
-        self.partida = Partida.Partida(self.posicion).leerPV(self.listaRM[fila].rm.pv)
+        self.partida = Partida.Partida(self.posicion)
+        self.partida.leerPV(self.listaRM[fila].rm.pv)
         self.maxMoves = self.partida.numJugadas()
         self.mueve(siInicio=True)
 

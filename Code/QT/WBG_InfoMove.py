@@ -243,7 +243,7 @@ class WInfomove(QtGui.QWidget):
                 pgn += '<span style="%s">%d.</span>' % (style_number, numJugada)
                 numJugada += 1
 
-            xp = jg.pgnHTML() if self.siFigurines else jg.pgnSP()
+            xp = jg.pgnHTML(self.siFigurines)
             if n == pos:
                 xp = '<span style="%s">%s</span>' % (style_select, xp)
             else:

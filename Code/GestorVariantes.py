@@ -136,7 +136,7 @@ class GestorVariantes(Gestor.Gestor):
         if self.partida.numJugadas():
             self.partida.anulaSoloUltimoMovimiento()
             if not self.fen:
-                self.listaAperturasStd.asignaApertura(self.partida)
+                self.partida.asignaApertura()
             self.ponteAlFinal()
             self.refresh()
             self.siguienteJugada()
@@ -211,7 +211,7 @@ class GestorVariantes(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:

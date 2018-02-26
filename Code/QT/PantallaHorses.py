@@ -3,7 +3,7 @@ import datetime
 import random
 import time
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import ControlPosicion
 from Code.QT import Colocacion

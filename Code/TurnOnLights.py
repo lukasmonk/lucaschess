@@ -3,6 +3,7 @@ import codecs
 import random
 import datetime
 
+from Code import ControlPosicion
 from Code import PGNreader
 from Code import Util
 from Code import VarGen
@@ -57,6 +58,17 @@ class TOL_Block:
             return 10.0 + len(self.times)*5.0
         else:
             return 10.0
+
+    def factorDistancia(self):
+        nummoves = 0
+        distancia = 0.0
+        for line in self.lines:
+            d, n = line.distancia_moves()
+            nummoves += n
+            distancia += d
+        base_dist = ControlPosicion.distancia("a1", "a4")
+
+        return (distancia/nummoves)/base_dist
 
     def add_line(self, line):
         self.lines.append(line)
@@ -135,6 +147,10 @@ class TOL_Line:
 
     def total_moves(self):
         return len(self.limoves)
+
+    def distancia_moves(self):
+        dt = sum( ControlPosicion.distancia(pv[:2], pv[2:4]) for pv in self.limoves )
+        return dt, len(self.limoves)
 
 
 class TOL_level:

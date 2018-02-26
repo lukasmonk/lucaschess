@@ -1,7 +1,7 @@
 import codecs
 import os
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import Analisis
 from Code import Partida
@@ -97,7 +97,8 @@ class Tutor:
                 pvBloque = ""
 
             if pvBloque:
-                self.partidaRival = Partida.Partida(self.ultPosicion).leerPV(pvBloque)
+                self.partidaRival = Partida.Partida(self.ultPosicion)
+                self.partidaRival.leerPV(pvBloque)
                 self.posRival = 0
                 self.maxRival = len(self.partidaRival.liJugadas) - 1
                 if self.maxRival >= 0:
@@ -165,7 +166,8 @@ class Tutor:
     def cambiadoRM(self, pos):
         self.posRM = pos
         rm = self.listaRM[pos][0]
-        self.partidaTutor = Partida.Partida(self.ultPosicion).leerPV(rm.getPV())
+        self.partidaTutor = Partida.Partida(self.ultPosicion)
+        self.partidaTutor.leerPV(rm.getPV())
 
         self.w.ponPuntuacionTutor(rm.texto())
 
@@ -319,7 +321,8 @@ class Tutor:
         self.tableroAperturas = tableroAperturas
 
     def cambiarApertura(self, numero):
-        self.partidaAperturas = Partida.Partida(self.ultPosicion).leerPV(self.liApPosibles[numero].a1h8)
+        self.partidaAperturas = Partida.Partida(self.ultPosicion)
+        self.partidaAperturas.leerPV(self.liApPosibles[numero].a1h8)
         self.tableroAperturas.ponPosicion(self.partidaAperturas.jugada(0).posicion)
         self.maxApertura = len(self.partidaAperturas)
         self.mueveApertura(siInicio=True)

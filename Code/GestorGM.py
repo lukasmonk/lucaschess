@@ -308,10 +308,12 @@ class GestorGM(Gestor.Gestor):
 
             rmUsu, nada = mrm.buscaRM(jgUsu.movimiento())
             if rmUsu is None:
+                um = QTUtil2.analizando(self.pantalla)
                 self.analizaFinal()
                 rmUsu = self.xtutor.valora(posicion, desde, hasta, coronacion)
                 mrm.agregaRM(rmUsu)
                 self.analizaInicio()
+                um.final()
 
             rmGM, posGM = mrm.buscaRM(jgGM.movimiento())
             if rmGM is None:
@@ -390,7 +392,7 @@ class GestorGM(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         self.ponFlechaSC(jg.desde, jg.hasta)
         self.beepExtendido(siNuestra)

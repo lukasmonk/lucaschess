@@ -1,6 +1,6 @@
 import collections
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from PyQt4 import QtGui, QtCore
 

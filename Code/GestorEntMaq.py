@@ -1,4 +1,4 @@
-import LCEngine
+import LCEngineV1 as LCEngine
 from PyQt4 import QtCore
 
 from Code import Analisis
@@ -475,7 +475,7 @@ class GestorEntMaq(Gestor.Gestor):
             self.ponAyudasEM()
             self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
             if not self.fen:
-                self.listaAperturasStd.asignaApertura(self.partida)
+                self.partida.asignaApertura()
             self.ponteAlFinal()
             self.reOpenBook()
             self.refresh()
@@ -883,7 +883,7 @@ class GestorEntMaq(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:

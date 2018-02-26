@@ -261,14 +261,18 @@ class Entrenamientos:
         menu1.separador()
         menu2 = menu1.submenu(_("Turn on the lights"), Iconos.TOL())
         menu3 = menu2.submenu(_("Memory mode"), Iconos.TOL())
-        xopcion(menu3, "tol_uned", _("UNED chess school"), Iconos.Uned())
+        xopcion(menu3, "tol_uned_easy", "%s (%s)" % (_("UNED chess school"), _("Initial")), Iconos.Uned())
+        menu3.separador()
+        xopcion(menu3, "tol_uned", "%s (%s)" % (_("UNED chess school"), _("Complete")), Iconos.Uned())
         menu3.separador()
         xopcion(menu3, "tol_uwe_easy", "%s (%s)" % (_("Uwe Auerswald"), _("Initial")), Iconos.Uwe())
         menu3.separador()
         xopcion(menu3, "tol_uwe", "%s (%s)" % (_("Uwe Auerswald"), _("Complete")), Iconos.Uwe())
         menu2.separador()
         menu3 = menu2.submenu(_("Calculation mode"), Iconos.Calculo())
-        xopcion(menu3, "tol_uned_calc", _("UNED chess school"), Iconos.Uned())
+        xopcion(menu3, "tol_uned_easy_calc", "%s (%s)" % (_("UNED chess school"), _("Initial")), Iconos.Uned())
+        menu3.separador()
+        xopcion(menu3, "tol_uned_calc", "%s (%s)" % (_("UNED chess school"), _("Complete")), Iconos.Uned())
         menu3.separador()
         xopcion(menu3, "tol_uwe_easy_calc", "%s (%s)" % (_("Uwe Auerswald"), _("Initial")), Iconos.Uwe())
         menu3.separador()
@@ -290,8 +294,8 @@ class Entrenamientos:
             txt = cat.nombre()
 
             nm = mem.nivel(x)
-            if nm > -1:
-                txt += " %s %d" % (_("Level"), nm + 1)
+            if nm >= 0:
+                txt += " %s %d" % (_("Level"), nm+1)
 
             xopcion(menu2, -100 - x, txt, cat.icono(), siDeshabilitado=not mem.siActiva(x))
 
@@ -667,7 +671,12 @@ class Entrenamientos:
         PantallaEverest.everest(self.procesador)
 
     def turn_on_lights(self, name):
-        if name.startswith("uned"):
+        if name.startswith("uned_easy"):
+            title = "%s (%s)" % (_("UNED chess school"), _("Initial"))
+            folder = "Trainings/Tactics by UNED chess school"
+            icono = Iconos.Uned()
+            li_tam_blocks = (4, 6, 9, 12, 18, 36)
+        elif name.startswith("uned"):
             title = _("UNED chess school")
             folder = "Trainings/Tactics by UNED chess school"
             icono = Iconos.Uned()

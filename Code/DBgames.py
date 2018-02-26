@@ -4,7 +4,7 @@ import sqlite3
 import time
 import random
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import ControlPosicion
 from Code import Partida
@@ -524,8 +524,9 @@ class TreeSTAT:
 
 
 class DBgames:
-    def __init__(self, nomFichero):
+    def __init__(self, nomFichero, with_dbSTAT=True):
         self.nomFichero = Util.dirRelativo(nomFichero)
+        self.with_dbSTAT = with_dbSTAT
         self.liCamposBase = ["EVENT", "SITE", "DATE", "WHITE", "BLACK", "RESULT", "ECO", "WHITEELO", "BLACKELO", "PLIES"]
         self.liCamposWork = ["XPV", ]
         self.liCamposBLOB = ["PGN", ]
@@ -556,7 +557,10 @@ class DBgames:
 
         self.liOrden = []
 
-        self.dbSTAT = TreeSTAT(self.nomFichero + "_s1")
+        if self.with_dbSTAT:
+            self.dbSTAT = TreeSTAT(self.nomFichero + "_s1")
+        else:
+            self.dbSTAT = None
 
         self.liRowids = []
 
@@ -759,10 +763,12 @@ class DBgames:
         for recno in lista:
             pv = self.damePV(recno)
             result = self.field(recno, "RESULT")
-            self.dbSTAT.append(pv, result, -1)
+            if self.with_dbSTAT:
+                self.dbSTAT.append(pv, result, -1)
             self._cursor.execute(cSQL,(self.liRowids[recno],))
             del self.liRowids[recno]
-        self.dbSTAT.commit()
+        if self.with_dbSTAT:
+            self.dbSTAT.commit()
         self._conexion.commit()
 
     def getSummary(self, pvBase, dicAnalisis, siFigurinesPGN, allmoves=True):
@@ -803,7 +809,8 @@ class DBgames:
 
         t1 = time.time()-0.7  # para que empiece enseguida
 
-        self.dbSTAT.massive_append_set(True)
+        if self.with_dbSTAT:
+            self.dbSTAT.massive_append_set(True)
 
         def write_logs(fich, pgn):
             with open(fich, "ab") as ferr:
@@ -880,7 +887,8 @@ class DBgames:
                                     pgn = Util.var2blob(pgn)
 
                                 reg = (xpv, event, site, date, white, black, result, eco, whiteelo, blackelo, pgn, plies)
-                                self.dbSTAT.append_fen(pv, result, liFens)
+                                if self.with_dbSTAT:
+                                    self.dbSTAT.append_fen(pv, result, liFens)
                                 liRegs.append(reg)
                                 nRegs += 1
                                 importados += 1
@@ -890,9 +898,10 @@ class DBgames:
                                     liRegs = []
                                     stRegs = set()
                                     conexion.commit()
-                                    self.dbSTAT.massive_append_set(False)
-                                    self.dbSTAT.commit()
-                                    self.dbSTAT.massive_append_set(True)
+                                    if self.with_dbSTAT:
+                                        self.dbSTAT.massive_append_set(False)
+                                        self.dbSTAT.commit()
+                                        self.dbSTAT.massive_append_set(True)
                     if n == next_n:
                         if time.time()-t1> 0.8:
                             if not dlTmp.actualiza(erroneos+duplicados+importados, erroneos, duplicados, importados):
@@ -906,15 +915,17 @@ class DBgames:
         dlTmp.actualiza(erroneos+duplicados+importados, erroneos, duplicados, importados)
         dlTmp.ponSaving()
 
-        self.dbSTAT.massive_append_set(False)
-        self.dbSTAT.commit()
+        if self.with_dbSTAT:
+            self.dbSTAT.massive_append_set(False)
+            self.dbSTAT.commit()
         conexion.commit()
         dlTmp.ponContinuar()
 
     def appendDB(self, db, liRecnos, dlTmp):
         duplicados = importados = 0
 
-        self.dbSTAT.massive_append_set(True)
+        if self.with_dbSTAT:
+            self.dbSTAT.massive_append_set(True)
 
         t1 = time.time() - 0.7  # para que empiece enseguida
 
@@ -941,7 +952,8 @@ class DBgames:
                 pv = xpv2pv(xpv)
                 reg = (xpv, raw["EVENT"], raw["SITE"], raw["DATE"], raw["WHITE"], raw["BLACK"], raw["RESULT"], raw["ECO"], raw["WHITEELO"],
                        raw["BLACKELO"], raw["PGN"], raw["PLIES"])
-                self.dbSTAT.append(pv, raw["RESULT"])
+                if self.with_dbSTAT:
+                    self.dbSTAT.append(pv, raw["RESULT"])
                 liRegs.append(reg)
                 nRegs += 1
                 importados += 1
@@ -949,9 +961,10 @@ class DBgames:
                     cursor.executemany(sql, liRegs)
                     liRegs = []
                     conexion.commit()
-                    self.dbSTAT.massive_append_set(False)
-                    self.dbSTAT.commit()
-                    self.dbSTAT.massive_append_set(True)
+                    if self.with_dbSTAT:
+                        self.dbSTAT.massive_append_set(False)
+                        self.dbSTAT.commit()
+                        self.dbSTAT.massive_append_set(True)
 
             if pos == next_n:
                 if time.time() - t1 > 0.8:
@@ -967,8 +980,9 @@ class DBgames:
         dlTmp.actualiza(duplicados + importados, duplicados, importados)
         dlTmp.ponSaving()
 
-        self.dbSTAT.massive_append_set(False)
-        self.dbSTAT.commit()
+        if self.with_dbSTAT:
+            self.dbSTAT.massive_append_set(False)
+            self.dbSTAT.commit()
         conexion.commit()
 
         dlTmp.ponContinuar()
@@ -1022,7 +1036,7 @@ class DBgames:
             litags.extend(rtags)
 
         p.setTags(litags)
-        p.asignaApertura(VarGen.configuracion)
+        p.asignaApertura()
         return p
 
     def leePGNRecno(self, recno):
@@ -1102,9 +1116,10 @@ class DBgames:
         self._conexion.commit()
         pvAnt = xpv2pv(reg_ant["XPV"])
         resNue = dTags.get("RESULT", "*")
-        self.dbSTAT.append(pvAnt, resAnt, -1)
-        self.dbSTAT.append(pvNue, resNue, +1)
-        self.dbSTAT.commit()
+        if self.with_dbSTAT:
+            self.dbSTAT.append(pvAnt, resAnt, -1)
+            self.dbSTAT.append(pvNue, resNue, +1)
+            self.dbSTAT.commit()
 
         del self.cache[rowid]
 
@@ -1136,8 +1151,9 @@ class DBgames:
         sql = "insert into games (XPV,EVENT,SITE,DATE,WHITE,BLACK,RESULT,ECO,WHITEELO,BLACKELO,PLIES,PGN) values (?,?,?,?,?,?,?,?,?,?,?,?);"
         self._cursor.execute(sql, data)
         self._conexion.commit()
-        self.dbSTAT.append(pv, dTags.get("RESULT", "*"), +1)
-        self.dbSTAT.commit()
+        if self.with_dbSTAT:
+            self.dbSTAT.append(pv, dTags.get("RESULT", "*"), +1)
+            self.dbSTAT.commit()
 
         self.liRowids.append(self._cursor.lastrowid)
 

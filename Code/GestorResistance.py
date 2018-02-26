@@ -34,7 +34,6 @@ class GestorResistance(Gestor.Gestor):
         self.apertura = Apertura.AperturaPol(5)  # lee las aperturas
 
         # debe hacerse antes que rival
-        # arbitro = self.configuracion.buscaRival( "stockfish" )
         self.xarbitro = self.procesador.creaGestorMotor(self.configuracion.tutor, self.segundos * 1000, None)
         self.xarbitro.anulaMultiPV()
 
@@ -289,7 +288,7 @@ class GestorResistance(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:

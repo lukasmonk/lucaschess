@@ -529,7 +529,7 @@ class GestorElo(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:
@@ -692,7 +692,7 @@ class GestorElo(Gestor.Gestor):
     def atras(self):
         if self.partida.numJugadas() > 2:
             self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
             self.ponteAlFinal()
             self.refresh()
             self.siguienteJugada()

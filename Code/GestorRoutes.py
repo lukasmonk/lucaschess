@@ -1,7 +1,7 @@
 import random
 import time
 
-import LCEngine
+import LCEngineV1 as LCEngine
 
 from Code import Util
 from Code import Books
@@ -141,7 +141,7 @@ class GestorRoutes(Gestor.Gestor):
     def masJugada(self, jg, siNuestra):
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:

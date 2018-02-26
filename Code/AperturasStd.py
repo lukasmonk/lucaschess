@@ -1,3 +1,5 @@
+import LCEngineV1 as LCEngine
+
 from operator import attrgetter
 
 from Code import TrListas
@@ -34,6 +36,7 @@ class AperturaStd:
 class ListaAperturasStd:
     def __init__(self):
         self.dic = None
+        self.dicFenM2 = None
         self.hijos = None
         self.lia1h8 = None
 
@@ -48,6 +51,14 @@ class ListaAperturasStd:
             for bl in self.dic.itervalues():
                 bl.trOrdena = ("A" if bl.siBasic else "B") + bl.trNombre.upper()
             self.hijos = self.ordena(self.hijos, 0)
+
+        dfen = {}
+        makePV = LCEngine.makePV
+        fen2fenM2 = LCEngine.fen2fenM2
+        for pv, ap in self.dic.iteritems():
+            fen = makePV(pv)
+            dfen[fen2fenM2(fen)] = ap
+        self.dicFenM2 = dfen
 
     def ordena(self, hijos, n):
         if hijos:
@@ -131,6 +142,16 @@ class ListaAperturasStd:
                 n = a1h8.rfind(" ")
             if n <= 0:
                 self.hijos.append(bloque)
+
+    def asignaTransposition(self, partida):
+        partida.transposition = None
+        if not (partida.apertura is None or partida.pendienteApertura):
+            for nj, jg in enumerate(partida.liJugadas):
+                if not jg.siApertura:
+                    fenm2 = jg.posicion.fenM2()
+                    if fenm2 in self.dicFenM2:
+                        partida.transposition = self.dicFenM2[fenm2]
+                        partida.jg_transposition = jg
 
     def asignaApertura(self, partida):
         partida.apertura = None

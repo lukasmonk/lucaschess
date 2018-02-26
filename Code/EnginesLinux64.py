@@ -48,8 +48,8 @@ def leeRivales():
     cm.ponMultiPV(20, 218)
     mas(cm)
 
-    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "8", "http://stockfishchess.org/")
-    cm.path = "Linux/stockfish_8_x64"
+    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "9", "http://stockfishchess.org/")
+    cm.path = "Linux/stockfish-9-64"
     cm.elo = 3300
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "64")
@@ -138,10 +138,10 @@ def leeRivales():
     cm.ordenUCI("Hash", "64")
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne (based on stockfish)", "4.0", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "SSF-McBrain-v40_x64_linux"
+    cm = ConfigMotor("mcbrain", "Michael Byrne", "9", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McBrain-9_x64_linux"
     cm.elo = 3200
-    cm.ordenUCI("Tactical", "3")
+    cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
     cm.ponMultiPV(20, 500)
     mas(cm)

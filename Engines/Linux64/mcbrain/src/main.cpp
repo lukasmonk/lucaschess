@@ -3,7 +3,7 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+ Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
  
  McBrain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -48,11 +48,11 @@ int main(int argc, char* argv[]) {
   polybook.init(Options["BookFile"]);
   Tablebases::init(Options["SyzygyPath"]);
   TT.resize(Options["Hash"]);
-  Threads.init(Options["Threads"]);
+  Threads.set(Options["Threads"]);
   Search::clear(); // After threads are up
 
   UCI::loop(argc, argv);
 
-  Threads.exit();
+  Threads.set(0);
   return 0;
 }

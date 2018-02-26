@@ -566,6 +566,28 @@ def validNomFichero(nombre):
     return nombre
 
 
+def asciiNomFichero(nombre):
+    nombre = validNomFichero(nombre)
+    li = []
+    for x in nombre:
+        if not(31 < ord(x) < 127):
+            li.append("_")
+        else:
+            li.append(x)
+    nombre = "".join(li)
+    while "__" in nombre:
+        nombre = nombre.replace("__", "_")
+    return nombre
+
+
+def datefile(pathfile):
+    try:
+        mtime = os.path.getmtime(pathfile)
+        return datetime.datetime.fromtimestamp(mtime)
+    except:
+        return None
+
+
 class Timer:
     def __init__(self, tiempoPendiente):
 

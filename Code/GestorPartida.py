@@ -184,7 +184,7 @@ class GestorPartida(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:
@@ -349,8 +349,7 @@ class GestorPartida(Gestor.Gestor):
                     return
                 p = Partida.PartidaCompleta()
                 p.leeOtra(partida)
-                if self.siCompleta:
-                    p.asignaApertura(self.configuracion)
+                p.asignaApertura()
                 p.setTags(unpgn.listaCabeceras())
                 self.reinicio = p.save()
                 self.reiniciar()
@@ -368,8 +367,7 @@ class GestorPartida(Gestor.Gestor):
                     return
                 p = Partida.PartidaCompleta()
                 p.leeOtra(partida)
-                if self.siCompleta:
-                    p.asignaApertura(self.configuracion)
+                p.asignaApertura()
                 p.setTags(unpgn.listaCabeceras())
                 self.reinicio = p.save()
                 self.reiniciar()
@@ -438,7 +436,7 @@ class GestorPartida(Gestor.Gestor):
         if self.partida.numJugadas():
             self.partida.anulaSoloUltimoMovimiento()
             if not self.fen:
-                self.listaAperturasStd.asignaApertura(self.partida)
+                self.partida.asignaApertura()
             self.ponteAlFinal()
             self.estado = kJugando
             self.refresh()

@@ -246,6 +246,13 @@ class GestorEverest(Gestor.Gestor):
                 um.final()
 
             rmUsu, posUsu = mrm.buscaRM(jgUsu.movimiento())
+            if rmUsu is None:
+                um = QTUtil2.analizando(self.pantalla)
+                self.analizaFinal()
+                rmUsu = self.xanalyzer.valora(posicion, desde, hasta, coronacion)
+                mrm.agregaRM(rmUsu)
+                self.analizaInicio()
+                um.final()
 
             w = PantallaJuicio.WJuicio(self, self.xanalyzer, self.nombreObj, posicion, mrm, rmObj, rmUsu, analisis,
                                        siCompetitivo=False)
@@ -286,7 +293,7 @@ class GestorEverest(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
         self.movimientosPiezas(jg.liMovs, True)
         self.tablero.ponPosicion(jg.posicion)
         self.ponFlechaSC(jg.desde, jg.hasta)

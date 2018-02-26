@@ -438,18 +438,13 @@ class WColores(QTVarios.WDialogo):
         self.tablero.ponPosicion(cp)
         self.rehazFlechas()
 
-        liAcciones = [(_("Accept"), Iconos.Aceptar(), "aceptar"),
-                      None,
-                      (_("Cancel"), Iconos.Cancelar(), "cancelar"),
-                      None,
-                      (_("Your themes"), Iconos.Temas(), "temas"),
-                      None,
-                      (_("Import"), Iconos.Mezclar(), "importar"),
-                      None,
-                      (_("Export"), Iconos.Grabar(), "exportar"),
-                      None,
+        liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
+                      (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
+                      (_("Your themes"), Iconos.Temas(), self.temas), None,
+                      (_("Import"), Iconos.Mezclar(), self.importar), None,
+                      (_("Export"), Iconos.Grabar(), self.exportar), None,
                       ]
-        tb = Controles.TB(self, liAcciones)
+        tb = Controles.TBrutina(self, liAcciones)
 
         # tam tablero
         self.lbTamTablero = Controles.LB(self, "%d px" % self.tablero.width())
@@ -495,10 +490,10 @@ class WColores(QTVarios.WDialogo):
 
     def rehazFlechas(self):
         self.tablero.quitaFlechas()
-        self.tablero.creaFlechaTmp("b8", "b4", True)
-        self.tablero.creaFlechaTmp("f5", "c2", False)
-        self.tablero.creaFlechaMov("d1", "h5", "ms100")
-        self.tablero.creaFlechaMov("d8", "d5", "mt100")
+        self.tablero.creaFlechaTmp("f2", "f4", True)
+        self.tablero.creaFlechaTmp("d1", "d4", False)
+        self.tablero.creaFlechaMov("f5", "d7", "ms100")
+        self.tablero.creaFlechaMov("d6", "b4", "mt100")
 
     def cambiadoTema(self):
         fichTema = self.cbTemas.valor()
@@ -573,27 +568,16 @@ class WColores(QTVarios.WDialogo):
 
         self.actualizaTablero()
 
-    def procesarTB(self):
-        accion = self.sender().clave
-        if accion == "aceptar":
+    def aceptar(self):
+        self.confTablero.guardaEnDisco()
+        self.tableroOriginal.reset(self.confTablero)
 
-            self.confTablero.guardaEnDisco()
-            self.tableroOriginal.reset(self.confTablero)
+        self.guardarVideo()
+        self.accept()
 
-            self.guardarVideo()
-            self.accept()
-        elif accion == "cancelar":
-            self.guardarVideo()
-            self.reject()
-
-        elif accion == "temas":
-            self.temas()
-
-        elif accion == "importar":
-            self.importar()
-
-        elif accion == "exportar":
-            self.exportar()
+    def cancelar(self):
+        self.guardarVideo()
+        self.reject()
 
     def importar(self):
         # import os

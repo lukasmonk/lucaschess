@@ -185,7 +185,7 @@ class GestorCompeticion(Gestor.Gestor):
                 self.ponAyudas(self.ayudas)
                 self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
                 self.siApertura = False
-                self.listaAperturasStd.asignaApertura(self.partida)
+                self.partida.asignaApertura()
                 self.ponteAlFinal()
                 self.siAnalizadoTutor = False
                 self.refresh()
@@ -322,7 +322,7 @@ class GestorCompeticion(Gestor.Gestor):
 
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:

@@ -3,7 +3,7 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+ Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
  
  McBrain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -60,8 +60,15 @@ bool CaseInsensitiveLess::operator() (const string& s1, const string& s2) const 
 
 void init(OptionsMap& o) {
 
-  const int MaxHashMB = Is64Bit ? 1024 * 1024 : 2048;
+  // at most 2^32 clusters.
+  const int MaxHashMB = Is64Bit ? 131072 : 2048;
 
+  o["Debug Log File"]        << Option("", on_logger);
+  o["Contempt"]              << Option(20, -100, 100);
+  o["Analysis Contempt"]     << Option("Off var Off var White var Black var Both", "Off");
+  o["UCI_AnalyseMode"]       << Option(false);
+  o["Tactical"]              << Option(0, 0,  8);
+  o["Threads"]               << Option(1, 1, 512, on_threads);
   o["Hash"]                  << Option(16, 1, MaxHashMB, on_hash_size);
   o["Ponder"]                << Option(false);
   o["Threads"]               << Option(1, 1, 512, on_threads);
@@ -70,21 +77,25 @@ void init(OptionsMap& o) {
   o["BruteForce"]            << Option(false);
   o["FastPlay"]              << Option(false);
   o["No_Null_Moves"]         << Option(false);
-
-  o["UCI_LimitStrength"]     << Option(false);
-  o["UCI_ELO"]               << Option(1500, 1500, 2800);
-  o["MultiPV"]               << Option(1, 1, 500);
-  o["Skill Level"]           << Option(20, 0, 20);
-  o["Contempt"]              << Option(2, -150, 150);
-  o["Tactical"]              << Option(0, 0,  8);
-
-  o["Move Overhead"]         << Option(100, 0, 5000);
-  o["nodestime"]             << Option(0, 0, 10000);
   o["UCI_Chess960"]          << Option(false);
+  o["UCI_LimitStrength"]     << Option(false);
+
+  o["UCI_ELO"]               << Option(1500, 1500, 2800);
+  o["Skill Level"]           << Option(20, 0, 20);
+
+  o["MultiPV"]               << Option(1, 1, 256);
+
+
+  o["Move Overhead"]         << Option(30, 0, 5000);
+  o["Minimum Thinking Time"] << Option(20, 0, 5000);
+  o["Slow Mover"]            << Option(89, 10, 1000);
+  o["nodestime"]             << Option(0, 0, 10000);
+
   o["SyzygyPath"]            << Option("<empty>", on_tb_path);
   o["SyzygyProbeDepth"]      << Option(1, 1, 100);
   o["Syzygy50MoveRule"]      << Option(true);
   o["SyzygyProbeLimit"]      << Option(6, 0, 6);
+  o["Book_Enabled"]          << Option(false);
   o["BookFile"]              << Option("<empty>", on_book_file);
   o["BestBookMove"]          << Option(true, on_best_book_move);
   o["BookDepth"]             << Option(255, 1, 255, on_book_depth);
@@ -131,6 +142,9 @@ Option::Option(OnChange f) : type("button"), min(0), max(0), on_change(f)
 Option::Option(int v, int minv, int maxv, OnChange f) : type("spin"), min(minv), max(maxv), on_change(f)
 { defaultValue = currentValue = std::to_string(v); }
 
+Option::Option(const char* v, const char* cur, OnChange f) : type("combo"), min(0), max(0), on_change(f)
+{ defaultValue = v; currentValue = cur; }
+
 Option::operator int() const {
   assert(type == "check" || type == "spin");
   return (type == "spin" ? stoi(currentValue) : currentValue == "true");
@@ -139,6 +153,11 @@ Option::operator int() const {
 Option::operator std::string() const {
   assert(type == "string");
   return currentValue;
+}
+
+bool Option::operator==(const char* s) {
+  assert(type == "combo");
+  return !CaseInsensitiveLess()(currentValue, s) && !CaseInsensitiveLess()(s, currentValue);
 }
 
 

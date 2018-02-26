@@ -192,7 +192,10 @@ class WGM(QTVarios.WDialogo):
         self.recuperarVideo(anchoDefecto=450)
 
     def cambiadoDepth(self, num):
-        self.edJtiempo.ponFloat(0.0 if num > 0 else 3.0)
+        tiempo = self.edJtiempo.textoFloat()
+        if int(tiempo)*10 == 0:
+            tiempo = 3.0
+        self.edJtiempo.ponFloat(0.0 if num > 0 else tiempo)
         self.edJtiempo.setEnabled(num == 0)
 
     def closeEvent(self, event):
@@ -606,7 +609,7 @@ def importarGM(ownerGM, siWoman):
     # Primero nos tenemos que traer la lista de la web
     fichz = "_listaGM.zip"
     ficht = "_listaGM.txt"
-    fichtg = "gm/listaGM.txt"
+    fichtg = "GM/listaGM.txt"
     if siWoman:
         fichtg = "w" + fichtg
     try:
@@ -647,7 +650,7 @@ def importarGM(ownerGM, siWoman):
         linea = linea.strip()
         if linea:
             gm, nombre, ctam, cpart = linea.split(VarGen.XSEP)
-            fichero = "gm/%s.xgm" % gm
+            fichero = "GM/%s.xgm" % gm
             if siWoman:
                 fichero = "w" + fichero
             if Util.tamFichero(fichero) != int(ctam):  # si no existe tam = -1
@@ -673,7 +676,7 @@ def importarGM(ownerGM, siWoman):
 
                 zfobj = zipfile.ZipFile(fzip)
                 for name in zfobj.namelist():
-                    fichero = "gm/%s" % name
+                    fichero = "GM/%s" % name
                     if siWoman:
                         fichero = "w" + fichero
                     outfile = open(fichero, 'wb')

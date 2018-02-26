@@ -3,7 +3,7 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+ Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
  
  McBrain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -39,13 +39,13 @@ namespace PSQT {
 const Score Bonus[][RANK_NB][int(FILE_NB) / 2] = {
   { },
   { // Pawn
-   { S(  0, 0), S(  0, 0),  S(  0, 0), S( 0, 0) },
-   { S(-11, 7), S(  6,-4),  S(  7, 8), S( 3,-2) },
-   { S(-18,-4), S( -2,-5),  S( 19, 5), S(24, 4) },
-   { S(-17, 3), S( -9, 3),  S( 20,-8), S(35,-3) },
-   { S( -6, 7), S(  5, 8),  S(  3, 7), S(21, 6) },
-   { S( -6, 8), S( -8, 9),  S( -6, 8), S(-2, 7) },
-   { S( -4, 9), S( 20, 10), S( -8, 9), S(-4, 8) }
+   { S(  0, 0), S(  0, 0), S(  0, 0), S( 0, 0) },
+   { S(-11, 7), S(  6,-4), S(  7, 8), S( 3,-2) },
+   { S(-18,-4), S( -2,-5), S( 19, 5), S(24, 4) },
+   { S(-17, 3), S( -9, 3), S( 20,-8), S(35,-3) },
+   { S( -6, 8), S(  5, 9), S(  3, 7), S(21,-6) },
+   { S( -6, 8), S( -8,-5), S( -6, 2), S(-2, 4) },
+   { S( -4, 3), S( 20,-9), S( -8, 1), S(-4,18) }
   },
   { // Knight
    { S(-161,-105), S(-96,-82), S(-80,-46), S(-73,-14) },

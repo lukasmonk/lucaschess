@@ -15,6 +15,7 @@ Linux installation from sources
     - sudo pip install Pillow
     - sudo pip install PhotoHash
     - sudo pip install Cython
+    - sudo pip install scandir
 
     
 3) chmod +x -R Engines/Linux64/ - to ensure all engines have exec-permissions
@@ -22,7 +23,7 @@ Linux installation from sources
 4) 64 bits
     - cd LCEngine/irina
     - ./xmk_linux.sh
-    - cd .. #LXEngine
+    - cd .. 
     - ./xcython_linux.sh
 
 

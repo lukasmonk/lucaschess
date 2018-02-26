@@ -1,6 +1,5 @@
 # Generated with 'git shortlog -sn | cut -c8-', which sorts by commits, manually ordered the first four authors, merged duplicates
 
-Michael Byrne (McBrain)
 Tord Romstad
 Marco Costalba (mcostalba)
 Joona Kiiski (zamar)
@@ -95,4 +94,5 @@ ppigazzini
 renouve
 sf-x
 thaspel
+unknown
 

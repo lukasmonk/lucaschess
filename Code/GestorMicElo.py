@@ -134,7 +134,7 @@ class GestorMicElo(Gestor.Gestor):
             self.maxSegundos = aplazamiento["MAXSEGUNDOS"]
             self.segundosJugada = aplazamiento["SEGUNDOSJUGADA"]
 
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         else:
             self.datosMotor = datosMotor
@@ -392,7 +392,7 @@ class GestorMicElo(Gestor.Gestor):
 
         self.partida.liJugadas.append(jg)
         if self.partida.pendienteApertura:
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
 
         resp = self.partida.si3repetidas()
         if resp:
@@ -601,7 +601,7 @@ class GestorMicElo(Gestor.Gestor):
     def atras(self):
         if self.partida.numJugadas() > 2:
             self.partida.anulaUltimoMovimiento(self.siJugamosConBlancas)
-            self.listaAperturasStd.asignaApertura(self.partida)
+            self.partida.asignaApertura()
             self.ponteAlFinal()
             self.refresh()
             self.siguienteJugada()

@@ -24,21 +24,31 @@ class BoardLines(QtGui.QWidget):
         self.panelOpening = panelOpening
         self.dbop = panelOpening.dbop
 
+        self.partidabase = panelOpening.partidabase
+        self.num_jg_inicial = len(self.partidabase)
+        self.posJugada = self.num_jg_inicial
+
         confTablero = configuracion.confTablero("POSLINES", 32)
         self.tablero = Tablero.Tablero(self, confTablero)
         self.tablero.crea()
         self.tablero.ponerPiezasAbajo(True)
         self.tablero.ponMensajero(self.mueveHumano)
         self.tablero.dispatchSize(self.ajustaAncho)
+        self.tablero.dbVisual_setFichero(self.dbop.nomFichero)
+        self.tablero.dbVisual_setShowAllways(True)
+
+        self.dbop.setdbVisual_Tablero(self.tablero) # To close
 
         self.intervalo = 1400
+
+        tipoLetra = Controles.TipoLetra(puntos=configuracion.puntosPGN)
 
         lybt, bt = QTVarios.lyBotonesMovimiento(self, "", siTiempo=True, siLibre=False, tamIcon=24)
 
         self.lbPGN = Controles.LB(self).ponWrap()
         self.lbPGN.colocate = self.colocatePartida
         self.lbPGN.setStyleSheet("QLabel{ border-style: groove; border-width: 2px; border-color: LightSlateGray; padding: 8px;}")
-        self.lbPGN.ponTipoLetra(puntos=configuracion.puntosPGN)
+        self.lbPGN.ponFuente(tipoLetra)
         self.lbPGN.setOpenExternalLinks(False)
         def muestraPos(txt):
             self.colocatePartida(int(txt))
@@ -68,18 +78,23 @@ class BoardLines(QtGui.QWidget):
 
         # Valoracion
         liOpciones = [(tit[0], k, tit[1]) for k, tit in self.dicValoracion.iteritems()]
-        self.lbValoracion = Controles.LB(self, _("Rating") + ":")
         self.cbValoracion = Controles.CB(self, liOpciones, 0).capturaCambiado(self.cambiadoValoracion)
+        self.cbValoracion.ponFuente(tipoLetra)
 
         # Ventaja
         liOpciones = [(tit, k, icon) for k, (tit, icon) in self.dicVentaja.iteritems()]
         self.cbVentaja = Controles.CB(self, liOpciones, 0).capturaCambiado(self.cambiadoVentaja)
+        self.cbVentaja.ponFuente(tipoLetra)
 
         # Comentario
         self.emComentario = Controles.EM(self, siHTML=False).capturaCambios(self.cambiadoComentario)
-
-        lyVal = Colocacion.H().control(self.lbValoracion).control(self.cbValoracion).control(self.cbVentaja).relleno()
+        self.emComentario.ponFuente(tipoLetra)
+        self.emComentario.altoFijo(5*configuracion.altoFilaPGN)
+        lyVal = Colocacion.H().control(self.cbValoracion).control(self.cbVentaja)
         lyEd = Colocacion.V().otro(lyVal).control(self.emComentario)
+
+        # Apertura
+        self.lbApertura = Controles.LB(self).alinCentrado().ponFuente(tipoLetra).ponWrap()
 
         lyt = Colocacion.H().relleno().control(self.tablero).relleno()
 
@@ -90,12 +105,15 @@ class BoardLines(QtGui.QWidget):
         layout.otro(lybt)
         layout.otro(lya)
         layout.otro(lyEd)
+        layout.control(self.lbApertura)
         layout.relleno()
         self.setLayout(layout)
 
         self.ajustaAncho()
 
         self.siReloj = False
+
+        self.ponPartida(self.partidabase)
 
     def analisis(self):
         x = self.gb_analysis.isChecked()
@@ -104,23 +122,17 @@ class BoardLines(QtGui.QWidget):
         else:
             self.wanalisis.show()
 
-    def gridNumDatos(self, grid):
-        return 0
-
-    def reset_motor(self):
-        pass
-
-    def start(self):
-        pass
-
-    def stop(self):
-        pass
-
-    def ponPartidaBase(self, partida):
-        self.num_jg_inicial = partida.numJugadas()-1
-
     def ponPartida(self, partida):
+        partida.test_apertura()
         self.partida = partida
+        rotulo = partida.rotuloApertura()
+        if rotulo is not None:
+            trans = partida.rotuloTransposition()
+            if trans is not None:
+                rotulo += "\n%s: %s" % (_("Transposition"), trans)
+        else:
+            rotulo = ""
+        self.lbApertura.ponTexto(rotulo)
 
     def procesarTB(self):
         getattr(self, self.sender().clave)()
@@ -153,7 +165,7 @@ class BoardLines(QtGui.QWidget):
             self.emComentario.setVisible(siVisible)
 
     def mueveHumano(self, desde, hasta, coronacion=""):
-        cpActual = self.partida.jugada(self.posJugada).posicion
+        cpActual = self.partida.jugada(self.posJugada).posicion if self.posJugada >= 0 else self.partida.iniPosicion
         if cpActual.siPeonCoronando(desde, hasta):
             coronacion = self.tablero.peonCoronando(cpActual.siBlancas)
             if coronacion is None:
@@ -177,20 +189,24 @@ class BoardLines(QtGui.QWidget):
 
     def colocatePartida(self, pos):
         self.fenM2 = None
-        if not self.partida.numJugadas():
+        num_jugadas = self.partida.numJugadas()
+        if num_jugadas == 0:
+            self.posJugada = -1
             self.lbPGN.ponTexto("")
             self.tablero.ponPosicion(self.partida.iniPosicion)
             self.resetValues()
+            self.activaPiezas()
             return
 
-        lh = self.partida.numJugadas() - 1
-        if pos >= lh:
+        if pos >= num_jugadas:
             self.siReloj = False
-            pos = lh
+            pos = num_jugadas - 1
+        elif pos < self.num_jg_inicial-1:
+            pos = self.num_jg_inicial-1
 
         p = self.partida
 
-        numJugada = p.primeraJugada()
+        numJugada = 1
         pgn = ""
         style_number = "color:teal; font-weight: bold;"
         style_moves = "color:black;"
@@ -201,7 +217,7 @@ class BoardLines(QtGui.QWidget):
                 pgn += '<span style="%s">%d.</span>' % (style_number, numJugada)
                 numJugada += 1
 
-            xp = jg.pgnHTML() if self.siFigurines else jg.pgnSP()
+            xp = jg.pgnHTML(self.siFigurines)
             if n == pos:
                 xp = '<span style="%s">%s</span>' % (style_select, xp)
             else:
@@ -216,13 +232,15 @@ class BoardLines(QtGui.QWidget):
         if pos < 0:
             self.tablero.ponPosicion(self.partida.iniPosicion)
             self.resetValues()
+            self.activaPiezas()
             return
 
         jugada = self.partida.jugada(self.posJugada)
-        posicion = jugada.posicion
+        posicion = jugada.posicion if jugada else self.partida.iniPosicion
 
         self.tablero.ponPosicion(posicion)
-        self.tablero.ponFlechaSC(jugada.desde, jugada.hasta)
+        if jugada:
+            self.tablero.ponFlechaSC(jugada.desde, jugada.hasta)
 
         self.fenM2 = posicion.fenM2()
         dic = self.dbop.getfenvalue(self.fenM2)
@@ -242,14 +260,16 @@ class BoardLines(QtGui.QWidget):
 
     def activaPiezas(self):
         self.tablero.desactivaTodas()
-        if not self.siReloj and self.posJugada >= self.num_jg_inicial:
-            jg = self.partida.jugada(self.posJugada)
-            self.tablero.activaColor(not jg.siBlancas())
+        if not self.siReloj and self.posJugada >= self.num_jg_inicial-1:
+            if self.posJugada >= 0:
+                jg = self.partida.jugada(self.posJugada)
+                color = not jg.siBlancas()
+            else:
+                color = True
+            self.tablero.activaColor(color)
 
     def MoverInicio(self):
-         self.posJugada = -1
-         posicion = self.partida.iniPosicion
-         self.tablero.ponPosicion(posicion)
+         self.colocatePartida(0)
 
     def MoverAtras(self):
         self.colocatePartida(self.posJugada - 1)

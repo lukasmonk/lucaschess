@@ -3,7 +3,7 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
+ Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
  
  McBrain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -273,13 +273,13 @@ void UCI::loop(int argc, char* argv[]) {
 	  else if (token == "position")
 	  {
 		  position(pos, is, states);
-		  if (Options["Clean_Search"] == 1)
+		  if (Options["Clean_Search"] == true)
 			  Search::clear();
 	  }
 	  else if (token == "p")
 	  {
 		  position(pos, is, states);
-		  if (Options["Clean Search"] == 1)
+		  if (Options["Clean_Search"] == true)
 			  Search::clear();
 	  }
       else if (token == "ucinewgame") Search::clear();

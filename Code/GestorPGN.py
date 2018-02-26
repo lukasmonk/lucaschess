@@ -193,7 +193,7 @@ class GestorPGN(Gestor.Gestor):
     def mostrar(self, pgn, siRepiteFichero, siBlancas=None):
         self.pensando(True)
         self.partida.leeOtra(pgn.partida)
-        self.listaAperturasStd.asignaApertura(self.partida)
+        self.partida.asignaApertura()
         blancas = pgn.variable("WHITE")
         negras = pgn.variable("BLACK")
         resultado = pgn.variable("RESULT")

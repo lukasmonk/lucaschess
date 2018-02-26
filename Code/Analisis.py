@@ -595,7 +595,8 @@ class UnaMuestra:
     def ponPosRMactual(self, posRM):
         self.posRMactual = posRM
         self.rm = self.listaRM[self.posRMactual][0]
-        self.partida = Partida.Partida(self.jg.posicionBase).leerPV(self.rm.pv)
+        self.partida = Partida.Partida(self.jg.posicionBase)
+        self.partida.leerPV(self.rm.pv)
         self.partida.siTerminada()
         self.posMovActual = 0
 
@@ -817,7 +818,8 @@ class AnalisisVariantes:
         self.rm = self.xtutor.analizaVariante(jgNueva, secs * 1000, self.siBlancas)
         me.final()
 
-        self.partidaTutor = Partida.Partida(jgNueva.posicion).leerPV(self.rm.pv)
+        self.partidaTutor = Partida.Partida(jgNueva.posicion)
+        self.partidaTutor.leerPV(self.rm.pv)
 
         if len(self.partidaTutor):
             self.w.tableroT.ponPosicion(self.partidaTutor.jugada(0).posicion)
