@@ -38,7 +38,6 @@ class GestorOpeningLines(Gestor.Gestor):
 
         self.dicFENm2 = self.training["DICFENM2"]
 
-
         self.liMensBasic = [
             "%s: %d" % (_("Lines"), len(self.liGames)),
         ]
@@ -111,7 +110,7 @@ class GestorOpeningLines(Gestor.Gestor):
             fenM2 = self.partida.ultPosicion.fenM2()
             reg = self.dbop.getfenvalue(fenM2)
             if reg:
-                mens3 = reg["COMENTARIO"]
+                mens3 = reg.get("COMENTARIO", "")
                 ventaja = reg.get("VENTAJA", 0)
                 valoracion = reg.get("VALORACION", 0)
                 if ventaja:

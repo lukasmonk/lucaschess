@@ -115,13 +115,6 @@ class BoardLines(QtGui.QWidget):
 
         self.ponPartida(self.partidabase)
 
-    def analisis(self):
-        x = self.gb_analysis.isChecked()
-        if not x:
-            self.wanalisis.hide()
-        else:
-            self.wanalisis.show()
-
     def ponPartida(self, partida):
         partida.test_apertura()
         self.partida = partida
@@ -237,11 +230,6 @@ class BoardLines(QtGui.QWidget):
 
         jugada = self.partida.jugada(self.posJugada)
         posicion = jugada.posicion if jugada else self.partida.iniPosicion
-
-        self.tablero.ponPosicion(posicion)
-        if jugada:
-            self.tablero.ponFlechaSC(jugada.desde, jugada.hasta)
-
         self.fenM2 = posicion.fenM2()
         dic = self.dbop.getfenvalue(self.fenM2)
         valoracion = dic.get("VALORACION", SIN_VALORACION)
@@ -251,6 +239,17 @@ class BoardLines(QtGui.QWidget):
         self.cbVentaja.ponValor(ventaja)
         self.emComentario.ponTexto(comentario)
 
+        self.tablero.ponPosicion(posicion)
+        if jugada:
+            self.tablero.ponFlechaSC(jugada.desde, jugada.hasta)
+            posicionBase = jugada.posicionBase
+            fenM2_base = posicionBase.fenM2()
+            dicP = self.dbop.getfenvalue(fenM2_base)
+            if "ANALISIS" in dicP:
+                mrm = dicP["ANALISIS"]
+                rm = mrm.mejorMov()
+                self.tablero.creaFlechaMulti(rm.movimiento(), False)
+                
         if self.siReloj:
             self.tablero.desactivaTodas()
         else:

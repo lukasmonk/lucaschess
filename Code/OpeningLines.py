@@ -7,7 +7,6 @@ import LCEngineV1 as LCEngine
 from Code import Util
 from Code import Partida
 from Code import PGNreader
-from Code import Books
 from Code import DBgames
 from Code.QT import QTVarios
 from Code.QT import QTUtil2
@@ -602,17 +601,14 @@ class Opening:
         self._conexion.commit()
         self.li_xpv.sort()
 
-    def importarPolyglot(self, ventana, partidabase, ficheroBIN, depth, siWhite):
+    def importarPolyglot(self, ventana, partida, bookW, bookB, titulo, depth, siWhite):
         titulo = _("Import a polyglot book")
         bp = QTUtil2.BarraProgreso1(ventana, titulo)
         bp.ponTotal(0)
-        bp.ponRotulo(_X(_("Reading %1"), os.path.basename(ficheroBIN)))
+        bp.ponRotulo(_X(_("Reading %1"), titulo))
         bp.mostrar()
 
-        book = Books.Libro("P", ficheroBIN, ficheroBIN, True)
-        book.polyglot()
-
-        cp = partidabase.ultPosicion
+        cp = partida.ultPosicion
 
         liPartidas = []
 
@@ -624,7 +620,7 @@ class Opening:
             if bp.siCancelado():
                 return
             siWhite1 = " w " in fen
-
+            book = bookW if siWhite1 else bookB
             liPV = book.miraListaPV(fen, siWhite1 == siWhite)
             if liPV and len(lipv_ant) < depth:
                 for pv in liPV:
@@ -641,7 +637,7 @@ class Opening:
                 bp.ponTotal(len(liPartidas))
                 bp.pon(len(liPartidas))
 
-        hazFEN(cp.fen(), partidabase.lipv())
+        hazFEN(cp.fen(), partida.lipv())
 
         bp.ponRotulo(_("Writing..."))
         self.guardaPartidas(liPartidas)

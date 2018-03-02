@@ -5,7 +5,9 @@ from PyQt4 import QtCore, QtGui
 
 from Code import Util
 from Code import Partida
+from Code import Analisis
 from Code import OpeningLines
+from Code import Books
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -544,16 +546,16 @@ class WLines(QTVarios.WDialogo):
             self.addPartida(partida)
 
     def importarLeeParam(self, titulo, dicData):
-        liGen = [(None, None)]
+        liGen = [FormLayout.separador]
 
         liGen.append((None, _("Select a maximum number of moves (plies)<br> to consider from each game")))
         liGen.append((FormLayout.Spinbox(_("Depth"), 3, 99, 50), dicData.get("DEPTH", 30)))
-        liGen.append((None, None))
+        liGen.append(FormLayout.separador)
 
         li = [(_("Only white best moves"), True), (_("Only black best moves"), False)]
         config = FormLayout.Combobox(_("Moves"), li)
         liGen.append((config, dicData.get("SIWHITE", True)))
-        liGen.append((None, None))
+        liGen.append(FormLayout.separador)
 
         resultado = FormLayout.fedit(liGen, title=titulo, parent=self, anchoMinimo=360, icon=Iconos.PuntoNaranja())
         if resultado:
@@ -577,19 +579,35 @@ class WLines(QTVarios.WDialogo):
                 self.glines.refresh()
                 self.glines.gotop()
 
-    def importarPolyglot(self):
-        dicData = self.configuracion.leeVariables("OPENINGLINES")
-        carpeta = dicData.get("CARPETABIN", "")
+    def importarPolyglot(self, partida):
+        listaLibros = Books.ListaLibros()
+        listaLibros.recuperaVar(self.configuracion.ficheroBooks)
+        listaLibros.comprueba()
 
-        ficheroBIN = QTUtil2.leeFichero(self, carpeta, "%s (*.bin)" % _("Polyglot book"), titulo=_("File to import"))
-        if not ficheroBIN:
+        liGen = [FormLayout.separador]
+
+        li = [(book.nombre, book) for book in listaLibros.lista]
+        config = FormLayout.Combobox(_("Book that plays white side"), li)
+        liGen.append((config, listaLibros.lista[0]))
+        liGen.append(FormLayout.separador)
+        config = FormLayout.Combobox(_("Book that plays black side"), li)
+        liGen.append((config, listaLibros.lista[0]))
+        resultado = FormLayout.fedit(liGen, title=_("Polyglot book"), parent=self, anchoMinimo=360, icon=Iconos.Libros())
+        if resultado:
+            accion, liResp = resultado
+            bookW, bookB = liResp
+        else:
             return
 
-        dicData["CARPETABIN"] = os.path.dirname(ficheroBIN)
-        dicData = self.importarLeeParam(dicData)
+        bookW.polyglot()
+        bookB.polyglot()
+
+        titulo = bookW.nombre if bookW==bookB else "%s/%s" % (bookW.nombre, bookB.nombre)
+        dicData = self.configuracion.leeVariables("OPENINGLINES")
+        dicData = self.importarLeeParam(titulo, dicData)
         if dicData:
             depth, siWhite = dicData["DEPTH"], dicData["SIWHITE"]
-            self.dbop.importarPolyglot(self, ficheroBIN, depth, siWhite)
+            self.dbop.importarPolyglot(self, partida, bookW, bookB, titulo, depth, siWhite)
             self.glines.refresh()
             self.glines.gotop()
 
@@ -706,6 +724,30 @@ class WLines(QTVarios.WDialogo):
                 self.borrar()
             else:
                 self.borrar_move()
+
+    def gridDobleClick(self, grid, fila, oColumna):
+        partida = self.partidaActual()
+        if partida:
+            self.procesador.cambiaXAnalyzer()
+            xanalyzer = self.procesador.xanalyzer
+            jg = partida.jugada(-1)
+            fenM2 = jg.posicionBase.fenM2()
+            dic = self.dbop.getfenvalue(fenM2)
+            if "ANALISIS" in dic:
+                mrm = dic["ANALISIS"]
+                jg.analisis = mrm, 0
+            else:
+                me = QTUtil2.mensEspera.inicio(self, _("Analyzing the move...."), posicion="ad")
+
+                jg.analisis = xanalyzer.analizaJugadaPartida(partida, len(partida)-1, xanalyzer.motorTiempoJugada,
+                                                               xanalyzer.motorProfundidad)
+                me.final()
+            Analisis.muestraAnalisis(self.procesador, xanalyzer, jg, self.pboard.tablero.siBlancasAbajo, 9999,
+                                     len(partida)-1, pantalla=self)
+
+            dic = self.dbop.getfenvalue(fenM2)
+            dic["ANALISIS"] = jg.analisis[0]
+            self.dbop.setfenvalue(fenM2, dic)
 
     def borrar_move(self):
         fila, col = self.glines.posActual()

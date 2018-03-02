@@ -658,9 +658,11 @@ class WElegir(QTVarios.WDialogo):
 
 
 class WFiltrar(QtGui.QDialog):
-    def __init__(self, wParent, oColumnas, liFiltro):
-
+    def __init__(self, wParent, oColumnas, liFiltro, dbSaveNom=None):
         super(WFiltrar, self).__init__()
+
+        if dbSaveNom is None:
+            dbSaveNom = VarGen.configuracion.ficheroFiltrosPGN
 
         self.setWindowTitle(_("Filter"))
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
@@ -668,6 +670,7 @@ class WFiltrar(QtGui.QDialog):
 
         self.liFiltro = liFiltro
         nFiltro = len(liFiltro)
+        self.dbSaveNom = dbSaveNom
 
         liCampos = [(x.cabecera, x.clave) for x in oColumnas.liColumnas if x.clave != "numero"]
         liCampos.insert(0, ("", None))
@@ -702,11 +705,8 @@ class WFiltrar(QtGui.QDialog):
         self.numC = 8
         liC = []
 
+        union, par0, campo, condicion, valor, par1 = None, False, None, None, "", False
         for i in range(self.numC):
-            if nFiltro > i:
-                union, par0, campo, condicion, valor, par1 = liFiltro[i]
-            else:
-                union, par0, campo, condicion, valor, par1 = None, False, None, None, "", False
             if i > 0:
                 c_union = Controles.CB(self, liUnion, union)
                 ly.controlc(c_union, i + 1, 0)
@@ -732,7 +732,9 @@ class WFiltrar(QtGui.QDialog):
         liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
                       (_("Cancel"), Iconos.Cancelar(), self.reject), None,
                       (_("Reinit"), Iconos.Reiniciar(), self.reiniciar), None,
+                      (_("Save/Restore"), Iconos.Grabar(), self.grabar), None
                       ]
+
         tb = Controles.TBrutina(self, liAcciones)
 
         # Layout
@@ -740,6 +742,80 @@ class WFiltrar(QtGui.QDialog):
         self.setLayout(layout)
 
         liC[0][2].setFocus()
+
+        if nFiltro > 0:
+            self.lee_filtro(self.liFiltro)
+
+    def grabar(self):
+        if not self.lee_filtro_actual():
+            return
+        with Util.DicSQL(self.dbSaveNom, tabla="Filters") as dbc:
+            liConf = dbc.keys(siOrdenados=True)
+            if len(liConf) == 0 and len(self.liFiltro) == 0:
+                return
+            menu = Controles.Menu(self)
+            SELECCIONA, BORRA, GRABA = range(3)
+            for x in liConf:
+                menu.opcion((SELECCIONA, x), x, Iconos.PuntoAzul())
+            menu.separador()
+
+            if len(self.liFiltro) > 0:
+                submenu = menu.submenu(_("Save current"), Iconos.Mas())
+                if liConf:
+                    for x in liConf:
+                        submenu.opcion((GRABA, x), x, Iconos.PuntoAmarillo())
+                submenu.separador()
+                submenu.opcion((GRABA, None), _("New"), Iconos.NuevoMas())
+
+            if liConf:
+                menu.separador()
+                submenu = menu.submenu(_("Remove"), Iconos.Delete())
+                for x in liConf:
+                    submenu.opcion((BORRA, x), x, Iconos.PuntoRojo())
+            resp = menu.lanza()
+
+            if resp:
+                op, nombre = resp
+
+                if op == SELECCIONA:
+                    liFiltro = dbc[nombre]
+                    self.lee_filtro(liFiltro)
+                elif op == BORRA:
+                    if QTUtil2.pregunta(self, _X(_("Delete %1 ?"), nombre)):
+                        del dbc[nombre]
+                elif op == GRABA:
+                    if self.lee_filtro_actual():
+                        if nombre is None:
+                            liGen = [FormLayout.separador]
+                            liGen.append((_("Name") + ":", ""))
+
+                            resultado = FormLayout.fedit(liGen, title=_("Filter"), parent=self, icon=Iconos.Libre())
+                            if resultado:
+                                accion, liGen = resultado
+
+                                nombre = liGen[0].strip()
+                                if nombre:
+                                    dbc[nombre] = self.liFiltro
+                        else:
+                            dbc[nombre] = self.liFiltro
+
+    def lee_filtro(self, liFiltro):
+        self.liFiltro = liFiltro
+        nFiltro = len(liFiltro)
+
+        for i in range(self.numC):
+            if nFiltro > i:
+                union, par0, campo, condicion, valor, par1 = liFiltro[i]
+            else:
+                union, par0, campo, condicion, valor, par1 = None, False, None, None, "", False
+            c_union, c_par0, c_campo, c_condicion, c_valor, c_par1 = self.liC[i]
+            if c_union:
+                c_union.ponValor(union)
+            c_par0.ponValor(par0)
+            c_campo.ponValor(campo)
+            c_condicion.ponValor(condicion)
+            c_valor.ponTexto(valor)
+            c_par1.ponValor(par1)
 
     def reiniciar(self):
         for i in range(self.numC):
@@ -752,8 +828,7 @@ class WFiltrar(QtGui.QDialog):
                 self.liC[i][0].setCurrentIndex(0)
         self.aceptar()
 
-    def aceptar(self):
-
+    def lee_filtro_actual(self):
         self.liFiltro = []
 
         npar = 0
@@ -786,9 +861,12 @@ class WFiltrar(QtGui.QDialog):
                 break
         if npar:
             QTUtil2.mensError(self, _("The parentheses are unbalanced."))
-            return
+            return False
+        return True
 
-        self.accept()
+    def aceptar(self):
+        if self.lee_filtro_actual():
+            self.accept()
 
     def where(self):
         where = ""

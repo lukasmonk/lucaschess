@@ -224,7 +224,7 @@ def leeRivales():
     cm.elo = 3200
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
-    cm.ponMultiPV(20, 500)
+    cm.ponMultiPV(20, 256)
     mas(cm)
 
     cm = ConfigMotor("gull", "Vadim Demichev", "3 32bit", "https://sourceforge.net/projects/gullchess/")

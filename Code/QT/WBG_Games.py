@@ -296,7 +296,7 @@ class WGames(QtGui.QWidget):
                 xpv = " ".join(li[:-1])
 
         def standard():
-            w = PantallaPGN.WFiltrar(self, self.grid.oColumnas, self.liFiltro)
+            w = PantallaPGN.WFiltrar(self, self.grid.oColumnas, self.liFiltro, self.dbGames.nomFichero)
             if w.exec_():
                 self.liFiltro = w.liFiltro
 

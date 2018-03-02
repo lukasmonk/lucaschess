@@ -143,7 +143,7 @@ def leeRivales():
     cm.elo = 3200
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
-    cm.ponMultiPV(20, 500)
+    cm.ponMultiPV(20, 256)
     mas(cm)
 
     cm = ConfigMotor("andscacs", "Daniel José Queraltó", "0.8932n", "http://www.andscacs.com/")

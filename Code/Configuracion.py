@@ -334,6 +334,8 @@ class Configuracion:
 
         self.ficheroVariables = "%s/Variables.pk" % self.carpeta
 
+        self.ficheroFiltrosPGN = "%s/pgnFilters.db" % self.carpeta
+
         Util.creaCarpeta(self.dirPersonalTraining)
 
         self.carpetaGames = "%s/%s" % (self.carpeta, "DatabasesGames")

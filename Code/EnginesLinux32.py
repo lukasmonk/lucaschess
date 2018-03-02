@@ -156,7 +156,7 @@ def leeRivales():
     cm.elo = 3200
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
-    cm.ponMultiPV(20, 500)
+    cm.ponMultiPV(20, 256)
     mas(cm)
 
     cm = ConfigMotor("zappa", "Anthony Cozzie", "1.1", "http://www.acoz.net/zappa/")

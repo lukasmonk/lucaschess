@@ -428,7 +428,7 @@ def paramAnalisisMasivo(parent, configuracion, siVariosSeleccionados, siDatabase
         alm.liJugadores = cjug.upper().split(";") if cjug else None
 
         alm.libroAperturas = liGen[7]
-        alm.libro = alm.libroAperturas.nombre
+        alm.libro = alm.libroAperturas.nombre if alm.libroAperturas is not None else None
 
         alm.desdeelfinal = liGen[8]
 
