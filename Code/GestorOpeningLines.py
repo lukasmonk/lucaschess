@@ -5,6 +5,7 @@ from Code import Jugada
 from Code import ControlPosicion
 from Code import TrListas
 from Code.QT import QTUtil2
+from Code.QT import Iconos
 from Code import Util
 from Code import OpeningLines
 from Code import XMotorRespuesta
@@ -39,7 +40,7 @@ class GestorOpeningLines(Gestor.Gestor):
         self.dicFENm2 = self.training["DICFENM2"]
 
         self.liMensBasic = [
-            "%s: %d" % (_("Lines"), len(self.liGames)),
+            "%s: %d/%d" % (_("Line"), self.num_linea+1, len(self.liGames)),
         ]
 
         self.siAyuda = False
@@ -80,7 +81,7 @@ class GestorOpeningLines(Gestor.Gestor):
 
     def ayuda(self):
         self.siAyuda = True
-        self.pantalla.ponToolBar((k_mainmenu, k_reiniciar))
+        self.pantalla.ponToolBar((k_mainmenu, k_reiniciar, k_configurar, k_utilidades))
         self.tablero.dbVisual_setShowAllways(True)
 
         self.muestraAyuda()
@@ -160,11 +161,11 @@ class GestorOpeningLines(Gestor.Gestor):
                     self.training["LIGAMES_SEQUENTIAL"] = liNuevo
                     self.pantalla.ponToolBar((k_mainmenu, k_siguiente))
                 else:
-                    self.pantalla.ponToolBar((k_mainmenu, k_reiniciar))
+                    self.pantalla.ponToolBar((k_mainmenu, k_reiniciar, k_configurar, k_utilidades))
             else:
                 self.game["NOERROR"] -= 1
 
-                self.pantalla.ponToolBar((k_mainmenu, k_reiniciar))
+                self.pantalla.ponToolBar((k_mainmenu, k_reiniciar, k_configurar, k_utilidades))
         else:
             if not sinError:
                 self.game["NOERROR"] -= 1
@@ -281,7 +282,7 @@ class GestorOpeningLines(Gestor.Gestor):
 
             self.errores += 1
             mens = "%s: %d" % (_("Error"), self.errores)
-            QTUtil2.mensajeTemporal(self.pantalla, mens, 2, posicion="tb", background="#FF9B00")
+            QTUtil2.mensajeTemporal(self.pantalla, mens, 1.2, posicion="ad", background="#FF9B00", pmImagen=Iconos.pmError())
             self.muestraInformacion()
             self.sigueHumano()
             return False

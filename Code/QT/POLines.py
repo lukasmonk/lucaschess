@@ -40,7 +40,7 @@ class WOpeningLines(QTVarios.WDialogo):
         oColumnas.nueva("BASEPV", _("First moves"), 280)
         oColumnas.nueva("NUMLINES", _("Lines"), 80, siCentrado=True)
         oColumnas.nueva("FILE", _("File"), 200)
-        self.glista = Grid.Grid(self, oColumnas, siSelecFilas=True)
+        self.glista = Grid.Grid(self, oColumnas, siSelecFilas=True, siSeleccionMultiple=True)
 
         liAcciones = (
             (_("Close"), Iconos.MainMenu(), self.terminar), None,
@@ -71,7 +71,7 @@ class WOpeningLines(QTVarios.WDialogo):
         # Colocamos
 
         lytb = Colocacion.H().control(tb).control(self.wtrain)
-        ly = Colocacion.V().otro(lytb).control(self.glista).margen(3)
+        ly = Colocacion.V().otro(lytb).control(self.glista).margen(4)
 
         self.setLayout(ly)
 
@@ -557,12 +557,15 @@ class WLines(QTVarios.WDialogo):
         liGen.append((config, dicData.get("SIWHITE", True)))
         liGen.append(FormLayout.separador)
 
+        liGen.append((FormLayout.Spinbox(_("Minimum moves must have each line"), 0, 99, 50), dicData.get("MINMOVES", 0)))
+
         resultado = FormLayout.fedit(liGen, title=titulo, parent=self, anchoMinimo=360, icon=Iconos.PuntoNaranja())
         if resultado:
             accion, liResp = resultado
-            depth, siWhite = liResp
+            depth, siWhite, minMoves = liResp
             dicData["DEPTH"] = depth
             dicData["SIWHITE"] = siWhite
+            dicData["MINMOVES"] = minMoves
             self.configuracion.escVariables("WBG_MOVES", dicData)
             return dicData
         return None
@@ -574,8 +577,8 @@ class WLines(QTVarios.WDialogo):
             dicData = self.importarLeeParam(_("Database summary"), previo)
             if dicData:
                 ficheroSummary = nomfichgames + "_s1"
-                depth, siWhite = dicData["DEPTH"], dicData["SIWHITE"]
-                self.dbop.importarSummary(self, partida, ficheroSummary, depth, siWhite)
+                depth, siWhite, minMoves = dicData["DEPTH"], dicData["SIWHITE"], dicData["MINMOVES"]
+                self.dbop.importarSummary(self, partida, ficheroSummary, depth, siWhite, minMoves)
                 self.glines.refresh()
                 self.glines.gotop()
 
@@ -592,6 +595,8 @@ class WLines(QTVarios.WDialogo):
         liGen.append(FormLayout.separador)
         config = FormLayout.Combobox(_("Book that plays black side"), li)
         liGen.append((config, listaLibros.lista[0]))
+        liGen.append(FormLayout.separador)
+
         resultado = FormLayout.fedit(liGen, title=_("Polyglot book"), parent=self, anchoMinimo=360, icon=Iconos.Libros())
         if resultado:
             accion, liResp = resultado
@@ -606,8 +611,8 @@ class WLines(QTVarios.WDialogo):
         dicData = self.configuracion.leeVariables("OPENINGLINES")
         dicData = self.importarLeeParam(titulo, dicData)
         if dicData:
-            depth, siWhite = dicData["DEPTH"], dicData["SIWHITE"]
-            self.dbop.importarPolyglot(self, partida, bookW, bookB, titulo, depth, siWhite)
+            depth, siWhite, minMoves = dicData["DEPTH"], dicData["SIWHITE"], dicData["MINMOVES"]
+            self.dbop.importarPolyglot(self, partida, bookW, bookB, titulo, depth, siWhite, minMoves)
             self.glines.refresh()
             self.glines.gotop()
 
@@ -957,7 +962,7 @@ class WStaticTraining(QTVarios.WDialogo):
     def gridDato(self, grid, fila, oColumna):
         col = oColumna.clave
         if col == "FILA":
-            return "%d" % (fila + 1)
+            return "%d" % fila
         elif col.startswith("COL"):
             num = fila*self.elems_fila + int(col[3:])
             if num >= self.num_games:

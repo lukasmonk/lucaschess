@@ -111,7 +111,7 @@ class MensEspera(QtGui.QWidget):
         self.siCancelado = False
 
         if posicion == "tb":
-            fixedSize = self.owner.width()
+            fixedSize = parent.width()
 
         self.lb = lb = Controles.LB(parent, resalta(mensaje)).ponFuente(Controles.TipoLetra(puntos=puntos))
         if fixedSize is not None:

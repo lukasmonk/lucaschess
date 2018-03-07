@@ -249,7 +249,7 @@ class BoardLines(QtGui.QWidget):
                 mrm = dicP["ANALISIS"]
                 rm = mrm.mejorMov()
                 self.tablero.creaFlechaMulti(rm.movimiento(), False)
-                
+
         if self.siReloj:
             self.tablero.desactivaTodas()
         else:

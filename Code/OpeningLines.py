@@ -197,33 +197,41 @@ class Opening:
         return self.setconfig("TRAINING", reg)
 
     def preparaTraining(self, reg):
-        lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
         maxmoves = reg["MAXMOVES"]
-        if maxmoves:
-            for num, lipv in enumerate(lilipv):
-                if len(lipv) > maxmoves:
-                    lilipv[num] = lipv[:maxmoves]
-
         siBlancas = reg["COLOR"] == "WHITE"
+        siRandom = reg["RANDOM"]
 
-        if reg["RANDOM"]:
+        lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
+
+        if maxmoves:
+            for pos, lipv in enumerate(lilipv):
+                if len(lipv) > maxmoves:
+                    lilipv[pos] = lipv[:maxmoves]
+
+        # Ultimo el usuario
+        for pos, lipv in enumerate(lilipv):
+            if len(lipv) % 2 == (0 if siBlancas else 1):
+                lilipv[pos] = lipv[:-1]
+
+        # Duplicados
+        stBorrar = set()
+        lista = [(pos, "".join(lipv)) for pos, lipv in enumerate(lilipv)]
+        lista.sort(key=lambda elem: elem[1])
+        for pos, (posli, pv) in enumerate(lista):
+            for pos1 in range(pos+1, len(lista)):
+                if lista[pos1][1].startswith(pv):
+                    stBorrar.add(posli)
+                    break
+
+        lilipv = [lipv for pos, lipv in enumerate(lilipv) if pos not in stBorrar]
+
+        if siRandom:
             random.shuffle(lilipv)
 
         ligamesST = []
         ligamesSQ = []
-        stPV = set()
         dicFENm2 = {}
         for lipv in lilipv:
-            # Siempre termina el usuario
-            if len(lipv) % 2 == (0 if siBlancas else 1):
-                lipv = lipv[:-1]
-
-            # Duplicados
-            pv = "".join(lipv)
-            if pv in stPV:
-                continue
-            stPV.add(pv)
-
             game = {}
             game["LIPV"] = lipv
             game["NOERROR"] = 0
@@ -576,13 +584,13 @@ class Opening:
         dlTmp.actualiza(n, erroneos, duplicados, importados)
         dlTmp.ponContinuar()
 
-    def guardaPartidas(self, liPartidas):
+    def guardaPartidas(self, liPartidas, minMoves=0):
         partidabase = self.getpartidabase()
         sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
         sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
         cursor = self._conexion.cursor()
         for partida in liPartidas:
-            if partida.numJugadas() > partidabase.numJugadas():
+            if minMoves <= partida.numJugadas() > partidabase.numJugadas():
                 xpv = LCEngine.pv2xpv(partida.pv())
                 if xpv not in self.li_xpv:
                     line_blob = partida.save2blob()
@@ -601,11 +609,10 @@ class Opening:
         self._conexion.commit()
         self.li_xpv.sort()
 
-    def importarPolyglot(self, ventana, partida, bookW, bookB, titulo, depth, siWhite):
-        titulo = _("Import a polyglot book")
+    def importarPolyglot(self, ventana, partida, bookW, bookB, titulo, depth, siWhite, minMoves):
         bp = QTUtil2.BarraProgreso1(ventana, titulo)
         bp.ponTotal(0)
-        bp.ponRotulo(_X(_("Reading %1"), titulo))
+        bp.ponRotulo(_X(_("Reading %1"), "..."))
         bp.mostrar()
 
         cp = partida.ultPosicion
@@ -640,12 +647,12 @@ class Opening:
         hazFEN(cp.fen(), partida.lipv())
 
         bp.ponRotulo(_("Writing..."))
-        self.guardaPartidas(liPartidas)
+        self.guardaPartidas(liPartidas, minMoves)
         bp.cerrar()
 
         return True
 
-    def importarSummary(self, ventana, partidabase, ficheroSummary, depth, siWhite):
+    def importarSummary(self, ventana, partidabase, ficheroSummary, depth, siWhite, minMoves):
         titulo = _("Importing the summary of a database")
         bp = QTUtil2.BarraProgreso1(ventana, titulo)
         bp.ponTotal(0)

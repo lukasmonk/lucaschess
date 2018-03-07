@@ -505,7 +505,7 @@ class EntrenamientoAperturas(QTVarios.WDialogo):
         if VarGen.isWindows:
             exe = 'Engines/Windows/_tools/polyglot/polyglot.exe'
         else:
-            exe = 'Engines/Linux/_tools/polyglot/polyglot'
+            exe = '%s/_tools/polyglot/polyglot' % VarGen.folder_engines
         li = [os.path.abspath(exe),
               'make-book',
               "-pgn", fichTMP,

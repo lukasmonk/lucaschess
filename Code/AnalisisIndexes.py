@@ -5,9 +5,8 @@ from Code import Partida
 
 
 def calc_formula(cual, cp, mrm):  # , limit=200.0):
-    f = open("./IntFiles/Formulas/%s.formula" % cual, "rb")
-    formula = f.read()
-    f.close()
+    with open("./IntFiles/Formulas/%s.formula" % cual, "rb") as f:
+        formula = f.read()
     piew = pieb = 0
     mat = 0.0
     matw = matb = 0.0
@@ -283,7 +282,7 @@ def tp_gamestage(cp, mrm):
     return _("Game stage"), calc_gamestage(cp, mrm), get_gamestage(cp, mrm)
 
 
-def genIndexes(partida, elos, alm):
+def genIndexes(partida, elos, elosFORM, alm):
     average = {True: 0, False: 0}
     domination = {True: 0, False: 0}
     complexity = {True: 0.0, False: 0.0}
@@ -369,6 +368,12 @@ def genIndexes(partida, elos, alm):
     for std, tit in ((Partida.OPENING, _("Opening")), (Partida.MIDDLEGAME, _("Middle game")), (Partida.ENDGAME, _("End game"))):
         if elos[None][std]:
             txt += plantillaC % ( tit, int(elos[True][std]), int(elos[False][std]), int(elos[None][std]))
+
+    txt += plantillaC % ("Elo WITH FORMULA", elosFORM[True][Partida.ALLGAME], elosFORM[False][Partida.ALLGAME], elosFORM[None][Partida.ALLGAME])
+
+    for std, tit in ((Partida.OPENING, _("Opening")), (Partida.MIDDLEGAME, _("Middle game")), (Partida.ENDGAME, _("End game"))):
+        if elos[None][std]:
+            txt += plantillaC % ( tit, int(elosFORM[True][std]), int(elosFORM[False][std]), int(elosFORM[None][std]))
 
     txtHTML = '<table border="1" cellpadding="5" cellspacing="1" >%s%s</table>' % (cab, txt)
 

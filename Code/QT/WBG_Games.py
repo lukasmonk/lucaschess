@@ -736,12 +736,12 @@ class WGames(QtGui.QWidget):
         self.limpiaColumnas()
         self.actualiza(True)
 
-    def damePGNtemporal(self, wPantallaBooks):
+    def damePGNtemporal(self, wowner):
         total = self.dbGames.reccount()
         if total < 1:
             return None
         fichTemporalPGN = self.configuracion.ficheroTemporal("pgn")
-        pb = QTUtil2.BarraProgreso1(wPantallaBooks, _("Creating temporary PGN file..."), formato1="%p%")
+        pb = QTUtil2.BarraProgreso1(wowner, _("Creating temporary PGN file..."), formato1="%p%")
         pb.mostrar()
         pb.ponTotal(total)
 

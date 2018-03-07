@@ -358,3 +358,12 @@ class GestorMotor:
     def set_option(self, name, value):
         self.testEngine()
         self.motor.set_option(name, value)
+
+    def miraListaPV(self, fen, siUna):  #
+        """Servicio para Opening lines-importar polyglot-generador de movimientos-emula un book polyglot"""
+        mrm = self.analiza(fen)
+        lipv = [rm.movimiento() for rm in mrm.liMultiPV]
+        return lipv[0] if siUna else lipv
+
+
+

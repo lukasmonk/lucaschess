@@ -372,6 +372,8 @@ class VentanaMultiPV(QtGui.QDialog):
                     self.si_read_multipv = False
                     self.mrm.ordena()
                     self.liData = self.mrm.liMultiPV
+                    if len(self.liData) == 0:
+                        continue
                     rm = self.mrm.liMultiPV[0]
                     self.lbDepth.ponTexto("%s: %d" % (_("Depth"), rm.depth))
                     partida = Partida.Partida(fen=self.fen)

@@ -2380,3 +2380,9 @@ def pmTrainPositions():
 def TrainPositions():
     return QtGui.QIcon(pmTrainPositions())
 
+def pmError():
+    return PM(50641,54641)
+
+def Error():
+    return QtGui.QIcon(pmError())
+

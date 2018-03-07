@@ -292,9 +292,9 @@ class WPosicion(QtGui.QWidget):
 
     def leeDatos(self):
         siBlancas = self.rbWhite.isChecked()
-        EnPassant = self.edEnPassant.texto().strip()
-        if not EnPassant:
-            EnPassant = "-"
+        alPaso = self.edEnPassant.texto().strip()
+        if not alPaso:
+            alPaso = "-"
         jugadas = self.edFullMoves.value()
         movPeonCap = self.edMovesPawn.value()
 
@@ -304,10 +304,10 @@ class WPosicion(QtGui.QWidget):
                 enroques += pieza
         if not enroques:
             enroques = "-"
-        return siBlancas, EnPassant, jugadas, movPeonCap, enroques
+        return siBlancas, alPaso, jugadas, movPeonCap, enroques
 
     def actPosicion(self):
-        self.posicion.siBlancas, self.posicion.EnPassant, \
+        self.posicion.siBlancas, self.posicion.alPaso, \
         self.posicion.jugadas, self.posicion.movPeonCap, self.posicion.enroques = self.leeDatos()
 
     def setPosicion(self, posicion):

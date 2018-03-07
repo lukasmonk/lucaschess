@@ -313,7 +313,7 @@ class WElegir(QTVarios.WDialogo):
                 self.grid.goto(li[-1], 0)
                 self.ponStatus()
 
-    def damePGNtemporal(self):
+    def damePGNtemporal(self, wowner):
         fichTemporal = VarGen.configuracion.ficheroTemporal("pgn")
         fw = open(fichTemporal, "wb")
         dbf = self.dbf
