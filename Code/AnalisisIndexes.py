@@ -369,11 +369,11 @@ def genIndexes(partida, elos, elosFORM, alm):
         if elos[None][std]:
             txt += plantillaC % ( tit, int(elos[True][std]), int(elos[False][std]), int(elos[None][std]))
 
-    txt += plantillaC % ("Elo WITH FORMULA", elosFORM[True][Partida.ALLGAME], elosFORM[False][Partida.ALLGAME], elosFORM[None][Partida.ALLGAME])
+    # txt += plantillaC % ("Elo WITH FORMULA", elosFORM[True][Partida.ALLGAME], elosFORM[False][Partida.ALLGAME], elosFORM[None][Partida.ALLGAME])
 
-    for std, tit in ((Partida.OPENING, _("Opening")), (Partida.MIDDLEGAME, _("Middle game")), (Partida.ENDGAME, _("End game"))):
-        if elos[None][std]:
-            txt += plantillaC % ( tit, int(elosFORM[True][std]), int(elosFORM[False][std]), int(elosFORM[None][std]))
+    # for std, tit in ((Partida.OPENING, _("Opening")), (Partida.MIDDLEGAME, _("Middle game")), (Partida.ENDGAME, _("End game"))):
+    #     if elos[None][std]:
+    #         txt += plantillaC % ( tit, int(elosFORM[True][std]), int(elosFORM[False][std]), int(elosFORM[None][std]))
 
     txtHTML = '<table border="1" cellpadding="5" cellspacing="1" >%s%s</table>' % (cab, txt)
 

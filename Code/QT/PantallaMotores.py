@@ -432,7 +432,7 @@ def selectEngine(wowner):
     """
     # Pedimos el ejecutable
     folderEngines = VarGen.configuracion.leeVariables("FOLDER_ENGINES")
-    exeMotor = QTUtil2.leeFichero(wowner, folderEngines if folderEngines else ".", "*", _("Engine"))
+    exeMotor = QTUtil2.leeFichero(wowner, folderEngines if folderEngines else ".", "%s EXE (*.exe)" % _("File"), _("Engine"))
     if not exeMotor:
         return None
     folderEngines = Util.dirRelativo(os.path.dirname(exeMotor))

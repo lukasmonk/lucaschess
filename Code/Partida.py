@@ -1,6 +1,3 @@
-import LCEngineV1 as LCEngine
-
-from Code import VarGen
 from Code import Util
 from Code import ControlPosicion
 from Code import Jugada
@@ -459,69 +456,69 @@ class Partida:
 
         return elos
 
-    def calc_elo_colorFORM(self, perfomance, siBlancas):
-        bad_moves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
-        verybad_moves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
-        nummoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
-        sumelos = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
-        factormoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
-        last = OPENING
-        for jg in self.liJugadas:
-            if jg.analisis:
-                if jg.siBlancas() != siBlancas:
-                    continue
-                if last == ENDGAME:
-                    std = ENDGAME
-                else:
-                    if jg.siBook:
-                        std = OPENING
-                    else:
-                        std = MIDDLEGAME
-                        material = jg.posicionBase.valor_material()
-                        if material < 15:
-                            std = ENDGAME
-                        else:
-                            pzW, pzB = jg.posicionBase.numPiezasWB()
-                            if pzW < 3 and pzB < 3:
-                                std = ENDGAME
-                jg.estadoOME = std
-                last = std
-                jg.elo = calc_formula_elo(jg)
-                # jg.calc_elo(perfomance)
-                if jg.bad_move:
-                    bad_moves[std] += 1
-                elif jg.verybad_move:
-                    verybad_moves[std] += 1
-                nummoves[std] += 1
-                sumelos[std] += jg.elo*1.0
-                factormoves[std] += 1.0
-
-        topes = {}
-        elos = {}
-        for std in (OPENING, MIDDLEGAME, ENDGAME):
-            sume = sumelos[std]
-            numf = factormoves[std]
-            tope = topes[std] = perfomance.limit(verybad_moves[std], bad_moves[std], nummoves[std])
-            if numf:
-                elos[std] = int((sume*1.0/numf)*tope/perfomance.limit_max)
-            else:
-                elos[std] = 0
-
-        sume = 0
-        numf = 0
-        tope = perfomance.limit_max
-        for std in (OPENING, MIDDLEGAME, ENDGAME):
-            sume += sumelos[std]
-            numf += factormoves[std]
-            if topes[std] < tope:
-                tope = topes[std]
-
-        if numf:
-            elos[ALLGAME] = int((sume*1.0/numf)*tope/perfomance.limit_max)
-        else:
-            elos[ALLGAME] = 0
-
-        return elos
+    # def calc_elo_colorFORM(self, perfomance, siBlancas):
+    #     bad_moves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+    #     verybad_moves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+    #     nummoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+    #     sumelos = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+    #     factormoves = {OPENING:0, MIDDLEGAME:0, ENDGAME:0}
+    #     last = OPENING
+    #     for jg in self.liJugadas:
+    #         if jg.analisis:
+    #             if jg.siBlancas() != siBlancas:
+    #                 continue
+    #             if last == ENDGAME:
+    #                 std = ENDGAME
+    #             else:
+    #                 if jg.siBook:
+    #                     std = OPENING
+    #                 else:
+    #                     std = MIDDLEGAME
+    #                     material = jg.posicionBase.valor_material()
+    #                     if material < 15:
+    #                         std = ENDGAME
+    #                     else:
+    #                         pzW, pzB = jg.posicionBase.numPiezasWB()
+    #                         if pzW < 3 and pzB < 3:
+    #                             std = ENDGAME
+    #             jg.estadoOME = std
+    #             last = std
+    #             jg.elo = calc_formula_elo(jg)
+    #             # jg.calc_elo(perfomance)
+    #             if jg.bad_move:
+    #                 bad_moves[std] += 1
+    #             elif jg.verybad_move:
+    #                 verybad_moves[std] += 1
+    #             nummoves[std] += 1
+    #             sumelos[std] += jg.elo*1.0
+    #             factormoves[std] += 1.0
+    #
+    #     topes = {}
+    #     elos = {}
+    #     for std in (OPENING, MIDDLEGAME, ENDGAME):
+    #         sume = sumelos[std]
+    #         numf = factormoves[std]
+    #         tope = topes[std] = perfomance.limit(verybad_moves[std], bad_moves[std], nummoves[std])
+    #         if numf:
+    #             elos[std] = int((sume*1.0/numf)*tope/perfomance.limit_max)
+    #         else:
+    #             elos[std] = 0
+    #
+    #     sume = 0
+    #     numf = 0
+    #     tope = perfomance.limit_max
+    #     for std in (OPENING, MIDDLEGAME, ENDGAME):
+    #         sume += sumelos[std]
+    #         numf += factormoves[std]
+    #         if topes[std] < tope:
+    #             tope = topes[std]
+    #
+    #     if numf:
+    #         elos[ALLGAME] = int((sume*1.0/numf)*tope/perfomance.limit_max)
+    #     else:
+    #         elos[ALLGAME] = 0
+    #
+    #     return elos
 
     def calc_elos(self, configuracion):
         for jg in self.liJugadas:
@@ -544,26 +541,26 @@ class Partida:
 
         return elos
 
-    def calc_elosFORM(self, configuracion):
-        for jg in self.liJugadas:
-            jg.siBook = False
-        if self.siFenInicial():
-            from Code import Apertura
-            ap = Apertura.AperturaPol(999)
-            for jg in self.liJugadas:
-                jg.siBook = ap.compruebaHumano(jg.posicionBase.fen(), jg.desde, jg.hasta)
-                if not jg.siBook:
-                    break
-
-        elos = {}
-        for siBlancas in (True, False):
-            elos[siBlancas] = self.calc_elo_colorFORM(configuracion.perfomance, siBlancas)
-
-        elos[None] = {}
-        for std in (OPENING, MIDDLEGAME, ENDGAME, ALLGAME):
-            elos[None][std] = int((elos[True][std] + elos[False][std])/2.0)
-
-        return elos
+    # def calc_elosFORM(self, configuracion):
+    #     for jg in self.liJugadas:
+    #         jg.siBook = False
+    #     if self.siFenInicial():
+    #         from Code import Apertura
+    #         ap = Apertura.AperturaPol(999)
+    #         for jg in self.liJugadas:
+    #             jg.siBook = ap.compruebaHumano(jg.posicionBase.fen(), jg.desde, jg.hasta)
+    #             if not jg.siBook:
+    #                 break
+    #
+    #     elos = {}
+    #     for siBlancas in (True, False):
+    #         elos[siBlancas] = self.calc_elo_colorFORM(configuracion.perfomance, siBlancas)
+    #
+    #     elos[None] = {}
+    #     for std in (OPENING, MIDDLEGAME, ENDGAME, ALLGAME):
+    #         elos[None][std] = int((elos[True][std] + elos[False][std])/2.0)
+    #
+    #     return elos
 
     def asignaApertura(self):
         AperturasStd.ap.asignaApertura(self)
@@ -665,110 +662,110 @@ class PartidaCompleta(Partida):
 
 firstLG = [True]
 
-def calc_formula_elo(jg):  # , limit=200.0):
-    with open("./IntFiles/Formulas/eloperformance.formula") as f:
-        formula = f.read().strip()
-
-    dataLG = []
-    titLG = []
-
-    def LG(key, value):
-        titLG.append(key)
-        dataLG.append(str(value))
-
-    cp = jg.posicionBase
-    mrm, pos = jg.analisis
-
-    LG("move", mrm.liMultiPV[pos].movimiento())
-
-    pts = mrm.liMultiPV[pos].puntosABS_5()
-    pts0 = mrm.liMultiPV[0].puntosABS_5()
-    lostp_abs = pts0 - pts
-
-    LG("pts best", pts0)
-    LG("pts current", pts)
-    LG("xlostp", lostp_abs)
-
-    piew = pieb = 0
-    mat = 0.0
-    matw = matb = 0.0
-    dmat = {"k": 3.0, "q": 9.9, "r": 5.5, "b": 3.5, "n": 3.1, "p": 1.0}
-    for k, v in cp.casillas.iteritems():
-        if v:
-            m = dmat[v.lower()]
-            mat += m
-            if v.isupper():
-                piew += 1
-                matw += m
-            else:
-                pieb += 1
-                matb += m
-    mov = LCEngine.setFen(cp.fen())
-    base = mrm.liMultiPV[0].puntosABS()
-    siBlancas = cp.siBlancas
-
-    gmo34 = gmo68 = gmo100 = 0
-    for rm in mrm.liMultiPV:
-        dif = abs(rm.puntosABS() - base)
-        if dif < 34:
-            gmo34 += 1
-        elif dif < 68:
-            gmo68 += 1
-        elif dif < 101:
-            gmo100 += 1
-    gmo = float(gmo34) + float(gmo68) ** 0.8 + float(gmo100) ** 0.5
-    plm = (cp.jugadas - 1) * 2
-    if not siBlancas:
-        plm += 1
-
-    # xshow: Factor de conversion a puntos para mostrar
-    xshow = +1 if siBlancas else -1
-    if not VarGen.configuracion.centipawns:
-        xshow = 0.01*xshow
-
-    li = (
-        ("xpiec", piew if siBlancas else pieb),
-        ("xpie", piew + pieb),
-        ("xmov", mov),
-        ("xeval", base if siBlancas else -base),
-        ("xstm", +1 if siBlancas else -1),
-        ("xplm", plm),
-        ("xshow", xshow),
-        ("xlost", lostp_abs)
-    )
-    for k, v in li:
-        if k in formula:
-            formula = formula.replace(k, "%d.0" % v)
-    li = (
-        ("xgmo", gmo),
-        ("xmat", mat),
-        ("xpow", matw if siBlancas else matb),
-    )
-    for k, v in li:
-
-        LG(k, v)
-
-        if k in formula:
-            formula = formula.replace(k, "%f" % v)
-    if "xcompl" in formula:
-        formula = formula.replace("xcompl", "%f" % calc_formula_elo("complexity", cp, mrm))
-    try:
-        x = float(eval(formula))
-        # if x < 0.0:
-        # x = -x
-        # if x > limit:
-        # x = limit
-
-        LG("elo", int(min(3500, max(0, x))))
-        LG("other elo", int(jg.elo))
-
-
-        with open("FormulaELO.csv", "ab") as q:
-            if firstLG[0]:
-                firstLG[0] = False
-                q.write(",".join(titLG) + "\r\n")
-            q.write(",".join(dataLG) + "\r\n")
-
-        return min(3500, max(0, x))
-    except:
-        return 0.0
+# def calc_formula_elo(jg):  # , limit=200.0):
+#     with open("./IntFiles/Formulas/eloperformance.formula") as f:
+#         formula = f.read().strip()
+#
+#     dataLG = []
+#     titLG = []
+#
+#     def LG(key, value):
+#         titLG.append(key)
+#         dataLG.append(str(value))
+#
+#     cp = jg.posicionBase
+#     mrm, pos = jg.analisis
+#
+#     LG("move", mrm.liMultiPV[pos].movimiento())
+#
+#     pts = mrm.liMultiPV[pos].puntosABS_5()
+#     pts0 = mrm.liMultiPV[0].puntosABS_5()
+#     lostp_abs = pts0 - pts
+#
+#     LG("pts best", pts0)
+#     LG("pts current", pts)
+#     LG("xlostp", lostp_abs)
+#
+#     piew = pieb = 0
+#     mat = 0.0
+#     matw = matb = 0.0
+#     dmat = {"k": 3.0, "q": 9.9, "r": 5.5, "b": 3.5, "n": 3.1, "p": 1.0}
+#     for k, v in cp.casillas.iteritems():
+#         if v:
+#             m = dmat[v.lower()]
+#             mat += m
+#             if v.isupper():
+#                 piew += 1
+#                 matw += m
+#             else:
+#                 pieb += 1
+#                 matb += m
+#     mov = LCEngine.setFen(cp.fen())
+#     base = mrm.liMultiPV[0].puntosABS()
+#     siBlancas = cp.siBlancas
+#
+#     gmo34 = gmo68 = gmo100 = 0
+#     for rm in mrm.liMultiPV:
+#         dif = abs(rm.puntosABS() - base)
+#         if dif < 34:
+#             gmo34 += 1
+#         elif dif < 68:
+#             gmo68 += 1
+#         elif dif < 101:
+#             gmo100 += 1
+#     gmo = float(gmo34) + float(gmo68) ** 0.8 + float(gmo100) ** 0.5
+#     plm = (cp.jugadas - 1) * 2
+#     if not siBlancas:
+#         plm += 1
+#
+#     # xshow: Factor de conversion a puntos para mostrar
+#     xshow = +1 if siBlancas else -1
+#     if not VarGen.configuracion.centipawns:
+#         xshow = 0.01*xshow
+#
+#     li = (
+#         ("xpiec", piew if siBlancas else pieb),
+#         ("xpie", piew + pieb),
+#         ("xmov", mov),
+#         ("xeval", base if siBlancas else -base),
+#         ("xstm", +1 if siBlancas else -1),
+#         ("xplm", plm),
+#         ("xshow", xshow),
+#         ("xlost", lostp_abs)
+#     )
+#     for k, v in li:
+#         if k in formula:
+#             formula = formula.replace(k, "%d.0" % v)
+#     li = (
+#         ("xgmo", gmo),
+#         ("xmat", mat),
+#         ("xpow", matw if siBlancas else matb),
+#     )
+#     for k, v in li:
+#
+#         LG(k, v)
+#
+#         if k in formula:
+#             formula = formula.replace(k, "%f" % v)
+#     if "xcompl" in formula:
+#         formula = formula.replace("xcompl", "%f" % calc_formula_elo("complexity", cp, mrm))
+#     try:
+#         x = float(eval(formula))
+#         # if x < 0.0:
+#         # x = -x
+#         # if x > limit:
+#         # x = limit
+#
+#         LG("elo", int(min(3500, max(0, x))))
+#         LG("other elo", int(jg.elo))
+#
+#
+#         with open("FormulaELO.csv", "ab") as q:
+#             if firstLG[0]:
+#                 firstLG[0] = False
+#                 q.write(",".join(titLG) + "\r\n")
+#             q.write(",".join(dataLG) + "\r\n")
+#
+#         return min(3500, max(0, x))
+#     except:
+#         return 0.0
