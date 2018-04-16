@@ -2386,3 +2386,9 @@ def pmError():
 def Error():
     return QtGui.QIcon(pmError())
 
+def pmAtajos():
+    return PM(916833,918012)
+
+def Atajos():
+    return QtGui.QIcon(pmAtajos())
+

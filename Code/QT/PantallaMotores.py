@@ -439,10 +439,11 @@ def selectEngine(wowner):
     VarGen.configuracion.escVariables("FOLDER_ENGINES", folderEngines)
 
     # Leemos el UCI
-    um = QTUtil2.unMomento(wowner)
     me = MotoresExternos.MotorExterno()
-    resp = me.leerUCI(exeMotor)
-    um.final()
+    while True:
+        um = QTUtil2.unMomento(wowner)
+        resp = me.leerUCI(exeMotor)
+        um.final()
     if not resp:
         QTUtil2.mensaje(wowner, _X(_("The file %1 does not correspond to a UCI engine type."), exeMotor))
         return None

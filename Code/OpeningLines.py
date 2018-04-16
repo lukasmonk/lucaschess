@@ -125,6 +125,7 @@ class ListaOpenings:
         op.settitle(title)
         op.close()
         self.lista[num]["title"] = title
+        self.save()
 
     def add_training_file(self, file):
         for dicline in self.lista:

@@ -752,7 +752,7 @@ class Ventana(QtGui.QDialog):
             p = psutil.Process(pid)
             p.nice(self.cpu.prioridad)
 
-        if siMultiPV:
+        if siMultiPV and configMotor.maxMultiPV:
             configMotor.liUCI.append(("MultiPV", str(configMotor.maxMultiPV)))
 
         self.orden_ok("uci", "uciok")
@@ -1271,7 +1271,7 @@ class VentanaIndices(Ventana):
 
         self.setLayout(layout)
 
-        self.lanzaMotor(True)
+        self.lanzaMotor(False)
 
     def ponFen(self, fen):
         if fen:

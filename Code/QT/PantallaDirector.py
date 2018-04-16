@@ -22,7 +22,7 @@ from Code.QT import QTUtil2
 from Code.QT import QTVarios
 
 
-class WTabDirVisual(QTVarios.WDialogo):
+class WPanelDirector(QTVarios.WDialogo):
     def __init__(self, owner, tablero):
         self.owner = owner
         self.posicion = tablero.ultPosicion
@@ -857,13 +857,13 @@ class WTabDirVisual(QTVarios.WDialogo):
             self.gborrar()
 
 
-class DirVisual:
+class Director:
     def __init__(self, tablero):
         self.tablero = tablero
         self.ultTareaSelect = None
         self.director = False
         self.directorItemSC = None
-        self.w = WTabDirVisual(self, tablero)
+        self.w = WPanelDirector(self, tablero)
         self.w.show()
         self.guion = self.w.guion
 
@@ -890,10 +890,10 @@ class DirVisual:
         self.director = ok
         self.ultTareaSelect = None
         self.directorItemSC = None
-        if ok:
-            self.tablero.activaTodas()
-        else:
-            self.tablero.desactivaTodas()
+        # if ok:
+        #     self.tablero.activaTodas()
+        # else:
+        #     self.tablero.desactivaTodas()
 
     def keyPressEvent(self, event):
         k = event.key()

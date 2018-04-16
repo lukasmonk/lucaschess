@@ -28,7 +28,6 @@ class WBase(QtGui.QWidget):
         self.procesandoEventos = None
 
         self.setWindowIcon(Iconos.Aplicacion())
-        self.setStyleSheet("QToolButton { padding: 0px; }")
 
         self.creaToolBar()
         self.creaTablero()
@@ -39,12 +38,17 @@ class WBase(QtGui.QWidget):
 
         lyT = Colocacion.V().control(self.tablero).relleno()
 
+        self.conAtajos = True
+
+
         lyAI = Colocacion.H().relleno(1).control(self.capturas).otroi(lyT).otroi(lyBI).relleno(1).margen(0)
         ly = Colocacion.V().control(self.tb).relleno().otro(lyAI).relleno().margen(2)
 
         self.setLayout(ly)
 
         self.preparaColoresPGN()
+
+        self.setAutoFillBackground(True)
 
     def preparaColoresPGN(self):
         self.colorMateNegativo = QTUtil.qtColorRGB(0, 0, 0)
@@ -63,8 +67,23 @@ class WBase(QtGui.QWidget):
         self.tb.setToolButtonStyle(iconsTB)
         sz = 32 if iconsTB == QtCore.Qt.ToolButtonTextUnderIcon else 16
         self.tb.setIconSize(QtCore.QSize(sz, sz))
-        self.tb.setStyleSheet("QToolBar {border-bottom: 1px solid gray; border-top: 1px solid gray;}");
+        style = "QToolBar {border-bottom: 1px solid gray; border-top: 1px solid gray;}"
+        self.tb.setStyleSheet(style)
+        sp = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.tb.setSizePolicy(sp)
+        self.tb.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tb.customContextMenuRequested.connect(self.lanzaAtajos)
+
         self.preparaTB()
+
+    def lanzaAtajos(self):
+        if self.conAtajos:
+            self.gestor.procesarAccion(k_atajos)
+
+    def lanzaAtajosALT(self, key):
+        if self.conAtajos:
+            self.gestor.lanzaAtajosALT(key)
+
 
     def creaTablero(self):
         ae = QTUtil.altoEscritorio()
@@ -238,7 +257,6 @@ class WBase(QtGui.QWidget):
                       (_("Show text"), Iconos.Modificar(), k_showtext),
                       (_("Help to move"), Iconos.BotonAyuda(), k_ayudaMover),
                       (_("Send"), Iconos.Enviar(), k_enviar),
-                      # ( "Debug", Iconos.Camara(), 999),# Martin debug
                       )
 
         cf = self.gestor.configuracion
@@ -258,31 +276,22 @@ class WBase(QtGui.QWidget):
     def procesarAccion(self):
         self.gestor.procesarAccion(self.sender().clave)
 
-    def ponToolBar(self, liAcciones, separator=False):
+    def ponToolBar(self, liAcciones, separator=False, conAtajos=False):
 
-        # liAcciones = list(liAcciones) # Martin debug
-        # liAcciones.append( 999 )
+        self.conAtajos = conAtajos
 
         self.tb.clear()
-        for k in liAcciones:
+        last = len(liAcciones)-1
+        for n, k in enumerate(liAcciones):
             self.dicTB[k].setVisible(True)
             self.dicTB[k].setEnabled(True)
             self.tb.addAction(self.dicTB[k])
-            if separator:
+            if separator and n != last:
                 self.tb.addSeparator()
 
         self.tb.liAcciones = liAcciones
         self.tb.update()
         QTUtil.refreshGUI()
-
-        # if getattr( self, "problemTB", True ):
-        # x = self.tb.height()
-        # if x > 50:
-        # x+= 2
-        # self.problemTB = False
-        # self.tb.setFixedHeight(x)
-        # self.tb.update()
-        # QTUtil.refreshGUI()
 
     def dameToolBar(self):
         return self.tb.liAcciones
@@ -408,8 +417,6 @@ class WBase(QtGui.QWidget):
             stNAGS.add(str(nag))
             color_nag = nag
 
-
-
         if jg.siApertura or jg.critica or jg.comentario or jg.variantes:
             siA = jg.siApertura
             nR = 0
@@ -441,6 +448,13 @@ class WBase(QtGui.QWidget):
         pass
 
     def keyPressEvent(self, event):
+        k = event.key()
+        if self.conAtajos:
+            if 49 <= k <= 57:
+                m = int(event.modifiers())
+                if (m & QtCore.Qt.AltModifier) > 0:
+                    self.lanzaAtajosALT(k-48)
+                    return
         self.teclaPulsada("V", event.key())
 
     def tableroWheelEvent(self, tablero, siAdelante):

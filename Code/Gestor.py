@@ -43,6 +43,7 @@ class Gestor:
         self.procesador = procesador
         self.pantalla = procesador.pantalla
         self.tablero = procesador.tablero
+        self.tablero.setAcceptDropPGNs(None)
         # self.tablero.mostrarPiezas(True, True)
         self.configuracion = procesador.configuracion
         self.runSound = VarGen.runSound
@@ -494,7 +495,7 @@ class Gestor:
                self.tipoJuego in (kJugEntPos, kJugPGN, kJugEntMaq, kJugEntTac, kJugGM, kJugSolo, kJugBooks, kJugAperturas) or
                (self.tipoJuego in (kJugElo, kJugMicElo) and not self.siCompetitivo))
 
-    def miraKibitzers(self, jg, columnaClave):
+    def miraKibitzers(self, jg, columnaClave, soloNuevo=False):
         if jg:
             fenBase = jg.posicionBase.fen()
             fen = fenBase if columnaClave == "NUMERO" else jg.posicion.fen()
@@ -502,8 +503,11 @@ class Gestor:
             fen = self.partida.ultPosicion.fen()
             fenBase = fen
         liApagadas = []
+        last = len(self.liKibitzersActivas) - 1
         for n, xkibitzer in enumerate(self.liKibitzersActivas):
             if xkibitzer.siActiva():
+                if soloNuevo and n != last:
+                    continue
                 xkibitzer.ponFen(fen, fenBase)
             else:
                 liApagadas.append(n)
@@ -1067,7 +1071,9 @@ class Gestor:
             nkibitzer = int(orden)
             xkibitzer = Kibitzers.IPCKibitzer(self, nkibitzer)
             self.liKibitzersActivas.append(xkibitzer)
-            self.ponVista()
+            fila, columna = self.pantalla.pgnPosActual()
+            posJugada, jg = self.pgn.jugada(fila, columna.clave)
+            self.miraKibitzers(jg, columna.clave, True)
 
     def paraHumano(self):
         self.siJuegaHumano = False
@@ -1502,7 +1508,7 @@ class Gestor:
     def showAnalisis(self):
         um = self.procesador.unMomento()
         elos = self.partida.calc_elos(self.configuracion)
-        elosFORM = None #self.partida.calc_elosFORM(self.configuracion)
+        elosFORM = self.partida.calc_elosFORM(self.configuracion)
         alm = Histogram.genHistograms(self.partida, self.configuracion.centipawns)
         alm.indexesHTML, alm.indexesRAW, alm.eloW, alm.eloB, alm.eloT = AnalisisIndexes.genIndexes(self.partida, elos, elosFORM, alm)
         alm.siBlancasAbajo = self.tablero.siBlancasAbajo

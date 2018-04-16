@@ -748,7 +748,11 @@ class DBgames:
         return xpv2pv(xpv)
 
     def ponOrden(self, liOrden):
-        li = ["%s %s" % (campo, tipo) for campo, tipo in liOrden]
+        li = []
+        for campo, tipo in liOrden:
+            if campo == "PLIES":
+                campo =  "CAST(PLIES AS INTEGER)"
+            li.append( "%s %s" % (campo, tipo))
         self.order = ",".join(li)
         self.liRowids = []
         self.rowidReader.run(self.liRowids, self.filter, self.order)

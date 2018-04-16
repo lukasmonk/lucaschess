@@ -71,6 +71,7 @@ class Perfomance:
         self.good_depth = 3
 
     def elo(self, xlost):
+        # 3500.0 - ((60 * xlost) / (xgmo ** 0.4)) + abs(xeval ** 0.8)
         return min(max(int(self.limit_max - self.lost_factor * (xlost ** self.lost_exp)), self.limit_min), self.limit_max)
 
     def elo_bad_vbad(self, xlost):
@@ -764,6 +765,7 @@ class Configuracion:
 
                 self.liTrasteros = dg("TRASTEROS", [])
                 self.liFavoritos = dg("FAVORITOS", [])
+                self.testFavoritos()
                 self.liPersonalidades = dg("PERSONALIDADES", [])
 
                 self.centipawns = dg("CENTIPAWNS", self.centipawns)
@@ -815,6 +817,11 @@ class Configuracion:
         self.releeTRA()
 
         TrListas.ponPiecesLNG(self.siNomPiezasEN or self.traductor == "en")
+
+    def testFavoritos(self):
+        if len(self.liFavoritos) > 0:
+            if type(self.liFavoritos[0]) != type({}):
+                self.liFavoritos = [{"OPCION": valor} for valor in self.liFavoritos]
 
     def releeTRA(self):
         Traducir.install(self.traductor)

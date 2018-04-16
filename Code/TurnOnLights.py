@@ -73,14 +73,14 @@ class TOL_Block:
     def add_line(self, line):
         self.lines.append(line)
 
-    def new_result(self, seconds):
+    def new_result(self, seconds, true_time_used, errores, ayudas):
         today = datetime.datetime.now()
-        self.times.append((seconds, today))
+        self.times.append((seconds, today, true_time_used, errores, ayudas))
         self.times.sort(key=lambda x: x[0])
 
-    def new_reinit(self, seconds):
+    def new_reinit(self, seconds, errores, ayudas):
         today = datetime.datetime.now()
-        self.reinits.append((seconds, today))
+        self.reinits.append((seconds, today, errores, ayudas))
 
     def av_seconds(self):
         return self.times[0][0] if self.times else None

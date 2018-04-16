@@ -134,7 +134,7 @@ class GestorTurnOnLights(Gestor.Gestor):
             if self.ini_time:
                 self.total_time_used += time.time() - self.ini_time
         if self.total_time_used:
-            self.block.new_reinit(self.total_time_used)
+            self.block.new_reinit(self.total_time_used, self.errores, self.ayudas)
             self.total_time_used = 0.0
             TurnOnLights.write_tol(self.tol)
         self.inicio(self.num_theme, self.num_block, self.tol)
@@ -193,7 +193,7 @@ class GestorTurnOnLights(Gestor.Gestor):
             num_moves = self.block.num_moves()
             ta = self.total_time_used + self.errores*self.penaltyError + self.ayudas*self.penaltyHelp
             tm = ta/num_moves
-            self.block.new_result(tm)
+            self.block.new_result(tm, self.total_time_used, self.errores, self.ayudas)
             TurnOnLights.write_tol(self.tol)
             cat_block, ico = TurnOnLights.qualification(tm, self.calculation_mode)
             cat_level, ico = self.tol.cat_num_level()

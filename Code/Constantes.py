@@ -28,8 +28,8 @@ kMoverAdelante, kMoverAtras, kMoverInicio, kMoverFinal, kMoverLibre, kMoverReloj
     k_peliculaPGN, k_jugar, k_anterior, k_siguiente, k_trasteros,
     k_ayuda, k_mateNivel, k_ayudaMover,
     k_aceptar, k_cancelar,
-    k_configurar, k_utilidades, k_variantes, k_tools, k_elo, k_cambiar, k_libre, k_showtext, k_enviar
-) = range(55)
+    k_configurar, k_utilidades, k_variantes, k_tools, k_elo, k_cambiar, k_libre, k_showtext, k_enviar, k_atajos
+) = range(56)
 
 kMP_1, kMP_2, kMP_3, kMP_4, kMP_5, kMP_6, kMP_7 = range(7)
 

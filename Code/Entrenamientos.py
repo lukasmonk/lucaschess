@@ -128,7 +128,7 @@ class Entrenamientos:
                 menu.opcion(clave, texton, icono, siDeshabilitado, tipoLetra=tpirat)
             else:
                 menu.opcion(clave, texto, icono, siDeshabilitado)
-            dicMenu[clave] = (clave, texto, icono, siDeshabilitado)
+            dicMenu[clave] = (self.menu_run, texto, icono, siDeshabilitado)
 
         # Posiciones de entrenamiento --------------------------------------------------------------------------
         self.menuFNS(menu, _("Training positions"), xopcion)
@@ -355,18 +355,6 @@ class Entrenamientos:
 
         return menu, dicMenu
 
-    def menuFavoritos(self, liFavoritos):
-
-        menu = QTVarios.LCMenu(self.parent)
-
-        for clave, texto, icono, siDeshabilitado in liFavoritos:
-            menu.opcion(clave, texto, icono, siDeshabilitado)
-            menu.separador()
-
-        menu.opcion("menu_global", _("Training"), Iconos.Entrenamiento())
-
-        return menu
-
     def comprueba(self):
         if self.menu is None:
             self.menu, self.dicMenu = self.creaMenu()
@@ -374,33 +362,17 @@ class Entrenamientos:
     def rehaz(self):
         self.menu, self.dicMenu = self.creaMenu()
 
-    def lanza(self, siFavoritos=True):
+    def lanza(self):
 
         self.comprueba()
 
-        liFavoritos = None
-        if siFavoritos:
-            liFav = self.procesador.configuracion.liFavoritos
-            if liFav:
-                li = []
-                for elem in liFav:
-                    if elem in self.dicMenu:
-                        li.append(self.dicMenu[elem])
-                liFavoritos = li
+        resp = self.menu.lanza()
+        self.menu_run(resp)
 
-        if liFavoritos:
-            menu = self.menuFavoritos(liFavoritos)
-        else:
-            menu = self.menu
-
-        resp = menu.lanza()
-
+    def menu_run(self, resp):
         if resp:
             if type(resp) == str:
-                if resp == "menu_global":
-                    self.lanza(False)
-
-                elif resp == "gm":
+                if resp == "gm":
                     self.entrenaGM()
 
                 elif resp == "wgm":
@@ -471,14 +443,24 @@ class Entrenamientos:
                         jump = False
                     else:
                         db = Util.DicSQL(self.configuracion.ficheroTrainings)
-                        posUltimo = db[entreno]
-                        if posUltimo is None:
+                        data = db[entreno]
+                        jump = False
+                        tipo = "s"
+                        if data is None:
                             posUltimo = 1
+                        elif type(data) == int:
+                            posUltimo = data
+                        else:
+                            posUltimo = data["POSULTIMO"]
+                            jump = data["SALTA"]
+                            tipo = data["TIPO"]
                         resp = DatosNueva.numPosicion(self.procesador.pantalla,
-                                                      titentreno, nPosiciones, posUltimo)
+                                                      titentreno, nPosiciones, posUltimo, jump, tipo)
                         if resp is None:
+                            db.close()
                             return
                         pos, tipo, jump = resp
+                        db[entreno] = {"POSULTIMO": pos, "SALTA":jump, "TIPO":tipo}
                         db.close()
                         if tipo.startswith("r"):
                             if tipo == "rk":

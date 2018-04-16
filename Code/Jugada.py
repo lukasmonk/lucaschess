@@ -410,12 +410,12 @@ class Jugada:
     def calc_elo(self, perfomance):
         if self.analisis:
             mrm, pos = self.analisis
-            pts = mrm.liMultiPV[pos].puntosABS_5()
-            pts0 = mrm.liMultiPV[0].puntosABS_5()
+            pts = mrm.liMultiPV[pos].puntosABS()
+            pts0 = mrm.liMultiPV[0].puntosABS()
             lostp_abs = pts0 - pts
             self.elo, self.bad_move, self.verybad_move = perfomance.elo_bad_vbad(lostp_abs)
 
-            li = list({rm.puntosABS_5() for rm in mrm.liMultiPV})
+            li = list({rm.puntosABS() for rm in mrm.liMultiPV})
             li.sort()
             ant = li[0]
             nfactor = 1

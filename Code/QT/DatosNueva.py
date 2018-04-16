@@ -261,7 +261,7 @@ class WNumEntrenamiento(QtGui.QDialog):
         self.accept()
 
 
-def numPosicion(wParent, titulo, nFEN, pos):
+def numPosicion(wParent, titulo, nFEN, pos, salta, tipo):
     liGen = [FormLayout.separador]
 
     label = "%s (1..%d)" % (_("Select position"), nFEN)
@@ -273,11 +273,11 @@ def numPosicion(wParent, titulo, nFEN, pos):
           (_("Random"), "r"),
           (_("Random with same sequence based on position"), "rk")
           ]
-    liGen.append((FormLayout.Combobox(_("Type"), li), "s"))
+    liGen.append((FormLayout.Combobox(_("Type"), li), tipo))
 
     liGen.append(FormLayout.separador)
 
-    liGen.append((_("Jump to the next after solve") + ":", False))
+    liGen.append((_("Jump to the next after solve") + ":", salta))
 
     resultado = FormLayout.fedit(liGen, title=titulo, parent=wParent, anchoMinimo=200,
                                  icon=Iconos.Entrenamiento())

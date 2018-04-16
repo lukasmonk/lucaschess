@@ -376,7 +376,6 @@ class WElegir(QTVarios.WDialogo):
                 self.gm()
 
     def gm(self):
-
         liSelec = self.grid.recnosSeleccionados()
 
         # Datos
@@ -960,12 +959,13 @@ def elegirPGN(owner, dbf, dClaves, gestor, estado, siElegir=False):
     return False, None, w.seHaBorradoAlgo
 
 
-def eligePartida(ventana):
+def eligePartida(ventana, path=None):
     configuracion = VarGen.configuracion
     # Elegimos el fichero PGN
-    path = QTUtil2.leeFichero(ventana, configuracion.dirPGN, "pgn")
-    if not path:
-        return None
+    if path is None:
+        path = QTUtil2.leeFichero(ventana, configuracion.dirPGN, "pgn")
+        if not path:
+            return None
     carpeta, fichero = os.path.split(path)
     if configuracion.dirPGN != carpeta:
         configuracion.dirPGN = carpeta

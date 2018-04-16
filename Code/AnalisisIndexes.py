@@ -363,17 +363,21 @@ def genIndexes(partida, elos, elosFORM, alm):
     txt += plantillaC % (_("Pieces activity"), xac(piecesactivity[True]), xac(piecesactivity[False]), xac(piecesactivityT))
     txt += plantillaC % (_("Exchange tendency"), xac(exchangetendency[True]), xac(exchangetendency[False]), xac(exchangetendencyT))
     txt += plantillaL % ( "%", alm.porcW, prc, alm.porcB, prc, alm.porcT, prc)
-    txt += plantillaC % ( _("Elo performance"), elos[True][Partida.ALLGAME], elos[False][Partida.ALLGAME], elos[None][Partida.ALLGAME])
 
-    for std, tit in ((Partida.OPENING, _("Opening")), (Partida.MIDDLEGAME, _("Middle game")), (Partida.ENDGAME, _("End game"))):
-        if elos[None][std]:
-            txt += plantillaC % ( tit, int(elos[True][std]), int(elos[False][std]), int(elos[None][std]))
-
+    # txt += plantillaC % ( _("Elo performance"), elos[True][Partida.ALLGAME], elos[False][Partida.ALLGAME], elos[None][Partida.ALLGAME])
+    # for std, tit in ((Partida.OPENING, _("Opening")), (Partida.MIDDLEGAME, _("Middle game")), (Partida.ENDGAME, _("End game"))):
+    #     if elos[None][std]:
+    #         txt += plantillaC % ( tit, int(elos[True][std]), int(elos[False][std]), int(elos[None][std]))
+    #
     # txt += plantillaC % ("Elo WITH FORMULA", elosFORM[True][Partida.ALLGAME], elosFORM[False][Partida.ALLGAME], elosFORM[None][Partida.ALLGAME])
-
     # for std, tit in ((Partida.OPENING, _("Opening")), (Partida.MIDDLEGAME, _("Middle game")), (Partida.ENDGAME, _("End game"))):
     #     if elos[None][std]:
     #         txt += plantillaC % ( tit, int(elosFORM[True][std]), int(elosFORM[False][std]), int(elosFORM[None][std]))
+
+    txt += plantillaC % ( _("Elo performance"), elosFORM[True][Partida.ALLGAME], elosFORM[False][Partida.ALLGAME], elosFORM[None][Partida.ALLGAME])
+    for std, tit in ((Partida.OPENING, _("Opening")), (Partida.MIDDLEGAME, _("Middle game")), (Partida.ENDGAME, _("End game"))):
+        if elos[None][std]:
+            txt += plantillaC % ( tit, int(elosFORM[True][std]), int(elosFORM[False][std]), int(elosFORM[None][std]))
 
     txtHTML = '<table border="1" cellpadding="5" cellspacing="1" >%s%s</table>' % (cab, txt)
 

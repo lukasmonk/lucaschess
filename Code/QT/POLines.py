@@ -42,10 +42,13 @@ class WOpeningLines(QTVarios.WDialogo):
         oColumnas.nueva("FILE", _("File"), 200)
         self.glista = Grid.Grid(self, oColumnas, siSelecFilas=True, siSeleccionMultiple=True)
 
+        sp = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+
         liAcciones = (
             (_("Close"), Iconos.MainMenu(), self.terminar), None,
             (_("Edit"), Iconos.Modificar(), self.modificar), None,
             (_("New"), Iconos.Nuevo(), self.new), None,
+            (_("Rename"), Iconos.Modificar(), self.renombrar), None,
             (_("Up"), Iconos.Arriba(), self.arriba),
             (_("Down"), Iconos.Abajo(), self.abajo), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
@@ -53,7 +56,6 @@ class WOpeningLines(QTVarios.WDialogo):
         )
         tb = Controles.TBrutina(self, liAcciones)
 
-        sp = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         tb.setSizePolicy(sp)
 
         liAcciones = (
@@ -68,10 +70,14 @@ class WOpeningLines(QTVarios.WDialogo):
         self.wtrain = QtGui.QWidget()
         self.wtrain.setLayout(lytrain)
 
+        lytb = Colocacion.H().control(tb).control(self.wtrain).margen(0)
+        wtb = QtGui.QWidget()
+        wtb.setFixedHeight(62)
+        wtb.setLayout(lytb)
+
         # Colocamos
 
-        lytb = Colocacion.H().control(tb).control(self.wtrain)
-        ly = Colocacion.V().otro(lytb).control(self.glista).margen(4)
+        ly = Colocacion.V().control(wtb).control(self.glista).margen(4)
 
         self.setLayout(ly)
 
@@ -144,18 +150,33 @@ class WOpeningLines(QTVarios.WDialogo):
         if si_expl:
             QTUtil2.mensaje(self, _("Secondly you have to choose a name for this opening studio."))
 
+        name = self.get_nombre(name)
+        if name:
+            file = self.listaOpenings.select_filename(name)
+            self.listaOpenings.new(file, pv, name)
+            self.resultado = self.listaOpenings[-1]
+            self.guardarVideo()
+            self.accept()
+
+    def get_nombre(self, name):
         liGen = [(None, None)]
         liGen.append((_("Opening studio name") + ":", name))
         resultado = FormLayout.fedit(liGen, title=_("Opening studio name"), parent=self, icon=Iconos.OpeningLines(), anchoMinimo=460)
         if resultado:
             accion, liResp = resultado
-            name = liResp[0]
+            name = liResp[0].strip()
             if name:
-                file = self.listaOpenings.select_filename(name)
-                self.listaOpenings.new(file, pv, name)
-                self.resultado = self.listaOpenings[-1]
-                self.guardarVideo()
-                self.accept()
+                return name
+        return None
+
+    def renombrar(self):
+        fila = self.glista.recno()
+        if fila >= 0:
+            op = self.listaOpenings[fila]
+            name = self.get_nombre(op["title"])
+            if name:
+                self.listaOpenings.change_title(fila, name)
+                self.glista.refresh()
 
     def borrar(self):
         li = self.glista.recnosSeleccionados()
@@ -190,11 +211,6 @@ class WOpeningLines(QTVarios.WDialogo):
                 return p.pgnBaseRAW()
             else:
                 return ""
-
-    def gridPonValor(self, grid, fila, columna, valor):
-        valor = valor.strip()
-        if valor:
-            self.listaOpenings.change_title(fila, valor)
 
     def gridCambiadoRegistro(self, grid, fila, columna):
         ok = False
@@ -830,7 +846,7 @@ class WLines(QTVarios.WDialogo):
                         if cad:
                             sli.append(cad)
                         cli = "\n".join(sli)
-                        if QTUtil2.pregunta(self, _("Do you want to remove the next lines ?") + "\n\n" + cli):
+                        if QTUtil2.pregunta(self, _("Do you want to remove the next lines?") + "\n\n" + cli):
                             li.sort(reverse=True)
                             um = QTUtil2.unMomento(self, _("Working..."))
                             for num in li:
@@ -903,9 +919,9 @@ class WLines(QTVarios.WDialogo):
         fila = num_linea*2
         if not siBlancas:
             fila += 1
-        self.glines.goto(fila, ncol)
 
         self.glines.refresh()
+        self.glines.goto(fila, ncol)
 
 
 class WStaticTraining(QTVarios.WDialogo):

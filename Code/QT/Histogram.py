@@ -466,8 +466,8 @@ def genHistograms(partida, sicentipawns):
         if jg.analisis:
             mrm, pos = jg.analisis
             siBlancas = jg.siBlancas()
-            pts = mrm.liMultiPV[pos].puntosABS_5()
-            pts0 = mrm.liMultiPV[0].puntosABS_5()
+            pts = mrm.liMultiPV[pos].puntosABS()
+            pts0 = mrm.liMultiPV[0].puntosABS()
             jg.lostp_abs = lostp_abs = pts0 - pts
 
             porc = jg.porcentaje = 100 - lostp_abs if lostp_abs < 100 else 0

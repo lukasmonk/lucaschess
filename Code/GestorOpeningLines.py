@@ -122,6 +122,7 @@ class GestorOpeningLines(Gestor.Gestor):
 
 
     def partidaTerminada(self, siCompleta):
+        self.estado = kFinJuego
         tm = time.time() - self.ini_time
         li = [_("Line finished.")]
         if self.siAyuda:

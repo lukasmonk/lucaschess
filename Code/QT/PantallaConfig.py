@@ -42,7 +42,7 @@ def opciones(parent, configuracion):
     liEng.append(separador)
     liEng.append((_("Do not work in background when possible") + ":", configuracion.notbackground))
     liEng.append(separador)
-    liEng.append((_("Save engines log") + ":", configuracion.siLogEngines))
+    liEng.append(("%s -> %s:" %(_("Save engines log"), "UsrData/EngineLogs"), configuracion.siLogEngines))
 
     # Aspect
     liAsp = []
@@ -52,7 +52,6 @@ def opciones(parent, configuracion):
 
     ## font general
     liAsp.append((FormLayout.FontCombobox(_("Font")), configuracion.familia))
-    liAsp.append(separador)
 
     ## Menus
     liAsp.append((None, _("Menus") + ":"))

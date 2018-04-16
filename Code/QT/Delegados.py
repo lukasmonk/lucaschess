@@ -282,7 +282,7 @@ class PmIconosColor(QtGui.QStyledItemDelegate):
     def __init__(self, parent=None):
         QtGui.QStyledItemDelegate.__init__(self, parent)
 
-        self.dicIconos = {"0": Iconos.pmGris32(),
+        self.dicpmIconos = {"0": Iconos.pmGris32(),
                           "1": Iconos.pmAmarillo32(),
                           "2": Iconos.pmNaranja32(),
                           "3": Iconos.pmVerde32(),
@@ -290,15 +290,15 @@ class PmIconosColor(QtGui.QStyledItemDelegate):
                           "5": Iconos.pmMagenta32(),
                           "6": Iconos.pmRojo32(),
                           "7": Iconos.pmLight32()
-                          }
+                            }
 
     def paint(self, painter, option, index):
         pos = str(index.model().data(index, QtCore.Qt.DisplayRole))
-        if pos not in self.dicIconos:
+        if pos not in self.dicpmIconos:
             return
         painter.save()
         painter.translate(option.rect.x(), option.rect.y())
-        painter.drawPixmap(4, 4, self.dicIconos[pos])
+        painter.drawPixmap(4, 4, self.dicpmIconos[pos])
         painter.restore()
 
 

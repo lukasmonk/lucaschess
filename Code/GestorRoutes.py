@@ -381,10 +381,16 @@ class GestorRoutesEndings(GestorRoutes):
         GestorRoutes.inicio(self, route)
 
         ending = self.route.get_ending()
-        self.is_guided = True
-        self.fen, label, pv = ending.split("|")
-        self.liPV = pv.split(" ")
-        self.posPV = 0
+        if "|" in ending:
+            self.is_guided = True
+            self.t4 = None
+            self.fen, label, pv = ending.split("|")
+            self.liPV = pv.split(" ")
+            self.posPV = 0
+        else:
+            self.is_guided = False
+            self.t4 = LibChess.T4()
+            self.fen = ending + " - - 0 1"
 
         self.rivalPensando = False
 
@@ -466,6 +472,8 @@ class GestorRoutesEndings(GestorRoutes):
             Gestor.Gestor.rutinaAccionDef(self, clave)
 
     def finPartida(self):
+        if self.t4:
+            self.t4.close()
         GestorRoutes.finPartida(self)
 
     def siguienteJugada(self):
@@ -488,39 +496,72 @@ class GestorRoutesEndings(GestorRoutes):
 
         siRival = siBlancas == self.siRivalConBlancas
         if siRival:
-            pv = self.liPV[self.posPV].split("-")[0]
-            self.posPV += 1
+            if self.is_guided:
+                pv = self.liPV[self.posPV].split("-")[0]
+                self.posPV += 1
+            else:
+                fen = self.partida.ultPosicion.fen()
+                pv = self.t4.best_move(fen)
             self.mueveRival(pv[:2], pv[2:4], pv[4:])
             self.siguienteJugada()
         else:
             self.siJuegaHumano = True
             self.activaColor(siBlancas)
 
+    def show_error(self, mens):
+        QTUtil2.mensajeTemporal(self.pantalla, mens, 4, background="#FF9B00", posicion="tb")
+
+    def show_mens(self, mens):
+        QTUtil2.mensajeTemporal(self.pantalla, mens, 4, posicion="tb", background="#C3D6E8")
+
     def mueveHumano(self, desde, hasta, coronacion=None):
         jgSel = self.checkMueveHumano(desde, hasta, coronacion)
         if not jgSel:
             return False
 
-        pvSel = jgSel.movimiento().lower()
-        pvObj = self.liPV[self.posPV]
-        li = pvObj.split("-")
-        if li[0] != pvSel:
-
-            if pvSel in li:
-                pgn = Partida.pv_pgn(jgSel.posicionBase.fen(), pvObj)
-                mens = _("You have selected one correct move, but the line use %s") % pgn
-                QTUtil2.mensajeTemporal(self.pantalla, mens, 4, posicion="tb", background="#C3D6E8")
-                self.ponFlechaSC(pvObj[:2], pvObj[2:4])
-                self.ayuda(False)
-            else:
-                pgn = Partida.pv_pgn(jgSel.posicionBase.fen(), pvSel)
-                mens = _("Wrong move")
-                QTUtil2.mensajeTemporal(self.pantalla, mens, 4, background="#FF9B00", posicion="tb")
+        if self.is_guided:
+            pvSel = jgSel.movimiento().lower()
+            pvObj = self.liPV[self.posPV]
+            li = pvObj.split("-")
+            if li[0] != pvSel:
+                if pvSel in li:
+                    pgn = Partida.pv_pgn(jgSel.posicionBase.fen(), pvObj)
+                    self.show_mens(_("You have selected one correct move, but the line use %s") % pgn)
+                    self.ponFlechaSC(pvObj[:2], pvObj[2:4])
+                    self.ayuda(False)
+                else:
+                    self.show_error(_("Wrong move"))
+                    self.warnings += 1
+                    self.ponWarnings()
+                self.sigueHumano()
+                return False
+            self.posPV += 1
+        else:
+            fen = self.partida.ultPosicion.fen()
+            pv = jgSel.movimiento().lower()
+            b_wdl, b_dtz = self.t4.wdl_dtz(fen)
+            m_wdl, m_dtz = self.t4.wd_move(fen, pv)
+            if b_wdl != m_wdl:
+                self.show_error(_("Wrong move"))
                 self.warnings += 1
                 self.ponWarnings()
-            self.sigueHumano()
-            return False
-        self.posPV += 1
+                self.ponPosicion(self.partida.ultPosicion)
+                self.sigueHumano()
+                return False
+            if b_wdl == 2:
+                numjug = self.partida.ultPosicion.jugadas
+                if b_dtz % 2 == 1:
+                    b_dtz += 1
+                numjug += b_dtz / 2
+                if numjug >= 50:
+                    mens = "%s\n%s" % (_("Wrong move"), _("Draw according to the 50 move rule"))
+                    self.show_error(mens)
+                    QTUtil2.mensajeTemporal(self.pantalla,mens, 2)
+                    self.warnings += 1
+                    self.ponWarnings()
+                    self.ponPosicion(self.partida.ultPosicion)
+                    self.sigueHumano()
+                    return False
 
         self.movimientosPiezas(jgSel.liMovs)
 

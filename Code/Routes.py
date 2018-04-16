@@ -111,8 +111,8 @@ class Transsiberian:
 
         self.read_level()
 
-    def initialize(self):
-        self._level = 1
+    def initialize(self, nlevel=1):
+        self._level = nlevel
         self._km = 0
         self._state = BETWEEN
         self._pos_tactics = random.randint(0, 300)
@@ -207,13 +207,7 @@ class Transsiberian:
                     continue
         return lines[:-1]
 
-    def read_current(self):
-        # self._km = 59
-        # self._state = PLAYING
-        # self._level = 5
-        # self._is_miles = True
-        # self.write_current()
-        dic = self.configuracion.leeVariables("TRANSSIBERIAN")
+    def read_dic(self, dic):
         if dic:
             self._level = dic["LEVEL"]
             self._km = dic["KM"]
@@ -228,7 +222,23 @@ class Transsiberian:
             self._key = dic.get("KEY", self._key)
             self._dpos_endings = dic.get("DPOS_ENDINGS", self._dpos_endings)
 
-    def write_current(self):
+    def read_with_level(self, nlevel):
+        dic = self.configuracion.leeVariables("TRANSSIBERIAN%s" % nlevel)
+        if dic:
+            self.read_dic(dic)
+        else:
+            self.initialize(nlevel)
+
+    def read_current(self):
+        # self._km = 59
+        # self._state = PLAYING
+        # self._level = 5
+        # self._is_miles = True
+        # self.write_current()
+        dic = self.configuracion.leeVariables("TRANSSIBERIAN")
+        self.read_dic(dic)
+
+    def write_dic(self):
         dic = {
             "KM": self._km,
             "LEVEL": self._level,
@@ -243,7 +253,13 @@ class Transsiberian:
             "GO_FAST": self._go_fast,
             "KEY": self._key,
         }
-        self.configuracion.escVariables("TRANSSIBERIAN", dic)
+        return dic
+
+    def write_current(self):
+        self.configuracion.escVariables("TRANSSIBERIAN", self.write_dic())
+
+    def write_with_level(self):
+        self.configuracion.escVariables("TRANSSIBERIAN%s" % self._level, self.write_dic())
 
     def get_line(self):
         km = self._km
@@ -315,8 +331,9 @@ class Transsiberian:
 
     def set_level(self, nlevel):
         if nlevel != self._level:
-            self.initialize()
-            self._level = nlevel
+            self.read_with_level(nlevel)
+            # self.initialize()
+            # self._level = nlevel
             self.write_current()
 
     def time(self, state=None):

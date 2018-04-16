@@ -1,5 +1,7 @@
 import time
 
+from PyQt4 import QtGui
+
 from Code import TurnOnLights
 from Code.QT import Colocacion
 from Code.QT import Columnas
@@ -50,8 +52,14 @@ class WTurnOnLights(QTVarios.WDialogo):
         oColumnas = Columnas.ListaColumnas()
         work_level = self.tol.work_level + 1
         oColumnas.nueva("THEME", _("Level %d/%d") % (work_level, self.tol.num_levels), 175)
+
+        edicionIconos = Delegados.PmIconosColor()
+        self.dicIconos = {}
+        for k, pm in edicionIconos.dicpmIconos.iteritems():
+            self.dicIconos[k] = QtGui.QIcon(pm)
+
         for x in range(self.tol.num_blocks):
-            oColumnas.nueva("BLOCK%d" % x, "%d" % (x+1,), 42, siCentrado=True, edicion=Delegados.PmIconosColor())
+            oColumnas.nueva("BLOCK%d" % x, "%d" % (x+1,), 42, siCentrado=True, edicion=edicionIconos)
 
         self.grid = grid = Grid.Grid(self, oColumnas, altoFila=42, background="white")
         self.grid.setAlternatingRowColors(False)
@@ -112,35 +120,54 @@ class WTurnOnLights(QTVarios.WDialogo):
         menu = QTVarios.LCMenu(self)
         menu.ponTipoLetra(nombre="Courier New", puntos=10)
         tt = 0
-        d =  {  "0": Iconos.Gris32(),
-                "1": Iconos.Amarillo32(),
-                "2": Iconos.Naranja32(),
-                "3": Iconos.Verde32(),
-                "4": Iconos.Azul32(),
-                "5": Iconos.Magenta32(),
-                "6": Iconos.Rojo32(),
-                "7": Iconos.Light32()
-            }
-        for segs, fecha in litimes:
+        te = 0
+        ta = 0
+        mixed_results = False
+        for dato in litimes:
+            if len(dato) == 2: # version antigua
+                segs, fecha = dato
+                time_used = segs*nmoves
+                errores = 0
+                ayudas = 0
+                mixed_results = True
+            else:
+                segs, fecha, time_used, errores, ayudas = dato
             txt, ico = TurnOnLights.qualification(segs, self.tol.is_calculation_mode())
             menu.opcion(None, "%d-%02d-%02d %02d:%02d %6.02f  %6.02f  %s" % (fecha.year, fecha.month, fecha.day,
                                                                            fecha.hour, fecha.minute, segs,
-                                                                           segs*nmoves, txt), d[ico])
-            tt += segs*nmoves
+                                                                           time_used, txt), self.dicIconos[ico])
+            tt += time_used
+            te += errores
+            ta += ayudas
+
         if litimes:
             menu.separador()
             menu.opcion(None, "%16s %6.02f" %(_("Average"), tt/(nmoves*len(litimes))))
             menu.separador()
         plant = "%16s %15.02f  %s"
-        menu.opcion(None, plant %(_("Total time"), tt, time.strftime("%H:%M:%S", time.gmtime(tt))))
         if block.reinits:
             tr = 0.0
-            for segs, fecha in block.reinits:
+            for dato in block.reinits:
+                if len(dato) == 2: # version antigua
+                    segs, fecha = dato
+                    errores = 0
+                    ayudas = 0
+                else:
+                    segs, fecha, errores, ayudas = dato
                 tr += segs
+                tt += segs
+                te += errores
+                ta += ayudas
             menu.separador()
             menu.opcion(None, plant %(_("Restarts"), tr, time.strftime("%H:%M:%S", time.gmtime(tr))))
+        if not mixed_results:
             menu.separador()
-            menu.opcion(None, plant %(_("Working time"), tt+tr, time.strftime("%H:%M:%S", time.gmtime(tt+tr))))
+            menu.opcion(None, "%16s %6d" %(_("Errors"), te))
+            menu.separador()
+            menu.opcion(None, "%16s %6d" %(_("Hints"), ta))
+        menu.separador()
+        menu.opcion(None, plant %(_("Total time"), tt, time.strftime("%H:%M:%S", time.gmtime(tt))))
+
         menu.lanza()
 
     def goto_previous(self):
@@ -181,15 +208,6 @@ class WTurnOnLights(QTVarios.WDialogo):
 
     def colors(self):
         menu = QTVarios.LCMenu(self)
-        d =  {  "0": Iconos.Gris32(),
-                "1": Iconos.Amarillo32(),
-                "2": Iconos.Naranja32(),
-                "3": Iconos.Verde32(),
-                "4": Iconos.Azul32(),
-                "5": Iconos.Magenta32(),
-                "6": Iconos.Rojo32(),
-                "7": Iconos.Light32()
-            }
         num, ultimo = TurnOnLights.numColorMinimum(self.tol)
         snum = str(num)
         thinkMode = self.tol.is_calculation_mode()
@@ -197,7 +215,7 @@ class WTurnOnLights(QTVarios.WDialogo):
             rotulo = "%s < %0.2f\"" % (_F(txt), secsThink if thinkMode else secs )
             if key == snum and not ultimo:
                 rotulo += " = %s" % _("Minimum to access next level")
-            menu.opcion(None, rotulo, d[key])
+            menu.opcion(None, rotulo, self.dicIconos[key])
             menu.separador()
         menu.lanza()
 

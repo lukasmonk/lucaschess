@@ -60,6 +60,8 @@ class Tablero(QtGui.QGraphicsView):
         self.nomdbVisual = None
         self.dbVisual_showAllways = False
 
+        self.rutinaDropsPGN = None
+
         self.confTablero = confTablero
 
         self.blindfold = None
@@ -152,7 +154,7 @@ class Tablero(QtGui.QGraphicsView):
                 self.kb_buffer = self.kb_buffer[:-1]
             return
 
-        if self.mensajero and self.siActivasPiezas:
+        if self.mensajero and self.siActivasPiezas and not siAlt:
             nk = len(self.kb_buffer)
             if nk == 4:
                 k = chr(key).lower()
@@ -609,6 +611,32 @@ class Tablero(QtGui.QGraphicsView):
 
         self.init_kb_buffer()
 
+    def setAcceptDropPGNs(self, rutinaDropsPGN):
+        self.baseCasillasSC.setAcceptDrops(rutinaDropsPGN is not None)
+        self.rutinaDropsPGN = rutinaDropsPGN
+
+    def dropEvent(self, event):
+        if self.rutinaDropsPGN is not None:
+            mimeData = event.mimeData()
+            if mimeData.hasUrls():
+                li = mimeData.urls()
+                if len(li) > 0:
+                    self.rutinaDropsPGN(li[0].path().strip("/"))
+        event.setDropAction(QtCore.Qt.IgnoreAction)
+        event.ignore()
+        # if mimeData.hasFormat('image/x-lc-dato'):
+        #     dato = mimeData.data('image/x-lc-dato')
+        #     p = event.pos()
+        #     x = p.x()
+        #     y = p.y()
+        #     cx = self.punto2columna(x)
+        #     cy = self.punto2fila(y)
+        #     if cx in range(1, 9) and cy in range(1, 9):
+        #         a1h8 = self.num2alg(cy, cx)
+        #         self.dispatchDrop(a1h8, str(dato))
+        #     event.setDropAction(QtCore.Qt.IgnoreAction)
+
+
     def showKeys(self):
         liKeys = [
             (_("ALT") + "-F", _("Flip the board")),
@@ -664,7 +692,7 @@ class Tablero(QtGui.QGraphicsView):
 
         menu.separador()
         if self.siDirector:
-            menu.opcion("director", _("Director") + " [%s] " %_("F1-F10 or Ctrl Right button"), Iconos.Director())
+            menu.opcion("director", _("Director") + " [%s] " %_("F1-F10 or Ctrl-Right mouse button"), Iconos.Director())
             menu.separador()
 
         if self.siPosibleRotarTablero:
@@ -743,9 +771,9 @@ class Tablero(QtGui.QGraphicsView):
                 self.dirvisual = None
                 return False
             else:
-                from Code.QT import PantallaTabDirVisual
+                from Code.QT import PantallaDirector
 
-                self.dirvisual = PantallaTabDirVisual.DirVisual(self)
+                self.dirvisual = PantallaDirector.Director(self)
             return True
         else:
             return False

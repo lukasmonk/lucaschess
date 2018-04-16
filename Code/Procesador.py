@@ -5,7 +5,6 @@ import webbrowser
 
 from Code import AperturasStd
 from Code import Routes
-from Code import Util
 from Code import VarGen
 from Code import XGestorMotor
 from Code.Constantes import *
@@ -36,7 +35,7 @@ from Code import Presentacion
 from Code import OpeningLines
 from Code import GestorWashing
 from Code import GestorPlayPGN
-from Code.QT import DatosNueva
+from Code.QT import DatosNueva, BasicMenus
 from Code.QT import Iconos
 from Code.QT import Info
 from Code.QT import Pantalla
@@ -47,7 +46,6 @@ from Code.QT import PantallaColores
 from Code.QT import PantallaConfig
 from Code.QT import PantallaEntMaq
 from Code.QT import PantallaEverest
-from Code.QT import PantallaFavoritos
 from Code.QT import PantallaMotores
 from Code.QT import PantallaRoutes
 from Code.QT import PantallaSTS
@@ -178,7 +176,7 @@ class Procesador:
         self.pantalla.ponGestor(self)  # Necesario, no borrar
         self.tablero.indicadorSC.setVisible(False)
         self.tablero.blindfoldQuitar()
-        self.pantalla.ponToolBar(self.liOpcionesInicio)
+        self.pantalla.ponToolBar(self.liOpcionesInicio, atajos=True)
         self.pantalla.activaJuego(False, False)
         self.tablero.exePulsadoNum = None
         self.tablero.ponPosicion(self.posicionInicial)
@@ -325,55 +323,23 @@ class Procesador:
         self.configuracion.graba()
 
     def menuPlay(self):
-        menu = QTVarios.LCMenu(self.pantalla)
-        menu.opcion(("free", None), _("Play against an engine of your choice"), Iconos.Libre())
-        menu.separador()
-
-        # Principiantes ----------------------------------------------------------------------------------------
-        menu1 = menu.submenu(_("Opponents for young players"), Iconos.RivalesMP())
-
-        for name, trans, ico in QTVarios.list_irina():
-            menu1.opcion(("person", name), trans, ico)
-        menu1.separador()
-
-        menu2 = menu1.submenu(_("Albums of animals"), Iconos.Penguin())
-        albumes = Albums.AlbumesAnimales()
-        dic = albumes.list_menu()
-        anterior = None
-        for animal in dic:
-            siDeshabilitado = False
-            if anterior and not dic[anterior]:
-                siDeshabilitado = True
-            menu2.opcion(("animales", animal), _F(animal), Iconos.icono(animal), siDeshabilitado=siDeshabilitado)
-            anterior = animal
-        menu1.separador()
-
-        menu2 = menu1.submenu(_("Albums of vehicles"), Iconos.Wheel())
-        albumes = Albums.AlbumesVehicles()
-        dic = albumes.list_menu()
-        anterior = None
-        for character in dic:
-            siDeshabilitado = False
-            if anterior and not dic[anterior]:
-                siDeshabilitado = True
-            menu2.opcion(("vehicles", character), _F(character), Iconos.icono(character),
-                         siDeshabilitado=siDeshabilitado)
-            anterior = character
-
-        resp = menu.lanza()
+        resp = BasicMenus.menuPlay(self)
         if resp:
-            tipo, rival = resp
-            if tipo == "free":
-                self.procesarAccion(k_libre)
+            self.menuPlay_run(resp)
 
-            elif tipo == "person":
-                self.playPerson(rival)
+    def menuPlay_run(self, resp):
+        tipo, rival = resp
+        if tipo == "free":
+            self.procesarAccion(k_libre)
 
-            elif tipo == "animales":
-                self.albumAnimales(rival)
+        elif tipo == "person":
+            self.playPerson(rival)
 
-            elif tipo == "vehicles":
-                self.albumVehicles(rival)
+        elif tipo == "animales":
+            self.albumAnimales(rival)
+
+        elif tipo == "vehicles":
+            self.albumVehicles(rival)
 
     def playPersonAplazada(self, aplazamiento):
         self.gestor = GestorPerson.GestorPerson(self)
@@ -436,73 +402,75 @@ class Procesador:
         self.gestor.inicio(album, cromo)
 
     def menuCompetir(self):
-        menu = QTVarios.LCMenu(self.pantalla)
-        menu.opcion(("competition", None), _("Competition with tutor"), Iconos.NuevaPartida())
-        menu.separador()
-
-        submenu = menu.submenu(_("Elo-Rating"), Iconos.Elo())
-        submenu.opcion(("lucaselo",0), "%s (%d)" % (_("Lucas-Elo"), self.configuracion.elo), Iconos.Elo())
-        submenu.separador()
-        if VarGen.isWindows or VarGen.isWine:
-            submenu.opcion(("micelo",0), "%s (%d)" % (_("Tourney-Elo"), self.configuracion.michelo), Iconos.EloTimed())
-            submenu.separador()
-        fics = self.configuracion.fics
-        menuf = submenu.submenu("%s (%d)" % (_("Fics-Elo"), fics), Iconos.Fics())
-        rp = QTVarios.rondoPuntos()
-        for elo in range(900, 2800, 100):
-            if (elo == 900) or (0 <= (elo + 99 - fics) <= 400 or 0 <= (fics - elo) <= 400):
-                menuf.opcion(("fics", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
-        submenu.separador()
-        fide = self.configuracion.fide
-        menuf = submenu.submenu("%s (%d)" % (_("Fide-Elo"), fide), Iconos.Fide())
-        for elo in range(1500, 2700, 100):
-            if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
-                menuf.opcion(("fide", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
-        lichess = self.configuracion.lichess
-        submenu.separador()
-        menuf = submenu.submenu("%s (%d)" % (_("Lichess-Elo"), fide), Iconos.Lichess())
-        rp = QTVarios.rondoPuntos()
-        for elo in range(800, 2700, 100):
-            if (elo == 800) or (0 <= (elo + 99 - lichess) <= 400 or 0 <= (lichess - elo) <= 400):
-                menuf.opcion(("lichess", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
-        menu.separador()
-        submenu = menu.submenu(_("Singular moves"), Iconos.Singular())
-        submenu.opcion(("strenght101", 0), _("Calculate your strength"), Iconos.Strength())
-        submenu.separador()
-        submenu.opcion(("challenge101",0), _("Challenge 101"), Iconos.Wheel())
-
-        resp = menu.lanza()
+        resp = BasicMenus.menuCompetir(self)
         if resp:
-            tipo, rival = resp
-            if tipo == "competition":
-                self.competicion()
+            self.menuCompetir_run(resp)
 
-            elif tipo == "lucaselo":
-                self.lucaselo(True)
+    def menuCompetir_run(self, resp):
+        tipo, rival = resp
+        if tipo == "competition":
+            self.competicion()
 
-            elif tipo == "micelo":
-                self.micelo(True)
+        elif tipo == "lucaselo":
+            self.lucaselo(True)
 
-            elif tipo == "fics":
-                self.ficselo(True, rival)
+        elif tipo == "micelo":
+            self.micelo(True)
 
-            elif tipo == "fide":
-                self.fideelo(True, rival)
+        elif tipo == "fics":
+            self.ficselo(True, rival)
 
-            elif tipo == "lichess":
-                self.lichesselo(True, rival)
+        elif tipo == "fide":
+            self.fideelo(True, rival)
 
-            elif tipo == "challenge101":
-                Presentacion.GestorChallenge101(self)
+        elif tipo == "lichess":
+            self.lichesselo(True, rival)
 
-            elif tipo == "strenght101":
-                self.strenght101()
+        elif tipo == "challenge101":
+            Presentacion.GestorChallenge101(self)
+
+        elif tipo == "strenght101":
+            self.strenght101()
 
     def strenght101(self):
         w = PantallaSingularM.WSingularM(self.pantalla, self.configuracion)
         if w.exec_():
             self.gestor = GestorSingularM.GestorSingularM(self)
             self.gestor.inicio(w.sm)
+
+    def lucaselo(self, siCompetitivo):
+        self.gestor = GestorElo.GestorElo(self)
+        resp = PantallaMotores.eligeMotorElo(self.gestor, self.configuracion.eloActivo(siCompetitivo))
+        if resp:
+            self.gestor.inicio(resp, siCompetitivo)
+
+    def micelo(self, siCompetitivo):
+        self.gestor = GestorMicElo.GestorMicElo(self)
+        resp = PantallaMotores.eligeMotorMicElo(self.gestor, self.configuracion.miceloActivo(siCompetitivo))
+        if resp:
+            respT = QTVarios.tiempo(self.pantalla, minMinutos=10 if siCompetitivo else 3, minSegundos=0, maxMinutos=999,
+                                    maxSegundos=999)
+            if respT:
+                minutos, segundos = respT
+                self.gestor.inicio(resp, minutos, segundos, siCompetitivo)
+
+    def ficselo(self, siCompetitivo, nivel):
+        self.gestor = GestorFideFics.GestorFideFics(self)
+        self.gestor.selecciona(kJugFics)
+        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
+        self.gestor.inicio(xid, siCompetitivo)
+
+    def fideelo(self, siCompetitivo, nivel):
+        self.gestor = GestorFideFics.GestorFideFics(self)
+        self.gestor.selecciona(kJugFide)
+        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
+        self.gestor.inicio(xid, siCompetitivo)
+
+    def lichesselo(self, siCompetitivo, nivel):
+        self.gestor = GestorFideFics.GestorFideFics(self)
+        self.gestor.selecciona(kJugLichess)
+        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
+        self.gestor.inicio(xid, siCompetitivo)
 
     def procesarAccion(self, clave):
         if self.siPresentacion:
@@ -530,10 +498,16 @@ class Procesador:
             self.opciones()
 
         elif clave == k_tools:
-            self.tools()
+            self.menuTools()
 
         elif clave == k_informacion:
             self.informacion()
+
+        elif clave == k_atajos:
+            BasicMenus.atajos(self)
+
+    def lanzaAtajosALT(self, key):
+        BasicMenus.atajosALT(self, key)
 
     def opciones(self):
         menu = QTVarios.LCMenu(self.pantalla)
@@ -549,9 +523,6 @@ class Procesador:
 
         menu1 = menu.submenu(_("Sound"), Iconos.SoundTool())
         menu1.opcion(self.sonidos, _("Custom sounds"), Iconos.S_Play())
-        menu.separador()
-        menu.opcion(self.favoritos, _("Training favorites"), Iconos.Corazon())
-
         menu.separador()
         menu.opcion(self.setPassword, _("Set password"), Iconos.Password())
 
@@ -590,9 +561,6 @@ class Procesador:
         w = PantallaSonido.WSonidos(self)
         w.exec_()
 
-    def favoritos(self):
-        PantallaFavoritos.miraFavoritos(self.entrenamientos)
-
     def folder_change(self):
         carpeta = QTUtil2.leeCarpeta(self.pantalla, self.configuracion.carpeta,
                                      _("Change the folder where all data is saved") + "\n" + _(
@@ -628,81 +596,6 @@ class Procesador:
     def setPassword(self):
         PantallaUsuarios.setPassword(self)
 
-    def elo(self):
-        menu = QTVarios.LCMenu(self.pantalla)
-
-        menu.opcion("lucaselo", "%s (%d)" % (_("Lucas-Elo"), self.configuracion.elo), Iconos.Elo())
-        menu.separador()
-        if VarGen.isWindows or VarGen.isWine:
-            menu.opcion("micelo", "%s (%d)" % (_("Tourney-Elo"), self.configuracion.michelo), Iconos.EloTimed())
-            menu.separador()
-        fics = self.configuracion.fics
-        menuf = menu.submenu("%s (%d)" % (_("Fics-Elo"), fics), Iconos.Fics())
-        rp = QTVarios.rondoPuntos()
-        for elo in range(900, 2800, 100):
-            if (elo == 900) or (0 <= (elo + 99 - fics) <= 400 or 0 <= (fics - elo) <= 400):
-                menuf.opcion("fics%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
-        fide = self.configuracion.fide
-        menu.separador()
-        menuf = menu.submenu("%s (%d)" % (_("Fide-Elo"), fide), Iconos.Fide())
-        rp = QTVarios.rondoPuntos()
-        for elo in range(1500, 2700, 100):
-            if (elo == 1500) or (0 <= (elo + 99 - fide) <= 400 or 0 <= (fide - elo) <= 400):
-                menuf.opcion("fide%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
-        lichess = self.configuracion.lichess
-        menu.separador()
-        menuf = menu.submenu("%s (%d)" % (_("Lichess-Elo"), lichess), Iconos.Lichess())
-        rp = QTVarios.rondoPuntos()
-        for elo in range(800, 2700, 100):
-            if (elo == 800) or (0 <= (elo + 99 - lichess) <= 400 or 0 <= (lichess - elo) <= 400):
-                menuf.opcion("lichess%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
-        resp = menu.lanza()
-
-        if resp:
-            if resp == "lucaselo":
-                self.lucaselo(True)
-            elif resp == "micelo":
-                self.micelo(True)
-            elif resp.startswith("fics"):
-                self.ficselo(True, int(resp[4:]))
-            elif resp.startswith("fide"):
-                self.fideelo(True, int(resp[4:]))
-            elif resp.startswith("lichess"):
-                self.lichesselo(True, int(resp[7:]))
-
-    def lucaselo(self, siCompetitivo):
-        self.gestor = GestorElo.GestorElo(self)
-        resp = PantallaMotores.eligeMotorElo(self.gestor, self.configuracion.eloActivo(siCompetitivo))
-        if resp:
-            self.gestor.inicio(resp, siCompetitivo)
-
-    def micelo(self, siCompetitivo):
-        self.gestor = GestorMicElo.GestorMicElo(self)
-        resp = PantallaMotores.eligeMotorMicElo(self.gestor, self.configuracion.miceloActivo(siCompetitivo))
-        if resp:
-            respT = QTVarios.tiempo(self.pantalla, minMinutos=10 if siCompetitivo else 3, minSegundos=0, maxMinutos=999,
-                                    maxSegundos=999)
-            if respT:
-                minutos, segundos = respT
-                self.gestor.inicio(resp, minutos, segundos, siCompetitivo)
-
-    def ficselo(self, siCompetitivo, nivel):
-        self.gestor = GestorFideFics.GestorFideFics(self)
-        self.gestor.selecciona(kJugFics)
-        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
-        self.gestor.inicio(xid, siCompetitivo)
-
-    def fideelo(self, siCompetitivo, nivel):
-        self.gestor = GestorFideFics.GestorFideFics(self)
-        self.gestor.selecciona(kJugFide)
-        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
-        self.gestor.inicio(xid, siCompetitivo)
-
-    def lichesselo(self, siCompetitivo, nivel):
-        self.gestor = GestorFideFics.GestorFideFics(self)
-        self.gestor.selecciona(kJugLichess)
-        xid = self.gestor.eligeJuego(siCompetitivo, nivel)
-        self.gestor.inicio(xid, siCompetitivo)
 
     def trainingMap(self, mapa):
         resp = PantallaWorkMap.train_map(self, mapa)
@@ -710,86 +603,43 @@ class Procesador:
             self.gestor = GestorMateMap.GestorMateMap(self)
             self.gestor.inicio(resp)
 
-    def tools(self):
-        menu = QTVarios.LCMenu(self.pantalla)
-
-        menu.opcion("juega_solo", _("Create your own game"), Iconos.JuegaSolo())
-        menu.separador()
-
-        menu1 = menu.submenu(_("PGN viewer"), Iconos.PGN())
-        menu1.opcion("pgn_paste", _("Paste PGN"), Iconos.Pegar())
-        menu1.separador()
-        menu1.opcion("pgn_fichero", _("Read PGN"), Iconos.Fichero())
-        menu1.separador()
-        menu1.opcion("pgn_miniatura", _("Miniature of the day"), Iconos.Miniatura())
-        menu1.separador()
-        if self.configuracion.liTrasteros:
-            menu1.opcion("pgn_trasteros", _("Boxrooms PGN"), Iconos.Trasteros())
-            menu1.separador()
-        if self.configuracion.salvarFichero and Util.existeFichero(self.configuracion.salvarFichero):
-            menu1.opcion("pgn_nuestroFichero", _("My games"), Iconos.NuestroFichero())
-        menu.separador()
-
-        menu1 = menu.submenu(_("Database"), Iconos.Database())
-        menu1.opcion("database", _("Complete games"), Iconos.DatabaseC())
-        menu1.separador()
-        menu1.opcion("databaseFEN", _("Positions"), Iconos.DatabaseF()) # TODO
-        menu.separador()
-
-        menu.opcion("manual_save", _("Save positions to FNS/PGN"), Iconos.ManualSave())
-        menu.separador()
-
-        menu1 = menu.submenu(_("Openings"), Iconos.Aperturas())
-        menu1.opcion("aperturaspers", _("Custom openings"), Iconos.Apertura())
-        menu1.separador()
-        menu1.opcion("bookguide", _("Personal Opening Guide"), Iconos.BookGuide())
-        menu1.separador()
-        menu1.opcion("openings", _("Opening lines"), Iconos.OpeningLines())
-        menu.separador()
-
-        menu1 = menu.submenu(_("Engines"), Iconos.Motores())
-        menu1.opcion("torneos", _("Tournaments between engines"), Iconos.Torneos())
-        menu1.separador()
-        menu1.opcion("sts", _("STS: Strategic Test Suite"), Iconos.STS())
-        menu1.separador()
-        menu1.opcion("motores", _("External engines"), Iconos.Motores())
-        menu1.separador()
-        menu1.opcion("kibitzers", _("Kibitzers"), Iconos.Kibitzer())
-        menu.separador()
-
-        resp = menu.lanza()
+    def menuTools(self):
+        resp = BasicMenus.menuTools(self)
         if resp:
-            if resp.startswith("pgn_"):
-                self.visorPGN(resp)
+            self.menuTools_run(resp)
 
-            elif resp == "juega_solo":
-                self.jugarSolo()
+    def menuTools_run(self, resp):
+        if resp.startswith("pgn_"):
+            self.visorPGN(resp)
 
-            elif resp == "torneos":
-                self.torneos()
-            elif resp == "motores":
-                self.motoresExternos()
-            elif resp == "sts":
-                self.sts()
-            elif resp == "kibitzers":
-                self.kibitzers()
+        elif resp == "juega_solo":
+            self.jugarSolo()
 
-            elif resp == "manual_save":
-                self.manual_save()
+        elif resp == "torneos":
+            self.torneos()
+        elif resp == "motores":
+            self.motoresExternos()
+        elif resp == "sts":
+            self.sts()
+        elif resp == "kibitzers":
+            self.kibitzers()
 
-            elif resp == "database":
-                self.database()
+        elif resp == "manual_save":
+            self.manual_save()
 
-            elif resp == "databaseFEN":
-                self.databaseFEN()
+        elif resp == "database":
+            self.database()
 
-            elif resp == "aperturaspers":
-                self.aperturaspers()
-            elif resp == "bookguide":
-                w = WOpeningGuide.WOpeningGuide(self.pantalla, self)
-                w.exec_()
-            elif resp == "openings":
-                self.openings()
+        elif resp == "databaseFEN":
+            self.databaseFEN()
+
+        elif resp == "aperturaspers":
+            self.aperturaspers()
+        elif resp == "bookguide":
+            w = WOpeningGuide.WOpeningGuide(self.pantalla, self)
+            w.exec_()
+        elif resp == "openings":
+            self.openings()
 
     def openings(self):
         dicline = POLines.openingLines(self)
@@ -808,7 +658,6 @@ class Procesador:
                     self.openingsTrainingStatic(pathFichero)
                 elif resp == "tr_positions":
                     self.openingsTrainingPositions(pathFichero)
-
 
     def openingsTrainingSequential(self, pathFichero):
         self.gestor = GestorOpeningLines.GestorOpeningLines(self)
@@ -985,45 +834,12 @@ class Procesador:
             self.playWashing()
 
     def informacion(self):
-        liBlog = (
-            ("Tactical training with your own blunders",
-             "http://lucaschess.blogspot.com.es/2011/11/tactical-training-with-your-own.html"),
-            ("Announcements sounds", "http://lucaschess.blogspot.com.es/2011/10/announcements-sounds.html"),
-            ("Personalities in Game against an engine of your choice",
-             "http://lucaschess.blogspot.com.es/2011/09/version-60-beta-1-personalities.html"),
-            ("Training favourites and Your daily test",
-             "http://lucaschess.blogspot.com.es/2011/09/version-60-dev4-with-favourites-and.html"),
-            (
-                "Captured material panel",
-                "http://lucaschess.blogspot.com.es/2011/06/version-53-captures-and-more.html"),
-            ("Learn openings by repetition",
-             "http://lucaschess.blogspot.com.es/2011/06/version-52-standard-openings.html"),
-            ("Kibitzers", "http://lucaschess.blogspot.com.es/2011/06/version-51-with-kibitzers.html"),
-            ("Training mate positions",
-             "http://lucaschess.blogspot.com.es/2011/03/new-option-training-mate-positions.html"),
-        )
+        resp = BasicMenus.menuInformacion(self)
+        if resp:
+            self.informacion_run(resp)
 
-        menu = QTVarios.LCMenu(self.pantalla)
-
-        menu.opcion("docs", _("Documents"), Iconos.Ayuda())
-        menu.separador()
-        menu.opcion("web", _("Homepage"), Iconos.Web())
-        menu.separador()
-        menu1 = menu.submenu("Fresh news", Iconos.Blog())
-        menu1.opcion("blog", "Fresh news", Iconos.Blog())
-        menu1.separador()
-        for txt, lnk in liBlog:
-            menu1.opcion(lnk, txt, Iconos.PuntoAzul())
-        menu.separador()
-        menu.opcion("mail", _("Contact") + " (%s)" % "lukasmonk@gmail.com", Iconos.Mail())
-        menu.separador()
-
-        menu.opcion("acercade", _("About"), Iconos.Aplicacion())
-
-        resp = menu.lanza()
-        if resp is None:
-            return
-        elif resp == "acercade":
+    def informacion_run(self, resp):
+        if resp == "acercade":
             self.acercade()
         elif resp == "docs":
             webbrowser.open("%s/docs" % self.web)

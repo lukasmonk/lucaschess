@@ -111,6 +111,8 @@ class GestorSolo(Gestor.Gestor):
         self.siJuegaHumano = True
         self.siJugamosConBlancas = True
 
+        self.tablero.setAcceptDropPGNs(self.dropPGN)
+
         self.siJuegaPorMi = True
         self.dicRival = {}
 
@@ -196,6 +198,11 @@ class GestorSolo(Gestor.Gestor):
         self.valor_inicial = self.dame_valor_actual()
 
         self.siguienteJugada()
+
+    def dropPGN(self, pgn):
+        unpgn = PantallaPGN.eligePartida(self.pantalla, pgn)
+        if unpgn:
+            self.leerpgn(unpgn)
 
     def tituloVentanaPGN(self):
         white = ""
@@ -287,6 +294,8 @@ class GestorSolo(Gestor.Gestor):
         self.pantalla.ponToolBar(li)
 
     def finPartida(self):
+        self.tablero.setAcceptDropPGNs(None)
+
         # Comprobamos que no haya habido cambios desde el ultimo grabado
         self.siCambios = self.siCambios or self.valor_inicial != self.dame_valor_actual()
         if self.siCambios and self.partida.numJugadas():
@@ -756,20 +765,7 @@ class GestorSolo(Gestor.Gestor):
                     pass
 
         elif resp == "leerpgn":
-            unpgn = PantallaPGN.eligePartida(self.pantalla)
-            if unpgn:
-                self.bloqueApertura = None
-                self.posicApertura = None
-                self.fen = unpgn.dic.get("FEN", None)
-                self.xfichero = None
-                self.xpgn = None
-                self.xjugadaInicial = None
-                dic = self.creaDic()
-                dic["PARTIDA"] = unpgn.partida.guardaEnTexto()
-                dic["liPGN"] = unpgn.listaCabeceras()
-                dic["FEN"] = self.fen
-                dic["SIBLANCASABAJO"] = unpgn.partida.ultPosicion.siBlancas
-                self.reiniciar(dic)
+            self.leerpgn()
 
         elif resp == "pastepgn":
             texto = QTUtil.traePortapapeles()
@@ -815,6 +811,23 @@ class GestorSolo(Gestor.Gestor):
                 dic["FEN"] = None if p.siFenInicial() else p.iniPosicion.fen()
                 dic["SIBLANCASABAJO"] = self.tablero.siBlancasAbajo
                 self.reiniciar(dic)
+
+    def leerpgn(self, unpgn=None):
+        if unpgn is None:
+            unpgn = PantallaPGN.eligePartida(self.pantalla)
+        if unpgn:
+            self.bloqueApertura = None
+            self.posicApertura = None
+            self.fen = unpgn.dic.get("FEN", None)
+            self.xfichero = None
+            self.xpgn = None
+            self.xjugadaInicial = None
+            dic = self.creaDic()
+            dic["PARTIDA"] = unpgn.partida.guardaEnTexto()
+            dic["liPGN"] = unpgn.listaCabeceras()
+            dic["FEN"] = self.fen
+            dic["SIBLANCASABAJO"] = unpgn.partida.ultPosicion.siBlancas
+            self.reiniciar(dic)
 
     def controlTeclado(self, nkey):
         if nkey == Qt.Key_V:

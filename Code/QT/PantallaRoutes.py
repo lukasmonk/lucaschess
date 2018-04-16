@@ -200,6 +200,7 @@ class WTranssiberian(QTVarios.WDialogo):
                 return
             elif resp.startswith("l"):
                 if QTUtil2.pregunta(self, _("Change level") + "\n" + _("Are you sure?")):
+                    self.route.write_with_level()
                     n = int(resp[1])
                     self.route.set_level(n)
             self.reject()
