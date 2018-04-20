@@ -9,7 +9,7 @@ from Code.QT import Gui
 from Code.Constantes import *
 
 DEBUG = False
-VERSION = "11.07"
+VERSION = "11.07a"
 
 if DEBUG:
     prlkn("DEBUG " * 20)

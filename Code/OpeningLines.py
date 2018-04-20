@@ -732,3 +732,8 @@ class Opening:
                 stFENm2.add(fenM2)
                 LCEngine.makeMove(pv)
         return stFENm2
+
+    def getNumLinesPV(self, pv):
+        xpv = LCEngine.pv2xpv(" ".join(pv))
+        li = [num for num, xpv0 in enumerate(self.li_xpv, 1) if xpv0.startswith(xpv)]
+        return li

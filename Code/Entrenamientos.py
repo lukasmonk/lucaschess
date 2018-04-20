@@ -243,6 +243,8 @@ class Entrenamientos:
 
 
         menu.separador()
+        # xopcion(menu, "tolday", _("Your daily turn on the lights"), Iconos.TOLday())
+        # menu.separador()
 
         # Longs ----------------------------------------------------------------------------------------
         menu1 = menu.submenu(_("Long-term trainings"), Iconos.Longhaul())

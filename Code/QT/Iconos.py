@@ -2392,3 +2392,9 @@ def pmAtajos():
 def Atajos():
     return QtGui.QIcon(pmAtajos())
 
+def pmTOLday():
+    return PM(918012,919387)
+
+def TOLday():
+    return QtGui.QIcon(pmTOLday())
+

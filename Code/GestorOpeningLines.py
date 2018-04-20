@@ -39,8 +39,11 @@ class GestorOpeningLines(Gestor.Gestor):
 
         self.dicFENm2 = self.training["DICFENM2"]
 
+        limens = ",".join(["%d"%line for line in self.dbop.getNumLinesPV(self.liPV)])
+
         self.liMensBasic = [
-            "%s: %d/%d" % (_("Line"), self.num_linea+1, len(self.liGames)),
+            "%d/%d" % (self.num_linea+1, len(self.liGames)),
+            "%s: %s" % (_("Lines"), limens),
         ]
 
         self.siAyuda = False

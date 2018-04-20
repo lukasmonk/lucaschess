@@ -440,10 +440,9 @@ def selectEngine(wowner):
 
     # Leemos el UCI
     me = MotoresExternos.MotorExterno()
-    while True:
-        um = QTUtil2.unMomento(wowner)
-        resp = me.leerUCI(exeMotor)
-        um.final()
+    um = QTUtil2.unMomento(wowner)
+    resp = me.leerUCI(exeMotor)
+    um.final()
     if not resp:
         QTUtil2.mensaje(wowner, _X(_("The file %1 does not correspond to a UCI engine type."), exeMotor))
         return None

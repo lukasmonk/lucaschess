@@ -1,3 +1,5 @@
+import time
+
 from Code import Books
 from Code import Gestor
 from Code import Jugada
@@ -5,6 +7,7 @@ from Code import Partida
 from Code.QT import PantallaTorneos
 from Code import Util
 from Code import XGestorMotor
+from Code.QT import QTUtil
 from Code.Constantes import *
 
 
@@ -21,7 +24,8 @@ class GestorTorneo(Gestor.Gestor):
         self.ponPiezasAbajo(True)
         self.mostrarIndicador(True)
         self.siTerminar = False
-        self.pantalla.ponToolBar((k_cancelar,))
+        self.siPausa = False
+        self.pantalla.ponToolBar((k_cancelar, k_peliculaPausa))
         self.colorJugando = True
         self.ponCapPorDefecto()
 
@@ -43,6 +47,7 @@ class GestorTorneo(Gestor.Gestor):
     def siguienteJuego(self, gm, ngame, numGames):
         self.estado = kJugando
         self.fenInicial = self.torneo.fenNorman()
+        self.siPausa = False
 
         self.gm = gm
         self.maxSegundos = self.gm.minutos() * 60.0
@@ -103,8 +108,11 @@ class GestorTorneo(Gestor.Gestor):
         self.refresh()
 
         self.finPorTiempo = None
-        while self.siguienteJugada():
-            pass
+        while self.siPausa or self.siguienteJugada():
+            QTUtil.refreshGUI()
+            if self.siPausa:
+                time.sleep(0.1)
+
 
         self.xmotor[True].terminar()
         self.xmotor[False].terminar()
@@ -275,6 +283,12 @@ class GestorTorneo(Gestor.Gestor):
     def procesarAccion(self, clave):
         if clave == k_cancelar:
             self.siTerminar = True
+        elif clave == k_peliculaPausa:
+            self.siPausa = True
+            self.pantalla.ponToolBar((k_cancelar, k_peliculaSeguir))
+        elif clave == k_peliculaSeguir:
+            self.siPausa = False
+            self.pantalla.ponToolBar((k_cancelar, k_peliculaPausa))
 
     def finalX(self):
         self.siTerminar = True

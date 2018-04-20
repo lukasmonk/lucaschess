@@ -26,10 +26,6 @@
 
 
 
-
-
-
-
 import os
 import sip
 from imp import reload
