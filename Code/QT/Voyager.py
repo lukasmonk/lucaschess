@@ -181,11 +181,18 @@ class WPosicion(QtGui.QWidget):
                 sik = True
         if siK and sik:
             self.wparent.setPosicion(self.posicion)
-        self.scanner_write()
-        if self.is_game:
-            self.wparent.ponModo(MODO_PARTIDA)
+            self.scanner_write()
+            if self.is_game:
+                self.wparent.ponModo(MODO_PARTIDA)
+            else:
+                self.wparent.save()
         else:
-            self.wparent.save()
+            if not siK:
+                QTUtil2.mensError(self, _("King") + "-" + _("White") + "???")
+                return
+            if not sik:
+                QTUtil2.mensError(self, _("King") + "-" + _("Black") + "???")
+                return
 
     def cancelar(self):
         self.scanner_write()
@@ -314,21 +321,21 @@ class WPosicion(QtGui.QWidget):
         self.posicion = posicion.copia()
         self.resetPosicion()
 
-    def aceptar(self):
-        if self.posicion.siExistePieza("K") != 1:
-            QTUtil2.mensError(self, _("King") + "-" + _("White") + "???")
-            return
-        if self.posicion.siExistePieza("k") != 1:
-            QTUtil2.mensError(self, _("King") + "-" + _("Black") + "???")
-            return
-
-        self.actPosicion()
-
-        self.fen = self.posicion.fen()  # Hace control de enroques y EnPassant
-        if self.fen == ControlPosicion.FEN_INICIAL:
-            self.fen = ""
-        self.cierra()
-        self.accept()
+    # def aceptar(self):
+    #     if self.posicion.siExistePieza("K") != 1:
+    #         QTUtil2.mensError(self, _("King") + "-" + _("White") + "???")
+    #         return
+    #     if self.posicion.siExistePieza("k") != 1:
+    #         QTUtil2.mensError(self, _("King") + "-" + _("Black") + "???")
+    #         return
+    #
+    #     self.actPosicion()
+    #
+    #     self.fen = self.posicion.fen()  # Hace control de enroques y EnPassant
+    #     if self.fen == ControlPosicion.FEN_INICIAL:
+    #         self.fen = ""
+    #     self.cierra()
+    #     self.accept()
 
     def pegar(self):
         cb = QtGui.QApplication.clipboard()

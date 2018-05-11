@@ -80,7 +80,7 @@ def leeRivales():
     cm.ordenUCI("Log", "false")
     mas(cm)
 
-    cm = ConfigMotor("godel", "Juan Manuel Vazquez", "3.4.9", "https://sites.google.com/site/godelchessengine")
+    cm = ConfigMotor("godel", "Juan Manuel Vazquez", "4.0.7", "https://sites.google.com/site/godelchessengine")
     cm.path = "Godel64"
     cm.elo = 2600
     mas(cm)
@@ -138,8 +138,8 @@ def leeRivales():
     cm.ordenUCI("Hash", "64")
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne", "9", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "McBrain-9_x64_linux"
+    cm = ConfigMotor("mcbrain", "Michael Byrne", "9.1", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McBrain-91_x64_linux"
     cm.elo = 3200
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")

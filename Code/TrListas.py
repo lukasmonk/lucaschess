@@ -2143,11 +2143,17 @@ def dicTraining():
         "Attacking Defender": _("Attacking Defender"),
 
         "All tactics": _("All tactics"),
-        'Pawn endings': _("Pawn endings")
+        "Pawn endings": _("Pawn endings"),
+
+        "Singular moves to equalize": _("Singular moves to equalize"),
+        "Singular moves to win": _("Singular moves to win"),
     }
 
     for n in range(1,10):
         d["Mate in %d" % n] = _X(_("Mate in %1"), str(n))
+
+    for n in range(1,10):
+        d["Level %d" % n] = _X(_("Level %1"), str(n))
     return d
 
 

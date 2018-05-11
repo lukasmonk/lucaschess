@@ -13,7 +13,7 @@ def leeRivales():
         # p-rint """["%s", "%s", "%s"],"""%(cm.nombre, cm.autor, cm.url)
 
     ConfigMotor = BaseConfig.ConfigMotor
-    cm = ConfigMotor("acqua", "Giovanni Di Maria", "20160918", "http://www.elektrosoft.it/scacchi/acqua/acqua.asp")
+    cm = ConfigMotor("acqua", "Giovanni Di Maria", "2.0", "http://www.elektrosoft.it/scacchi/acqua/acqua.asp")
     cm.path = "acqua.exe"
     cm.elo = 844
     mas(cm)
@@ -121,12 +121,12 @@ def leeRivales():
     cm.ordenUCI("Hash", "32")
     mas(cm)
 
-    cm = ConfigMotor("godel", "Juan Manuel Vazquez", "3.4.9", "https://sites.google.com/site/godelchessengine")
-    cm.path = "godel.exe"
+    cm = ConfigMotor("godel", "Juan Manuel Vazquez", "4.0.7", "https://sites.google.com/site/godelchessengine")
+    cm.path = "Godel32.exe"
     cm.elo = 2720
     cm.ordenUCI("Hash", "32")
     cm.ordenUCI("Ponder", "false")
-    cm.nombre = "Gödel 3.4.9".decode("utf-8")
+    cm.nombre = "Gödel 4.0.7".decode("utf-8")
 
     mas(cm)
 
@@ -218,9 +218,9 @@ def leeRivales():
     cm.ponMultiPV(20, 500)
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne", "9 32bit", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "McBrain-9_x32_old.exe"
-    cm.path_64 = "McBrain-9_x64_bmi2.exe", "9 64bit bmi2"
+    cm = ConfigMotor("mcbrain", "Michael Byrne", "9.1 32bit", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McBrain-91_x32_old.exe"
+    cm.path_64 = "McBrain-91_x64_bmi2.exe", "9.1 64bit bmi2"
     cm.elo = 3200
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")

@@ -84,7 +84,7 @@ class AnalizaPartida:
             self.libroAperturas.polyglot()
         self.listaElegidas = li_moves
         self.desdeelfinal = alm.desdeelfinal
-        self.siBorrarPrevio = True if is_massiv else alm.siBorrarPrevio
+        self.siBorrarPrevio = alm.siBorrarPrevio
 
     def terminarBMT(self, bmt_lista, nombre):
         """

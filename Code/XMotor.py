@@ -71,6 +71,8 @@ class XMotor:
             self.put_line("isready")
             self.wait_mrm("readyok", 1000)
 
+        self.ucinewgame()
+
     def log_open(self, fichero):
         self.log = open(fichero, "ab")
         self.log.write("%s %s\n\n" % (str(Util.hoy()), "-"*70))
@@ -254,14 +256,17 @@ class XMotor:
         li = [jg.movimiento().lower() for n, jg in enumerate(partida.liJugadas) if n < njg]
         moves = " moves %s" % (" ".join(li)) if li else ""
         if not li:
-            self.work_ok("ucinewgame")
+            self.ucinewgame()
         self.work_ok("position %s%s" % (posInicial, moves))
         self.is_white = partida.siBlancas() if njg > 9000 else partida.jugada(njg).siBlancas()
 
     def set_fen_position(self, fen):
-        self.work_ok("ucinewgame")
+        self.ucinewgame()
         self.work_ok("position fen %s" % fen)
         self.is_white = "w" in fen
+
+    def ucinewgame(self):
+        self.work_ok("ucinewgame")
 
     def ac_inicio(self, partida):
         self.lockAC = True
@@ -367,8 +372,6 @@ class XMotor:
         self.put_line("uci")
         li, self.uci_ok = self.wait_list("uciok", 10000)
         self.uci_lines = [x for x in li if x.startswith("id ") or x.startswith("option name")] if self.uci_ok else []
-        self.put_line("ucinewgame")
-        self.put_line("isready")
 
     def set_option(self, name, value):
         if value:
@@ -413,7 +416,7 @@ class XMotor:
         li.extend(li1[:2])
         moves = " moves %s" % (" ".join(li)) if li else ""
         if not li:
-            self.work_ok("ucinewgame")
+            self.ucinewgame()
         self.pondering = True
         self.work_ok("position %s%s" % (posInicial, moves))
         self.put_line("go ponder")
@@ -489,6 +492,7 @@ class FastEngine(object):
 
         if setoptions:
             self.pwait_list("isready", "readyok", 1000)
+        self.ucinewgame()
 
     def put_line(self, line):
         self.stdin.write(line + "\n")
@@ -524,19 +528,25 @@ class FastEngine(object):
         li, self.uci_ok = self.pwait_list("uci", "uciok", 10000)
         self.uci_lines = [x for x in li if x.startswith("id ") or x.startswith("option name")] if self.uci_ok else []
 
+    def ready_ok(self):
+        li, readyok = self.pwait_list("isready", "readyok", 10000)
+        return readyok
+
+    def work_ok(self, orden):
+        self.put_line(orden)
+        return self.ready_ok()
+
+    def ucinewgame(self):
+        self.put_line("ucinewgame")
+
     def set_option(self, name, value):
         if value:
             self.put_line("setoption name %s value %s" % (name, value))
         else:
             self.put_line("setoption name %s" % name)
 
-    def orden_ok_nop(self, orden):
-        self.put_line(orden)
-        self.put_line("isready")
-
     def bestmove_fen(self, fen, maxTiempo, maxProfundidad):
-        self.orden_ok_nop("ucinewgame")
-        self.orden_ok_nop("position fen %s" % fen)
+        self.work_ok("position fen %s" % fen)
         self.siBlancas = siBlancas = "w" in fen
         return self._mejorMov(maxTiempo, maxProfundidad, siBlancas)
 

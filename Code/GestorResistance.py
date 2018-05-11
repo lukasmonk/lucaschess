@@ -30,7 +30,7 @@ class GestorResistance(Gestor.Gestor):
 
         self.rmRival = None
 
-        self.siApertura = True
+        self.siApertura = False
         self.apertura = Apertura.AperturaPol(5)  # lee las aperturas
 
         # debe hacerse antes que rival
@@ -123,7 +123,6 @@ class GestorResistance(Gestor.Gestor):
         return self.finJuego(False)
 
     def siguienteJugada(self):
-
         if self.estado == kFinJuego:
             return
 
@@ -165,9 +164,7 @@ class GestorResistance(Gestor.Gestor):
             puntosRivalPrevio = self.puntosRival
 
             if self.siApertura:
-
                 siBien, desde, hasta, coronacion = self.apertura.juegaMotor(self.fenUltimo())
-
                 if siBien:
                     self.rmRival = XMotorRespuesta.RespuestaMotor("Apertura", self.siRivalConBlancas)
                     self.rmRival.desde = desde

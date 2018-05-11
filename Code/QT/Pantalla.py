@@ -243,6 +243,9 @@ class Pantalla():
     def alturaRotulo3(self, px):
         return self.base.alturaRotulo3(px)
 
+    def ponWhiteBlack(self, white=None, black=None):
+        self.base.ponWhiteBlack(white, black)
+
     def ponRevision(self, siponer):
         return
         # if siponer:

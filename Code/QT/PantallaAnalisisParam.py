@@ -365,6 +365,9 @@ def paramAnalisisMasivo(parent, configuracion, siVariosSeleccionados, siDatabase
     liGen.append((_("Start from the end of the game") + ":", alm.desdeelfinal))
 
     liGen.append(SEPARADOR)
+    liGen.append((_("Redo any existing prior analyses (if they exist)") + ":", alm.siBorrarPrevio))
+
+    liGen.append(SEPARADOR)
     liGen.append((_("Only selected games") + ":", siVariosSeleccionados))
 
     liBlunders, liBrilliancies = formBlundersBrilliancies(alm, configuracion)
@@ -414,38 +417,20 @@ def paramAnalisisMasivo(parent, configuracion, siVariosSeleccionados, siDatabase
 
         liGen, liBlunders, liBrilliancies = liResp
 
-        alm.motor = liGen[0]
-        alm.tiempo = int(liGen[1] * 1000)
-        alm.depth = liGen[2]
-        alm.timedepth = liGen[3]
-        alm.multiPV = liGen[4]
+        alm.motor, tiempo, alm.depth, alm.timedepth, alm.multiPV, color, cjug, alm.libroAperturas, \
+            alm.desdeelfinal, alm.siBorrarPrevio, alm.siVariosSeleccionados = liGen
 
-        color = liGen[5]
+        alm.tiempo = int(tiempo * 1000)
         alm.blancas = color != "NEGRAS"
         alm.negras = color != "BLANCAS"
-
-        cjug = liGen[6].strip()
+        cjug = cjug.strip()
         alm.liJugadores = cjug.upper().split(";") if cjug else None
-
-        alm.libroAperturas = liGen[7]
         alm.libro = alm.libroAperturas.nombre if alm.libroAperturas is not None else None
 
-        alm.desdeelfinal = liGen[8]
+        alm.kblunders, alm.tacticblunders, alm.pgnblunders, alm.oriblunders, alm.bmtblunders = liBlunders
 
-        alm.siVariosSeleccionados = liGen[9]
-
-        alm.kblunders = liBlunders[0]
-        alm.tacticblunders = liBlunders[1]
-        alm.pgnblunders = liBlunders[2]
-        alm.oriblunders = liBlunders[3]
-        alm.bmtblunders = liBlunders[4]
-
-        alm.dpbrilliancies = liBrilliancies[0]
-        alm.ptbrilliancies = liBrilliancies[1]
-        alm.fnsbrilliancies = liBrilliancies[2]
-        alm.pgnbrilliancies = liBrilliancies[3]
-        alm.oribrilliancies = liBrilliancies[4]
-        alm.bmtbrilliancies = liBrilliancies[5]
+        alm.dpbrilliancies, alm.ptbrilliancies, alm.fnsbrilliancies, alm.pgnbrilliancies, \
+            alm.oribrilliancies, alm.bmtbrilliancies = liBrilliancies
 
         dic = {}
         for x in dir(alm):

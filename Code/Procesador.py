@@ -929,6 +929,11 @@ class Procesador:
         dic["PARTIDA"] = partida.guardaEnTexto()
         return dic
 
+    def selectOneFNS(self, owner=None):
+        if owner is None:
+            owner = self.pantalla
+        return Entrenamientos.selectOneFNS(owner, self)
+
 
 class ProcesadorVariantes(Procesador):
 

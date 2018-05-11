@@ -168,6 +168,7 @@ class Game:
         self._segundosJugada = None
         self._result = None
         self._date = None
+        self._termination = None
 
     def hwhite(self, valor=None):
         if valor is not None:
@@ -206,6 +207,11 @@ class Game:
             self.date(Util.hoy())
         return self._result
 
+    def termination(self, valor=None):
+        if valor is not None:
+            self._termination = valor
+        return self._termination
+
     def date(self, valor=None):
         if valor is not None:
             self._date = valor
@@ -227,6 +233,8 @@ class Game:
         self._result = dic["RESULT"]
         self._date = dic["DATE"]
 
+        self._termination = dic.get("TERMINATION", "normal")
+
     def grabarDIC(self):
         dic = {}
         dic["HWHITE"] = self._hwhite
@@ -235,6 +243,7 @@ class Game:
         dic["DATE"] = self._date
         dic["MINUTOS"] = self._minutos
         dic["SEGUNDOSJUGADA"] = self._segundosJugada
+        dic["TERMINATION"] = self._termination
 
         dic["PARTIDA"] = None if self._partida is None else self._partida.guardaEnTexto()
         return dic
@@ -267,6 +276,9 @@ class Game:
         if ap:
             li.append(("ECO", ap.eco))
             li.append(("Opening", ap.nombre))
+
+        if self._termination:
+            li.append(("Termination", self._termination))
 
         cabecera = ""
         for campo, valor in li:

@@ -25,7 +25,7 @@ class ThanksTo:
 
     def listaMotores(self, bloque):
         li = [
-            ["Acqua 20160918", "Giovanni Di Maria", "http://www.elektrosoft.it/scacchi/acqua/acqua.asp"],
+            ["Acqua 2.0", "Giovanni Di Maria", "http://www.elektrosoft.it/scacchi/acqua/acqua.asp"],
             ["Tarrasch ToyEngine Beta V0.905", "Bill Forster", "http://www.triplehappy.com/"],
             ["Rocinante 2.0", "Antonio Torrecillas", "http://sites.google.com/site/barajandotrebejos/"],
             ["Roce 0.0390", "Roman Hartmann", "http://www.rocechess.ch/rocee.html"],
@@ -47,7 +47,7 @@ class ThanksTo:
             ["Alaric 707", "Peter Fendrich", "http://alaric.fendrich.se/index.html"],
             ["Cyrano 06B17", "Harald Johnsen", "http://sites.estvideo.net/tipunch/cyrano/"],
             ["Daydreamer 1.75 JA", "Aaron Becker", "http://github.com/AaronBecker/daydreamer/downloads"],
-            ["Gödel 3.4.9", "Juan Manuel Vazquez", "https://sites.google.com/site/godelchessengine"],
+            ["Gödel 4.0.7", "Juan Manuel Vazquez", "https://sites.google.com/site/godelchessengine"],
             ["Rhetoric 1.4.3", "Alberto Sanjuan", "http://www.chessrhetoric.com/"],
             ["Cheng 4 0.39", "Martin Sedlák", "http://www.vlasak.biz/cheng"],
             ["Glaurung 2.2 JA", "Tord RomsTad", "http://www.glaurungchess.com/"],
@@ -62,7 +62,7 @@ class ThanksTo:
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
             ["Texel 1.07", "Peter Österlund", "http://hem.bredband.net/petero2b/javachess/index.html#texel"],
             ["Stockfish 9", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["McBrain 9", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
+            ["McBrain 9.1", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
             ["Delfi 5.4", "Fabio Cavicchio", "http://www.msbsoftware.it/delfi/"],
             # ["SmartThink 1.97", "Sergei S. Markoff", "http://genes1s.net/smarthink.php"],
@@ -234,7 +234,7 @@ class ThanksTo:
 
         li = [
             ("Nuvola", '<a href="http://icon-king.com/?p=15">David Vignoni</a>', 'http://www.icon-king.com/projects/nuvola/', "LGPL"),
-            ("Gnome", 'Gnome', "http://svn.gnome.org/viewvc/gnome-icon-theme/", "GPL"),
+            ("Gnome", 'Gnome', "https://github.com/GNOME/gnome-icon-theme", "GPL"),
             ("Silk icon set 1.3", 'Mark James', 'http://www.famfamfam.com/lab/icons/silk/', "Creative Commons Attribution 2.5 License"),
             ("Wooicons1", 'Janik Baumgartner', 'http://www.woothemes.com/2010/08/woocons1/', "GPL"),
             ("Ultimate Gnome 0.5.1", 'Marco Tessarotto', 'http://gnome-look.org/content/show.php/Ultimate+Gnome?content=75000', "GPL"),

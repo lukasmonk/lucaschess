@@ -107,6 +107,12 @@ class WBase(QtGui.QWidget):
 
         self.pgn.seleccionaFilas(siPoner, False)
 
+    def ponWhiteBlack(self, white, black):
+        oColumnas = self.pgn.oColumnas
+        oColumnas.liColumnas[1].cabecera = white if white else _("White")
+        oColumnas.liColumnas[2].cabecera = black if black else _("Black")
+
+
     def creaBloqueInformacion(self):
         configuracion = self.gestor.configuracion
         nAnchoPgn = configuracion.anchoPGN

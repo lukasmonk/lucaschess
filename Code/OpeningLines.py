@@ -185,6 +185,7 @@ class Opening:
                 self.setfenvalue(fenM2, dic)
         self.packAlTerminar()
 
+
     def getconfig(self, key, default=None):
         return self.db_config.get(key, default)
 
@@ -197,10 +198,11 @@ class Opening:
     def setTraining(self, reg):
         return self.setconfig("TRAINING", reg)
 
-    def preparaTraining(self, reg):
+    def preparaTraining(self, reg, procesador):
         maxmoves = reg["MAXMOVES"]
         siBlancas = reg["COLOR"] == "WHITE"
         siRandom = reg["RANDOM"]
+        siRepetir = False
 
         lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
 
@@ -214,20 +216,20 @@ class Opening:
             if len(lipv) % 2 == (0 if siBlancas else 1):
                 lilipv[pos] = lipv[:-1]
 
-        # Duplicados
-        stBorrar = set()
-        lista = [(pos, "".join(lipv)) for pos, lipv in enumerate(lilipv)]
-        lista.sort(key=lambda elem: elem[1])
-        for pos, (posli, pv) in enumerate(lista):
-            for pos1 in range(pos+1, len(lista)):
-                if lista[pos1][1].startswith(pv):
-                    stBorrar.add(posli)
+        # Quitamos las repetidas
+        lilipvfinal = []
+        nt = len(lilipv)
+        for x in range(nt-1):
+            pvmirar = "".join(lilipv[x])
+            esta = False
+            for y in range(x+1, nt):
+                pvotro = "".join(lilipv[y])
+                if pvotro.startswith(pvmirar):
+                    esta = True
                     break
-
-        lilipv = [lipv for pos, lipv in enumerate(lilipv) if pos not in stBorrar]
-
-        if siRandom:
-            random.shuffle(lilipv)
+            if not esta:
+                lilipvfinal.append(lilipv[x])
+        lilipv = lilipvfinal
 
         ligamesST = []
         ligamesSQ = []
@@ -250,9 +252,48 @@ class Opening:
                 dicFENm2[fenM2].add(pv)
                 LCEngine.makeMove(pv)
 
-        reg["LIGAMES_STATIC"] = ligamesST
-        if reg["RANDOM"]:
+        if not siRepetir:
+            stBorrar = set()
+            xanalyzer = procesador.XAnalyzer()
+            for stpv, fenM2 in dicFENm2.iteritems():
+                if len(stpv) > 1:
+                    siW = " w " in fenM2
+                    if siW and siBlancas:
+                        dic = self.getfenvalue(fenM2)
+                        if "ANALISIS" not in dic:
+                            dic["ANALISIS"] = xanalyzer.analiza(fen)
+                            self.setfenvalue(fenM2, dic)
+                        mrm = dic["ANALISIS"]
+                        pvsel = stpv[0]  # el primero que encuentre por defecto
+                        for rm in mrm.liMultiPV():
+                            pv0 = rm.movimiento()
+                            if pv0 in stpv:
+                                pvsel = pv0
+                                stpv.remove(pvsel)
+                                break
+                        dicFENm2[fenM2] = {pvsel}
+                        for pv in stpv:
+                            stBorrar.add("%s|%s" % (fenM2, pv))
+            liBorrar = []
+            for n, game in enumerate(ligamesSQ):
+                LCEngine.setFenInicial()
+                for pv in game["LIPV"]:
+                    fen = LCEngine.getFen()
+                    fenM2 = LCEngine.fen2fenM2(fen)
+                    key = "%s|%s" % (fenM2, pv)
+                    if key in stBorrar:
+                        liBorrar.append(n)
+                        break
+                    LCEngine.makeMove(pv)
+            liBorrar.sort(reverse=True)
+            for n in liBorrar:
+                del ligamesSQ[n]
+                del ligamesST[n]
+
+        if siRandom:
             random.shuffle(ligamesSQ)
+            random.shuffle(ligamesST)
+        reg["LIGAMES_STATIC"] = ligamesST
         reg["LIGAMES_SEQUENTIAL"] = ligamesSQ
         reg["DICFENM2"] = dicFENm2
 
@@ -269,14 +310,14 @@ class Opening:
         random.shuffle(liTrainPositions)
         reg["LITRAINPOSITIONS"] = liTrainPositions
 
-    def createTraining(self, reg, configuracion):
-        self.preparaTraining(reg)
+    def createTraining(self, reg, procesador):
+        self.preparaTraining(reg, procesador)
 
         reg["DATECREATION"] = Util.hoy()
         self.setconfig("TRAINING", reg)
         self.setconfig("ULT_PACK", 100)  # Se le obliga al VACUUM
 
-        lo = ListaOpenings(configuracion)
+        lo = ListaOpenings(procesador.configuracion)
         lo.add_training_file(os.path.basename(self.nomFichero))
 
     def withTrainings(self):

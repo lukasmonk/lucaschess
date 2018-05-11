@@ -651,6 +651,7 @@ class Ventana(QtGui.QDialog):
     def finalizar(self):
         self.guardarVideo()
         if self.motor:
+            self.escribe("quit")
             self.motor.close()
             self.motor = None
 

@@ -1004,6 +1004,56 @@ class DBgames:
             setattr(alm, campo, raw[campo])
         return alm, raw
 
+    def countData(self, filtro):
+        sql = "SELECT COUNT(*) FROM %s"%self.tabla
+        if self.filter:
+            sql += " WHERE %s"%self.filter
+            if filtro:
+                sql += " AND %s" % filtro
+        else:
+            if filtro:
+                sql += " WHERE %s"% filtro
+
+        self._cursor.execute(sql)
+        return self._cursor.fetchone()[0]
+
+    def yieldData(self, liFields, filtro):
+        select = ",".join(liFields)
+        sql = "SELECT %s FROM %s"%(select, self.tabla)
+        if self.filter:
+            sql += " WHERE %s"%self.filter
+            if filtro:
+                sql += " AND %s" % filtro
+        else:
+            if filtro:
+                sql += " WHERE %s"% filtro
+
+        self._cursor.execute(sql)
+        while True:
+            raw = self._cursor.fetchone()
+            if raw:
+                alm = Util.Almacen()
+                for campo in liFields:
+                    setattr(alm, campo, raw[campo])
+                yield alm
+            else:
+                return
+
+    def players(self):
+        sql = "SELECT DISTINCT WHITE FROM %s"%self.tabla
+        self._cursor.execute(sql)
+        listaw = [raw[0] for raw in self._cursor.fetchall()]
+
+        sql = "SELECT DISTINCT BLACK FROM %s" % self.tabla
+        self._cursor.execute(sql)
+        listab = [raw[0] for raw in self._cursor.fetchall()]
+
+        listaw.extend(listab)
+
+        lista = list(set(listaw))
+        lista.sort()
+        return lista
+
     def leePartidaRecno(self, recno):
         raw = self.leeAllRecno(recno)
         return self.leePartidaRaw(raw)
@@ -1035,7 +1085,7 @@ class DBgames:
         for field in self.liCamposBase:
              v = raw[field]
              if v:
-                 litags.append( (drots.get(field, field), str(v) ) )
+                 litags.append((drots.get(field, field), v if type(v) == unicode else str(v)))
         if rtags:
             litags.extend(rtags)
 
@@ -1217,6 +1267,11 @@ class DBgames:
         self._conexion.commit()
 
         self.reset_cache()
+
+    def pack(self):
+        self._conexion.execute("VACUUM")
+        if self.with_dbSTAT:
+            self.dbSTAT._conexion.execute("VACUUM")
 
     def insert_pks(self, path_pks):
         f = open(path_pks, "rb")

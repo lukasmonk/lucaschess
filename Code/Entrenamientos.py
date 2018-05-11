@@ -235,16 +235,14 @@ class Entrenamientos:
                 xopcion(menuf, "fide%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
 
         lichess = self.configuracion.lichessNC
+        menu1.separador()
         menuf = menu1.submenu("%s (%d)" % (_("Lichess-Elo"), fide), Iconos.Lichess())
         rp = QTVarios.rondoPuntos()
         for elo in range(800, 2700, 100):
             if (elo == 800) or (0 <= (elo + 99 - lichess) <= 400 or 0 <= (lichess - elo) <= 400):
-                xopcion(menuf, "fide%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
-
+                xopcion(menuf, "lichess%d" % (elo / 100,), "%d-%d" % (elo, elo + 99), rp.otro())
 
         menu.separador()
-        # xopcion(menu, "tolday", _("Your daily turn on the lights"), Iconos.TOLday())
-        # menu.separador()
 
         # Longs ----------------------------------------------------------------------------------------
         menu1 = menu.submenu(_("Long-term trainings"), Iconos.Longhaul())
@@ -262,6 +260,7 @@ class Entrenamientos:
         # TOL
         menu1.separador()
         menu2 = menu1.submenu(_("Turn on the lights"), Iconos.TOL())
+        menu.separador()
         menu3 = menu2.submenu(_("Memory mode"), Iconos.TOL())
         xopcion(menu3, "tol_uned_easy", "%s (%s)" % (_("UNED chess school"), _("Initial")), Iconos.Uned())
         menu3.separador()
@@ -280,6 +279,8 @@ class Entrenamientos:
         menu3.separador()
         xopcion(menu3, "tol_uwe_calc", "%s (%s)" % (_("Uwe Auerswald"), _("Complete")), Iconos.Uwe())
         # Washing
+        menu2.separador()
+        xopcion(menu2, "tol_oneline", _("In one line"), Iconos.TOLline())
         menu1.separador()
         xopcion(menu1, "washing_machine", _("The Washing Machine"), Iconos.WashingMachine())
 
@@ -427,6 +428,7 @@ class Entrenamientos:
                 elif resp.startswith("ep_"):
                     um = self.procesador.unMomento()
                     entreno = resp[3:].replace("\\", "/")
+                    titentreno = entreno
                     if "/" in entreno:
                         dicTraining = TrListas.dicTraining()
                         titentreno = ""
@@ -655,6 +657,7 @@ class Entrenamientos:
         PantallaEverest.everest(self.procesador)
 
     def turn_on_lights(self, name):
+        one_line = False
         if name.startswith("uned_easy"):
             title = "%s (%s)" % (_("UNED chess school"), _("Initial"))
             folder = "Trainings/Tactics by UNED chess school"
@@ -676,8 +679,14 @@ class Entrenamientos:
             folder = "Trainings/Tactics by Uwe Auerswald"
             icono = Iconos.Uwe()
             li_tam_blocks = (5, 10, 20, 40, 80)
+        elif name == "oneline":
+            title = _("In one line")
+            folder = None
+            icono = Iconos.TOLline()
+            li_tam_blocks = None
+            one_line = True
 
-        resp = PantallaTurnOnLights.pantallaTurnOnLigths(self.procesador, name, title, icono, folder, li_tam_blocks)
+        resp = PantallaTurnOnLights.pantallaTurnOnLigths(self.procesador, name, title, icono, folder, li_tam_blocks, one_line)
         if resp:
             num_theme, num_block, tol = resp
             self.procesador.tipoJuego = kJugEntLight
@@ -688,3 +697,25 @@ class Entrenamientos:
     def washing_machine(self):
         self.procesador.showWashing()
 
+
+def selectOneFNS(owner, procesador):
+    tpirat = Controles.TipoLetra("Chess Diagramm Pirat", procesador.configuracion.puntosMenu + 4)
+    def xopcion(menu, clave, texto, icono, siDeshabilitado=False):
+        if "KP" in texto:
+            d = {"K": "r", "P": "w", "k": chr(126), "p": chr(134)}
+            k2 = texto.index("K", 2)
+            texto = texto[:k2] + texto[k2:].lower()
+            texton = ""
+            for c in texto:
+                texton += d[c]
+            menu.opcion(clave, texton, icono, siDeshabilitado, tipoLetra=tpirat)
+        else:
+            menu.opcion(clave, texto, icono, siDeshabilitado)
+
+    menu = QTVarios.LCMenu(owner)
+    td = TrainingDir("Trainings")
+    td.addOtherFolder(procesador.configuracion.dirPersonalTraining)
+    td.reduce()
+    td.menu(menu, xopcion)
+    resp = menu.lanza()
+    return resp if resp is None else resp[3:]

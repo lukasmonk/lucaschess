@@ -1,3 +1,4 @@
+import LCEngineV1 as LCEngine
 from Code import Util
 from Code import VarGen
 from Code import ControlPosicion
@@ -597,6 +598,13 @@ def pv_pgn(fen, pv):
     p.leerPV(pv)
     return p.pgnSP()
 
+def lipv_lipgn(lipv):
+    LCEngine.setFenInicial()
+    li_pgn = []
+    for pv in lipv:
+        info = LCEngine.moveExPV(pv[:2], pv[2:4], pv[4:])
+        li_pgn.append(info._san)
+    return li_pgn
 
 def pv_pgn_raw(fen, pv):
     p = Partida(fen=fen)

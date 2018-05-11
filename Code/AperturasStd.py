@@ -55,10 +55,15 @@ class ListaAperturasStd:
         dfen = {}
         makePV = LCEngine.makePV
         fen2fenM2 = LCEngine.fen2fenM2
-        for pv, ap in self.dic.iteritems():
+
+        mx = 0
+        for n, (pv, ap) in enumerate(self.dic.iteritems(), 1):
             fen = makePV(pv)
             dfen[fen2fenM2(fen)] = ap
+            if n > mx:
+                mx = n
         self.dicFenM2 = dfen
+        self.max_ply = mx
 
     def ordena(self, hijos, n):
         if hijos:
@@ -226,6 +231,27 @@ class ListaAperturasStd:
                     li.append(ap)
 
         return li if li else None
+
+    def baseXPV(self, xpv):
+        lipv = LCEngine.xpv2pv(xpv).split(" ")
+        last_ap = None
+
+        LCEngine.setFenInicial()
+        mx = self.max_ply + 3
+        for n, pv in enumerate(lipv):
+            if n > mx:
+                break
+            LCEngine.makeMove(pv)
+            fen = LCEngine.getFen()
+            fenM2 = LCEngine.fen2fenM2(fen)
+            if fenM2 in self.dicFenM2:
+                last_ap = self.dicFenM2[fenM2]
+        return last_ap
+
+    def XPV(self, xpv):
+        last_ap = self.baseXPV(xpv)
+        return last_ap.trNombre if last_ap else ""
+
 
 ap = ListaAperturasStd()
 apTrain = ListaAperturasStd()

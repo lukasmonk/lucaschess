@@ -15,9 +15,12 @@ from Code.QT import QTUtil2
 
 
 class WTurnOnLights(QTVarios.WDialogo):
-    def __init__(self, owner, name, title, icono, folder, li_tam_blocks):
-
-        self.tol = TurnOnLights.read_tol(name, title, folder, li_tam_blocks)
+    def __init__(self, procesador, name, title, icono, folder, li_tam_blocks, one_line):
+        self.one_line = one_line
+        if one_line:
+            self.tol = TurnOnLights.read_oneline_tol()
+        else:
+            self.tol = TurnOnLights.read_tol(name, title, folder, li_tam_blocks)
         self.reinit = False
 
         titulo = _("Turn on the lights") + ": " + title
@@ -28,9 +31,10 @@ class WTurnOnLights(QTVarios.WDialogo):
             tipo = _("Memory mode")
             background = "#BDDBE8"
 
+        self.procesador = procesador
         extparam = "tol%s-%d" % (name, self.tol.work_level)
 
-        QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
+        QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, icono, extparam)
 
         self.colorTheme = QTUtil.qtColor("#F0F0F0")
 
@@ -45,6 +49,8 @@ class WTurnOnLights(QTVarios.WDialogo):
             tb.new(_("Previous"), Iconos.Anterior(), self.goto_previous)
         if siguiente:
             tb.new(_("Next"), Iconos.Siguiente(), self.goto_next)
+        if one_line:
+            tb.new(_("Change"), Iconos.TOLchange(), self.cambiar_one_line)
         tb.new(_("Config"), Iconos.Configurar(), self.config)
         tb.new(_("Information"), Iconos.Informacion(), self.colors)
 
@@ -193,6 +199,7 @@ class WTurnOnLights(QTVarios.WDialogo):
         smenu.opcion("t_true", _("Jump to the next after solve"), dico[go_fast])
         menu.separador()
         menu.opcion("remove", _("Remove all results of all levels"), Iconos.Cancelar())
+
         resp = menu.lanza()
         if resp:
             if resp.startswith("t_"):
@@ -201,10 +208,21 @@ class WTurnOnLights(QTVarios.WDialogo):
             elif resp == "remove":
                 if not QTUtil2.pregunta(self, _("Are you sure you want to delete all results of all levels and start again from scratch?")):
                     return
-                TurnOnLights.remove_tol(self.tol)
+                if self.one_line:
+                    self.tol.new()
+                else:
+                    TurnOnLights.remove_tol(self.tol)
                 self.reinit = True
                 self.guardarVideo()
                 self.accept()
+
+
+    def cambiar_one_line(self):
+        resp = configOneLine(self, self.procesador)
+        if resp:
+            self.reinit = True
+            self.guardarVideo()
+            self.accept()
 
     def colors(self):
         menu = QTVarios.LCMenu(self)
@@ -220,13 +238,98 @@ class WTurnOnLights(QTVarios.WDialogo):
         menu.lanza()
 
 
-def pantallaTurnOnLigths(procesador, name, title, icono, folder, li_tam_blocks):
+def pantallaTurnOnLigths(procesador, name, title, icono, folder, li_tam_blocks, one_line):
     while True:
-        w = WTurnOnLights(procesador.pantalla, name, title, icono, folder, li_tam_blocks)
+        w = WTurnOnLights(procesador, name, title, icono, folder, li_tam_blocks, one_line)
         if w.exec_():
             if not w.reinit:
                 return w.num_theme, w.num_block, w.tol
         else:
             break
     return None
+
+
+class WConfigOneLineTOL(QTVarios.WDialogo):
+    def __init__(self, owner, procesador):
+
+        title = _("In one line")
+        titulo = _("Turn on the lights") + ": " + title
+        extparam = "tolconfoneline"
+        icono = Iconos.TOLchange()
+        QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
+
+        self.tol = TurnOnLights.read_oneline_tol()
+        self.procesador = procesador
+
+        lbNumPos = Controles.LB2P(self, _("Number of positions"))
+        liBlocks = [(str(x), x) for x in range(6, 60, 6)]
+        self.cbNumPos = Controles.CB(self, liBlocks, self.tol.num_pos)
+
+        lbtipo = Controles.LB2P(self, _("Mode"))
+        liTipos = [(_("Calculation mode"), True),  (_("Memory mode"), False)]
+        self.cbTipo = Controles.CB(self, liTipos, self.tol.calculation_mode)
+
+        lbfile = Controles.LB2P(self, _("File"))
+        pbfile = Controles.PB(self, "", self.newfile).ponIcono(Iconos.Buscar())
+        self.lbshowfile = Controles.LB(self, self.tol.fns)
+        lyfile = Colocacion.H().control(pbfile).control(self.lbshowfile).relleno(1)
+
+        self.chbauto = Controles.CHB(self, _("Redo each day automatically"), self.tol.auto_day )
+
+        tb = Controles.TBrutina(self)
+        tb.new(_("Accept"), Iconos.Aceptar(), self.aceptar)
+        tb.new(_("Cancel"), Iconos.Cancelar(), self.cancelar)
+
+        # Colocamos ---------------------------------------------------------------
+        ly = Colocacion.G()
+        ly.controld(lbNumPos, 1, 0).control(self.cbNumPos, 1, 1)
+        ly.controld(lbtipo, 2, 0).control(self.cbTipo, 2, 1)
+        ly.controld(lbfile, 3, 0).otro(lyfile, 3, 1)
+        ly.control(self.chbauto, 4, 0, 1, 2)
+
+        layout = Colocacion.V().control(tb).espacio(10).otro(ly)
+
+        self.setLayout(layout)
+
+        self.recuperarVideo(siTam=True)
+
+    def aceptar(self):
+        num_positions = self.calc_lines_fns(self.tol.fns)
+        if num_positions < self.cbNumPos.valor():
+            QTUtil2.mensError(self, _("This file has %d solved positions").replace("%d", str(num_positions)))
+            return
+        self.tol.set_num_pos(self.cbNumPos.valor())
+        self.tol.calculation_mode = self.cbTipo.valor()
+        self.tol.auto_day = self.chbauto.valor()
+        self.tol.new()
+        self.guardarVideo()
+        self.accept()
+
+    def cancelar(self):
+        self.guardarVideo()
+        self.reject()
+
+    def calc_lines_fns(self, fns):
+        nl = 0
+        with open(fns) as f:
+            for linea in f:
+                li = linea.split("|")
+                if len(li) >= 3:
+                    nl += 1
+        return nl
+
+    def newfile(self):
+        fns = self.procesador.selectOneFNS(self)
+        if fns:
+            num_positions = self.calc_lines_fns(fns)
+            if num_positions < self.cbNumPos.valor():
+                QTUtil2.mensError(self, _("This file has %d solved positions").replace("%d", str(num_positions)) )
+                return
+            self.tol.fns = fns
+            self.lbshowfile.setText(fns)
+
+
+def configOneLine(owner, procesador):
+    w = WConfigOneLineTOL(owner, procesador)
+    return w.exec_()
 

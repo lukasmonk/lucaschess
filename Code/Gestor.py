@@ -519,7 +519,7 @@ class Gestor:
 
     def paraKibitzers(self):
         for n, xkibitzer in enumerate(self.liKibitzersActivas):
-            xkibitzer.ponFen(None)
+            xkibitzer.terminar() #ponFen(None)
 
     def ponPiezasAbajo(self, siBlancas):
         self.tablero.ponerPiezasAbajo(siBlancas)

@@ -167,9 +167,9 @@ class GestorMotor:
             return mrm.mejorMov()
 
     def juegaTiempo(self, tiempoBlancas, tiempoNegras, tiempoJugada, nAjustado=0):
+        self.testEngine()
         if self.motorTiempoJugada or self.motorProfundidad:
             return self.juega(nAjustado)
-        self.testEngine()
         tiempoBlancas = int(tiempoBlancas * 1000)
         tiempoNegras = int(tiempoNegras * 1000)
         tiempoJugada = int(tiempoJugada * 1000)

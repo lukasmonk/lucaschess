@@ -53,9 +53,26 @@ class GestorPartida(Gestor.Gestor):
 
         self.ponPosicionDGT()
 
+        self.ponInformacion()
+
         self.refresh()
 
         self.siguienteJugada()
+
+    def ponInformacion(self):
+        if self.siCompleta:
+            white = black = result = None
+            for clave, valor in self.partida.liTags:
+                clave = clave.upper()
+                if clave == "WHITE":
+                    white = valor
+                elif clave == "BLACK":
+                    black = valor
+                elif clave == "RESULT":
+                    result = valor
+            self.ponRotulo1("%s : <b>%s</b><br>%s : <b>%s</b>" % (_("White"), white, _("Black"), black) if white and black else "")
+            self.ponRotulo2("%s : <b>%s</b>" % (_("Result"), result) if result else "" )
+            self.pantalla.ponWhiteBlack(white, black)
 
     def reiniciar(self):
         if self.siCambios and not QTUtil2.pregunta(self.pantalla, _("You will loose all changes, are you sure?")):
@@ -269,6 +286,7 @@ class GestorPartida(Gestor.Gestor):
         if resp:
             self.partida.liTags = resp
             self.siCambios = True
+            self.ponInformacion()
 
     def informacion(self):
         menu = QTVarios.LCMenu(self.pantalla)

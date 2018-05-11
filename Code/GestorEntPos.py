@@ -29,7 +29,9 @@ class GestorEntPos(Gestor.Gestor):
     def guardaPosicion(self, posEntreno):
         db = Util.DicSQL(self.configuracion.ficheroTrainings)
         data = db[self.entreno]
-        data["ULTPOSICION"] = posEntreno
+        if data is None:
+            data = {}
+        data["POSULTIMO"] = posEntreno
         db[self.entreno] = data
         db.close()
 

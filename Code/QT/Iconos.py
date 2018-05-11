@@ -2333,49 +2333,49 @@ def OpeningLines():
     return QtGui.QIcon(pmOpeningLines())
 
 def pmStudy():
-    return PM(908838,909875)
+    return PM(908838,909751)
 
 def Study():
     return QtGui.QIcon(pmStudy())
 
 def pmLichess():
-    return PM(909875,910765)
+    return PM(909751,910641)
 
 def Lichess():
     return QtGui.QIcon(pmLichess())
 
 def pmMiniatura():
-    return PM(910765,911692)
+    return PM(910641,911568)
 
 def Miniatura():
     return QtGui.QIcon(pmMiniatura())
 
 def pmLocomotora():
-    return PM(911692,912473)
+    return PM(911568,912349)
 
 def Locomotora():
     return QtGui.QIcon(pmLocomotora())
 
 def pmPositions():
-    return PM(912473,914064)
+    return PM(912349,913940)
 
 def Positions():
     return QtGui.QIcon(pmPositions())
 
 def pmTrainSequential():
-    return PM(914064,915009)
+    return PM(913940,915081)
 
 def TrainSequential():
     return QtGui.QIcon(pmTrainSequential())
 
 def pmTrainStatic():
-    return PM(915009,915979)
+    return PM(915081,916041)
 
 def TrainStatic():
     return QtGui.QIcon(pmTrainStatic())
 
 def pmTrainPositions():
-    return PM(915979,916833)
+    return PM(916041,917022)
 
 def TrainPositions():
     return QtGui.QIcon(pmTrainPositions())
@@ -2387,14 +2387,26 @@ def Error():
     return QtGui.QIcon(pmError())
 
 def pmAtajos():
-    return PM(916833,918012)
+    return PM(917022,918201)
 
 def Atajos():
     return QtGui.QIcon(pmAtajos())
 
-def pmTOLday():
-    return PM(918012,919387)
+def pmTOLline():
+    return PM(918201,919305)
 
-def TOLday():
-    return QtGui.QIcon(pmTOLday())
+def TOLline():
+    return QtGui.QIcon(pmTOLline())
+
+def pmTOLchange():
+    return PM(919305,921527)
+
+def TOLchange():
+    return QtGui.QIcon(pmTOLchange())
+
+def pmPack():
+    return PM(921527,922192)
+
+def Pack():
+    return QtGui.QIcon(pmPack())
 

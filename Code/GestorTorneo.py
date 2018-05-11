@@ -139,6 +139,7 @@ class GestorTorneo(Gestor.Gestor):
         else:
             jgUlt = self.partida.last_jg()
             result = None
+            adjudication = None
             if self.partida.siTerminada():
                 if jgUlt.siJaqueMate:
                     result = 1 if jgUlt.posicionBase.siBlancas else 2
@@ -181,12 +182,19 @@ class GestorTorneo(Gestor.Gestor):
                         pTut = -rmTut.mejorMov().puntosABS()
                         if pTut >= rs:
                             result = 1 if jgAnt.posicion.siBlancas else 2
+                            adjudication = True
 
             if result is None:
                 return False
 
         self.gm.partida(self.partida)
         self.gm.result(result)
+        termination = "normal"
+        if self.finPorTiempo:
+            termination = "time forfeit"
+        elif adjudication:
+            termination = "adjudication"
+        self.gm.termination(termination)
         self.torneo.grabar()
 
         return True

@@ -459,7 +459,7 @@ class WLines(QTVarios.WDialogo):
 
         reg["COLOR"], reg["RANDOM"], reg["MAXMOVES"] = liResp
 
-        self.dbop.createTraining(reg, self.configuracion)
+        self.dbop.createTraining(reg, self.procesador)
 
         QTUtil2.mensaje(self, _("The trainings of this opening has been created"))
 

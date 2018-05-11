@@ -58,7 +58,7 @@ class WSummary(QtGui.QWidget):
         oColumnas.nueva("trans", "", 28, edicion=Delegados.PmIconosBMT(dicIconos=dicTipos))
         oColumnas.nueva("analisis", _("Analysis"), 60, siDerecha=True)
         oColumnas.nueva("games", _("Games"), 70, siDerecha=True)
-        oColumnas.nueva("pgames", "% " + _("Games"), 70, siDerecha=True, siCentrado=True)
+        oColumnas.nueva("pgames", "% " + _("Games"), 70, siDerecha=True)
         oColumnas.nueva("win", _("Win"), 70, siDerecha=True)
         oColumnas.nueva("draw", _("Draw"), 70, siDerecha=True)
         oColumnas.nueva("lost", _("Lost"), 70, siDerecha=True)
