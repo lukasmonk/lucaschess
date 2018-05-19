@@ -952,7 +952,7 @@ class Tablero(QtGui.QGraphicsView):
             self.markPositionExt("a8", "c6", "R")
 
     def showCandidates(self, liC):
-        if not liC:
+        if not liC or not self.configuracion.showCandidates:
             return
         self.checkLEDS()
 

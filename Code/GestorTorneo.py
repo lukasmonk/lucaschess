@@ -133,13 +133,14 @@ class GestorTorneo(Gestor.Gestor):
         if self.partida.numJugadas() == 0:
             return False
 
+        adjudication = None
+
         if self.finPorTiempo is not None:
             result = self.finPorTiempo
 
         else:
             jgUlt = self.partida.last_jg()
             result = None
-            adjudication = None
             if self.partida.siTerminada():
                 if jgUlt.siJaqueMate:
                     result = 1 if jgUlt.posicionBase.siBlancas else 2

@@ -38,12 +38,14 @@ class GestorOpeningLines(Gestor.Gestor):
         self.calc_totalTiempo()
 
         self.dicFENm2 = self.training["DICFENM2"]
-
-        limens = ",".join(["%d"%line for line in self.dbop.getNumLinesPV(self.liPV)])
-
+        li = self.dbop.getNumLinesPV(self.liPV)
+        if len(li) > 10:
+            mensLines = ",".join(["%d"%line for line in li[:10]]) + ", ..."
+        else:
+            mensLines = ",".join(["%d"%line for line in li])
         self.liMensBasic = [
             "%d/%d" % (self.num_linea+1, len(self.liGames)),
-            "%s: %s" % (_("Lines"), limens),
+            "%s: %s" % (_("Lines"), mensLines),
         ]
 
         self.siAyuda = False

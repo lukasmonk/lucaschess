@@ -259,16 +259,21 @@ class TurnOnLights:
             for theme in self.themes:
                 level.set_theme_blocks(theme)
             self.levels.append(level)
+        self.work_level = 0
+        write_tol(self)
 
     def prev_next(self):
         prev, next = False, False
         if self.work_level > 0:
             prev = True
+        level = self.levels[self.work_level]
+        terminado = False
         if self.work_level < (len(self.levels)-1):
-            level = self.levels[self.work_level]
             if level.done(self.calculation_mode):
                 next = True
-        return prev, next
+        else:
+            terminado = level.done(self.calculation_mode)
+        return prev, next, terminado
 
     @property
     def num_blocks(self):
@@ -372,6 +377,7 @@ class TurnOnLightsOneLine(TurnOnLights):
             level.set_theme_blocks(theme)
             self.levels.append(level)
         self.last_date = self.hoy()
+        self.work_level = 0
         write_tol(self)
 
 

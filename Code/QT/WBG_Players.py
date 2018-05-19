@@ -373,6 +373,8 @@ class WPlayer(QtGui.QWidget):
         alias2 = self.leeVariable("ALIAS2")
         alias3 = self.leeVariable("ALIAS3")
 
+        liplayer = (nombre, alias1, alias2, alias3)
+
         filtro = "WHITE = '%s' or BLACK = '%s'" %(nombre, nombre)
         for alias in (alias1, alias2, alias3):
             if alias:
@@ -391,10 +393,10 @@ class WPlayer(QtGui.QWidget):
                 resultw = "win" if result == "1-0" else ("lost" if result == "0-1" else "draw")
                 resultb = "win" if result == "0-1" else ("lost" if result == "1-0" else "draw")
 
-                if white == nombre:
+                if white in liplayer:
                     side = "white"
                     result = resultw
-                elif black == nombre:
+                elif black in liplayer:
                     side = "black"
                     result = resultb
                 else:

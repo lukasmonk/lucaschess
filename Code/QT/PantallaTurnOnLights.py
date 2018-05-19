@@ -44,7 +44,9 @@ class WTurnOnLights(QTVarios.WDialogo):
         # Toolbar
         tb = Controles.TBrutina(self)
         tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
-        anterior, siguiente = self.tol.prev_next()
+        anterior, siguiente, terminado = self.tol.prev_next()
+        if terminado:
+            tb.new(_("Rebuild"), Iconos.Reindexar(), self.rebuild)
         if anterior:
             tb.new(_("Previous"), Iconos.Anterior(), self.goto_previous)
         if siguiente:
@@ -80,7 +82,7 @@ class WTurnOnLights(QTVarios.WDialogo):
         self.setLayout(ly)
 
         alto = self.tol.num_themes*42 + 146
-        self.recuperarVideo(siTam=True, altoDefecto=alto, anchoDefecto=nAnchoPgn)
+        self.recuperarVideo(siTam=True, altoDefecto=alto, anchoDefecto=max(nAnchoPgn, 480))
 
     def terminar(self):
         self.guardarVideo()
@@ -206,16 +208,19 @@ class WTurnOnLights(QTVarios.WDialogo):
                 self.tol.go_fast = resp == "t_true"
                 TurnOnLights.write_tol(self.tol)
             elif resp == "remove":
-                if not QTUtil2.pregunta(self, _("Are you sure you want to delete all results of all levels and start again from scratch?")):
-                    return
-                if self.one_line:
-                    self.tol.new()
-                else:
-                    TurnOnLights.remove_tol(self.tol)
-                self.reinit = True
-                self.guardarVideo()
-                self.accept()
+                self.rebuild()
 
+    def rebuild(self):
+        if not QTUtil2.pregunta(self, _(
+                "Are you sure you want to delete all results of all levels and start again from scratch?")):
+            return
+        if self.one_line:
+            self.tol.new()
+        else:
+            TurnOnLights.remove_tol(self.tol)
+        self.reinit = True
+        self.guardarVideo()
+        self.accept()
 
     def cambiar_one_line(self):
         resp = configOneLine(self, self.procesador)
