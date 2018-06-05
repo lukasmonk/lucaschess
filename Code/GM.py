@@ -1,5 +1,6 @@
 import operator
 import os
+import sys
 
 from LCEngineV1 import xpv2pv, pv2xpv
 
@@ -67,7 +68,9 @@ class GM:
         return self.lastGame
 
     def read(self):
-        ficheroGM = self.gm + ".xgm"
+        #linux is case sensitive and can't find the xgm file because ficheroGM is all lower-case, but all
+        #the xgm files have the first letter capitalized (including ones recently downloaded)
+        ficheroGM = self.gm[0].upper() + self.gm[1:] + ".xgm"
         f = open(os.path.join(self.carpeta, ficheroGM), "rb")
         li = []
         for linea in f:
