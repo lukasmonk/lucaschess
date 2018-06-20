@@ -24,7 +24,8 @@ def leeCarpeta(owner, carpeta, titulo=None):
     if titulo is None:
         titulo = _("Open Directory")
     return QtGui.QFileDialog.getExistingDirectory(owner, titulo, carpeta,
-                                                  QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks)
+                                                  QtGui.QFileDialog.ShowDirsOnly | \
+                                                  QtGui.QFileDialog.DontResolveSymlinks)
 
 
 def _lfTituloFiltro(extension, titulo):

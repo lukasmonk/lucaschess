@@ -8,6 +8,8 @@ from Code.QT import PantallaTorneos
 from Code import Util
 from Code import XGestorMotor
 from Code.QT import QTUtil
+from Code.QT import QTVarios
+from Code.QT import Iconos
 from Code.Constantes import *
 
 
@@ -25,7 +27,7 @@ class GestorTorneo(Gestor.Gestor):
         self.mostrarIndicador(True)
         self.siTerminar = False
         self.siPausa = False
-        self.pantalla.ponToolBar((k_cancelar, k_peliculaPausa))
+        self.pantalla.ponToolBar((k_cancelar, k_peliculaPausa, k_forceEnd))
         self.colorJugando = True
         self.ponCapPorDefecto()
 
@@ -108,6 +110,7 @@ class GestorTorneo(Gestor.Gestor):
         self.refresh()
 
         self.finPorTiempo = None
+        self.finForce = None
         while self.siPausa or self.siguienteJugada():
             QTUtil.refreshGUI()
             if self.siPausa:
@@ -137,6 +140,9 @@ class GestorTorneo(Gestor.Gestor):
 
         if self.finPorTiempo is not None:
             result = self.finPorTiempo
+
+        elif self.finForce is not None:
+            result = self.finForce
 
         else:
             jgUlt = self.partida.last_jg()
@@ -193,6 +199,8 @@ class GestorTorneo(Gestor.Gestor):
         termination = "normal"
         if self.finPorTiempo:
             termination = "time forfeit"
+        elif self.finForce:
+            termination = "adjudication"
         elif adjudication:
             termination = "adjudication"
         self.gm.termination(termination)
@@ -294,10 +302,12 @@ class GestorTorneo(Gestor.Gestor):
             self.siTerminar = True
         elif clave == k_peliculaPausa:
             self.siPausa = True
-            self.pantalla.ponToolBar((k_cancelar, k_peliculaSeguir))
+            self.pantalla.ponToolBar((k_cancelar, k_peliculaSeguir, k_forceEnd))
         elif clave == k_peliculaSeguir:
             self.siPausa = False
-            self.pantalla.ponToolBar((k_cancelar, k_peliculaPausa))
+            self.pantalla.ponToolBar((k_cancelar, k_peliculaPausa, k_forceEnd))
+        elif clave == k_forceEnd:
+            self.assignResult()
 
     def finalX(self):
         self.siTerminar = True
@@ -344,3 +354,17 @@ class GestorTorneo(Gestor.Gestor):
         self.pgnRefresh(self.partida.ultPosicion.siBlancas)
 
         self.refresh()
+
+    def assignResult(self):
+        menu = QTVarios.LCMenu(self.pantalla)
+        menu.opcion(0,"1/2-1/2", Iconos.Tablas())
+        menu.separador()
+        menu.opcion(1, "1-0", Iconos.Blancas())
+        menu.separador()
+        menu.opcion(2, "0-1", Iconos.Negras())
+        resp = menu.lanza()
+        if resp is not None:
+            self.finForce = resp
+
+
+

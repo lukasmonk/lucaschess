@@ -109,7 +109,7 @@ RemotoCliente nuvola laptop_charge.png
 
 Cebra lucas cebra32.png
 
-Gafas visualpharm glasses-32.png
+Gafas windows8 glasses-32.png
 
 Puente silk shape_move_back.png
 
@@ -212,7 +212,7 @@ DailyTest nuvola log.png
 
 JuegaPorMi nuvola wizard.png
 
-Arbol nuvola view_tree.png
+Arbol windows8 Tree_Structure_32px.png
 
 GrabarFichero nuvola 3floppy_unmount.png
 Clip nuvola attach.png
@@ -429,13 +429,13 @@ DatabaseF qt4 icon_list-allf.png
 DatabaseCNew qt4 icon_list-allmNew.png
 DatabaseMas qt4 icon_list-allm_f.png
 
-Atacante visualpharm outline_star-26.png
-Atacada visualpharm delete_shield-26.png
+Atacante windows8 outline_star-26.png
+Atacada windows8 delete_shield-26.png
 
-GoToNext visualpharm right-26.png
+GoToNext windows8 right-26.png
 
-Blancas visualpharm rectangle_stroked-26.png
-Negras visualpharm rectangle-26.png
+Blancas windows8 rectangle_stroked-26.png
+Negras windows8 rectangle-26.png
 
 FolderChange gnome 64px-Gnome-folder-saved-search.png
 Markers ultimate edit-cut.png
@@ -545,3 +545,5 @@ TOLline windows8 Network_32px.png
 TOLchange gnome edit-redo.png
 
 Pack qt4 icon_list-all_circ.png
+
+Home nuvola folder_home.png

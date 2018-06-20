@@ -18,6 +18,23 @@ class Move:
         self.fenPrev = ""
         self.fen = ""
 
+    def clona(self):
+        m = Move()
+        m.pgn = self.pgn
+        m.pv = self.pv
+        m.comentarios = self.comentarios
+        m.variantes = self.variantes
+        m.criticas = self.criticas
+        m.desde = self.desde
+        m.hasta = self.hasta
+        m.coronacion = self.coronacion
+        m.siMate = self.siMate
+        m.siDesconocido = self.siDesconocido
+        m.fenPrev = self.fenPrev
+        m.fen = self.fen
+        return m
+
+
 
 class Moves:
     def __init__(self):

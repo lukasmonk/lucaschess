@@ -464,7 +464,6 @@ class WMoves(QtGui.QWidget):
         return True
 
     def tg_training(self):
-
         w = WBG_Training.WTraining(self, self.tree.dicValoracion, self.tree.dicVentaja)
         w.exec_()
         if not w.siAceptado:

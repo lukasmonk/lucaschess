@@ -14,7 +14,6 @@ Dependencies
 * PyAudio
 * psutil
 * Python for windows extensions
-* pygal
 * chardet
 * python-chess
 * pyllow

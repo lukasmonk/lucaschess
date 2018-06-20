@@ -263,6 +263,7 @@ class WBase(QtGui.QWidget):
                       (_("Show text"), Iconos.Modificar(), k_showtext),
                       (_("Help to move"), Iconos.BotonAyuda(), k_ayudaMover),
                       (_("Send"), Iconos.Enviar(), k_enviar),
+                      (_("End game"), Iconos.Rendirse(), k_forceEnd),
                       )
 
         cf = self.gestor.configuracion

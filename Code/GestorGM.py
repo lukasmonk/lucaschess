@@ -273,10 +273,7 @@ class GestorGM(Gestor.Gestor):
 
         movimiento = jgUsu.movimiento()
         posicion = self.partida.ultPosicion
-        analisis = None
-
         isValid = self.motorGM.isValidMove(movimiento)
-
         analisis = None
 
         if not isValid:
@@ -296,6 +293,8 @@ class GestorGM(Gestor.Gestor):
                         self.book = False
         else:
             siAnalizaJuez = self.siJuez and self.mostrar is None  # None es ver siempre False no ver nunca True ver si diferentes
+            if len(movimiento) == 5:
+                coronacion = movimiento[4].lower()
             desdeGM, hastaGM, coronacionGM = desde, hasta, coronacion
 
         siBien, mens, jgGM = Jugada.dameJugada(posicion, desdeGM, hastaGM, coronacionGM)

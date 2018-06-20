@@ -252,7 +252,6 @@ class ListaAperturasStd:
         last_ap = self.baseXPV(xpv)
         return last_ap.trNombre if last_ap else ""
 
-
 ap = ListaAperturasStd()
 apTrain = ListaAperturasStd()
 

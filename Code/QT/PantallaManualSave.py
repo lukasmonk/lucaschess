@@ -442,7 +442,7 @@ class WManualSave(QTVarios.WDialogo):
         txt = "".join(li)
         pc = Partida.PartidaCompleta(self.posicion)
         txt += "\n%s" % self.em_solucion.texto()
-        pc.readPGN(self.configuracion, txt)
+        pc.readPGN(txt)
         return pc
 
     def reset_partida(self):

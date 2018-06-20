@@ -8,7 +8,6 @@ import LCEngineV1 as LCEngine
 
 from Code import Partida
 from Code import Util
-from Code import VarGen
 
 posA1 = LCEngine.posA1
 a1Pos = LCEngine.a1Pos
@@ -308,7 +307,7 @@ class DBgamesFEN():
         if xpgn:
             xpgn = Util.blob2var(xpgn)
             if type(xpgn) in (str, unicode):  # Version -9
-                p.readPGN(VarGen.configuracion, xpgn)
+                p.readPGN(xpgn)
                 return p
             p.restore(xpgn["FULLGAME"])
             return p

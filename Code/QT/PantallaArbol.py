@@ -286,10 +286,6 @@ class TreeMoves(QtGui.QTreeWidget):
         self.setAlternatingRowColors(True)
         self.listaMoves = owner.listaMoves
         self.procesador = procesador
-        # self.setSelectionMode(self.ExtendedSelection)
-        # self.setDragDropMode(self.InternalMove)
-        # self.setDragEnabled(True)
-        # self.setDropIndicatorShown(True)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.menuContexto)
 

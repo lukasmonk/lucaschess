@@ -110,7 +110,7 @@ class BotonImagen(Colocacion.H):
             # import os
             # n = 0
             # while os.path.isfile("mira_%d.png"%n):
-            # n+=1
+            #     n+=1
             # f = open("mira_%d.png"%n,"wb")
             # f.write(png)
             # f.close()
@@ -881,7 +881,7 @@ def cambiaColores(parent, configuracion):
 
     liColor = []
     liColor.append(separador)
-    liColor.append((_("By default") + ":", False))
+    liColor.append((_("Reset to default") + ":", False))
     liColor.append(separador)
 
     palette = configuracion.palette
@@ -923,7 +923,7 @@ def cambiaColores(parent, configuracion):
 
     liPGN = []
     liPGN.append(separador)
-    liPGN.append((_("By default") + ":", False))
+    liPGN.append((_("Reset to default") + ":", False))
     liPGN.append(separador)
 
     dicNAGs = TrListas.dicNAGs()
@@ -947,7 +947,7 @@ def cambiaColores(parent, configuracion):
 
     liTables = []
     liTables.append(separador)
-    liTables.append((_("By default") + ":", False))
+    liTables.append((_("Reset to default") + ":", False))
     liTables.append(separador)
 
     liTables.append((None, _("Selected row")))

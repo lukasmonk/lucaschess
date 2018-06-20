@@ -1,8 +1,11 @@
+import os
 import os.path
 import copy
 
+
 from PyQt4 import QtCore, QtGui
 
+from Code import VarGen
 from Code import Util
 from Code import Partida
 from Code import Analisis
@@ -27,13 +30,13 @@ from Code.QT import FormLayout
 class WOpeningLines(QTVarios.WDialogo):
     def __init__(self, procesador):
 
-        QTVarios.WDialogo.__init__(self, procesador.pantalla,  _("Opening lines"), Iconos.OpeningLines(), "openingLines")
-
         self.procesador = procesador
         self.configuracion = procesador.configuracion
         self.resultado = None
-
         self.listaOpenings = OpeningLines.ListaOpenings(self.configuracion)
+
+        QTVarios.WDialogo.__init__(self, procesador.pantalla,  self.getTitulo(), Iconos.OpeningLines(), "openingLines")
+
 
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("TITLE", _("Name"), 240)
@@ -53,6 +56,7 @@ class WOpeningLines(QTVarios.WDialogo):
             (_("Down"), Iconos.Abajo(), self.abajo), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
             (_("Reinit"), Iconos.Reiniciar(), self.reiniciar), None,
+            (_("Folder"), Iconos.File(), self.changeFolder), None,
         )
         tb = Controles.TBrutina(self, liAcciones)
 
@@ -82,10 +86,14 @@ class WOpeningLines(QTVarios.WDialogo):
         self.setLayout(ly)
 
         self.registrarGrid(self.glista)
-        self.recuperarVideo()
+        self.recuperarVideo(anchoDefecto=self.glista.anchoColumnas()+20)
 
         self.wtrain.setVisible(False)
         self.glista.gotop()
+
+    def getTitulo(self):
+        return "%s [%s]" % (_("Opening lines"), os.path.relpath(self.listaOpenings.folder))
+
 
     def tr_(self, tipo):
         recno = self.glista.recno()
@@ -108,6 +116,70 @@ class WOpeningLines(QTVarios.WDialogo):
         self.listaOpenings.reiniciar()
         self.glista.refresh()
         self.glista.gotop()
+        if len(self.listaOpenings) == 0:
+            self.wtrain.setVisible(False)
+
+    def changeFolder(self):
+        nof = _("New opening folder")
+        base = self.configuracion.folderBaseOpenings
+        li = [x for x in os.listdir(base) if os.path.isdir(os.path.join(base, x))]
+        menu = QTVarios.LCMenu(self)
+        rondo = QTVarios.rondoPuntos()
+        menu.opcion("", _("Home folder"), Iconos.Home())
+        menu.separador()
+        for x in li:
+            menu.opcion(x, x, rondo.otro())
+        menu.separador()
+        menu.opcion(":n", nof, Iconos.Nuevo())
+        if VarGen.isWindows:
+            menu.separador()
+            menu.opcion(":m", _("Direct maintenance"), Iconos.Configurar())
+
+        resp = menu.lanza()
+        if resp is not None:
+            if resp == ":m":
+                os.startfile(base)
+                return
+
+            elif resp == ":n":
+                name = ""
+                error = ""
+                while True:
+                    liGen = [FormLayout.separador]
+                    liGen.append((nof + ":", name))
+                    if error:
+                        liGen.append(FormLayout.separador)
+                        liGen.append((None, error))
+
+                    resultado = FormLayout.fedit(liGen, title=nof, parent=self,
+                                                 icon=Iconos.OpeningLines(), anchoMinimo=460)
+                    if resultado:
+                        accion, liResp = resultado
+                        name = liResp[0].strip()
+                        if name:
+                            path = os.path.join(base, name)
+                            try:
+                                os.mkdir(path)
+                            except:
+                                error = _("Unable to create this folder")
+                                continue
+                            if not os.path.isdir(path):
+                                continue
+                            break
+                    else:
+                        return
+            else:
+                path = os.path.join(base, resp)
+
+            path = os.path.relpath(path)
+            self.configuracion.folderOpenings = path
+            self.configuracion.graba()
+            self.listaOpenings = OpeningLines.ListaOpenings(self.configuracion)
+            self.glista.refresh()
+            self.glista.gotop()
+            if len(self.listaOpenings) == 0:
+                self.wtrain.setVisible(False)
+            self.setWindowTitle(self.getTitulo())
 
     def arriba(self):
         fila = self.glista.recno()
@@ -464,7 +536,7 @@ class WLines(QTVarios.WDialogo):
         QTUtil2.mensaje(self, _("The trainings of this opening has been created"))
 
     def trainUpdate(self):
-        self.dbop.updateTraining()
+        self.dbop.updateTraining(self.procesador)
         QTUtil2.mensaje(self, _("The trainings have been updated"))
 
     def addPartida(self, partida):
@@ -515,6 +587,8 @@ class WLines(QTVarios.WDialogo):
             frommenu.opcion(("voyager2", part), _("Voyager 2"), Iconos.Voyager1())
             frommenu.separador()
             frommenu.opcion(("opening", part), _("Opening"), Iconos.Apertura())
+            frommenu.separador()
+            frommenu.opcion(("pgo", part), _("Personal Opening Guide"), Iconos.BookGuide())
 
         partida = self.partidaActual()
         if len(partida) > len(self.partidabase):
@@ -534,6 +608,8 @@ class WLines(QTVarios.WDialogo):
             self.importarPGN(partida)
         elif tipo == "polyglot":
             self.importarPolyglot(partida)
+        elif tipo == "pgo":
+            self.importarPGO(partida)
         elif tipo == "summary":
             self.importarSummary(partida)
         elif tipo == "voyager2":
@@ -659,6 +735,35 @@ class WLines(QTVarios.WDialogo):
             self.dbop.importarPGN(self, partida, ficheroPGN, depth)
             self.glines.refresh()
             self.glines.gotop()
+
+    def importarPGO(self, partida):
+        li = [(uno.name[:-4], uno.path) for uno in Util.listdir(self.configuracion.carpeta) if uno.name.endswith(".pgo")]
+        if not li:
+            QTUtil2.mensError(self, _("There is no one"))
+            return
+
+        liGen = [(None, None)]
+
+        config = FormLayout.Combobox(_("Personal Opening Guide"), li)
+        liGen.append((config, li[0][0]))
+
+        liGen.append((None, _("Select a maximum number of moves (plies)<br> to consider from each game")))
+
+        liGen.append((FormLayout.Spinbox(_("Depth"), 3, 999, 50), 30))
+        liGen.append((None, None))
+
+        resultado = FormLayout.fedit(liGen, title=_("Personal Opening Guide"), parent=self, anchoMinimo=460,
+                                     icon=Iconos.BookGuide())
+
+        if resultado:
+            accion, liResp = resultado
+            pgo, depth = liResp
+
+            self.dbop.importarPGO(partida, pgo, depth)
+            self.glines.refresh()
+            self.glines.gotop()
+
+            QTUtil2.mensaje(self, _("Imported"))
 
     def gridColorFondo(self, grid, fila, oColumna):
         col = oColumna.clave
@@ -882,6 +987,36 @@ class WLines(QTVarios.WDialogo):
 
         fila = linea*2
         njug = partida.numJugadas()
+        if njug % 2 == 0:
+            fila += 1
+
+        ncol = njug//2
+        if njug %2 == 1:
+            ncol += 1
+
+        ncol -= self.num_jg_inicial//2
+        self.glines.goto(fila, ncol)
+        self.glines.refresh()
+
+    def goto_next_lipv(self, lipv):
+        li = self.dbop.getNumLinesPV(lipv, base=0)
+        linea_actual = self.glines.recno() // 2
+
+        if linea_actual in li:
+            linea = linea_actual
+        else:
+            li.sort()
+            linea = None
+            for l in li:
+                if l > linea_actual:
+                    linea = l
+                    break
+            if linea is None:
+                linea = li[0]
+
+        njug = len(lipv)
+
+        fila = linea*2
         if njug % 2 == 0:
             fila += 1
 

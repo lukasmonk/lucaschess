@@ -1065,7 +1065,7 @@ class DBgames:
         if xpgn:
             xpgn = Util.blob2var(xpgn)
             if type(xpgn) in (str, unicode):  # Version -9
-                p.readPGN(VarGen.configuracion, xpgn)
+                p.readPGN(xpgn)
                 return p
             if "RTAGS" in xpgn:
                 rtags = xpgn["RTAGS"]

@@ -644,8 +644,8 @@ class WUnTorneo(QTVarios.WDialogo):
 
         liGen.append((None, None))
 
-        config = FormLayout.Spinbox(_("Total minutes"), 1, 999, 50)
-        liGen.append((config, get("MINUTES", 10)))
+        config = FormLayout.Editbox(_("Total minutes"), 40, tipo=float, decimales=2)
+        liGen.append((config, get("MINUTES", 10.00)))
 
         config = FormLayout.Spinbox(_("Seconds added per move"), 0, 999, 50)
         liGen.append((config, get("SECONDS", 0)))
@@ -666,14 +666,15 @@ class WUnTorneo(QTVarios.WDialogo):
         reg.form = None
 
         def dispatch(valor):
-            if reg.form is None:
-                reg.form = valor
-                reg.liEngines = []
-                leng = len(liEngines)
-                for x in range(leng):
-                    reg.liEngines.append(valor.getWidget(x + 3))
-                reg.selectall = valor.getWidget(leng + 3)
-                reg.valorall = False
+            if reg.form is None or not hasattr(reg, "selectall"):
+                if hasattr(valor, "getWidget"):
+                    reg.form = valor
+                    reg.liEngines = []
+                    leng = len(liEngines)
+                    for x in range(leng):
+                        reg.liEngines.append(valor.getWidget(x + 3))
+                    reg.selectall = valor.getWidget(leng + 3)
+                    reg.valorall = False
 
             else:
                 QTUtil.refreshGUI()

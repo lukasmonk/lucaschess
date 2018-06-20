@@ -8,12 +8,16 @@ from Code import Util
 from Code import Partida
 from Code import PGNreader
 from Code import DBgames
+from Code import AperturasStd
 from Code.QT import QTVarios
 from Code.QT import QTUtil2
 
 class ListaOpenings:
     def __init__(self, configuracion):
         self.folder = configuracion.folderOpenings
+        if not self.folder or not os.path.isdir(self.folder):
+            self.folder = configuracion.folderBaseOpenings
+
         self.fichero = os.path.join(self.folder, "openinglines.pk")
 
         self.lista = Util.recuperaVar(self.fichero)
@@ -222,11 +226,12 @@ class Opening:
         for x in range(nt-1):
             pvmirar = "".join(lilipv[x])
             esta = False
-            for y in range(x+1, nt):
-                pvotro = "".join(lilipv[y])
-                if pvotro.startswith(pvmirar):
-                    esta = True
-                    break
+            for y in range(nt):
+                if y != x:
+                    pvotro = "".join(lilipv[y])
+                    if pvotro.startswith(pvmirar):
+                        esta = True
+                        break
             if not esta:
                 lilipvfinal.append(lilipv[x])
         lilipv = lilipvfinal
@@ -323,12 +328,12 @@ class Opening:
     def withTrainings(self):
         return "TRAINING" in self.db_config
 
-    def updateTraining(self):
+    def updateTraining(self, procesador):
         reg = self.training()
         reg1 = {}
         for key in ("MAXMOVES", "COLOR", "RANDOM"):
             reg1[key] = reg[key]
-        self.preparaTraining(reg1)
+        self.preparaTraining(reg1, procesador)
 
         for tipo in ("LIGAMES_SEQUENTIAL", "LIGAMES_STATIC"):
             # Los que estan pero no son, los borramos
@@ -568,12 +573,11 @@ class Opening:
 
         cursor = self._conexion.cursor()
 
-        base = self.getconfig("BASEPV")
-        njugbase = partidabase.numJugadas()
-        n = 0
+        base = partidabase.pv() if partidabase else self.getconfig("BASEPV")
 
         sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
         sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
+
         for n, g in enumerate(PGNreader.readGames(ficheroPGN), 1):
             if not dlTmp.actualiza(n, erroneos, duplicados, importados):
                 break
@@ -584,21 +588,22 @@ class Opening:
                 erroneos += 1
                 continue
 
-            def haz_partida(partida, liMoves):
-                njg = len(partida)
-                if len(liMoves) + njg > maxDepth:
-                    liMoves = liMoves[:maxDepth - njg]
+            def haz_partida(liMoves):
+                njg = len(liMoves)
+                if njg > maxDepth:
+                    liMoves = liMoves[:maxDepth]
                 pv = " ".join([move.pv for move in liMoves])
+                partida = Partida.Partida()
                 partida.leerPV(pv)
                 pv = partida.pv()
-                if base and not pv.startswith(base) or partida.numJugadas() <= njugbase:
+                if base and not pv.startswith(base):
                     return
                 xpv = LCEngine.pv2xpv(pv)
-                if xpv in self.li_xpv:
-                    return
                 line_blob = partida.save2blob()
                 updated = False
                 for npos, xpv_ant in enumerate(self.li_xpv):
+                    if xpv_ant.startswith(xpv):
+                        return
                     if xpv.startswith(xpv_ant):
                         cursor.execute(sql_update, (xpv, line_blob, xpv_ant))
                         self.li_xpv[npos] = xpv
@@ -609,13 +614,14 @@ class Opening:
                     self.li_xpv.append(xpv)
 
                 for njug, move in enumerate(liMoves):
-                    if move.variantes:
-                        for lim in move.variantes:
-                            p = partida.copia(njug-1) if njug > 0 else Partida.Partida()
-                            haz_partida(p, lim.liMoves)
+                    for lim in move.variantes:
+                        limovnv = [liMoves[j].clona() for j in range(njug)]
+                        for move in limovnv:
+                            move.variantes = []
+                        limovnv.extend(lim.liMoves)
+                        haz_partida(limovnv)
 
-            partida = Partida.Partida()
-            haz_partida(partida, g.moves.liMoves)
+            haz_partida(g.moves.liMoves)
             if n % 50:
                 self._conexion.commit()
 
@@ -625,6 +631,64 @@ class Opening:
 
         dlTmp.actualiza(n, erroneos, duplicados, importados)
         dlTmp.ponContinuar()
+
+    def importarPGO(self, partidabase, ficheroPGO, maxDepth):
+        base = partidabase.pv() if partidabase else self.getconfig("BASEPV")
+        baseXPV = LCEngine.pv2xpv(base)
+
+        conexionPGO = sqlite3.connect(ficheroPGO)
+        liRawPGO = conexionPGO.execute("SELECT XPV from GUIDE")
+        stPGO = set()
+        for raw in liRawPGO:
+            xpv = raw[0]
+            if maxDepth:
+                lipv = LCEngine.xpv2pv(xpv).split(" ")
+                if len(lipv) > maxDepth:
+                    lipv = lipv[:maxDepth]
+                    xpv = LCEngine.pv2xpv(" ".join(lipv))
+            if not xpv.startswith(baseXPV):
+                continue
+            ok = True
+            lirem = []
+            for xpv0 in stPGO:
+                if xpv.startswith(xpv0):
+                    lirem.append(xpv0)
+                elif xpv0.startswith(xpv):
+                    ok = False
+                    break
+            for xpv0 in lirem:
+                stPGO.remove(xpv0)
+            if ok:
+                stPGO.add(xpv)
+        conexionPGO.close()
+
+        cursor = self._conexion.cursor()
+
+        sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
+        sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
+
+        for xpv in stPGO:
+            pv = LCEngine.xpv2pv(xpv)
+            partida = Partida.Partida()
+            partida.leerPV(pv)
+            line_blob = partida.save2blob()
+            add = True
+            for npos, xpv_ant in enumerate(self.li_xpv):
+                if xpv_ant.startswith(xpv):
+                    add = False
+                    break
+                if xpv.startswith(xpv_ant):
+                    cursor.execute(sql_update, (xpv, line_blob, xpv_ant))
+                    self.li_xpv[npos] = xpv
+                    add = False
+                    break
+            if add:
+                cursor.execute(sql_insert, (xpv, line_blob))
+                self.li_xpv.append(xpv)
+
+        cursor.close()
+        self.li_xpv.sort()
+        self._conexion.commit()
 
     def guardaPartidas(self, liPartidas, minMoves=0):
         partidabase = self.getpartidabase()
@@ -768,13 +832,77 @@ class Opening:
         for lipv in lilipv:
             LCEngine.setFenInicial()
             for pv in lipv:
+                LCEngine.makeMove(pv)
                 fen = LCEngine.getFen()
                 fenM2 = LCEngine.fen2fenM2(fen)
                 stFENm2.add(fenM2)
-                LCEngine.makeMove(pv)
         return stFENm2
 
-    def getNumLinesPV(self, pv):
-        xpv = LCEngine.pv2xpv(" ".join(pv))
-        li = [num for num, xpv0 in enumerate(self.li_xpv, 1) if xpv0.startswith(xpv)]
+    def getNumLinesPV(self, lipv, base=1):
+        xpv = LCEngine.pv2xpv(" ".join(lipv))
+        li = [num for num, xpv0 in enumerate(self.li_xpv, base) if xpv0.startswith(xpv)]
         return li
+
+    def totree(self):
+        parent = ItemTree(None, None, None, None)
+        dic = AperturasStd.ap.dicFenM2
+        for xpv in self.li_xpv:
+            lipv = LCEngine.xpv2pv(xpv).split(" ")
+            lipgn = LCEngine.xpv2pgn(xpv).replace("\n", " ").strip().split(" ")
+            linom = []
+            LCEngine.setFenInicial()
+            for pv in lipv:
+                LCEngine.makeMove(pv)
+                fen = LCEngine.getFen()
+                fenM2 = LCEngine.fen2fenM2(fen)
+                linom.append(dic[fenM2].trNombre if fenM2 in dic else "")
+            parent.addLista(lipv, lipgn, linom)
+        return parent
+
+
+class ItemTree:
+    def __init__(self, parent, move, pgn, opening):
+        self.move = move
+        self.pgn = pgn
+        self.parent = parent
+        self.opening = opening
+        self.dicHijos = {}
+        self.item = None
+
+    def add(self, move, pgn, opening):
+        if move not in self.dicHijos:
+            self.dicHijos[move] = ItemTree(self, move, pgn, opening)
+        return self.dicHijos[move]
+
+    def addLista(self, limoves, lipgn, liop):
+        n = len(limoves)
+        if n > 0:
+            item = self.add(limoves[0], lipgn[0], liop[0])
+            if n > 1:
+                item.addLista(limoves[1:], lipgn[1:], liop[1:])
+
+    def game(self):
+        li = []
+        if self.pgn:
+            li.append(self.pgn)
+
+        item = self.parent
+        while item is not None:
+            if item.pgn:
+                li.append(item.pgn)
+            item = item.parent
+        return " ".join(reversed(li))
+
+    def listaPV(self):
+        li = []
+        if self.move:
+            li.append(self.move)
+
+        item = self.parent
+        while item is not None:
+            if item.move:
+                li.append(item.move)
+            item = item.parent
+        return li[::-1]
+
+

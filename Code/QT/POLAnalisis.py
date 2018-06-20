@@ -200,10 +200,10 @@ class TabEngine(QtGui.QWidget):
 
 
 class TabBook(QtGui.QWidget):
-    def __init__(self, tabsanalisis, book, configuracion):
+    def __init__(self, tabsAnalisis, book, configuracion):
         QtGui.QWidget.__init__(self)
 
-        self.tabsanalisis = tabsanalisis
+        self.tabsAnalisis = tabsAnalisis
         self.posicion = None
         self.leido = False
 
@@ -309,10 +309,10 @@ class TabBook(QtGui.QWidget):
 
 
 class TabDatabase(QtGui.QWidget):
-    def __init__(self, tabsanalisis, procesador, dbstat):
+    def __init__(self, tabsAnalisis, procesador, dbstat):
         QtGui.QWidget.__init__(self)
 
-        self.tabsanalisis = tabsanalisis
+        self.tabsAnalisis = tabsAnalisis
 
         self.pv = None
 
@@ -335,6 +335,130 @@ class TabDatabase(QtGui.QWidget):
         self.dbstat.close()
 
 
+
+class TreeMoves(QtGui.QTreeWidget):
+    def __init__(self, owner):
+        QtGui.QTreeWidget.__init__(self, owner)
+        self.owner = owner
+
+    def mousePressEvent(self, event):
+        QtGui.QTreeWidget.mousePressEvent(self, event)
+        self.resizeColumnToContents(0)
+        self.owner.seleccionado()
+
+
+class TabTree(QtGui.QWidget):
+    def __init__(self, tabsAnalisis, configuracion):
+        QtGui.QWidget.__init__(self)
+
+        self.tabsAnalisis = tabsAnalisis
+
+        self.tree = TreeMoves(self)
+
+        self.tree.setAlternatingRowColors(True)
+
+        self.tree.setIndentation(24)
+        self.tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tree.customContextMenuRequested.connect(self.menuContexto)
+        self.tree.setStyleSheet("selection-background-color: #F1D369; selection-color: #000000;")
+        self.tree.setFont(Controles.TipoLetra(puntos=configuracion.puntosPGN))
+        self.tree.setHeaderLabels((_("Moves"), _("Opening")))
+
+        bt_act = Controles.PB(self, _("Update"), self.bt_update, plano=False).ponIcono(Iconos.Pelicula_Seguir(), 16)
+        self.lb_analisis = Controles.LB(self, "").ponFondoN("#C9D2D7").ponTipoLetra(puntos=configuracion.puntosPGN)
+        ly_act = Colocacion.H().control(bt_act).control(self.lb_analisis).relleno(1)
+
+        layout = Colocacion.V().otro(ly_act).control(self.tree)
+        self.setLayout(layout)
+
+        self.dicItems = {}
+
+    def seleccionado(self):
+        item = self.tree.currentItem()
+        if item:
+            data_item = self.dicItems[str(item)]
+            self.lb_analisis.ponTexto(data_item.game())
+            lipv = data_item.listaPV()
+            self.tabsAnalisis.panelOpening.goto_next_lipv(lipv)
+        self.tree.resizeColumnToContents(0)
+
+    def bt_update(self):
+        self.tree.clear()
+
+        dbop = self.tabsAnalisis.dbop
+        levelbase = len(dbop.basePV.split(" "))
+
+        def haz(trdata, iparent, nivel):
+            for move, hijo in trdata.dicHijos.iteritems():
+                item = QtGui.QTreeWidgetItem(iparent)
+                item.setText(0, hijo.pgn)
+                item.setText(1, hijo.opening)
+                hijo.item = item
+                if nivel < (levelbase + 1):
+                    item.setExpanded(True)
+                self.dicItems[str(item)] = hijo
+                haz(hijo, item, nivel+1)
+
+        self.tree_data = self.tabsAnalisis.dbop.totree()
+        haz(self.tree_data, self.tree, 1)
+        self.tree.resizeColumnToContents(0)
+
+        self.lb_analisis.ponTexto("")
+
+    def start(self):
+        if len(self.dicItems) == 0:
+            self.bt_update()
+
+    def stop(self):
+        pass
+
+    def setData(self, data):
+        pass
+
+
+    def menuContexto(self, position):
+        item = self.tree.currentItem()
+        if not item:
+            return
+
+        menu = QTVarios.LCMenu(self)
+
+        menu1 = menu.submenu(_("Expand"), Iconos.Mas22())
+        menu1.opcion("expandall", _("All"), Iconos.PuntoVerde())
+        menu1.separador()
+        menu1.opcion("expandthis", _("This branch"), Iconos.PuntoAmarillo())
+        menu.separador()
+        menu1 = menu.submenu(_("Collapse"), Iconos.Menos22())
+        menu1.opcion("collapseall", _("All"), Iconos.PuntoVerde())
+        menu1.separador()
+        menu1.opcion("collapsethis", _("This branch"), Iconos.PuntoAmarillo())
+        resp = menu.lanza()
+        if resp:
+            if resp == "expandthis":
+                quien, siExpand = item, True
+
+            elif resp == "expandall":
+                quien, siExpand = None, True
+
+            elif resp == "collapsethis":
+                quien, siExpand = item, False
+
+            elif resp == "collapseall":
+                quien, siExpand = None, False
+
+        def work(data):
+            item = data.item
+            if item:
+                item.setExpanded(siExpand)
+
+            for uno, datauno in data.dicHijos.iteritems():
+                work(datauno)
+
+        data = self.dicItems[str(quien)] if quien else self.tree_data
+        work(data)
+        self.tree.resizeColumnToContents(0)
+
+
 class TabsAnalisis(QtGui.QWidget):
     def __init__(self, panelOpening, procesador, configuracion):
         QtGui.QWidget.__init__(self)
@@ -347,14 +471,18 @@ class TabsAnalisis(QtGui.QWidget):
         self.partida = None
         self.njg = None
 
+        self.tabtree = TabTree(self, configuracion)
         self.tabengine = TabEngine(self, procesador, configuracion)
-        self.liTabs = [("engine", self.tabengine),]
+        self.liTabs = [("engine", self.tabengine), ("tree", self.tabtree),]
         self.tabActive = 0
 
         self.tabs = Controles.Tab(panelOpening)
         self.tabs.ponTipoLetra(puntos=self.configuracion.puntosPGN)
-        self.tabs.nuevaTab(self.tabengine, _("Engine"))
         self.tabs.setTabIcon(0, Iconos.Motor())
+        self.tabs.nuevaTab(self.tabengine, _("Engine"))
+        self.tabs.nuevaTab(self.tabtree, _("Tree"))
+        self.tabs.setTabIcon(1, Iconos.Arbol())
+
         self.tabs.dispatchChange(self.tabChanged)
 
         tabButton = QtGui.QToolButton(self)
@@ -381,14 +509,14 @@ class TabsAnalisis(QtGui.QWidget):
 
     def tabChanged(self, ntab):
         self.tabActive = ntab
-        if ntab:
+        if ntab > 0:
             tipo, wtab = self.liTabs[ntab]
             wtab.start()
 
     def tabCloseRequested(self, ntab):
         tipo, wtab = self.liTabs[ntab]
         wtab.stop()
-        if ntab:
+        if ntab > 1:
             del self.liTabs[ntab]
             self.tabs.removeTab(ntab)
             del wtab
@@ -398,6 +526,8 @@ class TabsAnalisis(QtGui.QWidget):
         menu.opcion("book", _("Polyglot book"), Iconos.Libros())
         menu.separador()
         menu.opcion("dbase", _("Database"), Iconos.Database())
+        # menu.separador()
+        # menu.opcion("tree", _("Tree"), Iconos.Arbol())
         resp = menu.lanza()
         pos = 0
         if resp == "book":
@@ -409,6 +539,15 @@ class TabsAnalisis(QtGui.QWidget):
                 self.tabs.nuevaTab(tabbook, book.nombre, pos)
                 self.tabs.setTabIcon(pos, Iconos.Libros())
                 self.setPosicion(self.partida, self.njg, pos)
+
+        # elif resp == "tree":
+        #     tabtree = TabTree(self, self.configuracion)
+        #     self.liTabs.append(("tree", tabtree))
+        #     pos = len(self.liTabs)-1
+        #     self.tabs.nuevaTab(tabtree, _("Tree"), pos)
+        #     self.tabs.setTabIcon(pos, Iconos.Arbol())
+        #     tabtree.bt_update()
+
         elif resp == "dbase":
             nomfichgames = QTVarios.selectDB(self, self.configuracion, False, True)
             if nomfichgames:
@@ -449,8 +588,9 @@ class TabsAnalisis(QtGui.QWidget):
                 if numTab is not None:
                     if ntab != numTab:
                         continue
-                tab.setData(data)
-                tab.start()
+                if ntab > 1:
+                    tab.setData(data)
+                    tab.start()
 
     def seleccionaLibro(self):
         listaLibros = Books.ListaLibros()

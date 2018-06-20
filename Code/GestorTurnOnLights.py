@@ -235,7 +235,7 @@ class GestorTurnOnLights(Gestor.Gestor):
             self.total_time_used = 0
 
         else:
-            if self.tol.go_fast:
+            if self.tol.go_fast == True or (self.tol.go_fast is None and self.tol.work_level > 0):
                 self.next_line_run()
                 return
             QTUtil2.mensajeTemporal(self.pantalla, _("This line training is completed."), 1.3)

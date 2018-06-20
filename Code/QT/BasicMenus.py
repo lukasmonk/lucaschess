@@ -78,11 +78,11 @@ def menuTools_savemenu(procesador, dicDatos=None):
     savemenu.separador()
 
     menu1 = savemenu.submenu(_("Openings"), Iconos.Aperturas())
-    menu1.opcion("aperturaspers", _("Custom openings"), Iconos.Apertura())
+    menu1.opcion("openings", _("Opening lines"), Iconos.OpeningLines())
     menu1.separador()
     menu1.opcion("bookguide", _("Personal Opening Guide"), Iconos.BookGuide())
     menu1.separador()
-    menu1.opcion("openings", _("Opening lines"), Iconos.OpeningLines())
+    menu1.opcion("aperturaspers", _("Custom openings"), Iconos.Apertura())
     savemenu.separador()
 
     menu1 = savemenu.submenu(_("Engines"), Iconos.Motores())

@@ -199,6 +199,8 @@ class Configuracion:
         self.salvarAbandonados = False
         self.salvarFichero = ""
 
+        self.folderOpenings = self.folderBaseOpenings
+
         self.salvarCSV = ""
 
         self.liTrasteros = []
@@ -360,8 +362,8 @@ class Configuracion:
         if not Util.existeFichero(self.ficheroRecursos):
             Util.copiaFichero("IntFiles/recursos.dbl", self.ficheroRecursos)
 
-        self.folderOpenings = os.path.join(self.carpeta, "OpeningLines")
-        Util.creaCarpeta(self.folderOpenings)
+        self.folderBaseOpenings = os.path.join(self.carpeta, "OpeningLines")
+        Util.creaCarpeta(self.folderBaseOpenings)
 
         if os.path.isdir(self.carpeta + "/confvid"):
             self.salto_version()
@@ -639,6 +641,8 @@ class Configuracion:
 
         dic["PERFOMANCE"] = self.perfomance.save()
 
+        dic["FOLDEROPENINGS"] = self.folderOpenings
+
         for clave, rival in self.dicRivales.iteritems():
             dic["RIVAL_%s" % clave] = rival.graba()
         if aplazamiento:
@@ -783,6 +787,11 @@ class Configuracion:
                 perf = dg("PERFOMANCE")
                 if perf:
                     self.perfomance.restore(perf)
+
+                self.folderOpenings = dg("FOLDEROPENINGS", self.folderBaseOpenings)
+                if not os.path.isdir(self.folderOpenings):
+                    self.folderOpenings = self.folderBaseOpenings
+
 
                 for k in dic.keys():
                     if k.startswith("RIVAL_"):

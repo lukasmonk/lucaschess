@@ -77,7 +77,7 @@ def lanzaGUI(procesador):
     app.setStyle(QtGui.QStyleFactory.create(configuracion.estilo))
 
     if configuracion.palette:
-        qpalette = QtGui.QPalette()
+        qpalette = QtGui.QPalette(QtGui.QPalette.Dark)
         palette = configuracion.palette
         def cl(tipo):
             return QtGui.QColor(palette[tipo])

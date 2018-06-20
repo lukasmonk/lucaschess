@@ -45,16 +45,14 @@ class WTurnOnLights(QTVarios.WDialogo):
         tb = Controles.TBrutina(self)
         tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
         anterior, siguiente, terminado = self.tol.prev_next()
-        if terminado:
-            tb.new(_("Rebuild"), Iconos.Reindexar(), self.rebuild)
         if anterior:
             tb.new(_("Previous"), Iconos.Anterior(), self.goto_previous)
         if siguiente:
             tb.new(_("Next"), Iconos.Siguiente(), self.goto_next)
-        if one_line:
-            tb.new(_("Change"), Iconos.TOLchange(), self.cambiar_one_line)
         tb.new(_("Config"), Iconos.Configurar(), self.config)
         tb.new(_("Information"), Iconos.Informacion(), self.colors)
+        if terminado:
+            tb.new(_("Rebuild"), Iconos.Reindexar(), self.rebuild)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()
@@ -194,21 +192,27 @@ class WTurnOnLights(QTVarios.WDialogo):
 
     def config(self):
         menu = QTVarios.LCMenu(self)
-        smenu = menu.submenu(_("Tactics"), Iconos.Tacticas())
+        if self.one_line:
+            menu.opcion("change", _("Change options and create new training"), Iconos.TOLchange())
+            menu.separador()
+        smenu = menu.submenu(_("What to do after solving"), Iconos.Tacticas())
         go_fast = self.tol.go_fast
         dico = {True: Iconos.Aceptar(), False: Iconos.PuntoAmarillo()}
-        smenu.opcion("t_false", _("Stop after solve"), dico[not go_fast])
-        smenu.opcion("t_true", _("Jump to the next after solve"), dico[go_fast])
+        smenu.opcion("t_False", _("Stop"), dico[go_fast == False])
+        smenu.opcion("t_True", _("Jump to the next"), dico[go_fast == True])
+        smenu.opcion("t_None", _("Jump to the next from level 2"), dico[go_fast is None])
         menu.separador()
         menu.opcion("remove", _("Remove all results of all levels"), Iconos.Cancelar())
 
         resp = menu.lanza()
         if resp:
             if resp.startswith("t_"):
-                self.tol.go_fast = resp == "t_true"
+                self.tol.go_fast = eval(resp[2:])
                 TurnOnLights.write_tol(self.tol)
             elif resp == "remove":
                 self.rebuild()
+            elif resp == "change":
+                self.cambiar_one_line()
 
     def rebuild(self):
         if not QTUtil2.pregunta(self, _(
