@@ -1,7 +1,10 @@
+import os
+
 from PyQt4 import QtGui
 
 from Code import Kibitzers
 from Code import EngineThread
+from Code import Books
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -35,6 +38,7 @@ class WKibitzers(QTVarios.WDialogo):
             (_("Copy"), Iconos.Copiar(), self.copy), None,
             (_("Up"), Iconos.Arriba(), self.up), None,
             (_("Down"), Iconos.Abajo(), self.down), None,
+            (_("Polyglot book"), Iconos.Book(), self.polyglot), None,
             (_("External engines"), Iconos.Motores(), self.ext_engines), None
         )
         tb = Controles.TBrutina(self, liAcciones)
@@ -75,6 +79,32 @@ class WKibitzers(QTVarios.WDialogo):
 
         self.gridKibitzers.gotop()
 
+    def polyglot(self):
+        listaLibros = Books.ListaLibros()
+        listaLibros.recuperaVar(self.configuracion.ficheroBooks)
+        listaLibros.comprueba()
+        menu = QTVarios.LCMenu(self)
+        rondo = QTVarios.rondoPuntos()
+        for book in listaLibros.lista:
+            menu.opcion(("book", book), book.nombre, rondo.otro())
+            menu.separador()
+        menu.opcion(("install", None), _("Install new book"), Iconos.Nuevo())
+        resp = menu.lanza()
+        if resp:
+            orden, book = resp
+            if orden == "book":
+                num = self.kibitzers.nuevoPolyglot(book)
+                self.goto(num)
+            elif orden == "install":
+                fbin = QTUtil2.leeFichero(self, listaLibros.path, "bin", titulo=_("Polyglot book"))
+                if fbin:
+                    listaLibros.path = os.path.dirname(fbin)
+                    nombre = os.path.basename(fbin)[:-4]
+                    book = Books.Libro("P", nombre, fbin, True)
+                    listaLibros.nuevo(book)
+                    listaLibros.guardaVar(self.configuracion.ficheroBooks)
+                    return self.polyglot()
+
     def me_setEditor(self, parent):
         recno = self.gridValores.recno()
         key = self.liKibActual[recno][2]
@@ -88,7 +118,7 @@ class WKibitzers(QTVarios.WDialogo):
             valor = kibitzer.nombre
         elif key == "tipo":
             valor = kibitzer.tipo
-            if valor == "I": # Indices no se cambian
+            if valor in "IB": # Indices/books no se cambian
                 return None
             control = "cb"
             lista = Kibitzers.Tipos().comboSinIndices()
@@ -289,6 +319,7 @@ class WKibitzers(QTVarios.WDialogo):
             return
 
         me = self.kibitzers.kibitzer(fila)
+        tipo = me.tipo
         self.liKibActual.append((_("Name"), me.nombre, "nombre"))
         self.liKibActual.append((_("Type"), me.ctipo(), "tipo"))
         self.liKibActual.append((_("Priority"), me.cpriority(), "prioridad"))
@@ -296,19 +327,21 @@ class WKibitzers(QTVarios.WDialogo):
         self.liKibActual.append((_("Analysis of the base position"), str(me.posicionBase), "posicionBase"))
         self.liKibActual.append((_("Visible in menu"), str(me.visible), "visible"))
 
-        self.liKibActual.append((_("Engine"), me.idName, None))
+        if tipo != "B":
+            self.liKibActual.append((_("Engine"), me.idName, None))
 
-        self.liKibActual.append((_("Author"), me.idAuthor, None))
+            self.liKibActual.append((_("Author"), me.idAuthor, None))
         self.liKibActual.append((_("File"), me.exe, None))
-        self.liKibActual.append((_("Information"), me.idInfo, "info"))
+        if tipo != "B":
+            self.liKibActual.append((_("Information"), me.idInfo, "info"))
 
-        for num, opcion in enumerate(me.liOpciones):
-            default = opcion.label_default()
-            label_default = " (%s)" % default if default else ""
-            valor = str(opcion.valor)
-            if opcion.tipo in ("check", "button"):
-                valor = valor.lower()
-            self.liKibActual.append(("%s%s" % (opcion.nombre, label_default), valor, "opcion,%d" % num))
+            for num, opcion in enumerate(me.liOpciones):
+                default = opcion.label_default()
+                label_default = " (%s)" % default if default else ""
+                valor = str(opcion.valor)
+                if opcion.tipo in ("check", "button"):
+                    valor = valor.lower()
+                self.liKibActual.append(("%s%s" % (opcion.nombre, label_default), valor, "opcion,%d" % num))
 
 
 class WKibitzerLive(QTVarios.WDialogo):

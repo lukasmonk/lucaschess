@@ -183,7 +183,6 @@ class WUnTorneo(QTVarios.WDialogo):
         lbBookDepth = Controles.LB(self, _("Max depth of book (0=Maximum)") + ": ")
         self.sbBookDepth = Controles.SB(self, torneo.bookDepth(), 0, 200)
 
-
         # Posicion inicial
         lbFEN = Controles.LB(self, _("Initial position") + ": ")
         self.fen = torneo.fen()

@@ -2,7 +2,6 @@ from Code import ControlPosicion
 from Code import Gestor
 from Code import Jugada
 from Code.QT import QTUtil
-from Code.QT import QTUtil2
 from Code.Constantes import *
 
 
@@ -244,7 +243,7 @@ class GestorMateMap(Gestor.Gestor):
             mensaje = _("Congratulations you have won %s.") % self.workmap.nameAim()
             self.workmap.winAim(self.partida.pv())
 
-        QTUtil2.mensaje(self.pantalla, mensaje)
+        self.mensajeEnPGN(mensaje)
 
         self.desactivaTodas()
         self.refresh()

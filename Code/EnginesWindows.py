@@ -137,7 +137,7 @@ def leeRivales():
     cm.ponMultiPV(1, 4)
     mas(cm)
 
-    cm = ConfigMotor("cheng", "Martin Sedlák", "4 0.39", "http://www.vlasak.biz/cheng")
+    cm = ConfigMotor("cheng", "Martin Sedlák".decode("utf-8"), "4 0.39", "http://www.vlasak.biz/cheng")
     cm.path = "cheng4.exe"
     cm.elo = 2750
     cm.ponMultiPV(20, 256)
@@ -200,7 +200,7 @@ def leeRivales():
     cm.ponMultiPV(20, 100)
     mas(cm)
 
-    cm = ConfigMotor("texel", "Peter Österlund", "1.07 32bit", "http://hem.bredband.net/petero2b/javachess/index.html#texel")
+    cm = ConfigMotor("texel", "Peter Österlund".decode("utf-8"), "1.07 32bit", "http://hem.bredband.net/petero2b/javachess/index.html#texel")
     cm.path = "texel32old.exe"
     cm.elo = 3100
     cm.ordenUCI("Hash", "32")
@@ -288,7 +288,7 @@ def leeRivales():
     cm.elo = 2100
     mas(cm)
 
-    cm = ConfigMotor("andscacs", "Daniel José Queraltó", "0.9032n", "http://www.andscacs.com/")
+    cm = ConfigMotor("andscacs", "Daniel José Queraltó".decode("utf-8"), "0.9032n", "http://www.andscacs.com/")
     cm.path = "andscacs32.exe"
     cm.elo = 3150
     mas(cm)
@@ -308,12 +308,12 @@ def leeRivales():
     cm.elo = 2627
     mas(cm)
 
-    cm = ConfigMotor("spike", "Volker Böhm and Ralf Schäfer", "1.4", "http://spike.lazypics.de/index_en.html")
+    cm = ConfigMotor("spike", "Volker Böhm and Ralf Schäfer".decode("utf-8"), "1.4", "http://spike.lazypics.de/index_en.html")
     cm.path = "Spike1.4.exe"
     cm.elo = 2921
     mas(cm)
 
-    cm = ConfigMotor("zappa", "Anthony Cozzie", "1.1", "http://www.acoz.net/zappa/")
+    cm = ConfigMotor("zappa", "Anthony Cozzie", "1.1", "http://www.acoz.net/zappa/")
     cm.path = "zappa.exe"
     cm.elo = 2581
     cm.removeLog("zappa_log.txt")

@@ -54,6 +54,12 @@ class ListaLibros:
                     return book
             return self.lista[0]
 
+    def buscaLibro(self, nombre):
+        for book in self.lista:
+            if book.nombre == nombre:
+                return book
+        return None
+
     def cambiaModo(self, apli):
         if apli in self._modoAnalisis:
             self._modoAnalisis = self._modoAnalisis.replace(apli, "")
@@ -231,7 +237,6 @@ class Libro:
 
         return listaJugadas
 
-
     def eligeJugadaTipo(self, fen, tipo):
         maxim = 0
         liMax = []
@@ -276,7 +281,7 @@ class Libro:
 
         return pv.lower()
 
-    def miraListaPV(self, fen, siMax):
+    def miraListaPV(self, fen, siMax, onlyone=True):
         li = self.book.lista(self.path, fen)
 
         liResp = []
@@ -287,8 +292,8 @@ class Libro:
                 if w > maxim:
                     maxim = w
                     liResp = [entry.pv()]
-                    # elif w == maxim:
-                    # liResp.append(entry.pv())
+                elif w == maxim and not onlyone:
+                    liResp.append(entry.pv())
         else:
             for entry in li:
                 liResp.append(entry.pv())

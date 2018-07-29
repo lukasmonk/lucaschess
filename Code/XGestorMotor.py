@@ -365,5 +365,3 @@ class GestorMotor:
         lipv = [rm.movimiento() for rm in mrm.liMultiPV]
         return lipv[0] if siUna else lipv
 
-
-

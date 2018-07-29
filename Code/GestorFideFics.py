@@ -459,7 +459,7 @@ class GestorFideFics(Gestor.Gestor):
 
         mensaje += "<br><br>%s : %d<br>" % (self._newTitulo, self._activo(self.siCompetitivo))
 
-        QTUtil2.mensaje(self.pantalla, mensaje)
+        self.mensajeEnPGN(mensaje)
         self.ponFinJuego()
 
         # def ponFinJuego( self ):

@@ -2380,6 +2380,12 @@ def pmTrainPositions():
 def TrainPositions():
     return QtGui.QIcon(pmTrainPositions())
 
+def pmTrainEngines():
+    return PM(915971,917405)
+
+def TrainEngines():
+    return QtGui.QIcon(pmTrainEngines())
+
 def pmError():
     return PM(50641,54641)
 
@@ -2387,25 +2393,25 @@ def Error():
     return QtGui.QIcon(pmError())
 
 def pmAtajos():
-    return PM(915971,917150)
+    return PM(917405,918584)
 
 def Atajos():
     return QtGui.QIcon(pmAtajos())
 
 def pmTOLline():
-    return PM(917150,918254)
+    return PM(918584,919688)
 
 def TOLline():
     return QtGui.QIcon(pmTOLline())
 
 def pmTOLchange():
-    return PM(918254,920476)
+    return PM(919688,921910)
 
 def TOLchange():
     return QtGui.QIcon(pmTOLchange())
 
 def pmPack():
-    return PM(920476,921141)
+    return PM(921910,922575)
 
 def Pack():
     return QtGui.QIcon(pmPack())
@@ -2415,4 +2421,40 @@ def pmHome():
 
 def Home():
     return QtGui.QIcon(pmHome())
+
+def pmImport8():
+    return PM(922575,923785)
+
+def Import8():
+    return QtGui.QIcon(pmImport8())
+
+def pmExport8():
+    return PM(923785,924410)
+
+def Export8():
+    return QtGui.QIcon(pmExport8())
+
+def pmTablas8():
+    return PM(924410,925202)
+
+def Tablas8():
+    return QtGui.QIcon(pmTablas8())
+
+def pmBlancas8():
+    return PM(925202,926232)
+
+def Blancas8():
+    return QtGui.QIcon(pmBlancas8())
+
+def pmNegras8():
+    return PM(926232,927071)
+
+def Negras8():
+    return QtGui.QIcon(pmNegras8())
+
+def pmBook():
+    return PM(927071,927645)
+
+def Book():
+    return QtGui.QIcon(pmBook())
 

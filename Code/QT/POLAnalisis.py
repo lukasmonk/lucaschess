@@ -335,7 +335,6 @@ class TabDatabase(QtGui.QWidget):
         self.dbstat.close()
 
 
-
 class TreeMoves(QtGui.QTreeWidget):
     def __init__(self, owner):
         QtGui.QTreeWidget.__init__(self, owner)
@@ -414,7 +413,6 @@ class TabTree(QtGui.QWidget):
 
     def setData(self, data):
         pass
-
 
     def menuContexto(self, position):
         item = self.tree.currentItem()

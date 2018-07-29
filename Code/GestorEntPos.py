@@ -35,7 +35,7 @@ class GestorEntPos(Gestor.Gestor):
         db[self.entreno] = data
         db.close()
 
-    def inicio(self, posEntreno, numEntrenos, titEntreno, liEntrenos, siTutorActivado=None, jump=False):
+    def inicio(self, posEntreno, numEntrenos, titEntreno, liEntrenos, siTutorActivado=None, saltoAutomatico=False):
         if hasattr(self, "reiniciando"):
             if self.reiniciando:
                 return
@@ -49,7 +49,7 @@ class GestorEntPos(Gestor.Gestor):
         self.numEntrenos = numEntrenos
         self.titEntreno = titEntreno
         self.liEntrenos = liEntrenos
-        self.jump = jump
+        self.saltoAutomatico = saltoAutomatico
 
         self.liHistorico = [self.posEntreno]
 
@@ -238,7 +238,7 @@ class GestorEntPos(Gestor.Gestor):
     def reiniciar(self):
         if self.rivalPensando:
             return
-        self.inicio(self.posEntreno, self.numEntrenos, self.titEntreno, self.liEntrenos, self.siTutorActivado, self.jump)
+        self.inicio(self.posEntreno, self.numEntrenos, self.titEntreno, self.liEntrenos, self.siTutorActivado, self.saltoAutomatico)
 
     def ent_siguiente(self, tipo):
         if not (self.siJuegaHumano or self.estado == kFinJuego):
@@ -248,7 +248,7 @@ class GestorEntPos(Gestor.Gestor):
             pos = 1
         elif pos == 0:
             pos = self.numEntrenos
-        self.inicio(pos, self.numEntrenos, self.titEntreno, self.liEntrenos, self.siTutorActivado, self.jump)
+        self.inicio(pos, self.numEntrenos, self.titEntreno, self.liEntrenos, self.siTutorActivado, self.saltoAutomatico)
 
     def controlTeclado(self, nkey):
         if nkey in (Qt.Key_Plus, Qt.Key_PageDown):
@@ -287,7 +287,7 @@ class GestorEntPos(Gestor.Gestor):
 
     def siguienteJugada(self):
         if self.estado == kFinJuego:
-            if self.siDirigido and self.jump:
+            if self.siDirigido and self.saltoAutomatico:
                 self.ent_siguiente(k_siguiente)
             return
 
@@ -396,7 +396,7 @@ class GestorEntPos(Gestor.Gestor):
 
     def lineaTerminadaOpciones(self):
         self.estado = kFinJuego
-        if self.jump:
+        if self.saltoAutomatico:
             self.ent_siguiente(k_siguiente)
             return False
         else:
@@ -719,9 +719,7 @@ class GestorEntPos(Gestor.Gestor):
 
         Util.dic8ini(nomIni, dicIni)
 
-        QTUtil2.mensaje(self.pantalla, _X(_("Tactic training %1 created."), nomDir) + "<br>" +
-                        _X(_(
-                                "You can access this training from menu Trainings-Learn tactics by repetition-%1"),
-                                nomDir))
+        self.mensajeEnPGN(_X(_("Tactic training %1 created."), nomDir) + "<br>" +
+                    _X(_("You can access this training from menu Trainings-Learn tactics by repetition-%1"), nomDir))
 
         self.procesador.entrenamientos.rehaz()

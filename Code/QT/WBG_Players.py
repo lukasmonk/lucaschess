@@ -41,7 +41,6 @@ class ToolbarMoves(QtGui.QWidget):
         ply4 = Controles.PB(self, _("%d ply") % 4, self.run_p4, plano=False).anchoFijo(ancho)
         ply5 = Controles.PB(self, _("%d ply") % 5, self.run_p5, plano=False).anchoFijo(ancho)
 
-
         self.sbply = Controles.SB(self, 0, 0, 100)
         self.sbply.capturaCambiado(self.run_p)
         lbply = Controles.LB(self, _("Plies"))
@@ -588,11 +587,9 @@ class WPlayer(QtGui.QWidget):
 
         um.final()
 
-
         self.data = data
         self.gridOpeningWhite.refresh()
         self.gridOpeningBlack.refresh()
         self.gridMovesWhite.refresh()
         self.gridMovesBlack.refresh()
-
 

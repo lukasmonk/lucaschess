@@ -110,12 +110,13 @@ class GestorTorneo(Gestor.Gestor):
         self.refresh()
 
         self.finPorTiempo = None
+        self.finPorError = None
+        self.finPorErrorMasInfo = ""
         self.finForce = None
         while self.siPausa or self.siguienteJugada():
             QTUtil.refreshGUI()
             if self.siPausa:
                 time.sleep(0.1)
-
 
         self.xmotor[True].terminar()
         self.xmotor[False].terminar()
@@ -140,6 +141,9 @@ class GestorTorneo(Gestor.Gestor):
 
         if self.finPorTiempo is not None:
             result = self.finPorTiempo
+
+        elif self.finPorError is not None:
+            result = self.finPorError
 
         elif self.finForce is not None:
             result = self.finForce
@@ -199,6 +203,8 @@ class GestorTorneo(Gestor.Gestor):
         termination = "normal"
         if self.finPorTiempo:
             termination = "time forfeit"
+        elif self.finPorError:
+            termination = self.finPorErrorMasInfo
         elif self.finForce:
             termination = "adjudication"
         elif adjudication:
@@ -223,8 +229,6 @@ class GestorTorneo(Gestor.Gestor):
         self.ponIndicador(siBlancas)
         self.refresh()
 
-        self.relojStart(siBlancas)
-
         siEncontrada = False
         analisis = None
         bk = self.book[siBlancas]
@@ -240,8 +244,16 @@ class GestorTorneo(Gestor.Gestor):
             segundosJugada = xrival.motorTiempoJugada
             if self.siTerminar:
                 return False
+            self.relojStart(siBlancas)
             mrm = xrival.juegaTiempoTorneo(tiempoBlancas, tiempoNegras, segundosJugada)
+            self.relojStop(siBlancas)
             if mrm is None:
+                if self.tiempo[siBlancas].siAgotado():
+                    self.finPorTiempo = 2 if siBlancas else 1
+                else:
+                    self.finPorError = 2 if siBlancas else 1
+                    self.finPorErrorMasInfo = "Engine error"
+                self.compruebaFinal()
                 return False
             rm = mrm.mejorMov()
             desde = rm.desde
@@ -249,12 +261,17 @@ class GestorTorneo(Gestor.Gestor):
             coronacion = rm.coronacion
             analisis = mrm, 0
 
-        self.relojStop(siBlancas)
         if self.siTerminar:
             return False
 
         siBien, mens, jg = Jugada.dameJugada(self.partida.ultPosicion, desde, hasta, coronacion)
         if not jg:
+            if self.tiempo[siBlancas].siAgotado():
+                self.finPorTiempo = 2 if siBlancas else 1
+            else:
+                self.finPorError = 2 if siBlancas else 1
+                self.finPorErrorMasInfo = "Engine error: bad move %s-%s%s" %(desde, hasta, coronacion if coronacion else "")
+            self.compruebaFinal()
             return False
         if analisis:
             jg.analisis = analisis
@@ -365,6 +382,4 @@ class GestorTorneo(Gestor.Gestor):
         resp = menu.lanza()
         if resp is not None:
             self.finForce = resp
-
-
 

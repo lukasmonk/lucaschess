@@ -30,12 +30,16 @@ class GestorTacticas(Gestor.Gestor):
         self.numPosiciones = self.tactica.numPosiciones()
         self.posActual = self.tactica.posActual()
 
+        self.siError = False
+
         numEnt = liOrden[self.posActual]
 
         self.siPenalizable = True
         self.puestosPenalizacion = self.tactica.puestosPenalizacion(self.posActual, len(liOrden))
 
         self.pointView = self.tactica.pointView()
+
+        self.siSaltoAutomatico = self.tactica.siSaltoAutomatico()
 
         txtEntreno = self.tactica.unFNS(numEnt)
 
@@ -141,7 +145,7 @@ class GestorTacticas(Gestor.Gestor):
         else:
             self.siShowText = len(etiDirigido) == 0
 
-        liOpciones = [k_mainmenu]
+        liOpciones = [k_mainmenu, k_configurar]
         if not self.siShowText:
             liOpciones.append(k_showtext)
         if self.dicEtiquetasPGN:
@@ -203,7 +207,16 @@ class GestorTacticas(Gestor.Gestor):
             self.lanzaVariantes()
 
         elif clave == k_configurar:
-            self.configurar(siSonidos=True, siCambioTutor=False)
+            base = _("What to do after solving")
+            if self.siSaltoAutomatico:
+                liMasOpciones = [("lmo_stop", "%s: %s" %(base, _("Stop")), Iconos.PuntoRojo())]
+            else:
+                liMasOpciones = [("lmo_jump", "%s: %s" %(base, _("Jump to the next")), Iconos.PuntoVerde())]
+
+            resp = self.configurar(siSonidos=True, siCambioTutor=False, liMasOpciones=liMasOpciones)
+            if resp in ("lmo_stop", "lmo_jump"):
+                self.siSaltoAutomatico = resp == "lmo_jump"
+                self.tactica.setSaltoAutomatico(self.siSaltoAutomatico)
 
         elif clave == k_utilidades:
             self.utilidades()
@@ -254,6 +267,7 @@ class GestorTacticas(Gestor.Gestor):
         self.siguienteJugada()
 
     def ent_siguiente(self):
+        self.siError = False # Para controlar salto, no es automatico si se produce un error
         if self.posSiguiente == self.numPosiciones:
             self.finPartida()
         else:
@@ -351,30 +365,33 @@ class GestorTacticas(Gestor.Gestor):
 
     def finLinea(self):
         self.compruebaComentarios()
-        QTUtil2.mensajeTemporal(self.pantalla, _("This line training is completed."), 0.7)
         self.estado = kFinJuego
         self.desactivaTodas()
-
-        liOpciones = [k_mainmenu, k_reiniciar, k_cambiar]
-
-        if not (self.siTerminada() and len(self.liVariantes) == 0):
-            liOpciones.append(k_variantes)
-
-        if not self.siShowText:
-            liOpciones.append(k_showtext)  # Si no se ha mostrado ahora es el momento
-
-        if self.dicEtiquetasPGN:
-            liOpciones.append(k_pgnInformacion)
-
-        liOpciones.extend([k_configurar, k_utilidades, k_siguiente])
-
-        self.pantalla.ponToolBar(liOpciones)
 
         self.tactica.ponPosActual(self.posSiguiente)
         if self.tactica.terminada():
             self.finalEntrenamiento()
 
         self.siPenalizable = False
+
+        if self.siSaltoAutomatico and not self.siError:
+            self.ent_siguiente()
+        else:
+            QTUtil2.mensajeTemporal(self.pantalla, _("This line training is completed."), 0.7)
+            liOpciones = [k_mainmenu, k_reiniciar, k_cambiar]
+
+            if not (self.siTerminada() and len(self.liVariantes) == 0):
+                liOpciones.append(k_variantes)
+
+            if not self.siShowText:
+                liOpciones.append(k_showtext)  # Si no se ha mostrado ahora es el momento
+
+            if self.dicEtiquetasPGN:
+                liOpciones.append(k_pgnInformacion)
+
+            liOpciones.extend([k_configurar, k_utilidades, k_siguiente])
+
+            self.pantalla.ponToolBar(liOpciones)
 
         return
 
@@ -406,6 +423,7 @@ class GestorTacticas(Gestor.Gestor):
                 liMovs.append((jg1.desde, jg1.hasta, siMain))
 
             if not siEsta:
+                self.siError = True
                 self.tactica.nuevoError()
                 self.ponPosicion(self.partida.ultPosicion)
                 if posMain and posMain != movimiento[:2]:
@@ -522,8 +540,8 @@ class GestorTacticas(Gestor.Gestor):
 
     def finalEntrenamiento(self):
         self.tactica.finalEntrenamiento()
-        txt = "<big>%s<br>%s</big>" % (_("Congratulations goal achieved"), _("Endgame"))
-        QTUtil2.mensaje(self.pantalla, txt)
+        mensaje = "<big>%s<br>%s</big>" % (_("Congratulations goal achieved"), _("Endgame"))
+        self.mensajeEnPGN(mensaje)
         self.finPartida()
 
     def guardaVariantes(self):

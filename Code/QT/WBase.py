@@ -40,7 +40,6 @@ class WBase(QtGui.QWidget):
 
         self.conAtajos = True
 
-
         lyAI = Colocacion.H().relleno(1).control(self.capturas).otroi(lyT).otroi(lyBI).relleno(1).margen(0)
         ly = Colocacion.V().control(self.tb).relleno().otro(lyAI).relleno().margen(2)
 
@@ -84,7 +83,6 @@ class WBase(QtGui.QWidget):
         if self.conAtajos:
             self.gestor.lanzaAtajosALT(key)
 
-
     def creaTablero(self):
         ae = QTUtil.altoEscritorio()
         mx = 64 if ae >= 750 else 48
@@ -111,7 +109,6 @@ class WBase(QtGui.QWidget):
         oColumnas = self.pgn.oColumnas
         oColumnas.liColumnas[1].cabecera = white if white else _("White")
         oColumnas.liColumnas[2].cabecera = black if black else _("Black")
-
 
     def creaBloqueInformacion(self):
         configuracion = self.gestor.configuracion
@@ -449,7 +446,6 @@ class WBase(QtGui.QWidget):
                  NAG_6: c.color_nag6}[int(color_nag)]
 
         return pgn, color, info, indicadorInicial, stNAGS
-
 
     def gridPonValor(self, grid, fila, oColumna, valor):
         pass

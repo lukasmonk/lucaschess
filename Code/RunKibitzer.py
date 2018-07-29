@@ -14,6 +14,11 @@ from Code import ControlPosicion
 from Code import Configuracion
 from Code import Partida
 from Code import EngineThread
+from Code import Util
+from Code import VarGen
+from Code import XMotorRespuesta
+from Code import Kibitzers
+from Code import Books
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -24,16 +29,301 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import Tablero
+from Code.QT import Delegados
 from Code.QT import PantallaKibitzers
-from Code import Util
-from Code import VarGen
-from Code import XMotorRespuesta
-from Code import Kibitzers
 
 CONFIGURACION = "C"
 FEN = "F"
 TERMINAR = "T"
 COPYCLIPBOARD = "P"
+
+
+class VentanaPolyglot(QtGui.QDialog):
+    def __init__(self, cpu):
+        QtGui.QDialog.__init__(self)
+
+        self.cpu = cpu
+
+        dicVideo = self.cpu.dic_video
+        if not dicVideo:
+            dicVideo = {}
+
+        self.siTop = dicVideo.get("SITOP", True)
+        self.siShowTablero = dicVideo.get("SHOW_TABLERO", True)
+        self.posicion = ControlPosicion.ControlPosicion()
+
+        self.fen = ""
+        self.siPlay = True
+
+        self.setWindowTitle(cpu.titulo)
+        self.setWindowIcon(Iconos.Book())
+
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
+
+        self.setBackgroundRole(QtGui.QPalette.Light)
+
+        configuracion = VarGen.configuracion = cpu.configuracion
+
+        VarGen.todasPiezas = Piezas.TodasPiezas()
+        confTablero = cpu.configuracion.confTablero("kib" + cpu.kibitzer.huella, 24)
+        self.tablero = Tablero.Tablero(self, confTablero)
+        self.tablero.crea()
+        Delegados.generaPM(self.tablero.piezas)
+
+        book = Books.Libro("P", cpu.kibitzer.nombre, cpu.kibitzer.exe, True)
+        self.book = book
+        book.polyglot()
+        self.li_moves = []
+
+        self.siFigurines = configuracion.figurinesPGN
+
+        oColumnas = Columnas.ListaColumnas()
+        delegado = Delegados.EtiquetaPOS(True, siLineas=False) if self.siFigurines else None
+        for x in range(20):
+            oColumnas.nueva(x, "", 80, siCentrado=True, edicion = delegado)
+        self.grid_moves = Grid.Grid(self, oColumnas, siSelecFilas=True, siCabeceraMovible=False, siCabeceraVisible=False)
+        self.grid_moves.tipoLetra(puntos=configuracion.puntosPGN)
+        self.grid_moves.ponAltoFila(configuracion.altoFilaPGN)
+
+        liAcciones = (
+            (_("Quit"), Iconos.Kibitzer_Terminar(), self.terminar),
+            (_("Continue"), Iconos.Kibitzer_Continuar(), self.play),
+            (_("Pause"), Iconos.Kibitzer_Pausa(), self.pause),
+            (_("Board"), Iconos.Tablero(), self.confTablero),
+            ("%s: %s" % (_("Enable"), _("window on top")), Iconos.Top(), self.windowTop),
+            ("%s: %s" % (_("Disable"), _("window on top")), Iconos.Bottom(), self.windowBottom),
+        )
+        self.tb = Controles.TBrutina(self, liAcciones, siTexto=False, tamIcon=16)
+        self.tb.setAccionVisible(self.play, False)
+
+        ly1 = Colocacion.H().control(self.tb)
+        ly2 = Colocacion.V().otro(ly1).control(self.grid_moves)
+
+        layout = Colocacion.H().control(self.tablero).otro(ly2)
+        self.setLayout(layout)
+
+        self.timer = QtCore.QTimer(self)
+        self.connect(self.timer, QtCore.SIGNAL("timeout()"), cpu.compruebaInput)
+        self.timer.start(200)
+
+        if not self.siShowTablero:
+            self.tablero.hide()
+        self.recuperarVideo(dicVideo)
+        self.ponFlags()
+
+    def ponFen(self, fen):
+        self.posicion = ControlPosicion.ControlPosicion()
+        self.posicion.leeFen(fen)
+        self.fen = fen
+
+        if self.siPlay:
+            self.siW = self.posicion.siBlancas
+            self.centipawns = self.cpu.configuracion.centipawns
+
+            self.tablero.ponPosicion(self.posicion)
+            self.li_moves = self.book.almListaJugadas(fen)
+            for alm in self.li_moves:
+                alm.nivel = 0
+                alm.dato = [""] * 20
+                alm.dato[0] = alm.pgn
+                alm.dato[1] = alm.porc
+                alm.dato[2] = "%d" % alm.weight
+            self.grid_moves.gotop()
+            self.grid_moves.refresh()
+            self.ponFlecha(0)
+
+    def ponFlags(self):
+        if self.siTop:
+            flags = self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint
+        else:
+            flags = self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
+        self.tb.setAccionVisible(self.windowTop, not self.siTop)
+        self.tb.setAccionVisible(self.windowBottom, self.siTop)
+        self.show()
+
+    def windowTop(self):
+        self.siTop = True
+        self.ponFlags()
+
+    def windowBottom(self):
+        self.siTop = False
+        self.ponFlags()
+
+    def terminar(self):
+        self.finalizar()
+        self.accept()
+
+    def pause(self):
+        self.siPlay = False
+        self.tb.setPosVisible(1, True)
+        self.tb.setPosVisible(2, False)
+
+    def play(self):
+        self.siPlay = True
+        self.tb.setPosVisible(1, False)
+        self.tb.setPosVisible(2, True)
+        self.ponFen(self.fen)
+
+    def siAnalizar(self):
+        siW = " w " in self.fen
+        if not self.siPlay or \
+                (siW and (not self.siBlancas)) or \
+                ((not siW) and (not self.siNegras)):
+            return False
+        return True
+
+    def color(self):
+        menu = QTVarios.LCMenu(self)
+        menu.opcion("blancas", _("White"), Iconos.PuntoNaranja())
+        menu.opcion("negras", _("Black"), Iconos.PuntoNegro())
+        menu.opcion("blancasnegras", "%s + %s" % (_("White"), _("Black")), Iconos.PuntoVerde())
+        resp = menu.lanza()
+        if resp:
+            self.siNegras = True
+            self.siBlancas = True
+            if resp == "blancas":
+                self.siNegras = False
+            elif resp == "negras":
+                self.siBlancas = False
+            if self.siAnalizar():
+                self.ponFen(self.fen)
+
+    def closeEvent(self, event):
+        self.finalizar()
+
+    def finalizar(self):
+        self.guardarVideo()
+
+    def guardarVideo(self):
+        dic = {}
+
+        pos = self.pos()
+        dic["_POSICION_"] = "%d,%d" % (pos.x(), pos.y())
+
+        tam = self.size()
+        dic["_SIZE_"] = "%d,%d" % (tam.width(), tam.height())
+
+        # dic["SHOW_TABLERO"] = self.siShowTablero
+        # dic["NARROWS"] = self.nArrows
+
+        dic["SITOP"] = self.siTop
+
+        self.cpu.save_video(dic)
+
+    def recuperarVideo(self, dicVideo):
+        if dicVideo:
+            wE, hE = QTUtil.tamEscritorio()
+            x, y = dicVideo["_POSICION_"].split(",")
+            x = int(x)
+            y = int(y)
+            if not (0 <= x <= (wE - 50)):
+                x = 0
+            if not (0 <= y <= (hE - 50)):
+                y = 0
+            self.move(x, y)
+            if "_SIZE_" not in dicVideo:
+                w, h = self.width(), self.height()
+                for k in dicVideo:
+                    if k.startswith("_TAMA"):
+                        w, h = dicVideo[k].split(",")
+            else:
+                w, h = dicVideo["_SIZE_"].split(",")
+            w = int(w)
+            h = int(h)
+            if w > wE:
+                w = wE
+            elif w < 20:
+                w = 20
+            if h > hE:
+                h = hE
+            elif h < 20:
+                h = 20
+            self.resize(w, h)
+
+    def gridNumDatos(self, grid):
+        return len(self.li_moves)
+
+    def gridDato(self, grid, fila, oColumna):
+        mv = self.li_moves[fila]
+        li = mv.dato
+        key = int(oColumna.clave)
+        pgn = li[key]
+        if self.siFigurines:
+            siBlancas = " w " in mv.fen
+            return pgn, siBlancas, None, None, None, None, False, True
+        else:
+            return pgn
+
+    def gridDobleClick(self, grid, fila, oColumna):
+        self.lee_subnivel(fila)
+        self.grid_moves.refresh()
+
+    def gridBotonDerecho(self, grid, fila, columna, modificadores):
+        self.borra_subnivel(fila)
+        self.grid_moves.refresh()
+
+    def gridCambiadoRegistro(self, grid, fila, oColumna):
+        self.ponFlecha(fila)
+
+    def ponFlecha(self, fila):
+        if fila < len(self.li_moves):
+            alm = self.li_moves[fila]
+            self.tablero.ponFlechaSC(alm.desde, alm.hasta)
+
+    def borra_subnivel(self, fila):
+        alm = self.li_moves[fila]
+        nv = alm.nivel
+        if nv == 0:
+            return
+        li = []
+        for x in range(fila, 0, -1):
+            alm1 = self.li_moves[x]
+            if alm1.nivel < nv:
+                break
+            li.append(x)
+        for x in range(fila+1, len(self.li_moves)):
+            alm1 = self.li_moves[x]
+            if alm1.nivel < nv:
+                break
+            li.append(x)
+        li.sort(reverse=True)
+        for x in li:
+            del self.li_moves[x]
+
+    def lee_subnivel(self, fila):
+        alm_base = self.li_moves[fila]
+        if alm_base.nivel >= 17:
+            return
+        LCEngine.setFen(alm_base.fen)
+        if LCEngine.movePV(alm_base.desde, alm_base.hasta, alm_base.coronacion):
+            fen = LCEngine.getFen()
+            for alm in self.book.almListaJugadas(fen):
+                nv = alm.nivel = alm_base.nivel + 1
+                alm.dato = [""] * 20
+                alm.dato[nv] = alm.pgn
+                alm.dato[nv+1] = alm.porc
+                alm.dato[nv+2] = "%d" % alm.weight
+                fila += 1
+                self.li_moves.insert(fila, alm)
+
+    def confTablero(self):
+        self.pause()
+        menu = QTVarios.LCMenu(self)
+        if self.siShowTablero:
+            menu.opcion("hide", _("Hide"), Iconos.PuntoNaranja())
+        else:
+            menu.opcion("show", _("Show"), Iconos.PuntoNaranja())
+        resp = menu.lanza()
+        if resp:
+            if resp == "hide":
+                self.siShowTablero = False
+                self.tablero.hide()
+            elif resp == "show":
+                self.siShowTablero = True
+                self.tablero.show()
+            self.guardarVideo()
+        self.play()
 
 
 class VentanaMultiPV(QtGui.QDialog):
@@ -1667,7 +1957,8 @@ class CPU:
 
             self.titulo = self.kibitzer.nombre
 
-            self.configMotor = self.kibitzer.configMotor()
+            if self.kibitzer.tipo != "B":
+                self.configMotor = self.kibitzer.configMotor()
 
             self.key_video = "KIB%s" % self.kibitzer.huella
             self.dic_video = self.configuracion.restore_video(self.key_video)
@@ -1716,6 +2007,8 @@ class CPU:
             self.ventana = VentanaMultiPV(self)
         elif self.tipo == "E":
             self.ventana = VentanaStockfishEval(self)
+        elif self.tipo == "B":
+            self.ventana = VentanaPolyglot(self)
         self.ventana.show()
 
         VarGen.gc = QTUtil.GarbageCollector()

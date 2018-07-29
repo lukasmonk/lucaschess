@@ -67,7 +67,6 @@ class Tablero(QtGui.QGraphicsView):
         self.blindfold = None
         self.blindfoldModoPosicion = False
 
-
         self.siInicializado = False
 
         self.ultPosicion = None
@@ -635,7 +634,6 @@ class Tablero(QtGui.QGraphicsView):
         #         a1h8 = self.num2alg(cy, cx)
         #         self.dispatchDrop(a1h8, str(dato))
         #     event.setDropAction(QtCore.Qt.IgnoreAction)
-
 
     def showKeys(self):
         liKeys = [
@@ -1344,7 +1342,6 @@ class Tablero(QtGui.QGraphicsView):
             if siActiva:
                 piezaSC.setDispatchMove(rutina)
 
-
     def activaTodas(self):
         self.siActivasPiezas = True
         for num, una in enumerate(self.liPiezas):
@@ -1468,7 +1465,6 @@ class Tablero(QtGui.QGraphicsView):
         bf.redondeos = True
         bf.forma = "1"
         bf.posicion.orden = kZvalue_pieza + 1
-
 
         flecha = self.creaFlecha(bf)
         self.liFlechas.append(flecha)

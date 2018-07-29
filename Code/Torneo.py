@@ -371,7 +371,7 @@ class Torneo:
     def bookDepth(self, valor=None):
         if valor is not None:
             self._bookDepth = valor
-        return self._bookDepth
+        return self._bookDepth if self._bookDepth else 0
 
     def fichero(self):
         if self._nombre:

@@ -328,9 +328,9 @@ class WPosicion(QtGui.QWidget):
     #     if self.posicion.siExistePieza("k") != 1:
     #         QTUtil2.mensError(self, _("King") + "-" + _("Black") + "???")
     #         return
-    #
+
     #     self.actPosicion()
-    #
+
     #     self.fen = self.posicion.fen()  # Hace control de enroques y EnPassant
     #     if self.fen == ControlPosicion.FEN_INICIAL:
     #         self.fen = ""

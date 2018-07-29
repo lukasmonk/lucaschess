@@ -691,6 +691,7 @@ def importarGM(ownerGM, siWoman):
 
     return False
 
+
 class SelectGame(QTVarios.WDialogo):
     def __init__(self, wgm, ogm, siWoman):
         self.ogm = ogm

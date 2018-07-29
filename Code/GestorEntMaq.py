@@ -659,7 +659,6 @@ class GestorEntMaq(Gestor.Gestor):
         self.timekeeper.start()
         self.activaColor(siBlancas)
 
-
     def juegaRival(self):
         self.pensando(True)
         self.desactivaTodas()
@@ -1031,18 +1030,22 @@ class GestorEntMaq(Gestor.Gestor):
             self.resultado = kTablas
 
         elif quien == kGanamosTiempo:
+            if self.partida.ultPosicion.siFaltaMaterialColor(self.siJugamosConBlancas):
+                return self.ponResultado(kTablasFaltaMaterial)
             mensaje = _X(_("Congratulations, you win %1 on time."), nombreContrario)
             self.resultado = kGanamos
             self.partida.last_jg().comentario = _X(_("%1 has won on time."), self.configuracion.jugador)
 
         elif quien == kGanaRivalTiempo:
+            if self.partida.ultPosicion.siFaltaMaterialColor(not self.siJugamosConBlancas):
+                return self.ponResultado(kTablasFaltaMaterial)
             mensaje = _X(_("%1 has won on time."), nombreContrario)
             self.resultado = kGanaRival
             self.partida.last_jg().comentario = _X(_("%1 has won on time."), nombreContrario)
 
         self.guardarGanados(quien == kGanamos)
         if quien != kGanaRivalTiempo:  # Ya que el mensaje ya se ha usado, para a_adir minutos
-            QTUtil2.mensaje(self.pantalla, mensaje)
+            self.mensajeEnPGN(mensaje)
         if QTUtil2.pregunta(self.pantalla, _("Do you want to play again?")):
             self.reiniciar(False)
         else:

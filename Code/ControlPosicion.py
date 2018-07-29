@@ -345,6 +345,24 @@ class ControlPosicion:
 
         return False
 
+    def siFaltaMaterialColor(self, siBlancas):
+        piezas = ""
+        nb = "nb"
+        prq = "prq"
+        if siBlancas:
+            nb = nb.upper()
+            prq = prq.upper()
+        for v in self.casillas.itervalues():
+            if v:
+                if v in prq:
+                    return False
+                if v in nb:
+                    if piezas:
+                        return False
+                    else:
+                        piezas = v
+        return False
+
     def numPiezas(self, pieza):
         if not self.siBlancas:
             pieza = pieza.lower()
@@ -434,6 +452,59 @@ class ControlPosicion:
             return False
 
         return True
+
+    def aura(self):
+        lista = []
+
+        def add(lipos):
+            for pos in lipos:
+                lista.append(LCEngine.posA1(pos))
+
+        def liBR(npos, fi, ci):
+            fil, col = LCEngine.posFC(npos)
+            liM = []
+            ft = fil + fi
+            ct = col + ci
+            while True:
+                if ft < 0 or ft > 7 or ct < 0 or ct > 7:
+                    break
+                t = LCEngine.FCpos(ft, ct)
+                liM.append(t)
+
+                pz = self.casillas[LCEngine.posA1(t)]
+                if pz:
+                    break
+                ft += fi
+                ct += ci
+            add(liM)
+
+        pzs = "KQRBNP" if self.siBlancas else "kqrbnp"
+
+        for i in range(8):
+            for j in range(8):
+                a1 = chr(i + 97) + chr(j + 49)
+                pz = self.casillas[a1]
+                if pz and pz in pzs:
+                    pz = pz.upper()
+                    npos = LCEngine.a1Pos(a1)
+                    if pz == "K":
+                        add(LCEngine.liK(npos))
+                    elif pz == "Q":
+                        for f_i, c_i in ((1, 1), (1, -1), (-1, 1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1)):
+                            liBR(npos, f_i, c_i)
+                    elif pz == "R":
+                        for f_i, c_i in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                            liBR(npos, f_i, c_i)
+                    elif pz == "B":
+                        for f_i, c_i in ((1, 1), (1, -1), (-1, 1), (-1, -1)):
+                            liBR(npos, f_i, c_i)
+                    elif pz == "N":
+                        add(LCEngine.liN(npos))
+                    elif pz == "P":
+                        lim, lix = LCEngine.liP(npos, self.siBlancas)
+                        add(lix)
+        return lista
+
 
 def distancia(desde, hasta):
     return ((ord(desde[0])-ord(hasta[0]))**2 + (ord(desde[1])-ord(hasta[1]))**2)**0.5

@@ -6,7 +6,6 @@ from Code import VarGen
 
 NOABANDONO, ABANDONO, ABANDONORIVAL = "N", "S", "R"
 
-
 # def creaDicHTML():
 #     base = '<img src="IntFiles/Figs/%s%s.png">'
 #     dic = {}
@@ -14,6 +13,7 @@ NOABANDONO, ABANDONO, ABANDONORIVAL = "N", "S", "R"
 #         dic[x.upper()] = base % ("w", x)
 #         dic[x] = base % ("b", x)
 #     return dic
+
 
 def creaDicHTML():
     base = '<span style="font-family:Chess Diagramm Pirat">%s</span>'

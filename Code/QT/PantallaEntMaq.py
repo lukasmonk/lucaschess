@@ -185,7 +185,6 @@ class WEntMaquina(QTVarios.WDialogo):
         gbThoughtOp = Controles.GB(self, _("Thought of the opponent"), ly)
         gbThoughtOp.setStyleSheet(gbStyle)
 
-
         ly = Colocacion.V().espacio(16).control(self.gbTutor).espacio(16).control(gbThoughtOp)
         ly.espacio(16).control(self.cbAtras).control(self.chbSummary)
         gb = Controles.GB(self, "", ly)

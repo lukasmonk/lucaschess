@@ -35,7 +35,6 @@ class Move:
         return m
 
 
-
 class Moves:
     def __init__(self):
         self.liMoves = []
@@ -260,7 +259,14 @@ class Game:
         for linea in liTxt:
             li = linea[1:-1].replace('""', '"').split('"')
             if len(li) == 3:
-                clave = li[0].strip()
+                clave = li[0].strip().replace(" ", "")
+                ok = True
+                for c in clave:
+                    if not( 33 < ord(c) < 127):
+                        ok = False
+                        break
+                if not ok:
+                    continue
                 valor = li[1].strip()
                 if clave and valor:
                     if clave.upper() == "FEN":

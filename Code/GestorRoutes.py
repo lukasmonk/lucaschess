@@ -333,9 +333,10 @@ class GestorRoutesPlay(GestorRoutes):
 
         if siwin:
             if self.route.end_playing():
-                QTUtil2.mensaje(self.pantalla, _("Congratulations, you have completed the game."))
+                mensaje = _("Congratulations, you have completed the game.")
             else:
-                QTUtil2.mensaje(self.pantalla, _("Well done"))
+                mensaje = _("Well done")
+            self.mensajeEnPGN(mensaje)
         else:
             if self.must_win:
                 QTUtil2.mensError(self.pantalla, _("You must win to pass this step."))
@@ -594,14 +595,17 @@ class GestorRoutesEndings(GestorRoutes):
 
         jgUlt = self.partida.last_jg()
         if jgUlt.siTablas():
-            QTUtil2.mensaje(self.pantalla, _("Draw") + "<br>" + _("You must repeat the puzzle."))
+            mensaje = "%s<br>%s" % (_("Draw"), _("You must repeat the puzzle."))
+            self.mensajeEnPGN(mensaje)
             self.inicio(self.route)
         elif self.warnings <= self.max_warnings:
             self.pantalla.ponToolBar([k_mainmenu, k_utilidades])
-            QTUtil2.mensaje(self.pantalla, _("Done"))
+            self.mensajeEnPGN(_("Done"))
             self.route.end_ending()
         else:
-            QTUtil2.mensaje(self.pantalla, _("Done with errors.") + "<br>" + _("You must repeat the puzzle."))
+            QTUtil2.mensaje(self.pantalla, )
+            mensaje = "%s<br>%s" % (_("Done with errors."), _("You must repeat the puzzle."))
+            self.mensajeEnPGN(mensaje)
             self.inicio(self.route)
 
     def actualPGN(self):
@@ -770,7 +774,8 @@ class GestorRoutesTactics(GestorRoutes):
         self.refresh()
         km = self.route.end_tactic()
         if not self.route.go_fast:
-            QTUtil2.mensaje(self.pantalla, _("Done") + "<br>" + _("You have traveled %s") % Routes.km_mi(km, self.route.is_miles))
+            mensaje = "%s<br>%s" % (_("Done"), _("You have traveled %s") % Routes.km_mi(km, self.route.is_miles))
+            self.mensajeEnPGN(mensaje)
         self.siJuegaHumano = False
         self.estado = kFinJuego
         if self.route.go_fast:

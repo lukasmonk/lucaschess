@@ -418,5 +418,5 @@ class GestorCompeticion(Gestor.Gestor):
             self.resultado = kTablas
 
         self.guardarGanados(quien == kGanamos)
-        QTUtil2.mensaje(self.pantalla, mensaje)
+        self.mensajeEnPGN(mensaje)
         self.ponFinJuego()

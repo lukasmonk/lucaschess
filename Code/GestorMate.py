@@ -360,7 +360,7 @@ class GestorMate(Gestor.Gestor):
             if siRecord:
                 txt += "<h3>%s</h3>" % _("Congratulations you have achieved a new record in this block.")
 
-            QTUtil2.mensaje(self.pantalla, txt)
+            self.mensajeEnPGN(txt)
             self.finJuego()
 
         else:

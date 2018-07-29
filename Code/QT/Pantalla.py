@@ -225,9 +225,9 @@ class Pantalla():
 
     def ponTitulo(self):
         titulo = _("Lucas Chess")
-        conf = self.gestor.configuracion
+        # conf = self.gestor.configuracion
 
-        titulo += " - %s" % conf.jugador
+        # titulo += " - %s" % conf.jugador
 
         self.setWindowTitle(titulo)
 

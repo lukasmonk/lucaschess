@@ -1,6 +1,9 @@
 import os
+import shutil
 import sqlite3
 import random
+import datetime
+import collections
 
 import LCEngineV1 as LCEngine
 
@@ -11,6 +14,7 @@ from Code import DBgames
 from Code import AperturasStd
 from Code.QT import QTVarios
 from Code.QT import QTUtil2
+
 
 class ListaOpenings:
     def __init__(self, configuracion):
@@ -124,6 +128,30 @@ class ListaOpenings:
         op.close()
         self.save()
 
+    def copy(self, pos):
+        dicline = dict(self.lista[pos])
+        base = dicline["file"][:-3]
+        if base.split("-")[-1].isdigit():
+            li = base.split("-")
+            base = "-".join(li[:-1])
+        filenew = "%s-1.opk" % base
+        n = 1
+        while os.path.isfile(os.path.join(self.folder, filenew)):
+            filenew = "%s-%d.opk" % (base, n)
+            n += 1
+        try:
+            shutil.copy(self.filepath(pos), os.path.join(self.folder, filenew))
+        except:
+            return
+
+        dicline["file"] = filenew
+        dicline["title"] = dicline["title"] + " -%d"%(n-1 if n > 1 else 1)
+        self.lista.append(dicline)
+        op = Opening(self.filepath(len(self.lista)-1))
+        op.settitle(dicline["title"])
+        op.close()
+        self.save()
+
     def change_title(self, num, title):
         op = Opening(self.filepath(num))
         op.settitle(title)
@@ -138,6 +166,13 @@ class ListaOpenings:
                 self.save()
                 return
 
+    def add_training_engines_file(self, file):
+        for dicline in self.lista:
+            if file == dicline["file"]:
+                dicline["withtrainings_engine"] = True
+                self.save()
+                return
+
 
 class Opening:
     def __init__(self, nomFichero):
@@ -146,19 +181,50 @@ class Opening:
         self._conexion = sqlite3.connect(nomFichero)
 
         self.cache = {}
-        self.max_cache = 4000
+        self.max_cache = 14000
         self.del_cache = 1000
 
         self.grupo = 0
+
+        self.history = collections.OrderedDict()
 
         self.li_xpv = self.init_database()
 
         self.db_config = Util.DicSQL(nomFichero, tabla="CONFIG")
         self.db_fenvalues = Util.DicSQL(nomFichero, tabla="FENVALUES")
+        self.db_history = Util.DicSQL(nomFichero, tabla="HISTORY")
+        self.db_cache_engines = None
         self.basePV = self.getconfig("BASEPV", "")
         self.title = self.getconfig("TITLE", os.path.basename(nomFichero).split(".")[0])
 
         self.tablero = None
+
+    def open_cache_engines(self):
+        if self.db_cache_engines is None:
+            self.db_cache_engines = Util.DicSQL(self.nomFichero, tabla="CACHE_ENGINES")
+
+    def get_cache_engines(self, engine, ms, fenM2):
+        key = "%s-%d-%s" % (engine, ms, fenM2)
+        return self.db_cache_engines[key]
+
+    def set_cache_engines(self, engine, ms, fenM2, move):
+        key = "%s-%d-%s" % (engine, ms, fenM2)
+        self.db_cache_engines[key] = move
+
+    def init_database(self):
+        cursor = self._conexion.cursor()
+        cursor.execute("pragma table_info(LINES)")
+        if not cursor.fetchall():
+            sql = "CREATE TABLE LINES( XPV TEXT PRIMARY KEY );"
+            cursor.execute(sql)
+            self._conexion.commit()
+            li_xpv = []
+        else:
+            sql = "select XPV from LINES ORDER BY XPV"
+            cursor.execute(sql)
+            li_xpv = [ raw[0] for raw in cursor.fetchall()]
+        cursor.close()
+        return li_xpv
 
     def setdbVisual_Tablero(self, tablero):
         self.tablero = tablero
@@ -189,7 +255,6 @@ class Opening:
                 self.setfenvalue(fenM2, dic)
         self.packAlTerminar()
 
-
     def getconfig(self, key, default=None):
         return self.db_config.get(key, default)
 
@@ -200,7 +265,13 @@ class Opening:
         return self.getconfig("TRAINING")
 
     def setTraining(self, reg):
-        return self.setconfig("TRAINING", reg)
+        self.setconfig("TRAINING", reg)
+
+    def trainingEngines(self):
+        return self.getconfig("TRAINING_ENGINES")
+
+    def setTrainingEngines(self, reg):
+        self.setconfig("TRAINING_ENGINES", reg)
 
     def preparaTraining(self, reg, procesador):
         maxmoves = reg["MAXMOVES"]
@@ -221,20 +292,22 @@ class Opening:
                 lilipv[pos] = lipv[:-1]
 
         # Quitamos las repetidas
-        lilipvfinal = []
-        nt = len(lilipv)
-        for x in range(nt-1):
-            pvmirar = "".join(lilipv[x])
-            esta = False
-            for y in range(nt):
-                if y != x:
-                    pvotro = "".join(lilipv[y])
-                    if pvotro.startswith(pvmirar):
-                        esta = True
-                        break
-            if not esta:
-                lilipvfinal.append(lilipv[x])
-        lilipv = lilipvfinal
+        dicpv = {}
+        for lipv in lilipv:
+            pvmirar = "".join(lipv)
+            if pvmirar in dicpv:
+                continue
+
+            siesta = False
+            for pvotro in dicpv:
+                if pvotro.startswith(pvmirar):
+                    siesta = True
+                    break
+            if not siesta:
+                dicpv[pvmirar] = lipv
+        li = dicpv.keys()
+        li.sort()
+        lilipv = [value for key, value in dicpv.iteritems()]
 
         ligamesST = []
         ligamesSQ = []
@@ -315,7 +388,83 @@ class Opening:
         random.shuffle(liTrainPositions)
         reg["LITRAINPOSITIONS"] = liTrainPositions
 
-    def createTraining(self, reg, procesador):
+    def recalcFenM2(self):
+        lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
+
+        dicFENm2 = {}
+        for lipv in lilipv:
+            LCEngine.setFenInicial()
+            for pv in lipv:
+                fen = LCEngine.getFen()
+                fenM2 = LCEngine.fen2fenM2(fen)
+                if fenM2 not in dicFENm2:
+                    dicFENm2[fenM2] = set()
+                dicFENm2[fenM2].add(pv)
+                LCEngine.makeMove(pv)
+        return dicFENm2
+
+    def preparaTrainingEngines(self, reg):
+        reg["DICFENM2"] = self.recalcFenM2()
+        reg["TIMES"] = [500, 1000, 2000, 4000, 8000]
+        reg["ENGINES"] = self.listaEngines()[reg["NUM_LISTA"]]
+
+    def updateTrainingEngines(self):
+        reg = self.trainingEngines()
+        reg["DICFENM2"] = self.recalcFenM2()
+        self.setTrainingEngines(reg)
+
+    def listaEngines(self):
+        lista = [
+            ['irina', 'chispa', 'hamsters', 'zappa', 'demolito', 'wildcat', 'cheng', 'stockfish'],
+            ['irina', 'arminius', 'rodent', 'toga', 'rodentII', 'gaviota', 'texel', 'gull'],
+            ['tarrasch', 'cdrill', 'bikjump', 'garbochess', 'ufim', 'amyan', 'delfi', 'spike'],
+            ['rocinante', 'roce', 'cinnamon', 'gaia', 'greko', 'godel', 'rodent', 'mcbrain'],
+            ['zappa', 'demolito', 'rhetoric', 'critter', 'houdini', 'gull', 'andscacs', 'stockfish'],
+            ['clarabit', 'pawny', 'hamsters', 'cheng', 'spike', 'rybka', 'hannibal', 'texel'],
+            ['bikjump', 'clarabit', 'chispa', 'gaia', 'umko', 'greko', 'wildcat', 'critter'],
+            ['tarrasch', 'cdrill', 'lime', 'arminius', 'delfi', 'gaviota', 'andscacs', 'mcbrain'],
+            ['rocinante', 'cinnamon', 'pawny', 'amyan', 'alaric', 'daydreamer', 'godel', 'rodentII'],
+            ['irina', 'roce', 'demolito', 'rhetoric', 'toga', 'hannibal', 'komodo', 'stockfish'],
+            ['lime', 'zappa', 'wildcat', 'daydreamer', 'cheng', 'glaurung', 'critter', 'andscacs'],
+            ['bikjump', 'gaia', 'hamsters', 'umko', 'ufim', 'alaric', 'houdini', 'gull'],
+            ['cdrill', 'chispa', 'hamsters', 'amyan', 'spike', 'rybka', 'texel', 'komodo'],
+            ['tarrasch', 'clarabit', 'garbochess', 'ufim', 'delfi', 'fruit', 'rhetoric', 'mcbrain'],
+            ['rocinante', 'roce', 'cinnamon', 'pawny', 'alaric', 'cheng', 'fruit', 'rodent'],
+            ['irina', 'lime', 'garbochess', 'zappa', 'demolito', 'daydreamer', 'glaurung', 'spike'],
+            ['umko', 'greko', 'wildcat', 'glaurung', 'critter', 'gull', 'andscacs', 'stockfish'],
+            ['bikjump', 'chispa', 'gaia', 'wildcat', 'daydreamer', 'godel', 'fruit', 'toga'],
+            ['cdrill', 'clarabit', 'lime', 'umko', 'greko', 'amyan', 'delfi', 'texel'],
+            ['tarrasch', 'rocinante', 'roce', 'cinnamon', 'daydreamer', 'gaviota', 'houdini', 'mcbrain'],
+            ['irina', 'lime', 'umko', 'alaric', 'arminius', 'glaurung', 'fruit', 'stockfish'],
+            ['chispa', 'hamsters', 'zappa', 'demolito', 'cheng', 'rhetoric', 'houdini', 'andscacs'],
+            ['cdrill', 'bikjump', 'gaia', 'ufim', 'arminius', 'fruit', 'texel', 'gull'],
+            ['tarrasch', 'clarabit', 'simplex', 'amyan', 'delfi', 'godel', 'spike', 'hannibal'],
+            ['rocinante', 'roce', 'cinnamon', 'pawny', 'greko', 'glaurung', 'rhetoric', 'komodo'],
+            ['irina', 'lime', 'zappa', 'demolito', 'rodent', 'rodentII', 'gaviota', 'stockfish'],
+            ['bikjump', 'arminius', 'cheng', 'toga', 'critter', 'houdini', 'gull', 'mcbrain'],
+            ['chispa', 'gaia', 'umko', 'toga', 'hannibal', 'critter', 'texel', 'andscacs'],
+            ['cdrill', 'greko', 'godel', 'rodent', 'rhetoric', 'toga', 'rybka', 'hannibal'],
+            ['tarrasch', 'clarabit', 'arminius', 'delfi', 'rybka', 'gaviota', 'houdini', 'mcbrain'],
+            ['rocinante', 'roce', 'cinnamon', 'pawny', 'amyan', 'wildcat', 'godel', 'toga'],
+            ['irina', 'cdrill', 'zappa', 'demolito', 'daydreamer', 'fruit', 'andscacs', 'stockfish'],
+            ['lime', 'pawny', 'ufim', 'wildcat', 'alaric', 'glaurung', 'rhetoric', 'critter'],
+            ['chispa', 'gaia', 'amyan', 'arminius', 'rybka', 'hannibal', 'texel', 'gull'],
+            ['tarrasch', 'bikjump', 'alaric', 'delfi', 'cheng', 'spike', 'gaviota', 'mcbrain'],
+            ['cinnamon', 'simplex', 'umko', 'delfi', 'godel', 'spike', 'gaviota', 'komodo'],
+            ['irina', 'rocinante', 'roce', 'clarabit', 'zappa', 'daydreamer', 'houdini', 'stockfish'],
+            ['tarrasch', 'lime', 'umko', 'cheng', 'rodent', 'rybka', 'hannibal', 'gull'],
+            ['chispa', 'glaurung', 'spike', 'gaviota', 'critter', 'texel', 'andscacs', 'komodo'],
+            ['cdrill', 'bikjump', 'clarabit', 'hamsters', 'amyan', 'demolito', 'wildcat', 'mcbrain'],
+            ['cinnamon', 'godel', 'fruit', 'rhetoric', 'toga', 'hannibal', 'houdini', 'komodo'],
+            ['irina', 'rocinante', 'roce', 'hamsters', 'godel', 'glaurung', 'rodentII', 'stockfish'],
+            ['roce', 'umko', 'greko', 'garbochess', 'demolito', 'cheng', 'gull', 'andscacs'],
+            ['chispa', 'pawny', 'ufim', 'rodentII', 'spike', 'rybka', 'texel', 'komodo'],
+            ['bikjump', 'clarabit', 'lime', 'gaia', 'simplex', 'greko', 'rybka', 'hannibal'],
+            ['cdrill', 'rocinante', 'ufim', 'amyan', 'rhetoric', 'toga', 'rybka', 'komodo'],
+        ]
+        return lista
+
+    def createTrainingSSP(self, reg, procesador):
         self.preparaTraining(reg, procesador)
 
         reg["DATECREATION"] = Util.hoy()
@@ -324,6 +473,17 @@ class Opening:
 
         lo = ListaOpenings(procesador.configuracion)
         lo.add_training_file(os.path.basename(self.nomFichero))
+
+    def createTrainingEngines(self, reg, procesador):
+        self.preparaTrainingEngines(reg)
+        reg["DATECREATION"] = Util.hoy()
+        self.setTrainingEngines(reg)
+
+        self.setconfig("ENG_LEVEL", 0)
+        self.setconfig("ENG_ENGINE", 0)
+
+        lo = ListaOpenings(procesador.configuracion)
+        lo.add_training_engines_file(os.path.basename(self.nomFichero))
 
     def withTrainings(self):
         return "TRAINING" in self.db_config
@@ -446,29 +606,11 @@ class Opening:
                     break
         self.cache[xpv] = partida
 
-    def init_database(self):
-        cursor = self._conexion.cursor()
-        cursor.execute("pragma table_info(LINES)")
-        if not cursor.fetchall():
-            sql = "CREATE TABLE LINES( XPV TEXT PRIMARY KEY, GRUPO INTEGER, LINE BLOB );"
-            cursor.execute(sql)
-            sql = "CREATE INDEX IDX_GRUPO ON LINES( GRUPO );"
-            cursor.execute(sql)
-            self._conexion.commit()
-            li_xpv = []
-        else:
-            sql = "select XPV from LINES ORDER BY XPV"
-            cursor.execute(sql)
-            li_xpv = [ raw[0] for raw in cursor.fetchall()]
-        cursor.close()
-        return li_xpv
-
     def append(self, partida):
         xpv = LCEngine.pv2xpv(partida.pv())
-        line_blob = partida.save2blob()
-        sql = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
+        sql = "INSERT INTO LINES( XPV ) VALUES( ? )"
         cursor = self._conexion.cursor()
-        cursor.execute(sql, (xpv, line_blob))
+        cursor.execute(sql, (xpv,))
         cursor.close()
         self._conexion.commit()
         self.li_xpv.append(xpv)
@@ -504,8 +646,8 @@ class Opening:
                 self.li_xpv.sort()
                 num = self.li_xpv.index(xpv_nue)
         cursor = self._conexion.cursor()
-        sql = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
-        cursor.execute(sql, (xpv_nue, partida_nue.save2blob(), xpv_ant))
+        sql = "UPDATE LINES SET XPV=? WHERE XPV=?"
+        cursor.execute(sql, (xpv_nue, xpv_ant))
         self._conexion.commit()
         self.add_cache(xpv_nue, partida_nue)
         cursor.close()
@@ -516,14 +658,10 @@ class Opening:
         if xpv in self.cache:
             return self.cache[xpv]
 
-        sql = "select LINE from LINES where XPV=?"
-        cursor = self._conexion.cursor()
-        cursor.execute(sql, (xpv,))
-        blob = cursor.fetchone()[0]
         partida = Partida.Partida()
-        partida.blob2restore(blob)
+        pv = LCEngine.xpv2pv(xpv)
+        partida.leerPV(pv)
         self.add_cache(xpv, partida)
-        cursor.close()
         return partida
 
     def __delitem__(self, num):
@@ -540,6 +678,54 @@ class Opening:
     def __len__(self):
         return len(self.li_xpv)
 
+    def removeLines(self, li, label):
+        self.saveHistory(_("Removing"), label)
+        li.sort(reverse=True)
+        cursor = self._conexion.cursor()
+        for num in li:
+            xpv = self.li_xpv[num]
+            sql = "DELETE FROM LINES where XPV=?"
+            cursor.execute(sql, (xpv,))
+            if xpv in self.cache:
+                del self.cache[xpv]
+            del self.li_xpv[num]
+        self._conexion.commit()
+        cursor.close()
+
+    def lihistory(self):
+        return self.db_history.keys(siOrdenados=True, siReverse=True)
+
+    def saveHistory(self, *label):
+        d = datetime.datetime.now()
+        s = "%s-%s" % (d.strftime("%Y-%m-%d %H:%M:%S"), ",".join(label))
+        self.db_history[s] = self.li_xpv[:]
+
+    def rechistory(self, key):
+        self.saveHistory(_("Recovering"), key)
+
+        stActivo = set(self.li_xpv)
+        li_xpv_rec = self.db_history[key]
+        stRecuperar = set(li_xpv_rec)
+
+        cursor = self._conexion.cursor()
+
+        # Borramos los que no estan en Recuperar
+        sql = "DELETE FROM LINES where XPV=?"
+        for xpv in stActivo:
+            if xpv not in stRecuperar:
+                cursor.execute(sql, (xpv,))
+        self._conexion.commit()
+
+        # Mas los que no estan en Activo
+        sql = "INSERT INTO LINES( XPV ) VALUES( ? )"
+        for xpv in stRecuperar:
+            if xpv not in stActivo:
+                cursor.execute(sql, (xpv, ))
+        self._conexion.commit()
+
+        cursor.close()
+        self.li_xpv = li_xpv_rec
+
     def close(self):
         if self._conexion:
             conexion = self._conexion
@@ -553,15 +739,29 @@ class Opening:
             self.db_fenvalues.close()
             self.db_fenvalues = None
 
+            if self.db_cache_engines:
+                self.db_cache_engines.close()
+                self.db_cache_engines = None
+
             if self.tablero:
                 self.tablero.dbVisual_close()
                 self.tablero = None
 
             if si_pack:
+                if len(self.db_history) > 70:
+                    lik = self.db_history.keys(siOrdenados=True, siReverse=False)
+                    liremove = lik[:len(self.db_history)-50]
+                    for k in liremove:
+                        del self.db_history[k]
+                self.db_history.close()
+
                 cursor = conexion.cursor()
                 cursor.execute("VACUUM")
                 cursor.close()
                 conexion.commit()
+
+            else:
+                self.db_history.close()
 
             conexion.close()
 
@@ -571,12 +771,14 @@ class Opening:
         dlTmp.hideDuplicados()
         dlTmp.show()
 
+        self.saveHistory(_("Import"), _("PGN with variants"), os.path.basename(ficheroPGN))
+
         cursor = self._conexion.cursor()
 
         base = partidabase.pv() if partidabase else self.getconfig("BASEPV")
 
-        sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
-        sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
+        sql_insert = "INSERT INTO LINES( XPV ) VALUES( ? )"
+        sql_update = "UPDATE LINES SET XPV=? WHERE XPV=?"
 
         for n, g in enumerate(PGNreader.readGames(ficheroPGN), 1):
             if not dlTmp.actualiza(n, erroneos, duplicados, importados):
@@ -599,18 +801,17 @@ class Opening:
                 if base and not pv.startswith(base):
                     return
                 xpv = LCEngine.pv2xpv(pv)
-                line_blob = partida.save2blob()
                 updated = False
                 for npos, xpv_ant in enumerate(self.li_xpv):
                     if xpv_ant.startswith(xpv):
                         return
                     if xpv.startswith(xpv_ant):
-                        cursor.execute(sql_update, (xpv, line_blob, xpv_ant))
+                        cursor.execute(sql_update, (xpv, xpv_ant))
                         self.li_xpv[npos] = xpv
                         updated = True
                         break
                 if not updated:
-                    cursor.execute(sql_insert, (xpv, line_blob))
+                    cursor.execute(sql_insert, (xpv,))
                     self.li_xpv.append(xpv)
 
                 for njug, move in enumerate(liMoves):
@@ -633,6 +834,9 @@ class Opening:
         dlTmp.ponContinuar()
 
     def importarPGO(self, partidabase, ficheroPGO, maxDepth):
+
+        self.saveHistory(_("Personal Opening Guide"), os.path.basename(ficheroPGO))
+
         base = partidabase.pv() if partidabase else self.getconfig("BASEPV")
         baseXPV = LCEngine.pv2xpv(base)
 
@@ -664,58 +868,75 @@ class Opening:
 
         cursor = self._conexion.cursor()
 
-        sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
-        sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
+        sql_insert = "INSERT INTO LINES( XPV ) VALUES( ? )"
+        sql_update = "UPDATE LINES SET XPV=? WHERE XPV=?"
 
         for xpv in stPGO:
-            pv = LCEngine.xpv2pv(xpv)
-            partida = Partida.Partida()
-            partida.leerPV(pv)
-            line_blob = partida.save2blob()
             add = True
             for npos, xpv_ant in enumerate(self.li_xpv):
                 if xpv_ant.startswith(xpv):
                     add = False
                     break
                 if xpv.startswith(xpv_ant):
-                    cursor.execute(sql_update, (xpv, line_blob, xpv_ant))
+                    cursor.execute(sql_update, (xpv, xpv_ant))
                     self.li_xpv[npos] = xpv
                     add = False
                     break
             if add:
-                cursor.execute(sql_insert, (xpv, line_blob))
+                cursor.execute(sql_insert, (xpv, ))
                 self.li_xpv.append(xpv)
 
         cursor.close()
         self.li_xpv.sort()
         self._conexion.commit()
 
-    def guardaPartidas(self, liPartidas, minMoves=0):
+    def guardaPartidas(self, label, liPartidas, minMoves=0):
+        self.saveHistory(_("Import"), label)
         partidabase = self.getpartidabase()
-        sql_insert = "INSERT INTO LINES( XPV, LINE ) VALUES( ?, ? )"
-        sql_update = "UPDATE LINES SET XPV=?, LINE=? WHERE XPV=?"
+        sql_insert = "INSERT INTO LINES( XPV) VALUES( ? )"
+        sql_update = "UPDATE LINES SET XPV=? WHERE XPV=?"
         cursor = self._conexion.cursor()
         for partida in liPartidas:
             if minMoves <= partida.numJugadas() > partidabase.numJugadas():
                 xpv = LCEngine.pv2xpv(partida.pv())
                 if xpv not in self.li_xpv:
-                    line_blob = partida.save2blob()
                     updated = False
                     for npos, xpv_ant in enumerate(self.li_xpv):
                         if xpv.startswith(xpv_ant):
-                            cursor.execute(sql_update, (xpv, line_blob, xpv_ant))
+                            cursor.execute(sql_update, (xpv, xpv_ant))
                             self.li_xpv[npos] = xpv
                             updated = True
                             break
                     if not updated:
-                        cursor.execute(sql_insert, (xpv, line_blob))
+                        cursor.execute(sql_insert, (xpv,))
                         self.li_xpv.append(xpv)
 
         cursor.close()
         self._conexion.commit()
         self.li_xpv.sort()
 
-    def importarPolyglot(self, ventana, partida, bookW, bookB, titulo, depth, siWhite, minMoves):
+    def guardaLiXPV(self, label, liXPV):
+        self.saveHistory(_("Import"), label)
+        sql_insert = "INSERT INTO LINES( XPV) VALUES( ? )"
+        sql_update = "UPDATE LINES SET XPV=? WHERE XPV=?"
+        cursor = self._conexion.cursor()
+        for xpv in liXPV:
+            if xpv not in self.li_xpv:
+                updated = False
+                for npos, xpv_ant in enumerate(self.li_xpv):
+                    if xpv.startswith(xpv_ant):
+                        cursor.execute(sql_update, (xpv, xpv_ant))
+                        self.li_xpv[npos] = xpv
+                        updated = True
+                        break
+                if not updated:
+                    cursor.execute(sql_insert, (xpv,))
+                    self.li_xpv.append(xpv)
+        cursor.close()
+        self._conexion.commit()
+        self.li_xpv.sort()
+
+    def importarPolyglot(self, ventana, partida, bookW, bookB, titulo, depth, siWhite, onlyone, minMoves):
         bp = QTUtil2.BarraProgreso1(ventana, titulo)
         bp.ponTotal(0)
         bp.ponRotulo(_X(_("Reading %1"), "..."))
@@ -734,7 +955,7 @@ class Opening:
                 return
             siWhite1 = " w " in fen
             book = bookW if siWhite1 else bookB
-            liPV = book.miraListaPV(fen, siWhite1 == siWhite)
+            liPV = book.miraListaPV(fen, siWhite1 == siWhite, onlyone=onlyone)
             if liPV and len(lipv_ant) < depth:
                 for pv in liPV:
                     setFen(fen)
@@ -753,12 +974,13 @@ class Opening:
         hazFEN(cp.fen(), partida.lipv())
 
         bp.ponRotulo(_("Writing..."))
-        self.guardaPartidas(liPartidas, minMoves)
+
+        self.guardaPartidas("%s,%s,%s"%(_("Polyglot book"), bookW.nombre, bookB.nombre), liPartidas, minMoves)
         bp.cerrar()
 
         return True
 
-    def importarSummary(self, ventana, partidabase, ficheroSummary, depth, siWhite, minMoves):
+    def importarSummary(self, ventana, partidabase, ficheroSummary, depth, siWhite, onlyone, minMoves):
         titulo = _("Importing the summary of a database")
         bp = QTUtil2.BarraProgreso1(ventana, titulo)
         bp.ponTotal(0)
@@ -778,9 +1000,10 @@ class Opening:
         def hazPV(lipv_ant):
             if bp.siCancelado():
                 return
-            siWhite1 = len(lipv_ant) % 2 == 0
+            n_ant = len(lipv_ant)
+            siWhite1 = n_ant % 2 == 0
 
-            pv_ant = " ".join(lipv_ant)
+            pv_ant = " ".join(lipv_ant) if n_ant else ""
             liChildren = dbSTAT.children(pv_ant, False)
 
             if len(liChildren) == 0 or len(lipv_ant) > depth:
@@ -793,24 +1016,26 @@ class Opening:
                 return
 
             if siWhite1 == siWhite:
-                alm_max = None
                 tt_max = 0
+                limax = []
                 for alm in liChildren:
                     tt = alm.W + alm.B + alm.O + alm.D
                     if tt > tt_max:
                         tt_max = tt
-                        alm_max = alm
-                liChildren = [] if tt_max == 0 else [alm_max,]
+                        limax = [alm,]
+                    elif tt == tt_max and not onlyone:
+                        limax.append(alm)
+                liChildren = limax
 
             for alm in liChildren:
                 li = lipv_ant[:]
                 li.append(alm.move)
                 hazPV(li)
 
-        hazPV(pvBase.split(" "))
+        hazPV(pvBase.split(" ") if pvBase else [])
 
         bp.ponRotulo(_("Writing..."))
-        self.guardaPartidas(liPartidas)
+        self.guardaPartidas("%s,%s" %(_("Database summary"), os.path.basename(ficheroSummary)), liPartidas)
         bp.cerrar()
 
         return True
@@ -819,12 +1044,33 @@ class Opening:
         xpvbase = LCEngine.pv2xpv(partida.pv())
         tambase = len(xpvbase)
         otra = Opening(pathFichero)
-        liPartidas = []
+        lista = []
         for n, xpv in enumerate(otra.li_xpv):
-            if xpv.startswith(xpvbase) and tambase < len(xpv):
-                liPartidas.append(otra[n])
+            if xpv.startswith(xpvbase) and len(xpv) > tambase:
+                if xpv not in self.li_xpv:
+                    lista.append(xpv)
         otra.close()
-        self.guardaPartidas(liPartidas)
+        self.guardaLiXPV("%s,%s"% (_("Other opening lines"), otra.title), lista)
+
+    def exportarPGN(self, ws, result):
+        liTags = [
+            ("Event", self.title.replace('"', "")),
+            ("Site", ""),
+            ("Date", Util.hoy().strftime("%Y-%m-%d"))
+        ]
+        if result:
+            liTags.append(("Result", result))
+
+        for recno in range(len(self)):
+            partida = self[recno]
+
+            liTags[1] = ("Site", "%s %d" % (_("Line"), recno+1))
+
+            if recno > 0 or not ws.is_new:
+                ws.write("\n\n")
+            tags = "".join(['[%s "%s"]\n' % (k, v) for k, v in liTags])
+            ws.write(tags)
+            ws.write("\n%s" % partida.pgnBase())
 
     def getAllFen(self):
         stFENm2 = set()
@@ -904,5 +1150,4 @@ class ItemTree:
                 li.append(item.move)
             item = item.parent
         return li[::-1]
-
 

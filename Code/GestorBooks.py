@@ -3,7 +3,6 @@ import random
 from Code import Gestor
 from Code import Jugada
 from Code.QT import PantallaBooks
-from Code.QT import QTUtil2
 from Code import XMotorRespuesta
 from Code.Constantes import *
 
@@ -411,5 +410,4 @@ class GestorBooks(Gestor.Gestor):
         txt = self.txtAciertos()
 
         mensaje = "%s\n%s\n" % (_("Line completed"), txt)
-
-        QTUtil2.mensaje(self.pantalla, mensaje)
+        self.mensajeEnPGN(mensaje)

@@ -8,16 +8,15 @@ from Code import Util
 class BaseTactica:
     def __init__(self):
 
-        self.PUZZLES = 999  # Max number of puzzles in each block
-        self.JUMPS = []  # Puzzle repetitions, each puzzle can be repeated, this field determine separations among replicates, more repetitions are separated by comma, eg 3,5,7
+        self.PUZZLES = 100  # Max number of puzzles in each block
+        self.JUMPS = [3, 5, 9, 17]  # Puzzle repetitions, each puzzle can be repeated, this field determine separations among replicates, more repetitions are separated by comma, eg 3,5,7
         self.FILLEND = 0  # Si los flecos que quedan al final se rellenan con los puzzles mas antiguos,por orden
-        self.REPEAT = [
-            0, ]  # Block repetitions, Repetitions of total of puzzles, comma separated, indicating order of repetition as 0=original, 1=random, 2=previous, eg 1,2,0=3 repetitions,
+        self.REPEAT = [0, 1]  # Block repetitions, Repetitions of total of puzzles, comma separated, indicating order of repetition as 0=original, 1=random, 2=previous, eg 1,2,0=3 repetitions,
         # first is random, second repeat previous, and third original. Total field in blanck is the same as 0
         # Penalties, divided in blocks, by example 1,3,5,7 means first 25%
         # (100%/4) of puzzles has one position of penalty when error, second 25%
         # three and so on. Blank means no penalties.
-        self.PENALIZATION = []
+        self.PENALIZATION = [1, 2, 3, 4]
         self.SHOWTEXT = [1, ]  # Text while training, in blocks like penalties, 1,0,0,0, 25% Yes, rest No
         self.POINTVIEW = 0  # El que corresponda, 1 = White 2 = Black
         self.REFERENCE = ""
@@ -42,7 +41,7 @@ def leeREFERENCE(dic, default=""):
 
 
 def leeJUMPS(dic, default=None):
-    JUMPS = [] if default is None else default
+    JUMPS = [3, 5, 9, 17] if default is None else default
     c = dic.get("JUMPS", None)
     if c:
         JUMPS = [int(x) for x in c.replace(" ", "").split(",")]
@@ -58,7 +57,7 @@ def leeFILLEND(dic, default=None):
 
 
 def leeREPEAT(dic, default=None):
-    REPEAT = [0, ] if default is None else default
+    REPEAT = [0, 1] if default is None else default
     c = dic.get("REPEAT", None)
     if c:
         REPEAT = [int(x) for x in c.replace(" ", "").split(",")]
@@ -66,7 +65,7 @@ def leeREPEAT(dic, default=None):
 
 
 def leePENALIZATION(dic, default=None):
-    PENALIZATION = [] if default is None else default
+    PENALIZATION = [1, 2, 3, 4] if default is None else default
     c = dic.get("PENALIZATION", None)
     if c:
         PENALIZATION = [int(x) for x in c.replace(" ", "").split(",")]
@@ -84,12 +83,12 @@ def leeSHOWTEXT(dic, default=None):
 
 
 def leePUZZLES(dic, default=None):
-    PUZZLES = 999 if default is None else default
+    PUZZLES = 100 if default is None else default
     c = dic.get("PUZZLES", None)
     if c is not None and c.isdigit():
         PUZZLES = int(c)
     if not PUZZLES:
-        PUZZLES = 999
+        PUZZLES = 100
     return PUZZLES
 
 
@@ -153,7 +152,6 @@ CATEGORIAS|AFICIONADO=D1:70,D2:30
         return Tactica(self, resp)
 
     def leeCommon(self):
-
         dic = self.dic["COMMON"] if "COMMON" in self.dic else {}
 
         self.PUZZLES = leePUZZLES(dic)
@@ -224,6 +222,15 @@ class Tactica(BaseTactica):
     def ponPosActual(self, pos):
         with self.dbdatos() as db:
             db["POSACTIVE"] = pos
+
+    def siSaltoAutomatico(self):
+        with self.dbdatos() as db:
+            siauto = db["AUTOJUMP"]
+            return False if siauto is None else siauto
+
+    def setSaltoAutomatico(self, siSalto):
+        with self.dbdatos() as db:
+            db["AUTOJUMP"] = siSalto
 
     def dbdatos(self):
         return Util.DicSQL(self.fichero, tabla=self.nombre)

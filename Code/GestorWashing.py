@@ -139,10 +139,9 @@ class GestorWashingReplay(Gestor.Gestor):
 
         if ok:
             mens = _("Congratulations, this washing is done")
-            QTUtil2.mensaje(self.pantalla, mens)
         else:
             mens = "%s<br>%s: %d" %( _("Done with errors."), _("Errors"), self.errores)
-            QTUtil2.mensError(self.pantalla, mens)
+        self.mensajeEnPGN(mens)
 
     def mueveHumano(self, desde, hasta, coronacion=None):
         jg = self.checkMueveHumano(desde, hasta, coronacion)
@@ -384,7 +383,7 @@ class GestorWashingTactics(Gestor.Gestor):
             if self.num_lines == 0:
                 mens = "%s\n%s" % (mens, _("You have solved all puzzles"))
 
-            QTUtil2.mensaje(self.pantalla, mens)
+            self.mensajeEnPGN(mens)
         else:
             QTUtil2.mensError(self.pantalla, "%s: %d, %s: %d" % (_("Errors"), self.errores, _("Hints"), self.ayudas))
 
@@ -869,7 +868,7 @@ class GestorWashingCreate(Gestor.Gestor):
             self.resultado = kTablas
 
         self.guardarGanados(quien == kGanamos)
-        QTUtil2.mensaje(self.pantalla, mensaje)
+        self.mensajeEnPGN(mensaje)
         self.estado = kFinJuego
         self.desactivaTodas()
         liOpciones = [k_mainmenu, k_configurar, k_utilidades]

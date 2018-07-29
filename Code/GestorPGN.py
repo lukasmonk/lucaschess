@@ -4,7 +4,6 @@ import os
 import sys
 import random
 
-
 from Code import Gestor
 from Code import PGN
 from Code import Partida
@@ -188,7 +187,6 @@ class GestorPGN(Gestor.Gestor):
             return
         self.pgnPaste = txt
         self.mostrar(pgn, False)
-
 
     def mostrar(self, pgn, siRepiteFichero, siBlancas=None):
         self.pensando(True)

@@ -508,6 +508,15 @@ def mensErrorSobreControl(owner, mens, control):
     msgBox.exec_()
 
 
+def mensajeEnPunto(owner, mens, titulo, point, dif=5):
+    if titulo is None:
+        titulo = _("Information")
+    msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, titulo, resalta(mens), parent=owner)
+    msgBox.addButton(_("Continue"), QtGui.QMessageBox.ActionRole)
+    msgBox.move(point.x()+dif, point.y()+dif)
+    msgBox.exec_()
+
+
 def pregunta(parent, mens, etiSi=None, etiNo=None, si_top=False):
     msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, _("Question"), resalta(mens), parent=parent)
     if etiSi is None:

@@ -419,7 +419,8 @@ class GestorGM(Gestor.Gestor):
         if self.siJuez:
             mensaje += "<br><br><b>%s</b> = %+d<br>" % (_("Points accumulated"), self.puntos)
 
-        QTUtil2.mensaje(self.pantalla, mensaje, siResalta=False)
+        # QTUtil2.mensaje(self.pantalla, mensaje, siResalta=False)
+        self.mensajeEnPGN(mensaje)
 
         dbHisto = Util.DicSQL(self.configuracion.ficheroGMhisto)
 

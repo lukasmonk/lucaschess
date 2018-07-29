@@ -619,9 +619,9 @@ class GestorElo(Gestor.Gestor):
             # mensaje = _X( _("Congratulations, you win against %1 on time."), nombreContrario )
             # self.resultado = kGanamos
 
-        elif quien == kGanaRivalTiempo:
-            mensaje = _X(_("%1 has won on time."), nombreContrario)
-            self.resultado = kGanaRival
+        # elif quien == kGanaRivalTiempo:
+        #     mensaje = _X(_("%1 has won on time."), nombreContrario)
+        #     self.resultado = kGanaRival
 
         elo = self.configuracion.eloActivo(self.siCompetitivo)
         if self.resultado == kGanamos:
@@ -646,7 +646,7 @@ class GestorElo(Gestor.Gestor):
         mensaje += "<br><br>%s : %d<br>" % (_("New Lucas-Elo"), self.configuracion.eloActivo(self.siCompetitivo))
 
         self.guardarGanados(quien == kGanamos)
-        QTUtil2.mensaje(self.pantalla, mensaje)
+        self.mensajeEnPGN(mensaje)
         self.ponFinJuego()
 
         # def ponFinJuego( self ):

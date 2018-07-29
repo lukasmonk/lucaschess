@@ -792,7 +792,6 @@ class Configuracion:
                 if not os.path.isdir(self.folderOpenings):
                     self.folderOpenings = self.folderBaseOpenings
 
-
                 for k in dic.keys():
                     if k.startswith("RIVAL_"):
                         claveK = k[6:]

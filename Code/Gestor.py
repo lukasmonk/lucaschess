@@ -9,6 +9,7 @@ from Code import Analisis
 from Code import AnalisisIndexes
 from Code import AperturasStd
 from Code import ControlPGN
+from Code import ControlPosicion
 from Code import DGT
 from Code import Jugada
 from Code import Partida
@@ -28,6 +29,7 @@ from Code.QT import QTUtil
 from Code.QT import QTUtil2
 from Code.QT import QTVarios
 from Code.QT import WOpeningGuide
+from Code.QT import TabTipos
 from Code import Util
 from Code import VarGen
 from Code import Kibitzers
@@ -285,11 +287,12 @@ class Gestor:
         if not self.configuracion.siAtajosRaton:
             if li_destinos:
                 self.atajosRatonOrigen = a1h8
-                if self.atajosRatonDestino and self.atajosRatonDestino in li_destinos:
-                    mueve()
-                else:
-                    self.atajosRatonDestino = None
-                    showCandidates()
+                self.atajosRatonDestino = None
+                # if self.atajosRatonDestino and self.atajosRatonDestino in li_destinos:
+                #     mueve()
+                # else:
+                #     self.atajosRatonDestino = None
+                showCandidates()
                 return
             elif li_origenes:
                 self.atajosRatonDestino = a1h8
@@ -297,6 +300,7 @@ class Gestor:
                     mueve()
                 else:
                     self.atajosRatonOrigen = None
+                    self.atajosRatonDestino = None
                     showCandidates()
             return
 
@@ -520,6 +524,8 @@ class Gestor:
     def paraKibitzers(self):
         for n, xkibitzer in enumerate(self.liKibitzersActivas):
             xkibitzer.terminar() #ponFen(None)
+        self.procesador.quitaKibitzers()
+        self.liKibitzersActivas = []
 
     def ponPiezasAbajo(self, siBlancas):
         self.tablero.ponerPiezasAbajo(siBlancas)
@@ -829,7 +835,6 @@ class Gestor:
             self.pgnInformacion()
         self.pantalla.ajustaTam()
 
-
     def listado(self, tipo):
         if tipo == "pgn":
             return self.pgn.actual()
@@ -899,7 +904,7 @@ class Gestor:
             self.siAnalizadoTutor = False
 
             if self.tipoJuego == kJugEntMaq:
-                self.analizaTutorInicio()
+                self.analizaInicio()
 
     def siTerminada(self):
         return self.partida.ultPosicion.siTerminada()
@@ -1053,6 +1058,44 @@ class Gestor:
                 self.tablero.quitaFlechas()
                 if self.tablero.flechaSC:
                     self.tablero.flechaSC.show()
+
+        elif numero in [2, 7]:
+            if siActivar:
+                # Que jugada esta en el tablero
+                fen = self.fenActivoConInicio()
+                siBlancas = " w " in fen
+                if numero == 2:
+                    siMB = siBlancas
+                else:
+                    siMB = not siBlancas
+                if siMB != siBlancas:
+                    fen = LCEngine.fenOB(fen)
+                cp = ControlPosicion.ControlPosicion()
+                cp.leeFen(fen)
+                liMovs = cp.aura()
+
+                self.liMarcosTmp = []
+                regMarco = TabTipos.Marco()
+                color = self.tablero.confTablero.flechaActivoDefecto().colorinterior
+                if color == -1:
+                    color = self.tablero.confTablero.flechaActivoDefecto().color
+
+                st = set()
+                for h8 in liMovs:
+                    if h8 not in st:
+                        regMarco.a1h8 = h8 + h8
+                        regMarco.siMovible = True
+                        regMarco.color = color
+                        regMarco.colorinterior = color
+                        regMarco.opacidad = 0.5
+                        marco = self.tablero.creaMarco(regMarco)
+                        self.liMarcosTmp.append(marco)
+                        st.add(h8)
+
+            else:
+                for marco in self.liMarcosTmp:
+                    self.tablero.xremoveItem(marco)
+                self.liMarcosTmp = []
 
     def exePulsadaLetra(self, siActivar, letra):
         if siActivar:
@@ -1296,7 +1339,6 @@ class Gestor:
                             modoPosicionBlind = True
                     self.tablero.blindfoldChange(modoPosicionBlind)
 
-
                 elif orden == "conf":
                     self.tablero.blindfoldConfig()
 
@@ -1504,6 +1546,11 @@ class Gestor:
             self.salvaFEN_FNS(extension, si_fichero)
 
         return None
+
+    def mensajeEnPGN(self, mens, titulo=None):
+        p0 = self.pantalla.base.pgn.pos()
+        p = self.pantalla.mapToGlobal(p0)
+        QTUtil2.mensajeEnPunto(self.pantalla, mens, titulo, p)
 
     def showAnalisis(self):
         um = self.procesador.unMomento()

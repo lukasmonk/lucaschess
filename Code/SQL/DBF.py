@@ -442,6 +442,7 @@ class DBF:
         values = values[:-1]
 
         cSQL = "insert into %s(%s) values(%s)" % (self.ctabla, campos, values)
+
         self.cursor.execute(cSQL, liValues)
 
         if siCommit:

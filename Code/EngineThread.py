@@ -10,7 +10,8 @@ from Code.Constantes import *
 
 DEBUG_ENGINE = False
 
-def xpr(line):
+
+def xpr(exe, line):
     if DEBUG_ENGINE:
         t = time.time()
         prlk("%0.04f %s" % (t - tdbg[0], line))
@@ -29,7 +30,7 @@ def xprli(li):
 
 if DEBUG_ENGINE:
     tdbg = [time.time()]
-    xpr("DEBUG XMOTOR")
+    xpr("", "DEBUG XMOTOR")
 
 
 class Priorities:
@@ -87,7 +88,7 @@ class Engine(object):
         self.working = False
 
     def put_line(self, line):
-        assert xpr("put>>> %s\n" % line)
+        assert xpr(self.exe, "put>>> %s\n" % line)
         self.stdin_lock.acquire()
         self.stdin.write(line + "\n")
         self.stdin_lock.release()
@@ -109,7 +110,7 @@ class Engine(object):
         try:
             while self.working:
                 line = stdout.readline()
-                assert xpr(line)
+                assert xpr(self.exe, line)
                 if not line:
                     break
                 lock.acquire()

@@ -237,7 +237,7 @@ class GestorResistance(Gestor.Gestor):
                     txt = "<h3>%s</h3>" % (_X(_("You have lost %1 points."), str(-self.puntosRival)))
 
             if siFinPartida:
-                QTUtil2.mensaje(self.pantalla, txt)
+                self.mensajeEnPGN(txt)
             else:
                 resp = QTUtil2.pregunta(self.pantalla,
                                         txt + "<br>%s" % (_("Do you want to resign or continue playing?")),

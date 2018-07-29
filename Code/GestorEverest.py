@@ -314,6 +314,6 @@ class GestorEverest(Gestor.Gestor):
         mensaje = _("Congratulations you have passed this game.")
         self.expedition.add_try(True, self.tiempo, self.puntos)
 
-        QTUtil2.mensaje(self.pantalla, mensaje)
+        self.mensajeEnPGN(mensaje)
 
         self.terminar()

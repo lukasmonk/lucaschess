@@ -140,7 +140,6 @@ class Entrenamientos:
         xopcion(menu, "wgm", _("Play like a Woman Grandmaster"), Iconos.WGranMaestro())
         menu.separador()
 
-
         # Mate --------------------------------------------------------------------------------------------------
         menu1 = menu.submenu(_("Training mates"), Iconos.Mate())
         for mate in range(1, 5):
@@ -189,7 +188,6 @@ class Entrenamientos:
                             submenu1 = submenu.submenu(entry.name, nico.otro())
                             menuTacticas(submenu1, tipo, carpeta, lista)
             return lista
-
 
         menuTacticas(menu1, "B", "Tactics", [])
         lista = []

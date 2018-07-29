@@ -302,7 +302,7 @@ class GestorUnJuego(Gestor.Gestor):
 
         self.beepResultado(quien)
 
-        QTUtil2.mensaje(self.pantalla, mensaje)
+        self.mensajeEnPGN(mensaje)
         self.ponFinJuego()
         self.guardar()
 

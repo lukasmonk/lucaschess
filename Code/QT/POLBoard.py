@@ -37,6 +37,8 @@ class BoardLines(QtGui.QWidget):
         self.tablero.dbVisual_setFichero(self.dbop.nomFichero)
         self.tablero.dbVisual_setShowAllways(True)
 
+        self.tablero.ponerPiezasAbajo(self.dbop.getconfig("WHITEBOTTOM", True))
+
         self.dbop.setdbVisual_Tablero(self.tablero) # To close
 
         self.intervalo = 1400

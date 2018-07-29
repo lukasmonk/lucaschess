@@ -19,7 +19,8 @@ class Tipos:
                     ("L", _("Best move in one line"), Iconos.pmPuntoMagenta()),
                     ("J", _("Select move"), Iconos.pmPuntoNaranja()),
                     ("C", _("Threats"), Iconos.pmPuntoAzul()),
-                    ("E", _("Stockfish evaluation"), Iconos.pmPuntoAmarillo())
+                    ("E", _("Stockfish evaluation"), Iconos.pmPuntoAmarillo()),
+                    ("B", _("Polyglot book"), Iconos.pmPuntoEstrella())
         )
 
     def combo(self):
@@ -219,6 +220,17 @@ class Kibitzers:
         kib.alias = kib.nombre = nombre
         kib.tipo = tipo
         kib.prioridad = prioridad
+        self.lista.append(kib)
+        self.save()
+        return len(self.lista)-1
+
+    def nuevoPolyglot(self, book):
+        kib = Kibitzer()
+        kib.ponHuella(self.lista)
+        kib.alias = kib.nombre = book.nombre
+        kib.tipo = "B"
+        kib.exe = book.path
+        kib.clave = book.nombre
         self.lista.append(kib)
         self.save()
         return len(self.lista)-1

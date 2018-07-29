@@ -65,7 +65,8 @@ from Code.QT import PantallaManualSave
 from Code.QT import PantallaDatabaseFEN
 from Code.QT import WOpeningGuide
 from Code.QT import PantallaKibitzers
-from Code.QT import POLines
+from Code.QT import PantallaOpeningLines
+from Code.QT import PantallaOpeningLine
 
 
 class Procesador:
@@ -596,7 +597,6 @@ class Procesador:
     def setPassword(self):
         PantallaUsuarios.setPassword(self)
 
-
     def trainingMap(self, mapa):
         resp = PantallaWorkMap.train_map(self, mapa)
         if resp:
@@ -642,12 +642,12 @@ class Procesador:
             self.openings()
 
     def openings(self):
-        dicline = POLines.openingLines(self)
+        dicline = PantallaOpeningLines.openingLines(self)
         if dicline:
             if "TRAIN" in dicline:
                 resp = "tr_%s" % dicline["TRAIN"]
             else:
-                resp = POLines.study(self, dicline["file"])
+                resp = PantallaOpeningLine.study(self, dicline["file"])
             if resp is None:
                 self.openings()
             else:
@@ -658,14 +658,20 @@ class Procesador:
                     self.openingsTrainingStatic(pathFichero)
                 elif resp == "tr_positions":
                     self.openingsTrainingPositions(pathFichero)
+                elif resp == "tr_engines":
+                    self.openingsTrainingEngines(pathFichero)
 
     def openingsTrainingSequential(self, pathFichero):
         self.gestor = GestorOpeningLines.GestorOpeningLines(self)
         self.gestor.inicio(pathFichero, "sequential", 0)
 
+    def openingsTrainingEngines(self, pathFichero):
+        self.gestor = GestorOpeningLines.GestorOpeningEngines(self)
+        self.gestor.inicio(pathFichero)
+
     def openingsTrainingStatic(self, pathFichero):
         dbop = OpeningLines.Opening(pathFichero)
-        num_linea = POLines.selectLine(self, dbop)
+        num_linea = PantallaOpeningLines.selectLine(self, dbop)
         dbop.close()
         if num_linea is not None:
             self.gestor = GestorOpeningLines.GestorOpeningLines(self)
