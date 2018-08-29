@@ -19,11 +19,10 @@ Also make special mention of open source modules that are very instructive, as f
 
 Versions
 ========
-You have five versions in zip file:
-* andscacsb.exe for 64 bit Windows, requires a Cpu with BMI2 support for the instruction PEXT and is the faster one: (https://en.wikipedia.org/wiki/Bit_Manipulation_Instruction_Sets#BMI2_.28Bit_Manipulation_Instruction_Set_2.29)
+You have four versions in zip file:
 * andscacs.exe for 64 bit Windows, requires a Cpu with support for POPCNT instruction and is a little faster than the next two: (http://en.wikipedia.org/wiki/Bit_Manipulation_Instruction_Sets).
-* andscacsn.exe for 64 bit Windows, has not special requirements.
-* andscacs32.exe for 32 bit windows. Is something like 50 elo points weaker.
+* andscacs_no_popcnt.exe for 64 bit Windows, has not special requirements. Slower.
+* andscacs_32_no_popcnt.exe for 32 bit windows. Is something like 50 elo points weaker. Slowest
 * linux/andscacs, a x64 popcnt Linux version.
 
 
@@ -38,7 +37,22 @@ In Chessbase, start a new game, goto "Engines" -> "Create uci engine".
 With the "..." button, search for andscacs.exe.
 
 
-Other thanks
-============
-Is able to increase its performance on more than 64 cores on Windows thanks to Texel and Stockfish:
-https://github.com/official-stockfish/Stockfish/commit/0d9a9f5e985c13852cf9f29767e95f295bb29575
+Special UCI options
+===================
+
+I added to Andscacs the capability of saving the full hash to file, to allow the user to recover a previous analysis session and continue it.
+The saved hash file will be of the same size of the hash memory, so if you defined 4 GB of hash, such will be the file size. Saving and loading such big files can take some time.
+
+To be able to do it I have added 4 new uci parameters:
+
+option name NeverClearHash type check default false
+option name HashFile type string default hash.hsh
+option name SaveHashtoFile type button
+option name LoadHashfromFile type button
+
+You can set the NeverClearHash option to avoid that the hash could be cleared by a Clear Hash or ucinewgame command.
+The HashFile parameter is the full file name with path information. If you don't set the path, it will be saved in the current folder. It defaults to hash.hsh.
+To save the hash, stop the analysis and press the SaveHashtoFile button in the uci options screen of the GUI.
+To load the hash file, load the game you are interested in, load the engine withouth starting it, and press the LoadHashfromFile button in the uci options screen of the GUI. Now you can start the analysis.
+
+AlwaysFullPv is an uci option that when is active tries to show longer principal variation.

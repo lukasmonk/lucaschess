@@ -778,7 +778,7 @@ class Procesador:
         self.estado = kJugando
         self.gestor = GestorEntPos.GestorEntPos(self)
         self.gestor.ponEntreno(entreno)
-        self.gestor.inicio(posicion, nPosiciones, titentreno, liEntrenamientos, jump=jump)
+        self.gestor.inicio(posicion, nPosiciones, titentreno, liEntrenamientos, saltoAutomatico=jump)
 
     def playRoute(self, route):
         if route.state == Routes.BETWEEN:

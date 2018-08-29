@@ -12,6 +12,7 @@ from Code import Partida
 from Code import PGNreader
 from Code import DBgames
 from Code import AperturasStd
+from Code import EnginesBunch
 from Code.QT import QTVarios
 from Code.QT import QTUtil2
 
@@ -403,66 +404,16 @@ class Opening:
                 LCEngine.makeMove(pv)
         return dicFENm2
 
-    def preparaTrainingEngines(self, reg):
+    def preparaTrainingEngines(self, configuracion, reg):
         reg["DICFENM2"] = self.recalcFenM2()
         reg["TIMES"] = [500, 1000, 2000, 4000, 8000]
-        reg["ENGINES"] = self.listaEngines()[reg["NUM_LISTA"]]
+
+        reg["ENGINES"] = EnginesBunch.getListaClave(configuracion, reg["NUM_ENGINES"], reg["KEY_ENGINE"])
 
     def updateTrainingEngines(self):
         reg = self.trainingEngines()
         reg["DICFENM2"] = self.recalcFenM2()
         self.setTrainingEngines(reg)
-
-    def listaEngines(self):
-        lista = [
-            ['irina', 'chispa', 'hamsters', 'zappa', 'demolito', 'wildcat', 'cheng', 'stockfish'],
-            ['irina', 'arminius', 'rodent', 'toga', 'rodentII', 'gaviota', 'texel', 'gull'],
-            ['tarrasch', 'cdrill', 'bikjump', 'garbochess', 'ufim', 'amyan', 'delfi', 'spike'],
-            ['rocinante', 'roce', 'cinnamon', 'gaia', 'greko', 'godel', 'rodent', 'mcbrain'],
-            ['zappa', 'demolito', 'rhetoric', 'critter', 'houdini', 'gull', 'andscacs', 'stockfish'],
-            ['clarabit', 'pawny', 'hamsters', 'cheng', 'spike', 'rybka', 'hannibal', 'texel'],
-            ['bikjump', 'clarabit', 'chispa', 'gaia', 'umko', 'greko', 'wildcat', 'critter'],
-            ['tarrasch', 'cdrill', 'lime', 'arminius', 'delfi', 'gaviota', 'andscacs', 'mcbrain'],
-            ['rocinante', 'cinnamon', 'pawny', 'amyan', 'alaric', 'daydreamer', 'godel', 'rodentII'],
-            ['irina', 'roce', 'demolito', 'rhetoric', 'toga', 'hannibal', 'komodo', 'stockfish'],
-            ['lime', 'zappa', 'wildcat', 'daydreamer', 'cheng', 'glaurung', 'critter', 'andscacs'],
-            ['bikjump', 'gaia', 'hamsters', 'umko', 'ufim', 'alaric', 'houdini', 'gull'],
-            ['cdrill', 'chispa', 'hamsters', 'amyan', 'spike', 'rybka', 'texel', 'komodo'],
-            ['tarrasch', 'clarabit', 'garbochess', 'ufim', 'delfi', 'fruit', 'rhetoric', 'mcbrain'],
-            ['rocinante', 'roce', 'cinnamon', 'pawny', 'alaric', 'cheng', 'fruit', 'rodent'],
-            ['irina', 'lime', 'garbochess', 'zappa', 'demolito', 'daydreamer', 'glaurung', 'spike'],
-            ['umko', 'greko', 'wildcat', 'glaurung', 'critter', 'gull', 'andscacs', 'stockfish'],
-            ['bikjump', 'chispa', 'gaia', 'wildcat', 'daydreamer', 'godel', 'fruit', 'toga'],
-            ['cdrill', 'clarabit', 'lime', 'umko', 'greko', 'amyan', 'delfi', 'texel'],
-            ['tarrasch', 'rocinante', 'roce', 'cinnamon', 'daydreamer', 'gaviota', 'houdini', 'mcbrain'],
-            ['irina', 'lime', 'umko', 'alaric', 'arminius', 'glaurung', 'fruit', 'stockfish'],
-            ['chispa', 'hamsters', 'zappa', 'demolito', 'cheng', 'rhetoric', 'houdini', 'andscacs'],
-            ['cdrill', 'bikjump', 'gaia', 'ufim', 'arminius', 'fruit', 'texel', 'gull'],
-            ['tarrasch', 'clarabit', 'simplex', 'amyan', 'delfi', 'godel', 'spike', 'hannibal'],
-            ['rocinante', 'roce', 'cinnamon', 'pawny', 'greko', 'glaurung', 'rhetoric', 'komodo'],
-            ['irina', 'lime', 'zappa', 'demolito', 'rodent', 'rodentII', 'gaviota', 'stockfish'],
-            ['bikjump', 'arminius', 'cheng', 'toga', 'critter', 'houdini', 'gull', 'mcbrain'],
-            ['chispa', 'gaia', 'umko', 'toga', 'hannibal', 'critter', 'texel', 'andscacs'],
-            ['cdrill', 'greko', 'godel', 'rodent', 'rhetoric', 'toga', 'rybka', 'hannibal'],
-            ['tarrasch', 'clarabit', 'arminius', 'delfi', 'rybka', 'gaviota', 'houdini', 'mcbrain'],
-            ['rocinante', 'roce', 'cinnamon', 'pawny', 'amyan', 'wildcat', 'godel', 'toga'],
-            ['irina', 'cdrill', 'zappa', 'demolito', 'daydreamer', 'fruit', 'andscacs', 'stockfish'],
-            ['lime', 'pawny', 'ufim', 'wildcat', 'alaric', 'glaurung', 'rhetoric', 'critter'],
-            ['chispa', 'gaia', 'amyan', 'arminius', 'rybka', 'hannibal', 'texel', 'gull'],
-            ['tarrasch', 'bikjump', 'alaric', 'delfi', 'cheng', 'spike', 'gaviota', 'mcbrain'],
-            ['cinnamon', 'simplex', 'umko', 'delfi', 'godel', 'spike', 'gaviota', 'komodo'],
-            ['irina', 'rocinante', 'roce', 'clarabit', 'zappa', 'daydreamer', 'houdini', 'stockfish'],
-            ['tarrasch', 'lime', 'umko', 'cheng', 'rodent', 'rybka', 'hannibal', 'gull'],
-            ['chispa', 'glaurung', 'spike', 'gaviota', 'critter', 'texel', 'andscacs', 'komodo'],
-            ['cdrill', 'bikjump', 'clarabit', 'hamsters', 'amyan', 'demolito', 'wildcat', 'mcbrain'],
-            ['cinnamon', 'godel', 'fruit', 'rhetoric', 'toga', 'hannibal', 'houdini', 'komodo'],
-            ['irina', 'rocinante', 'roce', 'hamsters', 'godel', 'glaurung', 'rodentII', 'stockfish'],
-            ['roce', 'umko', 'greko', 'garbochess', 'demolito', 'cheng', 'gull', 'andscacs'],
-            ['chispa', 'pawny', 'ufim', 'rodentII', 'spike', 'rybka', 'texel', 'komodo'],
-            ['bikjump', 'clarabit', 'lime', 'gaia', 'simplex', 'greko', 'rybka', 'hannibal'],
-            ['cdrill', 'rocinante', 'ufim', 'amyan', 'rhetoric', 'toga', 'rybka', 'komodo'],
-        ]
-        return lista
 
     def createTrainingSSP(self, reg, procesador):
         self.preparaTraining(reg, procesador)
@@ -475,7 +426,7 @@ class Opening:
         lo.add_training_file(os.path.basename(self.nomFichero))
 
     def createTrainingEngines(self, reg, procesador):
-        self.preparaTrainingEngines(reg)
+        self.preparaTrainingEngines(procesador.configuracion, reg)
         reg["DATECREATION"] = Util.hoy()
         self.setTrainingEngines(reg)
 
@@ -490,6 +441,8 @@ class Opening:
 
     def updateTraining(self, procesador):
         reg = self.training()
+        if reg is None:
+            return
         reg1 = {}
         for key in ("MAXMOVES", "COLOR", "RANDOM"):
             reg1[key] = reg[key]
@@ -890,8 +843,9 @@ class Opening:
         self.li_xpv.sort()
         self._conexion.commit()
 
-    def guardaPartidas(self, label, liPartidas, minMoves=0):
-        self.saveHistory(_("Import"), label)
+    def guardaPartidas(self, label, liPartidas, minMoves=0, with_history=True):
+        if with_history:
+            self.saveHistory(_("Import"), label)
         partidabase = self.getpartidabase()
         sql_insert = "INSERT INTO LINES( XPV) VALUES( ? )"
         sql_update = "UPDATE LINES SET XPV=? WHERE XPV=?"
@@ -937,20 +891,18 @@ class Opening:
         self.li_xpv.sort()
 
     def importarPolyglot(self, ventana, partida, bookW, bookB, titulo, depth, siWhite, onlyone, minMoves):
-        bp = QTUtil2.BarraProgreso1(ventana, titulo)
+        bp = QTUtil2.BarraProgreso1(ventana, titulo, formato1="%m")
         bp.ponTotal(0)
         bp.ponRotulo(_X(_("Reading %1"), "..."))
         bp.mostrar()
 
         cp = partida.ultPosicion
 
-        liPartidas = []
-
         setFen = LCEngine.setFen
         makeMove = LCEngine.makeMove
         getFen = LCEngine.getFen
 
-        def hazFEN(fen, lipv_ant):
+        def hazFEN(fen, lipv_ant, control):
             if bp.siCancelado():
                 return
             siWhite1 = " w " in fen
@@ -963,19 +915,32 @@ class Opening:
                     fenN = getFen()
                     lipv_nue = lipv_ant[:]
                     lipv_nue.append(pv)
-                    hazFEN(fenN, lipv_nue)
+                    hazFEN(fenN, lipv_nue, control)
             else:
                 p = Partida.Partida()
                 p.leerLIPV(lipv_ant)
-                liPartidas.append(p)
-                bp.ponTotal(len(liPartidas))
-                bp.pon(len(liPartidas))
+                control.liPartidas.append(p)
+                control.num_partidas += 1
+                bp.ponTotal(control.num_partidas)
+                bp.pon(control.num_partidas)
+                if control.num_partidas and control.num_partidas % 5000 == 0:
+                    self.guardaPartidas(control.rotulo, control.liPartidas, minMoves, with_history=control.with_history)
+                    control.liPartidas = []
+                    control.with_history = False
 
-        hazFEN(cp.fen(), partida.lipv())
+
+        control = Util.Almacen()
+        control.liPartidas = []
+        control.num_partidas = 0
+        control.with_history = True
+        control.rotulo = "%s,%s,%s" % (_("Polyglot book"), bookW.nombre, bookB.nombre)
+
+        hazFEN(cp.fen(), partida.lipv(), control)
 
         bp.ponRotulo(_("Writing..."))
 
-        self.guardaPartidas("%s,%s,%s"%(_("Polyglot book"), bookW.nombre, bookB.nombre), liPartidas, minMoves)
+        if control.liPartidas:
+            self.guardaPartidas(control.rotulo, control.liPartidas, minMoves, with_history=control.with_history)
         bp.cerrar()
 
         return True

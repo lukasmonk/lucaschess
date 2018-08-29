@@ -9,6 +9,7 @@ from Code import Partida
 from Code import Analisis
 from Code import OpeningLines
 from Code import Books
+from Code import EnginesBunch
 from Code.QT import Colocacion
 from Code.QT import Columnas
 from Code.QT import Controles
@@ -322,12 +323,14 @@ class WLines(QTVarios.WDialogo):
     def trainNewEngines(self):
         training = self.dbop.trainingEngines()
         color = "WHITE"
-        mandatory = 5
+        basepv = self.dbop.basePV
+        mandatory = basepv.count(" ")+1 if len(basepv)>0 else 0
         control = 10
         lost_points = 20
         engine_control = self.configuracion.tutor.clave
         engine_time = 5.0
-        num_lista = 0
+        num_engines = 20
+        key_engine = "alaric"
 
         if training is not None:
             color = training["COLOR"]
@@ -336,7 +339,8 @@ class WLines(QTVarios.WDialogo):
             lost_points = training.get("LOST_POINTS", lost_points)
             engine_control = training.get("ENGINE_CONTROL", engine_control)
             engine_time = training.get("ENGINE_TIME", engine_time)
-            num_lista = training.get("NUM_LISTA", num_lista)
+            num_engines = training.get("NUM_ENGINES", num_engines)
+            key_engine = training.get("KEY_ENGINE", key_engine)
 
         separador = FormLayout.separador
         liGen = [separador]
@@ -352,9 +356,15 @@ class WLines(QTVarios.WDialogo):
         liGen.append((_("Maximum number of centipawns lost to pass control") + ":", lost_points))
         liGen.append(separador)
 
-        licombo = [("%2d. %s" %(n+1, ",".join(x)), n) for n, x in enumerate(self.dbop.listaEngines())]
-        config = FormLayout.Combobox(_("Bunch of engines"), licombo)
-        liGen.append((config, num_lista))
+        dicRivales = self.configuracion.dicRivales
+        dicRivales = EnginesBunch.filtra(dicRivales)
+        config = FormLayout.Spinbox(_("Number of engines"), 2, len(dicRivales), 50)
+        liGen.append((config, num_engines))
+
+        likeys = [(dicRivales[x].nombre, x) for x in dicRivales]
+        likeys.sort(key=lambda x: x[1])
+        config = FormLayout.Combobox(_("Bunch of engines"), likeys)
+        liGen.append((config, key_engine))
         liGen.append(separador)
 
         config = FormLayout.Combobox(_("Engine that does the control"), self.configuracion.comboMotoresCompleto())
@@ -369,7 +379,7 @@ class WLines(QTVarios.WDialogo):
 
         reg = {}
 
-        (reg["COLOR"], reg["MANDATORY"], reg["CONTROL"], reg["LOST_POINTS"], reg["NUM_LISTA"],
+        (reg["COLOR"], reg["MANDATORY"], reg["CONTROL"], reg["LOST_POINTS"], reg["NUM_ENGINES"], reg["KEY_ENGINE"],
             reg["ENGINE_CONTROL"], reg["ENGINE_TIME"] ) = liResp
 
         self.dbop.createTrainingEngines(reg, self.procesador)
@@ -814,7 +824,10 @@ class WLines(QTVarios.WDialogo):
                             else:
                                 cad = str(num)
                             if len(cad) > 80:
-                                sli.append(cad)
+                                if len(sli) == 4:
+                                    sli.append("...")
+                                elif len(sli) < 4:
+                                    sli.append(cad)
                                 cad = ""
                         if cad:
                             sli.append(cad)

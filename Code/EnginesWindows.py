@@ -288,8 +288,8 @@ def leeRivales():
     cm.elo = 2100
     mas(cm)
 
-    cm = ConfigMotor("andscacs", "Daniel José Queraltó".decode("utf-8"), "0.9032n", "http://www.andscacs.com/")
-    cm.path = "andscacs32.exe"
+    cm = ConfigMotor("andscacs", "Daniel José Queraltó".decode("utf-8"), "0.9432n", "http://www.andscacs.com/")
+    cm.path = "andscacs_32_no_popcnt.exe"
     cm.elo = 3150
     mas(cm)
 

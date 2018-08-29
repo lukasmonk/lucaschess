@@ -187,6 +187,7 @@ class WPanelDirector(QTVarios.WDialogo):
             # self.ponSiGrabar()
         tpid = tp, xid
         if tp == "P":
+            desde, hasta = a1h8[:2], a1h8[2:]
             tarea = TabVisual.GT_PiezaMueve(self.guion)
             desde, hasta = a1h8[:2], a1h8[2:]
             borra = self.tablero.dameNomPiezaEn(hasta)
@@ -808,8 +809,8 @@ class WPanelDirector(QTVarios.WDialogo):
         self.refresh_guion()
 
     def muevePieza(self, desde, hasta):
-        self.tablero.muevePieza(desde, hasta)
         self.creaTarea("P", None, desde + hasta, -1)
+        self.tablero.muevePieza(desde, hasta)
 
     def tableroPress(self, event, origin):
         if origin:

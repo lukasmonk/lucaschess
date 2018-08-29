@@ -68,7 +68,7 @@ class ThanksTo:
             # ["SmartThink 1.97", "Sergei S. Markoff", "http://genes1s.net/smarthink.php"],
             ["Hannibal 1.4b", "Samuel N. Hamilton and Edsel G. Apostol", "http://sites.google.com/site/edapostol/hannibal"],
             ["Monarch 1.7", "Steve Maughan", "http://www.monarchchess.com/"],
-            ["Andscacs 0.9032n", "Daniel José Queraltó", "http://www.andscacs.com/"],
+            ["Andscacs 0.9432n", "Daniel José Queraltó", "http://www.andscacs.com/"],
             ["Arminius 2017-01-01", "Volker Annus", "http://www.nnuss.de/Hermann/Arminius2017-01-01.zip"],
             ["WildCat", "Igor Korshunov", "http://www.igorkorshunov.narod.ru/WildCat"],
             ["Demolito", "Lucas Braesch", "https://github.com/lucasart/Demolito"],

@@ -43,6 +43,9 @@ def leeDicParametros(configuracion):
     alm.st_depths = dic.get("ST_DEPTHS", 3)
     alm.st_timelimit = dic.get("ST_TIMELIMIT", 5)
 
+    alm.blancas = dic.get("BLANCAS", True)
+    alm.negras = dic.get("NEGRAS", True)
+
     return alm
 
 
@@ -153,7 +156,15 @@ def paramAnalisis(parent, configuracion, siModoAmpliado, siTodosMotores=False):
 
         liJ = [(_("White"), "BLANCAS"), (_("Black"), "NEGRAS"), (_("White & Black"), "AMBOS")]
         config = FormLayout.Combobox(_("Analyze only color"), liJ)
-        liGen.append((config, "AMBOS"))
+        if alm.blancas and alm.negras:
+            color = "AMBOS"
+        elif alm.negras:
+            color = "NEGRAS"
+        elif alm.blancas:
+            color = "BLANCAS"
+        else:
+            color = "AMBOS"
+        liGen.append((config, color))
 
         config = FormLayout.Editbox("<div align=\"right\">" + _("Moves") + "<br>" +
                                     _("By example:") + " -5,8-12,14,19-",
@@ -343,7 +354,15 @@ def paramAnalisisMasivo(parent, configuracion, siVariosSeleccionados, siDatabase
 
     liJ = [(_("White"), "BLANCAS"), (_("Black"), "NEGRAS"), (_("White & Black"), "AMBOS")]
     config = FormLayout.Combobox(_("Analyze only color"), liJ)
-    liGen.append((config, "AMBOS"))
+    if alm.blancas and alm.negras:
+        color = "AMBOS"
+    elif alm.negras:
+        color = "NEGRAS"
+    elif alm.blancas:
+        color = "BLANCAS"
+    else:
+        color = "AMBOS"
+    liGen.append((config, color))
 
     liGen.append(("<div align=\"right\">" + _("Only player moves") + ":<br>%s</div>" % _(
             "(You can add multiple aliases separated by ; and wildcard * )"), ""))

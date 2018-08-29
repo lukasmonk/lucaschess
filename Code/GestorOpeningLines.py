@@ -6,6 +6,7 @@ from Code import ControlPosicion
 from Code import TrListas
 from Code.QT import QTUtil2
 from Code.QT import Iconos
+from Code.QT import QTVarios
 from Code import Util
 from Code import OpeningLines
 from Code import XMotorRespuesta
@@ -52,6 +53,7 @@ class GestorOpeningEngines(Gestor.Gestor):
 
         self.plies_mandatory = self.trainingEngines["MANDATORY"]
         self.plies_control = self.trainingEngines["CONTROL"]
+        self.plies_pendientes = self.plies_control
         self.lost_points = self.trainingEngines["LOST_POINTS"]
 
         self.siJugamosConBlancas = self.trainingEngines["COLOR"] == "WHITE"
@@ -117,16 +119,15 @@ class GestorOpeningEngines(Gestor.Gestor):
 
         siRival = siBlancas == self.siRivalConBlancas
 
-        if siRival:
-            self.desactivaTodas()
-
-            if not self.runcontrol():
+        if not self.runcontrol():
+            if siRival:
+                self.desactivaTodas()
                 if self.mueveRival():
                     self.siguienteJugada()
 
-        else:
-            self.activaColor(siBlancas)
-            self.siJuegaHumano = True
+            else:
+                self.activaColor(siBlancas)
+                self.siJuegaHumano = True
 
     def mueveRival(self):
         si_obligatorio = self.partida.numJugadas() <= self.plies_mandatory
@@ -193,9 +194,11 @@ class GestorOpeningEngines(Gestor.Gestor):
 
     def masJugada(self, jg, siNuestra):
         fenM2 = jg.posicionBase.fenM2()
+        jg.es_linea = False
         if fenM2 in self.dicFENm2:
             if jg.movimiento() in self.dicFENm2[fenM2]:
                 jg.criticaDirecta = "!"
+                jg.es_linea = True
         self.partida.append_jg(jg)
         if self.partida.pendienteApertura:
             self.partida.asignaApertura()
@@ -222,13 +225,15 @@ class GestorOpeningEngines(Gestor.Gestor):
                 si_obligatorio = False
 
         if not si_obligatorio and self.estado != kFinJuego:
-            tm = self.plies_mandatory + self.plies_control - self.partida.numJugadas()
-            if tm > 0:
-                li.append("%s: %d" % (_("Moves until the control"), tm))
+            tm = self.plies_pendientes
+            if tm > 1 and self.partida.numJugadas() and not self.partida.jugada(-1).es_linea:
+                li.append("%s: %d" % (_("Moves until the control"), tm-1))
 
         self.ponRotulo1("<br>".join(li))
 
     def runcontrol(self):
+        puntosInicio, mateInicio = 0, 0
+        puntosFinal, mateFinal = 0, 0
         numJugadas = self.partida.numJugadas()
         if numJugadas == 0:
             return False
@@ -249,13 +254,24 @@ class GestorOpeningEngines(Gestor.Gestor):
             self.muestraInformacion()
             self.mensajeEnPGN(mens)
 
-        def calcula(fen):
-            um = self.unMomento()
-            mrm = self.xjuez.analiza(fen)
-            um.final()
-            rm = mrm.mejorMov()
-            return rm.puntosABS(), rm.mate
+        def calculaJG(jg, siinicio):
+            fen = jg.posicionBase.fen() if siinicio else jg.posicion.fen()
+            nombre = self.xjuez.nombre
+            tiempo = self.xjuez.motorTiempoJugada
+            mrm = self.dbop.get_cache_engines(nombre, tiempo, fen)
+            if mrm is None:
+                um = self.unMomento()
+                mrm = self.xjuez.analiza(fen)
+                self.dbop.set_cache_engines(nombre, tiempo, fen, mrm)
+                um.final()
 
+            rm = mrm.mejorMov()
+            if (" w " in fen) == self.siJugamosConBlancas:
+                return rm.puntos, rm.mate
+            else:
+                return -rm.puntos, -rm.mate
+
+        siCalcularInicio = True
         if self.partida.siTerminada():
             self.ponFinJuego()
             jg = self.partida.jugada(-1)
@@ -269,35 +285,35 @@ class GestorOpeningEngines(Gestor.Gestor):
             puntosFinal, mateFinal = 0, 0
 
         else:
-            if numJugadas < self.plies_mandatory + self.plies_control:
+            jg = self.partida.jugada(-1)
+            if jg.es_linea:
+                self.plies_pendientes = self.plies_control
+            else:
+                self.plies_pendientes -= 1
+            if self.plies_pendientes > 0:
                 return False
             # Si la ultima jugada es de la linea no se calcula nada
-            jg = self.partida.jugada(-1)
-            if jg.criticaDirecta == "!":
-                puntosFinal, mateFinal = 0, 0
-            else:
-                puntosFinal, mateFinal = calcula(self.partida.ultPosicion.fen())
-                puntosFinal, mateFinal = -puntosFinal, -mateFinal
+            puntosFinal, mateFinal = calculaJG(jg, False)
 
         # Se marcan todas las jugadas que no siguen las lineas
         # Y se busca la ultima del color del jugador
-        fenM2_inicial = None
-        for njg in range(numJugadas):
-            jg = self.partida.jugada(njg)
-            fenM2 = jg.posicionBase.fenM2()
-            if fenM2 in self.dicFENm2:
-                moves = self.dicFENm2[fenM2]
-                if jg.movimiento() not in moves:
-                    jg.criticaDirecta = "?!"
-                    if fenM2_inicial is None and jg.siBlancas() == self.siJugamosConBlancas:
-                        fenM2_inicial = jg.posicion.fenM2()
-            elif fenM2_inicial is None and jg.siBlancas() == self.siJugamosConBlancas:
-                fenM2_inicial = jg.posicion.fenM2()
-        if fenM2_inicial:
-            puntosInicio, mateInicio = calcula(fenM2_inicial)
-            puntosInicio, mateInicio = -puntosInicio, -mateInicio
-        else:
-            puntosInicio, mateInicio = 0, 0
+        if siCalcularInicio:
+            jg_inicial = None
+            for njg in range(numJugadas):
+                jg = self.partida.jugada(njg)
+                fenM2 = jg.posicionBase.fenM2()
+                if fenM2 in self.dicFENm2:
+                    moves = self.dicFENm2[fenM2]
+                    if jg.movimiento() not in moves:
+                        jg.criticaDirecta = "?!"
+                        if jg_inicial is None:
+                            jg_inicial = jg
+                elif jg_inicial is None:
+                    jg_inicial = jg
+            if jg_inicial:
+                puntosInicio, mateInicio = calculaJG(jg_inicial, True)
+            else:
+                puntosInicio, mateInicio = 0, 0
 
         self.li_info.append("<b>%s:</b>" %_("Score"))
         template = "&nbsp;&nbsp;&nbsp;&nbsp;<b>%s</b>: %d"
@@ -349,8 +365,22 @@ class GestorOpeningEngines(Gestor.Gestor):
             if resp == "libros":
                 self.librosConsulta(False)
             elif resp == "add_line":
-                self.dbop.append(self.partida)
+                numJugadas, nj, fila, siBlancas = self.jugadaActual()
+                partida = self.partida
+                if numJugadas != nj+1:
+                    menu = QTVarios.LCMenu(self.pantalla)
+                    menu.opcion("all", _("Add all moves"), Iconos.PuntoAzul())
+                    menu.separador()
+                    menu.opcion("parcial", _("Add until current move"), Iconos.PuntoVerde())
+                    resp = menu.lanza()
+                    if resp is None:
+                        return
+                    if resp == "parcial":
+                        partida = self.partida.copia(nj)
+
+                self.dbop.append(partida)
                 self.dbop.updateTrainingEngines()
+                QTUtil2.mensaje(self.pantalla, _("Done"))
 
         else:
             Gestor.Gestor.rutinaAccionDef(self, clave)
