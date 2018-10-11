@@ -1607,6 +1607,12 @@ class Tablero(QtGui.QGraphicsView):
 
         self.escena.update()
 
+    def showCoordenadas(self, ok):
+        for coord in self.liCoordenadasHorizontales:
+            coord.setVisible(ok)
+        for coord in self.liCoordenadasVerticales:
+            coord.setVisible(ok)
+
     def peonCoronando(self, siBlancas):
         if self.configuracion.autocoronacion:
             modifiers = QtGui.QApplication.keyboardModifiers()

@@ -9,22 +9,22 @@ sudo apt-get install python-pyaudio
 # added install of setuptools, is required for psutils, python-chess and PhotoHash
 pip install setuptools
 pip install psutil
-pip install pygal
 pip install chardet
 pip install python-chess
 pip install Pillow
 pip install PhotoHash
 pip install Cython
+pip install scandir
 
 # !! modify path to your installation directory of lucaschess!!
-cd /usr/share/lucaschess
+cd ..
 
 # give read rights to group and others
 sudo chmod -R 755 *
 # give execution right to all executable files, especially chess engines
 sudo chmod -R +x *
 # give all rights to ./UsrData in order for all users to share settings
-sudo chmod 777 UsrData
+# sudo chmod 777 UsrData
 
 # build Irina engine etc, refresh existing libirina.so and LCEngine.so
 cd LCEngine/irina

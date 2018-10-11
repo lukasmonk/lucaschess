@@ -62,7 +62,7 @@ class ThanksTo:
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
             ["Texel 1.07", "Peter Österlund", "http://hem.bredband.net/petero2b/javachess/index.html#texel"],
             ["Stockfish 9", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["McBrain 9.1", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
+            ["McBrain 9.9", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
             ["Delfi 5.4", "Fabio Cavicchio", "http://www.msbsoftware.it/delfi/"],
             # ["SmartThink 1.97", "Sergei S. Markoff", "http://genes1s.net/smarthink.php"],
@@ -244,7 +244,7 @@ class ThanksTo:
             ("Figurines", 'Armando H. Marroquín', 'http://www.enpassant.dk/chess/fonteng.htm', _("Freeware")),
             ("Icons for Windows8", 'Icons8', 'https://icons8.com', "Creative Commons Attribution-NoDerivs 3.0 Unported"),
             ("Transsiberian map", "Stefan Ertmann & Lokal Profil",
-             "https://commons.wikimedia.org/wiki/File%3ATrans-Siberian_railway_map.svg", "CC BY-SA 2.5 via Wikimedia Commons"),
+             "https://commons.wikimedia.org/wiki/File:Trans-Siberian_railway_map.svg", "CC BY-SA 2.5 via Wikimedia Commons"),
             ("Washing machine", "Shinnoske", "https://openclipart.org/detail/218905/simple-washing-machine", "Public domain"),
         ]
         for tipo, autor, web, licencia in li:

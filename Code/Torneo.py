@@ -269,6 +269,10 @@ class Game:
             ("Black", enb.alias),
             ("Result", rs),
         ]
+        if enw.elo:
+            li.append(("WhiteElo", "%d" % enw.elo))
+        if enb.elo:
+            li.append(("BlackElo", "%d" % enb.elo))
         if not self._partida.siFenInicial():
             li.append(("FEN", self._partida.iniPosicion.fen()))
 

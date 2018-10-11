@@ -154,7 +154,7 @@ class ControlPGN:
 
         if tipoJuego == kJugGM:
             return self.actualGM()
-        elif tipoJuego in (kJugPGN, kJugSolo, kJugRoute, kJugEntLight):
+        elif tipoJuego in (kJugPGN, kJugSolo, kJugRoute, kJugEntLight, kJugAnotar):
             return self.gestor.actualPGN()
 
         if tipoJuego == kJugRemoto:

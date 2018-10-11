@@ -130,7 +130,7 @@ class Configuracion:
         self.estilo = "Cleanlooks"
         self.vistaTutor = kTutorH
 
-        self.efectosVisuales = True
+        self.efectosVisuales = False
         self.rapidezMovPiezas = 100
         self.guardarVariantesTutor = True
 
@@ -211,7 +211,7 @@ class Configuracion:
 
         self.dicRivales = Engines.leeRivales()
 
-        self.rivalInicial = "rocinante" if VarGen.isLinux else "tarrasch"
+        self.rivalInicial = "rocinante" if VarGen.isLinux else "irina"
         self.rival = self.buscaRival(self.rivalInicial)
 
         self.tutorInicial = "mcbrain"
@@ -331,6 +331,7 @@ class Configuracion:
         self.ficheroPlayPGN = "%s/PlayPGN.db" % self.carpeta
         self.ficheroAlbumes = "%s/albumes.pkd" % self.carpeta
         self.ficheroPuntuaciones = "%s/hpoints.pkd" % self.carpeta
+        self.ficheroAnotar = "%s/anotar.db" % self.carpeta
 
         self.ficheroSelectedPositions = "%s/Selected positions.fns" % self.dirPersonalTraining
         self.ficheroPresentationPositions = "%s/Challenge 101.fns" % self.dirPersonalTraining
@@ -895,10 +896,12 @@ class Configuracion:
         li = sorted(li, key=lambda cm: cm.nombre)
         return li
 
-    def listaMotoresExternos(self):
+    def listaMotoresExternos(self, ordenados=True):
         listaMotoresExt = MotoresExternos.ListaMotoresExternos(self.ficheroMExternos)
         listaMotoresExt.leer()
-        li = sorted(listaMotoresExt.liMotores, key=lambda cm: cm.alias)
+        li = listaMotoresExt.liMotores
+        if ordenados:
+            li.sort(key=lambda cm: cm.alias)
         return li
 
     def listaMotores(self):

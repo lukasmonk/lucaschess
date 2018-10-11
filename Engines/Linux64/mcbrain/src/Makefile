@@ -1,43 +1,59 @@
-# Stockfish, a UCI chess playing engine derived from Glaurung 2.1
-# Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
-# Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
-# Copyright (C) 2015-2018 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
-#
-# Stockfish is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Stockfish is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+### ==========================================================================
+### Copyright Notice and License Information
+### ==========================================================================
+#   McBrain, a UCI chess playing engine derived from SugaR, Stockfish and Glaurung 2.1
+#   Copyright (C) 2004-2008 Tord Romstad (Glaurung Author)
+#   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
+#   Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
+#   Copyright (C) 2017-2018 Michael Byrne, Marco Zerbinati, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McBrain Authors)
 
+#   McBrain is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
 
+#   McBrain is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### ==========================================================================
 ### Section 1. General Configuration
 ### ==========================================================================
 
 ### Executable name
+### McCain bench nodes 4717832
+### McBrain bench nodes 4576991
+VERSION=
+#VERSION=maverick
+ifeq ($(VERSION),maverick)
+CXXFLAGS += -DMaverick
 ifeq ($(COMP),mingw)
-EXE = McBrain-91.exe
+EXE = McCain-v2.exe
 else
-EXE = McBrain-91
+EXE = McCain-v2
 endif
-##### bench nodes:  6045167
+else
+CXXFLAGS += -DPAWN_SCORES
+ifeq ($(COMP),mingw)
+EXE = McBrain-v99.exe
+else
+EXE = McBrain-v99
+endif
+endif
 
 ### Installation dir definitions
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
 ### Built-in benchmark for pgo-builds
-PGOBENCH = ./$(EXE) bench
+PGOBENCH = ./$(EXE) bench 16 1 10
+PGOBENCH2 = ./$(EXE) bench 16 2 8
 
 ### Object files
-OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
+OBJS = benchmark.o bitbase.o bitboard.o book.o endgame.o evaluate.o main.o \
 	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
 	search.o thread.o timeman.o tt.o uci.o ucioption.o polybook.o syzygy/tbprobe.o
 
@@ -160,6 +176,7 @@ ifeq ($(COMP),gcc)
 	CXXFLAGS += -pedantic -Wextra -Wshadow
 
 	ifeq ($(ARCH),armv7)
+	CXXFLAGS += -mcpu=cortex-a53 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mneon-for-64bits -mtune=cortex-a53
 		ifeq ($(OS),Android)
 			CXXFLAGS += -m$(bits)
 			LDFLAGS += -m$(bits)
@@ -172,6 +189,9 @@ ifeq ($(COMP),gcc)
 	ifneq ($(KERNEL),Darwin)
 	   LDFLAGS += -Wl,--no-as-needed
 	endif
+
+	gccversion=$(shell gcc --version)
+	gccmasqueraded=$(findstring clang,$(gccversion))
 endif
 
 ifeq ($(COMP),mingw)
@@ -334,15 +354,24 @@ endif
 ### needs access to the optimization flags.
 ifeq ($(optimize),yes)
 ifeq ($(debug), no)
-	ifeq ($(comp),$(filter $(comp),gcc clang))
+	ifeq ($(comp),clang)
 		CXXFLAGS += -flto
 		LDFLAGS += $(CXXFLAGS)
+	endif
+
+	ifeq ($(comp),gcc)
+		CXXFLAGS += -flto
+	ifeq ($(gccmasqueraded),)
+		LDFLAGS += $(CXXFLAGS) -flto=jobserver
+	else
+		LDFLAGS += $(CXXFLAGS)
+	endif
 	endif
 
 	ifeq ($(comp),mingw)
 	ifeq ($(KERNEL),Linux)
 		CXXFLAGS += -flto
-		LDFLAGS += $(CXXFLAGS)
+		LDFLAGS += $(CXXFLAGS) -flto=jobserver
 	endif
 	endif
 endif
@@ -362,9 +391,13 @@ endif
 
 help:
 	@echo ""
-	@echo "To compile stockfish, type: "
+	@echo "To compile McBrain, type: "
+	@echo "'make <target> ARCH=arch [COMP=compiler] [COMPCXX=cxx]'"
+	@echo "<target> would be 'build' or 'profile-build'"
 	@echo ""
-	@echo "make target ARCH=arch [COMP=compiler] [COMPCXX=cxx]"
+	@echo "To compile McCain, uncomment this line in the makefile: "
+	@echo "'### VERSION=maverick' by remvoing the 3 #(pound signs)"
+	@echo "then type: 'make <target> ARCH=arch [COMP=compiler] [COMPCXX=cxx]'"
 	@echo ""
 	@echo "Supported targets:"
 	@echo ""
@@ -420,6 +453,7 @@ profile-build: config-sanity objclean profileclean
 	@echo ""
 	@echo "Step 2/4. Running benchmark for pgo-build ..."
 	$(PGOBENCH) > /dev/null
+	$(PGOBENCH2) > /dev/null
 	@echo ""
 	@echo "Step 3/4. Building optimized executable ..."
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) objclean
@@ -427,6 +461,9 @@ profile-build: config-sanity objclean profileclean
 	@echo ""
 	@echo "Step 4/4. Deleting profile data ..."
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) profileclean
+	strip $(EXE)
+#	cp $(EXE) /Users/michaelbyrne/cluster.mfb
+#	cp $(EXE) /opt/picochess/engines/armv7l
 
 strip:
 	strip $(EXE)
@@ -436,13 +473,20 @@ install:
 	-cp $(EXE) $(BINDIR)
 	-strip $(BINDIR)/$(EXE)
 
+both:
+	VERSION=
+	ARCH=x86-64-modern
+	COMP=gcc
+	target=build
+	$(MAKE) $(target)
+
 #clean all
 clean: objclean profileclean
 	@rm -f .depend *~ core
 
 # clean binaries and objects
 objclean:
-	@rm -f $(EXE) $(EXE).exe *.o ./syzygy/*.o
+	@rm -f $(EXE) *.o ./syzygy/*.o
 
 # clean auxiliary profiling files
 profileclean:
@@ -505,19 +549,19 @@ clang-profile-make:
 clang-profile-use:
 	llvm-profdata merge -output=stockfish.profdata *.profraw
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) \
-	EXTRACXXFLAGS='-fprofile-instr-use=stockfish.profdata' \
+	EXTRACXXFLAGS='-fprofile-instr-use=stockfish.profdata -Wno-profile-instr-out-of-date' \
 	EXTRALDFLAGS='-fprofile-use ' \
 	all
 
 gcc-profile-make:
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) \
-	EXTRACXXFLAGS='-fprofile-generate' \
+	EXTRACXXFLAGS='-fprofile-generate -fprofile-correction' \
 	EXTRALDFLAGS='-lgcov' \
 	all
 
 gcc-profile-use:
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) \
-	EXTRACXXFLAGS='-fprofile-use -fno-peel-loops -fno-tracer' \
+	EXTRACXXFLAGS='-fprofile-use -fprofile-correction -fno-peel-loops -fno-tracer' \
 	EXTRALDFLAGS='-lgcov' \
 	all
 
@@ -536,4 +580,3 @@ icc-profile-use:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS:.o=.cpp) > $@ 2> /dev/null
 
 -include .depend
-

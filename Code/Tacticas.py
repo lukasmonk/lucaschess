@@ -261,6 +261,12 @@ class Tactica(BaseTactica):
             if reference is None:
                 db["REFERENCE"] = ""
 
+            penalization = db["PENALIZATION"]
+            if penalization is None:
+                penalization = db["PENALIZATION"] = [1,2,3,4]
+
+            self.PENALIZATION = penalization
+
     def listaFicheros(self, clave):
         dalias = self.tts.dic.get("ALIAS", {})
         if clave in dalias:
@@ -392,6 +398,8 @@ class Tactica(BaseTactica):
             db["POINTVIEW"] = self.POINTVIEW
 
             db["REFERENCE"] = self.REFERENCE
+
+            db["PENALIZATION"] = self.PENALIZATION
 
             # 6.3d---------------+
             liHisto = db["HISTO"]

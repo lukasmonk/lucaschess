@@ -87,30 +87,6 @@ namespace {
 } // namespace
 
 
-/// Endgames members definitions
-
-Endgames::Endgames() {
-
-  add<KPK>("KPK");
-  add<KNNK>("KNNK");
-  add<KBNK>("KBNK");
-  add<KRKP>("KRKP");
-  add<KRKB>("KRKB");
-  add<KRKN>("KRKN");
-  add<KQKP>("KQKP");
-  add<KQKR>("KQKR");
-
-  add<KNPK>("KNPK");
-  add<KNPKB>("KNPKB");
-  add<KRPKR>("KRPKR");
-  add<KRPKB>("KRPKB");
-  add<KBPKB>("KBPKB");
-  add<KBPKN>("KBPKN");
-  add<KBPPKB>("KBPPKB");
-  add<KRPPKRP>("KRPPKRP");
-}
-
-
 /// Mate with KX vs K. This function is used to evaluate positions with
 /// king and plenty of material vs a lone king. It simply gives the
 /// attacking side a bonus for driving the defending king towards the edge
@@ -139,6 +115,28 @@ Value Endgame<KXK>::operator()(const Position& pos) const {
       || (   (pos.pieces(strongSide, BISHOP) & ~DarkSquares)
           && (pos.pieces(strongSide, BISHOP) &  DarkSquares)))
       result = std::min(result + VALUE_KNOWN_WIN, VALUE_MATE_IN_MAX_PLY - 1);
+
+  return strongSide == pos.side_to_move() ? result : -result;
+}
+
+
+/// Mate with KQX vs KX. This is similar to KX vs K.
+template<>
+Value Endgame<KQXKX>::operator()(const Position& pos) const {
+
+  assert(pos.non_pawn_material(strongSide) > QueenValueMg + RookValueMg);
+  assert(pos.non_pawn_material(weakSide) <= RookValueMg);
+
+  Square winnerKSq = pos.square<KING>(strongSide);
+  Square loserKSq = pos.square<KING>(weakSide);
+
+  Value result =  VALUE_KNOWN_WIN
+                + pos.non_pawn_material(strongSide)
+                - pos.non_pawn_material(weakSide)
+                + PushClose[distance(winnerKSq, loserKSq)]
+                + PushToCorners[loserKSq];
+
+  result = std::min(result, VALUE_MATE_IN_MAX_PLY - 1);
 
   return strongSide == pos.side_to_move() ? result : -result;
 }
@@ -215,7 +213,7 @@ Value Endgame<KRKP>::operator()(const Position& pos) const {
   Value result;
 
   // If the stronger side's king is in front of the pawn, it's a win
-  if (wksq < psq && file_of(wksq) == file_of(psq))
+  if (forward_file_bb(WHITE, wksq) & psq)
       result = RookValueEg - distance(wksq, psq);
 
   // If the weaker side's king is too far from the pawn and the rook,

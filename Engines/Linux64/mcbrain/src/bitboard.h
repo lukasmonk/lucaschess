@@ -153,16 +153,6 @@ inline Bitboard file_bb(Square s) {
 }
 
 
-/// make_bitboard() returns a bitboard from a list of squares
-
-constexpr Bitboard make_bitboard() { return 0; }
-
-template<typename ...Squares>
-constexpr Bitboard make_bitboard(Square s, Squares... squares) {
-  return (1ULL << s) | make_bitboard(squares...);
-}
-
-
 /// shift() moves a bitboard one step along direction D (mainly for pawns)
 
 template<Direction D>
@@ -338,6 +328,7 @@ inline Square msb(Bitboard b) {
 }
 
 #else  // MSVC, WIN32
+#include <intrin.h>
 
 inline Square lsb(Bitboard b) {
   assert(b);

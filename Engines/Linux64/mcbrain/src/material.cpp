@@ -35,12 +35,12 @@ namespace {
   constexpr int QuadraticOurs[][PIECE_TYPE_NB] = {
     //            OUR PIECES
     // pair pawn knight bishop rook queen
-    {1667                               }, // Bishop pair
-    {  40,    0                         }, // Pawn
-    {  32,  255,  -3                    }, // Knight      OUR PIECES
+    {1438                               }, // Bishop pair
+    {  40,   38                         }, // Pawn
+    {  32,  255, -62                    }, // Knight      OUR PIECES
     {   0,  104,   4,    0              }, // Bishop
-    { -26,   -2,  47,   105,  -149      }, // Rook
-    {-189,   24, 117,   133,  -134, -10 }  // Queen
+    { -26,   -2,  47,   105,  -208      }, // Rook
+    {-189,   24, 117,   133,  -134, -6  }  // Queen
   };
 
   constexpr int QuadraticTheirs[][PIECE_TYPE_NB] = {
@@ -56,7 +56,8 @@ namespace {
 
   // Endgame evaluation and scaling functions are accessed directly and not through
   // the function maps because they correspond to more than one material hash key.
-  Endgame<KXK>    EvaluateKXK[] = { Endgame<KXK>(WHITE),    Endgame<KXK>(BLACK) };
+  Endgame<KXK>    EvaluateKXK[]   = { Endgame<KXK>(WHITE),   Endgame<KXK>(BLACK) };
+  Endgame<KQXKX>  EvaluateKQXKX[] = { Endgame<KQXKX>(WHITE), Endgame<KQXKX>(BLACK) };
 
   Endgame<KBPsK>  ScaleKBPsK[]  = { Endgame<KBPsK>(WHITE),  Endgame<KBPsK>(BLACK) };
   Endgame<KQKRPs> ScaleKQKRPs[] = { Endgame<KQKRPs>(WHITE), Endgame<KQKRPs>(BLACK) };
@@ -69,6 +70,14 @@ namespace {
           && pos.non_pawn_material(us) >= RookValueMg;
   }
 
+  bool is_KQXKX(const Position& pos, Color us) {
+    return    more_than_one(pos.pieces(~us))
+          && !pos.count<PAWN>(~us)
+          &&  pos.non_pawn_material(~us) <= RookValueMg
+          &&  pos.count<QUEEN>(us)
+          &&  pos.non_pawn_material(us) > QueenValueMg + RookValueMg;
+  }
+
   bool is_KBPsK(const Position& pos, Color us) {
     return   pos.non_pawn_material(us) == BishopValueMg
           && pos.count<BISHOP>(us) == 1
@@ -78,7 +87,7 @@ namespace {
   bool is_KQKRPs(const Position& pos, Color us) {
     return  !pos.count<PAWN>(us)
           && pos.non_pawn_material(us) == QueenValueMg
-          && pos.count<QUEEN>(us)  == 1
+          && pos.count<QUEEN>(us) == 1
           && pos.count<ROOK>(~us) == 1
           && pos.count<PAWN>(~us) >= 1;
   }
@@ -145,15 +154,22 @@ Entry* probe(const Position& pos) {
       return e;
 
   for (Color c = WHITE; c <= BLACK; ++c)
+  {
       if (is_KXK(pos, c))
       {
           e->evaluationFunction = &EvaluateKXK[c];
           return e;
       }
+      else if (is_KQXKX(pos, c))
+      {
+          e->evaluationFunction = &EvaluateKQXKX[c];
+          return e;
+      }
+  }
 
   // OK, we didn't find any special evaluation function for the current material
   // configuration. Is there a suitable specialized scaling function?
-  EndgameBase<ScaleFactor>* sf;
+  const EndgameBase<ScaleFactor>* sf;
 
   if ((sf = pos.this_thread()->endgames.probe<ScaleFactor>(key)) != nullptr)
   {

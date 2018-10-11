@@ -504,6 +504,7 @@ class WLearnPuente(QTVarios.WDialogo):
         else:
             if hasta != desde:
                 self.errors += 1
+                self.tableroIni.ponFlechasTmp([(jg.desde, jg.hasta, False)])
             self.ponInfo()
             return False
 

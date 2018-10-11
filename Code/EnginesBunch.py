@@ -1,4 +1,5 @@
 
+
 def relaciones(dicRivales):
     result = """
 stockfish=b2b3 e2e4 c1d2 e3e4 g1e2 c4c5 c1d2 b3e3 e1g1 b3d1 a4d7 d2c4 f1b5 d1d4 a1c1 c4c5 d4d5 a2a4 d1c1 e2e4 c1f4 e2c1 e1g1 d2d4 a4b5 h2h3 c1g5 d3d4 b2b3 a2a4 f2f4 a2a4 e1g1 d3d4 a2a4 b1c3 f1e1 d1c1 d1a4 b2b3 d4d5 c1d2 a2a3 h2h3 c4b5 c3e2 c3d1 e1g1 f1g2 e3d4 d1e2 f1e1 a4c4 a4b5 a4b5 d2d4 e1g1 c2c3 d2d4 e1g1 a2a4 d4d5 e1g1 d2b3 b1c3 d2d3 g2c6 b2b3 d4d5 c1e3 c4d3 c4d3 a2a4 f1d3 d4e5 b1a3 g2g3 b5e2 d2d3 c1e3 e1g1 d4d5 c4c5 e2f4 c4c5 d2d4 b1c3 e3d4 g2g4 f1e1 c1f4 d2d4 b2b3 c1b2 b5c3 a2a4 d2d3 f1e2 e2e3 f1g2
@@ -76,6 +77,7 @@ rocinante=d1b3 e2e4 f1d3 f1e2 g1f3 c4c5 c1d2 c4c5 h2h3 b3a4 a4d7 d2c4 c3b5 d1d4 
             d[s] = n
     return d
 
+
 def filtra(dicRivales):
     d = relaciones(dicRivales)
     stkeys = set()
@@ -84,6 +86,7 @@ def filtra(dicRivales):
         stkeys.add(dos)
     dresp = {k:v for k,v in dicRivales.iteritems() if k in stkeys}
     return dresp
+
 
 def getLista(configuracion, num_elementos):
     def haz(xdrel, clave):
@@ -106,7 +109,7 @@ def getLista(configuracion, num_elementos):
                         resp = otro
                         mx = x
             if resp == None:
-                print "error", repet, clave
+                pass
             s.add(resp)
             total += mx
         li = list(s)
@@ -150,6 +153,7 @@ def getLista(configuracion, num_elementos):
         s.sort(key=lambda x:dicRivales[x].elo)
         dlista[clave] = s
     return dlista
+
 
 def getListaClave(configuracion, num_elementos, clave):
     dlista = getLista(configuracion, num_elementos)

@@ -171,7 +171,27 @@ enum Bound {
   BOUND_LOWER,
   BOUND_EXACT = BOUND_UPPER | BOUND_LOWER
 };
-
+#ifdef Maverick //MichaelB7
+enum Value : int {
+	VALUE_ZERO      = 0,
+	VALUE_DRAW      = 0,
+	VALUE_KNOWN_WIN = 10000,
+	VALUE_MATE      = 32000,
+	VALUE_INFINITE  = 32001,
+	VALUE_NONE      = 32002,
+	
+	VALUE_MATE_IN_MAX_PLY  =  VALUE_MATE - 2 * MAX_PLY,
+	VALUE_MATED_IN_MAX_PLY = -VALUE_MATE + 2 * MAX_PLY,
+	
+	PawnValueMg   = 142*10/11,   PawnValueEg   = 207*10/11,
+	KnightValueMg = 784*9/10,   KnightValueEg = 868*9/10,
+	BishopValueMg = 828*9/10,   BishopValueEg = 916*9/10,
+	RookValueMg   = 1286*8/9,  RookValueEg   = 1378*8/9,
+	QueenValueMg  = 2547*7/8,  QueenValueEg  = 2698*7/8,
+	
+	MidgameLimit  = 15258, EndgameLimit  = 3915
+};
+#else
 enum Value : int {
   VALUE_ZERO      = 0,
   VALUE_DRAW      = 0,
@@ -183,15 +203,15 @@ enum Value : int {
   VALUE_MATE_IN_MAX_PLY  =  VALUE_MATE - 2 * MAX_PLY,
   VALUE_MATED_IN_MAX_PLY = -VALUE_MATE + 2 * MAX_PLY,
 
-  PawnValueMg   = 171,   PawnValueEg   = 240,
-  KnightValueMg = 764,   KnightValueEg = 848,
-  BishopValueMg = 826,   BishopValueEg = 891,
-  RookValueMg   = 1282,  RookValueEg   = 1373,
-  QueenValueMg  = 2500,  QueenValueEg  = 2670,
+  PawnValueMg   = 142,   PawnValueEg   = 207,
+  KnightValueMg = 784,   KnightValueEg = 868,
+  BishopValueMg = 828,   BishopValueEg = 916,
+  RookValueMg   = 1286,  RookValueEg   = 1378,
+  QueenValueMg  = 2547,  QueenValueEg  = 2698,
 
   MidgameLimit  = 15258, EndgameLimit  = 3915
 };
-
+#endif
 enum PieceType {
   NO_PIECE_TYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
   ALL_PIECES = 0,
@@ -325,10 +345,10 @@ inline Value& operator+=(Value& v, int i) { return v = v + i; }
 inline Value& operator-=(Value& v, int i) { return v = v - i; }
 
 /// Additional operators to add a Direction to a Square
-inline Square operator+(Square s, Direction d) { return Square(int(s) + int(d)); }
-inline Square operator-(Square s, Direction d) { return Square(int(s) - int(d)); }
-inline Square& operator+=(Square &s, Direction d) { return s = s + d; }
-inline Square& operator-=(Square &s, Direction d) { return s = s - d; }
+constexpr Square operator+(Square s, Direction d) { return Square(int(s) + int(d)); }
+constexpr Square operator-(Square s, Direction d) { return Square(int(s) - int(d)); }
+inline Square& operator+=(Square& s, Direction d) { return s = s + d; }
+inline Square& operator-=(Square& s, Direction d) { return s = s - d; }
 
 /// Only declared but not defined. We don't want to multiply two scores due to
 /// a very high risk of overflow. So user should explicitly convert to integer.
@@ -346,7 +366,7 @@ inline Score operator*(Score s, int i) {
 
   assert(eg_value(result) == (i * eg_value(s)));
   assert(mg_value(result) == (i * mg_value(s)));
-  assert((i == 0) || (result / i) == s );
+  assert((i == 0) || (result / i) == s);
 
   return result;
 }
@@ -449,7 +469,7 @@ constexpr PieceType promotion_type(Move m) {
   return PieceType(((m >> 12) & 3) + KNIGHT);
 }
 
-inline Move make_move(Square from, Square to) {
+constexpr Move make_move(Square from, Square to) {
   return Move((from << 6) + to);
 }
 

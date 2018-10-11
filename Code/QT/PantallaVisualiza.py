@@ -1,7 +1,7 @@
 import os.path
 import time
 
-import LCEngineV1 as LCEngine
+import LCEngine2 as LCEngine
 from PyQt4 import QtCore
 
 from Code import ControlPosicion

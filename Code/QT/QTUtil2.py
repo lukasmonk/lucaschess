@@ -247,11 +247,14 @@ class ControlMensEspera:
 mensEspera = ControlMensEspera()
 
 
-def mensajeTemporal(pantalla, mensaje, segundos, background=None, pmImagen=None, posicion="c", fixedSize=256, siCancelar=None):
+def mensajeTemporal(pantalla, mensaje, segundos, background=None, pmImagen=None, posicion="c", fixedSize=256,
+                    siCancelar=None, titCancelar=None):
     if siCancelar is None:
         siCancelar = segundos > 3.0
+    if titCancelar is None:
+        titCancelar = _("Continue")
     me = mensEspera.inicio(pantalla, mensaje, background=background, pmImagen=pmImagen, siCancelar=siCancelar,
-                           titCancelar=_("Continue"), posicion=posicion, fixedSize=fixedSize)
+                           titCancelar=titCancelar, posicion=posicion, fixedSize=fixedSize)
     if segundos:
         me.time(segundos)
     return me
@@ -416,6 +419,8 @@ class BarraProgreso(QtGui.QProgressDialog):
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
         self.setWindowTitle(titulo)
         self.owner = owner
+        self.setAutoClose(False)
+        self.setAutoReset(False)
 
     def mostrar(self):
         if self.owner:

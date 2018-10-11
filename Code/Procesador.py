@@ -6,6 +6,7 @@ import webbrowser
 from Code import AperturasStd
 from Code import Routes
 from Code import VarGen
+from Code import Everest
 from Code import XGestorMotor
 from Code.Constantes import *
 
@@ -35,11 +36,13 @@ from Code import Presentacion
 from Code import OpeningLines
 from Code import GestorWashing
 from Code import GestorPlayPGN
+from Code import GestorAnotar
 from Code.QT import DatosNueva, BasicMenus
 from Code.QT import Iconos
 from Code.QT import Info
 from Code.QT import Pantalla
 from Code.QT import PantallaAlbumes
+from Code.QT import PantallaAnotar
 from Code.QT import PantallaAperturas
 from Code.QT import PantallaBMT
 from Code.QT import PantallaColores
@@ -690,6 +693,18 @@ class Procesador:
     def externBMT(self, fichero):
         self.configuracion.ficheroBMT = fichero
         PantallaBMT.pantallaBMT(self)
+
+    def anotar(self, partidacompleta, siblancasabajo):
+        self.gestor = GestorAnotar.GestorAnotar(self)
+        self.gestor.inicio(partidacompleta, siblancasabajo)
+
+    def show_anotar(self):
+        w = PantallaAnotar.WAnotar(self)
+        if w.exec_():
+            pc, siblancasabajo = w.resultado
+            if pc is None:
+                pc = Everest.get_partida_random()
+            self.anotar(pc, siblancasabajo)
 
     def externDatabase(self, fichero):
         self.configuracion.ficheroDBgames = fichero

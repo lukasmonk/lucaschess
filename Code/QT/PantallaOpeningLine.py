@@ -258,7 +258,7 @@ class WLines(QTVarios.WDialogo):
         if trEng or trSSP:
             submenu.opcion("update", _("Update current trainings"), Iconos.Reindexar())
             submenu.separador()
-        submenu1 = submenu.submenu(_("Re-create all trainings"), Iconos.Modificar())
+        submenu1 = submenu.submenu(_("Create trainings"), Iconos.Modificar())
         submenu1.opcion("new_ssp", "%s - %s - %s" %(_("Sequential"), _("Static"), _("Positions")), Iconos.TrainSequential())
         submenu1.opcion("new_eng", "With engines", Iconos.TrainEngines())
 
@@ -331,6 +331,11 @@ class WLines(QTVarios.WDialogo):
         engine_time = 5.0
         num_engines = 20
         key_engine = "alaric"
+        ext_engines = []
+        auto_analysis = True
+        ask_movesdifferent = False
+        times = [500, 1000, 2000, 4000, 8000]
+        books = ["", "", "", "", ""]
 
         if training is not None:
             color = training["COLOR"]
@@ -341,6 +346,11 @@ class WLines(QTVarios.WDialogo):
             engine_time = training.get("ENGINE_TIME", engine_time)
             num_engines = training.get("NUM_ENGINES", num_engines)
             key_engine = training.get("KEY_ENGINE", key_engine)
+            ext_engines = training.get("EXT_ENGINES", ext_engines)
+            auto_analysis = training.get("AUTO_ANALYSIS", auto_analysis)
+            ask_movesdifferent = training.get("ASK_MOVESDIFFERENT", ask_movesdifferent)
+            times = training.get("TIMES", times)
+            books = training.get("BOOKS", books)
 
         separador = FormLayout.separador
         liGen = [separador]
@@ -353,12 +363,12 @@ class WLines(QTVarios.WDialogo):
         liGen.append(separador)
         liGen.append((_("Moves until the control") + ":", control))
         liGen.append(separador)
-        liGen.append((_("Maximum number of centipawns lost to pass control") + ":", lost_points))
+        liGen.append((_("Maximum number of lost centipawns to pass control") + ":", lost_points))
         liGen.append(separador)
 
         dicRivales = self.configuracion.dicRivales
         dicRivales = EnginesBunch.filtra(dicRivales)
-        config = FormLayout.Spinbox(_("Number of engines"), 2, len(dicRivales), 50)
+        config = FormLayout.Spinbox(_("Number of engines"), 0, len(dicRivales), 50)
         liGen.append((config, num_engines))
 
         likeys = [(dicRivales[x].nombre, x) for x in dicRivales]
@@ -371,16 +381,84 @@ class WLines(QTVarios.WDialogo):
         liGen.append((config, engine_control))
         liGen.append((_("Duration of analysis (secs)") + ":", float(engine_time)))
 
-        resultado = FormLayout.fedit(liGen, title=_("With engines"), parent=self, anchoMinimo=360, icon=Iconos.Study())
+        liGen.append(separador)
+
+        liGen.append((_("Automatic analysis") + ":", auto_analysis))
+
+        liGen.append(separador)
+
+        liGen.append((_("Ask when the moves are different from the line") + ":", ask_movesdifferent))
+
+        liMotoresExternos = self.configuracion.listaMotoresExternos(ordenados=False)
+        if liMotoresExternos:
+            liExt = [separador]
+            for cm in liMotoresExternos:
+                liExt.append((cm.nombre, cm.alias in ext_engines))
+        else:
+            liExt = None
+
+        liLevels = [separador]
+        listaLibros = Books.ListaLibros()
+        listaLibros.recuperaVar(self.configuracion.ficheroBooks)
+        listaLibros.comprueba()
+        libooks = [(bookx.nombre, bookx) for bookx in listaLibros.lista]
+        libooks.insert(0, ("--", None))
+        for level in range(5):
+            n = level+1
+            title = "%s %d" % (_("Level"), n)
+            liLevels.append((None, title))
+            tm = times[level]/1000.0 if len(times) > level else 0.0
+            liLevels.append((_("Time engines think in seconds") + ":", tm))
+
+            bk = books[level] if len(books) > level else ""
+            book = listaLibros.buscaLibro(bk) if bk else None
+            config = FormLayout.Combobox(_("Book"), libooks)
+            liLevels.append((config, book))
+
+        lista = []
+        lista.append((liGen, _("Basic data"), ""))
+        if liExt:
+            lista.append((liExt, _("External engines"), ""))
+        lista.append((liLevels, _("Levels"), ""))
+
+        resultado = FormLayout.fedit(lista, title=_("With engines"), parent=self, anchoMinimo=360, icon=Iconos.Study())
         if resultado is None:
             return
 
         accion, liResp = resultado
 
+        selMotoresExt = []
+        if liMotoresExternos:
+            liGen, liExt, liLevels = liResp
+
+            for x in range(len(liMotoresExternos)):
+                if liExt[x]:
+                    selMotoresExt.append(liMotoresExternos[x].alias)
+        else:
+            liGen, liLevels = liResp
+
         reg = {}
 
         (reg["COLOR"], reg["MANDATORY"], reg["CONTROL"], reg["LOST_POINTS"], reg["NUM_ENGINES"], reg["KEY_ENGINE"],
-            reg["ENGINE_CONTROL"], reg["ENGINE_TIME"] ) = liResp
+            reg["ENGINE_CONTROL"], reg["ENGINE_TIME"], reg["AUTO_ANALYSIS"], reg["ASK_MOVESDIFFERENT"] ) = liGen
+        reg["EXT_ENGINES"] = selMotoresExt
+
+        if (len(selMotoresExt) + reg["NUM_ENGINES"]) == 0:
+            reg["NUM_ENGINES"] = 1
+
+        times = []
+        books = []
+        for x in range(5):
+            tm = int(liLevels[x*2]*1000)
+            bk = liLevels[x*2+1]
+            if tm:
+                times.append(tm)
+                books.append(bk.nombre if bk else "")
+        if len(times) == 0:
+            times.append(500)
+            books.append(None)
+        reg["TIMES"] = times
+        reg["BOOKS"] = books
 
         self.dbop.createTrainingEngines(reg, self.procesador)
 

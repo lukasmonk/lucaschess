@@ -1,0 +1,24 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+*.pdb
+*.tlog
+*.log
+*.exe
+*.obj
+*.lastbuildstate
+*.ilk
+*.idb
+*.ipch
+*.opendb
+*.db
+*.suo
+*.sqlite
+*.json
+
+# Ignore temporary folders
+.vs/
+/executable/Machine Learning/SugarMachineLearning.sml
+/executable/Master/Cerebellum_Light_Poly.bin
+/executable/Base Master/Cerebellum_Light_Poly.bin

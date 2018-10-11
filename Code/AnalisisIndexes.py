@@ -1,4 +1,4 @@
-import LCEngineV1 as LCEngine
+import LCEngine2 as LCEngine
 
 from Code import VarGen
 from Code import Partida

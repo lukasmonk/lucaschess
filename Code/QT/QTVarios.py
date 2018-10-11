@@ -1126,3 +1126,43 @@ def menuDB(submenu, configuracion, siFEN, siAll=False):
     for fich in lista:
         submenu.opcion("dbf_%s" % os.path.join(carpeta, fich), _F(fich[:-4]), rp.otro())
         submenu.separador()
+
+
+class ReadAnnotation(QtGui.QDialog):
+    def __init__(self, parent, objetivo):
+        QtGui.QDialog.__init__(self, parent)
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.FramelessWindowHint)
+
+        self.edAnotacion = Controles.ED(self, "")
+        btAceptar = Controles.PB(self, "", rutina=self.aceptar).ponIcono(Iconos.Aceptar())
+        btCancelar = Controles.PB(self, "", rutina=self.cancelar).ponIcono(Iconos.Cancelar())
+        btAyuda = Controles.PB(self, "", rutina=self.ayuda).ponIcono(Iconos.AyudaGR())
+
+        self.objetivo = objetivo
+        self.conAyuda = False
+        self.errores = 0
+        self.resultado = None
+
+        layout = Colocacion.H().relleno(1).control(btAyuda).control(self.edAnotacion).control(btAceptar).control(btCancelar).margen(3)
+        self.setLayout(layout)
+        self.move(parent.x()+parent.tablero.width()-212, parent.y()+parent.tablero.y()-3)
+
+    def aceptar(self):
+        txt = self.edAnotacion.texto()
+        txt = txt.strip().replace(" ", "").upper()
+
+        if txt:
+            if txt == self.objetivo.upper():
+                self.resultado = self.conAyuda, self.errores
+                self.accept()
+            else:
+                self.errores += 1
+                self.edAnotacion.setStyleSheet("QWidget { color: red }")
+
+    def cancelar(self):
+        self.reject()
+
+    def ayuda(self):
+        self.conAyuda = True
+        self.edAnotacion.ponTexto(self.objetivo)
+

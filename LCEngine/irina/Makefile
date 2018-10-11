@@ -1,6 +1,6 @@
 LINK_TARGET = ../libirina.a
 
-OBJS = loop.o board.o data.o util.o movegen.o makemove.o test.o eval.o search.o hash.o lc.o pgn.o
+OBJS = board.o data.o eval.o hash.o loop.o makemove.o movegen.o movegen_piece_to.o search.o test.o util.o pgn.o
 
 REBUILDABLES = $(OBJS) $(LINK_TARGET)
 
@@ -16,7 +16,7 @@ $(LINK_TARGET) : $(OBJS)
 
 
 %.o : %.c
-	#~ gcc -Wall -O3 -o $@ -c $< -DNDEBUG
+	gcc -Wall -O3 -o $@ -c $< -DNDEBUG
 	#~ mas rapida y menor tam = -O1
 	#~ profile mas -pg
-	clang -Wall -O2 -o $@ -c $<
+	#~ clang -Wall -O2 -o $@ -c $<

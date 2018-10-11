@@ -6,8 +6,8 @@ kSigueApertura, kSigueUsuario, kMalApertura = range(3)
     kJugNueva, kJugEntPos, kJugPGN, kJugEntMaq, kJugGM, kJugRemoto, kJugSolo, kJug60, kJugElo, kJugMicElo,
     kJugBooks, kJugAperturas, kJugOpeningLines, kJugBoxing, kJugEntTac, kJugMvM, kJugAlbum, kJugFics, kJugFide,
     kJugLichess, kJugWorldMap, kJugRoute, kJugEntLight, kJugWashingCreate, kJugWashingTactics, kJugWashingReplay,
-    kJugSingularMoves
-) = range(27)
+    kJugSingularMoves, kJugAnotar
+) = range(28)
 
 kFinNormal, kFinReinicio = range(2)
 

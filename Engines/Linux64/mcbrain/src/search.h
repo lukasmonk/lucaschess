@@ -29,7 +29,6 @@
 #include "types.h"
 
 class Position;
-
 namespace Search {
 
 /// Threshold used for countermoves based pruning
@@ -42,7 +41,7 @@ constexpr int CounterMovePruneThreshold = 0;
 
 struct Stack {
   Move* pv;
-  PieceToHistory* contHistory;
+  PieceToHistory* continuationHistory;
   int ply;
   Move currentMove;
   Move excludedMove;
@@ -70,8 +69,8 @@ struct RootMove {
   Value score = -VALUE_INFINITE;
   Value previousScore = -VALUE_INFINITE;
   int selDepth = 0;
-  int TBRank;
-  Value TBScore;
+  int tbRank;
+  Value tbScore;
   std::vector<Move> pv;
 };
 
@@ -101,7 +100,7 @@ struct LimitsType {
 
 extern LimitsType Limits;
 
-void init();
+void init(bool OptioncleanSearch);
 void clear();
 
 } // namespace Search

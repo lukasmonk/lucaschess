@@ -1,4 +1,4 @@
-import LCEngineV1 as LCEngine
+import LCEngine2 as LCEngine
 from Code import Util
 from Code import VarGen
 from Code import ControlPosicion
@@ -670,6 +670,14 @@ class PartidaCompleta(Partida):
         if not ok and fen != ControlPosicion.FEN_INICIAL:
             self.liTags.append(("FEN", fen))
         Partida.resetFEN(self, fen)
+
+    def titulo(self, litags):
+        li = []
+        for key in litags:
+            tag = self.getTAG(key)
+            if tag:
+                li.append(tag)
+        return "-".join(li)
 
 # firstLG = [True]
 

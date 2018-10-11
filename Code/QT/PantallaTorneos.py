@@ -760,6 +760,8 @@ class WUnTorneo(QTVarios.WDialogo):
             if w.exec_():
                 ws = PantallaSavePGN.FileSavePGN(self, w.dic_result)
                 if ws.open():
+                    if not ws.is_new:
+                        ws.write("\n\n")
                     ws.write(pgn)
                     ws.close()
                     ws.um_final()

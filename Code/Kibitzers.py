@@ -308,6 +308,8 @@ class IPCKibitzer:
         self.ipc.push(orden.bloqueEnvio())
 
     def siActiva(self):
+        if self.popen is None:
+            return False
         return self.popen.poll() is None
 
     def ponFen(self, fen, fenBase):

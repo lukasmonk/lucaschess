@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-import LCEngineV1 as LCEngine
+import LCEngine2 as LCEngine
 from PyQt4 import QtCore, QtGui
 
 import struct

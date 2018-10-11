@@ -419,7 +419,7 @@ FILESW=%s:100
             if siBP2:
                 tmpBP.pon(2, npos + 1)
             else:
-                tmpBP.pon(npos + 1)
+                tmpBP.pon(npos)
 
             if self.rutDispatchBP:
                 self.rutDispatchBP(npos, nJugadas, njg)

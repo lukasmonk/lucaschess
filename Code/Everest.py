@@ -1,4 +1,7 @@
-import LCEngineV1 as LCEngine
+import os
+import random
+
+import LCEngine2 as LCEngine
 
 from Code import Partida
 from Code.SQL import Base
@@ -8,6 +11,22 @@ from Code import Util
 def str_file(fichero):
     with open(fichero) as f:
         return eval(f.read())
+
+
+def get_partida_random():
+    path = "./IntFiles/Everest"
+    li = [fich for fich in os.listdir(path) if fich.endswith(".str")]
+    fichero = random.choice(li)
+    litourneys = str_file(os.path.join(path, fichero))
+    dictourney = random.choice(litourneys)
+    games = dictourney["GAMES"]
+    game = random.choice(games)
+    labels = game["LABELS"]
+    xpv = game["XPV"]
+    pc = Partida.PartidaCompleta(liTags=labels)
+    pv = LCEngine.xpv2pv(xpv)
+    pc.leerPV(pv)
+    return pc
 
 
 def gen_list(txt):  # tolerance and tries in 12

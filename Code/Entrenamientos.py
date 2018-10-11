@@ -350,6 +350,9 @@ class Entrenamientos:
         menu1.separador()
         xopcion(menu1, "visualiza", _("The board at a glance"), Iconos.Gafas())
 
+        menu1.separador()
+        xopcion(menu1, "anotar", _("Writing down moves of a game"), Iconos.Write())
+
         # menu2 = menu1.submenu(_("Endings with 3/4 pieces"), Iconos.Puente())
         # xopcion(menu2, "end_t4-1", "%s %d"%(_("Level"), 1), Iconos.PuntoAzul())
         # xopcion(menu2, "end_t4-2", "%s %d"%(_("Level"), 2), Iconos.PuntoMagenta())
@@ -405,6 +408,9 @@ class Entrenamientos:
 
                 elif resp == "visualiza":
                     self.visualiza()
+
+                elif resp == "anotar":
+                    self.anotar()
 
                 elif resp.startswith("tactica|"):
                     nada, tipo, nombre, carpeta, ini = resp.split("|")
@@ -629,6 +635,9 @@ class Entrenamientos:
 
     def visualiza(self):
         PantallaVisualiza.pantallaVisualiza(self.procesador)
+
+    def anotar(self):
+        self.procesador.show_anotar()
 
     def puente(self, nivel):
         PantallaPuente.pantallaPuente(self.procesador, nivel)

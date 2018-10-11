@@ -3,7 +3,7 @@ import copy
 import datetime
 import random
 
-import LCEngineV1 as LCEngine
+import LCEngine2 as LCEngine
 
 from Code import Apertura
 from Code import Gestor

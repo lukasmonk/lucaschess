@@ -5,7 +5,7 @@ import random
 import datetime
 import collections
 
-import LCEngineV1 as LCEngine
+import LCEngine2 as LCEngine
 
 from Code import Util
 from Code import Partida
@@ -204,13 +204,23 @@ class Opening:
         if self.db_cache_engines is None:
             self.db_cache_engines = Util.DicSQL(self.nomFichero, tabla="CACHE_ENGINES")
 
-    def get_cache_engines(self, engine, ms, fenM2):
-        key = "%s-%d-%s" % (engine, ms, fenM2)
+    def get_cache_engines(self, engine, ms, fenM2, depth=None):
+        if depth:
+            key = "%s-%d-%s-%d" % (engine, ms, fenM2, depth)
+        else:
+            key = "%s-%d-%s" % (engine, ms, fenM2)
         return self.db_cache_engines[key]
 
-    def set_cache_engines(self, engine, ms, fenM2, move):
-        key = "%s-%d-%s" % (engine, ms, fenM2)
+    def set_cache_engines(self, engine, ms, fenM2, move, depth=None):
+        if depth:
+            key = "%s-%d-%s-%d" % (engine, ms, fenM2, depth)
+        else:
+            key = "%s-%d-%s" % (engine, ms, fenM2)
         self.db_cache_engines[key] = move
+
+    def reinit_cache_engines(self):
+        self.open_cache_engines()
+        self.db_cache_engines.deleteall()
 
     def init_database(self):
         cursor = self._conexion.cursor()
@@ -435,6 +445,7 @@ class Opening:
 
         lo = ListaOpenings(procesador.configuracion)
         lo.add_training_engines_file(os.path.basename(self.nomFichero))
+        self.reinit_cache_engines()
 
     def withTrainings(self):
         return "TRAINING" in self.db_config
@@ -927,7 +938,6 @@ class Opening:
                     self.guardaPartidas(control.rotulo, control.liPartidas, minMoves, with_history=control.with_history)
                     control.liPartidas = []
                     control.with_history = False
-
 
         control = Util.Almacen()
         control.liPartidas = []

@@ -218,9 +218,9 @@ def leeRivales():
     cm.ponMultiPV(20, 500)
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne", "9.1 32bit", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "McBrain-91_x32_old.exe"
-    cm.path_64 = "McBrain-91_x64_bmi2.exe", "9.1 64bit bmi2"
+    cm = ConfigMotor("mcbrain", "Michael Byrne", "9.9 32bit", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McBrain-v99_x32_old.exe"
+    cm.path_64 = "McBrain-v99_x64_bmi2.exe", "9.9 64bit bmi2"
     cm.elo = 3200
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")

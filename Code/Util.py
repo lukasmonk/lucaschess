@@ -994,6 +994,13 @@ class DicSQL(object):
         cursor.close()
         self._conexion.commit()
 
+    def deleteall(self):
+        cursor = self._conexion.cursor()
+        cursor.execute("DELETE FROM %s" % self.table)
+        cursor.execute("VACUUM")
+        cursor.close()
+        self._conexion.commit()
+
     def __enter__(self):
         return self
 

@@ -11,6 +11,7 @@ FILE * fpgn;
 
 char * pgn;
 char * w_pgn;
+char * line;
 int max_pgn;
 char * pos_body;
 
@@ -24,6 +25,7 @@ int raw;
 char * fens[256];
 int pos_fens;
 int max_depth;
+int max_line;
 
 
 /*d = {"B":"WHITE_BISHOP", "P":"WHITE_PAWN", "Q":"WHITE_QUEEN", "R":"WHITE_ROOK", "N":"WHITE_KNIGHT", "K":"WHITE_KING"}
@@ -66,8 +68,10 @@ void pgn_start(char * fich, int depth)
 
     fpgn = fopen(fich, "rb");
     max_pgn = 64*1024;
+    max_line = 64*1024;
     pgn = (char *)malloc(max_pgn);
     pv = (char *)malloc(5*1024);
+    line = (char *)malloc(max_line);
     for( i=0; i < 256; i++)
     {
         labels[i] = (char *) malloc(256);
@@ -90,6 +94,7 @@ void pgn_stop( void )
     fclose(fpgn);
     free(pgn);
     free(pv);
+    free(line);
     for( i=0; i < 256; i++)
     {
         free(labels[i]);
@@ -108,7 +113,34 @@ bool empty_line()
     return true;
 }
 
-void mas_pgn(void)
+bool test_label()
+{
+    char * c;
+    char * end;
+    int n;
+    size_t size;
+
+    if(w_pgn[0] != '[') return false;
+    size = strlen(w_pgn);
+
+    end = w_pgn + size - 1;
+    while (end >= w_pgn && isspace(*end))
+        end--;
+    if( end[0] != ']') return false;
+
+    c = w_pgn;
+    n = 0;
+    while( *c ) {
+        if( *c == '\\') c++;
+        else {
+            if( *c == '"') n++;
+        }
+        c++;
+    }
+    return n == 2;
+}
+
+void test_size_pgn(void)
 {
     int tam_line, dif;
     tam_line = strlen(w_pgn);
@@ -126,7 +158,7 @@ void mas_label(void)
 {
     char *c, *lk, *lv;
 
-    if( pos_label > 255 ) return;
+    if( pos_label > 255 || !test_label()) return;
 
     lk = labels[pos_label];
     lv = values[pos_label];
@@ -171,6 +203,7 @@ void mas_label(void)
 
 int pgn_read( void )
 {
+    long int max_tam;
     w_pgn = pgn;
     fen[0] = 0;
     pos_label = 0;
@@ -179,13 +212,14 @@ int pgn_read( void )
     /* leemos primer label*/
     do
     {
-        if(!fgets(w_pgn, 1024, fpgn)) return false;
+        max_tam = max_pgn - (w_pgn-pgn);
+        if(!fgets(w_pgn, max_tam, fpgn)) return false;
 //        printf("PL:[%s]", w_pgn);
 
         if(w_pgn[0] == '[' )
         {
             mas_label();
-            mas_pgn();
+            test_size_pgn();
             break;
         }
     }
@@ -194,30 +228,32 @@ int pgn_read( void )
     /* leemos resto labels */
     do
     {
-        if(!fgets(w_pgn, 1024, fpgn)) return false; /*EOF*/
+        max_tam = max_pgn - (w_pgn-pgn);
+        if(!fgets(w_pgn, max_tam, fpgn)) return false; /*EOF*/
         if(w_pgn[0] != '[') break;
 //        printf("+L:[%s]", w_pgn);
         mas_label();
-        mas_pgn();
+        test_size_pgn();
     }
     while(1);
 //    printf("PR:[%s]", w_pgn);
 
     pos_body = w_pgn;
-    mas_pgn();
+    test_size_pgn();
 
     /* leemos hasta linea en blanco */
     do
     {
-        if(!fgets(w_pgn, 1024, fpgn)) break; /*EOF*/
-        if(w_pgn[0] == '[') {
+        max_tam = max_pgn - (w_pgn-pgn);
+        if(!fgets(w_pgn, max_tam, fpgn)) break; /*EOF*/
+        if(w_pgn[0] == '[' && test_label()) {
             fseek( fpgn, -strlen(w_pgn)-1, SEEK_CUR );
 //            printf("FR:[%s,%d]", w_pgn, -strlen(w_pgn)-1);
             w_pgn[0] = '\0';
             break;
         }
 //        printf("+R:[%s]", w_pgn);
-        mas_pgn();
+        test_size_pgn();
     }
     while(1);
 
