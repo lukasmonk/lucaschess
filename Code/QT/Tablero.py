@@ -56,9 +56,10 @@ class Tablero(QtGui.QGraphicsView):
         self.dirvisual = None
         self.guion = None
         self.lastFenM2 = ""
-        self.dbVisual = None
-        self.nomdbVisual = None
-        self.dbVisual_showAllways = False
+        self.dbVisual = TabVisual.DBGestorVisual(self.configuracion.ficheroRecursos, False)
+
+        self.current_graphlive = None
+        self.dic_graphlive = None
 
         self.rutinaDropsPGN = None
 
@@ -83,6 +84,9 @@ class Tablero(QtGui.QGraphicsView):
         self.si_borraMovibles = True
 
         self.kb_buffer = []
+
+        # dic = TabVisual.leeGraficos(self.configuracion)
+        # print dic
 
     def init_kb_buffer(self):
         self.kb_buffer = []
@@ -218,15 +222,20 @@ class Tablero(QtGui.QGraphicsView):
 
     def keyPressEvent(self, event):
         k = event.key()
+        m = int(event.modifiers())
 
         if Qt.Key_F1 <= k <= Qt.Key_F10:
             if self.dirvisual and self.dirvisual.keyPressEvent(event):
                 return
-            if self.lanzaDirector():
+            if (m & QtCore.Qt.ControlModifier) > 0:
+                if k == Qt.Key_F1:
+                    self.borraUltimoMovible()
+                elif k == Qt.Key_F2:
+                    self.borraMovibles()
+            elif self.lanzaDirector():
                 self.dirvisual.keyPressEvent(event)
             return
 
-        m = int(event.modifiers())
         event.ignore()
         self.exec_kb_buffer(k, m)
 
@@ -690,7 +699,7 @@ class Tablero(QtGui.QGraphicsView):
 
         menu.separador()
         if self.siDirector:
-            menu.opcion("director", _("Director") + " [%s] " %_("F1-F10 or Ctrl-Right mouse button"), Iconos.Director())
+            menu.opcion("director", _("Director") + " [%s] " %_("F1-F10"), Iconos.Director())
             menu.separador()
 
         if self.siPosibleRotarTablero:
@@ -780,7 +789,6 @@ class Tablero(QtGui.QGraphicsView):
         if self.guion is not None:
             self.guion.cierraPizarra()
             self.guion.cerrado = True
-            self.borraMovibles()
             self.guion = None
 
     def lanzaGuion(self):
@@ -843,48 +851,190 @@ class Tablero(QtGui.QGraphicsView):
             del item
         self.crea()
 
-    def mousePressEvent(self, event):
-        if self.dirvisual and self.dirvisual.mousePressEvent(event):
+    def key_current_graphlive(self, event):
+        m = int(event.modifiers())
+        key = ""
+        if (m & QtCore.Qt.ControlModifier) > 0:
+            key = "CTRL"
+        if (m & QtCore.Qt.AltModifier) > 0:
+            key += "ALT"
+        if (m & QtCore.Qt.ShiftModifier) > 0:
+            key += "SHIFT"
+        return key
+
+    def mousePressGraphLive(self, event, a1h8):
+        if not self.configuracion.directGraphics:
             return
-        self.blindfoldPosicion(False, None, None)
-        QtGui.QGraphicsView.mousePressEvent(self, event)
+        key = self.key_current_graphlive(event)
+        key += "MR"
+        if self.dic_graphlive is None:
+            self.dic_graphlive = self.readGraphLive()
+        elem = self.dic_graphlive[key] if key in self.dic_graphlive else None
+        if elem:
+            elem.a1h8 = a1h8+a1h8
+            if TabVisual.TP_FLECHA == elem.TP:
+                self.current_graphlive = self.creaFlecha(elem)
+                self.current_graphlive.mousePressExt(event)
+            elif TabVisual.TP_MARCO == elem.TP:
+                self.current_graphlive = self.creaMarco(elem)
+                self.current_graphlive.mousePressExt(event)
+            elif TabVisual.TP_MARKER == elem.TP:
+                self.current_graphlive = self.creaMarker(elem)
+                self.current_graphlive.mousePressExt(event)
+            elif TabVisual.TP_SVG == elem.TP:
+                self.current_graphlive = self.creaSVG(elem, False)
+                self.current_graphlive.mousePressExt(event)
+
+            self.current_graphlive.TP = elem.TP
+
+    def mouseMoveGraphLive(self, event):
+        if not self.configuracion.directGraphics:
+            return
+        if self.current_graphlive.TP in (TabVisual.TP_FLECHA, TabVisual.TP_MARCO):
+            self.current_graphlive.mouseMoveExt(event)
+        self.current_graphlive.update()
+
+    def readGraphLive(self):
+        rel = {0: "MR", 1: "ALTMR", 2: "SHIFTMR", 3: "CTRLMR", 4:"CTRLALTMR", 5:"CTRLSHIFTMR", 6: "MR1", 7: "ALTMR1", 8: "SHIFTMR1"}
+        dic = {}
+        db = self.dbVisual
+        li = self.dbVisual.dbConfig["SELECTBANDA"]
+        for xid, pos in li:
+            if xid.startswith("_F"):
+                xdb = db.dbFlechas
+                tp = TabVisual.TP_FLECHA
+            elif xid.startswith("_M"):
+                xdb = db.dbMarcos
+                tp = TabVisual.TP_MARCO
+            elif xid.startswith("_S"):
+                xdb = db.dbSVGs
+                tp = TabVisual.TP_SVG
+            elif xid.startswith("_X"):
+                xdb = db.dbMarkers
+                tp = TabVisual.TP_MARKER
+            else:
+                continue
+            if pos in rel:
+                valor = xdb[xid[3:]]
+                valor.TP = tp
+                valor.tpid = (tp, valor.id)
+                dic[rel[pos]] = valor
+        return dic
+
+    def remove_current_graphlive(self):
+        if self.current_graphlive:
+            self.current_graphlive.hide()
+            del self.current_graphlive
+            self.current_graphlive = None
+            self.borraUltimoMovible()
+
+    def mouseReleaseGraphLive(self, event):
+        if not self.configuracion.directGraphics:
+            return
+        h8 = self.event2a1h8(event)
+        if h8 is not None:
+            a1 = self.current_graphlive.bloqueDatos.a1h8[:2]
+            key = self.key_current_graphlive(event)
+            if a1 == h8 and not key.startswith("CTRL"):
+                self.remove_current_graphlive()
+                key += "MR1"
+                elem = self.dic_graphlive[key]
+                elem.a1h8 = a1+a1
+                tp = elem.TP
+                if tp == TabVisual.TP_SVG:
+                    self.current_graphlive = self.creaSVG(elem)
+                    self.current_graphlive.TP = tp
+                elif tp == TabVisual.TP_MARCO:
+                    self.current_graphlive = self.creaMarco(elem)
+                    self.current_graphlive.TP = tp
+                elif tp == TabVisual.TP_MARKER:
+                    self.current_graphlive = self.creaMarker(elem)
+                    self.current_graphlive.TP = tp
+
+            else:
+                self.current_graphlive.ponA1H8(a1 + h8)
+            keys = self.dicMovibles.keys()
+            if len(keys) > 1:
+                last = len(keys)-1
+                bd_last = self.current_graphlive.bloqueDatos
+                for n, (pos, item) in enumerate(self.dicMovibles.items()):
+                    if n != last:
+                        bd = item.bloqueDatos
+                        if bd_last.tpid == bd.tpid and bd_last.a1h8 in (bd.a1h8, bd.a1h8[2:]+bd.a1h8[:2]):
+                            self.borraMovible(self.current_graphlive)
+                            self.borraMovible(item)
+
+            self.refresh()
+        self.current_graphlive = None
+
+    def mouseMoveEvent(self, event):
+        if self.dirvisual and self.dirvisual.mouseMoveEvent(event):
+            return
         pos = event.pos()
         x = pos.x()
         y = pos.y()
         minimo = self.margenCentro
         maximo = self.margenCentro + (self.anchoCasilla * 8)
         siDentro = (minimo < x < maximo) and (minimo < y < maximo)
-        if event.button() == QtCore.Qt.RightButton:
-            if siDentro:
-                if not self.dirvisual:
-                    m = int(event.modifiers())
-                    if (m & QtCore.Qt.ControlModifier) == 0:
-                        return
-                self.lanzaDirector()
-            # if siDentro and hasattr(self.pantalla, "boardRightMouse") and not self.dirvisual:
-                # m = int(event.modifiers())
-                # siShift = (m & QtCore.Qt.ShiftModifier) > 0
-                # siControl = (m & QtCore.Qt.ControlModifier) > 0
-                # siAlt = (m & QtCore.Qt.AltModifier) > 0
-                # self.pantalla.boardRightMouse(siShift, siControl, siAlt)
-            # QtGui.QGraphicsView.mousePressEvent(self,event)
+        if siDentro and self.current_graphlive:
+            return self.mouseMoveGraphLive(event)
+
+        QtGui.QGraphicsView.mouseMoveEvent(self, event)
+
+    def mouseReleaseEvent(self, event):
+        if self.dirvisual and self.dirvisual.mouseReleaseEvent(event):
             return
-        if not siDentro:
+        if self.pendingRelease:
+            for objeto in self.pendingRelease:
+                objeto.hide()
+                del objeto
+            self.escena.update()
+            self.update()
+            self.pendingRelease = None
+        QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+        if self.current_graphlive:
+            self.mouseReleaseGraphLive(event)
+
+
+    def event2a1h8(self, event):
+        pos = event.pos()
+        x = pos.x()
+        y = pos.y()
+        minimo = self.margenCentro
+        maximo = self.margenCentro + (self.anchoCasilla * 8)
+        if (minimo < x < maximo) and (minimo < y < maximo):
+            xc = 1 + int(float(x - self.margenCentro) / self.anchoCasilla)
+            yc = 1 + int(float(y - self.margenCentro) / self.anchoCasilla)
+
+            if self.siBlancasAbajo:
+                yc = 9 - yc
+            else:
+                xc = 9 - xc
+
+            f = chr(48 + yc)
+            c = chr(96 + xc)
+            a1h8 = c + f
+        else:
+            a1h8 = None
+        return a1h8
+
+    def mousePressEvent(self, event):
+        if self.dirvisual and self.dirvisual.mousePressEvent(event):
+            return
+        a1h8 = self.event2a1h8(event)
+
+        siRight = event.button() == QtCore.Qt.RightButton
+        if siRight and a1h8:
+            return self.mousePressGraphLive(event, a1h8)
+
+        QtGui.QGraphicsView.mousePressEvent(self, event)
+
+        self.blindfoldPosicion(False, None, None)
+        if a1h8 is None:
             if self.atajosRaton:
                 self.atajosRaton(None)
             # QtGui.QGraphicsView.mousePressEvent(self,event)
             return
-        xc = 1 + int(float(x - self.margenCentro) / self.anchoCasilla)
-        yc = 1 + int(float(y - self.margenCentro) / self.anchoCasilla)
-
-        if self.siBlancasAbajo:
-            yc = 9 - yc
-        else:
-            xc = 9 - xc
-
-        f = chr(48 + yc)
-        c = chr(96 + xc)
-        a1h8 = c + f
 
         if self.atajosRaton:
             self.atajosRaton(a1h8)
@@ -967,22 +1117,6 @@ class Tablero(QtGui.QGraphicsView):
             self.pendingRelease.append(svg)
         self.escena.update()
 
-    def mouseMoveEvent(self, event):
-        if self.dirvisual and self.dirvisual.mouseMoveEvent(event):
-            return
-        QtGui.QGraphicsView.mouseMoveEvent(self, event)
-
-    def mouseReleaseEvent(self, event):
-        if self.dirvisual and self.dirvisual.mouseReleaseEvent(event):
-            return
-        if self.pendingRelease:
-            for objeto in self.pendingRelease:
-                objeto.hide()
-                del objeto
-            self.escena.update()
-            self.update()
-            self.pendingRelease = None
-        QtGui.QGraphicsView.mouseReleaseEvent(self, event)
 
     def mouseDoubleClickEvent(self, event):
         item = self.itemAt(event.pos())
@@ -1016,32 +1150,25 @@ class Tablero(QtGui.QGraphicsView):
         self.init_kb_buffer()
 
     def dbVisual_setFichero(self, fichero):
-        self.dbVisual_close()
-        self.nomdbVisual = fichero
+        self.dbVisual.setFichero(fichero)
 
     def dbVisual_setShowAllways(self, ok):
-        self.dbVisual_showAllways = ok
+        self.dbVisual.showAllways(ok)
 
-    def dbVisual_open(self):
-        if self.dbVisual is None:
-            if self.nomdbVisual is None:
-                self.nomdbVisual = self.configuracion.ficheroFEN
-            self.dbVisual = Util.DicSQL(self.nomdbVisual, tabla="FEN")
-        return self.dbVisual
+    def dbVisual_setSaveAllways(self, ok):
+        self.dbVisual.saveAllways(ok)
 
     def dbVisual_close(self):
-        if self.dbVisual is not None:
-            self.dbVisual.close()
-            self.dbVisual = None
+        self.dbVisual.close()
 
     def dbVisual_contiene(self, fenM2):
-        return fenM2 in self.dbVisual_open()
+        return fenM2 in self.dbVisual.dbFEN and len(self.dbVisual.dbFEN[fenM2]) > 0
 
     def dbVisual_lista(self, fenM2):
-        return self.dbVisual_open()[fenM2]
+        return self.dbVisual.dbFEN[fenM2]
 
     def dbVisual_save(self, fenM2, lista):
-        self.dbVisual_open()[fenM2] = lista
+        self.dbVisual.dbFEN[fenM2] = lista
 
     def saveVisual(self):
         alm = self.almSaveVisual = Util.Almacen()
@@ -1051,9 +1178,8 @@ class Tablero(QtGui.QGraphicsView):
         alm.dirvisual = self.dirvisual
         alm.guion = self.guion
         alm.lastFenM2 = self.lastFenM2
-        alm.dbVisual = self.dbVisual
-        alm.nomdbVisual = self.nomdbVisual
-        alm.dbVisual_showAllways = self.dbVisual_showAllways
+        alm.nomdbVisual = self.dbVisual.fichero
+        alm.dbVisual_showAllways = self.dbVisual.showAllways()
 
     def restoreVisual(self):
         alm = self.almSaveVisual
@@ -1063,31 +1189,31 @@ class Tablero(QtGui.QGraphicsView):
         self.dirvisual = alm.dirvisual
         self.guion = alm.guion
         self.lastFenM2 = alm.lastFenM2
-        self.dbVisual = alm.dbVisual
-        self.nomdbVisual = alm.nomdbVisual
-        self.dbVisual_showAllways = alm.dbVisual_showAllways
+        self.dbVisual.setFichero(alm.nomdbVisual)
+        self.dbVisual.showAllways(alm.dbVisual_showAllways)
 
     def setUltPosicion(self, posicion):
         self.cierraGuion()
         self.ultPosicion = posicion
-
-        if self.siDirectorIcon or self.dbVisual_showAllways:
+        if self.siDirectorIcon or self.dbVisual.showAllways():
             fenM2 = posicion.fenM2()
             if self.lastFenM2 != fenM2:
                 self.lastFenM2 = fenM2
                 if self.dbVisual_contiene(fenM2):
                     if self.siDirectorIcon:
                         self.scriptSC_menu.show()
-                    if self.dbVisual_showAllways:
+                    if self.dbVisual.showAllways():
                         self.lanzaGuion()
                 elif self.siDirectorIcon:
                     self.scriptSC_menu.hide()
 
-    def ponPosicion(self, posicion):
+    def ponPosicion(self, posicion, siBorraMoviblesAhora=True):
         if self.dirvisual:
             self.dirvisual.cambiadaPosicionAntes()
+        elif self.dbVisual.saveAllways():
+            self.dbVisual.saveMoviblesTablero(self)
 
-        if self.si_borraMovibles:
+        if self.si_borraMovibles and siBorraMoviblesAhora:
             self.borraMovibles()
         self.ponPosicionBase(posicion)
 
@@ -1832,6 +1958,19 @@ class Tablero(QtGui.QGraphicsView):
                 del self.dicMovibles[k]
                 self.xremoveItem(uno)
                 return
+
+    def borraUltimoMovibleA1(self, a1):
+        for k, uno in reversed(self.dicMovibles.items()):
+            a1h8 = uno.bloqueDatos.a1h8
+            if a1h8.startswith(a1) or a1h8.endswith(a1):
+                self.borraMovible(uno)
+                break
+
+    def borraUltimoMovible(self):
+        keys = self.dicMovibles.keys()
+        if keys:
+            self.xremoveItem(self.dicMovibles[keys[-1]])
+            del self.dicMovibles[keys[-1]]
 
     def borraMovibles(self):
         for k, uno in self.dicMovibles.items():

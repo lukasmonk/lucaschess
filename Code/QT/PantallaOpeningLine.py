@@ -987,7 +987,9 @@ class WLines(QTVarios.WDialogo):
         self.glines.refresh()
 
     def procesosFinales(self):
-        self.dbop.setconfig("WHITEBOTTOM", self.pboard.tablero.siBlancasAbajo)
+        tablero = self.pboard.tablero
+        tablero.dbVisual.saveMoviblesTablero(tablero)
+        self.dbop.setconfig("WHITEBOTTOM", tablero.siBlancasAbajo)
         self.tabsanalisis.saveConfig()
         self.dbop.close()
         self.guardarVideo()

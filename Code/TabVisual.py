@@ -4,6 +4,7 @@ import time
 from Code.QT import TabTipos
 from Code import TrListas
 from Code import Util
+from Code import VarGen
 
 
 class PFlecha(TabTipos.Flecha):
@@ -469,7 +470,7 @@ class Guion:
 
     def restoreTablero(self):
         self.tablero.dirvisual = None
-        self.tablero.ponPosicion(self.tablero_ultPosicion)
+        self.tablero.ponPosicion(self.tablero_ultPosicion, siBorraMoviblesAhora=False)
         if self.tablero_flechaSC:
             desde, hasta  = self.tablero_flechaSC
             self.tablero.ponFlechaSC(desde, hasta)
@@ -574,6 +575,26 @@ class Guion:
     def tarea(self, nTarea):
         return self.liGTareas[nTarea]
 
+    def borraRepeticionUltima(self):
+        len_li = len(self.liGTareas)
+        if len_li > 1:
+            ult_tarea = self.liGTareas[-1]
+            if hasattr(ult_tarea, "_itemSC"):
+                ult_bd = ult_tarea.bloqueDatos()
+                ult_tp, ult_xid = ult_bd.tpid
+                ult_a1h8 = ult_bd.a1h8
+                for pos in range(len_li-1):
+                    tarea = self.liGTareas[pos]
+                    if hasattr(tarea, "_itemSC"):
+                        bd = tarea.itemSC().bloqueDatos
+                        t_tp, t_xid =  bd.tpid
+                        t_a1h8 = bd.a1h8
+                        t_h8a1 = t_a1h8[2:] + t_a1h8[:2]
+                        if ult_tp == t_tp and ult_xid == t_xid and ult_a1h8 in (t_a1h8, t_h8a1):
+                            return [pos, len_li-1]
+        return False
+
+
     def arriba(self, nTarea):
         if nTarea > 0:
             self.liGTareas[nTarea], self.liGTareas[nTarea - 1] = self.liGTareas[nTarea - 1], self.liGTareas[nTarea]
@@ -621,20 +642,45 @@ class Guion:
         self.nuevaTarea(tarea, -1)
         return tarea
 
+    def recuperaMoviblesTablero(self):
+        stPrevios = set()
+        if self.tablero.dicMovibles:
+            for k, item in self.tablero.dicMovibles.iteritems():
+                bd = item.bloqueDatos
+                tp, xid = bd.tpid
+                if tp == TP_FLECHA:
+                    tarea = GT_Flecha(self)
+
+                elif tp == TP_MARCO:
+                    tarea = GT_Marco(self)
+
+                elif tp == TP_SVG:
+                    tarea = GT_SVG(self)
+
+                elif tp == TP_MARKER:
+                    tarea = GT_Marker(self)
+                tarea.itemSC(item)
+                self.nuevaTarea(tarea)
+                stPrevios.add((tp, xid, bd.a1h8))
+        return stPrevios
+
     def recupera(self):
         fenM2 = self.tablero.ultPosicion.fenM2()
         lista = self.tablero.dbVisual_lista(fenM2)
         self.liGTareas = []
-        if lista is None:
-            return
-
-        for reg in lista:
-            self.recuperaReg(reg)
+        stPrevios = self.recuperaMoviblesTablero()
+        if lista is not None:
+            for reg in lista:
+                bd = reg['_bloqueDatos']
+                buscar = (bd.tpid[0], bd.tpid[1], bd.a1h8)
+                if buscar not in stPrevios:
+                    self.recuperaReg(reg)
 
         if self.winDirector:
             for tarea in self.liGTareas:
                 if tarea.tp() not in (TP_ACTION, TP_CONFIGURATION, TP_TEXTO):
-                    tarea.run()
+                    if not tarea.itemSC():
+                        tarea.run()
                     tarea.marcado(True)
                 else:
                     tarea.marcado(False)
@@ -642,7 +688,8 @@ class Guion:
     def play(self):
         self.cerrado = False
         for tarea in self.liGTareas:
-            tarea.run()
+            if not tarea.itemSC():
+                tarea.run()
             if tarea.tp() == TP_TEXTO and tarea.continuar():
                 while self.pizarra is not None and self.pizarra.siBloqueada():
                     time.sleep(0.05)
@@ -650,7 +697,175 @@ class Guion:
                 return
 
 
-class DBvisual(Util.DicSQL):
-    def __init__(self, fichero):
-        self.fichero = fichero
-        Util.DicSQL.__init__(self, fichero, tabla="FEN")
+class DBGestorVisual():
+    def __init__(self, fichero, showAllways=False, saveAllways=False):
+        self._dbFEN = self._dbConfig = self._dbFlechas = self._dbMarcos = self._dbSVGs = self._dbMarkers = None
+        self._showAllways = showAllways
+        self._saveAllways = saveAllways
+        self.setFichero(fichero)
+
+    def saveMoviblesTablero(self, tablero):
+        fenM2 = tablero.lastFenM2
+        if not fenM2:
+            return
+        dicMovibles = tablero.dicMovibles
+        if len(dicMovibles) == 0:
+            if fenM2 in self.dbFEN:
+                del self.dbFEN[fenM2]
+            return
+        guion = Guion(tablero)
+        guion.recuperaMoviblesTablero()
+        self.dbFEN[fenM2] = guion.guarda()
+
+    def saveAllways(self, yesno=None):
+        if yesno is not None:
+            self._saveAllways = yesno
+        return self._saveAllways
+
+    def showAllways(self, yesno=None):
+        if yesno is not None:
+            self._showAllways = yesno
+        return self._showAllways
+
+    def getConfig(self, key, default=None):
+        return self.dbConfig.get(key, default)
+
+    def setConfig(self, key, value):
+        self.dbConfig[key] = value
+
+    def setFichero(self, fichero):
+        self.close()
+        self._fichero = fichero if fichero is not None else VarGen.configuracion.ficheroRecursos
+        if not Util.existeFichero(self._fichero):
+            Util.copiaFichero("IntFiles/recursos.dbl", self._fichero)
+
+        li = self.dbConfig["SELECTBANDA"]
+        if li is None:
+            dbr = DBGestorVisual("IntFiles/recursos.dbl", False)
+            li = dbr.dbConfig["SELECTBANDA"]
+            self.dbConfig["SELECTBANDA"] = li
+            for xid, pos in li:
+                key = xid[3:]
+                if xid.startswith("_F"):
+                    self.dbFlechas[key] = dbr.dbFlechas[key]
+                elif xid.startswith("_M"):
+                    self.dbMarcos[key] = dbr.dbMarcos[key]
+                elif xid.startswith("_S"):
+                    self.dbSVGs[key] = dbr.dbSVGs[key]
+                elif xid.startswith("_X"):
+                    self.dbMarkers[key] = dbr.dbMarkers[key]
+            dbr.close()
+
+
+    @property
+    def fichero(self):
+        return self._fichero
+
+    @property
+    def dbFEN(self):
+        if self._dbFEN is None:
+            self._dbFEN = Util.DicSQL(self._fichero, tabla="FEN")
+        return self._dbFEN
+
+    @property
+    def dbConfig(self):
+        if self._dbConfig is None:
+            self._dbConfig = Util.DicSQL(self._fichero, tabla="Config")
+        return self._dbConfig
+
+    @property
+    def dbFlechas(self):
+        if self._dbFlechas is None:
+            self._dbFlechas = Util.DicSQL(self._fichero, tabla="Flechas")
+        return self._dbFlechas
+
+    @property
+    def dbMarcos(self):
+        if self._dbMarcos is None:
+            self._dbMarcos = Util.DicSQL(self._fichero, tabla="Marcos")
+        return self._dbMarcos
+
+    @property
+    def dbSVGs(self):
+        if self._dbSVGs is None:
+            self._dbSVGs = Util.DicSQL(self._fichero, tabla="SVGs")
+        return self._dbSVGs
+
+    @property
+    def dbMarkers(self):
+        if self._dbMarkers is None:
+            self._dbMarkers = Util.DicSQL(self._fichero, tabla="Markers")
+        return self._dbMarkers
+
+
+    def close(self):
+        for db in (self._dbFEN, self._dbConfig, self._dbFlechas, self._dbMarcos, self._dbSVGs, self._dbMarkers):
+            if db is not None:
+                db.close()
+        self._dbFEN = self._dbConfig = self._dbFlechas = self._dbMarcos = self._dbSVGs = self._dbMarkers = None
+
+
+# def readGraphLive(configuracion):
+#     db = DBGestorVisual(configuracion.ficheroRecursos, False)
+#     rel = {0: "MR", 1: "ALTMR", 2: "SHIFTMR", 6: "MR1", 7: "ALTMR1", 8: "SHIFTMR1" }
+#     dic = {}
+#     li = db.dbConfig["SELECTBANDA"]
+#     for xid, pos in li:
+#         if xid.startswith("_F"):
+#             xdb = db.dbFlechas
+#             tp = TP_FLECHA
+#         elif xid.startswith("_M"):
+#             xdb = db.dbMarcos
+#             tp = TP_MARCO
+#         elif xid.startswith("_S"):
+#             xdb = db.dbSVGs
+#             tp = TP_SVG
+#         elif xid.startswith("_X"):
+#             xdb = db.dbMarkers
+#             tp = TP_MARKER
+#         else:
+#             continue
+#         if pos in rel:
+#             valor = xdb[xid[3:]]
+#             valor.TP = tp
+#             dic[rel[pos]] = valor
+#
+#     db.close()
+#     return dic
+#
+
+# def leeGraficos(configuracion):
+#     dicResp = {}
+#
+#     fdb = configuracion.ficheroRecursos
+#     dbConfig = Util.DicSQL(fdb, tabla="Config")
+#     li = dbConfig["SELECTBANDA"]
+#     dbConfig.close()
+#     dbFlechas = dbMarcos = dbSVGs = dbMarkers = None
+#     for xid, pos in li:
+#         if xid.startswith("_F"):
+#             if not dbFlechas:
+#                 dbFlechas = Util.DicSQL(fdb, tabla="Flechas")
+#             dicResp[pos] = dbFlechas[xid[3:]]
+#             dicResp[pos].xtipo = TP_FLECHA
+#         elif xid.startswith("_M"):
+#             if not dbMarcos:
+#                 dbMarcos = Util.DicSQL(fdb, tabla="Marcos")
+#             dicResp[pos] = dbMarcos[xid[3:]]
+#             dicResp[pos].xtipo = TP_MARCO
+#         elif xid.startswith("_S"):
+#             if not dbSVGs:
+#                 dbSVGs = Util.DicSQL(fdb, tabla="SVGs")
+#             dicResp[pos] = dbSVGs[xid[3:]]
+#             dicResp[pos].xtipo = TP_SVG
+#         elif xid.startswith("_X"):
+#             if not dbMarkers:
+#                 dbMarkers = Util.DicSQL(fdb, tabla="Markers")
+#             dicResp[pos] = dbMarkers[xid[3:]]
+#             dicResp[pos].xtipo = TP_MARKER
+#     for db in (dbFlechas, dbMarcos, dbSVGs, dbMarkers):
+#         if db:
+#             db.close()
+#
+#     return dicResp
+#

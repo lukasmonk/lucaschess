@@ -27,6 +27,7 @@ class GarbageCollector(QtCore.QObject):
         self.timer.start(self.INTERVAL)
 
     def check(self):
+        # num = gc.collect()
         l0, l1, l2 = gc.get_count()
         num = 0
         if l0 > self.threshold[0]:
@@ -35,7 +36,14 @@ class GarbageCollector(QtCore.QObject):
                 num = gc.collect(1)
                 if l2 > self.threshold[2]:
                     num = gc.collect(2)
+        # lista = gc.get_objects()
+        # with open("mira", "wb") as f:
+        #     for x in lista:
+        #         f.write(str(x)+"\n")
         return num
+
+    def collect(self):
+        gc.collect()
 
 
 def beep():

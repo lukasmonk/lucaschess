@@ -75,8 +75,8 @@ class WGames(QtGui.QWidget):
             (_("Last"), Iconos.Final(), self.tw_gobottom), None,
             (_("Filter"), Iconos.Filtrar(), self.tw_filtrar), None,
             (_("Remove"), Iconos.Borrar(), self.tw_borrar),None,
-            (_("Move up"), Iconos.Arriba(), self.tw_up), None,
-            (_("Move down"), Iconos.Abajo(), self.tw_down), None,
+            (_("Up"), Iconos.Arriba(), self.tw_up), None,
+            (_("Down"), Iconos.Abajo(), self.tw_down), None,
             (_("Config"), Iconos.Configurar(), self.tw_configure), None,
             (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
         ]

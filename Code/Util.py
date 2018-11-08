@@ -694,6 +694,14 @@ class Timer:
         self.paraMarcador(0.00)
         return self.tiempoPendiente
 
+    def save(self):
+        return (self.tiempoPendiente, self.marcaZeitnot)
+
+    def restore(self, tvar):
+        self.tiempoPendiente, self.marcaZeitnot = tvar
+        self.marcaTiempo = None
+        self.txt = ""
+
 
 def fideELO(eloJugador, eloRival, resultado):
     if resultado == +1:
@@ -911,6 +919,7 @@ class DicSQL(object):
         self.cache[key] = obj
 
     def __setitem__(self, key, obj):
+
         cursor = self._conexion.cursor()
         dato = base64.encodestring(cPickle.dumps(obj))
         key = str(key)
@@ -1049,6 +1058,125 @@ class LIdisk:
         if self._conexion:
             self._conexion.close()
             self._conexion = None
+
+
+class Cursor:
+    def __init__(self, nomDB, conexion = None, with_commit=False):
+        self.nomDB = nomDB
+        self.conexion = conexion
+        self.cursor = None
+        self.close_conexion = conexion is None
+        self.with_commit = with_commit
+
+    def __enter__(self):
+        if self.conexion is None:
+            self.conexion = sqlite3.connect(self.nomDB)
+        self.cursor = self.conexion.cursor()
+        return self.cursor
+
+    def __exit__(self, type, value, traceback):
+        if self.cursor:
+            self.cursor.close()
+        if self.conexion and self.close_conexion:
+            if self.with_commit:
+                self.conexion.commit()
+            self.conexion.close()
+
+
+class ListSQL(object):
+    def __init__(self, nomDB, tabla="Datos", auto_closed=True):
+        self.nomDB = nomDB
+        self.tabla = tabla
+        if not auto_closed:
+            self.conexion = sqlite3.connect(nomDB)
+            atexit.register(self.close)
+        else:
+            self.conexion = None
+        self.test_exist()
+        self.liRowIDs = self.leeIDs()
+        self.auto_closed = auto_closed
+
+    def close(self):
+        if self.conexion:
+            self.conexion.close()
+            self.conexion = None
+
+    def get_cursor(self):
+        return Cursor(self.nomDB, conexion=self.conexion)
+
+    def get_cursor_commit(self):
+        return Cursor(self.nomDB, with_commit=True, conexion=self.conexion)
+
+    def test_exist(self):
+        with self.get_cursor() as cursor:
+            cursor.execute("pragma table_info(%s)" % self.tabla)
+            liCampos = cursor.fetchall()
+            if not liCampos:
+                sql = "CREATE TABLE %s( DATO BLOB );" % self.tabla
+                cursor.execute(sql)
+
+    def leeIDs(self):
+        with self.get_cursor() as cursor:
+            sql = "SELECT ROWID FROM %s" % self.tabla
+            cursor.execute(sql)
+            li = [rowid for rowid, in cursor.fetchall()]
+            return li
+
+    def append(self, valor):
+        with self.get_cursor_commit() as cursor:
+            sql = "INSERT INTO %s( DATO ) VALUES( ? )" % self.tabla
+            cursor.execute(sql, [var2blob(valor)])
+            self.liRowIDs.append(cursor.lastrowid)
+
+    def __setitem__(self, num, valor):
+        if num < len(self.liRowIDs):
+            with self.get_cursor_commit() as cursor:
+                sql = "UPDATE %s SET dato=? WHERE ROWID = ?" % self.tabla
+                rowid = self.liRowIDs[num]
+                cursor.execute(sql, [var2blob(valor), rowid])
+
+    def __delitem__(self, num):
+        if num < len(self.liRowIDs):
+            with self.get_cursor_commit() as cursor:
+                sql = "DELETE FROM %s WHERE ROWID= ?" % self.tabla
+                rowid = self.liRowIDs[num]
+                cursor.execute(sql, [rowid,])
+                del self.liRowIDs[num]
+
+    def __getitem__(self, num):
+        if num < len(self.liRowIDs):
+            with self.get_cursor() as cursor:
+                sql = "SELECT dato FROM %s WHERE ROWID= ?" % self.tabla
+                rowid = self.liRowIDs[num]
+                cursor.execute(sql, [rowid,])
+                li = cursor.fetchone()
+                return blob2var(li[0])
+
+    def __len__(self):
+        return len(self.liRowIDs)
+
+    def __iter__(self):
+        self.num = 0
+        self.max = len(self.liRowIDs)
+        return self
+
+    def next(self):
+        if self.num < self.max:
+            result = self.__getitem__(self.num)
+            self.num += 1
+            return result
+        else:
+            raise StopIteration
+
+    def pack(self):
+        with self.get_cursor_commit() as cursor:
+            cursor.execute("VACUUM")
+
+    def zap(self):
+        with self.get_cursor_commit() as cursor:
+            cursor.execute("DELETE FROM %s" % self.tabla)
+            cursor.execute("VACUUM")
+            self.liRowIDs = []
 
 
 class DicRaw:

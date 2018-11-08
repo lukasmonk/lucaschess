@@ -1,6 +1,8 @@
 import copy
 import time
 
+from PyQt4 import QtCore
+
 from Code import Apertura
 from Code import Everest
 from Code import Gestor
@@ -98,6 +100,7 @@ class GestorEverest(Gestor.Gestor):
 
     def terminar(self):
         self.analizaTerminar()
+        self.terminaNoContinuo()
         self.procesador.inicio()
         self.procesador.showEverest(self.expedition.recno)
 
@@ -113,12 +116,14 @@ class GestorEverest(Gestor.Gestor):
         self.pgnRefresh(True)
         self.ponPosicionDGT()
         self.analizaFinal()
+        self.terminaNoContinuo()
 
         self.ponRotulo1(self.expedition.label())
         self.ponPuntos()
         self.siguienteJugada()
 
     def restart(self, lost_points):
+        self.terminaNoContinuo()
         change_game = self.expedition.add_try(False, self.tiempo, self.puntos)
         self.tiempo = 0.0
         licoment = []
@@ -159,6 +164,26 @@ class GestorEverest(Gestor.Gestor):
             self.siAnalizando = False
             self.xanalyzer.terminar()
 
+    def analizaNoContinuo(self):
+        self.tiempoNoContinuo += 500
+        if self.tiempoNoContinuo >= 5000:
+            self.analizaMinimo(5)
+            self.analizaFinal()
+            self.pendienteNoContinuo = False
+        else:
+            QtCore.QTimer.singleShot(500, self.analizaNoContinuo)
+
+    def analizaNoContinuoFinal(self):
+        if self.tiempoNoContinuo < 5000:
+            um = QTUtil2.analizando(self.pantalla)
+            self.analizaMinimo(5000)
+            um.final()
+
+    def terminaNoContinuo(self):
+        if not self.continueTt:
+            self.tiempoNoContinuo = 99999
+            self.pendienteNoContinuo = False
+
     def siguienteJugada(self):
         if self.estado == kFinJuego:
             return
@@ -196,11 +221,14 @@ class GestorEverest(Gestor.Gestor):
         else:
             self.siJuegaHumano = True
             self.pensando(True)
-            if self.continueTt:
-                self.analizaInicio()
+            self.analizaInicio()
             self.activaColor(siBlancas)
             self.pensando(False)
             self.iniTiempo = time.time()
+            if not self.continueTt:
+                QtCore.QTimer.singleShot(1000, self.analizaNoContinuo)
+                self.tiempoNoContinuo = 0
+                self.pendienteNoContinuo = True
 
     def mueveHumano(self, desde, hasta, coronacion=""):
         jgUsu = self.checkMueveHumano(desde, hasta, coronacion)
@@ -238,12 +266,16 @@ class GestorEverest(Gestor.Gestor):
             if saved:
                 rmObj, posObj, analisis, mrm = self.dic_analysis[fen]
             else:
-                um = QTUtil2.analizando(self.pantalla)
-                mrm = self.analizaMinimo(5000)
+                if self.continueTt:
+                    um = QTUtil2.analizando(self.pantalla)
+                    mrm = self.analizaMinimo(5000) if self.continueTt else self.mrm
+                    um.final()
+                else:
+                    self.analizaNoContinuoFinal()
+                    mrm = self.mrm
                 rmObj, posObj = mrm.buscaRM(jgObj.movimiento())
                 analisis = mrm, posObj
                 self.dic_analysis[fen] = [rmObj, posObj, analisis, mrm]
-                um.final()
 
             rmUsu, posUsu = mrm.buscaRM(jgUsu.movimiento())
             if rmUsu is None:
@@ -275,6 +307,8 @@ class GestorEverest(Gestor.Gestor):
                 comentario = "%s: %s %s\n%s: %s %s\n%s" % (self.nombreObj, jgObj.pgnSP(), comentarioObj,
                                                            self.configuracion.jugador, jgUsu.pgnSP(), comentarioUsu,
                                                            comentarioPuntos)
+        if not self.continueTt:
+            self.terminaNoContinuo()
 
         self.analizaFinal()
 

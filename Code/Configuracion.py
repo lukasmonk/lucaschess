@@ -165,6 +165,7 @@ class Configuracion:
         self.positionToolBoard = "T"
 
         self.directorIcon = False
+        self.directGraphics = True
 
         self.coloresPGNdefecto()
 
@@ -584,6 +585,7 @@ class Configuracion:
         dic["POSITIONTOOLBOARD"] = self.positionToolBoard
 
         dic["DIRECTORICON"] = self.directorIcon
+        dic["DIRECTGRAPHICS"] = self.directGraphics
 
         dic["FICHEROBMT"] = self.ficheroBMT
         dic["FICHEROFEN"] = self.ficheroFEN
@@ -736,6 +738,7 @@ class Configuracion:
                 self.positionToolBoard = dg("POSITIONTOOLBOARD", self.positionToolBoard)
 
                 self.directorIcon = dg("DIRECTORICON", self.directorIcon)
+                self.directGraphics = dg("DIRECTGRAPHICS", self.directGraphics)
 
                 self.familia = dg("FAMILIA", self.familia)
 

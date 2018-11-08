@@ -682,6 +682,8 @@ class Menu(QtGui.QMenu):
         QtCore.QCoreApplication.processEvents()
         QtGui.QApplication.processEvents()
         resp = self.exec_(QtGui.QCursor.pos())
+        import gc
+        gc.collect()
         if resp:
             return resp.clave
         else:

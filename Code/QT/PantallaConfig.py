@@ -197,11 +197,13 @@ def opciones(parent, configuracion):
     liB.append((_X(_("Enable %1"), _("DGT board")) + ":", configuracion.siDGT))
     liB.append(separador)
     # liT.append((FormLayout.Dial(_("Opacity of tool icon"), 1, 9, siporc=False), configuracion.opacityToolBoard))
-    liB.append((_("Show configuration icon"), configuracion.opacityToolBoard > 6))
+    liB.append((_("Show configuration icon") + ":", configuracion.opacityToolBoard > 6))
     liPos = [configuracion.positionToolBoard, ("B", _("Bottom")), ("T", _("Top"))]
     liB.append((_("Configuration icon position") + ":", liPos))
     liB.append(separador)
-    liB.append((_("Show icon when position has graphic information"), configuracion.directorIcon))
+    liB.append((_("Show icon when position has graphic information") + ":", configuracion.directorIcon))
+    liB.append(separador)
+    liB.append((_("Live graphics with the right mouse button") + ":", configuracion.directGraphics))
 
     liB.append(separador)
 
@@ -257,7 +259,7 @@ def opciones(parent, configuracion):
             configuracion.autocoronacion,
             configuracion.cursorThinking, configuracion.siActivarCapturas, configuracion.tipoMaterial,
             configuracion.siActivarInformacion, siDGT, toolIcon, configuracion.positionToolBoard,
-            configuracion.directorIcon) = liB
+            configuracion.directorIcon, configuracion.directGraphics) = liB
         configuracion.opacityToolBoard = 10 if toolIcon else 1
         configuracion.rapidezMovPiezas = drap[rapidezMovPiezas]
         if configuracion.siDGT != siDGT:

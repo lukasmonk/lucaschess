@@ -36,6 +36,7 @@ class BoardLines(QtGui.QWidget):
         self.tablero.dispatchSize(self.ajustaAncho)
         self.tablero.dbVisual_setFichero(self.dbop.nomFichero)
         self.tablero.dbVisual_setShowAllways(True)
+        self.tablero.dbVisual_setSaveAllways(True)
 
         self.tablero.ponerPiezasAbajo(self.dbop.getconfig("WHITEBOTTOM", True))
 

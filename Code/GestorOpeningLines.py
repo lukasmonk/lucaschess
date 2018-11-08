@@ -30,7 +30,7 @@ class GestorOpeningEngines(Gestor.Gestor):
         self.tipoJuego = kJugOpeningLines
 
         self.level = self.dbop.getconfig("ENG_LEVEL", 0)
-        self.numengine = self.dbop.getconfig("ENG_ENGINE", 0)
+        self.numengine = self.dbop.getconfig("ENG_ENGINE", 0)-1
 
         self.trainingEngines = self.dbop.trainingEngines()
 
@@ -276,6 +276,56 @@ class GestorOpeningEngines(Gestor.Gestor):
 
         self.ponRotulo1("<br>".join(li))
 
+    def run_auto_analysis(self):
+        lista = []
+        for njg in range(self.partida.numJugadas()):
+            jg = self.partida.jugada(njg)
+            if jg.siBlancas() == self.siJugamosConBlancas:
+                fenM2 = jg.posicionBase.fenM2()
+                if fenM2 not in self.dicFENm2:
+                    jg.njg = njg
+                    lista.append(jg)
+                    jg.fenM2 = fenM2
+        total = len(lista)
+        for pos, jg in enumerate(lista, 1):
+            if self.siCancelado():
+                break
+            self.ponteEnJugada(jg.njg)
+            self.mensEspera(siCancelar=True, masTitulo="%d/%d" % (pos, total))
+            nombre = self.xanalyzer.nombre
+            tiempo = self.xanalyzer.motorTiempoJugada
+            depth = self.xanalyzer.motorProfundidad
+            mrm = self.dbop.get_cache_engines(nombre, tiempo, jg.fenM2, depth)
+            ok = False
+            if mrm:
+                rm, pos = mrm.buscaRM(jg.movimiento())
+                if rm:
+                    ok = True
+            if not ok:
+                mrm, pos = self.xanalyzer.analizaJugada(jg, self.xanalyzer.motorTiempoJugada, self.xanalyzer.motorProfundidad)
+                self.dbop.set_cache_engines(nombre, tiempo, jg.fenM2, mrm, depth)
+
+            jg.analisis = mrm, pos
+            self.pantalla.base.pgnRefresh()
+
+    def mensEspera(self, siFinal=False, siCancelar=False, masTitulo=None):
+        if siFinal:
+            if self.um:
+                self.um.final()
+        else:
+            if self.um is None:
+                self.um = QTUtil2.mensajeTemporal(self.pantalla, _("Analyzing"), 0, posicion="ad", siCancelar=True,
+                                                titCancelar=_("Cancel"))
+            if masTitulo:
+                self.um.rotulo( _("Analyzing") + " " + masTitulo )
+            self.um.me.activarCancelar(siCancelar)
+
+    def siCancelado(self):
+        si = self.um.cancelado()
+        if si:
+            self.um.final()
+        return si
+
     def runcontrol(self):
         puntosInicio, mateInicio = 0, 0
         puntosFinal, mateFinal = 0, 0
@@ -283,25 +333,7 @@ class GestorOpeningEngines(Gestor.Gestor):
         if numJugadas == 0:
             return False
 
-        um = [None] # controla unMomento
-
-        def mensEspera(siFinal=False, siCancelar=False, masTitulo=None):
-            if siFinal:
-                if um[0]:
-                    um[0].final()
-            else:
-                if um[0] is None:
-                    um[0] = QTUtil2.mensajeTemporal(self.pantalla, _("Analyzing"), 0, posicion="ad", siCancelar=True,
-                                                    titCancelar=_("Cancel"))
-                if masTitulo:
-                    um[0].rotulo( _("Analyzing") + " " + masTitulo )
-                um[0].me.activarCancelar(siCancelar)
-
-        def siCancelado():
-            si = um[0].cancelado()
-            if si:
-                um[0].final()
-            return si
+        self.um = None # controla unMomento
 
         def aprobado():
             mens = "<b><span style=\"color:green\">%s</span></b>" % _("Congratulations, goal achieved")
@@ -325,7 +357,7 @@ class GestorOpeningEngines(Gestor.Gestor):
             tiempo = self.xjuez.motorTiempoJugada
             mrm = self.dbop.get_cache_engines(nombre, tiempo, fen)
             if mrm is None:
-                mensEspera()
+                self.mensEspera()
                 mrm = self.xjuez.analiza(fen)
                 self.dbop.set_cache_engines(nombre, tiempo, fen, mrm)
 
@@ -334,35 +366,6 @@ class GestorOpeningEngines(Gestor.Gestor):
                 return rm.puntos, rm.mate
             else:
                 return -rm.puntos, -rm.mate
-
-        def run_auto_analysis():
-            lista = []
-            for njg in range(self.partida.numJugadas()):
-                jg = self.partida.jugada(njg)
-                if jg.siBlancas() == self.siJugamosConBlancas:
-                    fenM2 = jg.posicionBase.fenM2()
-                    if fenM2 not in self.dicFENm2:
-                        lista.append(jg)
-                        jg.fenM2 = fenM2
-            total = len(lista)
-            for pos, jg in enumerate(lista, 1):
-                if siCancelado():
-                    break
-                mensEspera(siCancelar=True, masTitulo="%d/%d" % (pos, total))
-                nombre = self.xanalyzer.nombre
-                tiempo = self.xanalyzer.motorTiempoJugada
-                depth = self.xanalyzer.motorProfundidad
-                mrm = self.dbop.get_cache_engines(nombre, tiempo, jg.fenM2, depth)
-                ok = False
-                if mrm:
-                    rm, pos = mrm.buscaRM(jg.movimiento())
-                    if rm:
-                        ok = True
-                if not ok:
-                    mrm, pos = self.xanalyzer.analizaJugada(jg, self.xanalyzer.motorTiempoJugada, self.xanalyzer.motorProfundidad)
-                    self.dbop.set_cache_engines(nombre, tiempo, jg.fenM2, mrm, depth)
-                jg.analisis = mrm, pos
-                self.pantalla.base.pgnRefresh()
 
         siCalcularInicio = True
         if self.partida.siTerminada():
@@ -386,7 +389,7 @@ class GestorOpeningEngines(Gestor.Gestor):
             if self.plies_pendientes > 0:
                 return False
             # Si la ultima jugada es de la linea no se calcula nada
-            mensEspera()
+            self.mensEspera()
             puntosFinal, mateFinal = calculaJG(jg, False)
 
         # Se marcan todas las jugadas que no siguen las lineas
@@ -420,17 +423,19 @@ class GestorOpeningEngines(Gestor.Gestor):
         appendInfo(_("End"), puntosFinal, mateFinal)
         perdidos = (puntosInicio-puntosFinal)
         ok = perdidos < self.lost_points
+        if mateInicio or mateFinal:
+            ok = mateFinal > mateInicio
         mens = template % ("(%d)-(%d)" %(puntosInicio, puntosFinal), perdidos)
         mens = "%s %s %d" %(mens, "&lt;" if ok else "&gt;", self.lost_points)
         self.li_info.append(mens)
 
-        if perdidos > self.lost_points:
+        if not ok:
             if self.auto_analysis:
-                run_auto_analysis()
-            mensEspera(siFinal=True)
+                self.run_auto_analysis()
+            self.mensEspera(siFinal=True)
             suspendido()
         else:
-            mensEspera(siFinal=True)
+            self.mensEspera(siFinal=True)
             aprobado()
 
         self.ponFinJuego()
@@ -457,13 +462,17 @@ class GestorOpeningEngines(Gestor.Gestor):
             liMasOpciones = []
             liMasOpciones.append(("libros", _("Consult a book"), Iconos.Libros()))
             liMasOpciones.append((None, None, None))
-            liMasOpciones.append(("add_line", _("Add this line"), Iconos.OpeningLines()))
-            liMasOpciones.append((None, None, None))
+            liMasOpciones.append((None, _("Options"), Iconos.Opciones()))
             mens = _("cancel") if self.auto_analysis else _("activate")
             liMasOpciones.append(("auto_analysis", "%s: %s" % (_("Automatic analysis"), mens), Iconos.Analizar()))
             liMasOpciones.append((None, None, None))
             mens = _("cancel") if self.ask_movesdifferent else _("activate")
             liMasOpciones.append(("ask_movesdifferent", "%s: %s" % (_("Ask when the moves are different from the line"), mens), Iconos.Pelicula_Seguir()))
+            liMasOpciones.append((None, None, True)) # Para salir del submenu
+            liMasOpciones.append((None, None, None))
+            liMasOpciones.append(("run_analysis", _("Specific analysis"), Iconos.Analizar()))
+            liMasOpciones.append((None, None, None))
+            liMasOpciones.append(("add_line", _("Add this line"), Iconos.OpeningLines()))
 
             resp = self.utilidades(liMasOpciones)
             if resp == "libros":
@@ -496,6 +505,12 @@ class GestorOpeningEngines(Gestor.Gestor):
                 self.ask_movesdifferent = not self.ask_movesdifferent
                 self.trainingEngines["ASK_MOVESDIFFERENT"] = self.ask_movesdifferent
                 self.dbop.setTrainingEngines(self.trainingEngines)
+
+            elif resp == "run_analysis":
+                self.um = None
+                self.mensEspera()
+                self.run_auto_analysis()
+                self.mensEspera(siFinal=True)
 
         else:
             Gestor.Gestor.rutinaAccionDef(self, clave)

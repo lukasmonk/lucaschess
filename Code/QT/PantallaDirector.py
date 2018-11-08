@@ -31,6 +31,7 @@ class WPanelDirector(QTVarios.WDialogo):
         self.fenM2 = self.posicion.fenM2()
         self.origin_new = None
 
+        self.dbGestor = tablero.dbVisual
         self.leeRecursos()
 
         titulo = _("Director")
@@ -187,7 +188,6 @@ class WPanelDirector(QTVarios.WDialogo):
             # self.ponSiGrabar()
         tpid = tp, xid
         if tp == "P":
-            desde, hasta = a1h8[:2], a1h8[2:]
             tarea = TabVisual.GT_PiezaMueve(self.guion)
             desde, hasta = a1h8[:2], a1h8[2:]
             borra = self.tablero.dameNomPiezaEn(hasta)
@@ -246,6 +246,7 @@ class WPanelDirector(QTVarios.WDialogo):
         return tarea, fila
 
     def creaTarea(self, tp, xid, a1h8, fila):
+
         tarea, fila = self.creaTareaBase(tp, xid, a1h8, fila)
         if tarea is None:
             return None, None
@@ -352,7 +353,7 @@ class WPanelDirector(QTVarios.WDialogo):
 
             self.tablero.dbVisual_close()
 
-            self.tablero.borraMovibles()
+            # self.tablero.borraMovibles()
             self.guion.cierraPizarra()
             self.recuperar()
 
@@ -723,12 +724,11 @@ class WPanelDirector(QTVarios.WDialogo):
         return li
 
     def leeRecursos(self):
-        fdb = self.configuracion.ficheroRecursos
-        self.dbConfig = Util.DicSQL(fdb, tabla="Config")
-        self.dbFlechas = Util.DicSQL(fdb, tabla="Flechas")
-        self.dbMarcos = Util.DicSQL(fdb, tabla="Marcos")
-        self.dbSVGs = Util.DicSQL(fdb, tabla="SVGs")
-        self.dbMarkers = Util.DicSQL(fdb, tabla="Markers")
+        self.dbConfig = self.dbGestor.dbConfig
+        self.dbFlechas = self.dbGestor.dbFlechas
+        self.dbMarcos = self.dbGestor.dbMarcos
+        self.dbSVGs = self.dbGestor.dbSVGs
+        self.dbMarkers = self.dbGestor.dbMarcos
 
     def cierraRecursos(self):
         if self.guion is not None:
@@ -736,11 +736,7 @@ class WPanelDirector(QTVarios.WDialogo):
             self.dbConfig["SELECTBANDA"] = self.selectBanda.guardar()
             self.dbConfig["SELECTBANDANUM"] = self.selectBanda.numSeleccionada()
             self.dbConfig["SAVEWHENFINISHED"] = self.chbSaveWhenFinished.valor()
-            self.dbConfig.close()
-            self.dbFlechas.close()
-            self.dbMarcos.close()
-            self.dbSVGs.close()
-            self.dbMarkers.close()
+            self.dbGestor.close()
 
             self.guardarVideo()
             self.guion.restoreTablero()
@@ -812,9 +808,26 @@ class WPanelDirector(QTVarios.WDialogo):
         self.creaTarea("P", None, desde + hasta, -1)
         self.tablero.muevePieza(desde, hasta)
 
-    def tableroPress(self, event, origin):
+    def tableroPress(self, event, origin, siRight, siShift, siAlt, siCtrl):
         if origin:
-            lb_sel = self.selectBanda.seleccionada
+            if not siRight:
+                lb_sel = self.selectBanda.seleccionada
+            else:
+                if siCtrl:
+                    if siAlt:
+                        pos = 4
+                    elif siShift:
+                        pos = 5
+                    else:
+                        pos = 3
+                else:
+                    if siAlt:
+                        pos = 1
+                    elif siShift:
+                        pos = 2
+                    else:
+                        pos = 0
+                lb_sel = self.selectBanda.get_pos(pos)
             if lb_sel:
                 nada, tp, nid = lb_sel.id.split("_")
                 nid = int(nid)
@@ -834,20 +847,42 @@ class WPanelDirector(QTVarios.WDialogo):
             sc = self.datos_new[0].itemSC()
             sc.mouseMoveExt(event)
 
-    def tableroRelease(self, a1):
+    def tableroRelease(self, a1, siRight, siShift, siAlt):
         if self.origin_new:
             tarea, fila = self.datos_new
             sc = tarea.itemSC()
             sc.mouseReleaseExt()
             self.g_guion.goto(fila, 0)
-            if a1 is None or (a1 == self.origin_new and self.tp_new == TabVisual.TP_FLECHA):
-                self.gborrar()
-                if self.tp_new == TabVisual.TP_FLECHA:
-                    if not self.siGrabarInicio:
-                        self.ponNoGrabar()
+            if siRight:
+                if a1 == self.origin_new:
+                    if siShift:
+                        pos = 8
+                    elif siAlt:
+                        pos = 7
+                    else:
+                        pos = 6
+                    self.gborrar()
+                    lb = self.selectBanda.get_pos(pos)
+                    nada, tp, nid = lb.id.split("_")
+                    nid = int(nid)
+                    self.datos_new = self.creaTarea(tp, nid, a1+a1, -1)
+                    self.tp_new = tp
+                li = self.guion.borraRepeticionUltima()
+                if li:
+                    self.gborrar(li)
+                    self.origin_new = None
+                    return
+
             else:
-                self.ponSiGrabar()
-                self.refresh_guion()
+                if a1 is None or (a1 == self.origin_new and self.tp_new == TabVisual.TP_FLECHA):
+                    self.gborrar()
+                    if self.tp_new == TabVisual.TP_FLECHA:
+                        if not self.siGrabarInicio:
+                            self.ponNoGrabar()
+
+                else:
+                    self.ponSiGrabar()
+                    self.refresh_guion()
 
             self.origin_new = None
 
@@ -912,13 +947,13 @@ class Director:
         p = event.pos()
         a1h8 = self.punto2a1h8(p)
         m = int(event.modifiers())
-        if siRight and (m & QtCore.Qt.ControlModifier) > 0:
-            self.terminar()
-            return True
+        siCtrl = (m & QtCore.Qt.ControlModifier) > 0
+        siShift = (m & QtCore.Qt.ShiftModifier) > 0
+        siAlt = (m & QtCore.Qt.AltModifier) > 0
 
         li_tareas = self.guion.tareasPosicion(p)
 
-        if siRight:
+        if siRight and siShift and siAlt:
             pz_borrar = self.tablero.dameNomPiezaEn(a1h8)
             menu = Controles.Menu(self.tablero)
             dicPieces = TrListas.dicNomPiezas()
@@ -957,7 +992,7 @@ class Director:
         if self.director:
             return self.mousePressEvent_Drop(event)
 
-        self.w.tableroPress(event, a1h8)
+        self.w.tableroPress(event, a1h8, siRight, siShift, siAlt, siCtrl)
 
         return True
 
@@ -1034,7 +1069,11 @@ class Director:
 
         a1h8 = self.punto2a1h8(event.pos())
         if a1h8:
-            self.w.tableroRelease(a1h8)
+            siRight = event.button() == QtCore.Qt.RightButton
+            m = int(event.modifiers())
+            siShift = (m & QtCore.Qt.ShiftModifier) > 0
+            siAlt = (m & QtCore.Qt.AltModifier) > 0
+            self.w.tableroRelease(a1h8, siRight, siShift, siAlt)
         return True
 
     def terminar(self):

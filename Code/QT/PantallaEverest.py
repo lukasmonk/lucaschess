@@ -242,11 +242,11 @@ class WExpedition(QTVarios.WDialogo):
         grid.setMinimumWidth(grid.anchoColumnas() + 20)
         grid.coloresAlternados()
 
-        lyG = Colocacion.V().otro(lyRot).control(grid)
+        lyG = Colocacion.V().otro(lyRot).control(grid).margen(0)
 
-        lyR = Colocacion.H().control(tb).otro(lyG)
+        lyR = Colocacion.H().control(tb).otro(lyG).margen(0)
 
-        ly = Colocacion.V().otro(lySVG).otro(lyR)
+        ly = Colocacion.V().otro(lySVG).otro(lyR).margen(3)
 
         self.setLayout(ly)
 

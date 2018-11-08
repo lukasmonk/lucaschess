@@ -1,5 +1,6 @@
 import time
 
+from Code import Torneo
 from Code import Books
 from Code import Gestor
 from Code import Jugada
@@ -14,14 +15,12 @@ from Code.Constantes import *
 
 
 class GestorTorneo(Gestor.Gestor):
-    def inicio(self, torneo, liGames):
+    def inicio(self, nombre_torneo, liNumGames):
 
         self.tipoJuego = kJugMvM
 
-        self.torneo = torneo
-        self.torneoTMP = torneo.clone()
-        self.torneoTMP._liGames = liGames
-        self.liGames = liGames
+        self.torneo = Torneo.leer(nombre_torneo)
+        Torneo.leerTmp(liNumGames)
         self.pantalla.ponActivarTutor(False)
         self.ponPiezasAbajo(True)
         self.mostrarIndicador(True)
@@ -31,11 +30,12 @@ class GestorTorneo(Gestor.Gestor):
         self.colorJugando = True
         self.ponCapPorDefecto()
 
-        self.wresult = PantallaTorneos.WResult(self.pantalla, torneo, self.torneoTMP, self)
+        self.wresult = PantallaTorneos.WResult(self.pantalla, self)
         self.wresult.show()
 
-        numGames = len(self.liGames)
-        for ng, gm in enumerate(self.liGames):
+        numGames = len(liNumGames)
+        for ng in range(numGames):
+            gm = self.torneo._liGames[liNumGames[ng]]
             self.siguienteJuego(gm, ng + 1, numGames)
             self.procesador.pararMotores()
             if self.siTerminar:
@@ -129,7 +129,8 @@ class GestorTorneo(Gestor.Gestor):
             rm.siBlancas = self.partida.ultPosicion.siBlancas
             txt = "<b>[%s]</b> (%s) %s" % (rm.nombre, rm.abrTexto(), p.pgnSP())
             self.ponRotulo3(txt)
-            self.showPV(rm.pv, 3)
+            self.showPV(rm.pv, 1)
+        self.ponReloj()
         self.refresh()
         return not self.siTerminar
 
@@ -307,22 +308,26 @@ class GestorTorneo(Gestor.Gestor):
 
     def relojStart(self, siBlancas):
         self.tiempo[siBlancas].iniciaMarcador()
-        self.pantalla.iniciaReloj(self.ponReloj, transicion=200)
 
     def relojStop(self, siBlancas):
         self.tiempo[siBlancas].paraMarcador(self.segundosJugada)
         self.ponReloj()
-        self.pantalla.paraReloj()
+
+    def relojPausa(self, siBlancas):
+        self.tiempo[siBlancas].paraMarcador(0)
+        self.ponReloj()
 
     def procesarAccion(self, clave):
         if clave == k_cancelar:
             self.siTerminar = True
         elif clave == k_peliculaPausa:
             self.siPausa = True
+            self.relojPausa(self.partida.siBlancas())
             self.pantalla.ponToolBar((k_cancelar, k_peliculaSeguir, k_forceEnd))
         elif clave == k_peliculaSeguir:
             self.siPausa = False
             self.pantalla.ponToolBar((k_cancelar, k_peliculaPausa, k_forceEnd))
+            self.relojStart(self.partida.siBlancas())
         elif clave == k_forceEnd:
             self.assignResult()
 

@@ -56,7 +56,7 @@ class KRegistro:
 def prlk(*x):
     import sys
     for l in x:
-        sys.stdout.write(l)
+        sys.stdout.write(str(l))
         sys.stdout.write(" ")
 
 

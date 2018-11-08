@@ -159,7 +159,7 @@ class Engine(MotoresExternos.MotorExterno):
                         break
 
 
-class Game:
+class Game(object):
     def __init__(self):
         self._hwhite = None  # la huella de un engine
         self._hblack = None  # la huella de un engine
@@ -293,7 +293,7 @@ class Game:
         return cabecera + "\n" + base + " %s\n\n" % rs
 
 
-class Torneo:
+class Torneo(object):
     def __init__(self, nombre=""):
         self._nombre = nombre
         self._resign = 150
@@ -414,12 +414,12 @@ class Torneo:
         self._liEngines = li
 
         liDic = dic["GAMES"]
-        li = []
+        self.delGames()
+        self._liGames = []
         for dic in liDic:
             gm = Game()
             gm.leerDIC(dic)
-            li.append(gm)
-        self._liGames = li
+            self._liGames.append(gm)
 
     def leer(self):
         dic = Util.recuperaVar(self.fichero())
@@ -448,9 +448,12 @@ class Torneo:
     def grabar(self):
         Util.guardaVar(self.fichero(), self.grabarDIC())
 
-    def clone(self):
+    def clone(self, liNumGames):
         t = Torneo()
         t.leerDIC(self.grabarDIC())
+        liNumGames.sort(reverse=True)
+        for num in liNumGames:
+            del t._liGames[num]
         return t
 
     def numEngines(self):
@@ -466,8 +469,10 @@ class Torneo:
         otro = me.copiar(self._liEngines)
         self._liEngines.append(otro)
 
-    def delEngines(self, lista):
+    def delEngines(self, lista=None):
         liBgm = []
+        if lista is None:
+            lista = range(len(self._liEngines))
         for pos in lista:
             en = self._liEngines[pos]
             huella = en.huella()
@@ -475,17 +480,13 @@ class Torneo:
                 if gm.hwhite() == huella or gm.hblack() == huella:
                     liBgm.append(n)
         if liBgm:
-            li = []
-            for x in range(len(self._liGames)):
-                if x not in liBgm:
-                    li.append(self._liGames[x])
-            self._liGames = li
+            for x in range(len(self._liGames)-1, -1, -1):
+                if x in liBgm:
+                    del self._liGames[x]
 
-        li = []
-        for x in range(len(self._liEngines)):
-            if x not in lista:
-                li.append(self._liEngines[x])
-        self._liEngines = li
+        for x in range(len(self._liEngines)-1, -1, -1):
+            if x in lista:
+                del self._liEngines[x]
 
     def buscaHEngine(self, huella):
         for en in self._liEngines:
@@ -500,8 +501,12 @@ class Torneo:
         return self._liGames
 
     def randomize(self):
-        random.shuffle(self._liGames)
         num_games = len(self._liGames)
+        lista = random.shuffle(range(num_games))
+        liOtro = Util.ListSQL(VarGen.configuracion.ficheroTemporal("db"))
+        for dest in lista:
+            liOtro.append(self._liGames[dest])
+        self._liGames = liOtro
         for n in range(1, num_games-1):
             gm1 = self._liGames[n]
             gm0 = self._liGames[n-1]
@@ -514,12 +519,35 @@ class Torneo:
                         self._liGames[n] = gm2
                         break
 
-    def delGames(self, lista):
-        li = []
-        for x in range(len(self._liGames)):
-            if x not in lista:
-                li.append(self._liGames[x])
-        self._liGames = li
+    def delGames(self, lista=None):
+        for x in range(len(self._liGames)-1, -1, -1):
+            if lista is None or x in lista:
+                del self._liGames[x]
+
+    def reiniciar(self, nombre):
+        self.delGames()
+        self.delEngines()
+        self.__init__(nombre)
+        if self._nombre:
+            self.leer()
+
+    def reiniciarTmp(self, torneoBase, liFiltro):
+        self._liGames = []
+        st = set(liFiltro)
+        sten = set()
+        for num, gm in enumerate(torneoBase._liGames):
+            if num in st:
+                self._liGames.append(gm)
+                hw = gm._hwhite
+                hb = gm._hblack
+                if hw not in sten:
+                    sten.add(hw)
+                if hb not in sten:
+                    sten.add(hb)
+        self._liEngines = []
+        for en in torneoBase._liEngines:
+            if en.huella() in sten:
+                self._liEngines.append(en)
 
     def nuevoGame(self, hwhite, hblack, minutos, segundosJugada):
         gm = Game()
@@ -542,7 +570,7 @@ class Torneo:
             dbus[en.huella()] = pos
             liResult.append(dic)
 
-        for gm in self._liGames:
+        for n, gm in enumerate(self._liGames):
             rs = gm.result()
             if rs is None:
                 continue
@@ -566,3 +594,17 @@ class Torneo:
                     liResult[pb]["PTS"] += 10
 
         return sorted(liResult, key=lambda x: x["PTS"], reverse=True)
+
+torneo = Torneo()
+torneoTmp = Torneo()
+
+def leer(nomtorneo):
+    if nomtorneo != torneo.nombre():
+        torneo.reiniciar(nomtorneo)
+    return torneo
+
+def leerTmp(liFiltro):
+    torneoTmp.reiniciarTmp(torneo, liFiltro)
+    return torneoTmp
+
+

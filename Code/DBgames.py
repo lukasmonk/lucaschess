@@ -29,7 +29,10 @@ move2num = LCEngine.move2num
 rots = ["Event", "Site", "Date", "Round", "White", "Black", "Result",
         "WhiteTitle", "BlackTitle", "WhiteElo", "BlackElo", "WhiteUSCF", "BlackUSCF", "WhiteNA", "BlackNA",
         "WhiteType", "BlackType", "EventDate", "EventSponsor", "ECO", "UTCTime", "UTCDate", "TimeControl",
-        "SetUp", "FEN", "PlyCount"]
+        "SetUp", "FEN", "PlyCount",
+        "Section", "Stage", "Board", "Opening", "Variation", "SubVariation", "NIC", "Time",
+        "Termination", "Annotator", "Mode"
+]
 drots = {x.upper(): x for x in rots}
 
 
@@ -1111,13 +1114,20 @@ class DBgames:
         pgn = xpv2pgn(raw["XPV"])
         drots["PLIES"] = "PlyCount"
         litags = []
+        st = set()
         for field in self.liCamposBase:
             v = raw[field]
             if v:
-                litags.append('[%s "%s"]' % (drots.get(field, field), str(v)))
+                if field not in st:
+                    litags.append('[%s "%s"]' % (drots.get(field, field), Util.primeraMayuscula(str(v))))
+                    st.add(field)
+
         if rtags:
             for k, v in rtags:
-                litags.append('[%s "%s"]' % (k, v))
+                k = drots.get(k, Util.primeraMayuscula(k))
+                if k not in st:
+                    litags.append('[%s "%s"]' % (k, v))
+                    st.add(k)
         tags = "\n".join(litags)
         return "%s\n\n%s\n" % (tags, pgn), result
 

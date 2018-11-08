@@ -1263,6 +1263,12 @@ class Gestor:
         menu.opcion("ontop", "%s: %s" % (rotulo, _("window on top")),
                     Iconos.Bottom() if self.pantalla.onTop else Iconos.Top())
 
+        # Right mouse
+        menu.separador()
+        rotulo = _("Disable") if self.configuracion.directGraphics else _("Enable")
+        menu.opcion("mouseGraphics", "%s: %s" % (rotulo, _("Live graphics with the right mouse button") ),
+                    Iconos.RightMouse())
+
         # Logs of engines
         listaGMotores = VarGen.listaGestoresMotor.listaActivos() if VarGen.listaGestoresMotor else []
         menu.separador()
@@ -1325,6 +1331,10 @@ class Gestor:
 
             elif resp == "ontop":
                 self.pantalla.onTopWindow()
+
+            elif resp == "mouseGraphics":
+                self.configuracion.directGraphics = not self.configuracion.directGraphics
+                self.configuracion.graba()
 
             elif resp.startswith("cg_"):
                 orden = resp[3:]
@@ -1483,11 +1493,22 @@ class Gestor:
         # Mas Opciones
         if liMasOpciones:
             menu.separador()
+            submenu = menu
             for clave, rotulo, icono in liMasOpciones:
                 if rotulo is None:
-                    menu.separador()
+                    if icono is None:
+                        # liMasOpciones.append((None, None, None))
+                        submenu.separador()
+                    else:
+                        # liMasOpciones.append((None, None, True))  # Para salir del submenu
+                        submenu = menu
+                elif clave is None:
+                    # liMasOpciones.append((None, titulo, icono))
+                    submenu = menu.submenu(rotulo, icono)
+
                 else:
-                    menu.opcion(clave, rotulo, icono)
+                    # liMasOpciones.append((clave, titulo, icono))
+                    submenu.opcion(clave, rotulo, icono)
 
         resp = menu.lanza()
 
@@ -1841,7 +1862,7 @@ class Gestor:
         if not pv:
             return True
         self.tablero.quitaFlechas()
-        tipo = "m1"
+        tipo = "mt"
         opacidad = 100
         pv = pv.strip()
         while "  " in pv:

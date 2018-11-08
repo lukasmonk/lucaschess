@@ -15,6 +15,7 @@ class WAbout(QtGui.QDialog):
         self.setWindowIcon(Iconos.Aplicacion())
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setMaximumWidth(QTUtil.anchoEscritorio())
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         f = Controles.TipoLetra(puntos=10)  # 0, peso=75 )
 
@@ -28,7 +29,6 @@ class WAbout(QtGui.QDialog):
 
         lbIco = Controles.LB(self).ponImagen(Iconos.pmAplicacion64())
         lbTitulo = Controles.LB(self, cabecera)
-        btSeguir = Controles.PB(self, _("Continue"), self.accept).ponPlano(False)
 
         # Tabs
         tab = Controles.Tab()
@@ -44,7 +44,7 @@ class WAbout(QtGui.QDialog):
             tab.addTab(lb, titulo)
 
         lyV1 = Colocacion.H().control(lbIco).espacio(15).control(lbTitulo).relleno()
-        layout = Colocacion.V().otro(lyV1).espacio(10).control(tab).control(btSeguir).margen(10)
+        layout = Colocacion.V().otro(lyV1).espacio(10).control(tab).margen(10)
 
         self.setLayout(layout)
 

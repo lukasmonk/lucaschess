@@ -81,12 +81,32 @@ class SelectBanda(QtGui.QWidget):
                 lb.addText = True
             else:
                 lb = SelectUna(self, self.pmVacio, False)
+                if n < 9:
+                    lyV = Colocacion.V().relleno(1)
+
+                    if n in (3, 4, 5):
+                        lbct = Controles.LB(self).ponImagen(Iconos.pmControl())
+                        lyV.control(lbct).espacio(-8)
+
+                    if n in (1, 4, 7):
+                        lbalt = Controles.LB(self).ponImagen(Iconos.pmAlt())
+                        lyV.control(lbalt)
+                    elif n in (2, 5, 8):
+                        lbsh = Controles.LB(self).ponImagen(Iconos.pmShift())
+                        lyV.control(lbsh)
+                    elif n in (0, 6):
+                        lbim = Controles.LB(self).ponImagen(Iconos.pmRightMouse())
+                        lyV.control(lbim)
+
+                    lyV.relleno(1).margen(0)
+
+                    layout.otro(lyV, n, 2)
 
             lb_f.mousePressEvent = lb.mousePressEvent
             self.liLB.append(lb)
             self.liLB_F.append(lb_f)
             layout.controlc(lb, n, 0)
-        lb_f =  Controles.LB("%s F10\n%s" % (_("CTRL"), _("Changes")))
+        lb_f = Controles.LB("%s F10\n%s" % (_("CTRL"), _("Changes")))
         lb_f.setStyleSheet("*{ border: 1px solid %s; background: %s;}" % (color, color))
         lb_f.anchoFijo(64)
         lb_f.altoFijo(36)
@@ -259,6 +279,9 @@ class SelectBanda(QtGui.QWidget):
         if self.seleccionada and not self.seleccionada.id:
             self.seleccionada.seleccionar(False)
             self.seleccionada = None
+
+    def get_pos(self, pos):
+        return self.liLB[pos]
 
 
 class DragUna(Controles.LB):

@@ -191,6 +191,9 @@ class Procesador:
         self.pararMotores()
 
     def inicio(self):
+        if self.gestor:
+            del self.gestor
+            self.gestor = None
         self.configuracion.limpiaTemporal()
         self.reset()
         if self.configuracion.siPrimeraVez:
@@ -730,11 +733,12 @@ class Procesador:
     def torneos(self):
         xjugar = PantallaTorneos.torneos(self.pantalla)
         while xjugar:
-            torneo, liGames = xjugar
+            nombre_torneo, liNumGames = xjugar
             self.gestor = GestorTorneo.GestorTorneo(self)
-            self.gestor.inicio(torneo, liGames)
+            self.gestor.inicio(nombre_torneo, liNumGames)
             self.inicio()
-            xjugar = PantallaTorneos.unTorneo(self.pantalla, torneo)
+            xjugar = PantallaTorneos.unTorneo(self.pantalla, nombre_torneo)
+        self.reiniciar()
 
     def sts(self):
         PantallaSTS.sts(self, self.pantalla)
@@ -933,12 +937,12 @@ class Procesador:
         clonProcesador.gestor.inicio(partidaCompleta, siCompleta)
 
         tablero = clonProcesador.pantalla.tablero
-        tablero.dbVisual_setFichero(tableroFather.nomdbVisual)
-        tablero.dbVisual_setShowAllways(tableroFather.dbVisual_showAllways)
+        tablero.dbVisual_setFichero(tableroFather.dbVisual.fichero)
+        tablero.dbVisual_setShowAllways(tableroFather.dbVisual.showAllways)
 
         resp = clonProcesador.pantalla.muestraVariantes(clonProcesador.gestor.tituloVentana())
-        tableroFather.dbVisual_setFichero(tableroFather.nomdbVisual)
-        tableroFather.dbVisual_setShowAllways(tableroFather.dbVisual_showAllways)
+        tableroFather.dbVisual_setFichero(tableroFather.dbVisual.fichero)
+        tableroFather.dbVisual_setShowAllways(tableroFather.dbVisual.showAllways())
 
         if resp:
             return clonProcesador.gestor.partida

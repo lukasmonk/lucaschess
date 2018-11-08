@@ -26,7 +26,7 @@ from Code.QT import Voyager
 
 
 class WResult(QTVarios.WDialogo):
-    def __init__(self, wParent, torneo, torneoTMP, gestor):
+    def __init__(self, wParent, gestor):
 
         titulo = _("Results")
         icono = Iconos.Torneos()
@@ -34,11 +34,11 @@ class WResult(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, wParent, titulo, icono, extparam)
 
         # Datos
-        self.torneo = torneo
-        self.torneoTMP = torneoTMP
+        self.torneo = Torneo.torneo
+        self.torneoTmp = Torneo.torneoTmp
         self.gestor = gestor
         self.liResult = self.torneo.rehacerResult()
-        self.liResultTMP = self.torneoTMP.rehacerResult()
+        self.liResultTMP = self.torneoTmp.rehacerResult()
 
         # Tabs
         self.tab = tab = Controles.Tab()
@@ -87,12 +87,12 @@ class WResult(QTVarios.WDialogo):
 
     def refresh(self):
         self.liResult = self.torneo.rehacerResult()
-        self.liResultTMP = self.torneoTMP.rehacerResult()
+        self.liResultTMP = self.torneoTmp.rehacerResult()
         self.gridResult.refresh()
         self.gridResultTMP.refresh()
 
     def gridNumDatos(self, grid):
-        return self.torneoTMP.numEngines() if grid.id == "T" else self.torneo.numEngines()
+        return self.torneoTmp.numEngines() if grid.id == "T" else self.torneo.numEngines()
 
     def gridDato(self, grid, fila, oColumna):
         columna = oColumna.clave
@@ -128,7 +128,7 @@ class WResult(QTVarios.WDialogo):
 
 
 class WUnTorneo(QTVarios.WDialogo):
-    def __init__(self, wParent, torneo):
+    def __init__(self, wParent, nombre_torneo):
 
         titulo = _("Competition")
         icono = Iconos.Torneos()
@@ -138,7 +138,8 @@ class WUnTorneo(QTVarios.WDialogo):
         self.configuracion = VarGen.configuracion
 
         # Datos
-        self.torneo = torneo
+        torneo = self.torneo = Torneo.leer(nombre_torneo)
+
         self.liEnActual = []
         self.xjugar = None
         self.liResult = None
@@ -487,9 +488,9 @@ class WUnTorneo(QTVarios.WDialogo):
             liGames = self.torneo.liGames()
             li = []
             sten = set()
-            for gm in liGames:
+            for n, gm in enumerate(liGames):
                 if gm.result() is None:
-                    li.append(gm)
+                    li.append(n)
                     sten.add(gm.hwhite())
                     sten.add(gm.hblack())
             for heng in sten:
@@ -502,7 +503,7 @@ class WUnTorneo(QTVarios.WDialogo):
                     return
 
             if li:
-                self.xjugar = (self.torneo, li)
+                self.xjugar = (self.torneo.nombre(), li)
                 self.guardarVideo()
                 self.accept()
             else:
@@ -850,17 +851,14 @@ class WTorneos(QTVarios.WDialogo):
     def modificar(self):
         n = self.grid.recno()
         if n >= 0:
-            nombre = self.lista[n][0][:-4]
-            torneo = Torneo.Torneo(nombre)
-            torneo.leer()
-            self.trabajar(torneo)
+            nombre_torneo = self.lista[n][0][:-4]
+            self.trabajar(nombre_torneo)
 
     def crear(self):
-        torneo = Torneo.Torneo()
-        self.trabajar(torneo)
+        self.trabajar("")
 
-    def trabajar(self, torneo):
-        w = WUnTorneo(self, torneo)
+    def trabajar(self, nombre_torneo):
+        w = WUnTorneo(self, nombre_torneo)
         w.exec_()
 
         self.lista = self.leeTorneos()

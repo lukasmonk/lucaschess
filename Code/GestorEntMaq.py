@@ -29,6 +29,8 @@ class GestorEntMaq(Gestor.Gestor):
             dic = aplazamiento["EMDIC"]
         self.reinicio = dic
 
+        self.cache = dic.get("cache", {})
+
         self.tipoJuego = kJugEntMaq
 
         self.resultado = None
@@ -370,6 +372,7 @@ class GestorEntMaq(Gestor.Gestor):
         self.partida.reset()
         if self.siTiempo:
             self.pantalla.paraReloj()
+        self.reinicio["cache"] = self.cache
         self.inicio(self.reinicio)
 
     def genAplazamiento(self):
@@ -660,8 +663,19 @@ class GestorEntMaq(Gestor.Gestor):
         self.activaColor(siBlancas)
 
     def juegaRival(self):
-        self.pensando(True)
         self.desactivaTodas()
+
+        fenUltimo = self.fenUltimo()
+
+        if fenUltimo in self.cache:
+            jg = self.cache[fenUltimo]
+            self.partida.ultPosicion = jg.posicion
+            self.masJugada(jg, False)
+            self.movimientosPiezas(jg.liMovs, True)
+            self.tiempo[self.siRivalConBlancas].restore(jg.cacheTime)
+            return True
+
+        self.pensando(True)
 
         self.relojStart(False)
 
@@ -669,7 +683,7 @@ class GestorEntMaq(Gestor.Gestor):
         siEncontrada = False
 
         if self.aperturaObl:
-            siEncontrada, desde, hasta, coronacion = self.aperturaObl.juegaMotor(self.fenUltimo())
+            siEncontrada, desde, hasta, coronacion = self.aperturaObl.juegaMotor(fenUltimo)
             if not siEncontrada:
                 self.aperturaObl = None
 
@@ -680,7 +694,7 @@ class GestorEntMaq(Gestor.Gestor):
                 self.book = None
 
         if not siEncontrada and self.aperturaStd:
-            siEncontrada, desde, hasta, coronacion = self.aperturaStd.juegaMotor(self.fenUltimo())
+            siEncontrada, desde, hasta, coronacion = self.aperturaStd.juegaMotor(fenUltimo)
             if not siEncontrada:
                 self.aperturaStd = None
 
@@ -727,6 +741,8 @@ class GestorEntMaq(Gestor.Gestor):
             self.partida.ultPosicion = jg.posicion
             self.masJugada(jg, False)
             self.movimientosPiezas(jg.liMovs, True)
+            jg.cacheTime = self.tiempo[self.siRivalConBlancas].save()
+            self.cache[fenUltimo] = jg
             return True
         else:
             return False
