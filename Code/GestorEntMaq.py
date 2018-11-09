@@ -672,7 +672,8 @@ class GestorEntMaq(Gestor.Gestor):
             self.partida.ultPosicion = jg.posicion
             self.masJugada(jg, False)
             self.movimientosPiezas(jg.liMovs, True)
-            self.tiempo[self.siRivalConBlancas].restore(jg.cacheTime)
+            if self.siTiempo:
+                self.tiempo[self.siRivalConBlancas].restore(jg.cacheTime)
             return True
 
         self.pensando(True)
@@ -741,7 +742,8 @@ class GestorEntMaq(Gestor.Gestor):
             self.partida.ultPosicion = jg.posicion
             self.masJugada(jg, False)
             self.movimientosPiezas(jg.liMovs, True)
-            jg.cacheTime = self.tiempo[self.siRivalConBlancas].save()
+            if self.siTiempo:
+                jg.cacheTime = self.tiempo[self.siRivalConBlancas].save()
             self.cache[fenUltimo] = jg
             return True
         else:
