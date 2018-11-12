@@ -30,7 +30,7 @@ class GestorOpeningEngines(Gestor.Gestor):
         self.tipoJuego = kJugOpeningLines
 
         self.level = self.dbop.getconfig("ENG_LEVEL", 0)
-        self.numengine = self.dbop.getconfig("ENG_ENGINE", 0)-1
+        self.numengine = self.dbop.getconfig("ENG_ENGINE", 0)
 
         self.trainingEngines = self.dbop.trainingEngines()
 

@@ -502,7 +502,8 @@ class Torneo(object):
 
     def randomize(self):
         num_games = len(self._liGames)
-        lista = random.shuffle(range(num_games))
+        lista = range(num_games)
+        random.shuffle(lista)
         liOtro = Util.ListSQL(VarGen.configuracion.ficheroTemporal("db"))
         for dest in lista:
             liOtro.append(self._liGames[dest])
