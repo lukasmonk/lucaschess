@@ -23,7 +23,6 @@ class WSave():
         self.setWindowIcon(icono)
         flags = flag | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint
         self.setWindowFlags(flags)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
     def closeEvent(self, event):
         self.guardarVideo()

@@ -15,7 +15,6 @@ class WAbout(QtGui.QDialog):
         self.setWindowIcon(Iconos.Aplicacion())
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setMaximumWidth(QTUtil.anchoEscritorio())
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         f = Controles.TipoLetra(puntos=10)  # 0, peso=75 )
 
