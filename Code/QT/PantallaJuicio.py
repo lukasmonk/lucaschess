@@ -268,7 +268,7 @@ class MensajeF(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
 
         self.setWindowTitle(_("Result"))
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setWindowIcon(Iconos.Fide())
         self.setStyleSheet("QDialog, QLabel { background: #E9E9E9 }")
 

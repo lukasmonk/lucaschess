@@ -13,7 +13,7 @@ class WAbout(QtGui.QDialog):
 
         self.setWindowTitle(_("About"))
         self.setWindowIcon(Iconos.Aplicacion())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setMaximumWidth(QTUtil.anchoEscritorio())
 
         f = Controles.TipoLetra(puntos=10)  # 0, peso=75 )
@@ -54,7 +54,7 @@ class WInfo(QtGui.QDialog):
 
         self.setWindowTitle(titulo)
         self.setWindowIcon(Iconos.Aplicacion())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         f = Controles.TipoLetra(puntos=20)
 

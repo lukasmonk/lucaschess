@@ -22,7 +22,7 @@ class WSave():
         self.setWindowTitle(titulo)
         self.setWindowIcon(icono)
         flags = flag | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint
-        self.setWindowFlags(flags)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | flags)
 
     def closeEvent(self, event):
         self.guardarVideo()
@@ -131,7 +131,7 @@ class WWidget(QtGui.QWidget, WSave):
 class BlancasNegras(QtGui.QDialog):
     def __init__(self, parent):
         super(BlancasNegras, self).__init__(parent)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         icoP = VarGen.todasPiezas.iconoDefecto("K")
         icop = VarGen.todasPiezas.iconoDefecto("k")
@@ -162,7 +162,7 @@ def blancasNegras(owner):
 class BlancasNegrasTiempo(QtGui.QDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self, parent)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         icoP = VarGen.todasPiezas.iconoDefecto("K")
         icop = VarGen.todasPiezas.iconoDefecto("k")
@@ -219,7 +219,7 @@ def blancasNegrasTiempo(owner):
 class Tiempo(QtGui.QDialog):
     def __init__(self, parent, minMinutos, minSegundos, maxMinutos, maxSegundos):
         super(Tiempo, self).__init__(parent)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         self.setWindowTitle(_("Time"))
         self.setWindowIcon(Iconos.MoverTiempo())
@@ -828,7 +828,7 @@ class LCMenu(Controles.Menu):
 class ImportarFichero(QtGui.QDialog):
     def __init__(self, parent, titulo, siErroneos, icono):
         QtGui.QDialog.__init__(self, parent)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         self.setWindowTitle(titulo)
         self.setWindowIcon(icono)
@@ -937,7 +937,7 @@ class MensajeFics(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
 
         self.setWindowTitle(_("Fics-Elo"))
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setWindowIcon(Iconos.Fics())
         self.setStyleSheet("QDialog, QLabel { background: #E3F1F9 }")
 
@@ -982,7 +982,7 @@ class MensajeFide(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
 
         self.setWindowTitle(_("Fide-Elo"))
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setWindowIcon(Iconos.Fide())
         self.setStyleSheet("QDialog, QLabel { background: #E9E9E9 }")
 
@@ -1131,7 +1131,7 @@ def menuDB(submenu, configuracion, siFEN, siAll=False):
 class ReadAnnotation(QtGui.QDialog):
     def __init__(self, parent, objetivo):
         QtGui.QDialog.__init__(self, parent)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.FramelessWindowHint)
 
         self.edAnotacion = Controles.ED(self, "")
         btAceptar = Controles.PB(self, "", rutina=self.aceptar).ponIcono(Iconos.Aceptar())

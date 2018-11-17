@@ -24,7 +24,7 @@ class WTV_Marco(QtGui.QDialog):
         QtGui.QDialog.__init__(self, owner)
 
         self.setWindowTitle(_("Box"))
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         if not regMarco:
             regMarco = TabVisual.PMarco()

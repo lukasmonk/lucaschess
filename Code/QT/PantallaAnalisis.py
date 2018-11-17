@@ -24,7 +24,7 @@ class WAnalisisGraph(QTVarios.WDialogo):
         icono = Iconos.Estadisticas()
         extparam = "estadisticasv1"
         QTVarios.WDialogo.__init__(self, wowner, titulo, icono, extparam)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
 
         self.alm = alm
         self.procesador = gestor.procesador
@@ -604,7 +604,7 @@ class WAnalisisVariantes(QtGui.QDialog):
         # Creamos los controles
         self.setWindowTitle(_("Variants"))
 
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowMinimizeButtonHint)
         self.setWindowIcon(Iconos.Tutor())
 
         f = Controles.TipoLetra(puntos=12, peso=75)

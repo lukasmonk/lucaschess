@@ -289,7 +289,7 @@ class Pizarra(QtGui.QWidget):
         layout = Colocacion.V().control(self.mensaje).espacio(-6).control(cajon).margen(0)
 
         self.setLayout(layout)
-        self.setWindowFlags(QtCore.Qt.ToolTip)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.ToolTip)
 
         posTabl = tablero.pos()
         posTablGlobal = tablero.mapToGlobal(posTabl)

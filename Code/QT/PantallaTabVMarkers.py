@@ -25,7 +25,7 @@ class WTV_Marker(QtGui.QDialog):
         QtGui.QDialog.__init__(self, owner)
 
         self.setWindowTitle(_("Marker"))
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         self.configuracion = VarGen.configuracion
 

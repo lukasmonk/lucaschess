@@ -18,7 +18,7 @@ class WDatos(QtGui.QDialog):
 
         self.setWindowTitle(_("Check your memory on a chessboard"))
         self.setWindowIcon(Iconos.Memoria())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         tb = QTUtil2.tbAcceptCancel(self)
 

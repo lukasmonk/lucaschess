@@ -123,7 +123,7 @@ def lanzaGUI(procesador):
 class WPassword(QtGui.QDialog):
     def __init__(self, liUsuarios):
         QtGui.QDialog.__init__(self, None)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         main = liUsuarios[0]
 

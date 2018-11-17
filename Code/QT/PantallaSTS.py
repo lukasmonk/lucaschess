@@ -225,7 +225,7 @@ class WWork(QtGui.QDialog):
 
         self.setWindowTitle(work.pathToExe())
         self.setWindowIcon(Iconos.Motor())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
 
         tb = QTUtil2.tbAcceptCancel(self)
 
