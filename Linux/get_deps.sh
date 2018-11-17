@@ -17,3 +17,8 @@ sudo -H pip install Pillow
 sudo -H pip install PhotoHash
 sudo -H pip install Cython
 sudo -H pip install scandir
+
+# For reference, after building turn on the executable bit for the
+# following files:
+#
+# file `find Linux64/ ` | grep -i elf | cut -f 1 -d : | grep -v "\.o"
