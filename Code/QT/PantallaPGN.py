@@ -664,7 +664,7 @@ class WFiltrar(QtGui.QDialog):
             dbSaveNom = VarGen.configuracion.ficheroFiltrosPGN
 
         self.setWindowTitle(_("Filter"))
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setWindowIcon(Iconos.Filtrar())
 
         self.liFiltro = liFiltro

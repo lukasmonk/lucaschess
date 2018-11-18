@@ -127,7 +127,7 @@ class wDatos(QtGui.QDialog):
 
         self.setWindowTitle(_("New game"))
         self.setWindowIcon(Iconos.Datos())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         tb = QTUtil2.tbAcceptCancel(self)
 

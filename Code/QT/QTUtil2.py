@@ -100,7 +100,7 @@ class MensEspera(QtGui.QWidget):
 
         super(MensEspera, self).__init__(parent)
 
-        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
         self.setStyleSheet("QWidget, QLabel { background: %s }" % background)
         if conImagen:
             lbi = QtGui.QLabel(self)
@@ -274,7 +274,7 @@ class BarraProgreso2(QtGui.QDialog):
         self.owner = owner
 
         # self.setWindowModality(QtCore.Qt.WindowModal)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setWindowTitle(titulo)
 
         # gb1 + progress
@@ -344,7 +344,7 @@ class BarraProgreso1(QtGui.QDialog):
 
         self.owner = owner
 
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         self.setWindowTitle(titulo)
 
         # gb1 + progress
@@ -416,7 +416,7 @@ class BarraProgreso(QtGui.QProgressDialog):
         self.total = total
         self.actual = 0
         self.setWindowModality(QtCore.Qt.WindowModal)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
         self.setWindowTitle(titulo)
         self.owner = owner
         self.setAutoClose(False)
@@ -480,7 +480,7 @@ class Mensaje(QtGui.QDialog):
             mens = resalta(mens)
 
         self.setWindowTitle(titulo)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
         # ~ self.setStyleSheet("QDialog, QLabel { background: #79b600 }")
 
         lbi = QtGui.QLabel(self)

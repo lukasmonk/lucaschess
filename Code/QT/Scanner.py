@@ -40,7 +40,7 @@ class Scanner(QtGui.QDialog):
 
         self.fich_png = fich_png
 
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.FramelessWindowHint)
         self.setWindowOpacity(self.vars.opacity)
         self.setGeometry(QtGui.QDesktopWidget().availableGeometry())
 

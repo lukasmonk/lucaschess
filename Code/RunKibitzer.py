@@ -58,7 +58,7 @@ class VentanaPolyglot(QtGui.QDialog):
         self.setWindowTitle(cpu.titulo)
         self.setWindowIcon(Iconos.Book())
 
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
 
         self.setBackgroundRole(QtGui.QPalette.Light)
 
@@ -137,7 +137,7 @@ class VentanaPolyglot(QtGui.QDialog):
             flags = self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint
         else:
             flags = self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint
-        self.setWindowFlags(flags)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.WindowCloseButtonHint | flags)
         self.tb.setAccionVisible(self.windowTop, not self.siTop)
         self.tb.setAccionVisible(self.windowBottom, self.siTop)
         self.show()
@@ -348,7 +348,7 @@ class VentanaMultiPV(QtGui.QDialog):
         self.setWindowTitle(cpu.titulo)
         self.setWindowIcon(Iconos.Motor())
 
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
 
         self.setBackgroundRole(QtGui.QPalette.Light)
 
@@ -434,7 +434,7 @@ class VentanaMultiPV(QtGui.QDialog):
             flags = self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint
         else:
             flags = self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint
-        self.setWindowFlags(flags)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | flags)
         self.tb.setAccionVisible(self.windowTop, not self.siTop)
         self.tb.setAccionVisible(self.windowBottom, self.siTop)
         self.show()
@@ -808,7 +808,7 @@ class Ventana(QtGui.QDialog):
 
         if not flags:
             flags = QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint | QtCore.Qt.WindowStaysOnTopHint
-        self.setWindowFlags(flags)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | flags)
 
         self.setBackgroundRole(QtGui.QPalette.Light)
         self.setStyleSheet("QTextEdit { background-color: rgb( 250,250,250); }")
@@ -894,7 +894,7 @@ class Ventana(QtGui.QDialog):
             flags = self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint
         else:
             flags = self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint
-        self.setWindowFlags(flags)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | flags)
         self.tb.setAccionVisible(self.windowTop, not self.siTop)
         self.tb.setAccionVisible(self.windowBottom, self.siTop)
         self.show()
@@ -1731,7 +1731,7 @@ class VentanaLinea(Ventana):
         if self.siMover:
             self.guardarVideo()
         self.siMover = not self.siMover
-        self.setWindowFlags(self.flags[self.siMover])
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | self.flags[self.siMover])
         self.show()
         self.recuperarVideo()
         QTUtil.refreshGUI()

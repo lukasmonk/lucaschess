@@ -2065,7 +2065,7 @@ class WTamTablero(QtGui.QDialog):
 
         self.setWindowTitle(_("Change board size"))
         self.setWindowIcon(Iconos.TamTablero())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         self._dispatchSize = tablero._dispatchSize
         self.tablero = tablero

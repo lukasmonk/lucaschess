@@ -33,7 +33,7 @@ class WTV_Flecha(QtGui.QDialog):
         QtGui.QDialog.__init__(self, owner)
 
         self.setWindowTitle(_("Arrow"))
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         self.siNombre = siNombre
 

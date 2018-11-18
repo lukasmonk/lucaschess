@@ -260,7 +260,7 @@ class WMotor(QtGui.QDialog):
 
         self.setWindowTitle(motorExterno.idName)
         self.setWindowIcon(Iconos.Motor())
-        self.setWindowFlags(
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint |
                 QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
 
         scrollArea = genOpcionesME(self, motorExterno)

@@ -628,7 +628,7 @@ class WCambioRival(QtGui.QDialog):
 
         self.setWindowTitle(_("Change opponent"))
         self.setWindowIcon(Iconos.Motor())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         self.configuracion = configuracion
         self.personalidades = Personalidades.Personalidades(self, configuracion)

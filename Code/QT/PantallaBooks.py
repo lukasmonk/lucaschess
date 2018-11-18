@@ -25,7 +25,7 @@ class WBooksCrear(QtGui.QDialog):
 
         self.setWindowTitle(_("Create a new book"))
         self.setWindowIcon(Iconos.Libros())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint)
 
         f = Controles.TipoLetra(puntos=9, peso=75)
 
@@ -226,7 +226,7 @@ class WBooks(QtGui.QDialog):
 
         self.setWindowTitle(_("Training with a book"))
         self.setWindowIcon(Iconos.Libros())
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
 
         self.setMinimumWidth(450)
 

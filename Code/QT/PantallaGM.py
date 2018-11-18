@@ -559,7 +559,7 @@ class WImportar(QtGui.QDialog):
 
         self.setWindowTitle(_("Import"))
         self.setWindowIcon(Iconos.ImportarGM())
-        self.setWindowFlags(
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint |
                 QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
 
         # Toolbar

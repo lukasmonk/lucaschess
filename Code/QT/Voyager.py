@@ -767,7 +767,7 @@ class Voyager(QTVarios.WDialogo):
         titulo = _("Voyager 2") if is_game else _("Start position")
         icono = Iconos.Voyager() if is_game else Iconos.Datos()
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, "voyager")
-        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
 
         self.is_game = is_game
         self.partida = partida

@@ -138,7 +138,7 @@ class Pantalla():
         if self.onTop:
             flags |= QtCore.Qt.WindowStaysOnTopHint
 
-        self.setWindowFlags(flags)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | flags)
         if self.tablero.siMaximizado():
             self.showMaximized()
         else:
@@ -189,7 +189,7 @@ class Pantalla():
     def muestraVariantes(self, titulo):
         flags = QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint
 
-        self.setWindowFlags(flags)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | flags)
 
         self.setWindowTitle(titulo if titulo else "-")
 
