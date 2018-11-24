@@ -594,7 +594,6 @@ class Guion:
                             return [pos, len_li-1]
         return False
 
-
     def arriba(self, nTarea):
         if nTarea > 0:
             self.liGTareas[nTarea], self.liGTareas[nTarea - 1] = self.liGTareas[nTarea - 1], self.liGTareas[nTarea]
@@ -647,21 +646,22 @@ class Guion:
         if self.tablero.dicMovibles:
             for k, item in self.tablero.dicMovibles.iteritems():
                 bd = item.bloqueDatos
-                tp, xid = bd.tpid
-                if tp == TP_FLECHA:
-                    tarea = GT_Flecha(self)
+                if hasattr(bd, "tpid"):
+                    tp, xid = bd.tpid
+                    if tp == TP_FLECHA:
+                        tarea = GT_Flecha(self)
 
-                elif tp == TP_MARCO:
-                    tarea = GT_Marco(self)
+                    elif tp == TP_MARCO:
+                        tarea = GT_Marco(self)
 
-                elif tp == TP_SVG:
-                    tarea = GT_SVG(self)
+                    elif tp == TP_SVG:
+                        tarea = GT_SVG(self)
 
-                elif tp == TP_MARKER:
-                    tarea = GT_Marker(self)
-                tarea.itemSC(item)
-                self.nuevaTarea(tarea)
-                stPrevios.add((tp, xid, bd.a1h8))
+                    elif tp == TP_MARKER:
+                        tarea = GT_Marker(self)
+                    tarea.itemSC(item)
+                    self.nuevaTarea(tarea)
+                    stPrevios.add((tp, xid, bd.a1h8))
         return stPrevios
 
     def recupera(self):
@@ -709,7 +709,11 @@ class DBGestorVisual():
         if not fenM2:
             return
         dicMovibles = tablero.dicMovibles
-        if len(dicMovibles) == 0:
+        n = 0
+        for k, v in dicMovibles.iteritems():
+            if hasattr(v, "tpid"):
+                n += 1
+        if n == 0:
             if fenM2 in self.dbFEN:
                 del self.dbFEN[fenM2]
             return
@@ -756,7 +760,6 @@ class DBGestorVisual():
                     self.dbMarkers[key] = dbr.dbMarkers[key]
             dbr.close()
 
-
     @property
     def fichero(self):
         return self._fichero
@@ -797,13 +800,11 @@ class DBGestorVisual():
             self._dbMarkers = Util.DicSQL(self._fichero, tabla="Markers")
         return self._dbMarkers
 
-
     def close(self):
         for db in (self._dbFEN, self._dbConfig, self._dbFlechas, self._dbMarcos, self._dbSVGs, self._dbMarkers):
             if db is not None:
                 db.close()
         self._dbFEN = self._dbConfig = self._dbFlechas = self._dbMarcos = self._dbSVGs = self._dbMarkers = None
-
 
 # def readGraphLive(configuracion):
 #     db = DBGestorVisual(configuracion.ficheroRecursos, False)
@@ -829,14 +830,13 @@ class DBGestorVisual():
 #             valor = xdb[xid[3:]]
 #             valor.TP = tp
 #             dic[rel[pos]] = valor
-#
+
 #     db.close()
 #     return dic
-#
 
 # def leeGraficos(configuracion):
 #     dicResp = {}
-#
+
 #     fdb = configuracion.ficheroRecursos
 #     dbConfig = Util.DicSQL(fdb, tabla="Config")
 #     li = dbConfig["SELECTBANDA"]
@@ -866,6 +866,6 @@ class DBGestorVisual():
 #     for db in (dbFlechas, dbMarcos, dbSVGs, dbMarkers):
 #         if db:
 #             db.close()
-#
+
 #     return dicResp
-#
+

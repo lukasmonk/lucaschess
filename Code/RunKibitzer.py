@@ -137,7 +137,7 @@ class VentanaPolyglot(QtGui.QDialog):
             flags = self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint
         else:
             flags = self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint
-        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.WindowCloseButtonHint | flags)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | flags)
         self.tb.setAccionVisible(self.windowTop, not self.siTop)
         self.tb.setAccionVisible(self.windowBottom, self.siTop)
         self.show()

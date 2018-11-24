@@ -995,7 +995,6 @@ class Tablero(QtGui.QGraphicsView):
         if self.current_graphlive:
             self.mouseReleaseGraphLive(event)
 
-
     def event2a1h8(self, event):
         pos = event.pos()
         x = pos.x()
@@ -1116,7 +1115,6 @@ class Tablero(QtGui.QGraphicsView):
             svg = TabSVG.SVGCandidate(self.escena, regSVG, False)
             self.pendingRelease.append(svg)
         self.escena.update()
-
 
     def mouseDoubleClickEvent(self, event):
         item = self.itemAt(event.pos())

@@ -428,21 +428,21 @@ class Torneo(object):
         self.leerDIC(dic)
 
     def grabarDIC(self):
-        dic = {}
-        dic["RESIGN"] = self._resign
-        dic["DRAWMINPLY"] = self._drawMinPly
-        dic["DRAWRANGE"] = self._drawRange
-        dic["ULTCARPETAENGINES"] = self._ultCarpetaEngines
-        dic["ULTMINUTOS"] = self._ultMinutos
-        dic["ULTSEGUNDOSJUGADA"] = self._ultSegundosJugada
-        dic["FEN"] = self._fen
-        dic["NORMAN"] = self._norman
+        dic = {
+               "RESIGN": self._resign,
+               "DRAWMINPLY": self._drawMinPly,
+               "DRAWRANGE": self._drawRange,
+               "ULTCARPETAENGINES": self._ultCarpetaEngines,
+               "ULTMINUTOS": self._ultMinutos,
+               "ULTSEGUNDOSJUGADA": self._ultSegundosJugada,
+               "FEN": self._fen,
+               "NORMAN": self._norman,
+               "BOOK": self._book,
+               "BOOKDEPTH": self._bookDepth,
+               "ENGINES": [en.grabarTXT() for en in self._liEngines],
+               "GAMES": [gm.grabarDIC() for gm in self._liGames]
+        }
 
-        dic["BOOK"] = self._book
-        dic["BOOKDEPTH"] = self._bookDepth
-
-        dic["ENGINES"] = [en.grabarTXT() for en in self._liEngines]
-        dic["GAMES"] = [gm.grabarDIC() for gm in self._liGames]
         return dic
 
     def grabar(self):
@@ -504,7 +504,7 @@ class Torneo(object):
         num_games = len(self._liGames)
         lista = range(num_games)
         random.shuffle(lista)
-        liOtro = Util.ListSQL(VarGen.configuracion.ficheroTemporal("db"))
+        liOtro = []
         for dest in lista:
             liOtro.append(self._liGames[dest])
         self._liGames = liOtro
@@ -599,13 +599,14 @@ class Torneo(object):
 torneo = Torneo()
 torneoTmp = Torneo()
 
+
 def leer(nomtorneo):
     if nomtorneo != torneo.nombre():
         torneo.reiniciar(nomtorneo)
     return torneo
 
+
 def leerTmp(liFiltro):
     torneoTmp.reiniciarTmp(torneo, liFiltro)
     return torneoTmp
-
 

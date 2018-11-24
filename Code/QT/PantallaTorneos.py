@@ -88,6 +88,7 @@ class WResult(QTVarios.WDialogo):
     def refresh(self):
         self.liResult = self.torneo.rehacerResult()
         self.liResultTMP = self.torneoTmp.rehacerResult()
+
         self.gridResult.refresh()
         self.gridResultTMP.refresh()
 
