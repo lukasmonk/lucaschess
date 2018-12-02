@@ -91,9 +91,9 @@ class UnPGN:
 
 
 class PGN:
-    def __init__(self):
-        self.cdir = "dataDB"
-        self.cpkd = self.cdir + "/dataDB8.pkd"
+    def __init__(self, configuracion):
+        self.cdir = configuracion.dataDB()
+        self.cpkd = os.path.join(self.cdir, "dataDB8.pkd")
         self.maxdb = 10
         self.leePKD()
 
@@ -204,6 +204,7 @@ class PGN:
 
         jg = 0
         dbf = None
+        bd = None
         for g in PGNreader.readGames(fichero):
 
             if tmpBP.siCancelado():
@@ -266,8 +267,16 @@ def leeEntDirigidoBase(fen, solucion):
     st = set()
 
     def hazPartida(partida, siMain):
-        for jg in partida.liJugadas:
-            fenBase = jg.posicionBase.fen()
+
+        #for jg in partida.liJugadas:
+        num_of_jugadas = len(partida.liJugadas)
+        for i in range(0, (num_of_jugadas+1)):
+            if i < num_of_jugadas:
+                jg = partida.liJugadas[i]
+                fenBase = jg.posicionBase.fen()
+            else:
+                jg = partida.liJugadas[i-1]
+                fenBase = jg.posicion.fen()
             if fenBase not in dicDirigidoFen:
                 dicDirigidoFen[fenBase] = []
             liDDF = dicDirigidoFen[fenBase]

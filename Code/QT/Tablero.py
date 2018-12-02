@@ -1,3 +1,5 @@
+import LCEngine2 as LCEngine
+
 import StringIO
 import collections
 import copy
@@ -84,12 +86,15 @@ class Tablero(QtGui.QGraphicsView):
         self.si_borraMovibles = True
 
         self.kb_buffer = []
+        self.cad_buffer = ""
 
         # dic = TabVisual.leeGraficos(self.configuracion)
         # print dic
 
-    def init_kb_buffer(self):
+    def init_kb_buffer(self, alsoCad=True):
         self.kb_buffer = []
+        if alsoCad:
+            self.cad_buffer = ""
 
     def exec_kb_buffer(self, key, flags):
         if key == Qt.Key_Escape:
@@ -114,38 +119,39 @@ class Tablero(QtGui.QGraphicsView):
             QTUtil.ponPortapapeles(self.ultPosicion.fen())
             QTUtil2.mensaje(self, _("FEN is in clipboard"))
 
-        # ALT-F -> Rota tablero
-        elif siAlt and key == Qt.Key_F:
-            self.intentaRotarTablero(None)
+        elif siAlt:
 
-        # ALT-I Save image to clipboard (CTRL->no border)
-        elif key == Qt.Key_I:
-            self.salvaEnImagen(siCtrl=siCtrl, siAlt=siAlt)
-            QTUtil2.mensaje(self, _("Board image is in clipboard"))
+            # ALT-F -> Rota tablero
+            if key == Qt.Key_F:
+                self.intentaRotarTablero(None)
 
-        # ALT-J Save image to file (CTRL->no border)
-        elif key == Qt.Key_J:
-            path = QTUtil2.salvaFichero(self, _("File to save"), self.configuracion.dirSalvados, "%s PNG (*.png)" % _("File"), False)
-            if path:
-                self.salvaEnImagen(path, "png", siCtrl=siCtrl, siAlt=siAlt)
-                self.configuracion.dirSalvados = os.path.dirname(path)
-                self.configuracion.graba()
+            # ALT-I Save image to clipboard (CTRL->no border)
+            elif key == Qt.Key_I:
+                self.salvaEnImagen(siCtrl=siCtrl, siAlt=siAlt)
+                QTUtil2.mensaje(self, _("Board image is in clipboard"))
 
-        # ALT-K
-        elif key == Qt.Key_K:
-            self.showKeys()
+            # ALT-J Save image to file (CTRL->no border)
+            elif key == Qt.Key_J:
+                path = QTUtil2.salvaFichero(self, _("File to save"), self.configuracion.dirSalvados, "%s PNG (*.png)" % _("File"), False)
+                if path:
+                    self.salvaEnImagen(path, "png", siCtrl=siCtrl, siAlt=siAlt)
+                    self.configuracion.dirSalvados = os.path.dirname(path)
+                    self.configuracion.graba()
 
-        elif hasattr(self.pantalla, "gestor") and self.pantalla.gestor \
-            and key in (Qt.Key_P, Qt.Key_N, Qt.Key_C):
-            # P -> show information
-            if key == Qt.Key_P and hasattr(self.pantalla.gestor, "pgnInformacion"):
-                self.pantalla.gestor.pgnInformacion()
-            # ALT-N -> non distract mode
-            elif key == Qt.Key_N and siAlt and hasattr(self.pantalla.gestor, "nonDistractMode"):
-                self.pantalla.gestor.nonDistractMode()
-            # ALT-C -> show captures
-            elif key == Qt.Key_C and hasattr(self.pantalla.gestor, "capturas"):
-                if siAlt:
+            # ALT-K
+            elif key == Qt.Key_K:
+                self.showKeys()
+
+            elif hasattr(self.pantalla, "gestor") and self.pantalla.gestor \
+                and key in (Qt.Key_P, Qt.Key_N, Qt.Key_C):
+                # P -> show information
+                if key == Qt.Key_P and hasattr(self.pantalla.gestor, "pgnInformacion"):
+                    self.pantalla.gestor.pgnInformacion()
+                # ALT-N -> non distract mode
+                elif key == Qt.Key_N and hasattr(self.pantalla.gestor, "nonDistractMode"):
+                    self.pantalla.gestor.nonDistractMode()
+                # ALT-C -> show captures
+                elif key == Qt.Key_C and hasattr(self.pantalla.gestor, "capturas"):
                     self.pantalla.gestor.capturas()
                 else:
                     okseguir = True
@@ -155,9 +161,46 @@ class Tablero(QtGui.QGraphicsView):
         if not okseguir:
             if self.kb_buffer:
                 self.kb_buffer = self.kb_buffer[:-1]
+                self.cad_buffer = ""
             return
 
         if self.mensajero and self.siActivasPiezas and not siAlt:
+
+            # Entrada directa con el pgn
+            if key > 32:
+                self.cad_buffer += chr(key)
+            if self.cad_buffer:
+                LCEngine.setFen(self.ultPosicion.fen())
+                li = LCEngine.getExMoves()
+                ok_ini = False
+                busca = self.cad_buffer.lower()
+                if busca.startswith("o-o") and busca[-1] not in "o-":
+                    busca = "o-o"
+                if busca == "o2":
+                    busca = "o-o"
+                    key = 33
+                elif busca == "o3":
+                    busca = "o-o-o"
+                for m in li:
+                    san = m._san.lower().replace("+", "").replace("=", "")
+                    if san == busca:
+                        if busca == "o-o":
+                            siExt = False
+                            for mt in li:
+                                if mt._san == "O-O-O":
+                                    siExt = True
+                                    break
+                            if siExt and chr(key).lower() == "o":
+                                ok_ini = True     # esperamos al siguiente caracter
+                                break
+                        self.cad_buffer = ""
+                        self.mensajero(m._from, m._to, m._promotion)
+                        return
+                    elif san.startswith(busca):
+                        ok_ini = True
+                if not ok_ini:
+                    self.cad_buffer = ""
+
             nk = len(self.kb_buffer)
             if nk == 4:
                 k = chr(key).lower()
@@ -168,9 +211,7 @@ class Tablero(QtGui.QGraphicsView):
             elif 48 < key < 57 or 64 < key < 73:  # coordenadas
                 c = chr(key)
                 if nk == 0:
-                    if c.isdigit():
-                        self.markError()
-                    else:
+                    if not c.isdigit():
                         self.kb_buffer.append(RegKB(key, flags))
                     return
                 elif nk == 1:
@@ -183,7 +224,7 @@ class Tablero(QtGui.QGraphicsView):
                             self.markPosition(desde)
                         else:
                             self.markError(desde)
-                            self.init_kb_buffer()
+                            self.init_kb_buffer(False)
                     else:
                         self.kb_buffer[0] = RegKB(key, flags)
                     return
@@ -1092,11 +1133,9 @@ class Tablero(QtGui.QGraphicsView):
     def markPosition(self, a1):
         self.markPositionExt(a1, a1, "C")
 
-    def markError(self, a1=None):
+    def markError(self, a1):
         if a1:
             self.markPositionExt(a1, a1, "R")
-        else:
-            self.markPositionExt("a8", "c6", "R")
 
     def showCandidates(self, liC):
         if not liC or not self.configuracion.showCandidates:

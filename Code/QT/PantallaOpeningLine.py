@@ -2,6 +2,8 @@ import os
 import os.path
 import copy
 
+import LCEngine2 as LCEngine
+
 from PyQt4 import QtCore, QtGui
 
 from Code import Util
@@ -869,6 +871,8 @@ class WLines(QTVarios.WDialogo):
         if tam_dbop > 1:
             li.append(["lines", _("Remove a list of lines"), Iconos.MoverLibre()])
 
+        li.append(["worst", _("Remove worst lines"), Iconos.Borrar()])
+
         if len(li) > 0:
             menu = QTVarios.LCMenu(self)
             for key, title, ico in li:
@@ -881,7 +885,7 @@ class WLines(QTVarios.WDialogo):
                 del self.dbop[current]
                 self.goto_inilinea()
 
-            elif resp is not None:
+            elif resp == "lines":
                 liGen = [FormLayout.separador]
                 config = FormLayout.Editbox("<div align=\"right\">" + _("Lines") + "<br>" +
                                             _("By example:") + " -5,8-12,14,19-",
@@ -916,7 +920,80 @@ class WLines(QTVarios.WDialogo):
                             self.glines.refresh()
                             self.goto_inilinea()
                             um.final()
+            elif resp == "worst":
+                self.remove_worst()
         self.show_lines()
+
+    def remove_worst(self):
+        # color + time
+        liGen = [FormLayout.separador]
+        liJ = [(_("White"), "WHITE"), (_("Black"), "BLACK")]
+        config = FormLayout.Combobox(_("Side"), liJ)
+        liGen.append((config, "WHITE"))
+        liGen.append((_("Duration of engine analysis (secs)") + ":", float(self.configuracion.tiempoTutor / 1000.0)))
+        resultado = FormLayout.fedit(liGen, title=_("Remove worst lines"), parent=self, icon=Iconos.OpeningLines())
+        if resultado:
+            color, segs = resultado[1]
+            ms = int(segs * 1000)
+            if ms == 0:
+                return
+            si_white = color == "WHITE"
+            dic = self.dbop.dicRepeFen(si_white)
+            mensaje = _("Move") + "  %d/" + str(len(dic))
+            tmpBP = QTUtil2.BarraProgreso(self, _("Remove worst lines"), "", len(dic))
+
+            xgestor = self.procesador.creaGestorMotor(self.configuracion.tutor, ms, 0, siMultiPV=False)
+
+            st_borrar = set()
+
+            ok = True
+
+            for n, fen in enumerate(dic, 1):
+
+                if tmpBP.siCancelado():
+                    ok = False
+                    break
+
+                tmpBP.inc()
+                tmpBP.mensaje(mensaje % n)
+
+                max_puntos = -999999
+                max_pv = None
+                dicPV = dic[fen]
+                for pv in dicPV:
+                    if tmpBP.siCancelado():
+                        ok = False
+                        break
+                    LCEngine.setFen(fen)
+                    LCEngine.movePV(pv[:2], pv[2:4], pv[4:])
+                    mrm = xgestor.analiza(fen)
+                    rm = mrm.mejorMov()
+                    pts = rm.puntosABS()
+                    if not si_white:
+                        pts = -pts
+                    if pts > max_puntos:
+                        max_puntos = pts
+                        if max_pv:
+                            for nl in dicPV[max_pv]:
+                                st_borrar.add(nl)
+                        max_pv = pv
+                    else:
+                        for nl in dicPV[pv]:
+                            st_borrar.add(nl)
+
+
+            tmpBP.cerrar()
+
+            xgestor.terminar()
+
+            if ok:
+                li_borrar = list(st_borrar)
+                n = len(li_borrar)
+                if n:
+                    self.dbop.removeLines(li_borrar, _("Remove worst lines"))
+                    QTUtil2.mensaje(self, _("Removed %d lines") % n)
+                else:
+                    QTUtil2.mensaje(self, _("Done"))
 
     def goto_inilinea(self):
         nlines = len(self.dbop)

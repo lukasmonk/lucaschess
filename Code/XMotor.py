@@ -11,6 +11,7 @@ from Code import VarGen
 from Code import Util
 from Code import XMotorRespuesta
 from Code import EngineThread
+from Code.QT import QTUtil2
 
 
 class XMotor:
@@ -34,6 +35,7 @@ class XMotor:
         self.uci_lines = []
 
         if not os.path.isfile(exe):
+            QTUtil2.mensError(None, "%s:\n  %s" % (_("Engine not found"), exe))
             return
 
         self.engine = EngineThread.Engine(exe, priority, args)

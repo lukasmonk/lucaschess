@@ -55,6 +55,7 @@ class GestorTacticas(Gestor.Gestor):
         self.fenInicial = fenInicial
 
         self.dicEtiquetasPGN = None
+        solucion = None
         siPartidaOriginal = False
         nli = len(li)
         if nli >= 2:
@@ -109,6 +110,11 @@ class GestorTacticas(Gestor.Gestor):
 
         if not siPartidaOriginal:
             self.partida.reset(cp)
+            if solucion:
+                tmp_pgn = PGN.UnPGN()
+                tmp_pgn.leeTexto('[FEN "%s"]\n%s' % (fenInicial, solucion))
+                if tmp_pgn.partida.firstComment:
+                    self.partida.setFirstComment(tmp_pgn.partida.firstComment, True)
 
         self.partida.pendienteApertura = False
 
@@ -307,7 +313,7 @@ class GestorTacticas(Gestor.Gestor):
         if siRival:
             fenM2 = self.partida.ultPosicion.fenM2()
             siPiensaRival = False
-            if fenM2 in self.dicDirigidoFenM2:
+            if (fenM2 in self.dicDirigidoFenM2) and (fenM2 != self.dicDirigidoFenM2.keys()[-1]):
                 liOpciones = self.dicDirigidoFenM2[fenM2]
                 if liOpciones:
                     liJugadas = []
@@ -354,7 +360,7 @@ class GestorTacticas(Gestor.Gestor):
 
             if not self.siSeguirJugando:
                 fenM2 = self.partida.ultPosicion.fenM2()
-                if fenM2 not in self.dicDirigidoFenM2:
+                if (fenM2 not in self.dicDirigidoFenM2) or (fenM2 == self.dicDirigidoFenM2.keys()[-1]):
                     return self.finLinea()
 
             self.siJuegaHumano = True
@@ -403,7 +409,7 @@ class GestorTacticas(Gestor.Gestor):
         movimiento = jg.movimiento()
 
         fenM2 = self.partida.ultPosicion.fenM2()
-        if fenM2 in self.dicDirigidoFenM2:
+        if (fenM2 in self.dicDirigidoFenM2) and (fenM2 != self.dicDirigidoFenM2.keys()[-1]):
             liOpciones = self.dicDirigidoFenM2[fenM2]
             if len(liOpciones) > 1:
                 self.guardaVariantes()
@@ -489,7 +495,7 @@ class GestorTacticas(Gestor.Gestor):
             else:
 
                 fenM2 = self.partida.ultPosicion.fenM2()
-                if not (fenM2 in self.dicDirigidoFenM2):
+                if (not (fenM2 in self.dicDirigidoFenM2)) or (fenM2 == self.dicDirigidoFenM2.keys()[-1]):
                     self.analizaTutor()  # Que analice antes de activar humano, para que no tenga que esperar
                     self.siAnalizadoTutor = True
 

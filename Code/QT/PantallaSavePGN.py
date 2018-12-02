@@ -185,8 +185,8 @@ class WSave(QTVarios.WDialogo):
 
         # Opciones
         liOpciones = [
-            (_("Close"), Iconos.MainMenu(), self.terminar), None,
             (_("Save"), Iconos.GrabarFichero(), self.save), None,
+            (_("Cancel"), Iconos.Cancelar(), self.terminar), None,
             (_("Clipboard"), Iconos.Clip(), self.portapapeles), None,
             (_("Reinit"), Iconos.Reiniciar(), self.reinit), None,
         ]

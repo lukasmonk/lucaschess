@@ -182,7 +182,7 @@ class GestorMicElo(Gestor.Gestor):
 
         txt = "%s:%+d%s%s:%+d%s%s:%+d" % (_("Win"), self.datosMotor.pgana, nbsp,
                                           _("Draw"), self.datosMotor.ptablas, nbsp,
-                                          _("Lost"), self.datosMotor.ppierde)
+                                          _("Loss"), self.datosMotor.ppierde)
         self.ponRotulo1("<center>%s</center>" % txt)
         self.ponRotulo2("")
         self.pgnRefresh(True)

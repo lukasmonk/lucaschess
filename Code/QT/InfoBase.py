@@ -47,7 +47,7 @@ class ThanksTo:
             ["Alaric 707", "Peter Fendrich", "http://alaric.fendrich.se/index.html"],
             ["Cyrano 06B17", "Harald Johnsen", "http://sites.estvideo.net/tipunch/cyrano/"],
             ["Daydreamer 1.75 JA", "Aaron Becker", "http://github.com/AaronBecker/daydreamer/downloads"],
-            ["Gödel 4.0.7", "Juan Manuel Vazquez", "https://sites.google.com/site/godelchessengine"],
+            ["Gödel 4.4.5", "Juan Manuel Vazquez", "https://sites.google.com/site/godelchessengine"],
             ["Rhetoric 1.4.3", "Alberto Sanjuan", "http://www.chessrhetoric.com/"],
             ["Cheng 4 0.39", "Martin Sedlák", "http://www.vlasak.biz/cheng"],
             ["Glaurung 2.2 JA", "Tord RomsTad", "http://www.glaurungchess.com/"],
@@ -61,8 +61,8 @@ class ThanksTo:
             ["Rybka 2.3.2a 32-bit", "Vasik Rajlich", "http://rybkachess.com/"],
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
             ["Texel 1.07", "Peter Österlund", "http://hem.bredband.net/petero2b/javachess/index.html#texel"],
-            ["Stockfish 9", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["McBrain 9.9", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
+            ["Stockfish 10", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
+            ["McCain 10.1", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
             ["Delfi 5.4", "Fabio Cavicchio", "http://www.msbsoftware.it/delfi/"],
             # ["SmartThink 1.97", "Sergei S. Markoff", "http://genes1s.net/smarthink.php"],
@@ -389,7 +389,7 @@ class ThanksTo:
         txt += "</tr>"
         for nombre, autor, url in self.listaMotores(orden):
             txt += "<tr>"
-            if "McBrain" in nombre:
+            if "McCain" in nombre:
                 txt += '<th><font color="darkred">%s (%s)</font></th>' % (nombre, _("default"))
                 txt += '<td><font color="darkred">%s</font></td>' % autor
             else:

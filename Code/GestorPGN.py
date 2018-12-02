@@ -258,7 +258,7 @@ class GestorPGN(Gestor.Gestor):
 
         # ~ else ya esta el nombre
 
-        fpgn = PGN.PGN()
+        fpgn = PGN.PGN(self.configuracion)
 
         dicDB = fpgn.leeFichero(self.pantalla, path)
         if dicDB is None:
@@ -327,7 +327,7 @@ class GestorPGN(Gestor.Gestor):
         bd.cerrar()
 
         if siSeHaBorradoAlgo:
-            fpgn = PGN.PGN()
+            fpgn = PGN.PGN(self.configuracion)
             fpgn.borraReferenciaA(dicDB["FICHERO"])
 
         if siMostrar:

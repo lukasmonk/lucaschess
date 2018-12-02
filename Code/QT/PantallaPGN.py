@@ -972,7 +972,7 @@ def eligePartida(ventana, path=None):
         configuracion.graba()
 
     # Lo importamos
-    fpgn = PGN.PGN()
+    fpgn = PGN.PGN(configuracion)
 
     dicDB = fpgn.leeFichero(ventana, path)
     if dicDB is None:

@@ -48,8 +48,8 @@ def leeRivales():
     cm.ponMultiPV(20, 218)
     mas(cm)
 
-    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "9", "http://stockfishchess.org/")
-    cm.path = "Linux/stockfish-9-64"
+    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "10", "http://stockfishchess.org/")
+    cm.path = "Linux/stockfish_10_x64"
     cm.elo = 3300
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "64")
@@ -80,9 +80,12 @@ def leeRivales():
     cm.ordenUCI("Log", "false")
     mas(cm)
 
-    cm = ConfigMotor("godel", "Juan Manuel Vazquez", "4.0.7", "https://sites.google.com/site/godelchessengine")
+    cm = ConfigMotor("godel", "Juan Manuel Vazquez", "4.4.5", "https://sites.google.com/site/godelchessengine")
     cm.path = "Godel64"
-    cm.elo = 2600
+    cm.elo = 2814
+    cm.ordenUCI("Hash", "32")
+    cm.ordenUCI("Ponder", "false")
+    cm.nombre = "Gödel 4.4.5".decode("utf-8")
     mas(cm)
 
     cm = ConfigMotor("daydreamer", "Aaron Becker", "1.75 JA", "http://github.com/AaronBecker/daydreamer/downloads")
@@ -138,9 +141,9 @@ def leeRivales():
     cm.ordenUCI("Hash", "64")
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne", "9.9", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "McBrain-v99_x64_linux"
-    cm.elo = 3200
+    cm = ConfigMotor("mccain", "Michael Byrne", "10.1", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McCain-v10-1_x64_linux"
+    cm.elo = 3300
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
     cm.ponMultiPV(20, 256)
@@ -165,7 +168,7 @@ def dicMotoresFixedElo():
     for nm, desde, hasta in (
             ("cheng", 800, 2500),
             ("greko", 1600, 2400),
-            ("mcbrain", 1500, 2800),
+            ("mccain", 1500, 2800),
             ("discocheck", 1500, 2700),
     ):
         for elo in range(desde, hasta + 100, 100):

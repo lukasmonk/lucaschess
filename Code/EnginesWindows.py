@@ -121,13 +121,12 @@ def leeRivales():
     cm.ordenUCI("Hash", "32")
     mas(cm)
 
-    cm = ConfigMotor("godel", "Juan Manuel Vazquez", "4.0.7", "https://sites.google.com/site/godelchessengine")
+    cm = ConfigMotor("godel", "Juan Manuel Vazquez", "4.4.5", "https://sites.google.com/site/godelchessengine")
     cm.path = "Godel32.exe"
-    cm.elo = 2720
+    cm.elo = 2814
     cm.ordenUCI("Hash", "32")
     cm.ordenUCI("Ponder", "false")
-    cm.nombre = "Gödel 4.0.7".decode("utf-8")
-
+    cm.nombre = "Gödel 4.4.5".decode("utf-8")
     mas(cm)
 
     cm = ConfigMotor("rhetoric", "Alberto Sanjuan", "1.4.3", "http://www.chessrhetoric.com/")
@@ -208,9 +207,9 @@ def leeRivales():
     cm.ponMultiPV(20, 256)
     mas(cm)
 
-    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "9 32bits", "http://stockfishchess.org/")
-    cm.path = "Windows/stockfish_9_x32.exe"
-    cm.path_64 = "Windows/stockfish_9_x64_bmi2.exe", "9 64bits bmi2"
+    cm = ConfigMotor("stockfish", "Tord Romstad, Marco Costalba, Joona Kiiski", "10 32bits", "http://stockfishchess.org/")
+    cm.path = "Windows/stockfish_10_x32.exe"
+    cm.path_64 = "Windows/stockfish_10_x64_bmi2.exe", "10 64bits bmi2"
     cm.elo = 3300
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "64")
@@ -218,10 +217,10 @@ def leeRivales():
     cm.ponMultiPV(20, 500)
     mas(cm)
 
-    cm = ConfigMotor("mcbrain", "Michael Byrne", "9.9 32bit", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "McBrain-v99_x32_old.exe"
-    cm.path_64 = "McBrain-v99_x64_bmi2.exe", "9.9 64bit bmi2"
-    cm.elo = 3200
+    cm = ConfigMotor("mccain", "Michael Byrne", "10.1 32bit", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McCain-v10-1_x32_old.exe"
+    cm.path_64 = "McCain-v10-1_x64_bmi2.exe", "10.1 64bit bmi2"
+    cm.elo = 3300
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
     cm.ponMultiPV(20, 256)
@@ -349,7 +348,7 @@ def dicMotoresFixedElo():
     for nm, desde, hasta in (
             ("rodent", 600, 2600),
             ("amyan", 1000, 2400),
-            ("mcbrain", 1500, 2800),
+            ("mccain", 1500, 2800),
             ("rhetoric", 1300, 2600),
             ("cheng", 800, 2500),
             ("greko", 1600, 2400),

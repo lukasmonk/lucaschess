@@ -215,7 +215,7 @@ class Configuracion:
         self.rivalInicial = "rocinante" if VarGen.isLinux else "irina"
         self.rival = self.buscaRival(self.rivalInicial)
 
-        self.tutorInicial = "mcbrain"
+        self.tutorInicial = "mccain"
         self.tutor = self.buscaRival(self.tutorInicial)
         self.tutorMultiPV = 10  # 0: maximo
         self.tutorDifPts = 0
@@ -829,6 +829,9 @@ class Configuracion:
         self.releeTRA()
 
         TrListas.ponPiecesLNG(self.siNomPiezasEN or self.traductor == "en")
+
+    def dataDB(self):
+        return os.path.join(self.carpeta, "_dataDB")
 
     def testFavoritos(self):
         if len(self.liFavoritos) > 0:

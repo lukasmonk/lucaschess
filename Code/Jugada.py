@@ -164,30 +164,32 @@ class Jugada:
 
     def listaSonidos(self):
         pgn = self.pgnBase
+        liMedio = []
+        liFinal = []
         if pgn[0] == "O":
             liInicial = [pgn]
-            liMedio = []
-            liFinal = []
         else:
             if "=" in pgn:
-                liFinal = ["=", pgn[-1]]
-                pgn = pgn[:-2]
+                ult = pgn[-1]
+                if ult.lower() in "qrnb":
+                    liFinal = ["=", pgn[-1]]
+                    pgn = pgn[:-2]
+                else:
+                    liFinal = ["=", pgn[-2], pgn[-1]]
+                    pgn = pgn[:-3]
             elif pgn.endswith("e.p."):
-                # liFinal = [ "e.p." ]
                 pgn = pgn[:-4]
-            else:
-                liFinal = []
             liMedio = [pgn[-2], pgn[-1]]
             pgn = pgn[:-2]
             liInicial = list(pgn)
             if liInicial and liInicial[-1] == "x":
-                liInicial.append(self.posicionBase.casillas[self.hasta])
+                piece = self.posicionBase.casillas[self.hasta]
+                if piece is None: # e.p.
+                    piece = "P"
+                liInicial.append(piece.upper())
             if (not liInicial) or (not liInicial[0].isupper()):
                 liInicial.insert(0, "P")
-        if self.siJaqueMate:
-            liFinal.append("#")
-        elif self.siJaque:
-            liFinal.append("+")
+
         li = liInicial
         li.extend(liMedio)
         li.extend(liFinal)

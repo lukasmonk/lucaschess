@@ -395,7 +395,7 @@ def menuInformacion(procesador):
     menu.separador()
     menu.opcion("mail", _("Contact") + " (%s)" % "lukasmonk@gmail.com", Iconos.Mail())
     menu.separador()
-    submenu = menu.submenu(_("Scores"), Iconos.EstrellaAzul())  # EXE
+    submenu = menu.submenu("%s (%s)" % (_("Scores"), _("will be removed in the next version")), Iconos.EstrellaAzul())  # EXE
     submenu.opcion("puntuacionPost", _("Post your score"), Iconos.Puntuacion())  # EXE
     submenu.opcion("puntuacionConsulta", _("Check your scores in time"), Iconos.EstrellaAzul())  # EXE
     menu.separador()  # EXE

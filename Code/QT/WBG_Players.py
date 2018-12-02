@@ -116,10 +116,10 @@ class WPlayer(QtGui.QWidget):
         oColumnas.nueva("pgames", "% " + _("Games"), 70, siDerecha=True)
         oColumnas.nueva("win", _("Win"), ancho, siDerecha=True)
         oColumnas.nueva("draw", _("Draw"), ancho, siDerecha=True)
-        oColumnas.nueva("lost", _("Lost"), ancho, siDerecha=True)
+        oColumnas.nueva("lost", _("Loss"), ancho, siDerecha=True)
         oColumnas.nueva("pwin", "% " + _("Win"), ancho, siDerecha=True)
         oColumnas.nueva("pdraw", "% " + _("Draw"), ancho, siDerecha=True)
-        oColumnas.nueva("plost", "% " + _("Lost"), ancho, siDerecha=True)
+        oColumnas.nueva("plost", "% " + _("Loss"), ancho, siDerecha=True)
         oColumnas.nueva("pdrawwin", "%% %s" % _("W+D"), ancho, siDerecha=True)
         oColumnas.nueva("pdrawlost", "%% %s" % _("L+D"), ancho, siDerecha=True)
 
@@ -131,10 +131,10 @@ class WPlayer(QtGui.QWidget):
         oColumnas.nueva("games", _("Games"), ancho, siDerecha=True)
         oColumnas.nueva("win", _("Win"), ancho, siDerecha=True)
         oColumnas.nueva("draw", _("Draw"), ancho, siDerecha=True)
-        oColumnas.nueva("lost", _("Lost"), ancho, siDerecha=True)
+        oColumnas.nueva("lost", _("Loss"), ancho, siDerecha=True)
         oColumnas.nueva("pwin", "% " + _("Win"), ancho, siDerecha=True)
         oColumnas.nueva("pdraw", "% " + _("Draw"), ancho, siDerecha=True)
-        oColumnas.nueva("plost", "% " + _("Lost"), ancho, siDerecha=True)
+        oColumnas.nueva("plost", "% " + _("Loss"), ancho, siDerecha=True)
 
         ancho_col = 40
         siFigurinesPGN = self.configuracion.figurinesPGN

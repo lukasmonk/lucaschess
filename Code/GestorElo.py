@@ -320,7 +320,7 @@ class GestorElo(Gestor.Gestor):
 
         txt = "%s:%+d%s%s:%+d%s%s:%+d" % (_("Win"), self.datosMotor.pgana, nbsp,
                                           _("Draw"), self.datosMotor.ptablas, nbsp,
-                                          _("Lost"), self.datosMotor.ppierde)
+                                          _("Loss"), self.datosMotor.ppierde)
 
         self.ponRotulo2("<center>%s</center>" % txt)
         self.pgnRefresh(True)

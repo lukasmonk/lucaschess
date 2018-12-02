@@ -16,6 +16,7 @@ class GestorPerson(GestorEntMaq.GestorEntMaq):
         if aplazamiento:
             dic = aplazamiento["EMDIC"]
         self.reinicio = dic
+        self.cache = {}
 
         self.tipoJuego = kJugEntMaq
 

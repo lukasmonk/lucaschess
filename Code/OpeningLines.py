@@ -414,6 +414,28 @@ class Opening:
                 LCEngine.makeMove(pv)
         return dicFENm2
 
+    def dicRepeFen(self, si_white):
+        lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
+
+        dic = {}
+        for nlinea, lipv in enumerate(lilipv):
+            LCEngine.setFenInicial()
+            for pv in lipv:
+                fen = LCEngine.getFen()
+                if " w " in fen and si_white:
+                    if fen not in dic:
+                        dic[fen] = {}
+                    dicPV = dic[fen]
+                    if pv not in dicPV:
+                        dicPV[pv] = []
+                    dicPV[pv].append(nlinea)
+                LCEngine.makeMove(pv)
+        d = {}
+        for fen, dicPV in dic.iteritems():
+            if len(dicPV) > 1:
+                d[fen] = dicPV
+        return d
+
     def preparaTrainingEngines(self, configuracion, reg):
         reg["DICFENM2"] = self.recalcFenM2()
         reg["TIMES"] = [500, 1000, 2000, 4000, 8000]

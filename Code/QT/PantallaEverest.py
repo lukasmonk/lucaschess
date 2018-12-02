@@ -101,7 +101,7 @@ class WNewExpedition(QTVarios.WDialogo):
         if not path:
             return
 
-        fpgn = PGN.PGN()
+        fpgn = PGN.PGN(self.configuracion)
 
         dicDB = fpgn.leeFichero(self, path)
         if dicDB is None:
