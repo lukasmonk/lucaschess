@@ -717,7 +717,7 @@ class GestorSolo(Gestor.Gestor):
         liMasOpciones = [
             ("rotacion", _("Auto-rotate board"), Iconos.JS_Rotacion()), sep,
             ("apertura", _("Opening"), Iconos.Apertura()), sep,
-            ("posicion", _("Start position"), Iconos.Datos()), sep,
+            ("posicion", _("Edit start position"), Iconos.Datos()), sep,
             ("pasteposicion", _("Paste FEN position"), Iconos.Pegar16()), sep,
             ("leerpgn", _("Read PGN"), Iconos.PGN_Importar()), sep,
             ("pastepgn", _("Paste PGN"), Iconos.Pegar16()), sep,

@@ -1880,13 +1880,13 @@ class VentanaStockfishEval(Ventana):
         ok = False
         for linea in li:
             if not ok:
-                if "Eval term" in linea:
+                if "TERM" in linea.upper():
                     ok = True
                 else:
                     continue
             lir.append(linea)
 
-            if "Total Evaluation" in linea:
+            if "TOTAL EVALUATION" in linea.upper():
                 break
 
         if lir:

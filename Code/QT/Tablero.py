@@ -109,6 +109,11 @@ class Tablero(QtGui.QGraphicsView):
             else:
                 return
 
+        if key in (Qt.Key_Backspace, Qt.Key_Delete):
+            if hasattr(self.pantalla, "gestor") and hasattr(self.pantalla.gestor, "procesarAccion"):
+                self.pantalla.gestor.procesarAccion(k_atras)
+                return
+
         siAlt = (flags & QtCore.Qt.AltModifier) > 0
         siCtrl = (flags & QtCore.Qt.ControlModifier) > 0
 
@@ -167,7 +172,7 @@ class Tablero(QtGui.QGraphicsView):
         if self.mensajero and self.siActivasPiezas and not siAlt:
 
             # Entrada directa con el pgn
-            if key > 32:
+            if 128 > key > 32:
                 self.cad_buffer += chr(key)
             if self.cad_buffer:
                 LCEngine.setFen(self.ultPosicion.fen())
