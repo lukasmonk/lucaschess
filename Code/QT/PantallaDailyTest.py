@@ -50,7 +50,7 @@ class WDailyTestBase(QTVarios.WDialogo):
             (_("Configuration"), Iconos.Opciones(), self.configurar), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
         )
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Colocamos
         ly = Colocacion.V().control(tb).control(self.ghistorico).margen(3)

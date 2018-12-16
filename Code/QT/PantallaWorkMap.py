@@ -43,7 +43,7 @@ class WMap(QTVarios.WDialogo):
             (_("Close"), Iconos.MainMenu(), self.terminar), None,
             (_("Play"), Iconos.Empezar(), self.play), None,
         )
-        tbWork = Controles.TBrutina(self, liAcciones, tamIcon=24)
+        tbWork = QTVarios.LCTB(self, liAcciones, tamIcon=24)
 
         self.lbInfo = Controles.LB(self)
 
@@ -77,7 +77,7 @@ class WMap(QTVarios.WDialogo):
                       (_("New"), Iconos.NuevoMas(), self.data_new), None,
                       (_("Remove"), Iconos.Borrar(), self.data_remove), None,
                       )
-        tb = Controles.TBrutina(self, liAcciones, tamIcon=24)
+        tb = QTVarios.LCTB(self, liAcciones, tamIcon=24)
 
         ly = Colocacion.V().control(tb).control(self.gridData)
         w = QtGui.QWidget()
@@ -238,7 +238,7 @@ class WUnSTSMap(QTVarios.WDialogo):
             (_("Cancel"), Iconos.Cancelar(), self.cancelar),
             (_("Analysis"), Iconos.Tutor(), self.analizar),
         )
-        self.tb = Controles.TBrutina(self, self.liAcciones)
+        self.tb = QTVarios.LCTB(self, self.liAcciones)
 
         lyT = Colocacion.V().control(self.tablero).relleno()
         lyV = Colocacion.V().relleno().control(self.lbJuego).relleno(2)

@@ -49,7 +49,7 @@ class WOpeningLines(QTVarios.WDialogo):
             (_("Reinit"), Iconos.Reiniciar(), self.reiniciar), None,
             (_("Folder"), Iconos.File(), self.changeFolder), None,
         )
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         tb.setSizePolicy(sp)
 
@@ -331,7 +331,7 @@ class WStaticTraining(QTVarios.WDialogo):
         lb.ponFondoN("#BDDBE8").alinCentrado().ponTipoLetra(puntos=14)
 
         # Toolbar
-        tb = Controles.TBrutina(self)
+        tb = QTVarios.LCTB(self)
         tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
 
         # Lista

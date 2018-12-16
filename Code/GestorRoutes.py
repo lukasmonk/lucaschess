@@ -656,7 +656,7 @@ class GestorRoutesTactics(GestorRoutes):
         self.ponPosicion(self.partida.ultPosicion)
         self.mostrarIndicador(True)
         self.ponPiezasAbajo(siBlancas)
-        self.ponRotulo1("<b>%s</b>" % tactica.label)
+        # self.ponRotulo1("<b>%s</b>" % tactica.label)
         self.ponRotulo2(route.mens_tactic(False))
         self.pgnRefresh(True)
         QTUtil.xrefreshGUI()

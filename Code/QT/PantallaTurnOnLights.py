@@ -42,7 +42,7 @@ class WTurnOnLights(QTVarios.WDialogo):
         lb.ponFondoN(background).alinCentrado().ponTipoLetra(puntos=14)
 
         # Toolbar
-        tb = Controles.TBrutina(self)
+        tb = QTVarios.LCTB(self)
         tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
         anterior, siguiente, terminado = self.tol.prev_next()
         if anterior:
@@ -285,7 +285,7 @@ class WConfigOneLineTOL(QTVarios.WDialogo):
 
         self.chbauto = Controles.CHB(self, _("Redo each day automatically"), self.tol.auto_day )
 
-        tb = Controles.TBrutina(self)
+        tb = QTVarios.LCTB(self)
         tb.new(_("Accept"), Iconos.Aceptar(), self.aceptar)
         tb.new(_("Cancel"), Iconos.Cancelar(), self.cancelar)
 

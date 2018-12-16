@@ -190,7 +190,7 @@ class WSave(QTVarios.WDialogo):
             (_("Clipboard"), Iconos.Clip(), self.portapapeles), None,
             (_("Reinit"), Iconos.Reiniciar(), self.reinit), None,
         ]
-        tb = Controles.TBrutina(self, liOpciones)
+        tb = QTVarios.LCTB(self, liOpciones)
 
         tabs = Controles.Tab(self)
 
@@ -511,7 +511,7 @@ class WSaveVarios(QTVarios.WDialogo):
             (_("Save"), Iconos.GrabarFichero(), self.aceptar), None,
             (_("Cancel"), Iconos.Cancelar(), self.reject), None,
         ]
-        self.tb = Controles.TBrutina(self, liOpciones)
+        self.tb = QTVarios.LCTB(self, liOpciones)
 
         self.wbase = WBaseSave(self, configuracion)
 

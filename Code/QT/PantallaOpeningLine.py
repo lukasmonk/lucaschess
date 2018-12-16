@@ -14,7 +14,6 @@ from Code import Books
 from Code import EnginesBunch
 from Code.QT import Colocacion
 from Code.QT import Columnas
-from Code.QT import Controles
 from Code.QT import Grid
 from Code.QT import Iconos
 from Code.QT import PantallaAperturas
@@ -54,7 +53,7 @@ class WLines(QTVarios.WDialogo):
             (_("Utilities"), Iconos.Utilidades(), self.utilidades), None,
             (_("Train"), Iconos.Study(), self.train), None,
         )
-        self.tb = Controles.TBrutina(self, liAcciones)
+        self.tb = QTVarios.LCTB(self, liAcciones)
 
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("LINE", _("Line"), 35, edicion=Delegados.EtiquetaPOS(False, True))

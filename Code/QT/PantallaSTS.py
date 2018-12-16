@@ -39,7 +39,7 @@ class WRun(QTVarios.WDialogo):
                       (_("Run"), Iconos.Run(), self.run),
                       (_("Pause"), Iconos.Pelicula_Pausa(), self.pause), None,
                       ]
-        self.tb = tb = Controles.TBrutina(self, liAcciones, tamIcon=24)
+        self.tb = tb = QTVarios.LCTB(self, liAcciones, tamIcon=24)
 
         # Area resultados
         oColumnas = Columnas.ListaColumnas()

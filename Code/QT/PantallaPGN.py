@@ -137,7 +137,7 @@ class WElegir(QTVarios.WDialogo):
                 (_("Remove"), Iconos.Borrar(), self.borrar), None,
                 (_("Utilities"), Iconos.Utilidades(), self.utilidades), None
             ]
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Layout
         layout = Colocacion.V().control(tb).control(self.grid).control(self.status).margen(3)
@@ -734,7 +734,7 @@ class WFiltrar(QtGui.QDialog):
                       (_("Save/Restore"), Iconos.Grabar(), self.grabar), None
                       ]
 
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Layout
         layout = Colocacion.V().control(tb).otro(ly).margen(3)
@@ -936,7 +936,7 @@ class WFiltrarRaw(QTVarios.WDialogo):
         liAcciones = [(_("Accept"), Iconos.Aceptar(), self.aceptar), None,
                       (_("Cancel"), Iconos.Cancelar(), self.reject), None,
                       ]
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Layout
         layout = Colocacion.V().control(tb).otro(ly).otro(lyHelp).margen(3)

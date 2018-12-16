@@ -773,16 +773,22 @@ class TBrutina(QtGui.QToolBar):
         Y la clave enviada se obtiene de self.sender().clave
     """
 
-    def __init__(self, parent, liAcciones=None, siTexto=True, tamIcon=32, puntos=None, background=None):
+    def __init__(self, parent, liAcciones=None, siTexto=True, tamIcon=32, puntos=None, background=None, style=None):
 
         QtGui.QToolBar.__init__(self, "BASICO", parent)
+
+        if style:
+            self.setToolButtonStyle(style)
+            if style != QtCore.Qt.ToolButtonTextUnderIcon:
+                tamIcon = 16
+        elif siTexto:
+            self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+
 
         self.setIconSize(QtCore.QSize(tamIcon, tamIcon))
 
         self.parent = parent
 
-        if siTexto:
-            self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
         self.f = TipoLetra(puntos=puntos) if puntos else None
 

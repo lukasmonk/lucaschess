@@ -85,9 +85,11 @@ class WHistoricoTacticas(QTVarios.WDialogo):
                 ff = Util.hoy()
             dif = ff - fi
             t = int(dif.total_seconds())
-            h = t / 3600
-            m = (t - h * 3600) / 60
-            return "%d - %d:%02d" % (dif.days, h, m)
+            h = t // 3600
+            m = (t - h * 3600) // 60
+            d = h // 24
+            h -= d*24
+            return "%d - %d:%02d" % (d, h, m)
         elif col == "POSICIONES":
             if "POS" in reg:
                 posiciones = reg["POS"]

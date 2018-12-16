@@ -101,7 +101,7 @@ class WTranssiberian(QTVarios.WDialogo):
         self.set_style("White", color, lbTip, lbTit)
         lyTask = Colocacion.H().control(lbTip).control(lbTit)
 
-        tb = Controles.TBrutina(self, siTexto=True, tamIcon=32)
+        tb = QTVarios.LCTB(self, siTexto=True, tamIcon=32)
         tb.new(_("Play"), Iconos.Empezar(), self.play)
         tb.new(_("Config"), Iconos.Configurar(), self.config)
         tb.new(_("Close"), Iconos.MainMenu(), self.mainMenu)
@@ -133,7 +133,7 @@ class WTranssiberian(QTVarios.WDialogo):
         lyDB = ly(_("Starting date"), route.date_begin)
         lyDE = ly(_("Ending date"), route.date_end)
 
-        tb = Controles.TBrutina(self, siTexto=True, tamIcon=32)
+        tb = QTVarios.LCTB(self, siTexto=True, tamIcon=32)
         tb.new(_("Config"), Iconos.Configurar(), self.config)
         tb.new(_("Close"), Iconos.MainMenu(), self.mainMenu)
 

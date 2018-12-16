@@ -45,7 +45,7 @@ class WMotores(QTVarios.WDialogo):
             (_("Down"), Iconos.Abajo(), self.abajo), None,
             (_("Command"), Iconos.Terminal(), self.command), None,
         ]
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()
@@ -474,7 +474,7 @@ class WEligeMotorElo(QTVarios.WDialogo):
             liAcciones.append((_("Reset"), Iconos.Reiniciar(), self.reset))
             liAcciones.append(None)
 
-        self.tb = Controles.TBrutina(self, liAcciones)
+        self.tb = QTVarios.LCTB(self, liAcciones)
 
         self.liMotores = self.gestor.listaMotores(elo)
         self.liMotoresActivos = self.liMotores

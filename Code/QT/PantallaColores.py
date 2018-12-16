@@ -444,7 +444,7 @@ class WColores(QTVarios.WDialogo):
                       (_("Import"), Iconos.Mezclar(), self.importar), None,
                       (_("Export"), Iconos.Grabar(), self.exportar), None,
                       ]
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # tam tablero
         self.lbTamTablero = Controles.LB(self, "%d px" % self.tablero.width())

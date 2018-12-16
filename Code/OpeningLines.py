@@ -344,10 +344,10 @@ class Opening:
         if not siRepetir:
             stBorrar = set()
             xanalyzer = procesador.XAnalyzer()
+            busca = " w " if siBlancas else " b "
             for stpv, fenM2 in dicFENm2.iteritems():
                 if len(stpv) > 1:
-                    siW = " w " in fenM2
-                    if siW and siBlancas:
+                    if busca in fenM2:
                         dic = self.getfenvalue(fenM2)
                         if "ANALISIS" not in dic:
                             dic["ANALISIS"] = xanalyzer.analiza(fen)
@@ -418,11 +418,12 @@ class Opening:
         lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
 
         dic = {}
+        busca = " w " if si_white else " b "
         for nlinea, lipv in enumerate(lilipv):
             LCEngine.setFenInicial()
             for pv in lipv:
                 fen = LCEngine.getFen()
-                if " w " in fen and si_white:
+                if busca in fen:
                     if fen not in dic:
                         dic[fen] = {}
                     dicPV = dic[fen]

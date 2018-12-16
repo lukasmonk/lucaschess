@@ -85,7 +85,7 @@ class WSummary(QtGui.QWidget):
             liAcciones.append((_("Create a new guide based in these games") if siMoves else _("Create"), Iconos.BookGuide(), self.createGuide))
             liAcciones.append(None)
 
-        self.tb = Controles.TBrutina(self, liAcciones, tamIcon=20, siTexto=not self.siMoves)
+        self.tb = QTVarios.LCTB(self, liAcciones, tamIcon=20, siTexto=not self.siMoves)
         if self.siMoves:
             self.tb.vertical()
 

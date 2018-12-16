@@ -267,16 +267,8 @@ def leeEntDirigidoBase(fen, solucion):
     st = set()
 
     def hazPartida(partida, siMain):
-
-        #for jg in partida.liJugadas:
-        num_of_jugadas = len(partida.liJugadas)
-        for i in range(0, (num_of_jugadas+1)):
-            if i < num_of_jugadas:
-                jg = partida.liJugadas[i]
-                fenBase = jg.posicionBase.fen()
-            else:
-                jg = partida.liJugadas[i-1]
-                fenBase = jg.posicion.fen()
+        for jg in partida.liJugadas:
+            fenBase = jg.posicionBase.fen()
             if fenBase not in dicDirigidoFen:
                 dicDirigidoFen[fenBase] = []
             liDDF = dicDirigidoFen[fenBase]
@@ -301,8 +293,8 @@ def leeEntDirigidoBase(fen, solucion):
             if variantes:
                 for variante in variantes.split("\n"):
                     uno = UnPGN()
-                    uno.leeTexto('[FEN "%s"]\n%s' % (fenBase, variante))
-                    hazPartida(uno.partida, False)
+                    if uno.leeTexto('[FEN "%s"]\n%s' % (fenBase, variante)):
+                        hazPartida(uno.partida, False)
 
     partida = pgn.partida
     hazPartida(partida, True)

@@ -150,7 +150,7 @@ class WUnTorneo(QTVarios.WDialogo):
                       (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
                       (_("Play"), Iconos.Empezar(), self.gmJugar), None,
                       )
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Tabs
         self.tab = tab = Controles.Tab()
@@ -227,7 +227,7 @@ class WUnTorneo(QTVarios.WDialogo):
                       (_("Copy"), Iconos.Copiar(), self.enCopiar), None,
                       (_("Import"), Iconos.MasDoc(), self.enImportar), None,
                       ]
-        tbEnA = Controles.TBrutina(self, liAcciones, tamIcon=24)
+        tbEnA = QTVarios.LCTB(self, liAcciones, tamIcon=24)
 
         # Grid engine
         oColumnas = Columnas.ListaColumnas()
@@ -268,7 +268,7 @@ class WUnTorneo(QTVarios.WDialogo):
                       (_("Show"), Iconos.PGN(), self.gmMostrar), None,
                       (_("Save") + "(%s)" % _("PGN"), Iconos.GrabarComo(), self.gmGuardar), None,
                       ]
-        tbEnG = Controles.TBrutina(self, liAcciones, tamIcon=24)
+        tbEnG = QTVarios.LCTB(self, liAcciones, tamIcon=24)
         # Grid engine
         oColumnas = Columnas.ListaColumnas()
         oColumnas.nueva("WHITE", _("White"), 190, siCentrado=True)

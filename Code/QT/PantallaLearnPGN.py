@@ -79,7 +79,7 @@ class WLearnBase(QTVarios.WDialogo):
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
             (_("Learn"), Iconos.Empezar(), self.empezar),
         )
-        self.tb = Controles.TBrutina(self, liAcciones)
+        self.tb = QTVarios.LCTB(self, liAcciones)
 
         # Colocamos
         lyTB = Colocacion.H().control(self.tb).margen(0)

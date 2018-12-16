@@ -58,7 +58,7 @@ class WManualSave(QTVarios.WDialogo):
             (_("Close"), Iconos.MainMenu(), self.terminar), None,
             (_("External engines"), Iconos.Motores(), self.ext_engines), None,
         )
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Board + botones + solucion + boton salvado
         ##

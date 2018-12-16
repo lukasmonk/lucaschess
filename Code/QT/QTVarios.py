@@ -60,7 +60,6 @@ class WSave():
             dic = dicDef
         wE, hE = QTUtil.tamEscritorio()
         if dic:
-            wE, hE = QTUtil.tamEscritorio()
             if "_POSICION_" in dic:
                 x, y = dic["_POSICION_"].split(",")
                 x = int(x)
@@ -1166,3 +1165,8 @@ class ReadAnnotation(QtGui.QDialog):
         self.conAyuda = True
         self.edAnotacion.ponTexto(self.objetivo)
 
+
+class LCTB(Controles.TBrutina):
+    def __init__(self, parent, liAcciones=None, siTexto=True, tamIcon=32, puntos=None, background=None):
+        Controles.TBrutina.__init__(self, parent, liAcciones=liAcciones, siTexto=siTexto, tamIcon=tamIcon, puntos=puntos,
+                                    background=background, style=VarGen.configuracion.iconsTB)

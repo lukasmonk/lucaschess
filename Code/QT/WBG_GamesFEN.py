@@ -70,7 +70,7 @@ class WGamesFEN(QtGui.QWidget):
             (_("Utilities"), Iconos.Utilidades(), self.tw_utilities), None,
         ]
 
-        self.tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24, puntos=procesador.configuracion.puntosTB)
+        self.tbWork = QTVarios.LCTB(self, liAccionesWork, tamIcon=24, puntos=procesador.configuracion.puntosTB)
 
         self.lbName = Controles.LB(self, "").ponWrap().alinCentrado().ponColorFondoN("white", "#4E5A65").ponTipoLetra(puntos=16)
         lyNT = Colocacion.H().control(self.lbName)

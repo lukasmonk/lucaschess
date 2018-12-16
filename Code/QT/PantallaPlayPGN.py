@@ -98,7 +98,7 @@ class WPlayBase(QTVarios.WDialogo):
             (_("New"), Iconos.Nuevo(), self.nuevo), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
         )
-        self.tb = Controles.TBrutina(self, liAcciones)
+        self.tb = QTVarios.LCTB(self, liAcciones)
 
         # Colocamos
         lyTB = Colocacion.H().control(self.tb).margen(0)
@@ -192,7 +192,7 @@ class WPlay1(QTVarios.WDialogo):
             (_("Train"), Iconos.Entrenar(), self.empezar), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
         )
-        self.tb = Controles.TBrutina(self, liAcciones)
+        self.tb = QTVarios.LCTB(self, liAcciones)
 
         # Colocamos
         lyTB = Colocacion.H().control(self.tb).margen(0)

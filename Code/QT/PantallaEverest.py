@@ -63,7 +63,7 @@ class WNewExpedition(QTVarios.WDialogo):
         layout = Colocacion.H().relleno(1).control(self.cbcolor).relleno(1)
         gbcolor = Controles.GB(self, _("Color"), layout)
 
-        tb = Controles.TBrutina(self)
+        tb = QTVarios.LCTB(self)
         tb.new(_("Accept"), Iconos.Aceptar(), self.aceptar)
         tb.new(_("Cancel"), Iconos.Cancelar(), self.cancelar)
 
@@ -331,7 +331,7 @@ class WEverest(QTVarios.WDialogo):
             (_("New"), Iconos.Nuevo(), self.nuevo), None,
             (_("Remove"), Iconos.Borrar(), self.borrar), None,
         )
-        self.tb = Controles.TBrutina(self, liAcciones)
+        self.tb = QTVarios.LCTB(self, liAcciones)
 
         # Colocamos
         lyTB = Colocacion.H().control(self.tb).margen(0)

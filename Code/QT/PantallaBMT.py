@@ -52,7 +52,7 @@ class WHistorialBMT(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         # Toolbar
-        tb = Controles.TBrutina(self)
+        tb = QTVarios.LCTB(self)
         tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
 
         # Lista
@@ -802,7 +802,7 @@ class WBMT(QTVarios.WDialogo):
                       (_("Track record"), Iconos.Historial(), self.historial), None,
                       (_("Utilities"), Iconos.Utilidades(), self.utilidades),
                       ]
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         self.tab = tab = Controles.Tab()
 

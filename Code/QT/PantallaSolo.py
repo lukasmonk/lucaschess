@@ -2,7 +2,6 @@ from Code import TrListas
 
 from Code.QT import Colocacion
 from Code.QT import Columnas
-from Code.QT import Controles
 from Code.QT import Delegados
 from Code.QT import Grid
 from Code.QT import Iconos
@@ -27,7 +26,7 @@ class WEtiquetasPGN(QTVarios.WDialogo):
             (_("Up"), Iconos.Arriba(), self.arriba), None,
             (_("Down"), Iconos.Abajo(), self.abajo), None,
         )
-        tbWork = Controles.TBrutina(self, liAccionesWork, tamIcon=24)
+        tbWork = QTVarios.LCTB(self, liAccionesWork, tamIcon=24)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()

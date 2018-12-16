@@ -804,7 +804,7 @@ class PantallaArbol(QTVarios.WDialogo):
             posicion = partida.ultPosicion
         self.listaMoves = ListaMoves(None, posicion.fen(), self.dbCache)
 
-        tb = Controles.TBrutina(self)
+        tb = QTVarios.LCTB(self)
         tb.new(_("Save"), Iconos.Grabar(), self.grabar)
         tb.new(_("Cancel"), Iconos.Cancelar(), self.cancelar)
 

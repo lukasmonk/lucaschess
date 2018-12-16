@@ -39,7 +39,7 @@ class WWashing(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, owner, titulo, icono, extparam)
 
         # Toolbar
-        tb = Controles.TBrutina(self)
+        tb = QTVarios.LCTB(self)
         tb.new(_("Close"), Iconos.MainMenu(), self.terminar)
         tb.new(_("File"), Iconos.Recuperar(), self.file)
         if not siTerminado:

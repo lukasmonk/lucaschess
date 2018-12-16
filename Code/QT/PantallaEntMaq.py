@@ -38,7 +38,7 @@ class WEntMaquina(QTVarios.WDialogo):
                       (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
                       (_("Configurations"), Iconos.Configurar(), self.configuraciones), None,
                       ]
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Tab
         tab = Controles.Tab()

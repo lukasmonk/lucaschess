@@ -3,7 +3,6 @@ import shutil
 
 from Code.QT import Colocacion
 from Code.QT import Columnas
-from Code.QT import Controles
 from Code.QT import Delegados
 from Code.QT import Grid
 from Code.QT import Iconos
@@ -32,7 +31,7 @@ class WUsuarios(QTVarios.WDialogo):
                       (_("New"), Iconos.Nuevo(), self.nuevo), None,
                       (_("Remove"), Iconos.Borrar(), self.borrar), None,
                       )
-        tb = Controles.TBrutina(self, liAcciones)
+        tb = QTVarios.LCTB(self, liAcciones)
 
         # Lista
         oColumnas = Columnas.ListaColumnas()

@@ -166,10 +166,8 @@ class VentanaPolyglot(QtGui.QDialog):
         self.ponFen(self.fen)
 
     def siAnalizar(self):
-        siW = " w " in self.fen
-        if not self.siPlay or \
-                (siW and (not self.siBlancas)) or \
-                ((not siW) and (not self.siNegras)):
+        buscar = " w " if self.siBlancas else " b "
+        if not self.siPlay or not buscar in self.fen:
             return False
         return True
 
@@ -549,10 +547,8 @@ class VentanaMultiPV(QtGui.QDialog):
         self.finalizar()
 
     def siAnalizar(self):
-        siW = " w " in self.fen
-        if not self.siPlay or \
-                (siW and (not self.siBlancas)) or \
-                ((not siW) and (not self.siNegras)):
+        buscar = " w " if self.siBlancas else " b "
+        if not self.siPlay or not buscar in self.fen:
             return False
         return True
 
@@ -915,10 +911,8 @@ class Ventana(QtGui.QDialog):
             self.tablero.ponPosicion(posicion)
 
     def siAnalizar(self):
-        siW = " w " in self.fen
-        if not self.siPlay or \
-                (siW and (not self.siBlancas)) or \
-                ((not siW) and (not self.siNegras)):
+        buscar = " w " if self.siBlancas else " b "
+        if not self.siPlay or not buscar in self.fen:
             return False
         return True
 

@@ -454,7 +454,7 @@ class WAnalisis(QTVarios.WDialogo):
         self.siGrabar = siGrabar
         self.siBlancas = siBlancas
 
-        tbWork = Controles.TBrutina(self, tamIcon=24)
+        tbWork = QTVarios.LCTB(self, tamIcon=24)
         tbWork.new(_("Close"), Iconos.MainMenu(), self.terminar)
         tbWork.new(_("New"), Iconos.NuevoMas(), self.crear)
 

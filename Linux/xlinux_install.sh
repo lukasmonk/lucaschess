@@ -10,7 +10,7 @@ sudo apt-get install python-pyaudio
 pip install setuptools
 pip install psutil
 pip install chardet
-pip install python-chess
+pip install 'python-chess<0.24'
 pip install Pillow
 pip install PhotoHash
 pip install Cython
