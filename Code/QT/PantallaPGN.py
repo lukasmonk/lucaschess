@@ -605,11 +605,8 @@ class WElegir(QTVarios.WDialogo):
                 if not jugadas.strip("*"):
                     continue
                 fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
             event = xdic("EVENT")
-            # if event:
-            # eventAnt = event
-            # else:
-            # event = eventAnt
             site = xdic("SITE")
             date = xdic("DATE")
             if site == event:
@@ -630,6 +627,11 @@ class WElegir(QTVarios.WDialogo):
                 titulo += "<br>%s" % es
             if wb:
                 titulo += "<br>%s" % wb
+
+            for other in ("TASK", "SOURCE"):
+                v = xdic(other)
+                if v:
+                    titulo += "<br>%s" % v
 
             txt = fen + "|%s|%s\n" % (titulo, jugadas.strip())
 
@@ -1138,6 +1140,11 @@ def crearTactic(procesador, wowner, liRegistros, rutinaDatos):
             titulo += "<br>%s" % es
         if wb:
             titulo += "<br>%s" % wb
+
+        for other in ("TASK", "SOURCE"):
+            v = xdic(other)
+            if v:
+                titulo += "<br>%s" % v
 
         txt = fen + "|%s|%s\n" % (titulo, jugadas)
 

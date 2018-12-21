@@ -231,7 +231,7 @@ def leeRivales():
     cm.elo = 3125
     cm.ordenUCI("Hash", "32")
     cm.ordenUCI("Threads", "1")
-    cm.ponMultiPV(20, 64)
+    # cm.ponMultiPV(20, 64)
     mas(cm)
 
     cm = ConfigMotor("irina", "Lucas Monge", "0.15", "https://github.com/lukasmonk/irina")

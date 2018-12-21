@@ -124,7 +124,8 @@ class ThanksTo:
             return txt
 
         # Version 11
-        liBase = ["Alfonso Solbes", "Max Aloyau", "tico-tico", "Nils Andersson", "Bernhard", "Ed Smith", "Rob", "Giovanni di Maria", "vga", "Remes", "Péter Rabi", "Iñaki Rodriguez"]
+        liBase = ["Alfonso Solbes", "Max Aloyau", "tico-tico", "Nils Andersson", "Bernhard", "Ed Smith", "Rob",
+                  "Giovanni di Maria", "vga", "Remes", "Péter Rabi", "Iñaki Rodriguez"]
         liResto = ["Immortalchess forum",]
         txt += version(11, liBase, liResto)
 

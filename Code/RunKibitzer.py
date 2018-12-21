@@ -166,8 +166,10 @@ class VentanaPolyglot(QtGui.QDialog):
         self.ponFen(self.fen)
 
     def siAnalizar(self):
-        buscar = " w " if self.siBlancas else " b "
-        if not self.siPlay or not buscar in self.fen:
+        siW = " w " in self.fen
+        if not self.siPlay or \
+                (siW and (not self.siBlancas)) or \
+                ((not siW) and (not self.siNegras)):
             return False
         return True
 
@@ -547,8 +549,10 @@ class VentanaMultiPV(QtGui.QDialog):
         self.finalizar()
 
     def siAnalizar(self):
-        buscar = " w " if self.siBlancas else " b "
-        if not self.siPlay or not buscar in self.fen:
+        siW = " w " in self.fen
+        if not self.siPlay or \
+                (siW and (not self.siBlancas)) or \
+                ((not siW) and (not self.siNegras)):
             return False
         return True
 
@@ -911,8 +915,10 @@ class Ventana(QtGui.QDialog):
             self.tablero.ponPosicion(posicion)
 
     def siAnalizar(self):
-        buscar = " w " if self.siBlancas else " b "
-        if not self.siPlay or not buscar in self.fen:
+        siW = " w " in self.fen
+        if not self.siPlay or \
+                (siW and (not self.siBlancas)) or \
+                ((not siW) and (not self.siNegras)):
             return False
         return True
 
@@ -1722,12 +1728,13 @@ class VentanaLinea(Ventana):
         self.accept()
 
     def mover(self):
-        if self.siMover:
-            self.guardarVideo()
+        # if self.siMover:
+        #     self.guardarVideo()
         self.siMover = not self.siMover
         self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | self.flags[self.siMover])
         self.show()
-        self.recuperarVideo()
+        self.guardarVideo()
+        # self.recuperarVideo()
         QTUtil.refreshGUI()
 
     def pause(self):

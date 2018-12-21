@@ -2,6 +2,8 @@
 Rutinas internas para la conexion con DGTEBDLL.dll
 """
 
+# borrar los logs
+
 import ctypes
 
 from Code import Util
@@ -47,8 +49,7 @@ def cambiarON_OFF():
 
 
 def envia(quien, dato):
-    # log( "[%s] : [%s]"%( quien, dato ) )
-    # log( "Enviado a " + str(VarGen.dgtDispatch) + "\n" )
+    # log("[envia: %s] : %s [%s]"%(quien, dato, str(VarGen.dgtDispatch)))
     if VarGen.dgtDispatch:
         return VarGen.dgtDispatch(quien, dato)
     return 1
@@ -63,10 +64,13 @@ def quitarDispatch():
     VarGen.dgtDispatch = None
 
 
-def log(cad):
-    log = open("dgt.log", "ab")
-    log.write(".6.[%s]\n%s\n" % (Util.hoy(), cad))
-    log.close()
+# def log(cad):
+#     import traceback
+#
+#     with open("dgt.log", "ab") as q:
+#         q.write("\n[%s] %s\n" % (Util.hoy(), cad))
+#         for line in traceback.format_stack():
+#             q.write("    %s\n" % line.strip())
 
 # CALLBACKS
 
@@ -247,65 +251,65 @@ def _dgt2pv(dato):
 # Lo mismo, de otra forma
 
 
-def xdgt2fen(xdgt):
-    liD = xdgt.split(" ")
-    dgt = liD[0]
+# def xdgt2fen(xdgt):
+#     liD = xdgt.split(" ")
+#     dgt = liD[0]
+#
+#     li = []
+#     num = 0
+#     for c in dgt:
+#         if c.isdigit():
+#             num = num * 10 + int(c)
+#         else:
+#             if num:
+#                 li.append((1, num))
+#                 num = 0
+#             li.append((0, c))
+#     if num:
+#         li.append((1, num))
+#     lir = []
+#     act = ""
+#     pte = 8
+#     for tp, v in li:
+#         if tp == 1:
+#             while v >= pte:
+#                 act += str(pte)
+#                 lir.append(act)
+#                 v -= pte
+#                 act = ""
+#                 pte = 8
+#             if v:
+#                 act += str(v)
+#                 pte -= v
+#         else:
+#             act += v
+#             pte -= 1
+#         if pte == 0:
+#             lir.append(act)
+#             act = ""
+#             pte = 8
+#     if pte and len(lir) == 7:
+#         act += str(pte)
+#         lir.append(act)
+#     liD[0] = "/".join(lir)
+#     return " ".join(liD)
 
-    li = []
-    num = 0
-    for c in dgt:
-        if c.isdigit():
-            num = num * 10 + int(c)
-        else:
-            if num:
-                li.append((1, num))
-                num = 0
-            li.append((0, c))
-    if num:
-        li.append((1, num))
-    lir = []
-    act = ""
-    pte = 8
-    for tp, v in li:
-        if tp == 1:
-            while v >= pte:
-                act += str(pte)
-                lir.append(act)
-                v -= pte
-                act = ""
-                pte = 8
-            if v:
-                act += str(v)
-                pte -= v
-        else:
-            act += v
-            pte -= 1
-        if pte == 0:
-            lir.append(act)
-            act = ""
-            pte = 8
-    if pte and len(lir) == 7:
-        act += str(pte)
-        lir.append(act)
-    liD[0] = "/".join(lir)
-    return " ".join(liD)
 
-
-def fen2xdgt(fen):
-    li = fen.split(" ")
-    x0 = li[0]
-    li0 = x0.replace("/", "")
-    resp = ""
-    num = 0
-    for c in li0:
-        if c.isdigit():
-            num += int(c)
-        else:
-            if num:
-                resp += str(num)
-                num = 0
-            resp += c
-    if num:
-        resp += str(num)
-    li[0] = resp
-    return " ".join(li)
+# def fen2xdgt(fen):
+#     li = fen.split(" ")
+#     x0 = li[0]
+#     li0 = x0.replace("/", "")
+#     resp = ""
+#     num = 0
+#     for c in li0:
+#         if c.isdigit():
+#             num += int(c)
+#         else:
+#             if num:
+#                 resp += str(num)
+#                 num = 0
+#             resp += c
+#     if num:
+#         resp += str(num)
+#     li[0] = resp
+#     return " ".join(li)
