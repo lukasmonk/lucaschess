@@ -708,7 +708,6 @@ class WPotencia(QTVarios.WDialogo):
         self.liAnalisis = []
         cp = ControlPosicion.ControlPosicion()
         cp.leeFen(self.fen)
-        jg = Jugada.Jugada()
         siError = False
         totalPuntos = 0
         factor = 1

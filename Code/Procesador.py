@@ -84,8 +84,8 @@ class Procesador:
 
         self.user = user
 
-        self.web = "http://lucaschess.pythonanywhere.com"
-        self.blog = "http://lucaschess.blogspot.com"
+        self.web = "https://lucaschess.pythonanywhere.com"
+        self.blog = "https://lucaschess.blogspot.com"
 
         self.liOpcionesInicio = [k_terminar, k_play, k_entrenamiento, k_competir,
                                  k_tools, k_opciones, k_informacion]  # Lo incluimos aqui porque sino no lo lee, en caso de aplazada

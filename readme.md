@@ -24,8 +24,8 @@ Dependencies
 Links
 -----
 
-* [Web: http://lucaschess.pythonanywhere.com/](http://lucaschess.pythonanywhere.com/).
-* [Blog: http://lucaschess.blogspot.com.es/](http://lucaschess.blogspot.com.es/).
+* [Web: https://lucaschess.pythonanywhere.com/](https://lucaschess.pythonanywhere.com/).
+* [Blog: https://lucaschess.blogspot.com.es/](https://lucaschess.blogspot.com.es/).
 
 Legal Details
 -------------

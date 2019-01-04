@@ -617,10 +617,10 @@ def importarGM(ownerGM, siWoman):
     except:
         pass
     if siWoman:
-        web = "http://lucaschess.pythonanywhere.com/static/wgm"
+        web = "https://lucaschess.pythonanywhere.com/static/wgm"
         message = _("Reading the list of Women Grandmaster from the web")
     else:
-        web = "http://lucaschess.pythonanywhere.com/static/gm"
+        web = "https://lucaschess.pythonanywhere.com/static/gm"
         message = _("Reading the list of Grandmasters from the web")
     me = QTUtil2.mensEspera.inicio(ownerGM, message)
     siError = False

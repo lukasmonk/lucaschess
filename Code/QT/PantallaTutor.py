@@ -208,7 +208,7 @@ def cambioTutor(parent, configuracion):
     liGen.append((config, configuracion.tutorMultiPV))
 
     liGen.append((None, _("Sensitivity")))
-    liGen.append((FormLayout.Spinbox(_("Minimum difference in points"), 0, 1000, 70), configuracion.tutorDifPts))
+    liGen.append((FormLayout.Spinbox(_("Minimum difference in centipawns"), 0, 1000, 70), configuracion.tutorDifPts))
     liGen.append((FormLayout.Spinbox(_("Minimum difference in %"), 0, 1000, 70), configuracion.tutorDifPorc))
 
     # Editamos

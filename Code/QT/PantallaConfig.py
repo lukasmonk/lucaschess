@@ -127,7 +127,7 @@ def opciones(parent, configuracion):
     liTT.append(separador)
     liTT.append(separador)
     liTT.append((None, _("Sensitivity")))
-    liTT.append((FormLayout.Spinbox(_("Minimum difference in points"), 0, 1000, 70), configuracion.tutorDifPts))
+    liTT.append((FormLayout.Spinbox(_("Minimum difference in centipawns"), 0, 1000, 70), configuracion.tutorDifPts))
     liTT.append((FormLayout.Spinbox(_("Minimum difference in %"), 0, 1000, 70), configuracion.tutorDifPorc))
 
     # Perfomance

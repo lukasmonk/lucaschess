@@ -118,10 +118,10 @@ class WLines(QTVarios.WDialogo):
             if w.exec_():
                 ws = PantallaSavePGN.FileSavePGN(self, w.dic_result)
                 if ws.open():
-                    ws.um()
                     self.dbop.exportarPGN(ws, resp)
                     ws.close()
                     ws.um_final()
+
 
     def utilidades(self):
         menu = QTVarios.LCMenu(self)
@@ -671,13 +671,15 @@ class WLines(QTVarios.WDialogo):
         if not ficheroPGN:
             return
         previo["CARPETAPGN"] = os.path.dirname(ficheroPGN)
-        self.configuracion.escVariables("OPENINGLINES", previo)
 
         liGen = [(None, None)]
 
         liGen.append((None, _("Select a maximum number of moves (plies)<br> to consider from each game")))
 
-        liGen.append((FormLayout.Spinbox(_("Depth"), 3, 999, 50), 30))
+        liGen.append((FormLayout.Spinbox(_("Depth"), 3, 999, 50), previo.get("IPGN_DEPTH", 30)))
+        liGen.append((None, None))
+
+        liGen.append((_("Include variations"), previo.get("IPGN_VARIATIONS", True)))
         liGen.append((None, None))
 
         resultado = FormLayout.fedit(liGen, title=os.path.basename(ficheroPGN), parent=self, anchoMinimo=460,
@@ -685,11 +687,13 @@ class WLines(QTVarios.WDialogo):
 
         if resultado:
             accion, liResp = resultado
-            depth = liResp[0]
+            previo["IPGN_DEPTH"] = depth = liResp[0]
+            previo["IPGN_VARIATIONS"] = variations = liResp[1]
 
-            self.dbop.importarPGN(self, partida, ficheroPGN, depth)
+            self.dbop.importarPGN(self, partida, ficheroPGN, depth, variations)
             self.glines.refresh()
             self.glines.gotop()
+            self.configuracion.escVariables("OPENINGLINES", previo)
 
     def importarPGO(self, partida):
         li = [(uno.name[:-4], uno.path) for uno in Util.listdir(self.configuracion.carpeta) if uno.name.endswith(".pgo")]

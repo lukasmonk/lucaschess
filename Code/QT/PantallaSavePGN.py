@@ -382,7 +382,7 @@ class WSave(QTVarios.WDialogo):
             key = key.strip()
             value = value.strip()
             if key and value:
-                pgn += "[%s \"%s\"]\n" % (key, value)
+                pgn += '[%s "%s"]\n' % (key, value)
         pgn += "\n%s\n" % self.em_body.texto().strip()
         if "\r\n" in pgn:
             pgn = pgn.replace("\r\n", "\n")
@@ -524,7 +524,7 @@ class WSaveVarios(QTVarios.WDialogo):
         self.check_toolbar()
 
     def check_toolbar(self):
-        self.tb.setPosVisible(0, len(self.wbase.file)>0)
+        self.tb.setPosVisible(0, len(self.wbase.file) > 0)
 
     def aceptar(self):
         if self.wbase.file:
@@ -580,3 +580,20 @@ class FileSavePGN:
         if self.xum:
             self.xum.final()
         QTUtil2.mensaje(self.owner, _X(_("Saved to %1"), self.file))
+
+    def pb(self, total):
+        self._pb = QTUtil2.BarraProgreso(self.owner, self.file, "", total)
+        self._pb_total = total
+        self.pb_pos(0)
+
+    def pb_pos(self, pos):
+        self._pb.pon(pos)
+        self._pb.mensaje("%d/%d" % (pos, self._pb_total))
+
+    def pb_cancel(self):
+        return self._pb.siCancelado()
+
+    def pb_close(self):
+        self._pb.cerrar()
+
+

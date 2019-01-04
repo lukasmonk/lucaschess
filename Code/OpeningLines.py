@@ -27,7 +27,7 @@ class ListaOpenings:
 
         self.lista = Util.recuperaVar(self.fichero)
         if self.lista is None:
-            self.lista = self.read()    # file, lines, title, pv
+            self.lista = self.read()  # file, lines, title, pv
             self.save()
         else:
             self.testdates()
@@ -90,7 +90,7 @@ class ListaOpenings:
                     "pv": op.basePV,
                     "title": op.title,
                     "lines": len(op),
-                    "withtrainings": op.withTrainings()
+                    "withtrainings": op.withTrainings(),
                 }
                 li.append(dicline)
                 op.close()
@@ -115,15 +115,9 @@ class ListaOpenings:
         return os.path.join(self.folder, self.lista[num]["file"])
 
     def new(self, file, basepv, title):
-        dicline = {
-            "file": file,
-            "pv": basepv,
-            "title": title,
-            "lines": 0,
-            "withtrainings": False
-        }
+        dicline = {"file": file, "pv": basepv, "title": title, "lines": 0, "withtrainings": False}
         self.lista.append(dicline)
-        op = Opening(self.filepath(len(self.lista)-1))
+        op = Opening(self.filepath(len(self.lista) - 1))
         op.setbasepv(basepv)
         op.settitle(title)
         op.close()
@@ -146,9 +140,9 @@ class ListaOpenings:
             return
 
         dicline["file"] = filenew
-        dicline["title"] = dicline["title"] + " -%d"%(n-1 if n > 1 else 1)
+        dicline["title"] = dicline["title"] + " -%d" % (n - 1 if n > 1 else 1)
         self.lista.append(dicline)
-        op = Opening(self.filepath(len(self.lista)-1))
+        op = Opening(self.filepath(len(self.lista) - 1))
         op.settitle(dicline["title"])
         op.close()
         self.save()
@@ -182,8 +176,8 @@ class Opening:
         self._conexion = sqlite3.connect(nomFichero)
 
         self.cache = {}
-        self.max_cache = 14000
-        self.del_cache = 1000
+        self.max_cache = 1000
+        self.del_cache = 100
 
         self.grupo = 0
 
@@ -233,7 +227,7 @@ class Opening:
         else:
             sql = "select XPV from LINES ORDER BY XPV"
             cursor.execute(sql)
-            li_xpv = [ raw[0] for raw in cursor.fetchall()]
+            li_xpv = [raw[0] for raw in cursor.fetchall()]
         cursor.close()
         return li_xpv
 
@@ -244,7 +238,11 @@ class Opening:
         liOp = ListaOpenings(configuracion)
         fich = os.path.basename(self.nomFichero)
         pvbase = partida.pv()
-        liOp = [(dic["file"], dic["title"]) for dic in liOp.lista if dic["file"] != fich and (pvbase.startswith(dic["pv"]) or dic["pv"].startswith(pvbase))]
+        liOp = [
+            (dic["file"], dic["title"])
+            for dic in liOp.lista
+            if dic["file"] != fich and (pvbase.startswith(dic["pv"]) or dic["pv"].startswith(pvbase))
+        ]
         return liOp
 
     def getfenvalue(self, fenM2):
@@ -257,7 +255,7 @@ class Opening:
     def removeAnalisis(self, tmpBP, mensaje):
         for n, fenM2 in enumerate(self.db_fenvalues.keys()):
             tmpBP.inc()
-            tmpBP.mensaje(mensaje%n)
+            tmpBP.mensaje(mensaje % n)
             if tmpBP.siCancelado():
                 break
             dic = self.getfenvalue(fenM2)
@@ -626,9 +624,9 @@ class Opening:
             self.li_xpv[num] = xpv_nue
             si_sort = False
             if num > 0:
-                si_sort = xpv_nue < self.li_xpv[num-1]
-            if not si_sort and num < len(self.li_xpv)-1:
-                si_sort = xpv_nue > self.li_xpv[num+1]
+                si_sort = xpv_nue < self.li_xpv[num - 1]
+            if not si_sort and num < len(self.li_xpv) - 1:
+                si_sort = xpv_nue > self.li_xpv[num + 1]
             if si_sort:
                 self.li_xpv.sort()
                 num = self.li_xpv.index(xpv_nue)
@@ -707,7 +705,7 @@ class Opening:
         sql = "INSERT INTO LINES( XPV ) VALUES( ? )"
         for xpv in stRecuperar:
             if xpv not in stActivo:
-                cursor.execute(sql, (xpv, ))
+                cursor.execute(sql, (xpv,))
         self._conexion.commit()
 
         cursor.close()
@@ -719,7 +717,7 @@ class Opening:
             self._conexion = None
             ult_pack = self.getconfig("ULT_PACK", 0)
             si_pack = ult_pack > 50
-            self.setconfig("ULT_PACK", 0 if si_pack else ult_pack+1)
+            self.setconfig("ULT_PACK", 0 if si_pack else ult_pack + 1)
             self.db_config.close()
             self.db_config = None
 
@@ -737,7 +735,7 @@ class Opening:
             if si_pack:
                 if len(self.db_history) > 70:
                     lik = self.db_history.keys(siOrdenados=True, siReverse=False)
-                    liremove = lik[:len(self.db_history)-50]
+                    liremove = lik[: len(self.db_history) - 50]
                     for k in liremove:
                         del self.db_history[k]
                 self.db_history.close()
@@ -870,7 +868,7 @@ class Opening:
                     add = False
                     break
             if add:
-                cursor.execute(sql_insert, (xpv, ))
+                cursor.execute(sql_insert, (xpv,))
                 self.li_xpv.append(xpv)
 
         cursor.close()
@@ -957,7 +955,7 @@ class Opening:
                 control.num_partidas += 1
                 bp.ponTotal(control.num_partidas)
                 bp.pon(control.num_partidas)
-                if control.num_partidas and control.num_partidas % 5000 == 0:
+                if control.num_partidas and control.num_partidas % 1000 == 0:
                     self.guardaPartidas(control.rotulo, control.liPartidas, minMoves, with_history=control.with_history)
                     control.liPartidas = []
                     control.with_history = False
@@ -1020,7 +1018,7 @@ class Opening:
                     tt = alm.W + alm.B + alm.O + alm.D
                     if tt > tt_max:
                         tt_max = tt
-                        limax = [alm,]
+                        limax = [alm]
                     elif tt == tt_max and not onlyone:
                         limax.append(alm)
                 liChildren = limax
@@ -1033,7 +1031,7 @@ class Opening:
         hazPV(pvBase.split(" ") if pvBase else [])
 
         bp.ponRotulo(_("Writing..."))
-        self.guardaPartidas("%s,%s" %(_("Database summary"), os.path.basename(ficheroSummary)), liPartidas)
+        self.guardaPartidas("%s,%s" % (_("Database summary"), os.path.basename(ficheroSummary)), liPartidas)
         bp.cerrar()
 
         return True
@@ -1048,27 +1046,32 @@ class Opening:
                 if xpv not in self.li_xpv:
                     lista.append(xpv)
         otra.close()
-        self.guardaLiXPV("%s,%s"% (_("Other opening lines"), otra.title), lista)
+        self.guardaLiXPV("%s,%s" % (_("Other opening lines"), otra.title), lista)
 
     def exportarPGN(self, ws, result):
-        liTags = [
-            ("Event", self.title.replace('"', "")),
-            ("Site", ""),
-            ("Date", Util.hoy().strftime("%Y-%m-%d"))
-        ]
+        liTags = [("Event", self.title.replace('"', "")), ("Site", ""), ("Date", Util.hoy().strftime("%Y-%m-%d"))]
         if result:
             liTags.append(("Result", result))
 
-        for recno in range(len(self)):
+        total = len(self)
+
+        ws.pb(total)
+
+        for recno in range(total):
+            ws.pb_pos(recno+1)
+            if ws.pb_cancel():
+                break
             partida = self[recno]
 
-            liTags[1] = ("Site", "%s %d" % (_("Line"), recno+1))
+            liTags[1] = ("Site", "%s %d" % (_("Line"), recno + 1))
 
             if recno > 0 or not ws.is_new:
                 ws.write("\n\n")
             tags = "".join(['[%s "%s"]\n' % (k, v) for k, v in liTags])
             ws.write(tags)
             ws.write("\n%s" % partida.pgnBase())
+
+        ws.pb_close()
 
     def getAllFen(self):
         stFENm2 = set()
@@ -1148,4 +1151,3 @@ class ItemTree:
                 li.append(item.move)
             item = item.parent
         return li[::-1]
-

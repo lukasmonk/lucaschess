@@ -2,8 +2,6 @@
 Rutinas internas para la conexion con DGTEBDLL.dll
 """
 
-# borrar los logs
-
 import ctypes
 
 from Code import Util
