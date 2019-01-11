@@ -4,5 +4,5 @@ from distutils.extension import Extension
 from Cython.Build import cythonize
 
 setup(
-    ext_modules = cythonize([Extension("LCEngine2", ["LCEngine2.pyx"], libraries=["irina"])])
+    ext_modules = cythonize([Extension("LCEngine3", ["LCEngine3.pyx"], libraries=["irina"])])
 )

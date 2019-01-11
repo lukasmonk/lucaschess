@@ -5,7 +5,7 @@ import random
 import datetime
 import collections
 
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 
 from Code import Util
 from Code import Partida
@@ -677,6 +677,31 @@ class Opening:
         self._conexion.commit()
         cursor.close()
 
+    def remove_lastmove(self, is_white, label):
+        self.saveHistory(_("Removing"), label)
+        n = len(self.li_xpv)
+        cursor = self._conexion.cursor()
+        for x in range(n-1, -1, -1):
+            xpv = self.li_xpv[x]
+            pv = LCEngine.xpv2pv(xpv)
+            nm = pv.count(" ")
+            if nm%2 == 0 and is_white or nm%2 == 1 and not is_white:
+                pv_nue = " ".join(pv.split(" ")[:-1])
+                xpv_nue = LCEngine.pv2xpv(pv_nue)
+                if xpv_nue in self.li_xpv or not xpv_nue:
+                    sql = "DELETE FROM LINES where XPV=?"
+                    cursor.execute(sql, (xpv,))
+                    del self.li_xpv[x]
+                else:
+                    sql = "UPDATE LINES SET XPV=? WHERE XPV=?"
+                    cursor.execute(sql, (xpv_nue, xpv))
+                    self.li_xpv[x] = xpv_nue
+                if xpv in self.cache:
+                    del self.cache[xpv]
+        self.li_xpv.sort()
+        self._conexion.commit()
+        cursor.close()
+
     def lihistory(self):
         return self.db_history.keys(siOrdenados=True, siReverse=True)
 
@@ -750,7 +775,8 @@ class Opening:
 
             conexion.close()
 
-    def importarPGN(self, owner, partidabase, ficheroPGN, maxDepth):
+    def importarPGN(self, owner, partidabase, ficheroPGN, maxDepth, variations):
+
         erroneos = duplicados = importados = 0
         dlTmp = QTVarios.ImportarFicheroPGN(owner)
         dlTmp.hideDuplicados()
@@ -799,13 +825,23 @@ class Opening:
                     cursor.execute(sql_insert, (xpv,))
                     self.li_xpv.append(xpv)
 
-                for njug, move in enumerate(liMoves):
-                    for lim in move.variantes:
-                        limovnv = [liMoves[j].clona() for j in range(njug)]
-                        for move in limovnv:
-                            move.variantes = []
-                        limovnv.extend(lim.liMoves)
-                        haz_partida(limovnv)
+                if variations != "N":  #None
+                    for njug, move in enumerate(liMoves):
+                        ok = True
+                        if variations != "A":
+                            if variations == "W":
+                                if njug % 2 == 1:
+                                    ok = False
+                            elif variations == "B":
+                                if njug % 2 == 0:
+                                    ok = False
+                        if ok:
+                            for lim in move.variantes:
+                                limovnv = [liMoves[j].clona() for j in range(njug)]
+                                for move in limovnv:
+                                    move.variantes = []
+                                limovnv.extend(lim.liMoves)
+                                haz_partida(limovnv)
 
             haz_partida(g.moves.liMoves)
             if n % 50:

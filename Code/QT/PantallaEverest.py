@@ -1,7 +1,7 @@
 import os.path
 import random
 
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 from PyQt4 import QtSvg, QtCore
 
 from Code import Everest

@@ -384,7 +384,7 @@ class WGamesFEN(QtGui.QWidget):
             self.grid.gobottom(0)
 
     def tw_massive_change_tags(self):
-        resp = PantallaSolo.massive_change_tags(self, self.configuracion, len(self.grid.recnosSeleccionados()))
+        resp = PantallaSolo.massive_change_tags(self, self.configuracion, len(self.grid.recnosSeleccionados()), False)
         if resp:
             recno = self.grid.recno()
             liTags, remove, overwrite, si_all = resp

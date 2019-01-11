@@ -1,6 +1,6 @@
 import random
 
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 import chess
 import chess.syzygy
 

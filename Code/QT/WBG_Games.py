@@ -170,8 +170,10 @@ class WGames(QtGui.QWidget):
     def gridDobleClickCabecera(self, grid, col):
         liOrden = self.dbGames.dameOrden()
         clave = col.clave
-        if clave in ("numero", "opening"):
+        if clave in ("numero"):
             return
+        if clave == "opening":
+            clave = "XPV"
         siEsta = False
         for n, (cl, tp) in enumerate(liOrden):
             if cl == clave:
@@ -471,7 +473,7 @@ class WGames(QtGui.QWidget):
         menu.separador()
         menu.opcion(self.tw_massive_change_tags, _("Massive change of tags"), Iconos.PGN())
         menu.separador()
-        menu.opcion(self.tw_massive, _("Mass analysis"), Iconos.Analizar())
+        menu.opcion(self.tw_massive_analysis, _("Mass analysis"), Iconos.Analizar())
         menu.separador()
         menu.opcion(self.tw_play_against, _("Play against a game"), Iconos.Law())
         resp = menu.lanza()
@@ -521,22 +523,22 @@ class WGames(QtGui.QWidget):
         um.final()
 
     def tw_massive_change_tags(self):
-        resp = PantallaSolo.massive_change_tags(self, self.configuracion, len(self.grid.recnosSeleccionados()))
+        resp = PantallaSolo.massive_change_tags(self, self.configuracion, len(self.grid.recnosSeleccionados()), True)
         if resp:
             recno = self.grid.recno()
-            liTags, remove, overwrite, si_all = resp
+            liTags, remove, overwrite, si_all, set_extend = resp
             liRegistros = range(self.dbGames.reccount()) if si_all else self.grid.recnosSeleccionados()
             nRegistros = len(liRegistros)
             if (nRegistros == 1 or
                 ((nRegistros > 1) and
                  QTUtil2.pregunta(self, _("Are you sure do you want to change the %d registers?" % nRegistros)))):
                 um = QTUtil2.unMomento(self)
-                self.dbGames.massive_change_tags(liTags, liRegistros, remove, overwrite)
+                self.dbGames.massive_change_tags(liTags, liRegistros, remove, overwrite, set_extend)
                 self.grid.refresh()
                 self.grid.goto(recno, 0)
                 um.final()
 
-    def tw_massive(self):
+    def tw_massive_analysis(self):
         liSeleccionadas = self.grid.recnosSeleccionados()
         nSeleccionadas = len(liSeleccionadas)
 

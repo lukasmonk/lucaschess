@@ -302,7 +302,10 @@ class Jugada:
         self.siDesconocido = xL(17)
 
         if len(li) > 18 and li[18]:
-            self.analisis = cPickle.loads(str(li[18].replace("#&", "\n")))
+            try:
+                self.analisis = cPickle.loads(str(li[18].replace("#&", "\n")))
+            except:
+                pass
 
         if len(li) > 19 and li[19]:
             self.criticaDirecta = li[19]

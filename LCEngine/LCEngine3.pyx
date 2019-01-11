@@ -59,13 +59,15 @@ class PGNreader:
             pgn = pgn_game()
             pv = pgn_pv()
             d = {}
+            dlw = {}
             n = pgn_numlabels()
             r = pgn_raw()
             fens = [ pgn_fen(num) for num in range(pgn_numfens()) ]
             if n:
                 for x in range(n):
                     d[pgn_label(x).upper()] = pgn_value(x)
-            return pgn, pv, d, r, fens
+                    dlw[pgn_label(x).upper()] = pgn_label(x)
+            return pgn, pv, d, r, fens, dlw
         else:
             raise StopIteration
 

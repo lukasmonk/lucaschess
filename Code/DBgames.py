@@ -4,7 +4,7 @@ import sqlite3
 import time
 import random
 
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 
 from Code import ControlPosicion
 from Code import Partida
@@ -34,6 +34,7 @@ rots = ["Event", "Site", "Date", "Round", "White", "Black", "Result",
         "Termination", "Annotator", "Mode"
 ]
 drots = {x.upper(): x for x in rots}
+drots["PLIES"] = "PlyCount"
 
 
 class TreeSTAT:
@@ -845,7 +846,7 @@ class DBgames:
             dlTmp.pon_titulo(nomfichero)
             next_n = random.randint(100, 200)
             with LCEngine.PGNreader(fichero, self.depthStat()) as fpgn:
-                for n, (pgn, pv, dCab, raw, liFens) in enumerate(fpgn, 1):
+                for n, (pgn, pv, dCab, raw, liFens, dCablwr) in enumerate(fpgn, 1):
                     if not pv:
                         erroneos += 1
                         write_logs(fich_erroneos, pgn)
@@ -873,7 +874,7 @@ class DBgames:
                                         pgn = unicode(pgn, encoding=codec, errors="ignore")
 
                                 if raw: # si no tiene variantes ni comentarios, se graba solo las tags que faltan
-                                    liRTags = [(k,v) for k, v in dCab.iteritems() if k not in liCabs] # k is always upper
+                                    liRTags = [(dCablwr[k],v) for k, v in dCab.iteritems() if k not in liCabs] # k is always upper
                                     if liRTags:
                                         pgn = {}
                                         pgn["RTAGS"] = liRTags
@@ -1112,7 +1113,6 @@ class DBgames:
                 p.restore(xpgn["FULLGAME"])
                 return p.pgn(), result
         pgn = xpv2pgn(raw["XPV"])
-        drots["PLIES"] = "PlyCount"
         litags = []
         st = set()
         for field in self.liCamposBase:
@@ -1128,6 +1128,7 @@ class DBgames:
                 if k not in st:
                     litags.append('[%s "%s"]' % (k, v))
                     st.add(k)
+
         tags = "\n".join(litags)
         return "%s\n\n%s\n" % (tags, pgn), result
 
@@ -1226,7 +1227,7 @@ class DBgames:
     def guardaPartidaRecno(self, recno, partidaCompleta):
         return self.inserta(partidaCompleta) if recno is None else self.modifica(recno, partidaCompleta)
 
-    def massive_change_tags(self, li_tags_change, liRegistros, remove, overwrite):
+    def massive_change_tags(self, li_tags_change, liRegistros, remove, overwrite, set_extend):
         dtag = Util.SymbolDict({tag:val for tag, val in li_tags_change})
 
         def work_tag(tag, alm):
@@ -1246,6 +1247,7 @@ class DBgames:
             work_tag("Date", alm)
 
             p = self.leePartidaRaw(raw)
+
             if remove:
                 for n, (tag, val) in enumerate(p.liTags):
                     if tag.upper() == remove:
@@ -1265,6 +1267,11 @@ class DBgames:
                 if tag_new.upper() not in st_tag_ant_upper:
                     p.liTags.append([tag_new, dtag[tag_new]])
                     setattr(alm, tag_new.upper(), dtag[tag_new])
+
+            if set_extend:
+                p.set_extend_tags()
+                if not alm.ECO:
+                    alm.ECO = p.getTAG("ECO")
 
             rowid = self.liRowids[recno]
             pgn = {"FULLGAME": p.save()}
@@ -1302,57 +1309,56 @@ class DBgames:
 
         return None
 
-    def genPGNopen(self):
-        conexion = sqlite3.connect(self.nomFichero)
-        selectAll = ",".join(self.liCamposAll)
-        sql = "SELECT %s FROM %s"%(selectAll, self.tabla)
-        if self.filter:
-            sql += " WHERE %s"%self.filter
-        if self.order:
-            sql += " ORDER BY %s"%self.order
-        cursor = conexion.cursor()
-        cursor.execute(sql)
-        return conexion, cursor
-
-    def genPGN(self, cursor):
-        dicCampoPos = {campo:pos for pos, campo in enumerate(self.liCamposAll)}
-        posPGN = dicCampoPos["PGN"]
-        posRESULT = dicCampoPos["RESULT"]
-        posXPV = dicCampoPos["XPV"]
-        while True:
-            raw = cursor.fetchone()
-            if not raw:
-                break
-            xpgn = raw[posPGN]
-            rtags = None
-            result = raw[posRESULT]
-            if xpgn:
-                xpgn = Util.blob2var(xpgn)
-                if type(xpgn) in (str, unicode):
-                    yield xpgn, result
-                if "RTAGS" in xpgn:
-                    rtags = xpgn["RTAGS"]
-                else:
-                    p = Partida.PartidaCompleta()
-                    p.restore(xpgn["FULLGAME"])
-                    yield p.pgn(), result
-            pgn = xpv2pgn(raw[posXPV])
-            drots["PLIES"] = "PlyCount"
-            litags = []
-            for field in self.liCamposBase:
-                v = raw[dicCampoPos[field]]
-                if v:
-                    litags.append('[%s "%s"]' % (drots.get(field, field), str(v)))
-            if rtags:
-                for k, v in rtags:
-                     litags.append('[%s "%s"]' % (k, v))
-
-            tags = "\n".join(litags)
-            tags += "\n\n"
-
-            pgn = "%s\n\n%s" % (tags, pgn)
-            yield pgn, result
-
-    def genPGNclose(self, conexion, cursor):
-        cursor.close()
-        conexion.close()
+    # def genPGNopen(self):
+    #     conexion = sqlite3.connect(self.nomFichero)
+    #     selectAll = ",".join(self.liCamposAll)
+    #     sql = "SELECT %s FROM %s"%(selectAll, self.tabla)
+    #     if self.filter:
+    #         sql += " WHERE %s"%self.filter
+    #     if self.order:
+    #         sql += " ORDER BY %s"%self.order
+    #     cursor = conexion.cursor()
+    #     cursor.execute(sql)
+    #     return conexion, cursor
+    #
+    # def genPGN(self, cursor):
+    #     dicCampoPos = {campo:pos for pos, campo in enumerate(self.liCamposAll)}
+    #     posPGN = dicCampoPos["PGN"]
+    #     posRESULT = dicCampoPos["RESULT"]
+    #     posXPV = dicCampoPos["XPV"]
+    #     while True:
+    #         raw = cursor.fetchone()
+    #         if not raw:
+    #             break
+    #         xpgn = raw[posPGN]
+    #         rtags = None
+    #         result = raw[posRESULT]
+    #         if xpgn:
+    #             xpgn = Util.blob2var(xpgn)
+    #             if type(xpgn) in (str, unicode):
+    #                 yield xpgn, result
+    #             if "RTAGS" in xpgn:
+    #                 rtags = xpgn["RTAGS"]
+    #             else:
+    #                 p = Partida.PartidaCompleta()
+    #                 p.restore(xpgn["FULLGAME"])
+    #                 yield p.pgn(), result
+    #         pgn = xpv2pgn(raw[posXPV])
+    #         litags = []
+    #         for field in self.liCamposBase:
+    #             v = raw[dicCampoPos[field]]
+    #             if v:
+    #                 litags.append('[%s "%s"]' % (drots.get(field, field), str(v)))
+    #         if rtags:
+    #             for k, v in rtags:
+    #                  litags.append('[%s "%s"]' % (k, v))
+    #
+    #         tags = "\n".join(litags)
+    #         tags += "\n\n"
+    #
+    #         pgn = "%s\n\n%s" % (tags, pgn)
+    #         yield pgn, result
+    #
+    # def genPGNclose(self, conexion, cursor):
+    #     cursor.close()
+    #     conexion.close()

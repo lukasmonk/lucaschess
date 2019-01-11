@@ -1,4 +1,4 @@
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 from Code import Util
 from Code import VarGen
 from Code import ControlPosicion
@@ -642,6 +642,20 @@ class PartidaCompleta(Partida):
 
     def dicTags(self):
         return {k:v for k, v in self.liTags}
+
+    def set_extend_tags(self):
+        op = self.getTAG("OPENING")
+        eco = self.getTAG("ECO")
+        if not op or not eco:
+            self.asignaApertura()
+            if self.apertura:
+                if not op:
+                    self.liTags.append(("Opening", self.apertura.trNombre))
+                if not eco:
+                    self.liTags.append(("ECO", self.apertura.eco))
+        ply = self.getTAG("PLYCOUNT")
+        if not ply:
+            self.liTags.append(("PlyCount", str(self.numJugadas())))
 
     def readPGN(self, pgn):
         from Code import PGN  # evita el circulo vicioso

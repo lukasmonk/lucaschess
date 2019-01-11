@@ -28,7 +28,6 @@ class WJuicio(QTVarios.WDialogo):
         self.gestor = gestor
 
         self.listaRM, self.posOP = self.hazListaRM()
-        self.posicion = posicion
 
         titulo = _("Analysis")
         icono = Iconos.Analizar()

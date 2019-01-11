@@ -1,7 +1,7 @@
 import os
 import random
 
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 
 from Code import Partida
 from Code.SQL import Base

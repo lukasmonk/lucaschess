@@ -4,7 +4,7 @@ import sqlite3
 import time
 import random
 
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 
 from Code import Partida
 from Code import Util
@@ -223,7 +223,7 @@ class DBgamesFEN():
         liCabs.append("PLYCOUNT")
 
         with LCEngine.PGNreader(fichero, 0) as fpgn:
-            for n, (pgn, pv, dCab, raw, liFens) in enumerate(fpgn, 1):
+            for n, (pgn, pv, dCab, raw, liFens, dCablwr) in enumerate(fpgn, 1):
                 if "FEN" not in dCab:
                     erroneos += 1
                 else:

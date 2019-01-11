@@ -172,7 +172,7 @@ def menuCompetir_savemenu(procesador, dicDatos=None):
             menuf.opcion(("fide", elo / 100), "%d-%d" % (elo, elo + 99), rp.otro())
     lichess = procesador.configuracion.lichess
     submenu.separador()
-    menuf = submenu.submenu("%s (%d)" % (_("Lichess-Elo"), fide), Iconos.Lichess())
+    menuf = submenu.submenu("%s (%d)" % (_("Lichess-Elo"), lichess), Iconos.Lichess())
     rp = QTVarios.rondoPuntos()
     for elo in range(800, 2700, 100):
         if (elo == 800) or (0 <= (elo + 99 - lichess) <= 400 or 0 <= (lichess - elo) <= 400):

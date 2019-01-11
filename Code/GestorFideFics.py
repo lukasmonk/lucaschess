@@ -3,7 +3,7 @@ import copy
 import datetime
 import random
 
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 
 from Code import Apertura
 from Code import Gestor
@@ -58,6 +58,15 @@ class GestorFideFics(Gestor.Gestor):
 
         # dbf = db.dbfT("data", "ROWID,CABS,MOVS", condicion="LEVEL=%d AND WHITE=%d" % (nivel, 1 if color else 0 ))
         # dbf.leer()
+        # reccount = dbf.reccount()
+        # for recno in range(1,reccount+1):
+        #     dbf.goto(recno)
+        #     if "1652" in dbf.CABS:
+        #         pint dbf.CABS
+        #         pv = LCEngine.xpv2pv(dbf.MOVS)
+        #         pint pv
+        #         pint dbf.ROWID
+        #         pint "-"*40
         # import Partida
         # f = open("12001.pgn","wb")
         # for recno in range(1,reccount+1):
@@ -81,6 +90,7 @@ class GestorFideFics(Gestor.Gestor):
         xid = dbf.ROWID
         dbf.cerrar()
         db.cerrar()
+
         return xid
 
     def readID(self, xid):
@@ -148,7 +158,7 @@ class GestorFideFics(Gestor.Gestor):
 
         # tutor = self.configuracion.buscaRival("stockfish")
         # self.xtutor = self.procesador.creaGestorMotor(tutor, None, None)
-        # self.xtutor.maximizaactMultiPV(500)
+        self.xtutor.maximizaMultiPV()
 
         # -Aplazamiento 1/2--------------------------------------------------
         if aplazamiento:
@@ -326,7 +336,7 @@ class GestorFideFics(Gestor.Gestor):
         comentarioObj = ""
         comentarioPuntos = ""
 
-        siAnalizaJuez = True
+        siAnalizaJuez = jgUsu.movimiento() != jgObj.movimiento()
         if self.book:
             fen = self.fenUltimo()
             siBookUsu = self.book.compruebaHumano(fen, desde, hasta)
@@ -336,22 +346,23 @@ class GestorFideFics(Gestor.Gestor):
             if siBookObj:
                 comentarioObj = _("book move")
             if siBookUsu and siBookObj:
-                if jgObj.movimiento() == jgUsu.movimiento():
-                    comentario = "%s: %s" % (_("Same book move"), jgObj.pgnSP())
-                else:
+                if jgObj.movimiento() != jgUsu.movimiento():
+                    # comentario = "%s: %s" % (_("Same book move"), jgObj.pgnSP())
+                # else:
                     bmove = _("book move")
                     comentario = "%s: %s %s\n%s: %s %s" % (self.nombreObj, jgObj.pgnSP(), bmove,
                                                            self.configuracion.jugador, jgUsu.pgnSP(), bmove)
-                w = PantallaJuicio.MensajeF(self.pantalla, comentario)
-                w.mostrar()
+                    w = PantallaJuicio.MensajeF(self.pantalla, comentario)
+                    w.mostrar()
                 siAnalizaJuez = False
             else:
-                siAnalizaJuez = True
                 if not siBookObj:
                     self.book = None
 
         if siAnalizaJuez:
             um = QTUtil2.analizando(self.pantalla)
+            if not self.continueTt:
+                self.analizaInicio()
             mrm = self.analizaMinimo(5000)
             posicion = self.partida.ultPosicion
 
@@ -377,6 +388,7 @@ class GestorFideFics(Gestor.Gestor):
 
             analisis = w.analisis
             dpts = w.difPuntos()
+
             self.puntos += dpts
             self.ponPuntos()
 

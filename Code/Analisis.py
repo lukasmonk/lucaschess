@@ -442,24 +442,24 @@ FILESW=%s:100
                     continue
 
             # -# previos
-            if not self.siBorrarPrevio:
-                if jg.analisis:
-                    continue
+            if self.siBorrarPrevio:
+                jg.analisis = None
 
             # -# Procesamos
-            resp = self.xgestor.analizaJugadaPartida(partida, njg, self.tiempo, depth=self.depth,
-                                                     brDepth=self.dpbrilliancies, brPuntos=self.ptbrilliancies,
-                                                     stability=self.stability,
-                                                     st_centipawns=self.st_centipawns,
-                                                     st_depths=self.st_depths,
-                                                     st_timelimit=self.st_timelimit)
-            if not resp:
-                self.xgestor.quitaGuiDispatch()
-                return
+            if jg.analisis is None:
+                resp = self.xgestor.analizaJugadaPartida(partida, njg, self.tiempo, depth=self.depth,
+                                                         brDepth=self.dpbrilliancies, brPuntos=self.ptbrilliancies,
+                                                         stability=self.stability,
+                                                         st_centipawns=self.st_centipawns,
+                                                         st_depths=self.st_depths,
+                                                         st_timelimit=self.st_timelimit)
+                if not resp:
+                    self.xgestor.quitaGuiDispatch()
+                    return
 
-            jg.analisis = resp
+                jg.analisis = resp
             cp = jg.posicionBase
-            mrm = resp[0]
+            mrm, posAct = jg.analisis
             jg.complexity = AnalisisIndexes.calc_complexity(cp, mrm)
             jg.winprobability = AnalisisIndexes.calc_winprobability(cp, mrm)
             jg.narrowness = AnalisisIndexes.calc_narrowness(cp, mrm)
@@ -468,7 +468,6 @@ FILESW=%s:100
             jg.exchangetendency = AnalisisIndexes.calc_exchangetendency(cp, mrm)
 
             if siBlunders or siBrilliancies or self.siVariantes:
-                mrm, posAct = jg.analisis
                 rm = mrm.liMultiPV[posAct]
                 rm.ponBlunder(0)
                 mj = mrm.liMultiPV[0]

@@ -2,7 +2,7 @@ import os
 import os.path
 import copy
 
-import LCEngine2 as LCEngine
+import LCEngine3 as LCEngine
 
 from PyQt4 import QtCore, QtGui
 
@@ -679,7 +679,14 @@ class WLines(QTVarios.WDialogo):
         liGen.append((FormLayout.Spinbox(_("Depth"), 3, 999, 50), previo.get("IPGN_DEPTH", 30)))
         liGen.append((None, None))
 
-        liGen.append((_("Include variations"), previo.get("IPGN_VARIATIONS", True)))
+        liVariations = (
+            (_("All"), "A"),
+            (_("None"), "N"),
+            (_("White"), "W"),
+            (_("Black"), "B")
+        )
+        config = FormLayout.Combobox(_("Include variations"), liVariations)
+        liGen.append((config, previo.get("IPGN_VARIATIONSMODE", "A")))
         liGen.append((None, None))
 
         resultado = FormLayout.fedit(liGen, title=os.path.basename(ficheroPGN), parent=self, anchoMinimo=460,
@@ -688,7 +695,7 @@ class WLines(QTVarios.WDialogo):
         if resultado:
             accion, liResp = resultado
             previo["IPGN_DEPTH"] = depth = liResp[0]
-            previo["IPGN_VARIATIONS"] = variations = liResp[1]
+            previo["IPGN_VARIATIONSMODE"] = variations = liResp[1]
 
             self.dbop.importarPGN(self, partida, ficheroPGN, depth, variations)
             self.glines.refresh()
@@ -867,65 +874,75 @@ class WLines(QTVarios.WDialogo):
         tam_dbop = len(self.dbop)
         if tam_dbop == 0:
             return
+        menu = QTVarios.LCMenu(self)
         current = self.glines.recno()//2
-        li = []
         if 0 <= current < tam_dbop:
-            li.append(["current", _("Remove line %d") % (current+1,), Iconos.Mover()])
+            menu.opcion("current", _("Remove line %d") % (current+1,), Iconos.Mover())
+            menu.separador()
         if tam_dbop > 1:
-            li.append(["lines", _("Remove a list of lines"), Iconos.MoverLibre()])
+            menu.opcion("lines", _("Remove a list of lines"), Iconos.MoverLibre())
+            menu.separador()
+            menu.opcion("worst", _("Remove worst lines"), Iconos.Borrar())
+            menu.separador()
+        submenu = menu.submenu(_("Remove last move if the line ends with"), Iconos.Final())
+        submenu.opcion("last_white", _("White"), Iconos.Blancas())
+        submenu.separador()
+        submenu.opcion("last_black", _("Black"), Iconos.Negras())
 
-        li.append(["worst", _("Remove worst lines"), Iconos.Borrar()])
+        resp = menu.lanza()
 
-        if len(li) > 0:
-            menu = QTVarios.LCMenu(self)
-            for key, title, ico in li:
-                menu.opcion(key, title, ico)
-                menu.separador()
-            resp = menu.lanza()
+        if resp == "current":
+            self.dbop.saveHistory(_("Remove line %d") % (current+1,))
+            del self.dbop[current]
+            self.goto_inilinea()
 
-            if resp == "current":
-                self.dbop.saveHistory(_("Remove line %d") % (current+1,))
-                del self.dbop[current]
-                self.goto_inilinea()
-
-            elif resp == "lines":
-                liGen = [FormLayout.separador]
-                config = FormLayout.Editbox("<div align=\"right\">" + _("Lines") + "<br>" +
-                                            _("By example:") + " -5,8-12,14,19-",
-                                            rx="[0-9,\-,\,]*")
-                liGen.append((config, ""))
-                resultado = FormLayout.fedit(liGen, title=_("Remove a list of lines"), parent=self, anchoMinimo=460, icon=Iconos.OpeningLines())
-                if resultado:
-                    accion, liResp = resultado
-                    clista = liResp[0]
-                    if clista:
-                        ln = Util.ListaNumerosImpresion(clista)
-                        li = ln.selected(range(1, tam_dbop+1))
-                        sli = []
-                        cad = ""
-                        for num in li:
-                            if cad:
-                                cad += "," + str(num)
-                            else:
-                                cad = str(num)
-                            if len(cad) > 80:
-                                if len(sli) == 4:
-                                    sli.append("...")
-                                elif len(sli) < 4:
-                                    sli.append(cad)
-                                cad = ""
+        elif resp == "lines":
+            liGen = [FormLayout.separador]
+            config = FormLayout.Editbox("<div align=\"right\">" + _("Lines") + "<br>" +
+                                        _("By example:") + " -5,8-12,14,19-",
+                                        rx="[0-9,\-,\,]*")
+            liGen.append((config, ""))
+            resultado = FormLayout.fedit(liGen, title=_("Remove a list of lines"), parent=self, anchoMinimo=460, icon=Iconos.OpeningLines())
+            if resultado:
+                accion, liResp = resultado
+                clista = liResp[0]
+                if clista:
+                    ln = Util.ListaNumerosImpresion(clista)
+                    li = ln.selected(range(1, tam_dbop+1))
+                    sli = []
+                    cad = ""
+                    for num in li:
                         if cad:
-                            sli.append(cad)
-                        cli = "\n".join(sli)
-                        if QTUtil2.pregunta(self, _("Do you want to remove the next lines?") + "\n\n" + cli):
-                            um = QTUtil2.unMomento(self, _("Working..."))
-                            self.dbop.removeLines([x-1 for x in li], cli)
-                            self.glines.refresh()
-                            self.goto_inilinea()
-                            um.final()
-            elif resp == "worst":
-                self.remove_worst()
+                            cad += "," + str(num)
+                        else:
+                            cad = str(num)
+                        if len(cad) > 80:
+                            if len(sli) == 4:
+                                sli.append("...")
+                            elif len(sli) < 4:
+                                sli.append(cad)
+                            cad = ""
+                    if cad:
+                        sli.append(cad)
+                    cli = "\n".join(sli)
+                    if QTUtil2.pregunta(self, _("Do you want to remove the next lines?") + "\n\n" + cli):
+                        um = QTUtil2.unMomento(self, _("Working..."))
+                        self.dbop.removeLines([x-1 for x in li], cli)
+                        self.glines.refresh()
+                        self.goto_inilinea()
+                        um.final()
+        elif resp == "worst":
+            self.remove_worst()
+        elif resp == "last_white":
+            self.remove_lastmove(True)
+        elif resp == "last_black":
+            self.remove_lastmove(False)
         self.show_lines()
+
+    def remove_lastmove(self, iswhite):
+        um = QTUtil2.unMomento(self, _("Working..."))
+        self.dbop.remove_lastmove(iswhite, "%s %s" % (_("Remove last move if the line ends with"), _("White") if iswhite else _("Black")))
+        um.final()
 
     def remove_worst(self):
         # color + time

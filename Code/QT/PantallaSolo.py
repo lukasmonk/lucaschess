@@ -14,6 +14,7 @@ class WEtiquetasPGN(QTVarios.WDialogo):
         titulo = _("Edit PGN labels")
         icono = Iconos.PGN()
         extparam = "editlabels"
+        self.listandard = ("Event", "Site", "Date", "Round", "White", "Black", "Result", "ECO", "WhiteElo", "BlackElo")
 
         QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, icono, extparam)
         self.procesador = procesador
@@ -48,8 +49,7 @@ class WEtiquetasPGN(QTVarios.WDialogo):
         st = {eti for eti, val in liPGN}
 
         li = [[k,v] for k, v in liPGN]
-        listandard = ("Event", "Site", "Date", "Round", "White", "Black", "Result", "ECO", "WhiteElo", "BlackElo")
-        for eti in listandard:
+        for eti in self.listandard:
             if eti not in st:
                 li.append([eti, ""])
         while len(li) < 30:
@@ -57,6 +57,23 @@ class WEtiquetasPGN(QTVarios.WDialogo):
         self.liPGN = li
 
     def aceptar(self):
+        dic_rev = {}
+        for eti in self.listandard:
+            dic_rev[TrListas.pgnLabel(eti.upper())] = eti
+
+        for n, (eti, val) in enumerate(self.liPGN):
+            if eti in dic_rev:
+                self.liPGN[n][0] = dic_rev[eti]
+
+        li = []
+        st = set()
+        for n, (eti, val) in enumerate(self.liPGN):
+            val = val.strip()
+            if eti not in st and val:
+                st.add(eti)
+                li.append((eti, val))
+        self.liPGN = li
+
         self.guardarVideo()
         self.accept()
 
@@ -117,7 +134,7 @@ def editarEtiquetasPGN(procesador, liPGN):
         return None
 
 
-def massive_change_tags(owner, configuracion, num_selected):
+def massive_change_tags(owner, configuracion, num_selected, si_games):
     APPLY_ALL, APPLY_SELECTED = range(2)
     SAVE_NOTHING, SAVE_LABELS, SAVE_LABELS_VALUES = range(3)
     NUM_OTHERS = 4
@@ -152,6 +169,9 @@ def massive_change_tags(owner, configuracion, num_selected):
     liBase.append((combo, ""))
 
     sepBase()
+    if si_games:
+        liBase.append((_("Set Opening, ECO, PlyCount")+": ", False))
+        sepBase()
 
     liBase.append((None, _("Configuration")))
 
@@ -204,7 +224,11 @@ def massive_change_tags(owner, configuracion, num_selected):
         liBase, liOther = resp
 
         dic = {}
-        dic["EVENT"], dic["SITE"], dic["DATE"], dic["REMOVE"], dic["APPLY"], dic["OVERWRITE"], dic["SAVE"] = liBase
+        set_extend = False
+        if si_games:
+            dic["EVENT"], dic["SITE"], dic["DATE"], dic["REMOVE"], set_extend, dic["APPLY"], dic["OVERWRITE"], dic["SAVE"] = liBase
+        else:
+            dic["EVENT"], dic["SITE"], dic["DATE"], dic["REMOVE"], dic["APPLY"], dic["OVERWRITE"], dic["SAVE"] = liBase
 
         liTags = []
         for tag in ("Event", "Site", "Date"):
@@ -238,8 +262,11 @@ def massive_change_tags(owner, configuracion, num_selected):
 
         configuracion.escVariables("MASSIVE_CHANGE_TAGS", dic)
 
-        if liTags or dic["REMOVE"]:
-            return (liTags, dic["REMOVE"], dic["OVERWRITE"], dic["APPLY"] == APPLY_ALL)
+        if liTags or dic["REMOVE"] or set_extend:
+            if si_games:
+                return (liTags, dic["REMOVE"], dic["OVERWRITE"], dic["APPLY"] == APPLY_ALL, set_extend)
+            else:
+                return (liTags, dic["REMOVE"], dic["OVERWRITE"], dic["APPLY"] == APPLY_ALL)
 
     return None
 
