@@ -88,10 +88,11 @@ class Engine(object):
         self.working = False
 
     def put_line(self, line):
-        assert xpr(self.exe, "put>>> %s\n" % line)
-        self.stdin_lock.acquire()
-        self.stdin.write(line + "\n")
-        self.stdin_lock.release()
+        if self.working:
+            assert xpr(self.exe, "put>>> %s\n" % line)
+            self.stdin_lock.acquire()
+            self.stdin.write(line + "\n")
+            self.stdin_lock.release()
 
     def get_lines(self):
         self.stdout_lock.acquire()

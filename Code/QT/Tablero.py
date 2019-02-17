@@ -119,12 +119,12 @@ class Tablero(QtGui.QGraphicsView):
 
         okseguir = False
 
-        # CTRL-C : copy fen al clipboard
-        if siCtrl and key == Qt.Key_C:
-            QTUtil.ponPortapapeles(self.ultPosicion.fen())
-            QTUtil2.mensaje(self, _("FEN is in clipboard"))
+        if siAlt or siCtrl:
 
-        elif siAlt:
+            # CTRL-C : copy fen al clipboard
+            if siCtrl and key == Qt.Key_C:
+                QTUtil.ponPortapapeles(self.ultPosicion.fen())
+                QTUtil2.mensaje(self, _("FEN is in clipboard"))
 
             # ALT-F -> Rota tablero
             if key == Qt.Key_F:
@@ -692,14 +692,14 @@ class Tablero(QtGui.QGraphicsView):
 
     def showKeys(self):
         liKeys = [
-            (_("ALT") + "-F", _("Flip the board")),
-            (_("CTRL") + "-C", _("Copy FEN to clipboard")),
-            ("I", _("Copy board as image to clipboard")),
-            (_("CTRL") + "-I", _("Copy board as image to clipboard") + " (%s)" % _("without border")),
-            (_("ALT") + "-I", _("Copy board as image to clipboard") + " (%s)" % _("without coordinates")),
-            ("J", _("Copy board as image to a file")),
-            (_("CTRL") + "-J", _("Copy board as image to a file") + " (%s)" % _("without border")),
-            (_("ALT") + "-J", _("Copy board as image to a file") + " (%s)" % _("without coordinates")),
+            (_("ALT") + " F", _("Flip the board")),
+            (_("CTRL") + " C", _("Copy FEN to clipboard")),
+            (_("ALT") + " I", _("Copy board as image to clipboard")),
+            (_("CTRL") + " I", _("Copy board as image to clipboard") + " (%s)" % _("without border")),
+            (_("CTRL") + "+" + _("ALT") + " I", _("Copy board as image to clipboard") + " (%s)" % _("without coordinates")),
+            (_("ALT") + " J", _("Copy board as image to a file")),
+            (_("CTRL") + " J", _("Copy board as image to a file") + " (%s)" % _("without border")),
+            (_("CTRL") + "+" + _("ALT") + " J", _("Copy board as image to a file") + " (%s)" % _("without coordinates")),
         ]
         if self.siActivasPiezas:
             liKeys.append((None, None))
@@ -1622,6 +1622,7 @@ class Tablero(QtGui.QGraphicsView):
         self.liFlechas.append(flecha)
         flecha.show()
 
+
     def creaFlechaTutor(self, desdeA1h8, hastaA1h8, factor):
         bf = copy.deepcopy(self.confTablero.fTransicion())
         bf.a1h8 = desdeA1h8 + hastaA1h8
@@ -1825,19 +1826,19 @@ class Tablero(QtGui.QGraphicsView):
                 actScr = True
                 self.scriptSC_menu.hide()
 
-        if not (siCtrl or siAlt):
+        if siAlt and not siCtrl:
             pm = QtGui.QPixmap.grabWidget(self)
         else:
             x = 0
             y = 0
             w = self.width()
             h = self.height()
-            if siCtrl:
+            if siCtrl and not siAlt:
                 x = self.tamFrontera
                 y = self.tamFrontera
-                w -= self.tamFrontera*2
-                h -= self.tamFrontera*2
-            if siAlt:
+                w -= self.tamFrontera*2+2
+                h -= self.tamFrontera*2+2
+            elif siAlt and siCtrl:
                 x += self.margenCentro
                 y += self.margenCentro
                 w -= self.margenCentro*2

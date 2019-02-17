@@ -215,7 +215,15 @@ class GestorMotor:
 
         fen = posicionNueva.fen()
         if LCEngine.fenTerminado(fen):
-            return None
+            # Par que llegue hasta aqui tiene que ser tablas
+            rm = XMotorRespuesta.RespuestaMotor("", posicion.siBlancas)
+            rm.sinInicializar = False
+            self.sinMovimientos = True
+            self.pv = desde+hasta+coronacion
+            self.desde = desde
+            self.hasta = hasta
+            self.coronacion = coronacion
+            return rm
 
         mrm = self.motor.bestmove_fen(fen, self.motorTiempoJugada, self.motorProfundidad)
         rm = mrm.mejorMov()

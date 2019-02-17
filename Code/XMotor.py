@@ -438,9 +438,10 @@ class FastEngine(object):
         self.is_white = True
 
         self.guiDispatch = None
+        self.minDispatch = 1.0
         self.ultDispatch = 0
-        self.minDispatch = 1.0  # segundos
-        self.whoDispatch = nombre
+
+
         self.uci_ok = False
         self.pid = None
 
@@ -451,7 +452,7 @@ class FastEngine(object):
         if not os.path.isfile(exe):
             return
 
-        exe = os.path.abspath(exe)
+        self.exe = exe = os.path.abspath(exe)
         direxe = os.path.dirname(exe)
         xargs = [os.path.basename(exe), ]
         if args:
@@ -496,6 +497,9 @@ class FastEngine(object):
             self.pwait_list("isready", "readyok", 1000)
         self.ucinewgame()
 
+    def ponGuiDispatch(self, guiDispatch, whoDispatch=None):
+        self.guiDispatch = guiDispatch
+
     def put_line(self, line):
         self.stdin.write(line + "\n")
         if self.log:
@@ -522,6 +526,28 @@ class FastEngine(object):
             if self.log:
                 self.log_write(line.strip())
             li.append(line.strip())
+            if line.startswith(txt_busca):
+                return li, True
+        return li, False
+
+    def pwait_list_dispatch(self, orden, txt_busca, maxtime):
+        self.put_line(orden)
+        ini = time.time()
+        tm_dispatch = ini
+        li = []
+        mrm = XMotorRespuesta.MRespuestaMotor(self.nombre, self.is_white)
+        while time.time()-ini < maxtime:
+            if (time.time() - tm_dispatch) >= 1.0:
+                mrm.ordena()
+                rm = mrm.mejorMov()
+                if not self.guiDispatch(rm):
+                    return li, False
+                tm_dispatch = time.time()
+            line = self.stdout.readline().strip()
+            if self.log:
+                self.log_write(line)
+            li.append(line)
+            mrm.dispatch(line)
             if line.startswith(txt_busca):
                 return li, True
         return li, False
@@ -565,7 +591,11 @@ class FastEngine(object):
         elif maxProfundidad:
             msTiempo = int(maxProfundidad * msTiempo / 3.0)
 
-        li_resp, result = self.pwait_list(env, "bestmove", msTiempo)
+        if self.guiDispatch:
+            li_resp, result = self.pwait_list_dispatch(env, "bestmove", msTiempo)
+        else:
+            li_resp, result = self.pwait_list(env, "bestmove", msTiempo)
+
         if not result:
             return None
 

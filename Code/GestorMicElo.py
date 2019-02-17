@@ -496,24 +496,24 @@ class GestorMicElo(Gestor.Gestor):
         relo = self.datosMotor.elo
         if self.resultado == kGanamos:
             difelo = self.datosMotor.pgana
-            rdifelo = self.datosMotor.ppierde
+            # rdifelo = self.datosMotor.ppierde
 
         elif self.resultado == kGanaRival:
             difelo = self.datosMotor.ppierde
-            rdifelo = self.datosMotor.pgana
+            # rdifelo = self.datosMotor.pgana
 
         else:
             difelo = self.datosMotor.ptablas
-            rdifelo = self.datosMotor.ptablas
+            # rdifelo = self.datosMotor.ptablas
 
         nelo = elo + difelo
         if nelo < 0:
             nelo = 0
         self.configuracion.ponMiceloActivo(nelo, self.siCompetitivo)
 
-        rnelo = relo + rdifelo
-        if rnelo < 0:
-            rnelo = 0
+        rnelo = relo - difelo
+        if rnelo < 100:
+            rnelo = 100
         dme = DicMicElos()
         dme.cambiaElo(self.datosMotor.clave, rnelo)
 

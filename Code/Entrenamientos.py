@@ -234,7 +234,7 @@ class Entrenamientos:
 
         lichess = self.configuracion.lichessNC
         menu1.separador()
-        menuf = menu1.submenu("%s (%d)" % (_("Lichess-Elo"), fide), Iconos.Lichess())
+        menuf = menu1.submenu("%s (%d)" % (_("Lichess-Elo"), lichess), Iconos.Lichess())
         rp = QTVarios.rondoPuntos()
         for elo in range(800, 2700, 100):
             if (elo == 800) or (0 <= (elo + 99 - lichess) <= 400 or 0 <= (lichess - elo) <= 400):

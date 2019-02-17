@@ -181,7 +181,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
 
         # BT posiciones ---------------------------------------------------------------
         self.liBT = []
-        nSalto = (self.tablero.ancho + 20) / 22
+        nSalto = (self.tablero.ancho + 34) / 26
         self.dicIconos = {0: Iconos.PuntoBlanco(),
                           1: Iconos.PuntoNegro(), 2: Iconos.PuntoAmarillo(),
                           3: Iconos.PuntoNaranja(), 4: Iconos.PuntoVerde(),
@@ -217,7 +217,7 @@ class WEntrenarBMT(QTVarios.WDialogo):
         lyRM = Colocacion.G()
         numero = 0
         for x in range(16):
-            btRM = Controles.PB(self, "", rutina=self.pulsadoRM).anchoFijo(120).altoFijo(24).ponPlano(True)
+            btRM = Controles.PB(self, "", rutina=self.pulsadoRM).anchoFijo(180).altoFijo(24).ponPlano(True)
             btRM.numero = numero
             btRM.setEnabled(False)
             numero += 1
@@ -592,8 +592,16 @@ class WEntrenarBMT(QTVarios.WDialogo):
         self.finalizaTiempo()  # Para que guarde el tiempo, si no es el primero
 
         self.bmt_uno = bmt_uno = self.bmt_lista.dameUno(num)
-
-        self.lbCondiciones.ponTexto(bmt_uno.mrm.nombre + " %d %s" % (bmt_uno.mrm.maxTiempo / 1000, _("Second(s)")))
+        mrm = bmt_uno.mrm
+        tm = mrm.maxTiempo
+        dp = mrm.maxProfundidad
+        if tm > 0:
+            txt = " %d %s" % (tm / 1000, _("Second(s)"))
+        elif dp > 0:
+            txt = " %s %d" % (_("depth"), dp)
+        else:
+            txt = ""
+        self.lbCondiciones.ponTexto(mrm.nombre + txt)
 
         self.posicion.leeFen(bmt_uno.fen)
         self.tablero.ponPosicion(self.posicion)
@@ -602,7 +610,6 @@ class WEntrenarBMT(QTVarios.WDialogo):
         self.liBT[num].ponPlano(False)
         self.actualP = num
 
-        mrm = bmt_uno.mrm
         nliRM = len(mrm.liMultiPV)
         partida = Partida.Partida()
         for x in range(16):
