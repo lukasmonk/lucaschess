@@ -1,6 +1,6 @@
 import os
 
-import LCEngine3 as LCEngine
+import LCEngine4 as LCEngine
 
 from PyQt4 import QtGui, QtCore
 

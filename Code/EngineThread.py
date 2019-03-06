@@ -1,5 +1,4 @@
 import os
-import sys
 
 import time
 
@@ -163,14 +162,7 @@ class Engine(object):
             if self.process.poll() is None:
                 self.put_line("stop")
                 self.put_line("quit")
-                wtime = 40  # wait for it, wait for it...
-                while self.process.poll() is None and wtime > 0:
-                    time.sleep(0.05)
-                    wtime -= 1
-
-                if self.process.poll() is None:  # nope, no luck
-                    sys.stderr.write("INFO ENGINE: the engine %s won't close properly.\n" % self.exe)
-                    self.process.kill()
-                    self.process.terminate()
+                self.process.kill()
+                self.process.terminate()
 
             self.pid = None

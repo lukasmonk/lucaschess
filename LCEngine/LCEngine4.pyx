@@ -438,3 +438,120 @@ def fenOB(fen):
 def fenTerminado(fen):
     return setFen(fen) == 0
 
+
+def liK(npos):
+    cdef int fil, col, ft, ct
+    liM = []
+    fil, col = posFC(npos)
+    for fi, ci in ( (+1, +1), (+1, -1), (-1, +1), (-1, -1), (+1, 0), (-1, 0), (0, +1), (0, -1) ):
+        ft = fil + fi
+        ct = col + ci
+        if ft < 0 or ft > 7 or ct < 0 or ct > 7:
+            continue
+        liM.append(FCpos(ft, ct))
+    return tuple(liM)
+
+
+def liBR(npos, fi, ci):
+    cdef int fil, col, ft, ct
+
+    fil, col = posFC(npos)
+    liM = []
+    ft = fil + fi
+    ct = col + ci
+    while True:
+        if ft < 0 or ft > 7 or ct < 0 or ct > 7:
+            break
+
+        t = FCpos(ft, ct)
+        liM.append(t)
+        ft += fi
+        ct += ci
+    return tuple(liM)
+
+
+def liN(npos):
+    cdef int fil, col, ft, ct
+
+    fil, col = posFC(npos)
+    liM = []
+    for fi, ci in ( (+1, +2), (+1, -2), (-1, +2), (-1, -2), (+2, +1), (+2, -1), (-2, +1), (-2, -1) ):
+        ft = fil + fi
+        ct = col + ci
+        if ft < 0 or ft > 7 or ct < 0 or ct > 7:
+            continue
+
+        t = FCpos(ft, ct)
+        liM.append(t)
+    return tuple(liM)
+
+def liP(npos, siW):
+    cdef int fil, col, ft, ct, inc
+
+    fil, col = posFC(npos)
+    liM = []
+    liX = []
+    if siW:
+        filaIni = 1
+        salto = +1
+    else:
+        filaIni = 6
+        salto = -1
+    sig = FCpos(fil + salto, col)
+    liM.append(sig)
+
+    if fil == filaIni:
+        sig2 = FCpos(fil + salto * 2, col)
+        liM.append(sig2)
+
+    for inc in ( +1, -1 ):
+        ft = fil + salto
+        ct = col + inc
+        if not (ft < 0 or ft > 7 or ct < 0 or ct > 7):
+            t = FCpos(ft, ct)
+            liX.append(t)
+
+    return tuple(liM), tuple(liX)
+
+dicK = {}
+for i in range(64):
+    dicK[i] = liK(i)
+
+dicQ = {}
+for i in range(64):
+    li = []
+    for f_i, c_i in ( (1, 1), (1, -1), (-1, 1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1) ):
+        lin = liBR(i, f_i, c_i)
+        if lin:
+            li.append(lin)
+    dicQ[i] = tuple(li)
+
+dicB = {}
+for i in range(64):
+    li = []
+    for f_i, c_i in ( (1, 1), (1, -1), (-1, 1), (-1, -1) ):
+        lin = liBR(i, f_i, c_i)
+        if lin:
+            li.append(lin)
+    dicB[i] = tuple(li)
+
+dicR = {}
+for i in range(64):
+    li = []
+    for f_i, c_i in ( (1, 0), (-1, 0), (0, 1), (0, -1) ):
+        lin = liBR(i, f_i, c_i)
+        if lin:
+            li.append(lin)
+    dicR[i] = tuple(li)
+
+dicN = {}
+for i in range(64):
+    dicN[i] = liN(i)
+
+dicPW = {}
+for i in range(8, 56):
+    dicPW[i] = liP(i, True)
+
+dicPB = {}
+for i in range(8, 56):
+    dicPB[i] = liP(i, False)

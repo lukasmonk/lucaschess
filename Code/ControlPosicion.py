@@ -1,4 +1,4 @@
-import LCEngine3 as LCEngine
+import LCEngine4 as LCEngine
 
 from Code import TrListas
 
@@ -59,6 +59,19 @@ class ControlPosicion:
                 if self.siExistePieza(rey, posRey) and self.siExistePieza(torre, posTorre):
                     enr += tipo
             self.enroques = enr if enr else "-"
+        if self.alPaso != "-":
+            r, c = self.alPaso[0], self.alPaso[1]
+            if c in "36":
+                col = "4" if c == "3" else "5"
+                pz = "P" if self.siBlancas else "p"
+                ant = chr(ord(r)-1)
+                pz0 = self.casillas.get(ant+col)
+                nxt = chr(ord(r)+1)
+                pz2 = self.casillas.get(nxt+col)
+                if pz not in (pz0, pz2):
+                    self.alPaso = "-"
+            else:
+                self.alPaso = "-"
 
     def leeFen(self, fen):
         fen = fen.strip()

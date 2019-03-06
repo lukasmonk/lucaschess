@@ -601,9 +601,39 @@ class WEntrenarBMT(QTVarios.WDialogo):
             txt = " %s %d" % (_("depth"), dp)
         else:
             txt = ""
-        self.lbCondiciones.ponTexto(mrm.nombre + txt)
 
         self.posicion.leeFen(bmt_uno.fen)
+
+        mens = ""
+        if self.posicion.enroques:
+            color, colorR = _("White"), _("Black")
+            cK, cQ, cKR, cQR = "K", "Q", "k", "q"
+
+            def menr(ck, cq):
+                enr = ""
+                if ck in self.posicion.enroques:
+                    enr += "O-O"
+                if cq in self.posicion.enroques:
+                    if enr:
+                        enr += "  +  "
+                    enr += "O-O-O"
+                return enr
+
+            enr = menr(cK, cQ)
+            if enr:
+                mens += "  %s : %s" % (color, enr)
+            enr = menr(cKR, cQR)
+            if enr:
+                mens += " %s : %s" % (colorR, enr)
+        if self.posicion.alPaso != "-":
+            mens += "     %s : %s" % (_("En passant"), self.posicion.alPaso)
+
+        if mens:
+            txt += "  - " + mens
+
+        self.lbCondiciones.ponTexto(mrm.nombre + txt )
+
+
         self.tablero.ponPosicion(self.posicion)
 
         self.liBT[self.actualP].ponPlano(True)

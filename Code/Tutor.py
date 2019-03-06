@@ -1,7 +1,7 @@
 import codecs
 import os
 
-import LCEngine3 as LCEngine
+import LCEngine4 as LCEngine
 
 from Code import Analisis
 from Code import Partida
