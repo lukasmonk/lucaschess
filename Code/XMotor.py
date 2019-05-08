@@ -441,7 +441,6 @@ class FastEngine(object):
         self.minDispatch = 1.0
         self.ultDispatch = 0
 
-
         self.uci_ok = False
         self.pid = None
 

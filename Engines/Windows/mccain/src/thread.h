@@ -3,18 +3,18 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
- 
+ Copyright (C) 2017-2019 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
+
  McCain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  McCain is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -33,7 +33,7 @@
 #include "pawns.h"
 #include "position.h"
 #include "search.h"
-#include "thread_win32.h"
+#include "thread_win32_osx.h"
 
 
 /// Thread class keeps together all the thread-related stuff. We use
@@ -47,7 +47,7 @@ class Thread {
   ConditionVariable cv;
   size_t idx;
   bool exit = false, searching = true; // Set before starting std::thread
-  std::thread stdThread;
+  NativeThread stdThread;
 
 public:
   explicit Thread(size_t);
@@ -62,17 +62,16 @@ public:
   Material::Table materialTable;
   Endgames endgames;
   size_t pvIdx, pvLast;
+
 #ifdef Maverick //  Gunther Demetz zugzwangSolver
-  int selDepth, nmpMinPly, zugzwangMates;
+    int selDepth, nmpMinPly, zugzwangMates;
+    int64_t visits, allScores; //  joergoster and Stefano80 monteCarloJ_03
 #else
-#ifdef Matefinder //  Gunther Demetz zugzwangSolver
-  int selDepth, nmpMinPly, zugzwangMates;
-#else
-  int selDepth, nmpMinPly;
+    int selDepth, nmpMinPly;
 #endif
-#endif
+
   Color nmpColor;
-  std::atomic<uint64_t> nodes, tbHits;
+  std::atomic<uint64_t> nodes, tbHits, bestMoveChanges;
 
   Position rootPos;
   Search::RootMoves rootMoves;
@@ -82,6 +81,7 @@ public:
   CapturePieceToHistory captureHistory;
   ContinuationHistory continuationHistory;
   Score contempt;
+	
 };
 
 
@@ -94,9 +94,11 @@ struct MainThread : public Thread {
   void search() override;
   void check_time();
 
-  double bestMoveChanges, previousTimeReduction;
+  double previousTimeReduction;
   Value previousScore;
   int callsCnt;
+  bool stopOnPonderhit;
+  std::atomic_bool ponder;
 };
 
 
@@ -114,7 +116,7 @@ struct ThreadPool : public std::vector<Thread*> {
   uint64_t nodes_searched() const { return accumulate(&Thread::nodes); }
   uint64_t tb_hits()        const { return accumulate(&Thread::tbHits); }
 
-  std::atomic_bool stop, ponder, stopOnPonderhit;
+  std::atomic_bool stop;
 
 private:
   StateListPtr setupStates;

@@ -1,23 +1,21 @@
 /*
- McCain, a UCI chess playing engine derived from Stockfish and Glaurung 2.1
- Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
- Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
- Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
- 
- McCain is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- McCain is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+  Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+  Copyright (c) 2013 Ronald de Man
+  Copyright (C) 2016-2019 Marco Costalba, Lucas Braesch
+
+  Stockfish is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Stockfish is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include <algorithm>
 #include <atomic>
@@ -34,7 +32,7 @@
 #include "../movegen.h"
 #include "../position.h"
 #include "../search.h"
-#include "../thread_win32.h"
+#include "../thread_win32_osx.h"
 #include "../types.h"
 #include "../uci.h"
 
@@ -84,8 +82,6 @@ int LeadPawnsSize[6][4];       // [leadPawnsCnt][FILE_A..FILE_D]
 bool pawns_comp(Square i, Square j) { return MapPawns[i] < MapPawns[j]; }
 int off_A1H8(Square sq) { return int(rank_of(sq)) - file_of(sq); }
 
-	
-#ifndef Matefinder
 constexpr Value WDL_to_value[] = {
    -VALUE_MATE + MAX_PLY + 1,
     VALUE_DRAW - 2,
@@ -93,15 +89,6 @@ constexpr Value WDL_to_value[] = {
     VALUE_DRAW + 2,
     VALUE_MATE - MAX_PLY - 1
 };
-#else
-	constexpr Value WDL_to_value[] = {
-		-VALUE_TB_WIN + 5 * PawnValueEg,
-		VALUE_DRAW - 2,
-		VALUE_DRAW,
-		VALUE_DRAW + 2,
-		VALUE_TB_WIN - 5 * PawnValueEg
-	};
-#endif
 
 template<typename T, int Half = sizeof(T) / 2, int End = sizeof(T) - 1>
 inline void swap_endian(T& x)
@@ -227,38 +214,57 @@ public:
             return *baseAddress = nullptr, nullptr;
 
         fstat(fd, &statbuf);
+
+        if (statbuf.st_size % 64 != 16)
+        {
+            std::cerr << "Corrupt tablebase file " << fname << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
         *mapping = statbuf.st_size;
         *baseAddress = mmap(nullptr, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
+        madvise(*baseAddress, statbuf.st_size, MADV_RANDOM);
         ::close(fd);
 
-        if (*baseAddress == MAP_FAILED) {
+        if (*baseAddress == MAP_FAILED)
+        {
             std::cerr << "Could not mmap() " << fname << std::endl;
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 #else
+        // Note FILE_FLAG_RANDOM_ACCESS is only a hint to Windows and as such may get ignored.
         HANDLE fd = CreateFile(fname.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
-                               OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+                               OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, nullptr);
 
         if (fd == INVALID_HANDLE_VALUE)
             return *baseAddress = nullptr, nullptr;
 
         DWORD size_high;
         DWORD size_low = GetFileSize(fd, &size_high);
+
+        if (size_low % 64 != 16)
+        {
+            std::cerr << "Corrupt tablebase file " << fname << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
         HANDLE mmap = CreateFileMapping(fd, nullptr, PAGE_READONLY, size_high, size_low, nullptr);
         CloseHandle(fd);
 
-        if (!mmap) {
+        if (!mmap)
+        {
             std::cerr << "CreateFileMapping() failed" << std::endl;
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
         *mapping = (uint64_t)mmap;
         *baseAddress = MapViewOfFile(mmap, FILE_MAP_READ, 0, 0, 0);
 
-        if (!*baseAddress) {
+        if (!*baseAddress)
+        {
             std::cerr << "MapViewOfFile() failed, name = " << fname
                       << ", error = " << GetLastError() << std::endl;
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 #endif
         uint8_t* data = (uint8_t*)*baseAddress;
@@ -266,7 +272,8 @@ public:
         constexpr uint8_t Magics[][4] = { { 0xD7, 0x66, 0x0C, 0xA5 },
                                           { 0x71, 0xE8, 0x23, 0x5D } };
 
-        if (memcmp(data, Magics[type == WDL], 4)) {
+        if (memcmp(data, Magics[type == WDL], 4))
+        {
             std::cerr << "Corrupted table in file " << fname << std::endl;
             unmap(*baseAddress, *mapping);
             return *baseAddress = nullptr, nullptr;
@@ -427,7 +434,7 @@ class TBTables {
             }
         }
         std::cerr << "TB hash table size too low!" << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
 public:
@@ -1119,10 +1126,10 @@ void* mapped(TBTable<Type>& e, const Position& pos) {
 
     static Mutex mutex;
 
-    // Use 'aquire' to avoid a thread reads 'ready' == true while another is
-    // still working, this could happen due to compiler reordering.
+    // Use 'acquire' to avoid a thread reading 'ready' == true while
+    // another is still working. (compiler reordering may cause this).
     if (e.ready.load(std::memory_order_acquire))
-        return e.baseAddress; // Could be nullptr if file does not exsist
+        return e.baseAddress; // Could be nullptr if file does not exist
 
     std::unique_lock<Mutex> lk(mutex);
 
@@ -1289,7 +1296,7 @@ void Tablebases::init(const std::string& paths) {
                         continue; // First on diagonal, second above
 
                     else if (!off_A1H8(s1) && !off_A1H8(s2))
-                        bothOnDiagonal.push_back(std::make_pair(idx, s2));
+                        bothOnDiagonal.emplace_back(idx, s2);
 
                     else
                         MapKK[idx][s2] = code++;
@@ -1547,19 +1554,11 @@ bool Tablebases::root_probe(Position& pos, Search::RootMoves& rootMoves) {
         // Determine the score to be displayed for this move. Assign at least
         // 1 cp to cursed wins and let it grow to 49 cp as the positions gets
         // closer to a real win.
-#ifndef Matefinder
         m.tbScore =  r >= bound ? VALUE_MATE - MAX_PLY - 1
                    : r >  0     ? Value((std::max( 3, r - 800) * int(PawnValueEg)) / 200)
                    : r == 0     ? VALUE_DRAW
                    : r > -bound ? Value((std::min(-3, r + 800) * int(PawnValueEg)) / 200)
                    :             -VALUE_MATE + MAX_PLY + 1;
-#else
-		m.tbScore =  r >= bound ? VALUE_TB_WIN - PawnValueEg * (1 + popcount(pos.pieces(~pos.side_to_move())))
-					: r >  0     ? Value((std::max( 3, r - 800) * int(PawnValueEg)) / 200)
-					: r == 0     ? VALUE_DRAW
-					: r > -bound ? Value((std::min(-3, r + 800) * int(PawnValueEg)) / 200)
-					:             -VALUE_TB_WIN + PawnValueEg * (1 + popcount(pos.pieces( pos.side_to_move())));
-#endif
     }
 
     return true;

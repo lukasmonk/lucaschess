@@ -416,7 +416,6 @@ class WRun2(QTVarios.WDialogo):
                 r.labels[ng].is_max = key in st
 
 
-
 class WWork(QtGui.QDialog):
     def __init__(self, wParent, sts, work):
         super(WWork, self).__init__(wParent)

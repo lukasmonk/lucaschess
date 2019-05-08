@@ -3,18 +3,18 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
- 
+ Copyright (C) 2017-2019 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
+
  McCain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  McCain is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -96,10 +96,11 @@ public:
   template<PieceType Pt> int count() const;
   template<PieceType Pt> const Square* squares(Color c) const;
   template<PieceType Pt> Square square(Color c) const;
+  int semiopen_file(Color c, File f) const;
 
   // Castling
-  int can_castle(Color c) const;
-  int can_castle(CastlingRight cr) const;
+  int castling_rights(Color c) const;
+  bool can_castle(CastlingRight cr) const;
   bool castling_impeded(CastlingRight cr) const;
   Square castling_rook_square(CastlingRight cr) const;
 
@@ -116,38 +117,34 @@ public:
   template<PieceType> Bitboard attacks_from(Square s, Color c) const;
   Bitboard slider_blockers(Bitboard sliders, Square s, Bitboard& pinners) const;
 
-  // Properties of moves
-  bool legal(Move m) const;
-  bool pseudo_legal(const Move m) const;
-  bool capture(Move m) const;
-  bool capture_or_promotion(Move m) const;
-  bool gives_check(Move m) const;
-  bool advanced_pawn_push(Move m) const;
+    // Properties of moves
+    bool legal(Move m) const;
+    bool pseudo_legal(const Move m) const;
+    bool capture(Move m) const;
+    bool capture_or_promotion(Move m) const;
+    bool gives_check(Move m) const;
+    bool advanced_pawn_push(Move m) const;
 #ifdef Maverick
-  bool promotion_pawn_push(Move m) const;
+    bool promotion_pawn_push(Move m) const;
 #endif
-  Piece moved_piece(Move m) const;
-  Piece captured_piece() const;
+    Piece moved_piece(Move m) const;
+    Piece captured_piece() const;
 
   // Piece specific
   bool pawn_passed(Color c, Square s) const;
   bool opposite_bishops() const;
+  int  pawns_on_same_color_squares(Color c, Square s) const;
 
-  // Doing and undoing moves
-  void do_move(Move m, StateInfo& newSt);
-  void do_move(Move m, StateInfo& newSt, bool givesCheck);
+    // Doing and undoing moves
+    void do_move(Move m, StateInfo& newSt);
+    void do_move(Move m, StateInfo& newSt, bool givesCheck);
 #ifdef Maverick //Gunther Demetz zugzwangSolver
-  void removePawn(Square s, StateInfo& newSt);
-  void undo_removePawn(Square s, Color c);
-#else
-#ifdef Matefinder //Gunther Demetz zugzwangSolver
-	void removePawn(Square s, StateInfo& newSt);
-	void undo_removePawn(Square s, Color c);
+    void removePawn(Square s, StateInfo& newSt);
+    void undo_removePawn(Square s, Color c);
 #endif
-#endif
-  void undo_move(Move m);
-  void do_null_move(StateInfo& newSt);
-  void undo_null_move();
+    void undo_move(Move m);
+    void do_null_move(StateInfo& newSt);
+    void undo_null_move();
 
   // Static Exchange Evaluation
   bool see_ge(Move m, Value threshold = VALUE_ZERO) const;
@@ -273,12 +270,16 @@ inline Square Position::ep_square() const {
   return st->epSquare;
 }
 
-inline int Position::can_castle(CastlingRight cr) const {
+inline int Position::semiopen_file(Color c, File f) const {
+  return !(pieces(c, PAWN) & file_bb(f));
+}
+
+inline bool Position::can_castle(CastlingRight cr) const {
   return st->castlingRights & cr;
 }
 
-inline int Position::can_castle(Color c) const {
-  return st->castlingRights & ((WHITE_OO | WHITE_OOO) << (2 * c));
+inline int Position::castling_rights(Color c) const {
+  return st->castlingRights & (c == WHITE ? WHITE_CASTLING : BLACK_CASTLING);
 }
 
 inline bool Position::castling_impeded(CastlingRight cr) const {
@@ -323,19 +324,24 @@ inline Bitboard Position::check_squares(PieceType pt) const {
 }
 
 inline bool Position::pawn_passed(Color c, Square s) const {
-  return !(pieces(~c, PAWN) & passed_pawn_mask(c, s));
+  return !(pieces(~c, PAWN) & passed_pawn_span(c, s));
 }
 
 inline bool Position::advanced_pawn_push(Move m) const {
   return   type_of(moved_piece(m)) == PAWN
         && relative_rank(sideToMove, from_sq(m)) > RANK_4;
 }
-#ifdef Maverick
+#ifdef Maverick //MichaelB7
 inline bool Position::promotion_pawn_push(Move m) const {
-	return   type_of(moved_piece(m)) == PAWN
-	&& relative_rank(sideToMove, from_sq(m)) > RANK_5;
+    return   type_of(moved_piece(m)) == PAWN
+             && relative_rank(sideToMove, from_sq(m)) > RANK_5;
 }
 #endif
+
+inline int Position::pawns_on_same_color_squares(Color c, Square s) const {
+  return popcount(pieces(c, PAWN) & ((DarkSquares & s) ? DarkSquares : ~DarkSquares));
+}
+
 inline Key Position::key() const {
   return st->key;
 }
@@ -431,7 +437,7 @@ inline void Position::move_piece(Piece pc, Square from, Square to) {
 
   // index[from] is not updated and becomes stale. This works as long as index[]
   // is accessed just by known occupied squares.
-  Bitboard fromTo = SquareBB[from] ^ SquareBB[to];
+  Bitboard fromTo = square_bb(from) | square_bb(to);
   byTypeBB[ALL_PIECES] ^= fromTo;
   byTypeBB[type_of(pc)] ^= fromTo;
   byColorBB[color_of(pc)] ^= fromTo;

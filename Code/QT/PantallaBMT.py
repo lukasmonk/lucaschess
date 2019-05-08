@@ -633,7 +633,6 @@ class WEntrenarBMT(QTVarios.WDialogo):
 
         self.lbCondiciones.ponTexto(mrm.nombre + txt )
 
-
         self.tablero.ponPosicion(self.posicion)
 
         self.liBT[self.actualP].ponPlano(True)

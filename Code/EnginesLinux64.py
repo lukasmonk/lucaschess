@@ -40,8 +40,8 @@ def leeRivales():
     cm.ordenUCI("Ponder", "false")
     mas(cm)
 
-    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman", "9.02", "http://komodochess.com/")
-    cm.path = "Linux/komodo-9.02-linux-generic"
+    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman", "10", "http://komodochess.com/")
+    cm.path = "Linux/komodo-10-linux"
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "32")
     cm.elo = 3240
@@ -141,8 +141,8 @@ def leeRivales():
     cm.ordenUCI("Hash", "64")
     mas(cm)
 
-    cm = ConfigMotor("mccain", "Michael Byrne", "10.1", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "McCain-v10-1_x64_linux"
+    cm = ConfigMotor("mccain", "Michael Byrne", "X3", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McCain-X3_x64_linux"
     cm.elo = 3300
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
@@ -168,7 +168,7 @@ def dicMotoresFixedElo():
     for nm, desde, hasta in (
             ("cheng", 800, 2500),
             ("greko", 1600, 2400),
-            ("mccain", 1500, 2800),
+            ("mccain", 1300, 2800),
             ("discocheck", 1500, 2700),
     ):
         for elo in range(desde, hasta + 100, 100):

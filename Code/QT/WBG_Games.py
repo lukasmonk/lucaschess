@@ -103,8 +103,9 @@ class WGames(QtGui.QWidget):
         if liOrden:
             for clave, tipo in liOrden:
                 col = self.grid.buscaCabecera(clave)
-                col.antigua = col.cabecera
-                col.cabecera = col.antigua + ("+" if tipo == "ASC" else "-")
+                if col:
+                    col.antigua = col.cabecera
+                    col.cabecera = col.antigua + ("+" if tipo == "ASC" else "-")
             self.grid.refresh()
 
     def limpiaColumnas(self):

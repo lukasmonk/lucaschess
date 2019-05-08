@@ -807,7 +807,7 @@ class GestorOpeningLines(Gestor.Gestor):
 
         if pvSel != pvObj:
             fenM2 = jg.posicionBase.fenM2()
-            li = self.dicFENm2[fenM2]
+            li = self.dicFENm2.get(fenM2, [])
             if pvSel in li:
                 mens = _("You have selected a correct move, but this line uses another one.")
                 QTUtil2.mensajeTemporal(self.pantalla, mens, 2, posicion="tb", background="#C3D6E8")

@@ -3,23 +3,22 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
- 
+ Copyright (C) 2017-2019 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
+
  McCain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  McCain is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm> // For std::min
 #include <cassert>
 #include <cstring>   // For std::memset
 
@@ -71,14 +70,12 @@ namespace {
 
   bool is_KBPsK(const Position& pos, Color us) {
     return   pos.non_pawn_material(us) == BishopValueMg
-          && pos.count<BISHOP>(us) == 1
           && pos.count<PAWN  >(us) >= 1;
   }
 
   bool is_KQKRPs(const Position& pos, Color us) {
     return  !pos.count<PAWN>(us)
           && pos.non_pawn_material(us) == QueenValueMg
-          && pos.count<QUEEN>(us) == 1
           && pos.count<ROOK>(~us) == 1
           && pos.count<PAWN>(~us) >= 1;
   }
@@ -133,7 +130,7 @@ Entry* probe(const Position& pos) {
 
   Value npm_w = pos.non_pawn_material(WHITE);
   Value npm_b = pos.non_pawn_material(BLACK);
-  Value npm = std::max(EndgameLimit, std::min(npm_w + npm_b, MidgameLimit));
+  Value npm   = clamp(npm_w + npm_b, EndgameLimit, MidgameLimit);
 
   // Map total non-pawn material into [PHASE_ENDGAME, PHASE_MIDGAME]
   e->gamePhase = Phase(((npm - EndgameLimit) * PHASE_MIDGAME) / (MidgameLimit - EndgameLimit));
@@ -153,9 +150,9 @@ Entry* probe(const Position& pos) {
 
   // OK, we didn't find any special evaluation function for the current material
   // configuration. Is there a suitable specialized scaling function?
-  const EndgameBase<ScaleFactor>* sf;
+  const auto* sf = pos.this_thread()->endgames.probe<ScaleFactor>(key);
 
-  if ((sf = pos.this_thread()->endgames.probe<ScaleFactor>(key)) != nullptr)
+  if (sf)
   {
       e->scalingFunction[sf->strongSide] = sf; // Only strong color assigned
       return e;

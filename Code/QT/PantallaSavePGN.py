@@ -596,4 +596,3 @@ class FileSavePGN:
     def pb_close(self):
         self._pb.cerrar()
 
-

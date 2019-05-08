@@ -517,7 +517,7 @@ class GestorMicElo(Gestor.Gestor):
         dme = DicMicElos()
         dme.cambiaElo(self.datosMotor.clave, rnelo)
 
-        self.configuracion.ponMiceloActivo(nelo, self.siCompetitivo)
+        # self.configuracion.ponMiceloActivo(nelo, self.siCompetitivo)
 
         if not self.siCompetitivo:
             self.procesador.entrenamientos.rehaz()

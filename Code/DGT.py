@@ -61,10 +61,9 @@ def ponPosicion(partida):
 def quitarDispatch():
     VarGen.dgtDispatch = None
 
-
 # def log(cad):
 #     import traceback
-#
+
 #     with open("dgt.log", "ab") as q:
 #         q.write("\n[%s] %s\n" % (Util.hoy(), cad))
 #         for line in traceback.format_stack():
@@ -248,11 +247,10 @@ def _dgt2pv(dato):
 
 # Lo mismo, de otra forma
 
-
 # def xdgt2fen(xdgt):
 #     liD = xdgt.split(" ")
 #     dgt = liD[0]
-#
+
 #     li = []
 #     num = 0
 #     for c in dgt:
@@ -291,7 +289,6 @@ def _dgt2pv(dato):
 #         lir.append(act)
 #     liD[0] = "/".join(lir)
 #     return " ".join(liD)
-
 
 # def fen2xdgt(fen):
 #     li = fen.split(" ")

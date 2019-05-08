@@ -30,7 +30,7 @@ sip.setapi('QTime', 2)
 sip.setapi('QUrl', 2)
 sip.setapi('QVariant', 2)
 
-current_dir = os.path.dirname(sys.argv[0])
+current_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 if current_dir:
     os.chdir(current_dir)
 

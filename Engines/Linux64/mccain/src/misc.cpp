@@ -3,18 +3,18 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
- 
+ Copyright (C) 2017-2019 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
+
  McCain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  McCain is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -50,6 +50,7 @@ typedef bool(*fun3_t)(HANDLE, CONST GROUP_AFFINITY*, PGROUP_AFFINITY);
 
 #include "misc.h"
 #include "thread.h"
+#include "uci.h"
 
 using namespace std;
 
@@ -57,23 +58,26 @@ namespace {
 
 /// Version number. If Version is left empty, then compile date in the format
 /// DD-MM-YY and show in engine_info.
+#ifndef Maverick
+#define Stockfish
+#endif
+
+#if(defined Maverick && defined Add_Features)
+const string Version = "X3";
+#else
 #ifdef Maverick
-#ifdef Matefinder
-const string Version = "v10.1-MF";
-#else
-const string Version = "v10.1";
-#endif
-#else
-#ifdef Matefinder
-const string Version = "mf";
-#else
-const string Version = "";
+const string Version = "X3";
 #endif
 #endif
-	
 
+#if(defined Stockfish && defined Add_Features)
+	const string Version =git status "";
+#else
+#ifdef Stockfish
+	const string Version = "";
+#endif
+#endif
 
-	
 /// Our fancy logging facility. The trick here is to replace cin.rdbuf() and
 /// cout.rdbuf() with two Tie objects that tie cin and cout to a file stream. We
 /// can toggle the logging of std::cout and std:cin at runtime whilst preserving
@@ -133,36 +137,34 @@ public:
 } // namespace
 
 /// engine_info() returns the full name of the current McCain version. This
-/// will be either "McCain <Tag> DD-MM-YY" (where DD-MM-YY is the date when
+/// will be either "McCain <Tag> Mmm-dd-yy" (where Mmm-dd-yy is the date when
 /// the program was compiled) or "McCain <Version>", depending on whether
 /// Version is empty.
 
 const string engine_info(bool to_uci) {
 
-  const string months("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec");
-  string month, day, year;
-  stringstream ss, date(__DATE__); // From compiler, format is "Sep 21 2008"
+    const string months("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec");
+    string month, day, year;
+    stringstream ss, date(__DATE__); // From compiler, format is "Sep 21 2008"
 #ifdef Maverick
-  ss << "McCain " << Version << setfill('0');
+    ss << "McCain " << Version << setfill('0');
 #else
-  ss << "Stockfish " << Version << setfill('0');
+    ss << "Stockfish " << Version << setfill('0');
 #endif
-	
-  if (Version.empty())
-  {
-      date >> month >> day >> year;
-      ss << setw(2) << day << setw(2) << (1 + months.find(month) / 4) << year.substr(2);
-  }
+
+    if (Version.empty())
+    {
+        date >> month >> day >> year;
+		ss << setw(2) << (1 + months.find(month) / 4) <<setw(2) << day << year.substr(2) << "";
+    }
 #ifdef Maverick
-  ss //<< (Is64Bit ? " 64" : " 32")
-     //<< (HasPext ? " BMI2" : (HasPopCnt ? " POPCNT" : ""))
-	<< (to_uci  ? "\nid author ": " by ")
-	<< "M. Byrne and scores of others...";
+    ss	<< (to_uci  ? "\nid author ": " by ")
+            << "M. Byrne and scores of others...";
 #else
-	ss << (Is64Bit ? " 64" : " 32")
-	<< (HasPext ? " BMI2" : (HasPopCnt ? " POPCNT" : ""))
-	<< (to_uci  ? "\nid author ": " by ")
-     << "T. Romstad, M. Costalba, J. Kiiski, G. Linscott";
+//     ss << (Is64Bit ? " 64" : "") //most 95% of systems are 64 bit
+//     << (HasPext ? " BMI2" : (HasPopCnt ? " POPCNT" : "")) // may direupt some GUIs
+	   ss << (to_uci  ? "\nid author ": " by ")
+       << "T. Romstad, M. Costalba, J. Kiiski, G. Linscott";
 #endif
 
   return ss.str();
@@ -220,11 +222,11 @@ void prefetch(void*) {}
 
 void prefetch(void* addr) {
 
-#  if defined(__INTEL_COMPILER)
+//#  if defined(__INTEL_COMPILER)
    // This hack prevents prefetches from being optimized away by
    // Intel compiler. Both MSVC and gcc seem not be affected by this.
    __asm__ ("");
-#  endif
+//#  endif
 
 #  if defined(__INTEL_COMPILER) || defined(_MSC_VER)
   _mm_prefetch((char*)addr, _MM_HINT_T0);
@@ -282,7 +284,7 @@ int best_group(size_t idx) {
       return -1;
   }
 
-  while (ptr->Size > 0 && byteOffset + ptr->Size <= returnLength)
+  while (byteOffset < returnLength)
   {
       if (ptr->Relationship == RelationNumaNode)
           nodes++;
@@ -293,6 +295,7 @@ int best_group(size_t idx) {
           threads += (ptr->Processor.Flags == LTP_PC_SMT) ? 2 : 1;
       }
 
+      assert(ptr->Size);
       byteOffset += ptr->Size;
       ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((char*)ptr) + ptr->Size);
   }

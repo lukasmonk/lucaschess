@@ -96,8 +96,6 @@ def salvaFichero(pantalla, titulo, carpeta, filtro, siConfirmarSobreescritura=Tr
 class MensEspera(QtGui.QWidget):
     def __init__(self, parent, mensaje, siCancelar, siMuestraYa, opacity, posicion, fixedSize, titCancelar, background, pmImagen=None, puntos=12, conImagen=True):
 
-        assert parent is not None
-
         super(MensEspera, self).__init__(parent)
 
         self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)

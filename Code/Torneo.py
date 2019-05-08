@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 
 from Code import MotoresExternos
 from Code import Partida
@@ -293,6 +294,78 @@ class Game(object):
         return cabecera + "\n" + base + " %s\n\n" % rs
 
 
+class ListGames:
+    def __init__(self, torneo):
+        self.torneo = torneo
+        self.db = None
+
+    def test_db(self):
+        if self.db is None:
+            self.db = Util.DicSQL(self.torneo.fichero())
+
+    def close(self):
+        if self.db:
+            self.db.close()
+            self.db = None
+
+    def __getitem__(self, pos):
+        gm = Game()
+        self.test_db()
+        dc = self.db["GAME_%d" % pos]
+        if dc:
+            gm.leerDIC(dc)
+            return gm
+        return None
+
+    def __setitem__(self, pos, gm):
+        self.test_db()
+        self.db["GAME_%d" % pos] = gm.grabarDIC()
+
+    def __delitem__(self, pos):
+        self.test_db()
+        ng = self.db["NUM_GAMES"]
+        if ng:
+            del self.db["GAME_%d" % pos]
+            if pos < ng-1:
+                for x in range(pos, ng-1):
+                    self.db["GAME_%d" % pos] = self.db["GAME_%d" % (pos +1,)]
+            self.db["NUM_GAMES"] = ng -1
+
+    def __iter__(self):
+        self.test_db()
+        self.pos_iter = 0
+        return self
+
+    def next(self):
+        gm = self.__getitem__(self.pos_iter)
+        self.pos_iter += 1
+        if gm:
+            return gm
+        raise StopIteration
+
+    def __len__(self):
+        self.test_db()
+        ng = self.db["NUM_GAMES"]
+        if ng is None:
+            ng = 0
+        return ng
+
+    def reset(self):
+        self.test_db()
+        ng = self.db["NUM_GAMES"]
+        if ng:
+            for x in range(ng):
+                del self.db["GAME_%d" % x]
+        self.db["NUM_GAMES"] = 0
+
+    def append(self, gm):
+        ng = self.db["NUM_GAMES"]
+        if ng is None:
+            ng = 0
+        self.db["GAME_%d" % ng] = gm.grabarDIC()
+        self.db["NUM_GAMES"] = ng + 1
+
+
 class Torneo(object):
     def __init__(self, nombre=""):
         self._nombre = nombre
@@ -300,7 +373,7 @@ class Torneo(object):
         self._drawMinPly = 50
         self._drawRange = 10
         self._liEngines = []
-        self._liGames = []
+        self._liGames = ListGames(self)
         self._ultCarpetaEngines = ""
         self._ultMinutos = 15
         self._ultSegundosJugada = 0
@@ -310,6 +383,9 @@ class Torneo(object):
         self._norman = True
 
         self._liResult = None
+
+    def close(self):
+        self._liGames.close()
 
     def nombre(self, valor=None):
         if valor is not None:
@@ -413,44 +489,75 @@ class Torneo(object):
             li.append(me)
         self._liEngines = li
 
-        liDic = dic["GAMES"]
-        self.delGames()
-        self._liGames = []
-        for dic in liDic:
-            gm = Game()
-            gm.leerDIC(dic)
-            self._liGames.append(gm)
-
-    def leer(self):
-        dic = Util.recuperaVar(self.fichero())
+    def convert(self, fichero):
+        dic = Util.recuperaVar(fichero)
+        os.remove(fichero)
         if not dic:
             return
-        self.leerDIC(dic)
+        self._resign = dic["RESIGN"]
+        self._drawMinPly = dic["DRAWMINPLY"]
+        self._drawRange = dic["DRAWRANGE"]
+        self._ultCarpetaEngines = dic["ULTCARPETAENGINES"]
+        self._ultMinutos = dic["ULTMINUTOS"]
+        self._ultSegundosJugada = dic["ULTSEGUNDOSJUGADA"]
+        self._fen = dic.get("FEN", "")
+        self._norman = dic.get("NORMAN", False)
 
-    def grabarDIC(self):
-        dic = {
-               "RESIGN": self._resign,
-               "DRAWMINPLY": self._drawMinPly,
-               "DRAWRANGE": self._drawRange,
-               "ULTCARPETAENGINES": self._ultCarpetaEngines,
-               "ULTMINUTOS": self._ultMinutos,
-               "ULTSEGUNDOSJUGADA": self._ultSegundosJugada,
-               "FEN": self._fen,
-               "NORMAN": self._norman,
-               "BOOK": self._book,
-               "BOOKDEPTH": self._bookDepth,
-               "ENGINES": [en.grabarTXT() for en in self._liEngines],
-               "GAMES": [gm.grabarDIC() for gm in self._liGames]
-        }
+        self._book = dic.get("BOOK", "")
+        self._bookDepth = dic.get("BOOKDEPTH", "")
 
-        return dic
+        liTxt = dic["ENGINES"]
+        li = []
+        for txt in liTxt:
+            me = Engine()
+            me.leerTXT(txt)
+            li.append(me)
+        self._liEngines = li
+
+        if "GAMES" in dic:
+            liDic = dic["GAMES"]
+            self._liGames.reset()
+            for dc in liDic:
+                gm = Game()
+                gm.leerDIC(dc)
+                self._liGames.append(gm)
+        self.grabarDIC(fichero)
+
+    def leer(self):
+        fichero = self.fichero()
+        if fichero and Util.existeFichero(fichero):
+            si_sqlite = False
+            with open(fichero) as f:
+                if f.read(3) == "SQL":
+                    si_sqlite = True
+            if not si_sqlite:
+                self.convert(fichero)
+            if Util.existeFichero(fichero):
+                db = Util.DicSQL(fichero)
+                self.leerDIC(db)
+                db.close()
+
+    def grabarDIC(self, fichero):
+        self._liGames.test_db()
+        db = self._liGames.db
+        db["RESIGN"] = self._resign
+        db["DRAWMINPLY"] = self._drawMinPly
+        db["DRAWRANGE"] = self._drawRange
+        db["ULTCARPETAENGINES"] = self._ultCarpetaEngines
+        db["ULTMINUTOS"] = self._ultMinutos
+        db["ULTSEGUNDOSJUGADA"] = self._ultSegundosJugada
+        db["FEN"] = self._fen
+        db["NORMAN"] = self._norman
+        db["BOOK"] = self._book
+        db["BOOKDEPTH"] = self._bookDepth
+        db["ENGINES"] = [en.grabarTXT() for en in self._liEngines]
 
     def grabar(self):
-        Util.guardaVar(self.fichero(), self.grabarDIC())
+        self.grabarDIC(self.fichero())
 
-    def clone(self, liNumGames):
-        t = Torneo()
-        t.leerDIC(self.grabarDIC())
+    def clone(self, nom_tmp, liNumGames):
+        t = Torneo(nom_tmp)
+        shutil.copy(self.fichero(), t.fichero())
         liNumGames.sort(reverse=True)
         for num in liNumGames:
             del t._liGames[num]
@@ -501,24 +608,25 @@ class Torneo(object):
         return self._liGames
 
     def randomize(self):
-        num_games = len(self._liGames)
-        lista = range(num_games)
-        random.shuffle(lista)
-        liOtro = []
-        for dest in lista:
-            liOtro.append(self._liGames[dest])
-        self._liGames = liOtro
-        for n in range(1, num_games-1):
-            gm1 = self._liGames[n]
-            gm0 = self._liGames[n-1]
-            if gm0.hwhite() == gm1.hwhite() or gm0.hblack() == gm1.hblack():
-                for pos in range(n+1, num_games):
-                    gm2 = self._liGames[pos]
-                    if not(gm2.hwhite() == gm1.hwhite() or gm2.hblack() == gm1.hblack()
-                           or gm2.hwhite() == gm0.hwhite() or gm2.hblack() == gm0.hblack()):
-                        self._liGames[pos] = gm1
-                        self._liGames[n] = gm2
-                        break
+        return
+        # num_games = len(self._liGames)
+        # lista = range(num_games)
+        # random.shuffle(lista)
+        # liOtro = []
+        # for dest in lista:
+        #     liOtro.append(self._liGames[dest])
+        # self._liGames.reset()\
+        # for n in range(1, num_games-1):
+        #     gm1 = self._liGames[n]
+        #     gm0 = self._liGames[n-1]
+        #     if gm0.hwhite() == gm1.hwhite() or gm0.hblack() == gm1.hblack():
+        #         for pos in range(n+1, num_games):
+        #             gm2 = self._liGames[pos]
+        #             if not(gm2.hwhite() == gm1.hwhite() or gm2.hblack() == gm1.hblack()
+        #                    or gm2.hwhite() == gm0.hwhite() or gm2.hblack() == gm0.hblack()):
+        #                 self._liGames[pos] = gm1
+        #                 self._liGames[n] = gm2
+        #                 break
 
     def delGames(self, lista=None):
         for x in range(len(self._liGames)-1, -1, -1):
@@ -526,14 +634,15 @@ class Torneo(object):
                 del self._liGames[x]
 
     def reiniciar(self, nombre):
-        self.delGames()
-        self.delEngines()
+        self._liGames.close()
+        # self.delGames()
+        # self.delEngines()
         self.__init__(nombre)
         if self._nombre:
             self.leer()
 
     def reiniciarTmp(self, torneoBase, liFiltro):
-        self._liGames = []
+        self._liGames.reset()
         st = set(liFiltro)
         sten = set()
         for num, gm in enumerate(torneoBase._liGames):
@@ -558,7 +667,7 @@ class Torneo(object):
         gm.segundosJugada(segundosJugada)
         self._liGames.append(gm)
 
-    def rehacerResult(self):
+    def rehacerResult(self, st_filtro=None):
         liResult = []
         dbus = {}
         for pos, en in enumerate(self._liEngines):
@@ -571,7 +680,10 @@ class Torneo(object):
             dbus[en.huella()] = pos
             liResult.append(dic)
 
-        for n, gm in enumerate(self._liGames):
+        for n in range(len(self._liGames)):
+            if st_filtro and n not in st_filtro:
+                continue
+            gm = self._liGames[n]
             rs = gm.result()
             if rs is None:
                 continue
@@ -595,18 +707,3 @@ class Torneo(object):
                     liResult[pb]["PTS"] += 10
 
         return sorted(liResult, key=lambda x: x["PTS"], reverse=True)
-
-torneo = Torneo()
-torneoTmp = Torneo()
-
-
-def leer(nomtorneo):
-    if nomtorneo != torneo.nombre():
-        torneo.reiniciar(nomtorneo)
-    return torneo
-
-
-def leerTmp(liFiltro):
-    torneoTmp.reiniciarTmp(torneo, liFiltro)
-    return torneoTmp
-

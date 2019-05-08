@@ -59,7 +59,7 @@ class ControlPosicion:
                 if self.siExistePieza(rey, posRey) and self.siExistePieza(torre, posTorre):
                     enr += tipo
             self.enroques = enr if enr else "-"
-        if self.alPaso != "-":
+        if len(self.alPaso) == 2:
             r, c = self.alPaso[0], self.alPaso[1]
             if c in "36":
                 col = "4" if c == "3" else "5"
@@ -72,6 +72,8 @@ class ControlPosicion:
                     self.alPaso = "-"
             else:
                 self.alPaso = "-"
+        else:
+            self.alPaso = "-"
 
     def leeFen(self, fen):
         fen = fen.strip()

@@ -173,9 +173,9 @@ def leeRivales():
     cm.ordenUCI("Log", "false")
     mas(cm)
 
-    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman, Mark Lefler", "9.02 32bit", "http://komodochess.com/")
-    cm.path = "komodo-9.02-32bit.exe"
-    cm.path_64 = "komodo-9.02-64bit.exe", "9.02 64bit"
+    cm = ConfigMotor("komodo", "Don Dailey, Larry Kaufman, Mark Lefler", "10 32bit", "http://komodochess.com/")
+    cm.path = "komodo-10-32bit.exe"
+    cm.path_64 = "komodo-10-64bit.exe", "10 64bit"
     cm.ordenUCI("Ponder", "false")
     cm.ordenUCI("Hash", "64")
     cm.elo = 3240
@@ -217,9 +217,9 @@ def leeRivales():
     cm.ponMultiPV(20, 500)
     mas(cm)
 
-    cm = ConfigMotor("mccain", "Michael Byrne", "10.1 32bit", "https://github.com/MichaelB7/Stockfish/releases")
-    cm.path = "McCain-v10-1_x32_old.exe"
-    cm.path_64 = "McCain-v10-1_x64_bmi2.exe", "10.1 64bit bmi2"
+    cm = ConfigMotor("mccain", "Michael Byrne", "X3 32bit", "https://github.com/MichaelB7/Stockfish/releases")
+    cm.path = "McCain-X3_x32_old.exe"
+    cm.path_64 = "McCain-X3_x64_bmi2.exe", "X3 64bit bmi2"
     cm.elo = 3300
     cm.ordenUCI("Contempt", "0")
     cm.ordenUCI("Hash", "64")
@@ -348,7 +348,7 @@ def dicMotoresFixedElo():
     for nm, desde, hasta in (
             ("rodent", 600, 2600),
             ("amyan", 1000, 2400),
-            ("mccain", 1500, 2800),
+            ("mccain", 1300, 2800),
             ("rhetoric", 1300, 2600),
             ("cheng", 800, 2500),
             ("greko", 1600, 2400),

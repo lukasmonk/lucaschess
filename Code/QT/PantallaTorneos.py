@@ -34,11 +34,10 @@ class WResult(QTVarios.WDialogo):
         QTVarios.WDialogo.__init__(self, wParent, titulo, icono, extparam)
 
         # Datos
-        self.torneo = Torneo.torneo
-        self.torneoTmp = Torneo.torneoTmp
+        self.torneo = gestor.torneo
         self.gestor = gestor
         self.liResult = self.torneo.rehacerResult()
-        self.liResultTMP = self.torneoTmp.rehacerResult()
+        self.liResultTMP = self.torneo.rehacerResult(self.torneo.st_filtro)
 
         # Tabs
         self.tab = tab = Controles.Tab()
@@ -87,13 +86,13 @@ class WResult(QTVarios.WDialogo):
 
     def refresh(self):
         self.liResult = self.torneo.rehacerResult()
-        self.liResultTMP = self.torneoTmp.rehacerResult()
+        self.liResultTMP = self.torneo.rehacerResult(self.torneo.st_filtro)
 
         self.gridResult.refresh()
         self.gridResultTMP.refresh()
 
     def gridNumDatos(self, grid):
-        return self.torneoTmp.numEngines() if grid.id == "T" else self.torneo.numEngines()
+        return self.torneo.numEngines()
 
     def gridDato(self, grid, fila, oColumna):
         columna = oColumna.clave
@@ -131,6 +130,11 @@ class WResult(QTVarios.WDialogo):
 class WUnTorneo(QTVarios.WDialogo):
     def __init__(self, wParent, nombre_torneo):
 
+        um = QTUtil2.unMomento(wParent)
+        torneo = self.torneo = Torneo.Torneo(nombre_torneo)
+        torneo.leer()
+        um.final()
+
         titulo = _("Competition")
         icono = Iconos.Torneos()
         extparam = "untorneo_v1"
@@ -139,7 +143,6 @@ class WUnTorneo(QTVarios.WDialogo):
         self.configuracion = VarGen.configuracion
 
         # Datos
-        torneo = self.torneo = Torneo.leer(nombre_torneo)
 
         self.liEnActual = []
         self.xjugar = None
@@ -410,7 +413,9 @@ class WUnTorneo(QTVarios.WDialogo):
 
     def gridDatoResult(self, fila, columna):
         if self.liResult is None:
+            um = QTUtil2.unMomento(self)
             self.liResult = self.torneo.rehacerResult()
+            um.final()
         rs = self.liResult[fila]
         if columna == "NUMERO":
             return str(fila + 1)
@@ -481,11 +486,13 @@ class WUnTorneo(QTVarios.WDialogo):
 
     def terminar(self):
         if self.grabar():
+            self.torneo.close()
             self.guardarVideo()
             self.accept()
 
     def gmJugar(self):
         if self.grabar():
+            um = QTUtil2.unMomento(self)
             liGames = self.torneo.liGames()
             li = []
             sten = set()
@@ -498,13 +505,16 @@ class WUnTorneo(QTVarios.WDialogo):
                 engine = self.torneo.buscaHEngine(heng)
                 if not engine:
                     QTUtil2.mensError(self, _("Some engine is not valid"))
+                    um.final()
                     return
                 if not Util.existeFichero(engine.exe):
                     QTUtil2.mensError(self, "%s:\n\n%s\n\n%s" % (engine.alias, _("Path does not exist."), engine.exe))
+                    um.final()
                     return
-
+            um.final()
             if li:
                 self.xjugar = (self.torneo.nombre(), li)
+                self.torneo.close()
                 self.guardarVideo()
                 self.accept()
             else:
@@ -514,11 +524,15 @@ class WUnTorneo(QTVarios.WDialogo):
         return self.xjugar
 
     def cancelar(self):
+        self.torneo.close()
         self.guardarVideo()
         self.accept()
 
+    def closeEvent(self, QCloseEvent):
+        self.torneo.close()
+
     def grabar(self):
-        nombreInicial = self.torneo.nombre()
+        # nombreInicial = self.torneo.nombre()
         fichInicial = self.torneo.fichero()
         nombre = self.edNombre.texto()
         if not nombre:
@@ -534,16 +548,18 @@ class WUnTorneo(QTVarios.WDialogo):
         self.torneo.book(self.cbBooks.valor())
         self.torneo.bookDepth(self.sbBookDepth.valor())
 
-        try:
-            self.torneo.nombre(nombre)
-            self.torneo.grabar()
-            if fichInicial and self.torneo.fichero().lower() != fichInicial.lower():
-                os.remove(fichInicial)
-            return True
-        except:
-            self.torneo.nombre(nombreInicial)
-            QTUtil2.mensaje(self, _("Unable to save") + "\n" + _("The tournament name contains incorrect characters"))
-            return False
+        # try:
+        self.torneo.nombre(nombre)
+        um = QTUtil2.unMomento(self)
+        self.torneo.grabar()
+        um.final()
+        if fichInicial and self.torneo.fichero().lower() != fichInicial.lower():
+            os.remove(fichInicial)
+        return True
+        # except:
+        #     self.torneo.nombre(nombreInicial)
+        #     QTUtil2.mensaje(self, _("Unable to save") + "\n" + _("The tournament name contains incorrect characters"))
+        #     return False
 
     def enNuevo(self):
         # Pedimos el ejecutable
@@ -856,7 +872,18 @@ class WTorneos(QTVarios.WDialogo):
             self.trabajar(nombre_torneo)
 
     def crear(self):
-        self.trabajar("")
+        liGen = [(None, None)]
+        liGen.append((_("Name") + ":", ""))
+        resultado = FormLayout.fedit(liGen, title= _("Tournaments between engines"), parent=self, icon=Iconos.Torneos())
+        if resultado:
+            accion, liGen = resultado
+            nombre = Util.validNomFichero(liGen[0].strip())
+            if nombre:
+                path = os.path.join(self.configuracion.carpeta, nombre + ".mvm")
+                if os.path.isfile(path):
+                    QTUtil2.mensError(self, _("The file %s already exist") % nombre)
+                else:
+                    self.trabajar(nombre)
 
     def trabajar(self, nombre_torneo):
         w = WUnTorneo(self, nombre_torneo)

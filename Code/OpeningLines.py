@@ -9,6 +9,7 @@ import LCEngine4 as LCEngine
 
 from Code import Util
 from Code import Partida
+from Code import ControlPosicion
 from Code import PGNreader
 from Code import DBgames
 from Code import AperturasStd
@@ -91,6 +92,7 @@ class ListaOpenings:
                     "title": op.title,
                     "lines": len(op),
                     "withtrainings": op.withTrainings(),
+                    "withtrainings_engines": op.withTrainingsEngines(),
                 }
                 li.append(dicline)
                 op.close()
@@ -290,6 +292,8 @@ class Opening:
 
         lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
 
+        cp = ControlPosicion.ControlPosicion()
+
         if maxmoves:
             for pos, lipv in enumerate(lilipv):
                 if len(lipv) > maxmoves:
@@ -333,7 +337,8 @@ class Opening:
             LCEngine.setFenInicial()
             for pv in lipv:
                 fen = LCEngine.getFen()
-                fenM2 = LCEngine.fen2fenM2(fen)
+                cp.leeFen(fen)
+                fenM2 = cp.fenM2()
                 if fenM2 not in dicFENm2:
                     dicFENm2[fenM2] = set()
                 dicFENm2[fenM2].add(pv)
@@ -366,7 +371,8 @@ class Opening:
                 LCEngine.setFenInicial()
                 for pv in game["LIPV"]:
                     fen = LCEngine.getFen()
-                    fenM2 = LCEngine.fen2fenM2(fen)
+                    cp.leeFen(fen)
+                    fenM2 = cp.fenM2()
                     key = "%s|%s" % (fenM2, pv)
                     if key in stBorrar:
                         liBorrar.append(n)
@@ -400,12 +406,15 @@ class Opening:
     def recalcFenM2(self):
         lilipv = [LCEngine.xpv2pv(xpv).split(" ") for xpv in self.li_xpv]
 
+        cp = ControlPosicion.ControlPosicion()
+
         dicFENm2 = {}
         for lipv in lilipv:
             LCEngine.setFenInicial()
             for pv in lipv:
                 fen = LCEngine.getFen()
-                fenM2 = LCEngine.fen2fenM2(fen)
+                cp.leeFen(fen)
+                fenM2 = cp.fenM2() # Tiene en cuenta unpassant no validos
                 if fenM2 not in dicFENm2:
                     dicFENm2[fenM2] = set()
                 dicFENm2[fenM2].add(pv)
@@ -470,6 +479,9 @@ class Opening:
 
     def withTrainings(self):
         return "TRAINING" in self.db_config
+
+    def withTrainingsEngines(self):
+        return "TRAINING_ENGINES" in self.db_config
 
     def updateTraining(self, procesador):
         reg = self.training()

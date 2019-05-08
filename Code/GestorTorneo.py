@@ -16,11 +16,11 @@ from Code.Constantes import *
 
 class GestorTorneo(Gestor.Gestor):
     def inicio(self, nombre_torneo, liNumGames):
-
         self.tipoJuego = kJugMvM
 
-        self.torneo = Torneo.leer(nombre_torneo)
-        Torneo.leerTmp(liNumGames)
+        self.torneo = Torneo.Torneo(nombre_torneo)
+        self.torneo.leer()
+        self.torneo.st_filtro = set(liNumGames)
         self.pantalla.ponActivarTutor(False)
         self.ponPiezasAbajo(True)
         self.mostrarIndicador(True)
@@ -36,7 +36,7 @@ class GestorTorneo(Gestor.Gestor):
         numGames = len(liNumGames)
         for ng in range(numGames):
             gm = self.torneo._liGames[liNumGames[ng]]
-            self.siguienteJuego(gm, ng + 1, numGames)
+            self.siguienteJuego(gm, liNumGames[ng], numGames)
             self.procesador.pararMotores()
             if self.siTerminar:
                 break
@@ -52,8 +52,11 @@ class GestorTorneo(Gestor.Gestor):
         self.siPausa = False
 
         self.gm = gm
+        self.ngame = ngame
+
         self.maxSegundos = self.gm.minutos() * 60.0
         self.segundosJugada = self.gm.segundosJugada()
+
 
         rival = {
             True: self.torneo.buscaHEngine(self.gm.hwhite()),
@@ -103,7 +106,7 @@ class GestorTorneo(Gestor.Gestor):
         bl = self.xmotor[True].nombre
         ng = self.xmotor[False].nombre
         self.pantalla.activaJuego(True, True, siAyudas=False)
-        self.ponRotulo1("<center><b>%s %d/%d</b></center>" % (_("Game"), ngame, numGames))
+        self.ponRotulo1("<center><b>%s %d/%d</b></center>" % (_("Game"), ngame+1, numGames))
         self.ponRotulo2(None)
         self.quitaAyudas()
         self.pantalla.ponDatosReloj(bl, tpBL, ng, tpNG)
@@ -211,6 +214,7 @@ class GestorTorneo(Gestor.Gestor):
         elif adjudication:
             termination = "adjudication"
         self.gm.termination(termination)
+        self.torneo._liGames[self.ngame] = self.gm
         self.torneo.grabar()
 
         return True

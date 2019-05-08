@@ -1622,7 +1622,6 @@ class Tablero(QtGui.QGraphicsView):
         self.liFlechas.append(flecha)
         flecha.show()
 
-
     def creaFlechaTutor(self, desdeA1h8, hastaA1h8, factor):
         bf = copy.deepcopy(self.confTablero.fTransicion())
         bf.a1h8 = desdeA1h8 + hastaA1h8

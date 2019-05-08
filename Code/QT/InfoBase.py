@@ -57,7 +57,7 @@ class ThanksTo:
             ["Discocheck 5.2.1", "Lucas Braesch", "https://github.com/lucasart"],
             ["Gaviota 1.0", "Miguel A. Ballicora", "https://sites.google.com/site/gaviotachessengine"],
             ["Toga deepTogaNPS 1.9.6", "WHMoweryJr,Thomas Gaksch,Fabien Letouzey", "http://www.computerchess.info/tdbb/phpBB3/viewtopic.php?f=9&t=357"],
-            ["Komodo 9.02", "Don Dailey, Larry Kaufman, Mark Lefler", "http://komodochess.com/"],
+            ["Komodo 10", "Don Dailey, Larry Kaufman, Mark Lefler", "http://komodochess.com/"],
             ["Rybka 2.3.2a 32-bit", "Vasik Rajlich", "http://rybkachess.com/"],
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
             ["Texel 1.07", "Peter Österlund", "http://hem.bredband.net/petero2b/javachess/index.html#texel"],

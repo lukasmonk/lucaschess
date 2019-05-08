@@ -292,7 +292,7 @@ class WOpeningLines(QTVarios.WDialogo):
         if fila >= 0:
             op = self.listaOpenings[fila]
             ok_ssp = op.get("withtrainings", False)
-            ok_eng = op.get("withtrainings_engine", False)
+            ok_eng = op.get("withtrainings_engines", False)
 
         if ok_ssp or ok_eng:
             self.wtrain.setVisible(True)
@@ -302,6 +302,7 @@ class WOpeningLines(QTVarios.WDialogo):
             self.tbtrain.setAccionVisible(self.tr_engines, ok_eng)
         else:
             self.wtrain.setVisible(False)
+
     def closeEvent(self, event):  # Cierre con X
         self.guardarVideo()
 

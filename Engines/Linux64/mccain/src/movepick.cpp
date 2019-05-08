@@ -3,18 +3,18 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
- 
+ Copyright (C) 2017-2019 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
+
  McCain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  McCain is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -31,9 +31,6 @@ namespace {
     PROBCUT_TT, PROBCUT_INIT, PROBCUT,
     QSEARCH_TT, QCAPTURE_INIT, QCAPTURE, QCHECK_INIT, QCHECK
   };
-
-  // Helper filter used with select()
-  const auto Any = [](){ return true; };
 
   // partial_insertion_sort() sorts moves in descending order up to and including
   // a given limit. The order of moves smaller than the limit is left unspecified.
@@ -80,9 +77,9 @@ MovePicker::MovePicker(const Position& p, Move ttm, Depth d, const ButterflyHist
   assert(d <= DEPTH_ZERO);
 
   stage = pos.checkers() ? EVASION_TT : QSEARCH_TT;
-  ttMove =    ttm
-           && pos.pseudo_legal(ttm)
-           && (depth > DEPTH_QS_RECAPTURES || to_sq(ttm) == recaptureSquare) ? ttm : MOVE_NONE;
+  ttMove =   ttm
+          && (depth > DEPTH_QS_RECAPTURES || to_sq(ttm) == recaptureSquare)
+          && pos.pseudo_legal(ttm) ? ttm : MOVE_NONE;
   stage += (ttMove == MOVE_NONE);
 }
 
@@ -95,8 +92,8 @@ MovePicker::MovePicker(const Position& p, Move ttm, Value th, const CapturePiece
 
   stage = PROBCUT_TT;
   ttMove =   ttm
-          && pos.pseudo_legal(ttm)
           && pos.capture(ttm)
+          && pos.pseudo_legal(ttm)
           && pos.see_ge(ttm, threshold) ? ttm : MOVE_NONE;
   stage += (ttMove == MOVE_NONE);
 }
@@ -118,7 +115,8 @@ void MovePicker::score() {
           m.value =  (*mainHistory)[pos.side_to_move()][from_to(m)]
                    + (*continuationHistory[0])[pos.moved_piece(m)][to_sq(m)]
                    + (*continuationHistory[1])[pos.moved_piece(m)][to_sq(m)]
-                   + (*continuationHistory[3])[pos.moved_piece(m)][to_sq(m)];
+                   + (*continuationHistory[3])[pos.moved_piece(m)][to_sq(m)]
+                   + (*continuationHistory[5])[pos.moved_piece(m)][to_sq(m)] / 2;
 
       else // Type == EVASIONS
       {
@@ -142,12 +140,12 @@ Move MovePicker::select(Pred filter) {
       if (T == Best)
           std::swap(*cur, *std::max_element(cur, endMoves));
 
-      move = *cur++;
+      if (*cur != ttMove && filter())
+          return *cur++;
 
-      if (move != ttMove && filter())
-          return move;
+      cur++;
   }
-  return move = MOVE_NONE;
+  return MOVE_NONE;
 }
 
 /// MovePicker::next_move() is the most important method of the MovePicker class. It
@@ -177,10 +175,10 @@ top:
 
   case GOOD_CAPTURE:
       if (select<Best>([&](){
-                       return pos.see_ge(move, Value(-55 * (cur-1)->value / 1024)) ?
+                       return pos.see_ge(*cur, Value(-55 * cur->value / 1024)) ?
                               // Move losing capture to endBadCaptures to be tried later
-                              true : (*endBadCaptures++ = move, false); }))
-          return move;
+                              true : (*endBadCaptures++ = *cur, false); }))
+          return *(cur - 1);
 
       // Prepare the pointers to loop over the refutations array
       cur = std::begin(refutations);
@@ -195,10 +193,10 @@ top:
       /* fallthrough */
 
   case REFUTATION:
-      if (select<Next>([&](){ return    move != MOVE_NONE
-                                    && !pos.capture(move)
-                                    &&  pos.pseudo_legal(move); }))
-          return move;
+      if (select<Next>([&](){ return    *cur != MOVE_NONE
+                                    && !pos.capture(*cur)
+                                    &&  pos.pseudo_legal(*cur); }))
+          return *(cur - 1);
       ++stage;
       /* fallthrough */
 
@@ -213,10 +211,10 @@ top:
 
   case QUIET:
       if (   !skipQuiets
-          && select<Next>([&](){return   move != refutations[0]
-                                      && move != refutations[1]
-                                      && move != refutations[2];}))
-          return move;
+          && select<Next>([&](){return   *cur != refutations[0].move
+                                      && *cur != refutations[1].move
+                                      && *cur != refutations[2].move;}))
+          return *(cur - 1);
 
       // Prepare the pointers to loop over the bad captures
       cur = moves;
@@ -226,7 +224,7 @@ top:
       /* fallthrough */
 
   case BAD_CAPTURE:
-      return select<Next>(Any);
+      return select<Next>([](){ return true; });
 
   case EVASION_INIT:
       cur = moves;
@@ -237,15 +235,15 @@ top:
       /* fallthrough */
 
   case EVASION:
-      return select<Best>(Any);
+      return select<Best>([](){ return true; });
 
   case PROBCUT:
-      return select<Best>([&](){ return pos.see_ge(move, threshold); });
+      return select<Best>([&](){ return pos.see_ge(*cur, threshold); });
 
   case QCAPTURE:
       if (select<Best>([&](){ return   depth > DEPTH_QS_RECAPTURES
-                                    || to_sq(move) == recaptureSquare; }))
-          return move;
+                                    || to_sq(*cur) == recaptureSquare; }))
+          return *(cur - 1);
 
       // If we did not find any move and we do not try checks, we have finished
       if (depth != DEPTH_QS_CHECKS)
@@ -262,7 +260,7 @@ top:
       /* fallthrough */
 
   case QCHECK:
-      return select<Next>(Any);
+      return select<Next>([](){ return true; });
   }
 
   assert(false);

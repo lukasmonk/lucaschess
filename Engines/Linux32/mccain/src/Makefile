@@ -24,61 +24,82 @@
 ### ==========================================================================
 
 ### Executable name
-### McCain bench nodes 3944828
-### McCain-mf bench nodes 5056826
-### stockfish bench nodes 3314347 from this commnit https://github.com/official-stockfish/Stockfish/tree/081af9080542a0d076a5482da37103a96ee15f64
-### stockfish-mf bench nodes 4636790
+### McCain bench nodes ----> 4725155 > based on commits up to 4/23/2019
+### stockfish bench nodes -> 3402947 > based on commits up to 4/22/2019
 
 ####  Always leave the three lines below as is (any subsequent defines will override)
-VERSION=
+DATE=$(shell date +"%m%d%y")
 FEATURE1=
-FEATURE2=
-### Uncomment the line below for McCain
-VERSION=maverick
-### Uncomment the lines below for additional features and to activate matefinder code
-### for McCain or stockfish
-### features include : Cerebellum book functionality, play by Elo (UCI limit strength), keyboard shortcuts and a few other items
-FEATURE1=add_features
-### FEATURE2=matefinder
+
+### TEST versions, enter yes and labels below to build named test exe's
+TEST = no
+TESTv1 =
+TESTv2 =
+
+### Release versions , enter yes and release version below foor releases
+RELEASE = yes
+RELVERSION =X3
+
+### Uncomment the line below for McCain, comment out for Stockfish
+	VERSION=maverick
+
+### Uncomment for use with Raspberry Pi -  a slower NPS UCI option setting used in Play
+### by Elo and personalities
+###	RASPBERRY=Pi
+
+### Features include : Cerebellum book functionality, play by Elo (UCI limit strength), keyboard shortcuts and a few other items. Comment out to eliminate
+	FEATURE1=add_features
+
 ### should be no reason to change anything below here!
+### Only McCain with feature 1 will be publicly distributed at this time
+
+ifeq ($(FEATURE1),add_features)
+	CXXFLAGS += -DAdd_Features
+	FILES = with_c_book
+	SUFFIX1 =
+endif
+
+###  to reduce NPS setting using "setoption" command, to enable more similiar play when
+###  playimg at reduced strength on hardware
+ifeq ($(RASPBERRY),Pi)
+CXXFLAGS += -DPi
+endif
+
 ifeq ($(VERSION),maverick)
-CXXFLAGS += -DMaverick
-SUFFIX=
-ifeq ($(FEATURE1),add_features)
-CXXFLAGS += -DAdd_Features
-FILES = with_c_book
+	CXXFLAGS += -DMaverick
+	ifeq ($(RELEASE),no)
+		ifeq ($(TEST),no)
+			ifeq ($(COMP),mingw)
+				EXE = McCain-dev-$(DATE).exe
+			else
+				EXE = McCain-dev-$(DATE)
+			endif
+		endif
+		ifeq ($(TEST),yes)
+			EXE = McCain-$(TESTv1)$(TESTv2)
+		endif
+	endif
+	ifeq ($(RELEASE),yes)
+		ifeq ($(COMP),mingw)
+			EXE = McCain-$(RELVERSION).exe
+		else
+			EXE = McCain-$(RELVERSION)
+		endif
+	endif
 endif
-ifeq ($(FEATURE2),matefinder)
-CXXFLAGS += -DMatefinder
-SUFFIX = -mf
-endif
-ifeq ($(COMP),mingw)
-EXE = McCain-v10-1$(SUFFIX).exe
-else
-EXE = McCain-v10-1$(SUFFIX)
-endif
-else
-### Note: Comment below is for for building cur-dev stockfish with the features noted.
-### McCain always include those features
-### Uncomment out the two lines below for additional features for stockfish, such as play by ELO ,
-### cerebellum book, tactical mode, variety play and additional GUI options.
-ifeq ($(FEATURE1),add_features)
-CXXFLAGS += -DAdd_Features
-FILES = with_c_book
-endif
-ifeq ($(FEATURE2),matefinder)
-CXXFLAGS += -DMatefinder
-SUFFIX = -mf
-endif
-ifeq ($(COMP),mingw)
-EXE = stockfish$(SUFFIX).exe
-else
-EXE = stockfish$(SUFFIX)
-endif
+
+### Note:  For building cur-dev stockfish with the features added.
+ifneq ($(VERSION),maverick)
+	ifeq ($(COMP),mingw)
+		EXE = stockfish-$(DATE).exe
+	else
+		EXE = stockfish-$(DATE)
+	endif
 endif
 
 ### Installation dir definitions
-PREFIX = /usr/local
+PREFIX = /opt/local
+#PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
 ### Built-in benchmark for pgo-builds
@@ -87,13 +108,13 @@ PGOBENCH2 = ./$(EXE) bench 16 2 8
 
 ### Object files
 ifeq ($(FILES),with_c_book)
-OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
-material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
-search.o thread.o timeman.o tt.o uci.o ucioption.o polybook.o syzygy/tbprobe.o
-else
-OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
+	OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
-	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o
+	search.o thread.o timeman.o tt.o uci.o ucioption.o polybook.o syzygy/tbprobe.o
+else
+	OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
+		material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
+		search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o
 endif
 ### Establish the operating system name
 KERNEL = $(shell uname -s)
@@ -305,8 +326,8 @@ endif
 endif
 
 ifeq ($(KERNEL),Darwin)
-	CXXFLAGS += -arch $(arch) -mmacosx-version-min=10.9
-	LDFLAGS += -arch $(arch) -mmacosx-version-min=10.9
+	CXXFLAGS += -arch $(arch) -mmacosx-version-min=10.14
+	LDFLAGS += -arch $(arch) -mmacosx-version-min=10.14
 endif
 
 ### Travis CI script uses COMPILER to overwrite CXX
@@ -334,7 +355,7 @@ endif
 ifeq ($(debug),no)
 	CXXFLAGS += -DNDEBUG
 else
-	CXXFLAGS += -g
+	CXXFLAGS += -g -Wall -Wextra
 endif
 
 ### 3.2.2 Debugging with undefined behavior sanitizers
@@ -404,7 +425,7 @@ ifeq ($(debug), no)
 	endif
 
 	ifeq ($(comp),gcc)
-		CXXFLAGS += -flto
+		CXXFLAGS += -flto 
 	ifeq ($(gccmasqueraded),)
 		LDFLAGS += $(CXXFLAGS) -flto=jobserver
 	else
@@ -441,7 +462,7 @@ help:
 	@echo ""
 	@echo "To compile stockfish, uncomment this line in the makefile: "
 	@echo "'### VERSION=maverick' by remvoing the 3 #(pound signs)"
-	@echo "then type: 'make <target> ARCH=arch [COMP=compiler] [COMPCXX=cxx]'"
+	@echo "then type: 'make <target> ARCH=<arch> [COMP=compiler] [COMPCXX=cxx]'"
 	@echo ""
 	@echo "Supported targets:"
 	@echo ""
@@ -489,6 +510,9 @@ help:
 
 build: config-sanity
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) all
+	strip $(EXE)
+	cp $(EXE) /Users/michaelbyrne/cluster.mfb
+	rm -f *.o syzygy/*.o
 
 profile-build: config-sanity objclean profileclean
 	@echo ""
@@ -507,6 +531,8 @@ profile-build: config-sanity objclean profileclean
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) profileclean
 	strip $(EXE)
 	cp $(EXE) /Users/michaelbyrne/cluster.mfb
+	rm -f *.o syzygy/*.o llvm-profdata
+#	touch * syzygy/*
 #	cp $(EXE) /opt/picochess/engines/armv7l
 
 strip:
@@ -563,7 +589,7 @@ config-sanity:
 	@echo "Testing config sanity. If this fails, try 'make help' ..."
 	@echo ""
 	@test "$(debug)" = "yes" || test "$(debug)" = "no"
-	@test "$(sanitize)" = "undefined" || test "$(sanitize)" = "thread" || test "$(sanitize)" = "no"
+	@test "$(sanitize)" = "undefined" || test "$(sanitize)" = "thread" || test "$(sanitize)" = "address" || test "$(sanitize)" = "no"
 	@test "$(optimize)" = "yes" || test "$(optimize)" = "no"
 	@test "$(arch)" = "any" || test "$(arch)" = "x86_64" || test "$(arch)" = "i386" || \
 	 test "$(arch)" = "ppc64" || test "$(arch)" = "ppc" || test "$(arch)" = "armv7"
@@ -584,7 +610,7 @@ clang-profile-make:
 	all
 
 clang-profile-use:
-	llvm-profdata merge -output=stockfish.profdata *.profraw
+	llvm-profdata-mp-7.0 merge -output=stockfish.profdata *.profraw
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) \
 	EXTRACXXFLAGS='-fprofile-instr-use=stockfish.profdata -Wno-profile-instr-out-of-date' \
 	EXTRALDFLAGS='-fprofile-use ' \
@@ -598,7 +624,7 @@ gcc-profile-make:
 
 gcc-profile-use:
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) \
-	EXTRACXXFLAGS='-fprofile-use -fprofile-correction -fno-peel-loops -fno-tracer' \
+	EXTRACXXFLAGS='-fprofile-use -fprofile-correction -fno-peel-loops -fno-tracer -Os' \
 	EXTRALDFLAGS='-lgcov' \
 	all
 
@@ -617,3 +643,4 @@ icc-profile-use:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS:.o=.cpp) > $@ 2> /dev/null
 
 -include .depend
+

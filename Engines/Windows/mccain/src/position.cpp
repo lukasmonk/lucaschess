@@ -3,23 +3,22 @@
  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad (Stockfish Authors)
  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (Stockfish Authors)
- Copyright (C) 2017-2018 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
- 
+ Copyright (C) 2017-2019 Michael Byrne, Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad (McCain Authors)
+
  McCain is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  McCain is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef> // For offsetof()
 #include <cstring> // For std::memset, std::memcmp
@@ -184,7 +183,7 @@ void Position::init() {
                   {
                       std::swap(cuckoo[i], key);
                       std::swap(cuckooMove[i], move);
-                      if (move == 0)   // Arrived at empty slot ?
+                      if (move == MOVE_NONE) // Arrived at empty slot?
                           break;
                       i = (i == H1(key)) ? H2(key) : H1(key); // Push victim to alternative slot
                   }
@@ -342,13 +341,8 @@ void Position::set_castling_right(Color c, Square rfrom) {
   Square kto = relative_square(c, cs == KING_SIDE ? SQ_G1 : SQ_C1);
   Square rto = relative_square(c, cs == KING_SIDE ? SQ_F1 : SQ_D1);
 
-  for (Square s = std::min(rfrom, rto); s <= std::max(rfrom, rto); ++s)
-      if (s != kfrom && s != rfrom)
-          castlingPath[cr] |= s;
-
-  for (Square s = std::min(kfrom, kto); s <= std::max(kfrom, kto); ++s)
-      if (s != kfrom && s != rfrom)
-          castlingPath[cr] |= s;
+  castlingPath[cr] = (between_bb(rfrom, rto) | between_bb(kfrom, kto) | rto | kto)
+                   & ~(square_bb(kfrom) | rfrom);
 }
 
 
@@ -466,18 +460,18 @@ const string Position::fen() const {
   ss << (sideToMove == WHITE ? " w " : " b ");
 
   if (can_castle(WHITE_OO))
-      ss << (chess960 ? char('A' + file_of(castling_rook_square(WHITE |  KING_SIDE))) : 'K');
+      ss << (chess960 ? char('A' + file_of(castling_rook_square(WHITE_OO ))) : 'K');
 
   if (can_castle(WHITE_OOO))
-      ss << (chess960 ? char('A' + file_of(castling_rook_square(WHITE | QUEEN_SIDE))) : 'Q');
+      ss << (chess960 ? char('A' + file_of(castling_rook_square(WHITE_OOO))) : 'Q');
 
   if (can_castle(BLACK_OO))
-      ss << (chess960 ? char('a' + file_of(castling_rook_square(BLACK |  KING_SIDE))) : 'k');
+      ss << (chess960 ? char('a' + file_of(castling_rook_square(BLACK_OO ))) : 'k');
 
   if (can_castle(BLACK_OOO))
-      ss << (chess960 ? char('a' + file_of(castling_rook_square(BLACK | QUEEN_SIDE))) : 'q');
+      ss << (chess960 ? char('a' + file_of(castling_rook_square(BLACK_OOO))) : 'q');
 
-  if (!can_castle(WHITE) && !can_castle(BLACK))
+  if (!can_castle(ANY_CASTLING))
       ss << '-';
 
   ss << (ep_square() == SQ_NONE ? " - " : " " + UCI::square(ep_square()) + " ")
@@ -499,14 +493,15 @@ Bitboard Position::slider_blockers(Bitboard sliders, Square s, Bitboard& pinners
   Bitboard blockers = 0;
   pinners = 0;
 
-  // Snipers are sliders that attack 's' when a piece is removed
+  // Snipers are sliders that attack 's' when a piece and other snipers are removed
   Bitboard snipers = (  (PseudoAttacks[  ROOK][s] & pieces(QUEEN, ROOK))
                       | (PseudoAttacks[BISHOP][s] & pieces(QUEEN, BISHOP))) & sliders;
+  Bitboard occupancy = pieces() & ~snipers;
 
   while (snipers)
   {
     Square sniperSq = pop_lsb(&snipers);
-    Bitboard b = between_bb(s, sniperSq) & pieces();
+    Bitboard b = between_bb(s, sniperSq) & occupancy;
 
     if (b && !more_than_one(b))
     {
@@ -541,6 +536,7 @@ bool Position::legal(Move m) const {
 
   Color us = sideToMove;
   Square from = from_sq(m);
+  Square to = to_sq(m);
 
   assert(color_of(moved_piece(m)) == us);
   assert(piece_on(square<KING>(us)) == make_piece(us, KING));
@@ -551,7 +547,6 @@ bool Position::legal(Move m) const {
   if (type_of(m) == ENPASSANT)
   {
       Square ksq = square<KING>(us);
-      Square to = to_sq(m);
       Square capsq = to - pawn_push(us);
       Bitboard occupied = (pieces() ^ from ^ capsq) | to;
 
@@ -564,16 +559,35 @@ bool Position::legal(Move m) const {
             && !(attacks_bb<BISHOP>(ksq, occupied) & pieces(~us, QUEEN, BISHOP));
   }
 
-  // If the moving piece is a king, check whether the destination
-  // square is attacked by the opponent. Castling moves are checked
-  // for legality during move generation.
+  // Castling moves generation does not check if the castling path is clear of
+  // enemy attacks, it is delayed at a later time: now!
+  if (type_of(m) == CASTLING)
+  {
+      // After castling, the rook and king final positions are the same in
+      // Chess960 as they would be in standard chess.
+      to = relative_square(us, to > from ? SQ_G1 : SQ_C1);
+      Direction step = to > from ? WEST : EAST;
+
+      for (Square s = to; s != from; s += step)
+          if (attackers_to(s) & pieces(~us))
+              return false;
+
+      // In case of Chess960, verify that when moving the castling rook we do
+      // not discover some hidden checker.
+      // For instance an enemy queen in SQ_A1 when castling rook is in SQ_B1.
+      return   !chess960
+            || !(attacks_bb<ROOK>(to, pieces() ^ to_sq(m)) & pieces(~us, ROOK, QUEEN));
+  }
+
+  // If the moving piece is a king, check whether the destination square is
+  // attacked by the opponent.
   if (type_of(piece_on(from)) == KING)
-      return type_of(m) == CASTLING || !(attackers_to(to_sq(m)) & pieces(~us));
+      return !(attackers_to(to) & pieces(~us));
 
   // A non-king move is legal if and only if it is not pinned or it
   // is moving along the ray towards or away from the king.
   return   !(blockers_for_king(us) & from)
-        ||  aligned(from, to_sq(m), square<KING>(us));
+        ||  aligned(from, to, square<KING>(us));
 }
 
 
@@ -610,7 +624,7 @@ bool Position::pseudo_legal(const Move m) const {
   {
       // We have already handled promotion moves, so destination
       // cannot be on the 8th/1st rank.
-      if (rank_of(to) == relative_rank(us, RANK_8))
+      if ((Rank8BB | Rank1BB) & to)
           return false;
 
       if (   !(attacks_from<PAWN>(from, us) & pieces(~us) & to) // Not a capture
@@ -705,71 +719,38 @@ bool Position::gives_check(Move m) const {
 }
 #ifdef Maverick //Gunther Demetz zugzwangSolver
 void Position::removePawn(Square s, StateInfo& newSt) {
-	assert(&newSt != st);
-	assert(type_of(piece_on(s)) == PAWN);
+    assert(&newSt != st);
+    assert(type_of(piece_on(s)) == PAWN);
 
-	std::memcpy(&newSt, st, offsetof(StateInfo, key));
-	newSt.previous = st;
-	st = &newSt;
+    std::memcpy(&newSt, st, offsetof(StateInfo, key));
+    newSt.previous = st;
+    st = &newSt;
 
-	Key k = st->previous->key;
-	Piece pc = piece_on(s);
-	st->pawnKey ^= Zobrist::psq[pc][s];
+    Key k = st->previous->key;
+    Piece pc = piece_on(s);
+    st->pawnKey ^= Zobrist::psq[pc][s];
 
-	k ^= Zobrist::psq[pc][s];
+    k ^= Zobrist::psq[pc][s];
 
-	remove_piece(pc, s);
+    remove_piece(pc, s);
 
-	st->epSquare= SQ_NONE;
-	board[s] = NO_PIECE;
-	st->checkersBB = attackers_to(square<KING>(sideToMove)) & pieces(~sideToMove);
-	set_check_info(st);
+    st->epSquare= SQ_NONE;
+    board[s] = NO_PIECE;
+    st->checkersBB = attackers_to(square<KING>(sideToMove)) & pieces(~sideToMove);
+    set_check_info(st);
 
-	st->materialKey ^= Zobrist::psq[pc][pieceCount[pc]];
-	st->capturedPiece = NO_PIECE;
-	st->key = k;
+    st->materialKey ^= Zobrist::psq[pc][pieceCount[pc]];
+    st->capturedPiece = NO_PIECE;
+    st->key = k;
 }
 
 void Position::undo_removePawn(Square s, Color c) {
-  st = st->previous;
-  Piece pc = make_piece(c, PAWN);
-  put_piece(pc, s);
+    st = st->previous;
+    Piece pc = make_piece(c, PAWN);
+    put_piece(pc, s);
 }
-#else
-#ifdef Matefinder //Gunther Demetz zugzwangSolver
-void Position::removePawn(Square s, StateInfo& newSt) {
-	assert(&newSt != st);
-	assert(type_of(piece_on(s)) == PAWN);
-	
-	std::memcpy(&newSt, st, offsetof(StateInfo, key));
-	newSt.previous = st;
-	st = &newSt;
-	
-	Key k = st->previous->key;
-	Piece pc = piece_on(s);
-	st->pawnKey ^= Zobrist::psq[pc][s];
-	
-	k ^= Zobrist::psq[pc][s];
-	
-	remove_piece(pc, s);
-	
-	st->epSquare= SQ_NONE;
-	board[s] = NO_PIECE;
-	st->checkersBB = attackers_to(square<KING>(sideToMove)) & pieces(~sideToMove);
-	set_check_info(st);
-	
-	st->materialKey ^= Zobrist::psq[pc][pieceCount[pc]];
-	st->capturedPiece = NO_PIECE;
-	st->key = k;
-}
+#endif
 
-void Position::undo_removePawn(Square s, Color c) {
-	st = st->previous;
-	Piece pc = make_piece(c, PAWN);
-	put_piece(pc, s);
-}
-#endif
-#endif
 
 /// Position::do_move() makes a move, and saves all information necessary
 /// to a StateInfo object. The move is assumed to be legal. Pseudo-legal
@@ -805,7 +786,7 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
 
   assert(color_of(pc) == us);
   assert(captured == NO_PIECE || color_of(captured) == (type_of(m) != CASTLING ? them : us));
-  assert(type_of(captured) != KING);
+  //assert(type_of(captured) != KING);
 
   if (type_of(m) == CASTLING)
   {
@@ -1124,8 +1105,8 @@ bool Position::see_ge(Move m, Value threshold) const {
       stmAttackers = attackers & pieces(stm);
 
       // Don't allow pinned pieces to attack (except the king) as long as
-      // all pinners are on their original square.
-      if (!(st->pinners[~stm] & ~occupied))
+      // any pinners are on their original square.
+      if (st->pinners[~stm] & occupied)
           stmAttackers &= ~st->blockersForKing[stm];
 
       // If stm has no more attackers then give up: stm loses
@@ -1245,19 +1226,31 @@ bool Position::has_game_cycle(int ply) const {
       if (   (j = H1(moveKey), cuckoo[j] == moveKey)
           || (j = H2(moveKey), cuckoo[j] == moveKey))
       {
+#ifdef Maverick  //simplification, Rocky640
+		  Square s1 = from_sq(cuckooMove[j]);
+		  Square s2 = to_sq(cuckooMove[j]);
+#else
           Move move = cuckooMove[j];
           Square s1 = from_sq(move);
           Square s2 = to_sq(move);
-
+#endif
           if (!(between_bb(s1, s2) & pieces()))
           {
+#ifdef Maverick // not used, Vondele
+#else
               // In the cuckoo table, both moves Rc1c5 and Rc5c1 are stored in the same
               // location. We select the legal one by reversing the move variable if necessary.
               if (empty(s1))
                   move = make_move(s2, s1);
-
+#endif
               if (ply > i)
                   return true;
+#ifdef Maverick // #2097 by svivanov72
+              // For nodes before or at the root, check that the move is a repetition one
+              // rather than a move to the current position
+              if (color_of(piece_on(empty(s1) ? s2 : s1)) != side_to_move())
+                  continue;
+#endif
 
               // For repetitions before or at the root, require one more
               StateInfo* next_stp = stp;

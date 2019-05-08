@@ -122,7 +122,6 @@ class WLines(QTVarios.WDialogo):
                     ws.close()
                     ws.um_final()
 
-
     def utilidades(self):
         menu = QTVarios.LCMenu(self)
         submenu = menu.submenu(_("Analysis"), Iconos.Analizar())
@@ -1000,7 +999,6 @@ class WLines(QTVarios.WDialogo):
                     else:
                         for nl in dicPV[pv]:
                             st_borrar.add(nl)
-
 
             tmpBP.cerrar()
 

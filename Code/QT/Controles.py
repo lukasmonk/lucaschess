@@ -784,11 +784,9 @@ class TBrutina(QtGui.QToolBar):
         elif siTexto:
             self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
-
         self.setIconSize(QtCore.QSize(tamIcon, tamIcon))
 
         self.parent = parent
-
 
         self.f = TipoLetra(puntos=puntos) if puntos else None
 
