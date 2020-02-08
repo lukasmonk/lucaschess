@@ -711,7 +711,6 @@ class Polyglot:
         return False, entry
 
     def find_key(self, key):
-
         first = -1
         try:
             if self.f.seek(-16, os.SEEK_END):

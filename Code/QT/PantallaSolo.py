@@ -18,14 +18,18 @@ class WEtiquetasPGN(QTVarios.WDialogo):
 
         QTVarios.WDialogo.__init__(self, procesador.pantalla, titulo, icono, extparam)
         self.procesador = procesador
-        self.creaLista(liPGN)
+        self.liPGN = self.creaLista(liPGN)
 
         # Toolbar
         liAccionesWork = (
-            (_("Accept"), Iconos.Aceptar(), self.aceptar), None,
-            (_("Cancel"), Iconos.Cancelar(), self.cancelar), None,
-            (_("Up"), Iconos.Arriba(), self.arriba), None,
-            (_("Down"), Iconos.Abajo(), self.abajo), None,
+            (_("Accept"), Iconos.Aceptar(), self.aceptar),
+            None,
+            (_("Cancel"), Iconos.Cancelar(), self.cancelar),
+            None,
+            (_("Up"), Iconos.Arriba(), self.arriba),
+            None,
+            (_("Down"), Iconos.Abajo(), self.abajo),
+            None,
         )
         tbWork = QTVarios.LCTB(self, liAccionesWork, tamIcon=24)
 
@@ -48,13 +52,13 @@ class WEtiquetasPGN(QTVarios.WDialogo):
     def creaLista(self, liPGN):
         st = {eti for eti, val in liPGN}
 
-        li = [[k,v] for k, v in liPGN]
+        li = [[k, v] for k, v in liPGN]
         for eti in self.listandard:
             if eti not in st:
                 li.append([eti, ""])
         while len(li) < 30:
             li.append(["", ""])
-        self.liPGN = li
+        return li
 
     def aceptar(self):
         dic_rev = {}
@@ -158,10 +162,37 @@ def massive_change_tags(owner, configuracion, num_selected, si_games):
 
     sepBase()
 
-    liBaseOther = ["Round", "White", "Black", "Result", "WhiteTitle", "BlackTitle", "WhiteElo", "BlackElo",
-                   "WhiteUSCF", "BlackUSCF", "WhiteNA", "BlackNA", "WhiteType", "BlackType", "EventDate",
-                   "EventSponsor", "Section", "Stage", "Board", "Opening", "Variation", "SubVariation",
-                   "ECO", "Time", "UTCTime", "UTCDate", "TimeControl", "SetUp", "Termination"]
+    liBaseOther = [
+        "Round",
+        "White",
+        "Black",
+        "Result",
+        "WhiteTitle",
+        "BlackTitle",
+        "WhiteElo",
+        "BlackElo",
+        "WhiteUSCF",
+        "BlackUSCF",
+        "WhiteNA",
+        "BlackNA",
+        "WhiteType",
+        "BlackType",
+        "EventDate",
+        "EventSponsor",
+        "Section",
+        "Stage",
+        "Board",
+        "Opening",
+        "Variation",
+        "SubVariation",
+        "ECO",
+        "Time",
+        "UTCTime",
+        "UTCDate",
+        "TimeControl",
+        "SetUp",
+        "Termination",
+    ]
     li0 = ["", "Event", "Site", "Date"]
     li0.extend(liBaseOther)
     li = [[uno, uno] for uno in li0]
@@ -170,12 +201,12 @@ def massive_change_tags(owner, configuracion, num_selected, si_games):
 
     sepBase()
     if si_games:
-        liBase.append((_("Set Opening, ECO, PlyCount")+": ", False))
+        liBase.append((_("Set Opening, ECO, PlyCount") + ": ", False))
         sepBase()
 
     liBase.append((None, _("Configuration")))
 
-    liA = [(_("All read"), APPLY_ALL), ("%s [%d]"%(_("Only selected"), num_selected), APPLY_SELECTED)]
+    liA = [(_("All read"), APPLY_ALL), ("%s [%d]" % (_("Only selected"), num_selected), APPLY_SELECTED)]
     config = FormLayout.Combobox(_("Apply to"), liA)
     liBase.append((config, dic.get("APPLY", APPLY_SELECTED if num_selected > 1 else APPLY_ALL)))
     sepBase()
@@ -183,10 +214,11 @@ def massive_change_tags(owner, configuracion, num_selected, si_games):
     liBase.append((_("Overwrite"), dic.get("OVERWRITE", True)))
     sepBase()
 
-    liS = [(_("Nothing"), SAVE_NOTHING),
-           (_("Labels"), SAVE_LABELS),
-           ("%s+%s" % (_("Labels"), _("Values")), SAVE_LABELS_VALUES)
-           ]
+    liS = [
+        (_("Nothing"), SAVE_NOTHING),
+        (_("Labels"), SAVE_LABELS),
+        ("%s+%s" % (_("Labels"), _("Values")), SAVE_LABELS_VALUES),
+    ]
     config = FormLayout.Combobox(_("Save as default"), liS)
     liBase.append((config, dic.get("SAVE", SAVE_LABELS_VALUES)))
 
@@ -204,7 +236,7 @@ def massive_change_tags(owner, configuracion, num_selected, si_games):
         previo_value = dic.get("OTHERS_VALUE_%d" % x)
         rotulo = "%s %d" % (_("Value"), x + 1)
         if previo_value:
-            li=[["", ""], [previo_value, previo_value]]
+            li = [["", ""], [previo_value, previo_value]]
             combo = FormLayout.Combobox(rotulo, li, si_editable=True)
             liOther.append((combo, ""))
         else:
@@ -218,7 +250,9 @@ def massive_change_tags(owner, configuracion, num_selected, si_games):
     lista.append((liOther, _("Others"), ""))
 
     # Editamos
-    resultado = FormLayout.fedit(lista, title=_("Massive change of tags"), parent=owner, anchoMinimo=640, icon=Iconos.PGN())
+    resultado = FormLayout.fedit(
+        lista, title=_("Massive change of tags"), parent=owner, anchoMinimo=640, icon=Iconos.PGN()
+    )
     if resultado:
         accion, resp = resultado
         liBase, liOther = resp
@@ -226,7 +260,9 @@ def massive_change_tags(owner, configuracion, num_selected, si_games):
         dic = {}
         set_extend = False
         if si_games:
-            dic["EVENT"], dic["SITE"], dic["DATE"], dic["REMOVE"], set_extend, dic["APPLY"], dic["OVERWRITE"], dic["SAVE"] = liBase
+            dic["EVENT"], dic["SITE"], dic["DATE"], dic["REMOVE"], set_extend, dic["APPLY"], dic["OVERWRITE"], dic[
+                "SAVE"
+            ] = liBase
         else:
             dic["EVENT"], dic["SITE"], dic["DATE"], dic["REMOVE"], dic["APPLY"], dic["OVERWRITE"], dic["SAVE"] = liBase
 
@@ -236,15 +272,15 @@ def massive_change_tags(owner, configuracion, num_selected, si_games):
             if dic[tagu]:
                 liTags.append((tag, dic[tagu]))
 
-        for x in range(0, NUM_OTHERS*2, 2):
+        for x in range(0, NUM_OTHERS * 2, 2):
             tag = liOther[x]
-            if tag and tag.upper!= "FEN":
+            if tag and tag.upper != "FEN":
                 val = liOther[x + 1]
                 ntag = x / 2
                 dic["OTHERS_TAG_%d" % ntag] = tag
                 dic["OTHERS_VALUE_%d" % ntag] = val
                 if val:
-                   liTags.append((tag, val))
+                    liTags.append((tag, val))
 
         save = dic["SAVE"]
 
@@ -269,4 +305,3 @@ def massive_change_tags(owner, configuracion, num_selected, si_games):
                 return (liTags, dic["REMOVE"], dic["OVERWRITE"], dic["APPLY"] == APPLY_ALL)
 
     return None
-

@@ -215,7 +215,7 @@ class Configuracion:
         self.rivalInicial = "rocinante" if VarGen.isLinux else "irina"
         self.rival = self.buscaRival(self.rivalInicial)
 
-        self.tutorInicial = "mccain"
+        self.tutorInicial = "honey"
         self.tutor = self.buscaRival(self.tutorInicial)
         self.tutorMultiPV = 10  # 0: maximo
         self.tutorDifPts = 0

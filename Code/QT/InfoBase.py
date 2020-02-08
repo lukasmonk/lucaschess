@@ -62,7 +62,7 @@ class ThanksTo:
             ["Critter 1.6a 32bits", "Richard Vida", "http://www.vlasak.biz/critter/"],
             ["Texel 1.07", "Peter Österlund", "http://hem.bredband.net/petero2b/javachess/index.html#texel"],
             ["Stockfish 10", "Tord Romstad, Marco Costalba, Joona Kiiski", "http://stockfishchess.org/"],
-            ["McCain 10.1", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
+            ["McCain X3", "Michael Byrne", "https://github.com/MichaelB7/Stockfish/releases"],
             ["Gull 3", "Vadim Demichev", "https://sourceforge.net/projects/gullchess/"],
             ["Delfi 5.4", "Fabio Cavicchio", "http://www.msbsoftware.it/delfi/"],
             # ["SmartThink 1.97", "Sergei S. Markoff", "http://genes1s.net/smarthink.php"],
@@ -390,7 +390,7 @@ class ThanksTo:
         txt += "</tr>"
         for nombre, autor, url in self.listaMotores(orden):
             txt += "<tr>"
-            if "McCain" in nombre:
+            if "honey" in nombre:
                 txt += '<th><font color="darkred">%s (%s)</font></th>' % (nombre, _("default"))
                 txt += '<td><font color="darkred">%s</font></td>' % autor
             else:

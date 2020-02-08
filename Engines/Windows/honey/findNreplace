@@ -1,0 +1,55 @@
+#!/bin/csh
+
+# by Michael Byrne 5/28/2019
+# Invoke using terminal
+# findNreplace  <find word phrase> <replace with> <file.txt> or <file"*".txt> using a wildcard,
+# do not type the "less than" (<) or "greater than" (>)symbols; howverer, do do type the quote marks
+# around the wildcard symbal "*".  You may also identify a range within the quotes:
+# findNreplace  <find word> <replace with> <file"*"."[1-2]">
+# to replace a phrase with spaces, use double quotes
+# findNreplace "this is blah" "this is cool" <file.txt> or <file"*".txt>
+
+##set echo on
+
+set find = $1
+echo "find = $1"
+set replace = $2
+echo "replace = $2"
+set file = $3
+echo "file = $3"
+
+
+setenv countf  $#
+echo "$countf arguments provided"
+set counter = 0
+foreach x  (`ls  $3`)  ## files at the top,i.e., in current pwd
+@ counter = $counter + 1
+cp $x $x.bak  ### to make a backup, leave uncommented (recommended)
+echo $x
+grep -rliR . $x | xargs -I@ sed -i "" "s/$1/$2/gw $x.tmp" @
+# $x.tmp will show the changed item, if zero bytes, no changes were made
+end
+#foreach x  (`ls -1dR **/$3`) ## one level down in immediate (pwd) folders
+#@ counter = $counter + 1
+#echo $x
+#cp $x $x.bak  ### to make a backup, leave uncommented (recommended)
+#grep -rliR . $x | xargs -I@ sed -i "" "s/$1/$2/gw $x.tmp"  @
+#end
+#foreach x  (`ls  -1dR  **/*/$3`)  ## deep run , 2 directory levels down
+#@ counter = $counter + 1
+#cp $x $x.bak  ### to make a backup, leave uncommented (recommended)
+#echo $x
+#grep -rliR . $x | xargs -I@ sed -i "" "s/$1/$2/gw $x.tmp" @
+#end
+#foreach x  (`ls -1dR **/*/*/$3`) ## deeper run, three levels down from immediate (pwd) folders
+#@ counter = $counter + 1
+#echo $x
+#cp $x $x.bak  ### to make a backup, leave uncommented (recommended)
+#grep -rliR . $x | xargs -I@ sed -i "" "s/$1/$2/gw $x.tmp"  @
+#end
+#echo "found $counter files that matched criteria"
+wait
+ rm -fr  *.bak *.tmp **/*.bak **/*.tmp **/*/*.bak **/*/*.tmp */*/*.bak */*/*.tmp **/*/*.bak **/*/*.tmp **/**/**/*.bak **/**/**/*.tmp
+ rerun with this uncommented to delete temp file *.bak and *.tmp
+exit
+

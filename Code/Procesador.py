@@ -183,7 +183,7 @@ class Procesador:
         self.pantalla.ponToolBar(self.liOpcionesInicio, atajos=True)
         self.pantalla.activaJuego(False, False)
         self.tablero.exePulsadoNum = None
-        self.tablero.ponPosicion(self.posicionInicial)
+        # self.tablero.ponPosicion(self.posicionInicial)
         self.tablero.borraMovibles()
         self.tablero.quitaFlechas()
         self.pantalla.ajustaTam()

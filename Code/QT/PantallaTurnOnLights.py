@@ -222,6 +222,8 @@ class WTurnOnLights(QTVarios.WDialogo):
             self.tol.new()
         else:
             TurnOnLights.remove_tol(self.tol)
+            if self.tol.name.startswith("uwe_easy"):
+                TurnOnLights.compruebaUweEasy(self.procesador.configuracion, self.tol.name)
         self.reinit = True
         self.guardarVideo()
         self.accept()

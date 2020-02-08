@@ -8,10 +8,7 @@
 # Licence : GPL
 # ==============================================================================
 
-# flash-cards
-
-
-
+# stockfish 11
 
 import os
 import sip

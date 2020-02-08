@@ -198,19 +198,18 @@ class Moves:
                 mv.siDesconocido = True
                 pos += 1
 
-            elif c == "0":
+            elif c in "0":
                 desde = pos
                 hasta = pos
                 pos += 1
-                while pos < ntxt and txt[pos] in "0Oo-":
+                while pos < ntxt and txt[pos] in "0Oo-+":
                     hasta += 1
                     pos += 1
 
                 mv = Move()
                 x = mv.pgn = txt[desde:hasta + 1].replace("0", "O").upper()
-                if len(x) in (3, 5):
+                if x in ("O-O", "O-O-O", "O-O+", "O-O-O+"):
                     self.liMoves.append(mv)
-
             else:
                 pos += 1
 
@@ -218,6 +217,8 @@ class Moves:
         fenPrev = fen
         for mv in self.liMoves:
             mv.fenPrev = fenPrev
+            if mv.pgn in ("O-O+", "O-O-O+"):
+                mv.pgn = mv.pgn[:-1]
             pv = LCEngine.lc_pgn2pv(mv.pgn)
             if len(pv) < 4:
                 return False

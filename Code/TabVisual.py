@@ -711,7 +711,7 @@ class DBGestorVisual():
         dicMovibles = tablero.dicMovibles
         n = 0
         for k, v in dicMovibles.iteritems():
-            if hasattr(v, "tpid"):
+            if hasattr(v, "bloqueDatos") and hasattr(v.bloqueDatos, "tpid"):
                 n += 1
         if n == 0:
             if fenM2 in self.dbFEN:

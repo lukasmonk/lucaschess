@@ -36,8 +36,6 @@ cdef extern from "irina.h":
     char * pgn_fen(int num)
 
 
-
-
 class PGNreader:
     def __init__(self, fich, depth):
         self.fich = fich

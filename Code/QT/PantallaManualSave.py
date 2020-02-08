@@ -193,7 +193,7 @@ class WManualSave(QTVarios.WDialogo):
 
             self.sb_number.ponValor(dic_vars.get("NUMBER",0))
 
-            self.cb_engine.ponValor(dic_vars.get("ENGINE", "mccain"))
+            self.cb_engine.ponValor(dic_vars.get("ENGINE", "honey"))
 
             self.sb_multipv.ponValor(dic_vars.get("MULTIPV", 1))
 

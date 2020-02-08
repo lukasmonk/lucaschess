@@ -175,7 +175,7 @@ def dicMotoresFixedElo():
     for nm, desde, hasta in (
             ("cheng", 800, 2500),
             ("greko", 1600, 2400),
-            ("mccain", 1300, 2800),
+            ("honey", 1300, 2800),
             ("discocheck", 1500, 2700),
     ):
         for elo in range(desde, hasta + 100, 100):

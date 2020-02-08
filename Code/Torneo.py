@@ -1,6 +1,7 @@
 import os
 import random
 import shutil
+import collections
 
 from Code import MotoresExternos
 from Code import Partida
@@ -298,6 +299,13 @@ class ListGames:
     def __init__(self, torneo):
         self.torneo = torneo
         self.db = None
+        self.cache = {}
+        self.max_cache = 256
+
+    def addCache(self, key, obj):
+        if len(self.cache) > self.max_cache:
+            self.cache.popitem()
+        self.cache[key] = obj
 
     def test_db(self):
         if self.db is None:
@@ -309,23 +317,32 @@ class ListGames:
             self.db = None
 
     def __getitem__(self, pos):
+        key = "GAME_%d" % pos
+        if key in self.cache:
+            return self.cache[key]
         gm = Game()
         self.test_db()
-        dc = self.db["GAME_%d" % pos]
+        dc = self.db[key]
         if dc:
             gm.leerDIC(dc)
+            self.addCache(key, gm)
             return gm
         return None
 
     def __setitem__(self, pos, gm):
         self.test_db()
-        self.db["GAME_%d" % pos] = gm.grabarDIC()
+        key = "GAME_%d" % pos
+        self.db[key] = gm.grabarDIC()
+        self.addCache(key, gm)
 
     def __delitem__(self, pos):
         self.test_db()
         ng = self.db["NUM_GAMES"]
         if ng:
-            del self.db["GAME_%d" % pos]
+            key = "GAME_%d" % pos
+            del self.db[key]
+            if key in self.cache:
+                del self.cache[key]
             if pos < ng-1:
                 for x in range(pos, ng-1):
                     self.db["GAME_%d" % pos] = self.db["GAME_%d" % (pos +1,)]
@@ -362,7 +379,9 @@ class ListGames:
         ng = self.db["NUM_GAMES"]
         if ng is None:
             ng = 0
-        self.db["GAME_%d" % ng] = gm.grabarDIC()
+        key = "GAME_%d" % ng
+        self.db[key] = gm.grabarDIC()
+        self.addCache(key, gm)
         self.db["NUM_GAMES"] = ng + 1
 
 

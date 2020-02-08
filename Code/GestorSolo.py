@@ -128,11 +128,11 @@ class GestorSolo(Gestor.Gestor):
             self.liPGN = []
             self.liPGN.append(["Event", _("Lucas Chess")])
             self.liPGN.append(["Date", "%d.%02d.%02d" % (hoy.year, hoy.month, hoy.day)])
-            jugador = self.configuracion.jugador
-            if len(jugador) == 0:
-                jugador = "Unknown"
-            self.liPGN.append(["White", jugador])
-            self.liPGN.append(["Black", jugador])
+            # jugador = self.configuracion.jugador
+            # if len(jugador) == 0:
+            #     jugador = "Unknown"
+            # self.liPGN.append(["White", jugador])
+            # self.liPGN.append(["Black", jugador])
         else:
             self.liPGN = dic["liPGN"]
 
@@ -167,7 +167,7 @@ class GestorSolo(Gestor.Gestor):
         self.pantalla.activaJuego(True, False, siAyudas=False)
         self.quitaAyudas(True, False)
         self.pantalla.ponRotulo1(dic.get("ROTULO1", None))
-        self.pantalla.ponRotulo2(None)
+        self.pon_rotulo()
         self.ponMensajero(self.mueveHumano)
         self.ponPosicion(self.partida.iniPosicion if siExterno else self.partida.ultPosicion)
         self.mostrarIndicador(True)
@@ -198,6 +198,18 @@ class GestorSolo(Gestor.Gestor):
         self.valor_inicial = self.dame_valor_actual()
 
         self.siguienteJugada()
+
+    def pon_rotulo(self):
+        li = []
+        for label, rotulo in self.liPGN:
+            if label.upper() == "WHITE":
+                li.append("%s: %s" % (_("White"), rotulo))
+            elif label.upper() == "BLACK":
+                li.append("%s: %s" % (_("Black"), rotulo))
+            elif label.upper() == "RESULT":
+                li.append("%s: %s" % (_("Result"), rotulo))
+        mensaje = "\n".join(li)
+        self.ponRotulo2(mensaje)
 
     def dropPGN(self, pgn):
         unpgn = PantallaPGN.eligePartida(self.pantalla, pgn)
@@ -269,9 +281,6 @@ class GestorSolo(Gestor.Gestor):
 
         elif clave == k_grabarComo:
             self.grabarComo()
-
-        elif clave == k_recuperar:
-            self.recuperar()
 
         elif clave == k_ayudaMover:
             self.ayudaMover(999)
@@ -501,6 +510,7 @@ class GestorSolo(Gestor.Gestor):
         if resp:
             self.liPGN = resp
             self.siCambios = True
+            self.pon_rotulo()
 
     def guardaDir(self, resp):
         direc = os.path.dirname(resp)
@@ -629,8 +639,6 @@ class GestorSolo(Gestor.Gestor):
             self.grabar()
         elif resp == "saveas":
             self.grabarComo()
-
-                # k_recuperar, k_grabar, k_grabarComo,
 
     # def recuperar(self):
     #     menu = QTVarios.LCMenu(self.pantalla)
@@ -902,6 +910,7 @@ class GestorSolo(Gestor.Gestor):
             dicBase = self.dicRival
         else:
             dicBase = self.configuracion.leeVariables("ENG_GESTORSOLO")
+        dicBase["SIBLANCAS"] = self.partida.iniPosicion.siBlancas
 
         dic = self.dicRival = PantallaEntMaq.cambioRival(self.pantalla, self.configuracion, dicBase, siGestorSolo=True)
 
@@ -940,6 +949,8 @@ class GestorSolo(Gestor.Gestor):
     def atras(self):
         if self.partida.numJugadas():
             self.partida.anulaSoloUltimoMovimiento()
+            if self.siJuegaMotor:
+                self.partida.anulaSoloUltimoMovimiento()
             if not self.fen:
                 self.partida.asignaApertura()
             self.ponteAlFinal()

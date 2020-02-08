@@ -458,11 +458,11 @@ class Gestor:
         fila, columna = self.pantalla.pgnPosActual()
         posJugada, jg = self.pgn.jugada(fila, columna.clave)
 
-        if jg:
-            posicion = jg.posicionBase if columna.clave == "NUMERO" else jg.posicion
-        else:
-            posicion = self.partida.iniPosicion
-        self.tablero.setUltPosicion(posicion)
+        # if jg:
+        #     posicion = jg.posicionBase if columna.clave == "NUMERO" else jg.posicion
+        # else:
+        #     posicion = self.partida.iniPosicion
+        # self.tablero.setUltPosicion(posicion)
 
         if self.pantalla.siCapturas or self.pantalla.siInformacionPGN or self.liKibitzersActivas:
             if jg:
@@ -1854,7 +1854,7 @@ class Gestor:
                 fen = self.partida.iniPosicion.fen()
             else:
                 jg = self.partida.jugada(nj)
-                fen = jg.posicionBase.fen()
+                fen = jg.posicion.fen()
 
             XRun.run_lucas("-play", fen)
 

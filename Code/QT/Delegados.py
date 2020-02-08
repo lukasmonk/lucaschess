@@ -139,13 +139,22 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
 
         iniPZ = None
         finPZ = None
-        if self.siFigurinesPGN and pgn:
+        salto_finPZ = 0
+        if self.siFigurinesPGN and len(pgn) > 2:
             if pgn[0] in "QBKRN":
                 iniPZ = pgn[0] if self.siBlancas else pgn[0].lower()
                 pgn = pgn[1:]
             elif pgn[-1] in "QBRN":
                 finPZ = pgn[-1] if self.siBlancas else pgn[-1].lower()
                 pgn = pgn[:-1]
+            elif pgn[-2] in "QBRN":
+                finPZ = pgn[-2] if self.siBlancas else pgn[-2].lower()
+                if info:
+                    info = pgn[-1] + info
+                else:
+                    info = pgn[-1]
+                pgn = pgn[:-2]
+                salto_finPZ = -6
 
         if info and not finPZ:
             pgn += info
@@ -193,7 +202,7 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
         if iniPZ:
             ancho += wpz
         if finPZ:
-            ancho += wpz
+            ancho += wpz + salto_finPZ
         if info:
             ancho += wINFO
         if liNAGs:
@@ -231,7 +240,7 @@ class EtiquetaPGN(QtGui.QStyledItemDelegate):
             pmRect = QtCore.QRectF(0, 0, hx, hx)
             pm.render(painter, pmRect)
             painter.restore()
-            x += wpz
+            x += wpz + salto_finPZ
 
         if info:
             painter.save()

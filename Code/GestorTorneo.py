@@ -36,7 +36,7 @@ class GestorTorneo(Gestor.Gestor):
         numGames = len(liNumGames)
         for ng in range(numGames):
             gm = self.torneo._liGames[liNumGames[ng]]
-            self.siguienteJuego(gm, liNumGames[ng], numGames)
+            self.siguienteJuego(gm, liNumGames[ng], ng, numGames)
             self.procesador.pararMotores()
             if self.siTerminar:
                 break
@@ -46,7 +46,7 @@ class GestorTorneo(Gestor.Gestor):
         if self.wresult:
             self.wresult.terminar()
 
-    def siguienteJuego(self, gm, ngame, numGames):
+    def siguienteJuego(self, gm, ngame, posGame, numGames):
         self.estado = kJugando
         self.fenInicial = self.torneo.fenNorman()
         self.siPausa = False
@@ -106,7 +106,7 @@ class GestorTorneo(Gestor.Gestor):
         bl = self.xmotor[True].nombre
         ng = self.xmotor[False].nombre
         self.pantalla.activaJuego(True, True, siAyudas=False)
-        self.ponRotulo1("<center><b>%s %d/%d</b></center>" % (_("Game"), ngame+1, numGames))
+        self.ponRotulo1("<center><b>%s %d/%d</b></center>" % (_("Game"), posGame+1, numGames))
         self.ponRotulo2(None)
         self.quitaAyudas()
         self.pantalla.ponDatosReloj(bl, tpBL, ng, tpNG)

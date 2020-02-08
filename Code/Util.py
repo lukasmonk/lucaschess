@@ -915,11 +915,10 @@ class DicSQL(object):
 
     def addCache(self, key, obj):
         if len(self.cache) > self.maxCache:
-            del self.cache[self.cache.keys[0]]
+            del self.cache[self.cache.keys()[0]]
         self.cache[key] = obj
 
     def __setitem__(self, key, obj):
-
         cursor = self._conexion.cursor()
         dato = base64.encodestring(cPickle.dumps(obj))
         key = str(key)
@@ -940,7 +939,6 @@ class DicSQL(object):
         if key in self.stKeys:
             if key in self.cache:
                 return self.cache[key]
-
             cursor = self._conexion.cursor()
             sql = "SELECT VALUE FROM %s WHERE KEY= ?" % self.table
             cursor.execute(sql, (key,))

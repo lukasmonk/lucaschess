@@ -449,6 +449,9 @@ class WorkMap:
             d[iso] = reg
         self.dic = d
         self.resetListaGrid()
+        # for k in d:
+        #     alm = d[k]
+        #     p rint alm.iso, alm.donePV
 
     def resetListaGrid(self):
         if self.current:
