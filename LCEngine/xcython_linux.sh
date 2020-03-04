@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-rm LCEngine2.so
+rm LCEngine4.so
 
 x=$(pwd)
 export LIBRARY_PATH=$x
@@ -14,7 +14,7 @@ then
 else
 	folder=32
 fi
-cp LCEngine2.so ../Engines/Linux$folder/_tools
+cp LCEngine4.so ../Engines/Linux$folder/_tools
 cp libirina.so ../Engines/Linux$folder/_tools
-cp LCEngine2.so ..
+cp LCEngine4.so ..
 cp libirina.so ..
